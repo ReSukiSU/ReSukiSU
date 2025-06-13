@@ -424,7 +424,7 @@ static bool is_init_rc(struct file *fp)
         return false;
     }
 
-    if (!d_is_reg(fp->f_path.dentry)) {
+    if (!S_ISREG(fp->f_path.dentry->d_inode->i_mode)) {
         return false;
     }
 
