@@ -238,9 +238,16 @@ $(info -- $(REPO_NAME)/compat: modern dentry_open found)
 ccflags-y += -DKSU_COMPAT_HAS_MODERN_DENTRY_OPEN
 endif
 
+# UL, look for "ext4_unregister_sysfs" on fs/ext4
 ifeq ($(shell grep -q "^extern void ext4_unregister_sysfs" $(srctree)/fs/ext4/ext4.h 2>/dev/null; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: ext4_unregister_sysfs found)
 ccflags-y += -DKSU_HAS_MODERN_EXT4
+endif
+
+# UL, look for read_iter on f_op struct
+ifeq ($(shell grep -q "read_iter" $(srctree)/include/linux/fs.h 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: f_op->read_iter found!)
+ccflags-y += -DKSU_HAS_FOP_READ_ITER
 endif
 
 # The FUCKING Sulog logic require that
