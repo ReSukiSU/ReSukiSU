@@ -182,4 +182,17 @@ int get_cmdline(struct task_struct *task, char *buffer, int buflen);
 #define U16_MAX ((u16)~0U)
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 11, 0) &&                           \
+    !defined(KSU_HAS_ITERATE_DIR)
+struct dir_context {
+    const filldir_t actor;
+    loff_t pos;
+};
+
+static int iterate_dir(struct file *file, struct dir_context *ctx)
+{
+    return vfs_readdir(file, ctx->actor, ctx);
+}
+#endif // KSU_HAS_ITERATE_DIR
+
 #endif
