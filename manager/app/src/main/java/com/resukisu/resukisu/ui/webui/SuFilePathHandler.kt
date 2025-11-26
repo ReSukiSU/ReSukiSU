@@ -5,6 +5,7 @@ import android.util.Log
 import android.webkit.WebResourceResponse
 import androidx.annotation.WorkerThread
 import androidx.webkit.WebViewAssetLoader
+import com.resukisu.resukisu.ui.webui.MonetColorsProvider.getColorsCss
 import com.resukisu.resukisu.ui.webui.SuFilePathHandler.Companion.DEFAULT_MIME_TYPE
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.io.SuFile
@@ -97,6 +98,15 @@ class SuFilePathHandler(
         if (path == "internal/insets.css") {
             onInsetsRequestedListener?.invoke(true)
             val css = insetsSupplier.get().css
+            return WebResourceResponse(
+                "text/css",
+                "utf-8",
+                ByteArrayInputStream(css.toByteArray(StandardCharsets.UTF_8))
+            )
+        }
+
+        if (path == "internal/colors.css") {
+            val css = getColorsCss()
             return WebResourceResponse(
                 "text/css",
                 "utf-8",
