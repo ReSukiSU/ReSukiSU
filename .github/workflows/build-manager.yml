@@ -122,12 +122,6 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Download all userscanner artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: userscanner-all-linux-android
-          path: .
-
       - name: Download arm64 ksud
         uses: actions/download-artifact@v4
         with:
