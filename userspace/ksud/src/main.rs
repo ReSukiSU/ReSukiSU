@@ -45,8 +45,6 @@ mod su;
 #[cfg(target_arch = "aarch64")]
 mod susfs;
 #[cfg(target_os = "android")]
-mod uid_scanner;
-#[cfg(target_os = "android")]
 mod umount;
 #[cfg(target_os = "android")]
 mod utils;
