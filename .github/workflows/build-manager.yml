@@ -157,9 +157,9 @@ jobs:
         with:
           name: ${{ steps.determine.outputs.title }}-${{ matrix.build_type }}
           path: |
-            app/release/*。apk
-            app/release/*.mapping
-            app/build/outputs/apk/debug/*.apk
+            manager/app/build/outputs/apk/release/*.apk
+            manager/app/build/outputs/apk/release/*.mapping
+            manager/app/build/outputs/apk/debug/*.apk
 
   upload-telegram:
     needs: build-manager
