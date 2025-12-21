@@ -53,7 +53,7 @@ jobs:
       fail-fast: false
       matrix:
         spoofed: ["true","false"]
-        build_type: ["Release","Debug"]
+        build_type: ["release","debug"]
     defaults:
       run:
         working-directory: ./manager
@@ -156,8 +156,8 @@ jobs:
         with:
           name: ${{ steps.determine.outputs.title }}-${{ matrix.build_type }}
           path: |
-            app/build/outputs/apk/${{ matrix.build_type | lower }}/*.apk
-            app/build/outputs/mapping/${{ matrix.build_type | lower }}/
+            app/build/outputs/apk/${{ matrix.build_type }}/*.apk
+            app/build/outputs/mapping/${{ matrix.build_type }}/
 
   upload-telegram:
     needs: build-manager
@@ -165,7 +165,7 @@ jobs:
     strategy:
       matrix:
         spoofed: ["true","false"]
-        build_type: ["Release","Debug"]
+        build_type: ["release","debug"]
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -179,6 +179,6 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
           pip3 install telethon
-          APK=$(find ./manager/app/build/outputs/apk/${{ matrix.build_type | lower }} -name "*.apk")
+          APK=$(find ./manager/app/build/outputs/apk/${{ matrix.build_type }} -name "*.apk")
           TITLE="${{ matrix.spoofed == 'true' && 'Spoofed-Manager' || 'Manager' }}-${{ matrix.build_type }}"
           python3 $GITHUB_WORKSPACE/scripts/ksubot.py $APK "$TITLE"
