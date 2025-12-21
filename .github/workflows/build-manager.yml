@@ -63,6 +63,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Determine commit for build
+        id: commit
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+          else
+            echo "COMMIT_SHA=${{ github.sha }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Setup need_upload
         id: need_upload
         run: |
@@ -72,8 +81,7 @@ jobs:
             echo "UPLOAD=false" >> $GITHUB_OUTPUT
           fi
 
-
-      - name: Determine manager variant for telegram bot
+      - name: Determine manager variant
         id: determine
         run: |
           if [ "${{ github.ref_name }}" == "miuix" ] && [ "${{ matrix.spoofed }}" == "true" ]; then
@@ -85,7 +93,6 @@ jobs:
             echo "topicid=${{ vars.MESSAGE_MIUIX_THREAD_ID }}" >> $GITHUB_OUTPUT
           elif [ "${{ matrix.spoofed }}" == "true" ]; then
             echo "title=Spoofed-Manager" >> $GITHUB_OUTPUT
-            # maybe need a new var
             echo "topicid=${{ vars.MESSAGE_SPOOFED_THREAD_ID }}" >> $GITHUB_OUTPUT
           else
             echo "title=Manager" >> $GITHUB_OUTPUT
@@ -140,35 +147,36 @@ jobs:
         with:
           name: ksud-armv7-linux-androideabi
           path: .
-  
+
       - name: Copy ksud to app jniLibs
         run: |
           mkdir -p app/src/main/jniLibs/arm64-v8a
           mkdir -p app/src/main/jniLibs/x86_64
           mkdir -p app/src/main/jniLibs/armeabi-v7a
-          cp -f ../aarch64-linux-android/release/ksud ../manager/app/src/main/jniLibs/arm64-v8a/libksud.so
-          cp -f ../x86_64-linux-android/release/ksud ../manager/app/src/main/jniLibs/x86_64/libksud.so
-          cp -f ../armv7-linux-androideabi/release/ksud ../manager/app/src/main/jniLibs/armeabi-v7a/libksud.so
+          cp -f ../aarch64-linux-android/release/ksud app/src/main/jniLibs/arm64-v8a/libksud.so
+          cp -f ../x86_64-linux-android/release/ksud app/src/main/jniLibs/x86_64/libksud.so
+          cp -f ../armv7-linux-androideabi/release/ksud app/src/main/jniLibs/armeabi-v7a/libksud.so
 
-      - name: Build with Gradle
+      - name: Build Release
         if: ${{ steps.determine.outputs.SKIP != 'true' }}
-        run: ./gradlew clean assembleRelease
+        run: ./gradlew clean assembleRelease -Pcommit=${{ steps.commit.outputs.COMMIT_SHA }}
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+      - name: Build Debug
+        if: ${{ steps.determine.outputs.SKIP != 'true' }}
+        run: ./gradlew assembleDebug -Pcommit=${{ steps.commit.outputs.COMMIT_SHA }}
+
+      - name: Upload build artifacts
         if: ${{ ( github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' )) || github.ref_type == 'tag' }}
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.determine.outputs.title }}
-          path: manager/app/build/outputs/apk/release/*.apk
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/mapping/release/
+            app/build/outputs/mapping/debug/
 
-      - name: Upload mappings
-        uses: actions/upload-artifact@v4
-        if: ${{ ( github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' )) || github.ref_type == 'tag' }}
-        with:
-          name: "${{ steps.determine.outputs.title }}-mappings"
-          path: "manager/app/build/outputs/mapping/release/"
-
-      - name: Upload to telegram
+      - name: Upload to Telegram
         if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true' && steps.determine.outputs.SKIP != 'true'
         env:
           CHAT_ID: ${{ vars.CHAT_ID }}
@@ -180,9 +188,9 @@ jobs:
           TITLE: ${{ steps.determine.outputs.title }}
           BRANCH: ${{ github.ref_name }}
         run: |
-          if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
-            export VERSION=$(git rev-list --count HEAD)
-            APK=$(find ./app/build/outputs/apk/release -name "*.apk")
-            pip3 install telethon
-            python3 $GITHUB_WORKSPACE/scripts/ksubot.py $APK
-          fi
+          pip3 install telethon
+          for BUILD_TYPE in Release Debug; do
+            APK=$(find ./app/build/outputs/apk/${BUILD_TYPE,,} -name "*.apk")
+            TITLE="${{ steps.determine.outputs.title }}-${BUILD_TYPE}"
+            python3 $GITHUB_WORKSPACE/scripts/ksubot.py $APK "$TITLE"
+          done
