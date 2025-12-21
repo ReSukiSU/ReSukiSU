@@ -122,10 +122,22 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Download ksud artifacts
+      - name: Download arm64 ksud
         uses: actions/download-artifact@v4
         with:
-          name: ksud-${{ matrix.target }}
+          name: ksud-aarch64-linux-android
+          path: .
+
+      - name: Download x86_64 ksud
+        uses: actions/download-artifact@v4
+        with:
+          name: ksud-x86_64-linux-android
+          path: .
+
+      - name: Download arm ksud
+        uses: actions/download-artifact@v4
+        with:
+          name: ksud-armv7-linux-androideabi
           path: .
 
       - name: Copy ksud to app jniLibs
@@ -133,9 +145,9 @@ jobs:
           mkdir -p app/src/main/jniLibs/arm64-v8a
           mkdir -p app/src/main/jniLibs/x86_64
           mkdir -p app/src/main/jniLibs/armeabi-v7a
-          cp -f ../aarch64-linux-android/release/ksud app/src/main/jniLibs/arm64-v8a/libksud.so
-          cp -f ../x86_64-linux-android/release/ksud app/src/main/jniLibs/x86_64/libksud.so
-          cp -f ../armv7-linux-androideabi/release/ksud app/src/main/jniLibs/armeabi-v7a/libksud.so
+          cp -f ../aarch64-linux-android/release/ksud ../manager/app/src/main/jniLibs/arm64-v8a/libksud.so
+          cp -f ../x86_64-linux-android/release/ksud ../manager/app/src/main/jniLibs/x86_64/libksud.so
+          cp -f ../armv7-linux-androideabi/release/ksud ../manager/app/src/main/jniLibs/armeabi-v7a/libksud.so
 
       - name: Build APK
         run: ./gradlew assemble${{ matrix.build_type }} -Pcommit=${{ steps.commit.outputs.COMMIT_SHA }}
