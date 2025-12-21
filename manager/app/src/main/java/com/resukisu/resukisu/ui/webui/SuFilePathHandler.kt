@@ -5,6 +5,7 @@ import android.util.Log
 import android.webkit.WebResourceResponse
 import androidx.annotation.WorkerThread
 import androidx.webkit.WebViewAssetLoader
+import com.resukisu.resukisu.ui.webui.SuFilePathHandler.Companion.DEFAULT_MIME_TYPE
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.io.SuFile
 import com.topjohnwu.superuser.io.SuFileInputStream
@@ -37,7 +38,8 @@ import java.util.zip.GZIPInputStream
 class SuFilePathHandler(
     directory: File,
     private val shell: Shell,
-    private val insetsSupplier: InsetsSupplier
+    private val insetsSupplier: InsetsSupplier,
+    private val onInsetsRequestedListener: ((Boolean) -> Unit)?
 ) : WebViewAssetLoader.PathHandler {
 
     private val directory: File
@@ -93,6 +95,7 @@ class SuFilePathHandler(
     @WorkerThread
     override fun handle(path: String): WebResourceResponse {
         if (path == "internal/insets.css") {
+            onInsetsRequestedListener?.invoke(true)
             val css = insetsSupplier.get().css
             return WebResourceResponse(
                 "text/css",

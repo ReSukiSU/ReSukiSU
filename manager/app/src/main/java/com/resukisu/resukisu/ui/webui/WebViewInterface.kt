@@ -185,6 +185,13 @@ class WebViewInterface(
     }
 
     @JavascriptInterface
+    fun enableInsets(enable: Boolean = true) {
+        if (context is WebUIActivity) {
+            (context as WebUIActivity).enableInsets(enable)
+        }
+    }
+
+    @JavascriptInterface
     fun moduleInfo(): String {
         val moduleInfos = JSONArray(listModules())
         val currentModuleInfo = JSONObject()

@@ -5,10 +5,12 @@ import android.app.ActivityManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.view.ViewGroup
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.FrameLayout
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -36,6 +38,8 @@ class WebUIActivity : ComponentActivity() {
 
     private lateinit var insets: Insets
     private var webView = null as WebView?
+    private lateinit var container: FrameLayout
+    private var isInsetsEnabled = false
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,7 +88,9 @@ class WebUIActivity : ComponentActivity() {
             .setDomain("mui.kernelsu.org")
             .addPathHandler(
                 "/",
-                SuFilePathHandler(webRoot, rootShell) { insets }
+                SuFilePathHandler(webRoot, rootShell, { insets }, { enable ->
+                    enableInsets(enable)
+                })
             )
             .build()
 
@@ -111,13 +117,16 @@ class WebUIActivity : ComponentActivity() {
             }
         }
 
-        val webView = WebView(this).apply {
-            webView = this
+        container = FrameLayout(this).apply {
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        }
+
+        this.webView = WebView(this).apply {
 
             setBackgroundColor(Color.TRANSPARENT)
             val density = resources.displayMetrics.density
 
-            ViewCompat.setOnApplyWindowInsetsListener(this) { _, windowInsets ->
+            ViewCompat.setOnApplyWindowInsetsListener(container) { view, windowInsets ->
                 val inset = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
                 insets = Insets(
                     top = (inset.top / density).toInt(),
@@ -125,6 +134,11 @@ class WebUIActivity : ComponentActivity() {
                     left = (inset.left / density).toInt(),
                     right = (inset.right / density).toInt()
                 )
+                if (isInsetsEnabled) {
+                    view.setPadding(0, 0, 0, 0)
+                } else {
+                    view.setPadding(inset.left, inset.top, inset.right, inset.bottom)
+                }
                 WindowInsetsCompat.CONSUMED
             }
             settings.javaScriptEnabled = true
@@ -135,7 +149,17 @@ class WebUIActivity : ComponentActivity() {
             loadUrl("https://mui.kernelsu.org/index.html")
         }
 
-        setContentView(webView)
+        container.addView(this.webView)
+        setContentView(container)
+    }
+
+    fun enableInsets(enable: Boolean = true) {
+        runOnUiThread {
+            if (isInsetsEnabled != enable) {
+                isInsetsEnabled = enable
+                ViewCompat.requestApplyInsets(container)
+            }
+        }
     }
 
     override fun onDestroy() {
