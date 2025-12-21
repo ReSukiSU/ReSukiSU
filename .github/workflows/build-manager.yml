@@ -229,5 +229,4 @@ jobs:
           pip3 install telethon
           APK_DEBUG=../${{ steps.determine.outputs.title }}-debug/*.apk
           APK_RELEASE=../${{ steps.determine.outputs.title }}-release/*.apk
-          TITLE="${{ steps.determine.outputs.title }}"
-          python3 $GITHUB_WORKSPACE/scripts/ksubot.py $APK_DEBUG $APK_RELEASE "$TITLE"
+          python3 $GITHUB_WORKSPACE/scripts/ksubot.py $APK_DEBUG $APK_RELEASE
