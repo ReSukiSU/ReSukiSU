@@ -131,7 +131,7 @@ NativeBridge(getAppProfile, jobject, jstring pkg, jint uid) {
 
 	bool useDefaultProfile = get_app_profile(&profile) != 0;
 
-	jclass cls = GetEnvironment()->FindClass(env, "com/sukisu/ultra/Natives$Profile");
+	jclass cls = GetEnvironment()->FindClass(env, "com/resukisu/resukisu/Natives$Profile");
 	jmethodID constructor = GetEnvironment()->GetMethodID(env, cls, "<init>", "()V");
 	jobject obj = GetEnvironment()->NewObject(env, cls, constructor);
 	jfieldID keyField = GetEnvironment()->GetFieldID(env, cls, "name", "Ljava/lang/String;");
@@ -207,7 +207,7 @@ NativeBridge(getAppProfile, jobject, jstring pkg, jint uid) {
 }
 
 NativeBridge(setAppProfile, jboolean, jobject profile) {
-	jclass cls = GetEnvironment()->FindClass(env, "com/sukisu/ultra/Natives$Profile");
+	jclass cls = GetEnvironment()->FindClass(env, "com/resukisu/resukisu/Natives$Profile");
 
 	jfieldID keyField = GetEnvironment()->GetFieldID(env, cls, "name", "Ljava/lang/String;");
 	jfieldID currentUidField = GetEnvironment()->GetFieldID(env, cls, "currentUid", "I");
@@ -371,8 +371,8 @@ NativeBridgeNP(getDynamicManager, jobject) {
 		return NULL;
 	}
 
-	jobject obj = CREATE_JAVA_OBJECT("com/sukisu/ultra/Natives$DynamicManagerConfig");
-	jclass cls = GetEnvironment()->FindClass(env, "com/sukisu/ultra/Natives$DynamicManagerConfig");
+	jobject obj = CREATE_JAVA_OBJECT("com/resukisu/resukisu/Natives$DynamicManagerConfig");
+	jclass cls = GetEnvironment()->FindClass(env, "com/resukisu/resukisu/Natives$DynamicManagerConfig");
 
 	SET_INT_FIELD(obj, cls, size, (jint)config.size);
 	SET_STRING_FIELD(obj, cls, hash, config.hash);
@@ -397,8 +397,8 @@ NativeBridgeNP(getManagersList, jobject) {
 		return NULL;
 	}
 
-	jobject obj = CREATE_JAVA_OBJECT("com/sukisu/ultra/Natives$ManagersList");
-	jclass managerListCls = GetEnvironment()->FindClass(env, "com/sukisu/ultra/Natives$ManagersList");
+	jobject obj = CREATE_JAVA_OBJECT("com/resukisu/resukisu/Natives$ManagersList");
+	jclass managerListCls = GetEnvironment()->FindClass(env, "com/resukisu/resukisu/Natives$ManagersList");
 
 	SET_INT_FIELD(obj, managerListCls, count, (jint)managerListInfo.count);
 
@@ -406,7 +406,7 @@ NativeBridgeNP(getManagersList, jobject) {
 
 	for (int i = 0; i < managerListInfo.count; i++) {
 		jobject managerInfo = CREATE_JAVA_OBJECT_WITH_PARAMS(
-				"com/sukisu/ultra/Natives$ManagerInfo",
+				"com/resukisu/resukisu/Natives$ManagerInfo",
 				"(II)V",
 				(jint)managerListInfo.managers[i].uid,
 				(jint)managerListInfo.managers[i].signature_index

@@ -10,10 +10,10 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import zako.zako.zako.zakoui.screen.moreSettings.util.LocaleHelper
-import com.sukisu.ultra.Natives
-import com.sukisu.ultra.R
-import com.sukisu.ultra.ui.theme.CardConfig
-import com.sukisu.ultra.ui.theme.ThemeConfig
+import com.resukisu.resukisu.Natives
+import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.theme.CardConfig
+import com.resukisu.resukisu.ui.theme.ThemeConfig
 
 /**
  * 更多设置状态管理

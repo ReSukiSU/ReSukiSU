@@ -30,18 +30,18 @@ import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.list.ListDialog
 import com.maxkeppeler.sheets.list.models.ListOption
 import com.maxkeppeler.sheets.list.models.ListSelection
-import com.sukisu.ultra.Natives
+import com.resukisu.resukisu.Natives
 import zako.zako.zako.zakoui.screen.moreSettings.util.LocaleHelper
-import com.sukisu.ultra.R
-import com.sukisu.ultra.ui.component.ConfirmResult
-import com.sukisu.ultra.ui.component.rememberConfirmDialog
-import com.sukisu.ultra.ui.screen.SwitchItem
-import com.sukisu.ultra.ui.theme.*
-import com.sukisu.ultra.ui.util.cleanRuntimeEnvironment
-import com.sukisu.ultra.ui.util.getUidMultiUserScan
-import com.sukisu.ultra.ui.util.readUidScannerFile
-import com.sukisu.ultra.ui.util.setUidAutoScan
-import com.sukisu.ultra.ui.util.setUidMultiUserScan
+import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.component.ConfirmResult
+import com.resukisu.resukisu.ui.component.rememberConfirmDialog
+import com.resukisu.resukisu.ui.screen.SwitchItem
+import com.resukisu.resukisu.ui.theme.*
+import com.resukisu.resukisu.ui.util.cleanRuntimeEnvironment
+import com.resukisu.resukisu.ui.util.getUidMultiUserScan
+import com.resukisu.resukisu.ui.util.readUidScannerFile
+import com.resukisu.resukisu.ui.util.setUidAutoScan
+import com.resukisu.resukisu.ui.util.setUidMultiUserScan
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -585,7 +585,7 @@ fun UidScannerSection(
         exit = fadeOut() + shrinkVertically()
     ) {
         val confirmDialog = rememberConfirmDialog()
-        com.sukisu.ultra.ui.screen.SettingItem(
+        com.resukisu.resukisu.ui.screen.SettingItem(
             icon = Icons.Filled.CleaningServices,
             title = stringResource(R.string.clean_runtime_environment),
             summary = stringResource(R.string.clean_runtime_environment_summary),

@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sukisu.ultra.ui.theme.*
+import com.resukisu.resukisu.ui.theme.*
 
 private val SETTINGS_GROUP_SPACING = 16.dp
 

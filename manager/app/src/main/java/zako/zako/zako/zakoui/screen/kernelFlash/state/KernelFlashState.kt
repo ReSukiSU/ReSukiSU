@@ -5,11 +5,11 @@ import android.app.Activity
 import android.content.Context
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
-import com.sukisu.ultra.R
-import com.sukisu.ultra.network.RemoteToolsDownloader
-import com.sukisu.ultra.ui.util.install
-import com.sukisu.ultra.ui.util.rootAvailable
-import com.sukisu.ultra.utils.AssetsUtil
+import com.resukisu.resukisu.R
+import com.resukisu.resukisu.network.RemoteToolsDownloader
+import com.resukisu.resukisu.ui.util.install
+import com.resukisu.resukisu.ui.util.rootAvailable
+import com.resukisu.resukisu.utils.AssetsUtil
 import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow

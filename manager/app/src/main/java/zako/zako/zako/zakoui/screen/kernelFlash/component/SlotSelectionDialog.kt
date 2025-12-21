@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.sukisu.ultra.R
+import com.resukisu.resukisu.R
 
 /**
  * 槽位选择对话框组件

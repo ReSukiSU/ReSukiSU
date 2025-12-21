@@ -1,0 +1,724 @@
+package com.resukisu.resukisu.ui.susfs.component
+
+import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.susfs.util.SuSFSManager
+import com.resukisu.resukisu.ui.susfs.util.SuSFSManager.isSusVersion158
+import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
+
+/**
+ * SUS路径内容组件
+ */
+@Composable
+fun SusPathsContent(
+    susPaths: Set<String>,
+    isLoading: Boolean,
+    onAddPath: () -> Unit,
+    onAddAppPath: () -> Unit,
+    onRemovePath: (String) -> Unit,
+    onEditPath: ((String) -> Unit)? = null,
+    forceRefreshApps: Boolean = false
+) {
+    val superUserApps = SuperUserViewModel.apps
+    val superUserIsRefreshing = remember { SuperUserViewModel().isRefreshing }
+
+    LaunchedEffect(superUserIsRefreshing, superUserApps.size) {
+        if (!superUserIsRefreshing && superUserApps.isNotEmpty()) {
+            AppInfoCache.clearCache()
+        }
+    }
+
+    LaunchedEffect(forceRefreshApps) {
+        if (forceRefreshApps) {
+            AppInfoCache.clearCache()
+        }
+    }
+
+    val (appPathGroups, otherPaths) = remember(susPaths) {
+        val appPathRegex = Regex(".*/Android/data/([^/]+)/?.*")
+        val uidPathRegex = Regex("/sys/fs/cgroup(?:/[^/]+)*/uid_([0-9]+)")
+        val appPathMap = mutableMapOf<String, MutableList<String>>()
+        val uidToPackageMap = mutableMapOf<String, String>()
+        val others = mutableListOf<String>()
+
+        // 构建UID到包名的映射
+        SuperUserViewModel.apps.forEach { app ->
+            try {
+                val uid = app.packageInfo.applicationInfo?.uid
+                uidToPackageMap[uid.toString()] = app.packageName
+            } catch (_: Exception) {
+            }
+        }
+
+        susPaths.forEach { path ->
+            val appDataMatch = appPathRegex.find(path)
+            val uidMatch = uidPathRegex.find(path)
+
+            when {
+                appDataMatch != null -> {
+                    val packageName = appDataMatch.groupValues[1]
+                    appPathMap.getOrPut(packageName) { mutableListOf() }.add(path)
+                }
+                uidMatch != null -> {
+                    val uid = uidMatch.groupValues[1]
+                    val packageName = uidToPackageMap[uid]
+                    if (packageName != null) {
+                        appPathMap.getOrPut(packageName) { mutableListOf() }.add(path)
+                    } else {
+                        others.add(path)
+                    }
+                }
+                else -> {
+                    others.add(path)
+                }
+            }
+        }
+
+        val sortedAppGroups = appPathMap.toList()
+            .sortedBy { it.first }
+            .map { (packageName, paths) -> packageName to paths.sorted() }
+
+        Pair(sortedAppGroups, others.sorted())
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // 应用路径分组
+            if (appPathGroups.isNotEmpty()) {
+                item {
+                    SectionHeader(
+                        title = stringResource(R.string.app_paths_section),
+                        subtitle = null,
+                        icon = Icons.Default.Apps,
+                        count = appPathGroups.size
+                    )
+                }
+
+                items(appPathGroups) { (packageName, paths) ->
+                    AppPathGroupCard(
+                        packageName = packageName,
+                        paths = paths,
+                        onDeleteGroup = {
+                            paths.forEach { path -> onRemovePath(path) }
+                        },
+                        onEditGroup = if (onEditPath != null) {
+                            {
+                                onEditPath(paths.first())
+                            }
+                        } else null,
+                        isLoading = isLoading
+                    )
+                }
+            }
+
+            // 其他路径
+            if (otherPaths.isNotEmpty()) {
+                item {
+                    SectionHeader(
+                        title = stringResource(R.string.other_paths_section),
+                        subtitle = null,
+                        icon = Icons.Default.Folder,
+                        count = otherPaths.size
+                    )
+                }
+
+                items(otherPaths) { path ->
+                    PathItemCard(
+                        path = path,
+                        icon = Icons.Default.Folder,
+                        onDelete = { onRemovePath(path) },
+                        onEdit = if (onEditPath != null) { { onEditPath(path) } } else null,
+                        isLoading = isLoading
+                    )
+                }
+            }
+
+            if (susPaths.isEmpty()) {
+                item {
+                    EmptyStateCard(
+                        message = stringResource(R.string.susfs_no_paths_configured)
+                    )
+                }
+            }
+
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = onAddPath,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = stringResource(R.string.add_custom_path))
+                    }
+
+                    Button(
+                        onClick = onAddAppPath,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Apps,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = stringResource(R.string.add_app_path))
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * SUS循环路径内容组件
+ */
+@Composable
+fun SusLoopPathsContent(
+    susLoopPaths: Set<String>,
+    isLoading: Boolean,
+    onAddLoopPath: () -> Unit,
+    onRemoveLoopPath: (String) -> Unit,
+    onEditLoopPath: ((String) -> Unit)? = null
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // 说明卡片
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.sus_loop_paths_description_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = stringResource(R.string.sus_loop_paths_description_text),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = stringResource(R.string.susfs_loop_path_restriction_warning),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
+            }
+
+            if (susLoopPaths.isEmpty()) {
+                item {
+                    EmptyStateCard(
+                        message = stringResource(R.string.susfs_no_loop_paths_configured)
+                    )
+                }
+            } else {
+                item {
+                    SectionHeader(
+                        title = stringResource(R.string.loop_paths_section),
+                        subtitle = null,
+                        icon = Icons.Default.Loop,
+                        count = susLoopPaths.size
+                    )
+                }
+
+                items(susLoopPaths.toList()) { path ->
+                    PathItemCard(
+                        path = path,
+                        icon = Icons.Default.Loop,
+                        onDelete = { onRemoveLoopPath(path) },
+                        onEdit = if (onEditLoopPath != null) { { onEditLoopPath(path) } } else null,
+                        isLoading = isLoading
+                    )
+                }
+            }
+
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = onAddLoopPath,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = stringResource(R.string.add_loop_path))
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * SUS Maps内容组件
+ */
+@Composable
+fun SusMapsContent(
+    susMaps: Set<String>,
+    isLoading: Boolean,
+    onAddSusMap: () -> Unit,
+    onRemoveSusMap: (String) -> Unit,
+    onEditSusMap: ((String) -> Unit)? = null
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // 说明卡片
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.sus_maps_description_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = stringResource(R.string.sus_maps_description_text),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = stringResource(R.string.sus_maps_warning),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                        Text(
+                            text = stringResource(R.string.sus_maps_debug_info),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+            }
+
+            if (susMaps.isEmpty()) {
+                item {
+                    EmptyStateCard(
+                        message = stringResource(R.string.susfs_no_sus_maps_configured)
+                    )
+                }
+            } else {
+                item {
+                    SectionHeader(
+                        title = stringResource(R.string.sus_maps_section),
+                        subtitle = null,
+                        icon = Icons.Default.Security,
+                        count = susMaps.size
+                    )
+                }
+
+                items(susMaps.toList()) { map ->
+                    PathItemCard(
+                        path = map,
+                        icon = Icons.Default.Security,
+                        onDelete = { onRemoveSusMap(map) },
+                        onEdit = if (onEditSusMap != null) { { onEditSusMap(map) } } else null,
+                        isLoading = isLoading
+                    )
+                }
+            }
+
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = onAddSusMap,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = stringResource(R.string.add))
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Kstat配置内容组件
+ */
+@Composable
+fun KstatConfigContent(
+    kstatConfigs: Set<String>,
+    addKstatPaths: Set<String>,
+    isLoading: Boolean,
+    onAddKstatStatically: () -> Unit,
+    onAddKstat: () -> Unit,
+    onRemoveKstatConfig: (String) -> Unit,
+    onEditKstatConfig: ((String) -> Unit)? = null,
+    onRemoveAddKstat: (String) -> Unit,
+    onEditAddKstat: ((String) -> Unit)? = null,
+    onUpdateKstat: (String) -> Unit,
+    onUpdateKstatFullClone: (String) -> Unit
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.kstat_config_description_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = stringResource(R.string.kstat_config_description_add_statically),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = stringResource(R.string.kstat_config_description_add),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = stringResource(R.string.kstat_config_description_update),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = stringResource(R.string.kstat_config_description_update_full_clone),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            if (kstatConfigs.isNotEmpty()) {
+                item {
+                    Text(
+                        text = stringResource(R.string.static_kstat_config),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                items(kstatConfigs.toList()) { config ->
+                    KstatConfigItemCard(
+                        config = config,
+                        onDelete = { onRemoveKstatConfig(config) },
+                        onEdit = if (onEditKstatConfig != null) { { onEditKstatConfig(config) } } else null,
+                        isLoading = isLoading
+                    )
+                }
+            }
+
+            if (addKstatPaths.isNotEmpty()) {
+                item {
+                    Text(
+                        text = stringResource(R.string.kstat_path_management),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                items(addKstatPaths.toList()) { path ->
+                    AddKstatPathItemCard(
+                        path = path,
+                        onDelete = { onRemoveAddKstat(path) },
+                        onEdit = if (onEditAddKstat != null) { { onEditAddKstat(path) } } else null,
+                        onUpdate = { onUpdateKstat(path) },
+                        onUpdateFullClone = { onUpdateKstatFullClone(path) },
+                        isLoading = isLoading
+                    )
+                }
+            }
+
+            if (kstatConfigs.isEmpty() && addKstatPaths.isEmpty()) {
+                item {
+                    EmptyStateCard(
+                        message = stringResource(R.string.no_kstat_config_message)
+                    )
+                }
+            }
+
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = onAddKstat,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = stringResource(R.string.add))
+                    }
+
+                    Button(
+                        onClick = onAddKstatStatically,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = stringResource(R.string.add))
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * 路径设置内容组件
+ */
+@SuppressLint("SdCardPath")
+@Composable
+fun PathSettingsContent(
+    androidDataPath: String,
+    onAndroidDataPathChange: (String) -> Unit,
+    sdcardPath: String,
+    onSdcardPathChange: (String) -> Unit,
+    isLoading: Boolean,
+    onSetAndroidDataPath: () -> Unit,
+    onSetSdcardPath: () -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedTextField(
+                        value = androidDataPath,
+                        onValueChange = onAndroidDataPathChange,
+                        label = { Text(stringResource(R.string.susfs_android_data_path_label)) },
+                        placeholder = { Text("/sdcard/Android/data") },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isLoading,
+                        singleLine = true,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+
+                    Button(
+                        onClick = onSetAndroidDataPath,
+                        enabled = !isLoading && androidDataPath.isNotBlank(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(40.dp),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(stringResource(R.string.susfs_set_android_data_path))
+                    }
+                }
+            }
+        }
+
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedTextField(
+                        value = sdcardPath,
+                        onValueChange = onSdcardPathChange,
+                        label = { Text(stringResource(R.string.susfs_sdcard_path_label)) },
+                        placeholder = { Text("/sdcard") },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isLoading,
+                        singleLine = true,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+
+                    Button(
+                        onClick = onSetSdcardPath,
+                        enabled = !isLoading && sdcardPath.isNotBlank(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(40.dp),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(stringResource(R.string.susfs_set_sdcard_path))
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * 启用功能状态内容组件
+ */
+@Composable
+fun EnabledFeaturesContent(
+    enabledFeatures: List<SuSFSManager.EnabledFeature>,
+    onRefresh: () -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.susfs_enabled_features_description),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+
+        if (enabledFeatures.isEmpty()) {
+            item {
+                EmptyStateCard(
+                    message = stringResource(R.string.susfs_no_features_found)
+                )
+            }
+        } else {
+            items(enabledFeatures) { feature ->
+                FeatureStatusCard(
+                    feature = feature,
+                    onRefresh = onRefresh
+                )
+            }
+        }
+    }
+}

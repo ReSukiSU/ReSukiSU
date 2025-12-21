@@ -36,7 +36,7 @@ android {
             keyPassword = ""
         }
     }**/
-    namespace = "com.sukisu.ultra"
+    namespace = "com.resukisu.resukisu"
 
     buildTypes {
         release {
