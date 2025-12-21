@@ -73,15 +73,6 @@ jobs:
             echo "COMMIT_SHA=${{ github.sha }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Setup need_upload
-        id: need_upload
-        run: |
-          if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
-            echo "UPLOAD=true" >> $GITHUB_OUTPUT
-          else
-            echo "UPLOAD=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Determine manager variant
         id: determine
         run: |
@@ -167,13 +158,40 @@ jobs:
         spoofed: ["true","false"]
         build_type: ["release","debug"]
     steps:
+      - name: Setup need_upload
+        id: need_upload
+        run: |
+          if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
+            echo "UPLOAD=true" >> $GITHUB_OUTPUT
+          else
+            echo "UPLOAD=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Determine manager variant
+        id: determine
+        run: |
+          if [ "${{ github.ref_name }}" == "miuix" ] && [ "${{ matrix.spoofed }}" == "true" ]; then
+            echo "SKIP=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          if [ "${{ github.ref_name }}" == "miuix" ]; then
+            echo "title=Manager" >> $GITHUB_OUTPUT
+            echo "topicid=${{ vars.MESSAGE_MIUIX_THREAD_ID }}" >> $GITHUB_OUTPUT
+          elif [ "${{ matrix.spoofed }}" == "true" ]; then
+            echo "title=Spoofed-Manager" >> $GITHUB_OUTPUT
+            echo "topicid=${{ vars.MESSAGE_SPOOFED_THREAD_ID }}" >> $GITHUB_OUTPUT
+          else
+            echo "title=Manager" >> $GITHUB_OUTPUT
+            echo "topicid=${{ vars.MESSAGE_THREAD_ID }}" >> $GITHUB_OUTPUT
+          fi
+        
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.spoofed == 'true' && 'Spoofed-Manager' || 'Manager' }}-${{ matrix.build_type }}
 
       - name: Upload to Telegram
-        if: ${{ secrets.BOT_TOKEN != '' }}
+        if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true' && steps.determine.outputs.SKIP != 'true'
         env:
           CHAT_ID: ${{ vars.CHAT_ID }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
