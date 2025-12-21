@@ -98,7 +98,7 @@ jobs:
           ./randomizer
 
       - name: Write key
-        if: ${{ ( github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' )) || github.ref_type == 'tag' }}
+        if: ${{ github.event_name == 'workflow_dispatch' || ( github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' )) || github.ref_type == 'tag' }}
         run: |
           if [ ! -z "${{ secrets.KEYSTORE }}" ]; then
             {
@@ -158,7 +158,7 @@ jobs:
           name: ${{ steps.determine.outputs.title }}-${{ matrix.build_type }}
           path: |
             manager/app/build/outputs/apk/release/*.apk
-            manager/app/build/outputs/apk/release/*.mapping
+            manager/app/build/outputs/mapping/release/
             manager/app/build/outputs/apk/debug/*.apk
 
   upload-telegram:
@@ -227,6 +227,6 @@ jobs:
           BRANCH: ${{ github.ref_name }}
         run: |
           pip3 install telethon
-          APK_DEBUG=../${{ steps.determine.outputs.title }}-debug/*.apk
-          APK_RELEASE=../${{ steps.determine.outputs.title }}-release/*.apk
+          APK_DEBUG=${{ steps.determine.outputs.title }}-debug/*.apk
+          APK_RELEASE=${{ steps.determine.outputs.title }}-release/*.apk
           python3 $GITHUB_WORKSPACE/scripts/ksubot.py $APK_DEBUG $APK_RELEASE
