@@ -168,6 +168,10 @@ jobs:
       matrix:
         spoofed: ["true","false"]
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup need_upload
         id: need_upload
         run: |
@@ -227,6 +231,6 @@ jobs:
           BRANCH: ${{ github.ref_name }}
         run: |
           pip3 install telethon
-          APK_DEBUG=${{ steps.determine.outputs.title }}-debug/*.apk
-          APK_RELEASE=${{ steps.determine.outputs.title }}-release/*.apk
+          APK_DEBUG=../${{ steps.determine.outputs.title }}-debug/*.apk
+          APK_RELEASE=../${{ steps.determine.outputs.title }}-release/*.apk
           python3 $GITHUB_WORKSPACE/scripts/ksubot.py $APK_DEBUG $APK_RELEASE
