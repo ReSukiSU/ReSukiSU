@@ -1,0 +1,91 @@
+name: Test Telegram Upload
+
+on:
+  push:
+
+jobs:
+  upload-telegram:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        spoofed: ["true","false"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup need_upload
+        id: need_upload
+        run: |
+          if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
+            echo "UPLOAD=true" >> $GITHUB_OUTPUT
+          else
+            echo "UPLOAD=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Determine commit info
+        id: commit
+        run: |
+          echo "SHA=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+          echo "MESSAGE=$(git log -1 --pretty=%B | tr '\n' ' ')" >> $GITHUB_OUTPUT
+          echo "URL=${{ github.server_url }}/${{ github.repository }}/commit/$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Determine manager variant
+        id: determine
+        run: |
+          if [ "${{ github.ref_name }}" == "miuix" ] && [ "${{ matrix.spoofed }}" == "true" ]; then
+            echo "SKIP=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          if [ "${{ github.ref_name }}" == "miuix" ]; then
+            echo "title=Manager" >> $GITHUB_OUTPUT
+            echo "topicid=${{ vars.MESSAGE_MIUIX_THREAD_ID }}" >> $GITHUB_OUTPUT
+          elif [ "${{ matrix.spoofed }}" == "true" ]; then
+            echo "title=Spoofed-Manager" >> $GITHUB_OUTPUT
+            echo "topicid=${{ vars.MESSAGE_SPOOFED_THREAD_ID }}" >> $GITHUB_OUTPUT
+          else
+            echo "title=Manager" >> $GITHUB_OUTPUT
+            echo "topicid=${{ vars.MESSAGE_THREAD_ID }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: update test file
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.determine.outputs.title }}-debug
+          path: /bin/sh
+
+      - name: update test file
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.determine.outputs.title }}-release
+          path: /bin/sh
+        
+      - name: Download Debug artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.determine.outputs.title }}-debug
+          path: .
+
+      - name: Download Release artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.determine.outputs.title }}-release
+          path: .
+
+      - name: Upload to Telegram
+        if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true' && steps.determine.outputs.SKIP != 'true'
+        env:
+          CHAT_ID: ${{ vars.CHAT_ID }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          MESSAGE_THREAD_ID: ${{ steps.determine.outputs.topicid }}
+          COMMIT_MESSAGE: ${{ steps.commit.outputs.MESSAGE }}
+          COMMIT_URL: ${{ steps.commit.outputs.URL }} 
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TITLE: ${{ steps.determine.outputs.title }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          pip3 install telethon
+          export VERSION=$(git rev-list --count HEAD)
+          APK_DEBUG=../${{ steps.determine.outputs.title }}-debug/*.apk
+          APK_RELEASE=../${{ steps.determine.outputs.title }}-release/*.apk
+          python3 $GITHUB_WORKSPACE/scripts/ksubot.py $APK_DEBUG $APK_RELEASE
