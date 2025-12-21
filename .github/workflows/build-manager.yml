@@ -50,6 +50,7 @@ jobs:
     needs: build-ksud
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         spoofed: ["true","false"]
     defaults:
