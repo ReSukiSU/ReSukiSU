@@ -53,6 +53,7 @@ jobs:
       fail-fast: false
       matrix:
         spoofed: ["true","false"]
+        build_type: ["Release","Debug"]
     defaults:
       run:
         working-directory: ./manager
@@ -130,22 +131,10 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Download arm64 ksud
+      - name: Download ksud artifacts
         uses: actions/download-artifact@v4
         with:
-          name: ksud-aarch64-linux-android
-          path: .
-
-      - name: Download x86_64 ksud
-        uses: actions/download-artifact@v4
-        with:
-          name: ksud-x86_64-linux-android
-          path: .
-
-      - name: Download arm ksud
-        uses: actions/download-artifact@v4
-        with:
-          name: ksud-armv7-linux-androideabi
+          name: ksud-${{ matrix.target }}
           path: .
 
       - name: Copy ksud to app jniLibs
@@ -157,40 +146,39 @@ jobs:
           cp -f ../x86_64-linux-android/release/ksud app/src/main/jniLibs/x86_64/libksud.so
           cp -f ../armv7-linux-androideabi/release/ksud app/src/main/jniLibs/armeabi-v7a/libksud.so
 
-      - name: Build Release
+      - name: Build APK
         if: ${{ steps.determine.outputs.SKIP != 'true' }}
-        run: ./gradlew clean assembleRelease -Pcommit=${{ steps.commit.outputs.COMMIT_SHA }}
+        run: ./gradlew assemble${{ matrix.build_type }} -Pcommit=${{ steps.commit.outputs.COMMIT_SHA }}
 
-      - name: Build Debug
+      - name: Upload artifact
         if: ${{ steps.determine.outputs.SKIP != 'true' }}
-        run: ./gradlew assembleDebug -Pcommit=${{ steps.commit.outputs.COMMIT_SHA }}
-
-      - name: Upload build artifacts
-        if: ${{ ( github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' )) || github.ref_type == 'tag' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.determine.outputs.title }}
+          name: ${{ steps.determine.outputs.title }}-${{ matrix.build_type }}
           path: |
-            app/build/outputs/apk/release/*.apk
-            app/build/outputs/apk/debug/*.apk
-            app/build/outputs/mapping/release/
-            app/build/outputs/mapping/debug/
+            app/build/outputs/apk/${{ matrix.build_type | lower }}/*.apk
+            app/build/outputs/mapping/${{ matrix.build_type | lower }}/
+
+  upload-telegram:
+    needs: build-manager
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        spoofed: ["true","false"]
+        build_type: ["Release","Debug"]
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.spoofed == 'true' && 'Spoofed-Manager' || 'Manager' }}-${{ matrix.build_type }}
 
       - name: Upload to Telegram
-        if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true' && steps.determine.outputs.SKIP != 'true'
+        if: ${{ secrets.BOT_TOKEN != '' }}
         env:
           CHAT_ID: ${{ vars.CHAT_ID }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          MESSAGE_THREAD_ID: ${{ steps.determine.outputs.topicid }}
-          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-          COMMIT_URL: ${{ github.event.head_commit.url }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          TITLE: ${{ steps.determine.outputs.title }}
-          BRANCH: ${{ github.ref_name }}
         run: |
           pip3 install telethon
-          for BUILD_TYPE in Release Debug; do
-            APK=$(find ./app/build/outputs/apk/${BUILD_TYPE,,} -name "*.apk")
-            TITLE="${{ steps.determine.outputs.title }}-${BUILD_TYPE}"
-            python3 $GITHUB_WORKSPACE/scripts/ksubot.py $APK "$TITLE"
-          done
+          APK=$(find ./manager/app/build/outputs/apk/${{ matrix.build_type | lower }} -name "*.apk")
+          TITLE="${{ matrix.spoofed == 'true' && 'Spoofed-Manager' || 'Manager' }}-${{ matrix.build_type }}"
+          python3 $GITHUB_WORKSPACE/scripts/ksubot.py $APK "$TITLE"
