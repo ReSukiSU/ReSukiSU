@@ -82,7 +82,6 @@ Branch: {branch}
 <a href="{run_url}">Workflow run</a>
 <a href="https://nightly.link/ReSukiSU/ReSukiSU/workflows/build-manager/main/Manager-debug.zip">Get latest main Debug build</a>
 """.strip()
-
 MAIN_UPDATED_MSG ="""
 main branch updated, manager in there may outdated 
 main 分支已更新，此 topic 的管理器可能已过时
@@ -100,6 +99,9 @@ def get_caption():
         commit_line=commit_line,
         run_url=RUN_URL,
     )
+    if BRANCH != "main":
+        msg += "\n⚠️⚠️<b>DEV VERSION, PLEASE BACKUP BEFORE INSTALLATION</b>⚠️⚠️"
+        msg += "\n⚠️⚠️<b>测试版，安装前请备份</b>⚠️⚠️"
     return msg
 
 def get_caption_for_debug():
@@ -111,6 +113,9 @@ def get_caption_for_debug():
         commit_line=commit_line,
         run_url=RUN_URL,
     )
+    if BRANCH != "main":
+        msg += "\n⚠️⚠️<b>DEV VERSION, PLEASE BACKUP BEFORE INSTALLATION</b>⚠️⚠️"
+        msg += "\n⚠️⚠️<b>测试版，安装前请备份</b>⚠️⚠️"
     return msg
 
 def check_environ():
