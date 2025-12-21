@@ -218,6 +218,14 @@ jobs:
           name: ${{ steps.determine.outputs.title }}-release
           path: .
 
+      - name: Bot session cache
+        if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true'
+        id: bot_session_cache
+        uses: actions/cache@v4
+        with:
+          path: scripts/ksubot.session
+          key: ${{ runner.os }}-bot-session
+
       - name: Upload to Telegram
         if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true' && steps.determine.outputs.SKIP != 'true'
         env:
@@ -233,5 +241,5 @@ jobs:
           pip3 install telethon
           export VERSION=$(git rev-list --count HEAD)
           APK_DEBUG=apk/debug/*.apk
-          APK_RELEASE=apl/release/*.apk
+          APK_RELEASE=apk/release/*.apk
           python3 $GITHUB_WORKSPACE/scripts/ksubot.py $APK_DEBUG $APK_RELEASE
