@@ -157,8 +157,9 @@ jobs:
         with:
           name: ${{ steps.determine.outputs.title }}-${{ matrix.build_type }}
           path: |
-            app/build/outputs/apk/${{ matrix.build_type }}/*.apk
-            app/build/outputs/mapping/${{ matrix.build_type }}/
+            app/release/*。apk
+            app/release/*.mapping
+            app/build/outputs/apk/debug/*.apk
 
   upload-telegram:
     needs: build-manager
@@ -166,7 +167,6 @@ jobs:
     strategy:
       matrix:
         spoofed: ["true","false"]
-        build_type: ["release","debug"]
     steps:
       - name: Setup need_upload
         id: need_upload
@@ -202,10 +202,17 @@ jobs:
             echo "topicid=${{ vars.MESSAGE_THREAD_ID }}" >> $GITHUB_OUTPUT
           fi
         
-      - name: Download artifacts
+      - name: Download Debug artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ steps.determine.outputs.title }}-${{ matrix.build_type }}
+          name: ${{ steps.determine.outputs.title }}-debug
+          path: .
+
+      - name: Download Release artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.determine.outputs.title }}-release
+          path: .
 
       - name: Upload to Telegram
         if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true' && steps.determine.outputs.SKIP != 'true'
@@ -220,6 +227,7 @@ jobs:
           BRANCH: ${{ github.ref_name }}
         run: |
           pip3 install telethon
-          APK=$(find ./manager/app/build/outputs/apk/${{ matrix.build_type }} -name "*.apk")
-          TITLE="${{ matrix.spoofed == 'true' && 'Spoofed-Manager' || 'Manager' }}-${{ matrix.build_type }}"
+          APK_DEBUG=../${{ steps.determine.outputs.title }}-debug/*.apk
+          APK_RELEASE=../${{ steps.determine.outputs.title }}-release/*.apk
+          TITLE="${{ steps.determine.outputs.title }}"
           python3 $GITHUB_WORKSPACE/scripts/ksubot.py $APK "$TITLE"
