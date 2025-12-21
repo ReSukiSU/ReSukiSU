@@ -76,6 +76,11 @@ jobs:
           name: ${{ steps.determine.outputs.title }}-release
           path: .
 
+      - name: debug
+        run: |
+          tree
+          tree $GITHUB_WORKSPACE
+
       - name: Upload to Telegram
         if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true' && steps.determine.outputs.SKIP != 'true'
         env:
