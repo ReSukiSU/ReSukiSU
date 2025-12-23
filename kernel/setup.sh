@@ -59,7 +59,7 @@ setup_kernelsu() {
     ln -sf "$(realpath --relative-to="$DRIVER_DIR" "$KERNEL_ROOT/KernelSU/kernel")" "kernelsu" && echo "[+] Symlink created."
 
     # Add entries in Makefile and Kconfig if not already existing
-    grep -q "kernelsu" "$DRIVER_MAKEFILE" || echo "obj-$(CONFIG_KSU) += kernelsu/" >> "$DRIVER_MAKEFILE" && echo "[+] Modified Makefile."
+    grep -q "kernelsu" "$DRIVER_MAKEFILE" || printf "\nobj-\$(CONFIG_KSU) += kernelsu/\n" >> "$DRIVER_MAKEFILE" && echo "[+] Modified Makefile."
     grep -q 'source "drivers/kernelsu/Kconfig"' "$DRIVER_KCONFIG" || sed -i '/endmenu/i\source "drivers/kernelsu/Kconfig"' "$DRIVER_KCONFIG" && echo "[+] Modified Kconfig."
     echo '[+] Done.'
 }
