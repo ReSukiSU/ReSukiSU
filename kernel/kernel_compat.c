@@ -123,3 +123,28 @@ long ksu_strncpy_from_user_nofault(char *dst, const void __user *unsafe_addr,
     return ret;
 }
 #endif
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 9, 0) &&                           \
+     !defined(KSU_HAS_PATH_MOUNT))
+int path_mount(const char *dev_name, struct path *path, const char *type_page,
+               unsigned long flags, void *data_page)
+{
+    // 384 is enough
+    char buf[384] = { 0 };
+    mm_segment_t old_fs;
+    long ret;
+
+    // -1 on the size as implicit null termination
+    // as we zero init the thing
+    char *realpath = d_path(path, buf, sizeof(buf) - 1);
+    if (!(realpath && realpath != buf))
+        return -ENOENT;
+
+    old_fs = get_fs();
+    set_fs(KERNEL_DS);
+    ret = do_mount(dev_name, (const char __user *)realpath, type_page, flags,
+                   data_page);
+    set_fs(old_fs);
+    return ret;
+}
+#endif

@@ -8,26 +8,54 @@
 #include <linux/namei.h>
 #include <linux/proc_ns.h>
 #include <linux/pid.h>
-#include <linux/sched/task.h>
 #include <linux/slab.h>
 #include <linux/syscalls.h>
 #include <linux/task_work.h>
 #include <linux/version.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0)
+#include <linux/sched/task.h>
+#else
+#include <linux/sched.h>
+#endif
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0)
 #include <uapi/linux/mount.h>
+#else
+#include <uapi/linux/fs.h>
+#endif
 
-#include "arch.h"
 #include "klog.h" // IWYU pragma: keep
 #include "ksu.h"
+#include "kernel_compat.h"
 #include "su_mount_ns.h"
 
 extern int path_mount(const char *dev_name, struct path *path,
                       const char *type_page, unsigned long flags,
                       void *data_page);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 17, 0)
+
+// RKSU: tiny arch.h, avoid depending on real arch.h
+#ifndef __PT_REGS_CAST
+#define __PT_REGS_CAST(x) (x)
+#endif
+
 #if defined(__aarch64__)
+#define PT_PARM1(x) (__PT_REGS_CAST(x)->regs[0])
+#define PT_PARM2(x) (__PT_REGS_CAST(x)->regs[1])
 extern long __arm64_sys_setns(const struct pt_regs *regs);
+#define do_sys_setns(regs) (__arm64_sys_setns(regs))
 #elif defined(__x86_64__)
+#define PT_PARM1(x) (__PT_REGS_CAST(x)->di)
+#define PT_PARM2(x) (__PT_REGS_CAST(x)->si)
 extern long __x64_sys_setns(const struct pt_regs *regs);
+#define do_sys_setns(regs) (__x64_sys_setns(regs))
+#elif defined(__arm__) // https://syscalls.mebeim.net/?table=arm/32/eabi/latest
+// taken from:
+// https://github.com/backslashxx/KernelSU/blob/8b71e8bce199e8ac44538648e298092a9b3ef42b/kernel/arch.h#L29
+#define PT_PARM1(x) (__PT_REGS_CAST(x)->uregs[0])
+#define PT_PARM2(x) (__PT_REGS_CAST(x)->uregs[1])
+extern long sys_setns(const struct pt_regs *regs);
+#define do_sys_setns(regs) (sys_setns(regs))
 #endif
 
 static long ksu_sys_setns(int fd, int flags)
@@ -35,17 +63,22 @@ static long ksu_sys_setns(int fd, int flags)
     struct pt_regs regs;
     memset(&regs, 0, sizeof(regs));
 
-    PT_REGS_PARM1(&regs) = fd;
-    PT_REGS_PARM2(&regs) = flags;
+    PT_PARM1(&regs) = fd;
+    PT_PARM2(&regs) = flags;
 
-#if defined(__aarch64__)
-    return __arm64_sys_setns(&regs);
-#elif defined(__x86_64__)
-    return __x64_sys_setns(&regs);
-#else
-#error "Unsupported arch"
-#endif
+    return do_sys_setns(&regs);
 }
+#else
+static long ksu_sys_setns(int fd, int flags)
+{
+    return sys_setns(fd, flags);
+}
+
+int ksys_unshare(unsigned long unshare_flags)
+{
+    return sys_unshare(unshare_flags);
+}
+#endif
 
 // global mode , need CAP_SYS_ADMIN and CAP_SYS_CHROOT to perform setns
 static void ksu_mnt_ns_global(void)
@@ -117,11 +150,7 @@ try_setns:
     fd_install(fd, ns_file);
     ret = ksu_sys_setns(fd, CLONE_NEWNS);
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 11, 0)
-    ksys_close(fd);
-#else
-    close_fd(fd);
-#endif
+    do_close_fd(fd);
 
     if (ret) {
         pr_warn("call setns failed: %ld\n", ret);
@@ -162,6 +191,13 @@ static void ksu_mnt_ns_individual(void)
     }
 }
 
+#if !defined(CONFIG_KSU_SUSFS) &&                                              \
+    !defined(CONFIG_KSU_MANUAL_HOOK) // if tracepoint hook
+struct ksu_mns_tw {
+    struct callback_head cb;
+    int32_t ns_mode;
+};
+
 static void ksu_setup_mount_ns_tw_func(struct callback_head *cb)
 {
     struct ksu_mns_tw *tw = container_of(cb, struct ksu_mns_tw, cb);
@@ -174,6 +210,34 @@ static void ksu_setup_mount_ns_tw_func(struct callback_head *cb)
     revert_creds(old_cred);
     kfree(tw);
 }
+
+static void ksu_handle_setup_mount_ns(int32_t ns_mode)
+{
+    struct ksu_mns_tw *tw = kzalloc(sizeof(*tw), GFP_ATOMIC);
+    if (!tw) {
+        pr_err("no mem for tw! skip mnt_ns magic for pid: %d.\n", current->pid);
+        return;
+    }
+    tw->cb.func = ksu_setup_mount_ns_tw_func;
+    tw->ns_mode = ns_mode;
+    if (task_work_add(current, &tw->cb, TWA_RESUME)) {
+        kfree(tw);
+        pr_err("add task work failed! skip mnt_ns magic for pid: %d.\n",
+               current->pid);
+    }
+}
+#else
+static void ksu_handle_setup_mount_ns(int32_t ns_mode)
+{
+    const struct cred *old_cred = override_creds(ksu_cred);
+    if (ns_mode == KSU_NS_GLOBAL) {
+        ksu_mnt_ns_global();
+    } else {
+        ksu_mnt_ns_individual();
+    }
+    revert_creds(old_cred);
+}
+#endif
 
 void setup_mount_ns(int32_t ns_mode)
 {
@@ -194,16 +258,5 @@ void setup_mount_ns(int32_t ns_mode)
         return;
     }
 
-    struct ksu_mns_tw *tw = kzalloc(sizeof(*tw), GFP_ATOMIC);
-    if (!tw) {
-        pr_err("no mem for tw! skip mnt_ns magic for pid: %d.\n", current->pid);
-        return;
-    }
-    tw->cb.func = ksu_setup_mount_ns_tw_func;
-    tw->ns_mode = ns_mode;
-    if (task_work_add(current, &tw->cb, TWA_RESUME)) {
-        kfree(tw);
-        pr_err("add task work failed! skip mnt_ns magic for pid: %d.\n",
-               current->pid);
-    }
+    ksu_handle_setup_mount_ns(ns_mode);
 }

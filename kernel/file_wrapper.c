@@ -7,6 +7,7 @@
 #include <linux/cred.h>
 #include <linux/err.h>
 #include <linux/file.h>
+#include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/seq_file.h>
 #include <linux/slab.h>
@@ -14,13 +15,9 @@
 #include <linux/version.h>
 #include <linux/mount.h>
 
+#include "kernel_compat.h"
 #include "objsec.h"
-
-#include "klog.h" // IWYU pragma: keep
-#include "selinux/selinux.h"
 #include "ksud.h"
-
-#include "file_wrapper.h"
 
 struct ksu_file_wrapper {
     struct file *orig;
@@ -113,25 +110,12 @@ static int ksu_wrapper_iopoll(struct kiocb *kiocb, bool spin)
 }
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0) &&                            \
-    (LINUX_VERSION_CODE > KERNEL_VERSION(3, 11, 0) ||                          \
-     defined(KSU_HAS_ITERATE_DIR))
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0)
 static int ksu_wrapper_iterate(struct file *fp, struct dir_context *dc)
 {
     struct ksu_file_wrapper *data = fp->private_data;
     struct file *orig = data->orig;
     return orig->f_op->iterate(orig, dc);
-}
-#endif
-
-// int (*readdir) (struct file *, void *, filldir_t);
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 11, 0) &&                           \
-    !defined(KSU_HAS_ITERATE_DIR)
-static int ksu_wrapper_readdir(struct file *fp, void *ptr, filldir_t filler)
-{
-    struct ksu_file_wrapper *data = fp->private_data;
-    struct file *orig = data->orig;
-    return orig->f_op->readdir(orig, ptr, filler);
 }
 #endif
 
@@ -301,10 +285,8 @@ static int ksu_wrapper_setlease(struct file *fp, int arg1,
     }
     return -EINVAL;
 }
-#elif LINUX_VERSION_CODE >=                                                    \
-    KERNEL_VERSION(                                                            \
-        3, 18,                                                                 \
-        0) // int (*setlease)(struct file *, long, struct file_lock **, void **);
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 18, 0)
+// int (*setlease)(struct file *, long, struct file_lock **, void **);
 static int ksu_wrapper_setlease(struct file *fp, long arg1,
                                 struct file_lock **fl, void **p)
 {
@@ -315,7 +297,8 @@ static int ksu_wrapper_setlease(struct file *fp, long arg1,
     }
     return -EINVAL;
 }
-#else // int (*setlease)(struct file *, long, struct file_lock **);
+#else
+// int (*setlease)(struct file *, long, struct file_lock **);
 static int ksu_wrapper_setlease(struct file *fp, long arg1,
                                 struct file_lock **fl)
 {
@@ -348,7 +331,7 @@ static void ksu_wrapper_show_fdinfo(struct seq_file *m, struct file *f)
         orig->f_op->show_fdinfo(m, orig);
     }
 }
-#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0)
+#else
 static int ksu_wrapper_show_fdinfo(struct seq_file *m, struct file *f)
 {
     struct ksu_file_wrapper *data = f->private_data;
@@ -447,14 +430,8 @@ static struct ksu_file_wrapper *ksu_create_file_wrapper(struct file *fp)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)
     p->ops.iopoll = fp->f_op->iopoll ? ksu_wrapper_iopoll : NULL;
 #endif
-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0) &&                            \
-    (LINUX_VERSION_CODE > KERNEL_VERSION(3, 11, 0) ||                          \
-     defined(KSU_HAS_ITERATE_DIR))
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0)
     p->ops.iterate = fp->f_op->iterate ? ksu_wrapper_iterate : NULL;
-#endif
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 11, 0) &&                           \
-    !defined(KSU_HAS_ITERATE_DIR)
-    p->ops.readdir = fp->f_op->readdir ? ksu_wrapper_readdir : NULL;
 #endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 7, 0)
     p->ops.iterate_shared =
@@ -488,9 +465,7 @@ static struct ksu_file_wrapper *ksu_create_file_wrapper(struct file *fp)
     p->ops.splice_read = fp->f_op->splice_read ? ksu_wrapper_splice_read : NULL;
     p->ops.setlease = fp->f_op->setlease ? ksu_wrapper_setlease : NULL;
     p->ops.fallocate = fp->f_op->fallocate ? ksu_wrapper_fallocate : NULL;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0)
     p->ops.show_fdinfo = fp->f_op->show_fdinfo ? ksu_wrapper_show_fdinfo : NULL;
-#endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 7, 0)
     p->ops.copy_file_range =
         fp->f_op->copy_file_range ? ksu_wrapper_copy_file_range : NULL;
@@ -538,8 +513,8 @@ static const struct dentry_operations ksu_file_wrapper_d_ops = {
 #define ksu_anon_inode_create_getfile_compat anon_inode_create_getfile
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 0)
 #define ksu_anon_inode_create_getfile_compat anon_inode_getfile_secure
-#else
-// There is no anon_inode_create_getfile before 5.16, but it's not difficult to implement it.
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 19, 0)
+// There is no anon_inode_create_getfile in 4.19, but it's not difficult to implement it.
 // https://cs.android.com/android/kernel/superproject/+/common-android12-5.10:common/fs/anon_inodes.c;l=58-125;drc=0d34ce8aa78e38affbb501690bcabec4df88620e
 
 // Borrow kernel's anon_inode_mnt, so that we don't need to mount one by ourselves.
@@ -550,8 +525,10 @@ ksu_anon_inode_make_secure_inode(const char *name,
                                  const struct inode *context_inode)
 {
     struct inode *inode;
-    const struct qstr qname = QSTR_INIT(name, strlen(name));
+#ifdef KSU_OPTIONAL_HAS_INIT_SEC_ANON
     int error;
+    const struct qstr qname = QSTR_INIT(name, strlen(name));
+#endif
 
     if (unlikely(!anon_inode_mnt)) {
         return ERR_PTR(-ENODEV);
@@ -561,11 +538,13 @@ ksu_anon_inode_make_secure_inode(const char *name,
     if (IS_ERR(inode))
         return inode;
     inode->i_flags &= ~S_PRIVATE;
+#ifdef KSU_OPTIONAL_HAS_INIT_SEC_ANON
     error = security_inode_init_security_anon(inode, &qname, context_inode);
     if (error) {
         iput(inode);
         return ERR_PTR(error);
     }
+#endif
     return inode;
 }
 
@@ -601,6 +580,13 @@ err_iput:
 err:
     module_put(fops->owner);
     return file;
+}
+#else // KERNEL_VERSION < 4.19
+struct file *ksu_anon_inode_create_getfile_compat(
+    const char *name, const struct file_operations *fops, void *priv, int flags,
+    const struct inode *context_inode)
+{
+    return anon_inode_getfile(name, fops, priv, flags);
 }
 #endif
 
@@ -681,7 +667,8 @@ done:
 
 void ksu_file_wrapper_init(void)
 {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 16, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 19, 0) &&                          \
+    LINUX_VERSION_CODE < KERNEL_VERSION(5, 16, 0)
     static const struct file_operations tmp = { .owner = THIS_MODULE };
     struct file *dummy = anon_inode_getfile("dummy", &tmp, NULL, 0);
     if (IS_ERR(dummy)) {

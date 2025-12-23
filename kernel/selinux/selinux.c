@@ -5,6 +5,7 @@
 #include "selinux_defs.h"
 #include "../klog.h" // IWYU pragma: keep
 #include "../ksu.h"
+#include "../kernel_compat.h"
 
 static int transive_to_domain(const char *domain, struct cred *cred)
 {
@@ -15,7 +16,7 @@ static int transive_to_domain(const char *domain, struct cred *cred)
 #else
     struct cred_security_struct *tsec;
 #endif
-    tsec = cred->security;
+    tsec = selinux_cred(cred);
     if (!tsec) {
         pr_err("tsec == NULL!\n");
         return -1;
@@ -130,7 +131,7 @@ bool is_task_ksu_domain(const struct cred *cred)
 #else
     const struct cred_security_struct *tsec;
 #endif
-    tsec = cred->security;
+    tsec = selinux_cred(cred);
     if (!tsec) {
         return false;
     }
@@ -161,7 +162,7 @@ bool is_context(const struct cred *cred, const char *context)
 #else
     const struct cred_security_struct *tsec;
 #endif
-    tsec = cred->security;
+    tsec = selinux_cred(cred);
     if (!tsec) {
         return false;
     }

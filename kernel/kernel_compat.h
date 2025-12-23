@@ -78,4 +78,29 @@ static inline int do_close_fd(unsigned int fd)
 #endif
 }
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 9, 0) &&                            \
+    !defined(KSU_UL_HAS_FILE_INODE)
+static inline struct inode *file_inode(struct file *f)
+{
+    return f->f_path.dentry->d_inode;
+}
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 1, 0) &&                            \
+    !defined(KSU_OPTIONAL_SELINUX_INODE)
+static inline struct inode_security_struct *
+selinux_inode(const struct inode *inode)
+{
+    return inode->i_security;
+}
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 1, 0) &&                            \
+    !defined(KSU_OPTIONAL_SELINUX_CRED)
+static inline struct task_security_struct *selinux_cred(const struct cred *cred)
+{
+    return cred->security;
+}
+#endif
+
 #endif

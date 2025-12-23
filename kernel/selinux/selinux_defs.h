@@ -33,10 +33,4 @@
 #define __setenforce(val)
 #endif
 
-#ifdef KSU_OPTIONAL_SELINUX_CRED
-#define __selinux_cred(cred) (selinux_cred(cred))
-#else
-#define __selinux_cred(cred) (cred->security)
-#endif
-
 #endif
