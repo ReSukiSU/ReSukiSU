@@ -253,7 +253,4 @@ jobs:
           bot-id: ${{ secrets.BOT_TOKEN }}
           chat-id: ${{ vars.CHAT_ID }}
           topic-id: ${{ steps.determine.outputs.topicid }}
-          caption-path: caption.txt
-          file-path: |
-                 apk/debug/*.apk
-                 apk/release/*.apk
+          file-path: caption.txt
