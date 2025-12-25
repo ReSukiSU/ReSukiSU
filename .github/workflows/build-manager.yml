@@ -248,7 +248,6 @@ jobs:
            echo "$MSG_CONTENT"
            echo "$MSG_CONTENT" > caption.txt
       - name: Upload to Telegram
-        if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true' && steps.determine.outputs.SKIP != 'true'
         uses: PuerNya/tg-bot-upload@v1
         with:
           bot-id: ${{ secrets.BOT_TOKEN }}
