@@ -227,30 +227,28 @@ jobs:
           name: ${{ steps.determine.outputs.title }}-release
           path: .
 
-      - name: Make captain
+      - name: Bot session cache
+        if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true'
+        id: bot_session_cache
+        uses: actions/cache@v4
+        with:
+          path: scripts/ksubot.session
+          key: ${{ runner.os }}-bot-session
+
+      - name: Upload to Telegram
         if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true' && steps.determine.outputs.SKIP != 'true'
         env:
+          CHAT_ID: ${{ vars.CHAT_ID }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          MESSAGE_THREAD_ID: ${{ steps.determine.outputs.topicid }}
           COMMIT_MESSAGE: ${{ steps.commit.outputs.MESSAGE }}
           COMMIT_URL: ${{ steps.commit.outputs.URL }} 
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           TITLE: ${{ steps.determine.outputs.title }}
           BRANCH: ${{ github.ref_name }}
         run: |
-           #!/bin/bash
-           MSG_CONTENT="**${TITLE}**
-           Branch: ${BRANCH}
-           #ci_${VERSION}
-           \`\`\`
-           ${COMMIT_MESSAGE}
-           \`\`\`
-           [Commit](${COMMIT_URL})
-           [Workflow run](${RUN_URL})"
-           echo "$MSG_CONTENT"
-           echo "$MSG_CONTENT" > caption.txt
-      - name: Upload to Telegram
-        uses: PuerNya/tg-bot-upload@v1
-        with:
-          bot-id: ${{ secrets.BOT_TOKEN }}
-          chat-id: ${{ vars.CHAT_ID }}
-          topic-id: ${{ steps.determine.outputs.topicid }}
-          file-path: caption.txt
+          pip3 install telethon
+          export VERSION=$(git rev-list --count HEAD)
+          APK_DEBUG=apk/debug/*.apk
+          APK_RELEASE=apk/release/*.apk
+          python3 $GITHUB_WORKSPACE/scripts/ksubot.py $APK_DEBUG $APK_RELEASE
