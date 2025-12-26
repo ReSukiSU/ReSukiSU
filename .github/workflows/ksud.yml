@@ -43,15 +43,7 @@ jobs:
       if: ${{ inputs.pack_ksuinit }}
       run: |
         mv ksuinit/*/release/ksuinit ./userspace/ksud/bin/aarch64/
-        
-    - name: Setup ndk
-      run: |
-        ndk_url=$(wget -qO- https://github.com/android/ndk/releases/latest | grep -e 'https://dl.google.com/android/repository/android-ndk-.*-linux.zip' | sed -n 's/.*<a href="\([^"]*\)".*/\1/p')
-        wget -O ndk.zip $ndk_url -nv
-        mkdir -p ~/ndk_temp
-        unzip ndk.zip -d ~/ndk_temp 2>&1 > /dev/null
-        mv ~/ndk_temp/*/* ~/ndk_temp
-          
+     
     - name: Setup Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
