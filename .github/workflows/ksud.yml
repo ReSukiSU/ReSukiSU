@@ -56,6 +56,7 @@ jobs:
         
     - uses: Swatinem/rust-cache@v2
       with:
+        prefix-key: ksud-${{ inputs.target }}-rust
         workspaces: userspace/ksud
         cache-targets: false
 
