@@ -58,7 +58,6 @@ jobs:
       with:
         prefix-key: ksud-${{ inputs.target }}-rust
         workspaces: userspace/ksud
-        cache-targets: false
 
     - name: Build ksud
       run: |
