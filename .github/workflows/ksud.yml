@@ -68,7 +68,9 @@ jobs:
         cache-targets: false
 
     - name: Build ksud
-      run: cargo ndk b -t ${{ inputs.target }} -r --manifest-path ./userspace/ksud/Cargo.toml
+      run: |
+        cd userspace/ksud/
+        cargo ndk b -t ${{ inputs.target }} -r
 
     - name: Upload ksud artifact
       uses: actions/upload-artifact@v4
