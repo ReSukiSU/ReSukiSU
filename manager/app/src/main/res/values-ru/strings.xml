@@ -175,7 +175,6 @@
     <string name="settings_mode_always_enable">Постоянно включены</string>
     <string name="module_install_multiple_confirm_with_names">Уверены, что хотите установить следующие %1$d модули? \n\n%2$s</string>
     <string name="more_settings">Доп. настройки</string>
-    <string name="selinux">SELinux</string>
     <string name="selinux_enabled">Включено</string>
     <string name="selinux_disabled">Выключен</string>
     <string name="simple_mode">Режим простоты</string>
@@ -215,7 +214,6 @@
     <string name="yes">Да</string>
     <string name="no">Нет</string>
     <string name="failed_reboot">Не удалось перезагрузиться</string>
-    <string name="kpm_title">KPM</string>
     <string name="kpm_empty">На данный момент нет установленных модулей ядра</string>
     <string name="kpm_version">Версия</string>
     <string name="kpm_author">Автор</string>
@@ -399,8 +397,6 @@
     <string name="susfs_path_label">Путь</string>
     <string name="susfs_path_placeholder">например: /system/addon.d</string>
     <string name="susfs_no_paths_configured">SUS пути не настроены</string>
-    <!-- SuSFS Umount Mode -->
-    <!-- SuSFS Run Umount -->
     <!-- SuSFS Reset Categories -->
     <string name="susfs_reset_paths_title">Сбросить SUS пути</string>
     <string name="susfs_reset_paths_message">Это очистит все конфигурации пути SUS. Вы уверены, что хотите продолжить?</string>
@@ -438,13 +434,11 @@
     <string name="susfs_execution_location_label">Место выполнения</string>
     <string name="susfs_current_execution_location">Текущее место выполнения: %s</string>
     <string name="susfs_execution_location_service">Сервис</string>
-    <string name="susfs_execution_location_post_fs_data">Post-FS-Data</string>
     <string name="susfs_execution_location_service_description">Выполнить после запуска системных сервисов</string>
     <string name="susfs_execution_location_post_fs_data_description">Выполнить после монтирования файловой системы, но перед полной загрузкой. Может вызвать бутлуп</string>
     <string name="susfs_slot_info_title">Информация о слоте</string>
     <string name="susfs_slot_info_description">Просмотреть информацию о текущем слоте загрузки и скопировать значения</string>
     <string name="susfs_current_active_slot">Текущий слот: %s</string>
-    <string name="susfs_slot_uname">Uname: %s</string>
     <string name="susfs_slot_build_time">Время сборки: %s</string>
     <string name="susfs_slot_current_badge">Текущее</string>
     <string name="susfs_slot_use_uname">Использовать Uname</string>
@@ -555,7 +549,6 @@
     <string name="unknown_signature">Неизвестно</string>
     <string name="multi_manager_list">Активный менеджер</string>
     <string name="no_active_manager">Нет активного менеджера</string>
-    <string name="default_signature">SukiSU</string>
     <string name="home_zygisk_implement">Реализация Zygisk</string>
     <!-- 循环路径相关 -->
     <string name="susfs_tab_sus_loop_paths">Пути цикла SUS</string>
@@ -568,7 +561,6 @@
     <string name="susfs_reset_loop_paths_title">Сбросить SUS пути</string>
     <string name="susfs_reset_loop_paths_message">Вы уверены, что хотите очистить все пути цикла SUS? Это действие нельзя отменить.</string>
     <string name="susfs_loop_path_label">Циклический путь</string>
-    <string name="susfs_loop_path_placeholder">/data/example/path</string>
     <string name="susfs_loop_path_restriction_warning">Примечание: Только пути НЕ внутри /storage/ и /sdcard/ могут быть добавлены по цикловым путям.</string>
     <string name="susfs_loop_path_invalid_location">Ошибка: пути не могут быть внутри /storage/ или /sdcard/ каталогов</string>
     <string name="loop_paths_section">Циклические пути</string>
@@ -645,9 +637,7 @@
     <string name="description">Описание</string>
     <string name="supported_devices">Поддерживаемые устройства</string>
     <!-- SUS Map related strings -->
-    <string name="susfs_tab_sus_maps">SUS Maps</string>
     <string name="susfs_sus_map_label">Путь к библиотеке</string>
-    <string name="susfs_sus_map_placeholder">/data/adb/modules/my_module/zygisk/arm64-v8a.so</string>
     <string name="susfs_add_sus_map">Добавить SUS Map</string>
     <string name="susfs_edit_sus_map">Изменить SUS Map</string>
     <string name="susfs_sus_map_added_success">SUS map успешно добавлен: %1$s</string>
@@ -685,9 +675,6 @@
     <string name="log_viewer_too_many_logs">Слишком много журналов, отображаются только последние записи %1$d</string>
     <string name="log_viewer_load_more">Загрузить больше логов</string>
     <string name="log_viewer_all_logs_loaded">Все логи отображаются</string>
-    <!-- MiUI Uninstall Desc -->
-    <string name="miui_uninstall_title">Подтвердите удаление SukiSU Manager?</string>
-    <string name="miui_uninstall_content">Удаление не повлияет на функциональность вашего root-доступа. Он продолжит работать от этого менеджера.</string>
     <string name="incompatible_kernel_msg">    Текущий менеджер несовместим с этим ядром! Пожалуйста, обновите ядро до версии %2$d или выше (сейчас %1$d)
     </string>
     <string name="umount_path_manager">Управление путями размонтирования</string>

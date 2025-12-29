@@ -48,7 +48,6 @@
     <string name="reboot_to_apply">Etkili olması için yeniden başlatın</string>
     <string name="module_magisk_conflict">Magisk ile çakışma nedeniyle modüller kullanılamıyor!</string>
     <string name="home_learn_kernelsu">KernelSU\'yu öğrenin</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">KernelSU\'yu nasıl yükleyeceğinizi ve modülleri nasıl kullanacağınızı öğrenin</string>
     <string name="home_support_title">Bizi destekleyin</string>
     <string name="home_support_content">KernelSU, her zaman olduğu gibi ücretsiz ve açık kaynaklıdır. Ancak bir bağış yaparak bizi destekleyebilirsiniz.</string>
@@ -177,7 +176,6 @@
     <string name="settings_mode_always_enable">Kalıcı olarak etkinleştir</string>
     <string name="module_install_multiple_confirm_with_names">Aşağıdaki %1$d modülü yüklemek istediğinizden emin misiniz? \n\n%2$s</string>
     <string name="more_settings">Daha fazla ayar</string>
-    <string name="selinux">SELinux</string>
     <string name="selinux_enabled">Etkin</string>
     <string name="selinux_disabled">Devre dışı</string>
     <string name="simple_mode">Basit mod</string>
@@ -220,7 +218,6 @@
     <string name="yes">Evet</string>
     <string name="no">Hayır</string>
     <string name="failed_reboot">Yeniden başlatma başarısız</string>
-    <string name="kpm_title">KPM</string>
     <string name="kpm_empty">Şu anda yüklü çekirdek modülü yok</string>
     <string name="kpm_version">Sürüm</string>
     <string name="kpm_author">Geliştirici</string>
@@ -337,7 +334,6 @@
     <string name="warning_of_meta_module_summary">Bu modül /system bölümünü bağlamak istiyor, meta modül bunu halledecektir. Aksi takdirde çalışmayabilir</string>
     <!-- 分类相关 -->
     <string name="category_all_apps">Tümü</string>
-    <string name="category_root_apps">Root</string>
     <string name="category_custom_apps">Özel</string>
     <string name="category_default_apps">Varsayılan</string>
     <!-- 排序相关 -->
@@ -444,13 +440,11 @@
     <string name="susfs_execution_location_label">Çalıştırma Konumu</string>
     <string name="susfs_current_execution_location">Mevcut çalıştırma konumu: %s</string>
     <string name="susfs_execution_location_service">Servis</string>
-    <string name="susfs_execution_location_post_fs_data">Post-FS-Data</string>
     <string name="susfs_execution_location_service_description">Sistem servisleri başladıktan sonra çalıştır</string>
     <string name="susfs_execution_location_post_fs_data_description">Dosya sistemi bağlandıktan sonra ancak sistem tam olarak önyüklenmeden önce çalıştır, önyükleme döngüsüne neden olabilir</string>
     <string name="susfs_slot_info_title">Bölüm Bilgisi</string>
     <string name="susfs_slot_info_description">Mevcut önyükleme bölümü bilgisini görüntüleyin ve değerleri kopyalayın</string>
     <string name="susfs_current_active_slot">Mevcut Aktif Bölüm: %s</string>
-    <string name="susfs_slot_uname">Uname: %s</string>
     <string name="susfs_slot_build_time">Derleme Zamanı: %s</string>
     <string name="susfs_slot_current_badge">Mevcut</string>
     <string name="susfs_slot_use_uname">Uname Kullan</string>
@@ -561,7 +555,6 @@
     <string name="unknown_signature">Bilinmiyor</string>
     <string name="multi_manager_list">Aktif Yönetici</string>
     <string name="no_active_manager">Aktif yönetici yok</string>
-    <string name="default_signature">SukiSU</string>
     <string name="home_zygisk_implement">Zygisk uygulaması</string>
     <string name="home_meta_module_implement">Meta Modül uygulaması</string>
     <!-- 循环路径相关 -->
@@ -643,7 +636,6 @@
     <string name="confirm_multiple_installation">Kurulumu Onayla (%d dosya)</string>
     <string name="install_confirm">Yükle</string>
     <string name="module_package">Modül</string>
-    <string name="kernel_package">Kernel</string>
     <string name="unknown_package">Bilinmiyor</string>
     <string name="unknown_kernel">Bilinmeyen Kernel</string>
     <string name="unknown_file">Bilinmeyen Dosya</string>
@@ -654,7 +646,6 @@
     <!-- SUS Map related strings -->
     <string name="susfs_tab_sus_maps">SUS Eşlemeleri</string>
     <string name="susfs_sus_map_label">Kütüphane Yolu</string>
-    <string name="susfs_sus_map_placeholder">/data/adb/modules/my_module/zygisk/arm64-v8a.so</string>
     <string name="susfs_add_sus_map">SUS Eşlemesi Ekle</string>
     <string name="susfs_edit_sus_map">SUS Eşlemesini Düzenle</string>
     <string name="susfs_sus_map_added_success">SUS eşlemesi başarıyla eklendi: %1$s</string>
@@ -692,9 +683,6 @@
     <string name="log_viewer_too_many_logs">Çok fazla günlük var, yalnızca son %1$d giriş gösteriliyor</string>
     <string name="log_viewer_load_more">Daha Fazla Günlük Yükle</string>
     <string name="log_viewer_all_logs_loaded">Tüm günlükler görüntülendi</string>
-    <!-- MiUI Uninstall Desc -->
-    <string name="miui_uninstall_title">SukiSU Yöneticisi Kaldırılsın mı?</string>
-    <string name="miui_uninstall_content">Kaldırma işlemine devam etmek, root erişiminizin temel işlevselliğini etkilemeyecektir. Root, bu yöneticiden bağımsız olarak çalışacak şekilde tasarlanmıştır.</string>
     <string name="incompatible_kernel_msg">Mevcut yönetici bu çekirdekle uyumsuz! Lütfen çekirdeği %2$d veya daha yüksek bir sürüme yükseltin (mevcut sürüm %1$d)</string>
     <string name="umount_path_manager">Bağlantı Kaldırma Yolu Yönetimi</string>
     <string name="umount_path_manager_summary">Çekirdek bağlantı kaldırma yollarını yönetin</string>
@@ -702,7 +690,6 @@
     <string name="add_umount_path">Bağlantı Kaldırma Yolu Ekle</string>
     <string name="mount_path">Bağlama Yolu</string>
     <string name="umount_flags">Bağlantı Kaldırma Bayrakları</string>
-    <string name="umount_flags_hint">0=Normal unmount, 2=MNT_DETACH</string>
     <string name="flags">Bayraklar</string>
     <string name="confirm_delete">Silmeyi Onayla</string>
     <string name="confirm_delete_umount_path">%s yolunu silmek istediğinizden emin misiniz?</string>
@@ -715,7 +702,6 @@
     <string name="clear_custom_paths">Özel Yolları Temizle</string>
     <string name="apply_config">Yapılandırmayı Uygula</string>
     <string name="config_applied">Yapılandırma çekirdeğe uygulandı</string>
-    <string name="mnt_detach">MNT_DETACH</string>
     <string name="group_contains_apps">%d uygulama içeriyor</string>
     <string name="settings_disable_sulog">Süper kullanıcı günlük kaydını devre dışı bırak</string>
     <string name="settings_disable_sulog_summary">KernelSU süper kullanıcı erişim günlük kaydını devre dışı bırakır</string>
