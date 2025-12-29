@@ -274,6 +274,13 @@ class WebViewInterface(
     fun controlKpm(name: String, args: String): Int {
         return controlKpmModule(name, args)
     }
+
+    @JavascriptInterface
+    fun exit() {
+        if (context is Activity) {
+            (context as Activity).finish()
+        }
+    }
 }
 
 fun hideSystemUI(window: Window) =
