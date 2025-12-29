@@ -123,4 +123,11 @@ extern unsigned long *ksu_bitmap_zalloc(unsigned int nbits, gfp_t flags);
 extern void ksu_bitmap_free(const unsigned long *bitmap);
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 15, 0)
+__weak void groups_sort(struct group_info *group_info)
+{
+    return;
+}
+#endif
+
 #endif
