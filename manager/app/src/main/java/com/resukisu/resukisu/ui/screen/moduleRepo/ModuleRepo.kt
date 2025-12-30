@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -407,30 +409,31 @@ fun OnlineModuleItem(
                     ) {
                         Text(
                             text = module.moduleName,
-                            fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
-                            lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
-                            fontFamily = MaterialTheme.typography.titleMedium.fontFamily
+                            modifier = Modifier.weight(1f).horizontalScroll(rememberScrollState()),
+                            softWrap = true,
+                            maxLines = 1
                         )
-                        Spacer(modifier = Modifier.weight(1f))
-                        Row(
-                            horizontalArrangement = Arrangement.End,
-                        ) {
-                            if (module.stargazerCount > 0) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Star,
-                                        contentDescription = "stars",
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Text(
-                                        text = module.stargazerCount.toString(),
-                                        fontSize = 12.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.padding(start = 4.dp)
-                                    )
-                                }
+                        if (module.stargazerCount > 0) {
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Star,
+                                    contentDescription = "stars",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = module.stargazerCount.toString(),
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(start = 4.dp)
+                                )
                             }
                         }
                     }
