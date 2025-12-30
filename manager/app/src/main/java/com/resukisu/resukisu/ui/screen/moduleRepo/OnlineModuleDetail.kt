@@ -118,36 +118,57 @@ fun OnlineModuleDetailScreen(navigator: DestinationsNavigator, module: ModuleRep
 
     Scaffold(
         topBar = {
-            LargeFlexibleTopAppBar(
-                title = { Text(module.moduleName) },
-                scrollBehavior = scrollBehavior,
-                navigationIcon = {
-                    IconButton(
-                        onClick = { navigator.popBackStack() },
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(id = R.string.back),
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = {
-                            uriHandler.openUri("https://modules.kernelsu.org/module/${module.moduleId}")
+            Column {
+                LargeFlexibleTopAppBar(
+                    title = { Text(module.moduleName) },
+                    scrollBehavior = scrollBehavior,
+                    navigationIcon = {
+                        IconButton(
+                            onClick = { navigator.popBackStack() },
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(id = R.string.back),
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.OpenInBrowser,
-                            contentDescription = stringResource(R.string.open_module_home_page),
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                uriHandler.openUri("https://modules.kernelsu.org/module/${module.moduleId}")
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.OpenInBrowser,
+                                contentDescription = stringResource(R.string.open_module_home_page),
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors().copy(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                    )
+                )
+
+                PrimaryTabRow(
+                    selectedTabIndex = pagerState.currentPage,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    tabTitles.forEachIndexed { index, title ->
+                        Tab(
+                            selected = pagerState.currentPage == index,
+                            onClick = {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(index)
+                                }
+                            },
+                            unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            text = { Text(title) }
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors().copy(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
-                )
-            )
+                }
+            }
         },
         contentWindowInsets = WindowInsets.safeDrawing.only(
             WindowInsetsSides.Top + WindowInsetsSides.Horizontal
@@ -158,24 +179,6 @@ fun OnlineModuleDetailScreen(navigator: DestinationsNavigator, module: ModuleRep
             .fillMaxSize()
             .padding(innerPadding)
             .nestedScroll(scrollBehavior.nestedScrollConnection)) {
-            PrimaryTabRow(
-                selectedTabIndex = pagerState.currentPage,
-                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                tabTitles.forEachIndexed { index, title ->
-                    Tab(
-                        selected = pagerState.currentPage == index,
-                        onClick = {
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(index)
-                            }
-                        },
-                        unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        text = { Text(title) }
-                    )
-                }
-            }
 
             HorizontalPager(
                 state = pagerState,
