@@ -1,32 +1,32 @@
 package com.resukisu.resukisu.ui.component
 
-import android.content.Context
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.util.Log
+import android.view.MotionEvent
+import android.view.ViewGroup
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.FrameLayout
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import android.widget.FrameLayout
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.viewinterop.AndroidView
@@ -48,10 +48,9 @@ import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Suppress("DEPRECATION")
 @Composable
 fun GithubMarkdown(content: String, backgroundColor: androidx.compose.ui.graphics.Color) {
-    var loading by remember { mutableStateOf(true) }
+    var loading = remember { mutableStateOf(true) }
     val isDark = isInDarkTheme(ThemeConfig.forceDarkMode)
     val dir = if (LocalLayoutDirection.current == LayoutDirection.Rtl) "rtl" else "ltr"
 
@@ -97,6 +96,24 @@ fun GithubMarkdown(content: String, backgroundColor: androidx.compose.ui.graphic
         </html>
     """.trimIndent()
 
+    GithubMarkdownWebView(loading, html)
+
+    if (loading.value) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            LoadingIndicator()
+        }
+    }
+
+}
+
+@SuppressLint("ClickableViewAccessibility")
+@Suppress("DEPRECATION")
+@Composable
+private fun GithubMarkdownWebView(loading: MutableState<Boolean>, html: String) {
     AndroidView(
         factory = { context ->
             val frameLayout = FrameLayout(context)
@@ -121,6 +138,20 @@ fun GithubMarkdown(content: String, backgroundColor: androidx.compose.ui.graphic
                         private val assetLoader = WebViewAssetLoader.Builder()
                             .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(context))
                             .build()
+
+                        override fun onPageFinished(view: WebView, url: String) {
+                            super.onPageFinished(view, url)
+                            view.evaluateJavascript(
+                                "(function(){return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);})()"
+                            ) { value ->
+                                val raw = value.trim().trim('"')
+                                val cssPx = raw.toFloatOrNull() ?: return@evaluateJavascript
+                                val density = view.resources.displayMetrics.density
+                                val heightPx = (cssPx * density).toInt().coerceAtLeast(1)
+                                view.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, heightPx)
+                                view.requestLayout()
+                            }
+                        }
 
                         override fun shouldOverrideUrlLoading(
                             view: WebView, request: WebResourceRequest
@@ -163,8 +194,11 @@ fun GithubMarkdown(content: String, backgroundColor: androidx.compose.ui.graphic
                         }
 
                         override fun onPageCommitVisible(view: WebView?, url: String?) {
-                            loading = false
+                            loading.value = false
                         }
+                    }
+                    setOnTouchListener { _, ev ->
+                        ev.action == MotionEvent.ACTION_MOVE
                     }
                     loadDataWithBaseURL(
                         "https://appassets.androidplatform.net", html,
@@ -182,15 +216,4 @@ fun GithubMarkdown(content: String, backgroundColor: androidx.compose.ui.graphic
             .wrapContentHeight()
             .clipToBounds(),
     )
-
-    if (loading) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            LoadingIndicator()
-        }
-    }
-
 }
