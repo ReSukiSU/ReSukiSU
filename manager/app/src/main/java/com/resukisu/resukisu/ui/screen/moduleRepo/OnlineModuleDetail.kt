@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -49,6 +50,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
@@ -299,28 +301,39 @@ fun ReleasesTab(module: ModuleRepoViewModel.RepoModule, nestedScrollConnection: 
             .nestedScroll(nestedScrollConnection),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(module.releases) { it ->
+        items(module.releases) {
             ReleaseCard(module,it, coroutineScope, navigator)
             Spacer(modifier = Modifier.height(5.dp))
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ReadmeTab(module: ModuleRepoViewModel.RepoModule, nestedScrollConnection: NestedScrollConnection) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .nestedScroll(nestedScrollConnection),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        item {
-            Row(modifier = Modifier.fillMaxSize()) {
+    val loading = remember { mutableStateOf(true) }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(nestedScrollConnection),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
                 GithubMarkdown(
                     content = module.readme,
-                    backgroundColor = MaterialTheme.colorScheme.background
+                    backgroundColor = MaterialTheme.colorScheme.background,
+                    loading = loading,
+                    callerProvideLoadingIndicator = true
                 )
             }
+        }
+
+        if (loading.value) {
+            LoadingIndicator(
+                modifier = Modifier.align(Alignment.Center)
+            )
         }
     }
 }

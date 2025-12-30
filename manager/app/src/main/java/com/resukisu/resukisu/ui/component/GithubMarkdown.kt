@@ -49,8 +49,12 @@ import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun GithubMarkdown(content: String, backgroundColor: androidx.compose.ui.graphics.Color) {
-    var loading = remember { mutableStateOf(true) }
+fun GithubMarkdown(
+    content: String,
+    backgroundColor: androidx.compose.ui.graphics.Color,
+    loading: MutableState<Boolean> = remember { mutableStateOf(true) },
+    callerProvideLoadingIndicator: Boolean = false
+) {
     val isDark = isInDarkTheme(ThemeConfig.forceDarkMode)
     val dir = if (LocalLayoutDirection.current == LayoutDirection.Rtl) "rtl" else "ltr"
 
@@ -98,7 +102,7 @@ fun GithubMarkdown(content: String, backgroundColor: androidx.compose.ui.graphic
 
     GithubMarkdownWebView(loading, html)
 
-    if (loading.value) {
+    if (loading.value && !callerProvideLoadingIndicator) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
