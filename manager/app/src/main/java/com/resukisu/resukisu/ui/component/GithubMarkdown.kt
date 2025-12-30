@@ -301,6 +301,7 @@ private fun GithubMarkdownWebView(loading: MutableState<Boolean>, html: String) 
                                             }
                                         } else {
                                             v.parent.requestDisallowInterceptTouchEvent(false)
+                                            return true
                                         }
                                     }
                                 }
