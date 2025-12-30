@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -301,9 +300,11 @@ fun ReleasesTab(module: ModuleRepoViewModel.RepoModule, nestedScrollConnection: 
             .nestedScroll(nestedScrollConnection),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(module.releases) {
-            ReleaseCard(module,it, coroutineScope, navigator)
-            Spacer(modifier = Modifier.height(5.dp))
+        item {
+            module.releases.forEach {
+                ReleaseCard(module, it, coroutineScope, navigator)
+                Spacer(modifier = Modifier.height(5.dp))
+            }
         }
     }
 }
