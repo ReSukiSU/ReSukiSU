@@ -15,8 +15,7 @@
 #include <linux/uidgid.h>
 
 #ifdef CONFIG_KSU_SUSFS
-#include <linux/susfs.h>
-#include <linux/namei.h>
+#include <linux/susfs_def.h>
 #endif // #ifdef CONFIG_KSU_SUSFS
 
 #include "allowlist.h"
@@ -27,7 +26,7 @@
 #include "selinux/selinux.h"
 #include "seccomp_cache.h"
 #include "supercalls.h"
-#if !defined(CONFIG_KSU_SUSFS) && !defined(CONFIG_KSU_MANUAL_HOOK)
+#ifdef KSU_TP_HOOK
 #include "syscall_hook_manager.h"
 #endif
 #include "kernel_compat.h"
@@ -129,7 +128,7 @@ int ksu_handle_setuid(uid_t new_uid, uid_t old_uid, uid_t euid) // (new_euid)
         ksu_install_fd();
         spin_lock_irq(&current->sighand->siglock);
         ksu_seccomp_allow_cache(current->seccomp.filter, __NR_reboot);
-#ifndef CONFIG_KSU_MANUAL_HOOK // if tracepoint hook
+#ifdef KSU_TP_HOOK
         ksu_set_task_tracepoint_flag(current);
 #endif
         spin_unlock_irq(&current->sighand->siglock);
@@ -143,11 +142,11 @@ int ksu_handle_setuid(uid_t new_uid, uid_t old_uid, uid_t euid) // (new_euid)
             ksu_seccomp_allow_cache(current->seccomp.filter, __NR_reboot);
             spin_unlock_irq(&current->sighand->siglock);
         }
-#ifndef CONFIG_KSU_MANUAL_HOOK // if tracepoint hook
+#ifdef KSU_TP_HOOK
         ksu_set_task_tracepoint_flag(current);
 #endif
     }
-#ifndef CONFIG_KSU_MANUAL_HOOK // if tracepoint hook
+#ifdef KSU_TP_HOOK
     else {
         ksu_clear_task_tracepoint_flag_if_needed(current);
     }

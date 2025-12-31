@@ -2,7 +2,6 @@
 #include <linux/slab.h>
 #include <linux/task_work.h>
 #include <asm/current.h>
-#include <linux/compat.h>
 #include <linux/cred.h>
 #include <linux/dcache.h>
 #include <linux/err.h>
@@ -147,21 +146,6 @@ void on_boot_completed(void)
     pr_info("on_boot_completed!\n");
     track_throne(true);
 }
-
-#ifndef CONFIG_KSU_SUSFS
-#define MAX_ARG_STRINGS 0x7FFFFFFF
-struct user_arg_ptr {
-#ifdef CONFIG_COMPAT
-    bool is_compat;
-#endif
-    union {
-        const char __user *const __user *native;
-#ifdef CONFIG_COMPAT
-        const compat_uptr_t __user *compat;
-#endif
-    } ptr;
-};
-#endif // #ifndef CONFIG_KSU_SUSFS
 
 static const char __user *get_user_arg_ptr(struct user_arg_ptr argv, int nr)
 {

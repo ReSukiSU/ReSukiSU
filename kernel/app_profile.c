@@ -28,7 +28,7 @@
 #include "klog.h" // IWYU pragma: keep
 #include "selinux/selinux.h"
 #include "su_mount_ns.h"
-#ifndef CONFIG_KSU_SUSFS
+#ifdef KSU_TP_HOOK
 #include "syscall_hook_manager.h"
 #endif
 #include "sulog.h"
@@ -182,7 +182,7 @@ void escape_with_root_profile(void)
     ksu_sulog_report_su_grant(current_euid().val, NULL, "escape_to_root");
 #endif
 
-#ifndef CONFIG_KSU_SUSFS
+#ifdef KSU_TP_HOOK
     struct task_struct *t;
     for_each_thread (p, t) {
         ksu_set_task_tracepoint_flag(t);
@@ -195,143 +195,3 @@ void escape_to_root_for_init(void)
 {
     setup_selinux(KERNEL_SU_CONTEXT);
 }
-
-#ifdef CONFIG_KSU_MANUAL_SU
-
-#include "ksud.h"
-
-#ifndef DEVPTS_SUPER_MAGIC
-#define DEVPTS_SUPER_MAGIC 0x1cd1
-#endif
-
-static int __manual_su_handle_devpts(struct inode *inode)
-{
-    if (!current->mm) {
-        return 0;
-    }
-
-    uid_t uid = current_uid().val;
-    if (uid % 100000 < 10000) {
-        // not untrusted_app, ignore it
-        return 0;
-    }
-
-    if (likely(!ksu_is_allow_uid_for_current(uid)))
-        return 0;
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 1, 0) ||                           \
-    defined(KSU_OPTIONAL_SELINUX_INODE)
-    struct inode_security_struct *sec = selinux_inode(inode);
-#else
-    struct inode_security_struct *sec =
-        (struct inode_security_struct *)inode->i_security;
-#endif
-    if (ksu_file_sid && sec)
-        sec->sid = ksu_file_sid;
-
-    return 0;
-}
-
-void escape_to_root_for_cmd_su(uid_t target_uid, pid_t target_pid)
-{
-    struct cred *newcreds;
-    struct task_struct *target_task;
-    unsigned long flags;
-
-    pr_info("cmd_su: escape_to_root_for_cmd_su called for UID: %d, PID: %d\n",
-            target_uid, target_pid);
-
-    // Find target task by PID
-    rcu_read_lock();
-    target_task = pid_task(find_vpid(target_pid), PIDTYPE_PID);
-    if (!target_task) {
-        rcu_read_unlock();
-        pr_err("cmd_su: target task not found for PID: %d\n", target_pid);
-#if __SULOG_GATE
-        ksu_sulog_report_su_grant(target_uid, "cmd_su", "target_not_found");
-#endif
-        return;
-    }
-    get_task_struct(target_task);
-    rcu_read_unlock();
-
-    if (task_uid(target_task).val == 0) {
-        pr_warn("cmd_su: target task is already root, PID: %d\n", target_pid);
-        put_task_struct(target_task);
-        return;
-    }
-
-    newcreds = prepare_kernel_cred(target_task);
-    if (newcreds == NULL) {
-        pr_err("cmd_su: failed to allocate new cred for PID: %d\n", target_pid);
-#if __SULOG_GATE
-        ksu_sulog_report_su_grant(target_uid, "cmd_su", "cred_alloc_failed");
-#endif
-        put_task_struct(target_task);
-        return;
-    }
-
-    struct root_profile *profile = ksu_get_root_profile(target_uid);
-
-    newcreds->uid.val = profile->uid;
-    newcreds->suid.val = profile->uid;
-    newcreds->euid.val = profile->uid;
-    newcreds->fsuid.val = profile->uid;
-
-    newcreds->gid.val = profile->gid;
-    newcreds->fsgid.val = profile->gid;
-    newcreds->sgid.val = profile->gid;
-    newcreds->egid.val = profile->gid;
-    newcreds->securebits = 0;
-
-    u64 cap_for_cmd_su = profile->capabilities.effective | CAP_DAC_READ_SEARCH |
-                         CAP_SETUID | CAP_SETGID;
-    memcpy(&newcreds->cap_effective, &cap_for_cmd_su,
-           sizeof(newcreds->cap_effective));
-    memcpy(&newcreds->cap_permitted, &profile->capabilities.effective,
-           sizeof(newcreds->cap_permitted));
-    memcpy(&newcreds->cap_bset, &profile->capabilities.effective,
-           sizeof(newcreds->cap_bset));
-
-    setup_groups(profile, newcreds);
-    task_lock(target_task);
-
-    const struct cred *old_creds = get_task_cred(target_task);
-
-    rcu_assign_pointer(target_task->real_cred, newcreds);
-    rcu_assign_pointer(target_task->cred, get_cred(newcreds));
-    task_unlock(target_task);
-
-    if (target_task->sighand) {
-        spin_lock_irqsave(&target_task->sighand->siglock, flags);
-        disable_seccomp(target_task);
-        spin_unlock_irqrestore(&target_task->sighand->siglock, flags);
-    }
-
-    setup_selinux(profile->selinux_domain);
-    put_cred(old_creds);
-    wake_up_process(target_task);
-
-    if (target_task->signal->tty) {
-        struct inode *inode = target_task->signal->tty->driver_data;
-        if (inode && inode->i_sb->s_magic == DEVPTS_SUPER_MAGIC) {
-            __manual_su_handle_devpts(inode);
-        }
-    }
-
-    put_task_struct(target_task);
-#if __SULOG_GATE
-    ksu_sulog_report_su_grant(target_uid, "cmd_su", "manual_escalation");
-#endif
-#ifndef CONFIG_KSU_SUSFS
-    struct task_struct *p = current;
-    struct task_struct *t;
-    for_each_thread (p, t) {
-        ksu_set_task_tracepoint_flag(t);
-    }
-#endif
-    setup_mount_ns(profile->namespaces);
-    pr_info("cmd_su: privilege escalation completed for UID: %d, PID: %d\n",
-            target_uid, target_pid);
-}
-#endif

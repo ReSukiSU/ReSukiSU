@@ -59,7 +59,7 @@
 #endif
 
 #else
-#ifdef KSU_KPROBES_HOOK
+#ifdef KSU_TP_HOOK
 #error "Unsupported arch"
 #endif
 #endif

@@ -29,7 +29,7 @@
 #include "sulog.h"
 #include "selinux/selinux.h"
 #include "file_wrapper.h"
-#ifndef CONFIG_KSU_SUSFS
+#ifdef KSU_TP_HOOK
 #include "syscall_hook_manager.h"
 #endif
 #include "throne_comm.h"
@@ -405,7 +405,7 @@ static int do_get_wrapper_fd(void __user *arg)
 static int do_manage_mark(void __user *arg)
 {
     struct ksu_manage_mark_cmd cmd;
-#ifndef CONFIG_KSU_SUSFS
+#ifdef KSU_TP_HOOK
     int ret = 0;
 #endif
 
@@ -416,7 +416,7 @@ static int do_manage_mark(void __user *arg)
 
     switch (cmd.operation) {
     case KSU_MARK_GET: {
-#if !defined(CONFIG_KSU_SUSFS) && !defined(CONFIG_KSU_MANUAL_HOOK)
+#ifdef KSU_TP_HOOK
         // Get task mark status
         ret = ksu_get_task_mark(cmd.pid);
         if (ret < 0) {
@@ -424,14 +424,20 @@ static int do_manage_mark(void __user *arg)
             return ret;
         }
         cmd.result = (u32)ret;
-        break;
-#else
-        cmd.result = 0;
-        break;
 #endif
+#ifdef CONFIG_KSU_SUSFS
+        if (susfs_is_current_proc_umounted()) {
+            ret = 0; // SYSCALL_TRACEPOINT is NOT flagged
+        } else {
+            ret = 1; // SYSCALL_TRACEPOINT is flagged
+        }
+        pr_info("manage_mark: ret for pid %d: %d\n", cmd.pid, ret);
+        cmd.result = (u32)ret;
+#endif
+        break;
     }
     case KSU_MARK_MARK: {
-#if !defined(CONFIG_KSU_SUSFS) && !defined(CONFIG_KSU_MANUAL_HOOK)
+#ifdef KSU_TP_HOOK
         if (cmd.pid == 0) {
             ksu_mark_all_process();
         } else {
@@ -450,7 +456,7 @@ static int do_manage_mark(void __user *arg)
         break;
     }
     case KSU_MARK_UNMARK: {
-#if !defined(CONFIG_KSU_SUSFS) && !defined(CONFIG_KSU_MANUAL_HOOK)
+#ifdef KSU_TP_HOOK
         if (cmd.pid == 0) {
             ksu_unmark_all_process();
         } else {
@@ -469,7 +475,7 @@ static int do_manage_mark(void __user *arg)
         break;
     }
     case KSU_MARK_REFRESH: {
-#if !defined(CONFIG_KSU_SUSFS) && !defined(CONFIG_KSU_MANUAL_HOOK)
+#ifdef KSU_TP_HOOK
         ksu_mark_running_process();
         pr_info("manage_mark: refreshed running processes\n");
 #else
@@ -948,7 +954,6 @@ static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
     { .cmd = 0, .name = NULL, .handler = NULL, .perm_check = NULL } // Sentine
 };
 
-#ifndef CONFIG_KSU_SUSFS
 struct ksu_install_fd_tw {
     struct callback_head cb;
     int __user *outp;
@@ -1002,35 +1007,7 @@ int ksu_handle_sys_reboot(int magic1, int magic2, unsigned int cmd,
 
     // extensions
 
-    return 0;
-}
-
-#ifdef KSU_KPROBES_HOOK
-// Reboot hook for installing fd
-static int reboot_handler_pre(struct kprobe *p, struct pt_regs *regs)
-{
-    struct pt_regs *real_regs = PT_REAL_REGS(regs);
-    int magic1 = (int)PT_REGS_PARM1(real_regs);
-    int magic2 = (int)PT_REGS_PARM2(real_regs);
-    int cmd = (int)PT_REGS_PARM3(real_regs);
-    void __user **arg = (void __user **)&PT_REGS_SYSCALL_PARM4(real_regs);
-
-    return ksu_handle_sys_reboot(magic1, magic2, cmd, arg);
-}
-
-static struct kprobe reboot_kp = {
-    .symbol_name = REBOOT_SYMBOL,
-    .pre_handler = reboot_handler_pre,
-};
-#endif
-#else
-int ksu_handle_sys_reboot(int magic1, int magic2, unsigned int cmd,
-                          void __user **arg)
-{
-    if (magic1 != KSU_INSTALL_MAGIC1) {
-        return -EINVAL;
-    }
-
+#ifdef CONFIG_KSU_SUSFS
     // If magic2 is susfs and current process is root
     if (magic2 == SUSFS_MAGIC && current_uid().val == 0) {
 #ifdef CONFIG_KSU_SUSFS_SUS_PATH
@@ -1095,20 +1072,6 @@ int ksu_handle_sys_reboot(int magic1, int magic2, unsigned int cmd,
             return 0;
         }
 #endif //#ifdef CONFIG_KSU_SUSFS_OPEN_REDIRECT
-#ifdef CONFIG_KSU_SUSFS_SUS_SU
-        if (cmd == CMD_SUSFS_SHOW_SUS_SU_WORKING_MODE) {
-            susfs_get_sus_su_working_mode(arg);
-            return 0;
-        }
-        if (cmd == CMD_SUSFS_IS_SUS_SU_READY) {
-            susfs_is_sus_su_ready(arg);
-            return 0;
-        }
-        if (cmd == CMD_SUSFS_SUS_SU) {
-            susfs_sus_su(arg);
-            return 0;
-        }
-#endif //#ifdef CONFIG_KSU_SUSFS_SUS_SU
 #ifdef CONFIG_KSU_SUSFS_SUS_MAP
         if (cmd == CMD_SUSFS_ADD_SUS_MAP) {
             susfs_add_sus_map(arg);
@@ -1133,19 +1096,28 @@ int ksu_handle_sys_reboot(int magic1, int magic2, unsigned int cmd,
         }
         return 0;
     }
-
-    // Check if this is a request to install KSU fd
-    if (magic2 == KSU_INSTALL_MAGIC2) {
-        int fd = ksu_install_fd();
-        pr_info("[%d] install ksu fd: %d\n", current->pid, fd);
-        if (copy_to_user((int *)*arg, &fd, sizeof(fd))) {
-            pr_err("install ksu fd reply err\n");
-            return 0;
-        }
-    }
+#endif
     return 0;
 }
-#endif // #ifndef CONFIG_KSU_SUSFS
+
+#ifdef KSU_TP_HOOK
+// Reboot hook for installing fd
+static int reboot_handler_pre(struct kprobe *p, struct pt_regs *regs)
+{
+    struct pt_regs *real_regs = PT_REAL_REGS(regs);
+    int magic1 = (int)PT_REGS_PARM1(real_regs);
+    int magic2 = (int)PT_REGS_PARM2(real_regs);
+    int cmd = (int)PT_REGS_PARM3(real_regs);
+    void __user **arg = (void __user **)&PT_REGS_SYSCALL_PARM4(real_regs);
+
+    return ksu_handle_sys_reboot(magic1, magic2, cmd, arg);
+}
+
+static struct kprobe reboot_kp = {
+    .symbol_name = REBOOT_SYMBOL,
+    .pre_handler = reboot_handler_pre,
+};
+#endif
 
 void ksu_supercalls_init(void)
 {
@@ -1156,8 +1128,7 @@ void ksu_supercalls_init(void)
         pr_info("  %-18s = 0x%08x\n", ksu_ioctl_handlers[i].name,
                 ksu_ioctl_handlers[i].cmd);
     }
-#ifndef CONFIG_KSU_SUSFS
-#ifdef KSU_KPROBES_HOOK
+#ifdef KSU_TP_HOOK
     int rc = register_kprobe(&reboot_kp);
     if (rc) {
         pr_err("reboot kprobe failed: %d\n", rc);
@@ -1165,17 +1136,12 @@ void ksu_supercalls_init(void)
         pr_info("reboot kprobe registered successfully\n");
     }
 #endif
-#endif
 }
 
 void ksu_supercalls_exit(void)
 {
-#ifndef CONFIG_KSU_SUSFS
-#ifdef KSU_KPROBES_HOOK
+#ifdef KSU_TP_HOOK
     unregister_kprobe(&reboot_kp);
-#endif
-#else
-    pr_info("susfs: do nothing\n");
 #endif
 }
 

@@ -15,7 +15,7 @@
 #include "feature.h"
 #include "klog.h" // IWYU pragma: keep
 #include "throne_tracker.h"
-#ifndef CONFIG_KSU_SUSFS
+#ifndef KSU_TP_HOOK
 #include "syscall_hook_manager.h"
 #endif
 #include "ksud.h"
@@ -74,7 +74,7 @@ int __init kernelsu_init(void)
     ksu_supercalls_init();
 
     sukisu_custom_config_init();
-#if !defined(CONFIG_KSU_SUSFS) && !defined(CONFIG_KSU_MANUAL_HOOK)
+#ifdef KSU_TP_HOOK
     ksu_syscall_hook_manager_init();
 #endif
     ksu_setuid_hook_init();
@@ -88,7 +88,7 @@ int __init kernelsu_init(void)
     susfs_init();
 #endif
 
-#if !defined(CONFIG_KSU_SUSFS) && !defined(CONFIG_KSU_MANUAL_HOOK)
+#ifdef KSU_TP_HOOK
     ksu_ksud_init();
 #endif
 
@@ -111,7 +111,7 @@ void kernelsu_exit(void)
 
     ksu_throne_tracker_exit();
 
-#if !defined(CONFIG_KSU_SUSFS) && !defined(CONFIG_KSU_MANUAL_HOOK)
+#ifdef KSU_TP_HOOK
     ksu_ksud_exit();
     ksu_syscall_hook_manager_exit();
 #endif

@@ -1,6 +1,7 @@
 #ifndef __KSU_H_KSUD
 #define __KSU_H_KSUD
 
+#include <linux/compat.h>
 #include <linux/types.h>
 
 #define KSUD_PATH "/data/adb/ksud"
@@ -20,7 +21,6 @@ extern u32 ksu_file_sid;
 extern bool ksu_module_mounted;
 extern bool ksu_boot_completed;
 
-#ifdef CONFIG_KSU_SUSFS
 #define MAX_ARG_STRINGS 0x7FFFFFFF
 struct user_arg_ptr {
 #ifdef CONFIG_COMPAT
@@ -34,6 +34,7 @@ struct user_arg_ptr {
     } ptr;
 };
 
+#ifdef CONFIG_KSU_SUSFS
 int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
                              struct user_arg_ptr *argv,
                              struct user_arg_ptr *envp, int *flags);

@@ -25,9 +25,9 @@
 #include "allowlist.h"
 #include "manager.h"
 #include "kernel_compat.h"
-#ifndef CONFIG_KSU_SUSFS
+#ifdef KSU_TP_HOOK
 #include "syscall_hook_manager.h"
-#endif // #ifndef CONFIG_KSU_SUSFS
+#endif // #ifdef KSU_TP_HOOK
 #include "su_mount_ns.h"
 
 #define FILE_MAGIC 0x7f4b5355 // ' KSU', u32
@@ -270,7 +270,7 @@ out:
 
     if (persist) {
         persistent_allow_list();
-#if !defined(CONFIG_KSU_SUSFS) && !defined(CONFIG_KSU_MANUAL_HOOK)
+#ifdef KSU_TP_HOOK
         // FIXME: use a new flag
         ksu_mark_running_process();
 #endif

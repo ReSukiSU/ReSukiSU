@@ -35,9 +35,9 @@
 #include "sucompat.h"
 #include "app_profile.h"
 #include "util.h"
-#ifndef CONFIG_KSU_SUSFS
+#ifdef KSU_TP_HOOK
 #include "syscall_hook_manager.h"
-#endif // #ifndef CONFIG_KSU_SUSFS
+#endif // #ifdef KSU_TP_HOOK
 
 #include "sulog.h"
 

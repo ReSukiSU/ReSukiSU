@@ -81,13 +81,10 @@ ccflags-y += -DKSU_VERSION_FULL=\"$(KSU_VERSION_FULL)\"
 $(info -- Supported Unofficial Manager: MKSU, RKSU, SukiSU-Ultra, ReSukiSU )
 
 ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
-ccflags-y += -DKSU_MANUAL_HOOK
 $(info -- $(REPO_NAME): using KSU_MANUAL_HOOK)
 else ifeq ($(CONFIG_KSU_SUSFS), y)
-ccflags-y += -DCONFIG_KSU_SUSFS
 $(info -- $(REPO_NAME): using SUSFS_INLINE_HOOK)
 else
-ccflags-y += -DKSU_KPROBES_HOOK
 ccflags-y += -DKSU_TP_HOOK
 $(info -- $(REPO_NAME): using KSU_TRACEPOINT_HOOK)
 endif
