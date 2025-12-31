@@ -405,9 +405,7 @@ static int do_get_wrapper_fd(void __user *arg)
 static int do_manage_mark(void __user *arg)
 {
     struct ksu_manage_mark_cmd cmd;
-#ifdef KSU_TP_HOOK
     int ret = 0;
-#endif
 
     if (copy_from_user(&cmd, arg, sizeof(cmd))) {
         pr_err("manage_mark: copy_from_user failed\n");
