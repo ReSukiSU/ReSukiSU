@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.NavigateNext
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -163,7 +165,25 @@ fun SwitchSettingItem(
 
         Switch(
             checked = checked,
-            onCheckedChange = onChange
+            onCheckedChange = onChange,
+            thumbContent = {
+                if (checked) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(SwitchDefaults.IconSize),
+                    )
+                } else
+                {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        modifier = Modifier.size(SwitchDefaults.IconSize),
+                    )
+                }
+            }
         )
     }
 }

@@ -2,7 +2,11 @@ package com.resukisu.resukisu.ui.component
 
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -74,7 +78,25 @@ fun SwitchItem(
                     checked = checked,
                     enabled = enabled,
                     onCheckedChange = onCheckedChange,
-                    interactionSource = interactionSource
+                    interactionSource = interactionSource,
+                    thumbContent = {
+                        if (checked) {
+                            Icon(
+                                imageVector = Icons.Filled.Check,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(SwitchDefaults.IconSize),
+                            )
+                        } else
+                        {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                modifier = Modifier.size(SwitchDefaults.IconSize),
+                            )
+                        }
+                    }
                 )
             },
             supportingContent = {

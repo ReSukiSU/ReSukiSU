@@ -2,14 +2,9 @@ package com.resukisu.resukisu.ui.screen.main
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
@@ -72,8 +67,8 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -383,6 +378,22 @@ private fun SuperUserContent(
     val context = LocalContext.current
     val pullRefreshState = rememberPullToRefreshState()
 
+    if (filteredAndSortedAppGroups.isEmpty() && (viewModel.isRefreshing || viewModel.appGroupList.isEmpty()) && viewModel.search.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                LoadingIndicator()
+            }
+        }
+        return
+    }
+
     PullToRefreshBox(
         state = pullRefreshState,
         modifier = Modifier.padding(innerPadding),
@@ -497,19 +508,10 @@ private fun SuperUserContent(
 
             if (filteredAndSortedAppGroups.isEmpty()) {
                 item {
-                    Box(
-                        modifier = Modifier.fillMaxWidth().height(400.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if ((viewModel.isRefreshing || viewModel.appGroupList.isEmpty()) && viewModel.search.isEmpty()) {
-                            LoadingAnimation(isLoading = true)
-                        } else {
-                            EmptyState(
-                                selectedCategory = viewModel.selectedCategory,
-                                isSearchEmpty = viewModel.search.isNotEmpty()
-                            )
-                        }
-                    }
+                    EmptyState(
+                        selectedCategory = viewModel.selectedCategory,
+                        isSearchEmpty = viewModel.search.isNotEmpty()
+                    )
                 }
             }
         }
@@ -772,7 +774,10 @@ private fun BottomSheetMenuItemView(menuItem: BottomSheetMenuItem) {
         modifier = Modifier
             .fillMaxWidth()
             .scale(scale)
-            .clickable(interactionSource = interactionSource, indication = null) { menuItem.onClick() }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) { menuItem.onClick() }
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -799,42 +804,6 @@ private fun BottomSheetMenuItemView(menuItem: BottomSheetMenuItem) {
             textAlign = TextAlign.Center,
             maxLines = 2
         )
-    }
-}
-
-@Composable
-private fun LoadingAnimation(
-    modifier: Modifier = Modifier,
-    isLoading: Boolean = true
-) {
-    val infiniteTransition = rememberInfiniteTransition(label = "loading")
-
-    val alpha by infiniteTransition.animateFloat(
-        initialValue = 0.3f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(600, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "alpha"
-    )
-
-    AnimatedVisibility(
-        visible = isLoading,
-        enter = fadeIn() + scaleIn(),
-        exit = fadeOut() + scaleOut(),
-        modifier = modifier
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            LinearProgressIndicator(
-                modifier = Modifier.width(200.dp).height(4.dp),
-                color = MaterialTheme.colorScheme.primary.copy(alpha = alpha),
-                trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-            )
-        }
     }
 }
 
