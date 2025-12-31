@@ -66,7 +66,7 @@ fun SuperDropdown(
         showDialog = false
     }
 
-    val selectedItemText = items.getOrNull(currentIndex) ?: ""
+    val selectedItemText = items.getOrNull(selectedIndex) ?: ""
     val itemsNotEmpty = items.isNotEmpty()
     val actualEnabled = enabled && itemsNotEmpty
 
@@ -170,6 +170,7 @@ fun SuperDropdown(
             },
             dismissButton = {
                 TextButton(onClick = {
+                    setCurrentIndex(selectedIndex)
                     dismiss()
                 }) {
                     Text(text = stringResource(id = android.R.string.cancel))

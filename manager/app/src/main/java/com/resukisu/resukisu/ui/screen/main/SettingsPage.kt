@@ -34,7 +34,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.DeveloperMode
@@ -67,6 +69,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -131,7 +134,6 @@ import java.time.format.DateTimeFormatter
  * @author ShirkNeko
  * @date 2025/9/29.
  */
-private val SPACING_SMALL = 3.dp
 private val SPACING_MEDIUM = 8.dp
 private val SPACING_LARGE = 16.dp
 
@@ -839,13 +841,14 @@ fun SettingItem(
                 style = MaterialTheme.typography.titleMedium
             )
             if (summary != null) {
-                Spacer(modifier = Modifier.height(SPACING_SMALL))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = summary,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
         }
+        Spacer(modifier = Modifier.width(4.dp))
         Icon(
             imageVector = Icons.Filled.ChevronRight,
             contentDescription = null,
@@ -885,7 +888,7 @@ fun SwitchItem(
                 style = MaterialTheme.typography.titleMedium
             )
             if (summary != null) {
-                Spacer(modifier = Modifier.height(SPACING_SMALL))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = summary,
                     style = MaterialTheme.typography.bodyMedium
@@ -894,7 +897,25 @@ fun SwitchItem(
         }
         Switch(
             checked = checked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = onCheckedChange,
+            thumbContent = {
+                if (checked) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(SwitchDefaults.IconSize),
+                    )
+                } else
+                {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        modifier = Modifier.size(SwitchDefaults.IconSize),
+                    )
+                }
+            }
         )
     }
 }

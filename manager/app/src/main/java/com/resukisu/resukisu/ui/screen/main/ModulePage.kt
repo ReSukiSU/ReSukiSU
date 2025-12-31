@@ -45,6 +45,8 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Wysiwyg
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.Delete
@@ -72,6 +74,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -523,6 +526,24 @@ private fun ModuleBottomSheetContent(
                         prefs.edit {
                             putBoolean("module_sort_action_first", checked)
                         }
+                    },
+                    thumbContent = {
+                        if (viewModel.sortActionFirst) {
+                            Icon(
+                                imageVector = Icons.Filled.Check,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(SwitchDefaults.IconSize),
+                            )
+                        } else
+                        {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                modifier = Modifier.size(SwitchDefaults.IconSize),
+                            )
+                        }
                     }
                 )
             }
@@ -543,6 +564,24 @@ private fun ModuleBottomSheetContent(
                         viewModel.sortEnabledFirst = checked
                         prefs.edit {
                             putBoolean("module_sort_enabled_first", checked)
+                        }
+                    },
+                    thumbContent = {
+                        if (viewModel.sortEnabledFirst) {
+                            Icon(
+                                imageVector = Icons.Filled.Check,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(SwitchDefaults.IconSize),
+                            )
+                        } else
+                        {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                modifier = Modifier.size(SwitchDefaults.IconSize),
+                            )
                         }
                     }
                 )
@@ -1020,6 +1059,24 @@ fun ModuleItem(
                         checked = module.enabled,
                         onCheckedChange = onCheckChanged,
                         interactionSource = if (!module.hasWebUi) interactionSource else null,
+                        thumbContent = {
+                            if (module.enabled) {
+                                Icon(
+                                    imageVector = Icons.Filled.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(SwitchDefaults.IconSize),
+                                )
+                            } else
+                            {
+                                Icon(
+                                    imageVector = Icons.Filled.Close,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                    modifier = Modifier.size(SwitchDefaults.IconSize),
+                                )
+                            }
+                        }
                     )
                 }
             }
