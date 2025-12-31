@@ -35,7 +35,6 @@
 #include "throne_comm.h"
 #include "dynamic_manager.h"
 
-
 #ifdef CONFIG_KSU_SUSFS
 bool susfs_is_boot_completed_triggered __read_mostly = false;
 #endif // #ifdef CONFIG_KSU_SUSFS
