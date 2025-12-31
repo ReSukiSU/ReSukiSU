@@ -419,8 +419,7 @@ static int do_manage_mark(void __user *arg)
             return ret;
         }
         cmd.result = (u32)ret;
-#endif
-#ifdef CONFIG_KSU_SUSFS
+#elif CONFIG_KSU_SUSFS
         if (susfs_is_current_proc_umounted()) {
             ret = 0; // SYSCALL_TRACEPOINT is NOT flagged
         } else {
@@ -428,6 +427,8 @@ static int do_manage_mark(void __user *arg)
         }
         pr_info("manage_mark: ret for pid %d: %d\n", cmd.pid, ret);
         cmd.result = (u32)ret;
+#else
+        cmd.result = 0;
 #endif
         break;
     }
