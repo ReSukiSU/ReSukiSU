@@ -59,6 +59,10 @@
     <string name="profile_template">模版</string>
     <string name="profile_custom">自定义</string>
     <string name="profile_name">名称</string>
+    <string name="profile_namespace">挂载命名空间</string>
+    <string name="profile_namespace_inherited">继承</string>
+    <string name="profile_namespace_global">全局</string>
+    <string name="profile_namespace_individual">独立</string>
     <string name="profile_groups">组</string>
     <string name="profile_capabilities">权能</string>
     <string name="profile_selinux_context">SELinux</string>
