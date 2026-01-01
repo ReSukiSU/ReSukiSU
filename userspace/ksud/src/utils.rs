@@ -1,28 +1,24 @@
-use anyhow::{Context, Error, Ok, Result, bail};
+#[allow(unused_imports)]
+use std::fs::{Permissions, set_permissions};
+#[cfg(unix)]
+use std::os::unix::prelude::PermissionsExt;
 use std::{
     fs::{File, OpenOptions, create_dir_all, remove_file, write},
     io::{
         ErrorKind::{AlreadyExists, NotFound},
         Write,
     },
-    path::Path,
+    path::{Path, PathBuf},
     process::Command,
 };
 
-use crate::{assets, boot_patch, defs, ksucalls, module, restorecon};
-#[allow(unused_imports)]
-use std::fs::{Permissions, set_permissions};
-#[cfg(unix)]
-use std::os::unix::prelude::PermissionsExt;
-
-use std::path::PathBuf;
-
-use crate::boot_patch::BootRestoreArgs;
-
+use anyhow::{Context, Error, Ok, Result, bail};
 use rustix::{
     process,
     thread::{LinkNameSpaceType, move_into_link_name_space},
 };
+
+use crate::{assets, boot_patch, boot_patch::BootRestoreArgs, defs, ksucalls, module, restorecon};
 
 #[macro_export]
 macro_rules! debug_select {

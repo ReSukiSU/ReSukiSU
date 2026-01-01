@@ -1,12 +1,14 @@
+use std::{
+    collections::HashMap,
+    fs::{self, File},
+    io::{Read, Write},
+    path::{Path, PathBuf},
+};
+
 use anyhow::{Context, Result, bail};
 use log::{debug, warn};
-use std::collections::HashMap;
-use std::fs::{self, File};
-use std::io::{Read, Write};
-use std::path::{Path, PathBuf};
 
-use crate::defs;
-use crate::utils::ensure_dir_exists;
+use crate::{defs, utils::ensure_dir_exists};
 
 #[allow(clippy::unreadable_literal)]
 const MODULE_CONFIG_MAGIC: u32 = 0x4b53554d; // "KSUM"

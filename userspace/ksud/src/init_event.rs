@@ -1,14 +1,18 @@
-#[cfg(target_arch = "aarch64")]
-use crate::kpm;
-use crate::module::{handle_updated_modules, prune_modules};
-use crate::utils::is_safe_mode;
-use crate::{
-    assets, defs, ksucalls, metamodule, restorecon,
-    utils::{self},
-};
+use std::path::Path;
+
 use anyhow::{Context, Result};
 use log::{info, warn};
-use std::path::Path;
+
+#[cfg(target_arch = "aarch64")]
+use crate::kpm;
+use crate::{
+    assets, defs, ksucalls, metamodule,
+    module::{handle_updated_modules, prune_modules},
+    restorecon,
+    utils::{
+        is_safe_mode, {self},
+    },
+};
 
 pub fn on_post_data_fs() -> Result<()> {
     ksucalls::report_post_fs_data();
@@ -164,8 +168,7 @@ pub fn on_boot_completed() {
 
 #[cfg(unix)]
 fn catch_bootlog(logname: &str, command: &[&str]) -> Result<()> {
-    use std::os::unix::process::CommandExt;
-    use std::process::Stdio;
+    use std::{os::unix::process::CommandExt, process::Stdio};
 
     let logdir = Path::new(defs::LOG_DIR);
     utils::ensure_dir_exists(logdir)?;

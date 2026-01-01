@@ -1,8 +1,7 @@
 #![allow(clippy::unreadable_literal)]
+use std::{fs, os::fd::RawFd, sync::OnceLock};
+
 use libc::{_IO, _IOR, _IOW, _IOWR};
-use std::fs;
-use std::os::fd::RawFd;
-use std::sync::OnceLock;
 
 // Event constants
 const EVENT_POST_FS_DATA: u32 = 1;

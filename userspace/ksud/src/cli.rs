@@ -1,15 +1,16 @@
-use anyhow::{Context, Ok, Result};
-use clap::Parser;
 use std::path::PathBuf;
 
 use android_logger::Config;
+use anyhow::{Context, Ok, Result};
+use clap::Parser;
 use log::LevelFilter;
 
-use crate::boot_patch::{BootPatchArgs, BootRestoreArgs};
 #[cfg(target_arch = "aarch64")]
 use crate::susfs;
 use crate::{
-    apk_sign, assets, debug, defs, init_event, ksucalls, module, module_config, umount, utils,
+    apk_sign, assets,
+    boot_patch::{BootPatchArgs, BootRestoreArgs},
+    debug, defs, init_event, ksucalls, module, module_config, umount, utils,
 };
 
 /// KernelSU userspace cli
@@ -415,12 +416,6 @@ enum Umount {
     },
     /// List all mount points in umount list
     List,
-    /// Save current umount list to file
-    Save,
-    /// Apply saved umount list from file to kernel
-    Apply,
-    /// Clear custom umount paths (wipe kernel list)
-    ClearCustom,
 }
 
 #[derive(clap::Subcommand, Debug)]
@@ -444,8 +439,9 @@ enum UmountOp {
 
 #[cfg(target_arch = "aarch64")]
 mod kpm_cmd {
-    use clap::Subcommand;
     use std::path::PathBuf;
+
+    use clap::Subcommand;
 
     #[derive(Subcommand, Debug)]
     pub enum Kpm {
@@ -707,16 +703,13 @@ pub fn run() -> Result<()> {
         },
         Commands::BootRestore(boot_restore) => crate::boot_patch::restore(boot_restore),
         Commands::Umount { command } => match command {
-            Umount::Add { mnt, flags } => ksucalls::umount_list_add(&mnt, flags),
-            Umount::Remove { mnt } => umount::remove_umount_entry_from_config(&mnt),
+            Umount::Add { mnt, flags } => umount::add_umount(&mnt, flags),
+            Umount::Remove { mnt } => umount::del_umount(&mnt),
             Umount::List => {
                 let list = ksucalls::umount_list_list()?;
                 print!("{list}");
                 Ok(())
             }
-            Umount::Save => umount::save_umount_config(),
-            Umount::Apply => umount::apply_umount_config(),
-            Umount::ClearCustom => umount::clear_umount_config(),
         },
         Commands::Kernel { command } => match command {
             Kernel::NukeExt4Sysfs { mnt } => ksucalls::nuke_ext4_sysfs(&mnt),

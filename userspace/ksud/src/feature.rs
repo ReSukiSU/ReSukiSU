@@ -1,9 +1,12 @@
+use std::{
+    collections::HashMap,
+    fs::File,
+    io::{Read, Write},
+    path::Path,
+};
+
 use anyhow::{Context, Result, bail};
 use const_format::concatcp;
-use std::collections::HashMap;
-use std::fs::File;
-use std::io::{Read, Write};
-use std::path::Path;
 
 use crate::defs;
 

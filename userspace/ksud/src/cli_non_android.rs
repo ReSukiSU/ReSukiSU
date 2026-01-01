@@ -1,8 +1,11 @@
 use anyhow::Result;
 use clap::Parser;
 
-use crate::boot_patch::{BootPatchArgs, BootRestoreArgs};
-use crate::{apk_sign, defs};
+use crate::{
+    apk_sign,
+    boot_patch::{BootPatchArgs, BootRestoreArgs},
+    defs,
+};
 
 /// KernelSU cli for non-android
 #[derive(Parser, Debug)]
