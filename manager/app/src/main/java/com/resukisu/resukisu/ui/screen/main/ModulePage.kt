@@ -118,6 +118,7 @@ import com.ramcosta.composedestinations.generated.destinations.FlashScreenDestin
 import com.ramcosta.composedestinations.generated.destinations.ModuleRepoScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
+import com.resukisu.resukisu.KernelSUApplication
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.AnimatedFab
@@ -162,8 +163,10 @@ import java.util.concurrent.TimeUnit
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModulePage(navigator: DestinationsNavigator, bottomPadding: Dp) {
-    val viewModel = viewModel<ModuleViewModel>()
     val context = LocalContext.current
+    val viewModel = viewModel<ModuleViewModel>(
+        viewModelStoreOwner = context.applicationContext as KernelSUApplication
+    )
     val prefs = context.getSharedPreferences("settings", MODE_PRIVATE)
     val snackBarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()

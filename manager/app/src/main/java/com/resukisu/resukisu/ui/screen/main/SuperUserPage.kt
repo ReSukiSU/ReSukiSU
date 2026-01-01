@@ -60,6 +60,8 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.twotone.Archive
+import androidx.compose.material.icons.twotone.SearchOff
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -114,6 +116,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.ramcosta.composedestinations.generated.destinations.AppProfileScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.resukisu.resukisu.KernelSUApplication
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.FabMenuPresets
@@ -141,12 +144,14 @@ data class BottomSheetMenuItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SuperUserPage(navigator: DestinationsNavigator, bottomPadding: Dp) {
-    val viewModel = viewModel<SuperUserViewModel>()
+    val context = LocalContext.current
+    val viewModel = viewModel<SuperUserViewModel>(
+        viewModelStoreOwner = context.applicationContext as KernelSUApplication
+    )
     val scope = rememberCoroutineScope()
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     val listState = rememberLazyListState()
-    val context = LocalContext.current
     val snackBarHostState = remember { SnackbarHostState() }
 
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -378,7 +383,7 @@ private fun SuperUserContent(
     val context = LocalContext.current
     val pullRefreshState = rememberPullToRefreshState()
 
-    if (filteredAndSortedAppGroups.isEmpty() && (viewModel.isRefreshing || viewModel.appGroupList.isEmpty()) && viewModel.search.isEmpty()) {
+    if (filteredAndSortedAppGroups.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -388,7 +393,33 @@ private fun SuperUserContent(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                LoadingIndicator()
+                if ((viewModel.isRefreshing || viewModel.appGroupList.isEmpty()) && viewModel.search.isEmpty()) {
+                    LoadingIndicator()
+                }
+                else {
+                    val selectedCategory = viewModel.selectedCategory
+                    val isSearchEmpty = viewModel.search.isNotEmpty()
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Icon(
+                            imageVector = if (isSearchEmpty) Icons.TwoTone.SearchOff else Icons.TwoTone.Archive,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(96.dp).padding(bottom = 16.dp)
+                        )
+                        Text(
+                            text = if (isSearchEmpty || selectedCategory == AppCategory.ALL) {
+                                stringResource(R.string.no_apps_found)
+                            } else {
+                                stringResource(R.string.no_apps_in_category)
+                            },
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
+                }
             }
         }
         return
@@ -503,15 +534,6 @@ private fun SuperUserContent(
                     ) {
                         listItemContent()
                     }
-                }
-            }
-
-            if (filteredAndSortedAppGroups.isEmpty()) {
-                item {
-                    EmptyState(
-                        selectedCategory = viewModel.selectedCategory,
-                        isSearchEmpty = viewModel.search.isNotEmpty()
-                    )
                 }
             }
         }
@@ -803,36 +825,6 @@ private fun BottomSheetMenuItemView(menuItem: BottomSheetMenuItem) {
             style = MaterialTheme.typography.labelSmall,
             textAlign = TextAlign.Center,
             maxLines = 2
-        )
-    }
-}
-
-@Composable
-@SuppressLint("ModifierParameter")
-private fun EmptyState(
-    selectedCategory: AppCategory,
-    modifier: Modifier = Modifier,
-    isSearchEmpty: Boolean = false
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = modifier
-    ) {
-        Icon(
-            imageVector = if (isSearchEmpty) Icons.Filled.SearchOff else Icons.Filled.Archive,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-            modifier = Modifier.size(96.dp).padding(bottom = 16.dp)
-        )
-        Text(
-            text = if (isSearchEmpty || selectedCategory == AppCategory.ALL) {
-                stringResource(R.string.no_apps_found)
-            } else {
-                stringResource(R.string.no_apps_in_category)
-            },
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodyLarge,
         )
     }
 }

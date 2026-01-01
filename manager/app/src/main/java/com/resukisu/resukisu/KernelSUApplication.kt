@@ -12,6 +12,8 @@ import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
 import coil.Coil
 import coil.ImageLoader
 import com.dergoogler.mmrl.platform.Platform
+import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
+import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel
 import me.zhanghai.android.appiconloader.coil.AppIconFetcher
 import me.zhanghai.android.appiconloader.coil.AppIconKeyer
 import okhttp3.Cache
@@ -33,8 +35,12 @@ class KernelSUApplication : Application(), ViewModelStoreOwner {
 
         // For faster response when first entering superuser or webui activity
         val superUserViewModel = ViewModelProvider(this)[SuperUserViewModel::class.java]
+        val homeViewModel = ViewModelProvider(this)[HomeViewModel::class.java]
+        val moduleViewModel = ViewModelProvider(this)[ModuleViewModel::class.java]
         CoroutineScope(Dispatchers.Main).launch {
+            homeViewModel.refreshData(this@KernelSUApplication)
             superUserViewModel.fetchAppList()
+            moduleViewModel.fetchModuleList()
         }
 
         Platform.setHiddenApiExemptions()

@@ -89,11 +89,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.pm.PackageInfoCompat
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ramcosta.composedestinations.generated.destinations.InstallScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SuSFSConfigScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.resukisu.resukisu.BuildConfig
+import com.resukisu.resukisu.KernelSUApplication
 import com.resukisu.resukisu.KernelVersion
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
@@ -125,7 +127,9 @@ import kotlin.random.Random
 @Composable
 fun HomePage(navigator: DestinationsNavigator, bottomPadding: Dp) {
     val context = LocalContext.current
-    val viewModel = viewModel<HomeViewModel>()
+    val viewModel = viewModel<HomeViewModel>(
+        viewModelStoreOwner = context.applicationContext as KernelSUApplication
+    )
     val coroutineScope = rememberCoroutineScope()
 
     val pullRefreshState = rememberPullToRefreshState()
