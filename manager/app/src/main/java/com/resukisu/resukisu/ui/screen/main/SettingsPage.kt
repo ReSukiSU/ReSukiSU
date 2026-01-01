@@ -831,7 +831,7 @@ fun SwitchItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onCheckedChange(!checked) }
-            .padding(horizontal = SPACING_LARGE, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.Top
     ) {
         Icon(
@@ -839,7 +839,7 @@ fun SwitchItem(
             contentDescription = null,
             tint = if (checked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
-                .padding(end = SPACING_LARGE)
+                .padding(end = 16.dp)
                 .size(24.dp)
         )
 
@@ -856,6 +856,7 @@ fun SwitchItem(
                 )
             }
         }
+        Spacer(modifier = Modifier.width(10.dp))
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
@@ -867,8 +868,7 @@ fun SwitchItem(
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(SwitchDefaults.IconSize),
                     )
-                } else
-                {
+                } else {
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = null,
