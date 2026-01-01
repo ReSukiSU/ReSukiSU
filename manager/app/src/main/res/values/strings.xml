@@ -70,6 +70,7 @@
     <string name="profile_selinux_context">SELinux context</string>
     <string name="profile_umount_modules">Umount modules</string>
     <string name="failed_to_update_app_profile">Failed to update App Profile for %s</string>
+    <string name="debug_version_notice">"You are using DEBUG build of manager, if you don't know what is DEBUG version, switch into RELEASE build immediately"</string>
     <string name="require_kernel_version" formatted="false">The current KernelSU version %s is too low for the manager to work properly. Please upgrade to version %s or higher!</string>
     <string name="settings_umount_modules_default">Umount modules by default</string>
     <string name="settings_umount_modules_default_summary">The global default value for \"Umount modules\" in App Profile. If enabled, it will remove all module modifications to the system for apps that don\'t have a profile set</string>
@@ -737,7 +738,7 @@ Important Note:\n
     <string name="info">Info</string>
     <string name="author_link">Link of module author</string>
     <string name="source_code">Source code</string>
-    <string name="assert_support_content">%s,%d downloads</string>
+    <string name="assert_support_content">%1$s,%2$d downloads</string>
     <string name="show_detail_or_hide_detail">Show or hide detail</string>
     <string name="local">local</string>
     <string name="remote">remote</string>
