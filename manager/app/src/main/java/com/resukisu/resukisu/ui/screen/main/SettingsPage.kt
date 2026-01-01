@@ -65,7 +65,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Switch
@@ -498,9 +497,27 @@ fun SettingsPage(navigator: DestinationsNavigator, bottomPadding: Dp) {
 
                     // WebUI引擎选择
                     KsuIsValid {
-                        WebUIEngineSelector(
-                            selectedEngine = selectedEngine,
-                            onEngineSelected = { engine ->
+                        SuperDropdown(
+                            icon = Icons.Filled.WebAsset,
+                            title = stringResource(R.string.use_webuix),
+                            items = listOf(
+                                stringResource(R.string.engine_auto_select),
+                                stringResource(R.string.engine_force_webuix),
+                                stringResource(R.string.engine_force_ksu)
+                            ),
+                            selectedIndex = when (selectedEngine) {
+                                "default" -> 0
+                                "wx" -> 1
+                                "ksu" -> 2
+                                else -> throw UnsupportedOperationException("Unknown engine: $selectedEngine")
+                            },
+                            onSelectedIndexChange = { index ->
+                                val engine = when (index) {
+                                    0 -> "default"
+                                    1 -> "wx"
+                                    2 -> "ksu"
+                                    else -> throw UnsupportedOperationException("Unknown engine index: $index")
+                                }
                                 selectedEngine = engine
                                 prefs.edit { putString("webui_engine", engine) }
                             }
@@ -686,62 +703,6 @@ private fun SettingsGroupCard(
             )
             content()
         }
-    }
-}
-
-@Composable
-private fun WebUIEngineSelector(
-    selectedEngine: String,
-    onEngineSelected: (String) -> Unit
-) {
-    var showDialog by remember { mutableStateOf(false) }
-    val engineOptions = listOf(
-        "default" to stringResource(R.string.engine_auto_select),
-        "wx" to stringResource(R.string.engine_force_webuix),
-        "ksu" to stringResource(R.string.engine_force_ksu)
-    )
-
-    SettingItem(
-        icon = Icons.Filled.WebAsset,
-        title = stringResource(R.string.use_webuix),
-        summary = engineOptions.find { it.first == selectedEngine }?.second
-            ?: stringResource(R.string.engine_auto_select),
-        onClick = { showDialog = true }
-    )
-
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text(stringResource(R.string.use_webuix)) },
-            text = {
-                Column {
-                    engineOptions.forEach { (value, label) ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    onEngineSelected(value)
-                                    showDialog = false
-                                }
-                                .padding(vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = selectedEngine == value,
-                                onClick = null
-                            )
-                            Spacer(modifier = Modifier.width(SPACING_MEDIUM))
-                            Text(text = label)
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        )
     }
 }
 
