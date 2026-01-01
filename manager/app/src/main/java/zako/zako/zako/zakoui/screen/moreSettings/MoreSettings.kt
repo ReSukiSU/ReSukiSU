@@ -9,7 +9,6 @@ import android.provider.MediaStore
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -182,7 +181,7 @@ fun MoreSettingsScreen(
     }
 
     val pickImageLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia()
+        ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
             cropImageLauncher.launch(uri)
@@ -265,7 +264,7 @@ fun MoreSettingsScreen(
 private fun AppearanceSettings(
     state: MoreSettingsState,
     handlers: MoreSettingsHandlers,
-    pickImageLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>,
+    pickImageLauncher: ManagedActivityResultLauncher<String, Uri?>,
     coroutineScope: CoroutineScope
 ) {
     SettingsCard(title = stringResource(R.string.appearance_settings)) {
@@ -649,7 +648,7 @@ private fun DpiSliderControls(
 private fun CustomBackgroundSettings(
     state: MoreSettingsState,
     handlers: MoreSettingsHandlers,
-    pickImageLauncher: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>,
+    pickImageLauncher: ManagedActivityResultLauncher<String, Uri?>,
     coroutineScope: CoroutineScope
 ) {
     // 自定义背景开关
@@ -660,8 +659,7 @@ private fun CustomBackgroundSettings(
         checked = state.isCustomBackgroundEnabled,
         onChange = { isChecked ->
             if (isChecked) {
-                pickImageLauncher.launch(PickVisualMediaRequest.Builder().setMediaType(
-                    ActivityResultContracts.PickVisualMedia.ImageOnly).build())
+                pickImageLauncher.launch("image/*")
             } else {
                 handlers.handleRemoveCustomBackground()
             }
