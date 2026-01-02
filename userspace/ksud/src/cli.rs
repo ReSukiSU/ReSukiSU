@@ -1,4 +1,7 @@
-use std::path::PathBuf;
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use android_logger::Config;
 use anyhow::{Context, Ok, Result};
@@ -702,15 +705,17 @@ pub fn run() -> Result<()> {
             }
         },
         Commands::BootRestore(boot_restore) => crate::boot_patch::restore(boot_restore),
-        Commands::Umount { command } => match command {
-            Umount::Add { mnt, flags } => umount::add_umount(&mnt, flags),
-            Umount::Remove { mnt } => umount::del_umount(&mnt),
-            Umount::List => {
-                let list = ksucalls::umount_list_list()?;
-                print!("{list}");
-                Ok(())
+        Commands::Umount { command } => {
+            let path = Path::new(defs::UMOUNT_CONFIG_PATH);
+            if !path.exists() {
+                let _ = fs::File::create_new(defs::UMOUNT_CONFIG_PATH);
             }
-        },
+            match command {
+                Umount::Add { mnt, flags } => umount::add_umount(&mnt, flags),
+                Umount::Remove { mnt } => umount::del_umount(&mnt),
+                Umount::List => umount::list_umount(),
+            }
+        }
         Commands::Kernel { command } => match command {
             Kernel::NukeExt4Sysfs { mnt } => ksucalls::nuke_ext4_sysfs(&mnt),
             Kernel::Umount { command } => match command {

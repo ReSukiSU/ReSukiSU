@@ -16,7 +16,7 @@ pub fn load_umount_config() -> Result<()> {
     let mut count = 0;
 
     if !config_path.exists() {
-        info!("Umount config file does not exist, skipping");
+        eprintln!("u maybe haven't root");
         return Ok(());
     }
 
@@ -31,11 +31,29 @@ pub fn load_umount_config() -> Result<()> {
     Ok(())
 }
 
+pub fn list_umount() -> Result<()> {
+    let config_path = Path::new(defs::UMOUNT_CONFIG_PATH);
+
+    if !config_path.exists() {
+        eprintln!("u maybe haven't root");
+        return Ok(());
+    }
+
+    let file = fs::read_to_string(config_path)?;
+    let mut json_raw: Config = serde_json::from_str(&file)?;
+
+    for (path, flags) in json_raw.paths {
+        println!("path: {path}, flag: {flags}");
+    }
+
+    Ok(())
+}
+
 pub fn add_umount(target_path: &str, flags: u32) -> Result<()> {
     let config_path = Path::new(defs::UMOUNT_CONFIG_PATH);
 
     if !config_path.exists() {
-        info!("Umount config file does not exist, skipping");
+        eprintln!("u maybe haven't root");
         return Ok(());
     }
 
@@ -51,7 +69,7 @@ pub fn del_umount(target_path: &str) -> Result<()> {
     let config_path = Path::new(defs::UMOUNT_CONFIG_PATH);
 
     if !config_path.exists() {
-        info!("Umount config file does not exist, skipping");
+        eprintln!("u maybe haven't root");
         return Ok(());
     }
 
