@@ -76,12 +76,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -129,6 +127,7 @@ import com.resukisu.resukisu.ui.component.WarningCard
 import com.resukisu.resukisu.ui.component.ZipFileDetector.parseModuleInfo
 import com.resukisu.resukisu.ui.component.ZipFileInfo
 import com.resukisu.resukisu.ui.component.ZipType
+import com.resukisu.resukisu.ui.component.pinnedScrollBehavior
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.rememberFabVisibilityState
 import com.resukisu.resukisu.ui.component.rememberLoadingDialog
@@ -282,8 +281,7 @@ fun ModulePage(navigator: DestinationsNavigator, bottomPadding: Dp) {
     val hasMagisk = hasMagisk()
     val hideInstallButton = isSafeMode || hasMagisk
 
-    val topAppBarState = rememberTopAppBarState()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
+    val scrollBehavior = pinnedScrollBehavior()
 
     val webUILauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -293,10 +291,8 @@ fun ModulePage(navigator: DestinationsNavigator, bottomPadding: Dp) {
         modifier = Modifier.padding(bottom = bottomPadding),
         topBar = {
             SearchAppBar(
-                title = { Text(stringResource(R.string.module)) },
                 searchText = viewModel.search,
                 onSearchTextChange = { viewModel.search = it },
-                onClearClick = { viewModel.search = "" },
                 dropdownContent = {
                     IconButton(
                         onClick = {
@@ -318,6 +314,7 @@ fun ModulePage(navigator: DestinationsNavigator, bottomPadding: Dp) {
                     }
                 },
                 scrollBehavior = scrollBehavior,
+                searchBarPlaceHolderText = stringResource(R.string.search_modules)
             )
         },
         floatingActionButton = {

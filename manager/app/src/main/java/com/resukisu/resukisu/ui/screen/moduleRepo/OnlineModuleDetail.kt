@@ -391,7 +391,8 @@ fun ReleaseCard(module: ModuleRepoViewModel.RepoModule, release: ReleaseInfo, co
             ) {
                 GithubMarkdown(
                     content = release.descriptionHTML,
-                    backgroundColor = MaterialTheme.colorScheme.surfaceContainer
+                    backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
+                    callerProvideLoadingIndicator = true
                 )
             }
             HorizontalDivider(

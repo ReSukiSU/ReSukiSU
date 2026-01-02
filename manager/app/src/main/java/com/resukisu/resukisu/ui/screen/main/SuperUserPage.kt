@@ -1,6 +1,5 @@
 package com.resukisu.resukisu.ui.screen.main
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Spring
@@ -48,7 +47,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.GridView
@@ -57,7 +55,6 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.RestoreFromTrash
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.twotone.Archive
@@ -74,18 +71,17 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBarScrollBehavior
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -122,6 +118,7 @@ import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.FabMenuPresets
 import com.resukisu.resukisu.ui.component.SearchAppBar
 import com.resukisu.resukisu.ui.component.VerticalExpandableFab
+import com.resukisu.resukisu.ui.component.pinnedScrollBehavior
 import com.resukisu.resukisu.ui.screen.LabelText
 import com.resukisu.resukisu.ui.util.HanziToPinyin
 import com.resukisu.resukisu.ui.util.module.ModuleModify
@@ -149,8 +146,7 @@ fun SuperUserPage(navigator: DestinationsNavigator, bottomPadding: Dp) {
         viewModelStoreOwner = context.applicationContext as KernelSUApplication
     )
     val scope = rememberCoroutineScope()
-    val topAppBarState = rememberTopAppBarState()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
+    val scrollBehavior = pinnedScrollBehavior()
     val listState = rememberLazyListState()
     val snackBarHostState = remember { SnackbarHostState() }
 
@@ -233,10 +229,8 @@ fun SuperUserPage(navigator: DestinationsNavigator, bottomPadding: Dp) {
         modifier = Modifier.padding(bottom = bottomPadding),
         topBar = {
             SearchAppBar(
-                title = { TopBarTitle(viewModel.selectedCategory, appCounts, scrollBehavior) },
                 searchText = viewModel.search,
                 onSearchTextChange = { viewModel.search = it },
-                onClearClick = { viewModel.search = "" },
                 dropdownContent = {
                     IconButton(onClick = { showBottomSheet = true }) {
                         Icon(
@@ -245,7 +239,8 @@ fun SuperUserPage(navigator: DestinationsNavigator, bottomPadding: Dp) {
                         )
                     }
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                searchBarPlaceHolderText = stringResource(R.string.search_apps)
             )
         },
         snackbarHost = { SnackbarHost(snackBarHostState) },
@@ -373,7 +368,7 @@ private fun SuperUserContent(
     viewModel: SuperUserViewModel,
     filteredAndSortedAppGroups: List<SuperUserViewModel.AppGroup>,
     listState: androidx.compose.foundation.lazy.LazyListState,
-    scrollBehavior: TopAppBarScrollBehavior,
+    scrollBehavior: SearchBarScrollBehavior,
     navigator: DestinationsNavigator,
     scope: CoroutineScope
 ) {

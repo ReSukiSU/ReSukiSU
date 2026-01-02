@@ -57,7 +57,7 @@ fun KpmPage(bottomPadding: Dp) {
         module.id to stringResource(R.string.confirm_uninstall_content, moduleFileName)
     }
 
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = pinnedScrollBehavior()
 
     val kpmInstallSuccess = stringResource(R.string.kpm_install_success)
     val kpmInstallFailed = stringResource(R.string.kpm_install_failed)
@@ -260,10 +260,8 @@ fun KpmPage(bottomPadding: Dp) {
         modifier = Modifier.padding(bottom = bottomPadding),
         topBar = {
             SearchAppBar(
-                title = { Text(stringResource(R.string.kpm_title)) },
                 searchText = viewModel.search,
                 onSearchTextChange = { viewModel.search = it },
-                onClearClick = { viewModel.search = "" },
                 scrollBehavior = scrollBehavior,
                 dropdownContent = {
                     IconButton(
@@ -274,7 +272,8 @@ fun KpmPage(bottomPadding: Dp) {
                             contentDescription = stringResource(R.string.refresh),
                         )
                     }
-                }
+                },
+                searchBarPlaceHolderText = stringResource(R.string.search_modules)
             )
         },
         floatingActionButton = {

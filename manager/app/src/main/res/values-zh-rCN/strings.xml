@@ -543,6 +543,7 @@
     <string name="susfs_version_mismatch">SuSFS 库版本不匹配，内核：%1$s vs 管理器：%2$s，建议更新内核或管理器</string>
     <string name="warning">警告</string>
     <string name="search_apps">搜索应用</string>
+    <string name="search_modules">搜索模块</string>
     <string name="selected_apps_count">%1$d 个已选应用</string>
     <string name="already_added_apps_count">%1$d 个已添加应用</string>
     <string name="all_apps_already_added">所有应用均已添加</string>

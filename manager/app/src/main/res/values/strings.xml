@@ -546,6 +546,7 @@
     <string name="susfs_version_mismatch">SuSFS library version mismatch, kernel: %1$s vs manager: %2$s, It is recommended to update the kernel or manager</string>
     <string name="warning">Warning</string>
     <string name="search_apps">Search Apps</string>
+    <string name="search_modules">Search modules</string>
     <string name="selected_apps_count">%1$d apps selected</string>
     <string name="already_added_apps_count">%1$d apps already added</string>
     <string name="all_apps_already_added">All apps have been added</string>

@@ -57,12 +57,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -102,6 +100,7 @@ import com.resukisu.resukisu.ui.component.ConfirmDialogHandle
 import com.resukisu.resukisu.ui.component.ConfirmResult
 import com.resukisu.resukisu.ui.component.DialogHandle
 import com.resukisu.resukisu.ui.component.SearchAppBar
+import com.resukisu.resukisu.ui.component.pinnedScrollBehavior
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.rememberCustomDialog
 import com.resukisu.resukisu.ui.screen.FlashIt
@@ -130,8 +129,7 @@ fun ModuleRepoScreen(navigator: DestinationsNavigator) {
     val prefs = context.getSharedPreferences("settings", MODE_PRIVATE)
     val viewModel = viewModel<ModuleRepoViewModel>()
     val snackBarHost = LocalSnackbarHost.current
-    val topAppBarState = rememberTopAppBarState()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
+    val scrollBehavior = pinnedScrollBehavior()
     val currentModuleForChooseDialog = remember { mutableStateOf<RepoModule?>(null) }
     val chooseDialog = rememberCustomDialog({ dismiss ->
         ChooseDialogContent(currentModuleForChooseDialog, navigator, viewModel,dismiss)
@@ -146,17 +144,15 @@ fun ModuleRepoScreen(navigator: DestinationsNavigator) {
 
     LaunchedEffect(Unit) {
         viewModel.sortStargazerCountFirst = prefs.getBoolean("module_repo_sort_star_first", false)
-        scrollBehavior.state.heightOffset =
-            scrollBehavior.state.heightOffsetLimit
+//        scrollBehavior.state.heightOffset =
+//            scrollBehavior.state.heightOffsetLimit
     }
 
     Scaffold(
         topBar = {
             SearchAppBar(
-                title = { Text(stringResource(R.string.module_repo)) },
                 searchText = viewModel.search,
                 onSearchTextChange = { viewModel.search = it },
-                onClearClick = { viewModel.search = "" },
                 dropdownContent = {
                     IconButton(
                         onClick = { showBottomSheet = true },
@@ -177,7 +173,8 @@ fun ModuleRepoScreen(navigator: DestinationsNavigator) {
                         )
                     }
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                searchBarPlaceHolderText = stringResource(R.string.search_modules)
             )
         },
         contentWindowInsets = WindowInsets.safeDrawing.only(
