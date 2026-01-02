@@ -1,10 +1,10 @@
-use crate::defs;
-use anyhow::Result;
-use jwalk::{Parallelism::Serial, WalkDir};
 use std::path::Path;
 
-use anyhow::{Context, Ok};
+use anyhow::{Context, Ok, Result};
 use extattr::{Flags as XattrFlags, lsetxattr};
+use jwalk::{Parallelism::Serial, WalkDir};
+
+use crate::defs;
 
 pub const SYSTEM_CON: &str = "u:object_r:system_file:s0";
 pub const ADB_CON: &str = "u:object_r:adb_data_file:s0";
