@@ -323,28 +323,3 @@ pub fn umount_list_del(path: &str) -> anyhow::Result<()> {
     ksuctl(KSU_IOCTL_ADD_TRY_UMOUNT, &raw mut cmd)?;
     Ok(())
 }
-
-const KSU_IOCTL_LIST_TRY_UMOUNT: i32 = _IOWR::<()>(K, 301);
-
-#[repr(C)]
-#[derive(Clone, Copy, Default)]
-struct ListTryUmountCmd {
-    arg: u64,
-    buf_size: u32,
-}
-
-/// List all mount points in umount list
-pub fn umount_list_list() -> anyhow::Result<String> {
-    const BUF_SIZE: usize = 4096;
-    let mut buffer = vec![0u8; BUF_SIZE];
-    let mut cmd = ListTryUmountCmd {
-        arg: buffer.as_mut_ptr() as u64,
-        buf_size: BUF_SIZE as u32,
-    };
-    ksuctl(KSU_IOCTL_LIST_TRY_UMOUNT, &raw mut cmd)?;
-
-    // Find null terminator or end of buffer
-    let len = buffer.iter().position(|&b| b == 0).unwrap_or(BUF_SIZE);
-    let result = String::from_utf8_lossy(&buffer[..len]).to_string();
-    Ok(result)
-}
