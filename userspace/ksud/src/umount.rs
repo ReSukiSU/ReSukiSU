@@ -40,7 +40,7 @@ pub fn list_umount() -> Result<()> {
     }
 
     let file = fs::read_to_string(config_path)?;
-    let mut json_raw: Config = serde_json::from_str(&file)?;
+    let json_raw: Config = serde_json::from_str(&file)?;
 
     for (path, flags) in json_raw.paths {
         println!("path: {path}, flag: {flags}");
