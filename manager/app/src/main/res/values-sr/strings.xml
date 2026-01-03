@@ -6,4 +6,6 @@
     <string name="home_working_version">Верзија: %s</string>
     <string name="home_working">Ради</string>
     <string name="save_log">Сачувај Дневнике</string>
+    <string name="settings_check_update">Obaveštenja o ažuriranju</string>
+    <string name="settings_check_update_summary">Automatski proveri ažuriranja modula i menadžera</string>
 </resources>

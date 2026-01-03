@@ -79,6 +79,8 @@
     <string name="module_changelog">Changelog</string>
     <string name="settings_profile_template">Mẫu Hồ sơ ứng dụng</string>
     <string name="settings_profile_template_summary">Quản lý mẫu cục bộ và trực tuyến của Hồ sơ ứng dụng</string>
+    <string name="settings_check_update">Thông báo cập nhật</string>
+    <string name="settings_check_update_summary">Tự động kiểm tra bản cập nhật của mô-đun và trình quản lý</string>
     <string name="app_profile_template_create">Tạo mẫu</string>
     <string name="app_profile_template_edit">Chỉnh sửa mẫu</string>
     <string name="app_profile_template_id">ID</string>
@@ -99,8 +101,6 @@
     <string name="app_profile_template_save_failed">Lưu mẫu thất bại</string>
     <string name="app_profile_template_import_empty">Bộ nhớ tạm đang trống!</string>
     <string name="module_changelog_failed">Lấy changelog thất bại: %s</string>
-    <string name="settings_check_update">Kiểm tra cập nhật</string>
-    <string name="settings_check_update_summary">Tự động kiểm tra cập nhật khi mở ứng dụng</string>
     <string name="grant_root_failed">Cấp quyền root thất bại!</string>
     <string name="action">Khởi chạy</string>
     <string name="close">Đóng</string>

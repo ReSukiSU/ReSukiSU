@@ -77,6 +77,8 @@
     <string name="module_changelog">Dnevnik sprememb</string>
     <string name="settings_profile_template">Predloga za aplikacijski profil</string>
     <string name="settings_profile_template_summary">Upravljaj z lokalnimi in spletnimi predlogami za aplikacijski profil</string>
+    <string name="settings_check_update">Obvestila o posodobitvah</string>
+    <string name="settings_check_update_summary">Samodejno preveri posodobitve modulov in upravitelja</string>
     <string name="app_profile_template_create">Ustvari predlogo</string>
     <string name="app_profile_template_edit">Uredi predlogo</string>
     <string name="app_profile_template_id">id</string>
@@ -97,8 +99,6 @@
     <string name="app_profile_template_save_failed">Napaka pri shranjevanju predloge</string>
     <string name="app_profile_template_import_empty">Odložišče je prazno!</string>
     <string name="module_changelog_failed">Napaka pri pridobivanju dnevnika sprememb: %s</string>
-    <string name="settings_check_update">Check update</string>
-    <string name="settings_check_update_summary">Automatically check for updates when opening the app</string>
     <string name="grant_root_failed">Failed to grant root!</string>
     <string name="action">Action</string>
     <string name="close">Close</string>

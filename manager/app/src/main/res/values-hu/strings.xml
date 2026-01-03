@@ -77,6 +77,8 @@
     <string name="module_changelog">Változások</string>
     <string name="settings_profile_template">App Profile sablon</string>
     <string name="settings_profile_template_summary">Az App Profile helyi és online sablonjának kezelése</string>
+    <string name="settings_check_update">Frissítési értesítések</string>
+    <string name="settings_check_update_summary">Modul- és kezelőfrissítések automatikus keresése</string>
     <string name="app_profile_template_create">Sablon készítése</string>
     <string name="app_profile_template_edit">Sablon szerkesztése</string>
     <string name="app_profile_template_id">ID</string>
@@ -97,8 +99,6 @@
     <string name="app_profile_template_save_failed">A sablon mentése sikertelen</string>
     <string name="app_profile_template_import_empty">A vágólap üres!</string>
     <string name="module_changelog_failed">A változásnapló lekérése nem sikerült: %s</string>
-    <string name="settings_check_update">Frissítés ellenőrzése</string>
-    <string name="settings_check_update_summary">Automatikusan keressen frissítéseket az alkalmazás megnyitásakor</string>
     <string name="grant_root_failed">A root jog megadása sikertelen!</string>
     <string name="action">Művelet</string>
     <string name="close">Close</string>

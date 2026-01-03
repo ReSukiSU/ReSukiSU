@@ -71,4 +71,6 @@
     <string name="home_manager_version">גרסת מנהל</string>
     <string name="new_version_available">גרסה חדשה עבור: %s זמינה, לחץ כדי לשדרג</string>
     <string name="save_log">שמור יומנים</string>
+    <string name="settings_check_update">התראות עדכון</string>
+    <string name="settings_check_update_summary">בדוק אוטומטית אם יש עדכונים למודולים ולמנהל</string>
 </resources>

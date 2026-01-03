@@ -77,6 +77,8 @@
     <string name="module_changelog">سجل التغييرات</string>
     <string name="settings_profile_template">قالب ملف تعريف التطبيق</string>
     <string name="settings_profile_template_summary">إدارة القالب المحلي وعبر الإنترنت لملف تعريف التطبيق</string>
+    <string name="settings_check_update">إشعارات التحديث</string>
+    <string name="settings_check_update_summary">تحقق تلقائيًا من تحديثات الوحدة والمدير</string>
     <string name="app_profile_template_create">إنشاء قالب</string>
     <string name="app_profile_template_edit">تحرير القالب</string>
     <string name="app_profile_template_id">المعرف</string>
@@ -97,8 +99,6 @@
     <string name="app_profile_template_save_failed">فشل في حفظ القالب</string>
     <string name="app_profile_template_import_empty">الحافظة فارغة!</string>
     <string name="module_changelog_failed">فشل في جلب سجل التغيير: %s</string>
-    <string name="settings_check_update">التحقق من التحديث</string>
-    <string name="settings_check_update_summary">التحقق تلقائيًا من وجود تحديثات عند فتح التطبيق</string>
     <string name="grant_root_failed">فشل في منح صلاحية الجذر!</string>
     <string name="action">إجراء</string>
     <string name="close">إغلاق</string>

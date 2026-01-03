@@ -77,6 +77,8 @@
     <string name="module_changelog">更新日誌</string>
     <string name="settings_profile_template">App Profile 模版</string>
     <string name="settings_profile_template_summary">管理本地同在線嘅 App Profile 模版</string>
+    <string name="settings_check_update">更新提醒</string>
+    <string name="settings_check_update_summary">自動檢查模塊和管理器更新</string>
     <string name="app_profile_template_create">創建模版</string>
     <string name="app_profile_template_edit">編輯模版</string>
     <string name="app_profile_template_id">模版 ID</string>
@@ -97,8 +99,6 @@
     <string name="app_profile_template_save_failed">模版存儲失敗</string>
     <string name="app_profile_template_import_empty">剪貼板為空！</string>
     <string name="module_changelog_failed">獲取更新日誌失敗：%s</string>
-    <string name="settings_check_update">檢查更新</string>
-    <string name="settings_check_update_summary">喺應用啟動後自動檢查是否有最新版</string>
     <string name="grant_root_failed">獲取 root 失敗！</string>
     <string name="action">執行</string>
     <string name="close">關閉</string>

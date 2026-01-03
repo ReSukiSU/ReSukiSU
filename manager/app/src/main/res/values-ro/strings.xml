@@ -77,6 +77,8 @@
     <string name="module_changelog">Jurnalul modificărilor</string>
     <string name="settings_profile_template">Șablon de profil al aplicației</string>
     <string name="settings_profile_template_summary">Gestionează șablonul local și online al Profilului aplicației</string>
+    <string name="settings_check_update">Notificări de actualizare</string>
+    <string name="settings_check_update_summary">Verifică automat actualizările pentru modul și manager</string>
     <string name="app_profile_template_create">Creează un șablon</string>
     <string name="app_profile_template_edit">Editează șablonul</string>
     <string name="app_profile_template_id">ID</string>
@@ -97,8 +99,6 @@
     <string name="app_profile_template_save_failed">Nu s-a salvat șablonul</string>
     <string name="app_profile_template_import_empty">Clipboard-ul este gol!</string>
     <string name="module_changelog_failed">Preluarea jurnalului de modificări a eșuat: %s</string>
-    <string name="settings_check_update">Verifică actualizarea</string>
-    <string name="settings_check_update_summary">Se verifică automat actualizările când deschizi aplicația</string>
     <string name="grant_root_failed">Nu s-a acordat acces root!</string>
     <string name="action">Action</string>
     <string name="close">Close</string>

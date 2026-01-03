@@ -79,6 +79,8 @@
     <string name="module_changelog">Değişiklik günlüğü</string>
     <string name="settings_profile_template">Uygulama Profili Şablonu</string>
     <string name="settings_profile_template_summary">Uygulama Profil Şablonunu yerel ve çevrimiçi olarak yönetin</string>
+    <string name="settings_check_update">Güncelleme bildirimleri</string>
+    <string name="settings_check_update_summary">Modül ve yönetici güncellemelerini otomatik olarak kontrol et</string>
     <string name="app_profile_template_create">Şablon oluştur</string>
     <string name="app_profile_template_edit">Şablonu düzenle</string>
     <string name="app_profile_template_id">Kimlik</string>
@@ -99,8 +101,6 @@
     <string name="app_profile_template_save_failed">Şablon kaydedilemedi</string>
     <string name="app_profile_template_import_empty">Panodaki veri boş!</string>
     <string name="module_changelog_failed">Değişiklik günlüğü alılamadı: %s</string>
-    <string name="settings_check_update">Güncelleme kontrolü</string>
-    <string name="settings_check_update_summary">Uygulama açıldığında otomatik olarak güncellemeleri kontrol et</string>
     <string name="grant_root_failed">Root yetkisi verilemedi!</string>
     <string name="action">Eylem</string>
     <string name="close">Kapat</string>

@@ -77,6 +77,8 @@
     <string name="module_changelog">Registro de cambios</string>
     <string name="settings_profile_template">Plantilla de perfil de aplicación</string>
     <string name="settings_profile_template_summary">Gestionar la plantilla local y en línea de App Profile</string>
+    <string name="settings_check_update">Notificaciones de actualización</string>
+    <string name="settings_check_update_summary">Comprobar automáticamente las actualizaciones de módulos y del administrador</string>
     <string name="app_profile_template_create">Crear plantilla</string>
     <string name="app_profile_template_edit">Editar plantilla</string>
     <string name="app_profile_template_id">ID</string>
@@ -97,8 +99,6 @@
     <string name="app_profile_template_save_failed">No se ha podido guardar la plantilla</string>
     <string name="app_profile_template_import_empty">¡El portapapeles está vacío!</string>
     <string name="module_changelog_failed">Fallo en la obtención del registro de cambios: %s</string>
-    <string name="settings_check_update">Comprobar actualización</string>
-    <string name="settings_check_update_summary">Comprobación automática de actualizaciones al abrir la aplicación</string>
     <string name="grant_root_failed">¡No se ha podido conceder el acceso root!</string>
     <string name="action">Aktion</string>
     <string name="close">Cancelar</string>

@@ -77,6 +77,8 @@
     <string name="module_changelog">Catatan Perubahan</string>
     <string name="settings_profile_template">Templat Profil Aplikasi</string>
     <string name="settings_profile_template_summary">Atur templat Profil yang lokal dan daring</string>
+    <string name="settings_check_update">Notifikasi pembaruan</string>
+    <string name="settings_check_update_summary">Periksa otomatis pembaruan modul dan manajer</string>
     <string name="app_profile_template_create">Buat templat</string>
     <string name="app_profile_template_edit">Edit templat</string>
     <string name="app_profile_template_id">ID</string>
@@ -97,8 +99,6 @@
     <string name="app_profile_template_save_failed">Gagal menyimpan templat</string>
     <string name="app_profile_template_import_empty">Papan klip kosong!</string>
     <string name="module_changelog_failed">Gagal mengambil Changelog: %s</string>
-    <string name="settings_check_update">Cek terbaru</string>
-    <string name="settings_check_update_summary">Cek terbaru setiap membuka aplikasi</string>
     <string name="grant_root_failed">Gagal memberikan akses root!</string>
     <string name="action">Tindakan</string>
     <string name="close">Tutup</string>

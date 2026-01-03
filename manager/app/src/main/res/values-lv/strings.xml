@@ -77,6 +77,8 @@
     <string name="module_changelog">Izmaiņu žurnāls</string>
     <string name="settings_profile_template">Lietotnes profila veidne</string>
     <string name="settings_profile_template_summary">Pārvaldiet vietējo un tiešsaistes lietotņu profila veidni</string>
+    <string name="settings_check_update">Atjaunināšanas paziņojumi</string>
+    <string name="settings_check_update_summary">Automātiski pārbaudīt moduļa un pārvaldnieka atjauninājumus</string>
     <string name="app_profile_template_create">Izveidot veidni</string>
     <string name="app_profile_template_edit">Rediģēt veidni</string>
     <string name="app_profile_template_id">id</string>
@@ -97,8 +99,6 @@
     <string name="app_profile_template_save_failed">Neizdevās saglabāt veidni</string>
     <string name="app_profile_template_import_empty">Starpliktuve ir tukša!</string>
     <string name="module_changelog_failed">Izmaiņu žurnāla iegūšana neizdevās: %s</string>
-    <string name="settings_check_update">Pārbaudīt atjauninājumus</string>
-    <string name="settings_check_update_summary">Automātiski pārbaudīt atjauninājumus atverot aplikāciju</string>
     <string name="grant_root_failed">Neizdevās piešķirt sakni!</string>
     <string name="action">Action</string>
     <string name="close">Close</string>

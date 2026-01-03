@@ -78,6 +78,8 @@
     <string name="module_changelog">Список змін</string>
     <string name="settings_profile_template">Шаблон профілю додатку</string>
     <string name="settings_profile_template_summary">Керування локальними та онлайн-шаблонами профілю додатку</string>
+    <string name="settings_check_update">Сповіщення про оновлення</string>
+    <string name="settings_check_update_summary">Автоматично перевіряти наявність оновлень модуля та менеджера</string>
     <string name="app_profile_template_create">Створити шаблон</string>
     <string name="app_profile_template_edit">Редагувати шаблон</string>
     <string name="app_profile_template_id">ID</string>
@@ -98,8 +100,6 @@
     <string name="app_profile_template_save_failed">Не вдалося зберегти шаблон</string>
     <string name="app_profile_template_import_empty">Буфер обміну порожній!</string>
     <string name="module_changelog_failed">Не вдалося завантажити список змін: %s</string>
-    <string name="settings_check_update">Перевіряти оновлення</string>
-    <string name="settings_check_update_summary">Автоматично перевіряти оновлення при відкритті додатку</string>
     <string name="grant_root_failed">Не вдалося надати root-права!</string>
     <string name="action">Дія</string>
     <string name="close">Закрити</string>

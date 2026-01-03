@@ -77,6 +77,8 @@
     <string name="module_changelog">wijzigings logboek</string>
     <string name="settings_profile_template">App-profiel Sjabloon</string>
     <string name="settings_profile_template_summary">Beheer lokale en online sjabloon van app-profiel</string>
+    <string name="settings_check_update">Update-meldingen</string>
+    <string name="settings_check_update_summary">Automatisch controleren op module- en manager-updates</string>
     <string name="app_profile_template_create">Maken sjabloon</string>
     <string name="app_profile_template_edit">Bewerkin sjabloon</string>
     <string name="app_profile_template_id">ID</string>
@@ -97,8 +99,6 @@
     <string name="app_profile_template_save_failed">Mislukt naar opslaan sjabloon</string>
     <string name="app_profile_template_import_empty">Klembord is leeg!</string>
     <string name="module_changelog_failed">Ophalen van wijzigingslogboek mislukt: %s</string>
-    <string name="settings_check_update">Controleer update</string>
-    <string name="settings_check_update_summary">Controleer automatisch op updates bij het openen van de app</string>
     <string name="grant_root_failed">Kan geen root verlenen!</string>
     <string name="action">Actie</string>
     <string name="close">Close</string>

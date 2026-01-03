@@ -42,4 +42,6 @@
     <string name="module_version">ভার্সন</string>
     <string name="module_author">অথার</string>
     <string name="save_log">লগ সংরক্ষণ করুন</string>
+    <string name="settings_check_update">আপডেটের বিজ্ঞপ্তি</string>
+    <string name="settings_check_update_summary">মডিউল এবং ম্যানেজার আপডেটের জন্য স্বয়ংক্রিয়ভাবে পরীক্ষা করুন</string>
 </resources>

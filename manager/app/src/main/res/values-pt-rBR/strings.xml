@@ -89,11 +89,11 @@
     <string name="app_profile_template_description">Descrição</string>
     <string name="app_profile_template_save">Salvar</string>
     <string name="settings_profile_template_summary">Gerencie o modelo local e online do Perfil do Aplicativo</string>
+    <string name="settings_check_update">Notificações de atualização</string>
+    <string name="settings_check_update_summary">Verificar automaticamente se há atualizações do módulo e do gerenciador</string>
     <string name="app_profile_template_delete">Excluir</string>
     <string name="app_profile_template_import_empty">A área de transferência está vazia!</string>
     <string name="app_profile_template_view">Ver modelo</string>
-    <string name="settings_check_update">Verificar por atualização</string>
-    <string name="settings_check_update_summary">Verifique automaticamente se há atualizações ao abrir o app</string>
     <string name="grant_root_failed">Falha ao conceder acesso root!</string>
     <string name="enable_web_debugging">Ativar depuração do WebView</string>
     <string name="enable_web_debugging_summary">Pode ser usado para depurar o WebUI. Por favor, ative somente quando necessário.</string>

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="home">Inicio</string>
+    <string name="settings_check_update">Notificacións de actualización</string>
+    <string name="settings_check_update_summary">Comprobar automaticamente as actualizacións do módulo e do xestor</string>
 </resources>

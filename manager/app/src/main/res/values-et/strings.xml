@@ -77,6 +77,8 @@
     <string name="module_changelog">Muudatuste logi</string>
     <string name="settings_profile_template">Rakenduseprofiili mall</string>
     <string name="settings_profile_template_summary">Halda kohalikke ja võrgusolevaid rakenduseprofiili malle</string>
+    <string name="settings_check_update">Värskendusteated</string>
+    <string name="settings_check_update_summary">Kontrolli automaatselt mooduli ja halduri värskendusi</string>
     <string name="app_profile_template_create">Loo mall</string>
     <string name="app_profile_template_edit">Muuda malli</string>
     <string name="app_profile_template_id">ID</string>
@@ -97,8 +99,6 @@
     <string name="app_profile_template_save_failed">Malli salvestamine ebaõnnestus</string>
     <string name="app_profile_template_import_empty">Lõikelaud on tühi!</string>
     <string name="module_changelog_failed">Muudatuste logi hankimine ebaõnnestus: %s</string>
-    <string name="settings_check_update">Kontrolli uuendusi</string>
-    <string name="settings_check_update_summary">Rakenduse avamisel kontrolli automaatselt uuendusi</string>
     <string name="grant_root_failed">Juurkasutaja andmine ebaõnnestus!</string>
     <string name="action">Action</string>
     <string name="close">Close</string>

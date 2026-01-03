@@ -77,6 +77,8 @@
     <string name="module_changelog">क्या बदलाव हुए है</string>
     <string name="settings_profile_template">App Profile Template</string>
     <string name="settings_profile_template_summary">Manage local and online template of App Profile</string>
+    <string name="settings_check_update">अपडेट सूचनाएं</string>
+    <string name="settings_check_update_summary">मॉड्यूल और मैनेजर अपडेट के लिए ऑटो-चेक करें</string>
     <string name="app_profile_template_create">Create template</string>
     <string name="app_profile_template_edit">Edit template</string>
     <string name="app_profile_template_id">ID</string>
@@ -97,8 +99,6 @@
     <string name="app_profile_template_save_failed">Failed to save template</string>
     <string name="app_profile_template_import_empty">Clipboard is empty!</string>
     <string name="module_changelog_failed">Fetch changelog failed: %s</string>
-    <string name="settings_check_update">Check update</string>
-    <string name="settings_check_update_summary">Automatically check for updates when opening the app</string>
     <string name="grant_root_failed">Failed to grant root!</string>
     <string name="action">Action</string>
     <string name="close">Close</string>

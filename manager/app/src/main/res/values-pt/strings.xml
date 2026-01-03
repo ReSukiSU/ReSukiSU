@@ -77,6 +77,8 @@
     <string name="module_changelog">Registro de alterações</string>
     <string name="settings_profile_template">Modelo do Perfil do Aplicativo</string>
     <string name="settings_profile_template_summary">Gerenciar modelo local e online do perfil do aplicativo</string>
+    <string name="settings_check_update">Notificações de atualização</string>
+    <string name="settings_check_update_summary">Verificar automaticamente se há atualizações do módulo e do gerenciador</string>
     <string name="app_profile_template_create">Criar modelo</string>
     <string name="app_profile_template_edit">Editar modelo</string>
     <string name="app_profile_template_id">ID</string>
@@ -97,8 +99,6 @@
     <string name="app_profile_template_save_failed">Falha ao salvar o modelo</string>
     <string name="app_profile_template_import_empty">A área de transferência está vazia!</string>
     <string name="module_changelog_failed">Falha ao buscar o registro de alterações: %s</string>
-    <string name="settings_check_update">Verificar atualização</string>
-    <string name="settings_check_update_summary">Verifique automaticamente se há atualizações ao abrir o app</string>
     <string name="grant_root_failed">Falha ao conceder acesso root!</string>
     <string name="action">Ações</string>
     <string name="close">Fechar</string>

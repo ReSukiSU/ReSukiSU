@@ -77,6 +77,8 @@
     <string name="module_changelog">Список изменений</string>
     <string name="settings_profile_template">Шаблон профиля приложения</string>
     <string name="settings_profile_template_summary">Управление локальным и онлайн-шаблоном профиля приложения</string>
+    <string name="settings_check_update">Уведомления об обновлениях</string>
+    <string name="settings_check_update_summary">Автоматически проверять обновления модулей и менеджера</string>
     <string name="app_profile_template_create">Создать шаблон</string>
     <string name="app_profile_template_edit">Редактирование шаблона</string>
     <string name="app_profile_template_id">Идентификационный номер</string>
@@ -97,8 +99,6 @@
     <string name="app_profile_template_save_failed">Не удалось сохранить шаблон</string>
     <string name="app_profile_template_import_empty">Буфер обмена пуст!</string>
     <string name="module_changelog_failed">Не удалось получить список изменений: %s</string>
-    <string name="settings_check_update">Проверка обновлений</string>
-    <string name="settings_check_update_summary">Автоматически проверять обновления при открытии приложения</string>
     <string name="grant_root_failed">Не удалось выдать root!</string>
     <string name="action">Действие</string>
     <string name="close">Закрыть</string>

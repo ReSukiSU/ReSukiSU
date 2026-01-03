@@ -77,6 +77,8 @@
     <string name="module_changelog">Journal des modifications</string>
     <string name="settings_profile_template">Modèles de profils d\'application</string>
     <string name="settings_profile_template_summary">Gérer les modèles de profils d\'application locaux et en ligne</string>
+    <string name="settings_check_update">Notifications de mise à jour</string>
+    <string name="settings_check_update_summary">Vérifier automatiquement les mises à jour du module et du gestionnaire</string>
     <string name="app_profile_template_create">Créer un modèle</string>
     <string name="app_profile_template_edit">Modifier le modèle</string>
     <string name="app_profile_template_id">ID</string>
@@ -97,8 +99,6 @@
     <string name="app_profile_template_save_failed">Échec de l\'enregistrement du modèle</string>
     <string name="app_profile_template_import_empty">Le presse-papiers est vide !</string>
     <string name="module_changelog_failed">Échec de récupération du journal des modifications : %s</string>
-    <string name="settings_check_update">Vérifier les mises à jour</string>
-    <string name="settings_check_update_summary">Vérifier automatiquement les mises à jour à l\'ouverture de l\'application</string>
     <string name="grant_root_failed">Échec de l\'octroi des privilèges root !</string>
     <string name="action">Action</string>
     <string name="close">Fermer</string>

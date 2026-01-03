@@ -77,6 +77,8 @@
     <string name="module_changelog">Registro aggiornamenti</string>
     <string name="settings_profile_template">Modelli App Profile</string>
     <string name="settings_profile_template_summary">Gestisci i modelli locali e remoti di App Profile</string>
+    <string name="settings_check_update">Notifiche di aggiornamento</string>
+    <string name="settings_check_update_summary">Controlla automaticamente gli aggiornamenti del modulo e del gestore</string>
     <string name="app_profile_template_create">Crea modello</string>
     <string name="app_profile_template_edit">Modifica modello</string>
     <string name="app_profile_template_id">identificatore</string>
@@ -97,8 +99,6 @@
     <string name="app_profile_template_save_failed">Impossibile salvare il modello</string>
     <string name="app_profile_template_import_empty">Gli appunti sono vuoti!</string>
     <string name="module_changelog_failed">Impossibile reperire il changelog: %s</string>
-    <string name="settings_check_update">Controlla aggiornamenti</string>
-    <string name="settings_check_update_summary">Controlla automaticamente la disponibilità di aggiornamenti all\'apertura dell\'applicazione</string>
     <string name="grant_root_failed">Impossibile ottenere l\'accesso root!</string>
     <string name="action">Action</string>
     <string name="close">Close</string>

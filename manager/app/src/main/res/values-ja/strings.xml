@@ -77,6 +77,8 @@
     <string name="module_changelog">変更履歴</string>
     <string name="settings_profile_template">アプリプロファイルのテンプレート</string>
     <string name="settings_profile_template_summary">アプリプロファイルのローカルおよびオンラインテンプレートを管理します。</string>
+    <string name="settings_check_update">更新の通知</string>
+    <string name="settings_check_update_summary">モジュールとマネージャーの更新を自動的にチェックします</string>
     <string name="app_profile_template_create">テンプレートの作成</string>
     <string name="app_profile_template_edit">テンプレートの編集</string>
     <string name="app_profile_template_id">ID</string>
@@ -97,8 +99,6 @@
     <string name="app_profile_template_save_failed">テンプレートの保存に失敗しました</string>
     <string name="app_profile_template_import_empty">クリップボードが空です！</string>
     <string name="module_changelog_failed">変更ログの取得に失敗しました: %s</string>
-    <string name="settings_check_update">更新を確認する</string>
-    <string name="settings_check_update_summary">アプリの起動時に更新を自動で確認します。</string>
     <string name="grant_root_failed">root の付与に失敗しました！</string>
     <string name="action">アクション</string>
     <string name="close">閉じる</string>

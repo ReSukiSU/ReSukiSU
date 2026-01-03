@@ -77,6 +77,8 @@
     <string name="module_changelog">Änderungsprotokoll</string>
     <string name="settings_profile_template">App-Profil-Vorlage</string>
     <string name="settings_profile_template_summary">Verwalte die lokale und online Vorlage des App-Profils</string>
+    <string name="settings_check_update">Update-Benachrichtigungen</string>
+    <string name="settings_check_update_summary">Automatisch nach Modul- und Manager-Updates suchen</string>
     <string name="app_profile_template_create">Vorlage erstellen</string>
     <string name="app_profile_template_edit">Vorlage bearbeiten</string>
     <string name="app_profile_template_id">ID</string>
@@ -97,8 +99,6 @@
     <string name="app_profile_template_save_failed">Schlug beim Speichern der Vorlage fehl</string>
     <string name="app_profile_template_import_empty">Zwischenablage ist leer!</string>
     <string name="module_changelog_failed">Konnte Veränderungs-Protokoll nicht laden: %s</string>
-    <string name="settings_check_update">Auf Aktualisierung prüfen</string>
-    <string name="settings_check_update_summary">Prüfe automatisch auf Aktualisierungen, wenn die App geöffnet wird</string>
     <string name="grant_root_failed">Root-Zugriff konnte nicht gewährt werden!</string>
     <string name="action">Aktion</string>
     <string name="close">Schließen</string>
