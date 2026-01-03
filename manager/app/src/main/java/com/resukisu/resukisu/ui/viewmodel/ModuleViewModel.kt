@@ -1,5 +1,6 @@
 package com.resukisu.resukisu.ui.viewmodel
 
+import com.resukisu.resukisu.ksuApp
 import android.content.Context
 import android.os.SystemClock
 import android.util.Log
@@ -235,7 +236,9 @@ class ModuleViewModel : ViewModel() {
 
     fun checkUpdate(m: ModuleInfo): Triple<String, String, String> {
         val empty = Triple("", "", "")
-        if (m.updateJson.isEmpty() || m.remove || m.update || !m.enabled) {
+        val isCheckUpdateEnabled = ksuApp.getSharedPreferences("settings", Context.MODE_PRIVATE)
+            .getBoolean("check_update", true)
+        if (!isCheckUpdateEnabled || m.updateJson.isEmpty() || m.remove || m.update || !m.enabled) {
             return empty
         }
         // download updateJson
