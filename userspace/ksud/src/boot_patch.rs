@@ -1,15 +1,12 @@
 #![allow(clippy::ref_option, clippy::needless_pass_by_value)]
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
-use std::path::Path;
-use std::path::PathBuf;
-use std::process::Command;
-use std::process::Stdio;
+use std::{
+    path::{Path, PathBuf},
+    process::{Command, Stdio},
+};
 
-use anyhow::Context;
-use anyhow::Result;
-use anyhow::bail;
-use anyhow::ensure;
+use anyhow::{Context, Result, bail, ensure};
 use regex_lite::Regex;
 use which::which;
 
@@ -17,13 +14,16 @@ use crate::assets;
 
 #[cfg(target_os = "android")]
 mod android {
-    use super::{PermissionsExt, Result, do_cpio_cmd};
-    pub(super) use crate::defs::{BACKUP_FILENAME, KSU_BACKUP_DIR, KSU_BACKUP_FILE_PREFIX};
+    use std::{
+        path::{Path, PathBuf},
+        process::{Command, Stdio},
+    };
+
     use anyhow::{Context, anyhow, bail, ensure};
     use regex_lite::Regex;
-    use std::path::{Path, PathBuf};
-    use std::process::{Command, Stdio};
 
+    use super::{PermissionsExt, Result, do_cpio_cmd};
+    pub(super) use crate::defs::{BACKUP_FILENAME, KSU_BACKUP_DIR, KSU_BACKUP_FILE_PREFIX};
     use crate::utils;
 
     pub(super) fn ensure_gki_kernel() -> Result<()> {
@@ -94,8 +94,9 @@ mod android {
     }
 
     fn calculate_sha1(file_path: impl AsRef<Path>) -> Result<String> {
-        use sha1::Digest;
         use std::io::Read;
+
+        use sha1::Digest;
         let mut file = std::fs::File::open(file_path.as_ref())?;
         let mut hasher = sha1::Sha1::new();
         let mut buffer = [0; 1024];
@@ -223,8 +224,7 @@ mod android {
 
     #[cfg(target_os = "android")]
     pub(super) fn post_ota() -> Result<()> {
-        use crate::assets::BOOTCTL_PATH;
-        use crate::defs::ADB_DIR;
+        use crate::{assets::BOOTCTL_PATH, defs::ADB_DIR};
         let status = Command::new(BOOTCTL_PATH).arg("hal-info").status()?;
         if !status.success() {
             return Ok(());
@@ -282,8 +282,10 @@ rm -f /data/adb/post-fs-data.d/post_ota.sh
 pub use android::*;
 
 fn parse_kmi_from_kernel(kernel: &PathBuf, workdir: &Path) -> Result<String> {
-    use std::fs::{File, copy};
-    use std::io::{BufReader, Read};
+    use std::{
+        fs::{File, copy},
+        io::{BufReader, Read},
+    };
     let kernel_path = workdir.join("kernel");
     copy(kernel, &kernel_path).context("Failed to copy kernel")?;
 

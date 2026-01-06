@@ -1,9 +1,13 @@
-#[allow(clippy::wildcard_imports)]
-use crate::utils::*;
-use crate::{
-    assets, defs, ksucalls, metamodule,
-    restorecon::{restore_syscon, setsyscon},
-    sepolicy,
+#[cfg(unix)]
+use std::os::unix::{prelude::PermissionsExt, process::CommandExt};
+use std::{
+    collections::HashMap,
+    env::var as env_var,
+    fs::{File, Permissions, canonicalize, copy, remove_dir_all, rename, set_permissions},
+    io::Cursor,
+    path::{Path, PathBuf},
+    process::Command,
+    str::FromStr,
 };
 
 use anyhow::{Context, Result, anyhow, bail, ensure};
@@ -12,23 +16,18 @@ use is_executable::is_executable;
 use java_properties::PropertiesIter;
 use log::{debug, info, warn};
 use regex_lite::Regex;
-
-use std::fs::{copy, rename};
-use std::{
-    collections::HashMap,
-    env::var as env_var,
-    fs::{File, Permissions, canonicalize, remove_dir_all, set_permissions},
-    io::Cursor,
-    path::{Path, PathBuf},
-    process::Command,
-    str::FromStr,
-};
 use zip_extensions::zip_extract_file_to_memory;
 
-use crate::defs::{MODULE_DIR, MODULE_UPDATE_DIR, UPDATE_FILE_NAME};
-use crate::module::ModuleType::{Active, All};
-#[cfg(unix)]
-use std::os::unix::{prelude::PermissionsExt, process::CommandExt};
+#[allow(clippy::wildcard_imports)]
+use crate::utils::*;
+use crate::{
+    assets, defs,
+    defs::{MODULE_DIR, MODULE_UPDATE_DIR, UPDATE_FILE_NAME},
+    ksucalls, metamodule,
+    module::ModuleType::{Active, All},
+    restorecon::{restore_syscon, setsyscon},
+    sepolicy,
+};
 
 const INSTALLER_CONTENT: &str = include_str!("./installer.sh");
 const INSTALL_MODULE_SCRIPT: &str = concatcp!(

@@ -1,13 +1,13 @@
+use std::path::Path;
+
 use anyhow::Result;
 use rust_embed::RustEmbed;
-use std::path::Path;
 
 #[cfg(target_os = "android")]
 mod android {
-    use crate::assets::Asset;
-    use crate::defs::BINARY_DIR;
-    use crate::utils::ensure_binary;
     use const_format::concatcp;
+
+    use crate::{assets::Asset, defs::BINARY_DIR, utils::ensure_binary};
 
     pub const RESETPROP_PATH: &str = concatcp!(BINARY_DIR, "resetprop");
     pub const BUSYBOX_PATH: &str = concatcp!(BINARY_DIR, "busybox");
