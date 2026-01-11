@@ -6,7 +6,7 @@ use android_logger::Config;
 use log::LevelFilter;
 
 use crate::boot_patch::{BootPatchArgs, BootRestoreArgs};
-#[cfg(target_arch = "aarch64")]
+#[cfg(all(target_arch = "aarch64", target_os = "android"))]
 use crate::susfs;
 use crate::{
     apk_sign, assets, debug, defs, init_event, ksucalls, module, module_config, umount, utils,
@@ -37,7 +37,7 @@ enum Commands {
     /// Trigger `boot-complete` event
     BootCompleted,
 
-    #[cfg(target_arch = "aarch64")]
+    #[cfg(all(target_arch = "aarch64", target_os = "android"))]
     /// Susfs
     Susfs {
         #[command(subcommand)]
@@ -88,7 +88,7 @@ enum Commands {
     },
 
     /// KPM module manager
-    #[cfg(target_arch = "aarch64")]
+    #[cfg(all(target_arch = "aarch64", target_os = "android"))]
     Kpm {
         #[command(subcommand)]
         command: kpm_cmd::Kpm,
@@ -442,7 +442,7 @@ enum UmountOp {
     Wipe,
 }
 
-#[cfg(target_arch = "aarch64")]
+#[cfg(all(target_arch = "aarch64", target_os = "android"))]
 mod kpm_cmd {
     use clap::Subcommand;
     use std::path::PathBuf;
@@ -466,7 +466,7 @@ mod kpm_cmd {
     }
 }
 
-#[cfg(target_arch = "aarch64")]
+#[cfg(all(target_arch = "aarch64", target_os = "android"))]
 #[derive(clap::Subcommand, Debug)]
 enum Susfs {
     /// Get SUSFS Status
@@ -500,7 +500,7 @@ pub fn run() -> Result<()> {
             init_event::on_boot_completed();
             Ok(())
         }
-        #[cfg(target_arch = "aarch64")]
+        #[cfg(all(target_arch = "aarch64", target_os = "android"))]
         Commands::Susfs { command } => {
             match command {
                 Susfs::Version => println!("{}", susfs::get_susfs_version()),
@@ -730,7 +730,7 @@ pub fn run() -> Result<()> {
                 Ok(())
             }
         },
-        #[cfg(target_arch = "aarch64")]
+        #[cfg(all(target_arch = "aarch64", target_os = "android"))]
         Commands::Kpm { command } => {
             use crate::cli::kpm_cmd::Kpm;
             match command {
