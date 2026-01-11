@@ -1,7 +1,11 @@
 package com.resukisu.resukisu.ui.activity.component
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.navigationBars
@@ -34,7 +38,6 @@ import com.resukisu.resukisu.ui.util.getKpmModuleCount
 import com.resukisu.resukisu.ui.util.getModuleCount
 import com.resukisu.resukisu.ui.util.getSuperuserCount
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -48,7 +51,6 @@ fun BottomBar(destinations: List<BottomBarDestination>) {
     // 是否隐藏 badge
     val isHideOtherInfo by activity.settingsStateFlow
         .map { it.isHideOtherInfo }
-        .distinctUntilChanged()
         .collectAsState(initial = false)
 
     // 翻页处理
@@ -87,40 +89,58 @@ fun BottomBar(destinations: List<BottomBarDestination>) {
             val badge : @Composable BoxScope.() -> Unit = {
                 when (destination) {
                     BottomBarDestination.Kpm -> {
-                        if (kpmModuleCount > 0 && !isHideOtherInfo) {
-                            Badge(
-                                containerColor = MaterialTheme.colorScheme.secondary
+                        Row {
+                            AnimatedVisibility(
+                                visible = kpmModuleCount > 0 && !isHideOtherInfo,
+                                enter = fadeIn(),
+                                exit = fadeOut()
                             ) {
-                                Text(
-                                    text = kpmModuleCount.toString(),
-                                    style = MaterialTheme.typography.labelSmall
-                                )
+                                Badge(
+                                    containerColor = MaterialTheme.colorScheme.secondary
+                                ) {
+                                    Text(
+                                        text = kpmModuleCount.toString(),
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                }
                             }
                         }
                     }
 
                     BottomBarDestination.SuperUser -> {
-                        if (superuserCount > 0 && !isHideOtherInfo) {
-                            Badge(
-                                containerColor = MaterialTheme.colorScheme.secondary
+                        Row {
+                            AnimatedVisibility(
+                                visible = superuserCount > 0 && !isHideOtherInfo,
+                                enter = fadeIn(),
+                                exit = fadeOut()
                             ) {
-                                Text(
-                                    text = superuserCount.toString(),
-                                    style = MaterialTheme.typography.labelSmall
-                                )
+                                Badge(
+                                    containerColor = MaterialTheme.colorScheme.secondary
+                                ) {
+                                    Text(
+                                        text = superuserCount.toString(),
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                }
                             }
                         }
                     }
 
                     BottomBarDestination.Module -> {
-                        if (moduleCount > 0 && !isHideOtherInfo) {
-                            Badge(
-                                containerColor = MaterialTheme.colorScheme.secondary)
-                            {
-                                Text(
-                                    text = moduleCount.toString(),
-                                    style = MaterialTheme.typography.labelSmall
-                                )
+                        Row {
+                            AnimatedVisibility(
+                                visible = moduleCount > 0 && !isHideOtherInfo,
+                                enter = fadeIn(),
+                                exit = fadeOut()
+                            ) {
+                                Badge(
+                                    containerColor = MaterialTheme.colorScheme.secondary
+                                ) {
+                                    Text(
+                                        text = moduleCount.toString(),
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                }
                             }
                         }
                     }
