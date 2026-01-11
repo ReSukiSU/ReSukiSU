@@ -42,7 +42,7 @@ mod restorecon;
 mod sepolicy;
 #[cfg(target_os = "android")]
 mod su;
-#[cfg(target_arch = "aarch64")]
+#[cfg(all(target_arch = "aarch64", target_os = "android"))]
 mod susfs;
 #[cfg(target_os = "android")]
 mod umount;
