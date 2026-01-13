@@ -17,6 +17,8 @@
 #include "hook/syscall_hook.h"
 #include "hook/syscall_event_bridge.h"
 
+#include "compat/kernel_compat.h"
+
 static int ksu_handle_init_mark_tracker(const char __user **filename_user)
 {
     char path[64];
@@ -100,12 +102,12 @@ long __nocfi ksu_hook_execve(int orig_nr, const struct pt_regs *regs)
 
 long __nocfi ksu_hook_setresuid(int orig_nr, const struct pt_regs *regs)
 {
-    uid_t old_uid = current_uid().val;
+    uid_t old_uid = ksu_get_uid_t(current_uid());
     long ret = ksu_syscall_table[orig_nr](regs);
 
     if (ret < 0)
         return ret;
 
-    ksu_handle_setuid(current_uid().val, old_uid);
+    ksu_handle_setuid(ksu_get_uid_t(current_uid()), old_uid);
     return ret;
 }

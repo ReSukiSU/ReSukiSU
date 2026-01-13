@@ -4,6 +4,8 @@
 #include <linux/cred.h>
 #include <linux/types.h>
 
+#include "compat/kernel_compat.h"
+
 #ifdef CONFIG_KSU_DISABLE_MANAGER
 static inline void ksu_mark_manager(u32 uid)
 {
@@ -11,7 +13,7 @@ static inline void ksu_mark_manager(u32 uid)
 
 static inline bool is_manager(void)
 {
-    return current_uid().val == 0;
+    return ksu_get_uid_t(current_uid()) == 0;
 }
 
 static inline bool ksu_is_manager_appid(u16 appid)

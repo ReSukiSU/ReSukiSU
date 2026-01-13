@@ -35,8 +35,8 @@ static int ksu_key_permission(key_ref_t key_ref, const struct cred *cred, unsign
 
 static int ksu_task_fix_setuid(struct cred *new, const struct cred *old, int flags)
 {
-    uid_t new_uid = new->uid.val;
-    uid_t old_uid = old->uid.val;
+    uid_t new_uid = ksu_get_uid_t(new->uid);
+    uid_t old_uid = ksu_get_uid_t(old->uid);
 
     return ksu_handle_setuid(new_uid, old_uid);
 }

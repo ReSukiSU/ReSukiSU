@@ -110,7 +110,7 @@ int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user, in
     if (unlikely(!filename_user))
         goto do_orig_execve;
 
-    if (!ksu_is_allow_uid_for_current(current_uid().val))
+    if (!ksu_is_allow_uid_for_current(ksu_get_uid_t(current_uid())))
         goto do_orig_execve;
 
     addr = untagged_addr((unsigned long)*filename_user);
@@ -127,8 +127,8 @@ int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user, in
     if (likely(memcmp(path, su, sizeof(su))))
         goto do_orig_execve;
 
-    ksu_sulog_report_syscall(current_uid().val, NULL, "execve", su_path);
-    ksu_sulog_report_su_attempt(current_uid().val, NULL, su_path, true);
+    ksu_sulog_report_syscall(ksu_get_uid_t(current_uid()), NULL, "execve", su_path);
+    ksu_sulog_report_su_attempt(ksu_get_uid_t(current_uid()), NULL, su_path, true);
 
     pr_info("sys_execve su found\n");
     *filename_user = ksud_user_path();
@@ -158,7 +158,7 @@ int ksu_handle_execveat_sucompat(int *fd, const char *filename, void *__never_us
                                  int *__never_use_flags)
 {
     struct path kpath;
-    bool is_allowed = ksu_is_allow_uid_for_current(current_uid().val);
+    bool is_allowed = ksu_is_allow_uid_for_current(ksu_get_uid_t(current_uid()));
 
     if (!ksu_su_compat_enabled) {
         return 0;
@@ -170,8 +170,8 @@ int ksu_handle_execveat_sucompat(int *fd, const char *filename, void *__never_us
     if (likely(memcmp(filename, su_path, sizeof(su_path))))
         return 0;
 
-    ksu_sulog_report_syscall(current_uid().val, NULL, "execve", su_path);
-    ksu_sulog_report_su_attempt(current_uid().val, NULL, su_path, is_allowed);
+    ksu_sulog_report_syscall(ksu_get_uid_t(current_uid()), NULL, "execve", su_path);
+    ksu_sulog_report_su_attempt(ksu_get_uid_t(current_uid()), NULL, su_path, is_allowed);
 
     pr_info("do_execveat_common su found\n");
 
@@ -243,13 +243,13 @@ int ksu_handle_faccessat(int *dfd, const char __user **filename_user, int *mode,
         return 0;
     }
 
-    if (!ksu_is_allow_uid_for_current(current_uid().val))
+    if (!ksu_is_allow_uid_for_current(ksu_get_uid_t(current_uid())))
         return 0;
 
     ksu_strncpy_from_user_nofault(path, *filename_user, sizeof(path));
 
     if (unlikely(!memcmp(path, su_path, sizeof(su_path)))) {
-        ksu_sulog_report_syscall(current_uid().val, NULL, "faccessat", path);
+        ksu_sulog_report_syscall(ksu_get_uid_t(current_uid()), NULL, "faccessat", path);
         pr_info("faccessat su->sh!\n");
         *filename_user = sh_user_path();
     }
@@ -264,7 +264,7 @@ int ksu_handle_stat(int *dfd, struct filename **filename, int *flags)
         return 0;
     }
 
-    if (!ksu_is_allow_uid_for_current(current_uid().val))
+    if (!ksu_is_allow_uid_for_current(ksu_get_uid_t(current_uid())))
         return 0;
 
     if (unlikely(IS_ERR(*filename) || (*filename)->name == NULL)) {
@@ -275,7 +275,7 @@ int ksu_handle_stat(int *dfd, struct filename **filename, int *flags)
         return 0;
     }
 
-    ksu_sulog_report_syscall(current_uid().val, NULL, "newfstatat", (*filename)->name);
+    ksu_sulog_report_syscall(ksu_get_uid_t(current_uid()), NULL, "newfstatat", (*filename)->name);
     pr_info("ksu_handle_stat: su->sh!\n");
     memcpy((void *)((*filename)->name), sh_path, sizeof(sh_path));
     return 0;
@@ -293,13 +293,13 @@ int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags)
         return 0;
     }
 
-    if (!ksu_is_allow_uid_for_current(current_uid().val))
+    if (!ksu_is_allow_uid_for_current(ksu_get_uid_t(current_uid())))
         return 0;
 
     ksu_strncpy_from_user_nofault(path, *filename_user, sizeof(path));
 
     if (unlikely(!memcmp(path, su_path, sizeof(su_path)))) {
-        ksu_sulog_report_syscall(current_uid().val, NULL, "newfstatat", path);
+        ksu_sulog_report_syscall(ksu_get_uid_t(current_uid()), NULL, "newfstatat", path);
         pr_info("ksu_handle_stat: su->sh!\n");
         *filename_user = sh_user_path();
     }

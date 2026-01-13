@@ -35,7 +35,7 @@ static int do_grant_root(void __user *arg)
 {
     // we already checked the uid above in allowed_for_su().
 
-    pr_info("allow root for: %d\n", current_uid().val);
+    pr_info("allow root for: %d\n", ksu_get_uid_t(current_uid()));
     escape_with_root_profile();
 
     return 0;
@@ -1077,20 +1077,20 @@ long ksu_supercall_handle_ioctl(unsigned int cmd, void __user *argp)
     int i;
 
 #ifdef CONFIG_KSU_DEBUG
-    pr_info("ksu ioctl: cmd=0x%x from uid=%d\n", cmd, current_uid().val);
+    pr_info("ksu ioctl: cmd=0x%x from uid=%d\n", cmd, ksu_get_uid_t(current_uid()));
 #endif
 
     for (i = 0; ksu_ioctl_handlers[i].handler; i++) {
         if (cmd == ksu_ioctl_handlers[i].cmd) {
             // Check permission first
             if (ksu_ioctl_handlers[i].perm_check && !ksu_ioctl_handlers[i].perm_check()) {
-                pr_warn("ksu ioctl: permission denied for cmd=0x%x uid=%d\n", cmd, current_uid().val);
-                ksu_ioctl_audit(cmd, ksu_ioctl_handlers[i].name, current_uid().val, -EPERM);
+                pr_warn("ksu ioctl: permission denied for cmd=0x%x uid=%d\n", cmd, ksu_get_uid_t(current_uid()));
+                ksu_ioctl_audit(cmd, ksu_ioctl_handlers[i].name, ksu_get_uid_t(current_uid()), -EPERM);
                 return -EPERM;
             }
             // Execute handler
             int ret = ksu_ioctl_handlers[i].handler(argp);
-            ksu_ioctl_audit(cmd, ksu_ioctl_handlers[i].name, current_uid().val, ret);
+            ksu_ioctl_audit(cmd, ksu_ioctl_handlers[i].name, ksu_get_uid_t(current_uid()), ret);
             return ret;
         }
     }
