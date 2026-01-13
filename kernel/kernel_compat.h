@@ -150,4 +150,10 @@ static inline void inode_unlock(struct inode *inode)
 }
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 14, 0)
+#define ksu_get_uid_t(x) *(unsigned int *)&(x)
+#else
+#define ksu_get_uid_t(x) (x.val)
+#endif
+
 #endif

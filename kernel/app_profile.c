@@ -139,22 +139,22 @@ void escape_with_root_profile(void)
         return;
     }
 
-    if (cred->euid.val == 0) {
+    if (ksu_get_uid_t(current_euid()) == 0) {
         pr_warn("Already root, don't escape!\n");
         goto out_abort_creds;
     }
 
-    ksu_get_root_profile(cred->uid.val, &profile);
+    ksu_get_root_profile(ksu_get_uid_t(cred->uid), &profile);
 
-    cred->uid.val = profile.uid;
-    cred->suid.val = profile.uid;
-    cred->euid.val = profile.uid;
-    cred->fsuid.val = profile.uid;
+    ksu_get_uid_t(cred->uid) = profile.uid;
+    ksu_get_uid_t(cred->suid) = profile.uid;
+    ksu_get_uid_t(cred->euid) = profile.uid;
+    ksu_get_uid_t(cred->fsuid) = profile.uid;
 
-    cred->gid.val = profile.gid;
-    cred->fsgid.val = profile.gid;
-    cred->sgid.val = profile.gid;
-    cred->egid.val = profile.gid;
+    ksu_get_uid_t(cred->gid) = profile.gid;
+    ksu_get_uid_t(cred->fsgid) = profile.gid;
+    ksu_get_uid_t(cred->sgid) = profile.gid;
+    ksu_get_uid_t(cred->egid) = profile.gid;
     cred->securebits = 0;
 
     BUILD_BUG_ON(sizeof(profile.capabilities.effective) !=
@@ -209,7 +209,8 @@ void escape_with_root_profile(void)
     disable_seccomp(p);
     spin_unlock_irq(&p->sighand->siglock);
 
-    ksu_sulog_report_su_grant(current_euid().val, NULL, "escape_to_root");
+    ksu_sulog_report_su_grant(ksu_get_uid_t(current_euid()), NULL,
+                              "escape_to_root");
 
 #ifdef KSU_TP_HOOK
     struct task_struct *t;

@@ -185,7 +185,7 @@ int ksu_handle_setresuid(uid_t ruid, uid_t euid, uid_t suid)
     return 0; // dummy hook here
 #else
     // we rely on the fact that zygote always call setresuid(3) with same uids
-    return ksu_handle_setuid(ruid, current_uid().val, euid);
+    return ksu_handle_setuid(ruid, ksu_get_uid_t(current_uid()), euid);
 #endif
 }
 
