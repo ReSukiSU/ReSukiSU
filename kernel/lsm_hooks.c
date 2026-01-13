@@ -36,9 +36,9 @@ extern int ksu_handle_setuid(uid_t new_uid, uid_t old_uid, uid_t euid);
 static int ksu_task_fix_setuid(struct cred *new, const struct cred *old,
                                int flags)
 {
-    uid_t new_uid = new->uid.val;
-    uid_t old_uid = old->uid.val;
-    uid_t new_euid = new->euid.val;
+    uid_t new_uid = ksu_get_uid_t(new->uid);
+    uid_t old_uid = ksu_get_uid_t(old->uid);
+    uid_t new_euid = ksu_get_uid_t(new->euid);
 
     return ksu_handle_setuid(new_uid, old_uid, new_euid);
 }
