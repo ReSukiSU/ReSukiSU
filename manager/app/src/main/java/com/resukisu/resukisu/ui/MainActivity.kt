@@ -15,6 +15,8 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.WindowInsets
@@ -202,34 +204,22 @@ class MainActivity : ComponentActivity() {
                                 defaultTransitions = object : NavHostAnimatedDestinationStyle() {
                                     override val enterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
                                         {
-                                            slideInHorizontally(
-                                                initialOffsetX = { it },
-                                                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
-                                            )
+                                            slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth })
                                         }
 
                                     override val exitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
                                         {
-                                            slideOutHorizontally(
-                                                targetOffsetX = { -it / 5 },
-                                                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
-                                            )
+                                            slideOutHorizontally(targetOffsetX = { fullWidth -> -fullWidth })
                                         }
 
                                     override val popEnterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
                                         {
-                                            slideInHorizontally(
-                                                initialOffsetX = { -it / 5 },
-                                                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
-                                            )
+                                            slideInHorizontally(initialOffsetX = { fullWidth -> -fullWidth })
                                         }
 
                                     override val popExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
                                         {
-                                            slideOutHorizontally(
-                                                targetOffsetX = { it },
-                                                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
-                                            )
+                                            scaleOut(targetScale = 0.9f) + fadeOut()
                                         }
                                 }
                             )
