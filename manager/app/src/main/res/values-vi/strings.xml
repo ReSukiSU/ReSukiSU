@@ -164,8 +164,6 @@
     <string name="settings_disable_su_summary">Vô hiệu hoá khả năng thực thi lệnh SU để lấy quyền root (các app đã cấp trước đó không bị ảnh hưởng)</string>
     <string name="settings_disable_kernel_umount">Vô hiệu hoá kernel umount</string>
     <string name="settings_disable_kernel_umount_summary">Vô hiệu hoá umount kernel-level được kiểm soát bởi KernelSU</string>
-    <string name="settings_enable_enhanced_security">Kích hoạt bảo mật nâng cao</string>
-    <string name="settings_enable_enhanced_security_summary">Cho phép chính sách bảo mật chặt chẽ hơn</string>
     <string name="feature_status_unsupported_summary">Kernel không hỗ trợ tính năng này</string>
     <string name="feature_status_managed_summary">Tính năng này được quản lý bởi một module</string>
     <string name="settings_mode_default">Mặc định</string>

@@ -164,8 +164,6 @@
     <string name="settings_disable_su_summary">Herhangi bir uygulamanın ⁠su komutu aracılığıyla root ayrıcalıkları kazanma yeteneğini devre dışı bırakın (mevcut root işlemleri etkilenmeyecektir)</string>
     <string name="settings_disable_kernel_umount">Çekirdek ayırmasını devre dışı bırak</string>
     <string name="settings_disable_kernel_umount_summary">KernelSU tarafından kontrol edilen çekirdek seviyesindeki ayırma davranışını devre dışı bırakın</string>
-    <string name="settings_enable_enhanced_security">Gelişmiş güvenliği etkinleştir</string>
-    <string name="settings_enable_enhanced_security_summary">Daha sıkı güvenlik politikalarını etkinleştirin</string>
     <string name="feature_status_unsupported_summary">Çekirdek bu özelliği desteklemiyor</string>
     <string name="feature_status_managed_summary">Bu özellik bir modül tarafından yönetiliyor</string>
     <string name="settings_mode_default">Varsayılan</string>

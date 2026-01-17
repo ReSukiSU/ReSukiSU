@@ -52,7 +52,6 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Update
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.WebAsset
-import androidx.compose.material.icons.rounded.EnhancedEncryption
 import androidx.compose.material.icons.rounded.FolderDelete
 import androidx.compose.material.icons.rounded.RemoveCircle
 import androidx.compose.material.icons.rounded.RemoveModerator
@@ -206,65 +205,6 @@ fun SettingsPage(navigator: DestinationsNavigator, bottomPadding: Dp) {
                             stringResource(id = R.string.settings_mode_default),
                             stringResource(id = R.string.settings_mode_temp_enable),
                             stringResource(id = R.string.settings_mode_always_enable),
-                        )
-                        var enhancedSecurityMode by rememberSaveable {
-                            mutableIntStateOf(
-                                run {
-                                    val currentEnabled = Natives.isEnhancedSecurityEnabled()
-                                    val savedPersist = prefs.getInt("enhanced_security_mode", 0)
-                                    if (savedPersist == 2) 2 else if (currentEnabled) 1 else 0
-                                }
-                            )
-                        }
-                        val enhancedStatus by produceState(initialValue = "") {
-                            value = getFeatureStatus("enhanced_security")
-                        }
-                        val enhancedSummary = when (enhancedStatus) {
-                            "unsupported" -> stringResource(id = R.string.feature_status_unsupported_summary)
-                            "managed" -> stringResource(id = R.string.feature_status_managed_summary)
-                            else -> stringResource(id = R.string.settings_enable_enhanced_security_summary)
-                        }
-                        SuperDropdown(
-                            icon = Icons.Rounded.EnhancedEncryption,
-                            title = stringResource(id = R.string.settings_enable_enhanced_security),
-                            summary = enhancedSummary,
-                            items = modeItems,
-                            leftAction = {
-                                Icon(
-                                    Icons.Rounded.EnhancedEncryption,
-                                    modifier = Modifier.padding(end = 16.dp),
-                                    contentDescription = stringResource(id = R.string.settings_enable_enhanced_security),
-                                    tint = MaterialTheme.colorScheme.onBackground
-                                )
-                            },
-                            enabled = enhancedStatus == "supported",
-                            selectedIndex = enhancedSecurityMode,
-                            onSelectedIndexChange = { index ->
-                                when (index) {
-                                    // Default: disable and save to persist
-                                    0 -> if (Natives.setEnhancedSecurityEnabled(false)) {
-                                        execKsud("feature save", true)
-                                        prefs.edit { putInt("enhanced_security_mode", 0) }
-                                        enhancedSecurityMode = 0
-                                    }
-
-                                    // Temporarily enable: save disabled state first, then enable
-                                    1 -> if (Natives.setEnhancedSecurityEnabled(false)) {
-                                        execKsud("feature save", true)
-                                        if (Natives.setEnhancedSecurityEnabled(true)) {
-                                            prefs.edit { putInt("enhanced_security_mode", 0) }
-                                            enhancedSecurityMode = 1
-                                        }
-                                    }
-
-                                    // Permanently enable: enable and save
-                                    2 -> if (Natives.setEnhancedSecurityEnabled(true)) {
-                                        execKsud("feature save", true)
-                                        prefs.edit { putInt("enhanced_security_mode", 2) }
-                                        enhancedSecurityMode = 2
-                                    }
-                                }
-                            }
                         )
 
                         var suCompatMode by rememberSaveable {

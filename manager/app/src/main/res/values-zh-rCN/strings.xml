@@ -171,8 +171,6 @@
     <string name="settings_disable_su_summary">禁止任何应用通过 su 命令获取 root 权限（已运行的 root 进程不受影响）。</string>
     <string name="settings_disable_kernel_umount">关闭内核 umount</string>
     <string name="settings_disable_kernel_umount_summary">关闭 KernelSU 控制的内核级 umount 行为。</string>
-    <string name="settings_enable_enhanced_security">增强安全性</string>
-    <string name="settings_enable_enhanced_security_summary">使用更严格的安全策略。</string>
     <string name="feature_status_unsupported_summary">内核不支持此功能。</string>
     <string name="feature_status_managed_summary">此功能由模块管理。</string>
     <string name="settings_mode_default">默认</string>
