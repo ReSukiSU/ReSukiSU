@@ -21,12 +21,9 @@ sha256 = "1"
 tempfile = "3"
 chrono = "0.4"
 regex-lite = "0.1"
-rustix = { version = "=1.1.3", default-features = false, features = ["process", "thread", "fs", "system"] }
 
 [target.'cfg(target_os = "android")'.dependencies]
-rustix = { version = "=1.0.8", features = [
-    "all-apis",
-] }
+rustix = { version = "=1.1.3", default-features = false, features = ["process", "thread", "fs", "system"] }
 android-properties = { version = "0.2", features = ["bionic-deprecated"] }
 android_logger = { version = "0.15", default-features = false }
 zip = { version = "3",  features = [
