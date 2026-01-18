@@ -91,12 +91,6 @@ enum Commands {
         command: kpm_cmd::Kpm,
     },
 
-    /// Manage kernel umount paths
-    Umount {
-        #[command(subcommand)]
-        command: Umount,
-    },
-
     /// For developers
     Debug {
         #[command(subcommand)]
@@ -408,7 +402,7 @@ enum Kernel {
     /// Notify that module is mounted
     NotifyModuleMounted,
 }
-
+/*
 #[derive(clap::Subcommand, Debug)]
 enum Umount {
     /// Add mount point to umount list
@@ -423,17 +417,9 @@ enum Umount {
     Remove {
         /// mount point path
         mnt: String,
-    },
-    /// List all mount points in umount list
-    List,
-    /// Save current umount list to file
-    Save,
-    /// Apply saved umount list from file to kernel
-    Apply,
-    /// Clear custom umount paths (wipe kernel list)
-    ClearCustom,
+    }
 }
-
+*/
 #[derive(clap::Subcommand, Debug)]
 enum DynamicManagerOp {
     /// Get the signature of the current dynamic manager (size+hash)
@@ -472,6 +458,8 @@ enum UmountOp {
     },
     /// Wipe all entries from umount list
     Wipe,
+    /// List all entries from umount list
+    List,
 }
 
 #[cfg(all(target_arch = "aarch64", target_os = "android"))]
@@ -741,7 +729,7 @@ pub fn run() -> Result<()> {
             }
         },
         Commands::BootRestore(boot_restore) => crate::boot_patch::restore(boot_restore),
-        Commands::Umount { command } => match command {
+        /*Commands::Umount { command } => match command {
             Umount::Add { mnt, flags } => ksucalls::umount_list_add(&mnt, flags),
             Umount::Remove { mnt } => umount::remove_umount_entry_from_config(&mnt),
             Umount::List => {
@@ -752,13 +740,14 @@ pub fn run() -> Result<()> {
             Umount::Save => umount::save_umount_config(),
             Umount::Apply => umount::apply_umount_config(),
             Umount::ClearCustom => umount::clear_umount_config(),
-        },
+        },*/
         Commands::Kernel { command } => match command {
             Kernel::NukeExt4Sysfs { mnt } => ksucalls::nuke_ext4_sysfs(&mnt),
             Kernel::Umount { command } => match command {
-                UmountOp::Add { mnt, flags } => ksucalls::umount_list_add(&mnt, flags),
-                UmountOp::Del { mnt } => ksucalls::umount_list_del(&mnt),
-                UmountOp::Wipe => ksucalls::umount_list_wipe().map_err(Into::into),
+                UmountOp::Add { mnt, flags } => umount::add_umount(&mnt, flags),
+                UmountOp::Del { mnt } => umount::del_umount(&mnt),
+                UmountOp::Wipe => umount::wipe_umount(),
+                UmountOp::List => umount::list_umount(),
             },
             Kernel::DynamicManager { command } => match command {
                 DynamicManagerOp::Set { size, hash } => dynamic_manager::set(size, hash),
