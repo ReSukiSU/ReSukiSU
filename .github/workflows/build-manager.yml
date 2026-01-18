@@ -60,7 +60,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -111,31 +111,31 @@ jobs:
           fi
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
       - name: Download arm64 ksud
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: ksud-aarch64-linux-android
           path: .
 
       - name: Download x86_64 ksud
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: ksud-x86_64-linux-android
           path: .
 
       - name: Download arm ksud
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: ksud-armv7-linux-androideabi
           path: .
@@ -153,7 +153,7 @@ jobs:
         run: ./gradlew assemble${{ matrix.build_type }} -Pcommit=${{ steps.commit.outputs.COMMIT_SHA }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ steps.determine.outputs.title }}-${{ matrix.build_type }}
           path: |
@@ -169,7 +169,7 @@ jobs:
         spoofed: ["true","false"]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Setup need_upload
@@ -207,13 +207,13 @@ jobs:
           fi
         
       - name: Download Debug artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: ${{ steps.determine.outputs.title }}-debug
           path: .
 
       - name: Download Release artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: ${{ steps.determine.outputs.title }}-release
           path: .
@@ -221,7 +221,7 @@ jobs:
       - name: Bot session cache
         if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true'
         id: bot_session_cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: scripts/ksubot.session
           key: ${{ runner.os }}-bot-session
