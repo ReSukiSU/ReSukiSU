@@ -65,8 +65,6 @@ struct apk_path_hash {
     struct list_head list;
 };
 
-static struct list_head apk_path_hash_list = LIST_HEAD_INIT(apk_path_hash_list);
-
 struct my_dir_context {
     struct dir_context ctx;
     struct list_head *data_path_list;
@@ -101,6 +99,9 @@ FILLDIR_RETURN_TYPE my_actor(MY_ACTOR_CTX_ARG, const char *name, int namelen, lo
     struct my_dir_context *my_ctx = container_of(ctx, struct my_dir_context, ctx);
     char dirpath[DATA_PATH_LEN];
 
+    // we put the apk path we collected here
+    char *candidate_path = (char *)my_ctx->private_data;
+
     if (!my_ctx) {
         pr_err("Invalid context\n");
         return FILLDIR_ACTOR_STOP;
@@ -130,44 +131,13 @@ FILLDIR_RETURN_TYPE my_actor(MY_ACTOR_CTX_ARG, const char *name, int namelen, lo
         strncpy(data->dirpath, dirpath, DATA_PATH_LEN - 1);
         data->depth = my_ctx->depth - 1;
         list_add_tail(&data->list, my_ctx->data_path_list);
-    } else {
-        if ((namelen == 8) && (strncmp(name, "base.apk", namelen) == 0)) {
-            struct apk_path_hash *pos, *n;
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 8, 0)
-            unsigned int hash = full_name_hash(dirpath, strlen(dirpath));
-#else
-            unsigned int hash = full_name_hash(NULL, dirpath, strlen(dirpath));
-#endif
-            u8 signature_index = 0;
-            struct apk_path_hash *apk_data = NULL;
-            bool manager = is_manager_apk(dirpath, &signature_index);
+        return FILLDIR_ACTOR_CONTINUE;
+    }
 
-            list_for_each_entry (pos, &apk_path_hash_list, list) {
-                if (hash == pos->hash) {
-                    pos->exists = true;
-                    return FILLDIR_ACTOR_CONTINUE;
-                }
-            }
-
-            pr_info("Found new base.apk at path: %s\n", dirpath);
-
-            apk_data = kzalloc(sizeof(*apk_data), GFP_ATOMIC);
-            if (apk_data) {
-                apk_data->hash = hash;
-                apk_data->exists = true;
-                list_add_tail(&apk_data->list, &apk_path_hash_list);
-            }
-
-            if (manager) {
-                crown_manager(dirpath, my_ctx->private_data, signature_index);
-
-                // Manager found, clear APK cache list
-                list_for_each_entry_safe (pos, n, &apk_path_hash_list, list) {
-                    list_del(&pos->list);
-                    kfree(pos);
-                }
-            }
-        }
+    // now put this on candidate_path
+    if (d_type == DT_REG && !strncmp(name, "base.apk", 8)) {
+        snprintf(candidate_path, DATA_PATH_LEN, "%s/%.*s", my_ctx->parent_dir,
+                 namelen, name);
     }
 
     return FILLDIR_ACTOR_CONTINUE;
@@ -190,15 +160,13 @@ void search_manager(const char *path, int depth, struct list_head *uid_data)
 
     INIT_LIST_HEAD(&data_path_list);
 
-    // Initialize APK cache list
-    list_for_each_entry (pos, &apk_path_hash_list, list) {
-        pos->exists = false;
-    }
-
     // First depth
     strncpy(data.dirpath, path, DATA_PATH_LEN - 1);
     data.depth = depth;
     list_add_tail(&data.list, &data_path_list);
+
+    // we put the apk path we collected here
+    char candidate_path[DATA_PATH_LEN];
 
     for (i = depth; i >= 0; i--) {
         struct data_path *pos, *n;
@@ -208,10 +176,14 @@ void search_manager(const char *path, int depth, struct list_head *uid_data)
                 .ctx.actor = my_actor,
                 .data_path_list = &data_path_list,
                 .parent_dir = pos->dirpath,
-                .private_data = uid_data,
+                .private_data = candidate_path,
                 .depth = pos->depth,
             };
             struct file *file;
+            u8 signature_index = 0;
+
+            // make sure to clean buffer on every iteration
+            memset(candidate_path, 0, DATA_PATH_LEN);
 
             file = ksu_filp_open_compat(pos->dirpath, O_RDONLY | O_NOFOLLOW, 0);
             if (IS_ERR(file)) {
@@ -239,18 +211,27 @@ void search_manager(const char *path, int depth, struct list_head *uid_data)
 
             iterate_dir(file, &ctx.ctx);
             filp_close(file, NULL);
+
+            // ^ oh so thats the issue!
+            // we were calling is_manager_apk inside iterate_dir
+            // now we defer file opens after iterate_dir
+            // this way we dont open apks while inside that
+            if (!strstarts(candidate_path, "/data/ap"))
+                goto skip_iterate;
+
+            bool is_manager = is_manager_apk(candidate_path, &signature_index);
+            pr_info("Found new base.apk at path: %s, is_manager: %d\n",
+                    candidate_path, is_manager);
+
+            if (likely(!is_manager))
+                goto skip_iterate;
+
+            crown_manager(candidate_path, uid_data, signature_index);
+
         skip_iterate:
             list_del(&pos->list);
             if (pos != &data)
                 kfree(pos);
-        }
-    }
-
-    // Remove stale cached APK entries
-    list_for_each_entry_safe (pos, n, &apk_path_hash_list, list) {
-        if (!pos->exists) {
-            list_del(&pos->list);
-            kfree(pos);
         }
     }
 }
