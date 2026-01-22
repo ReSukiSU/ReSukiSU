@@ -37,7 +37,6 @@ import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.Fence
 import androidx.compose.material.icons.filled.FolderOff
-import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
@@ -102,11 +101,11 @@ import com.resukisu.resukisu.ui.component.AboutDialog
 import com.resukisu.resukisu.ui.component.ConfirmResult
 import com.resukisu.resukisu.ui.component.DialogHandle
 import com.resukisu.resukisu.ui.component.KsuIsValid
-import com.resukisu.resukisu.ui.component.settings.DropdownWidget
 import com.resukisu.resukisu.ui.component.ksuIsValid
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.rememberCustomDialog
 import com.resukisu.resukisu.ui.component.rememberLoadingDialog
+import com.resukisu.resukisu.ui.component.settings.DropdownWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
 import com.resukisu.resukisu.ui.component.settings.SplicedColumnGroup
@@ -489,7 +488,6 @@ fun SettingsPage(navigator: DestinationsNavigator, bottomPadding: Dp, hazeState:
                                 exit = fadeOut() + shrinkVertically()
                             ) {
                                 SettingsSwitchWidget(
-                                    icon = Icons.Filled.FormatListNumbered,
                                     title = stringResource(R.string.use_webuix_eruda),
                                     description = stringResource(R.string.use_webuix_eruda_summary),
                                     checked = useWebUIXEruda,
@@ -531,19 +529,17 @@ fun SettingsPage(navigator: DestinationsNavigator, bottomPadding: Dp, hazeState:
                         )
                     }
 
-                    if (ksuIsValid()) {
+                    if (ksuIsValid() && isSuLogEnabled) {
                         item {
                             // 查看使用日志
-                            if (isSuLogEnabled) {
-                                SettingsJumpPageWidget(
-                                    icon = Icons.Filled.Visibility,
-                                    title = stringResource(R.string.log_viewer_view_logs),
-                                    description = stringResource(R.string.log_viewer_view_logs_summary),
-                                    onClick = {
-                                        navigator.navigate(LogViewerScreenDestination)
-                                    }
-                                )
-                            }
+                            SettingsJumpPageWidget(
+                                icon = Icons.Filled.Visibility,
+                                title = stringResource(R.string.log_viewer_view_logs),
+                                description = stringResource(R.string.log_viewer_view_logs_summary),
+                                onClick = {
+                                    navigator.navigate(LogViewerScreenDestination)
+                                }
+                            )
                         }
                     }
 
