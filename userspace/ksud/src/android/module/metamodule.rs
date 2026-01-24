@@ -273,7 +273,7 @@ pub fn exec_stage_script(stage: &str, block: bool) -> Result<()> {
     };
 
     info!("Executing metamodule {stage}.sh");
-    module::exec_script(&script_path, block)?;
+    module::exec_script(&script_path, block, defs::EXEC_STAGE_TIMEOUT)?;
     info!("Metamodule {stage}.sh executed successfully");
     Ok(())
 }

@@ -41,6 +41,8 @@ mod android {
     pub const KSU_BACKUP_FILE_PREFIX: &str = "ksu_backup_";
     pub const BACKUP_FILENAME: &str = "stock_image.sha1";
     pub const UMOUNT_CONFIG_PATH: &str = concatcp!(WORKING_DIR, ".umount");
+
+    pub const EXEC_STAGE_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(10);
 }
 
 pub const VERSION_CODE: &str = include_str!(concat!(env!("OUT_DIR"), "/VERSION_CODE"));
