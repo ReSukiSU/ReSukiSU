@@ -163,7 +163,6 @@
     <string name="settings_disable_su_summary">臨時禁止任何應用程式通過 su 命令獲取 Root 權限（現有嘅 Root 進程唔受影響）</string>
     <string name="module_install_multiple_confirm_with_names">確定要安裝以下 %1$d 個模組嗎？\n\n%2$s</string>
     <string name="more_settings">更多配置</string>
-    <string name="selinux">SELinux</string>
     <string name="selinux_enabled">強制執行</string>
     <string name="selinux_disabled">寬容模式</string>
     <string name="simple_mode">簡潔模式</string>
@@ -182,7 +181,6 @@
     <string name="theme_follow_system">跟隨系統</string>
     <string name="theme_light">淺色</string>
     <string name="theme_dark">深色</string>
-    <string name="manual_hook">Manual Hook</string>
     <string name="dynamic_color_title">動態顏色</string>
     <string name="dynamic_color_summary">使用系統主題嘅動態顏色</string>
     <string name="choose_theme_color">選擇主題色</string>
@@ -316,7 +314,6 @@
     <string name="kernel_flashing">核心刷寫</string>
     <!-- 分类相关 -->
     <string name="category_all_apps">全部</string>
-    <string name="category_root_apps">Root</string>
     <string name="category_custom_apps">自定義</string>
     <string name="category_default_apps">默認</string>
     <!-- 排序相关 -->
@@ -385,8 +382,6 @@
     <string name="susfs_path_label">路徑</string>
     <string name="susfs_path_placeholder">例如: /system/addon.d</string>
     <string name="susfs_no_paths_configured">暫冇 SuS 路徑配置</string>
-    <!-- SuSFS Umount Mode -->
-    <!-- SuSFS Run Umount -->
     <!-- SuSFS Reset Categories -->
     <string name="susfs_reset_paths_title">重置 SuS 路徑</string>
     <string name="susfs_reset_paths_message">這將清除所有 SuS 路徑配置，確定要繼續嗎？</string>
@@ -423,8 +418,6 @@
     <string name="show_more_module_info_summary">顯示額外嘅模組信息，如更新配置 URL 等</string>
     <string name="susfs_execution_location_label">執行位置</string>
     <string name="susfs_current_execution_location">當前執行位置：%s</string>
-    <string name="susfs_execution_location_service">Service</string>
-    <string name="susfs_execution_location_post_fs_data">Post-FS-Data</string>
     <string name="susfs_execution_location_service_description">喺系統服務啟動後執行</string>
     <string name="susfs_execution_location_post_fs_data_description">喺文件系統掛載後但系統完全啟動前執行,可能會導致循環重新啟動</string>
     <string name="susfs_slot_info_title">槽位信息</string>
@@ -568,5 +561,4 @@
     <!-- 确认安装相关字符串 -->
     <!-- SUS Map related strings -->
     <!-- Log Viewer -->
-    <!-- MiUI Uninstall Desc -->
 </resources>
