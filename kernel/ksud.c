@@ -617,10 +617,6 @@ static void ksu_handle_sys_read_fd(unsigned int fd)
         return;
     }
 
-    if (!is_init_rc(file)) {
-        return;
-    }
-
     ksu_handle_initrc(file);
     fput(file);
 }

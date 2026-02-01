@@ -145,11 +145,6 @@ int ksu_handle_umount(uid_t old_uid, uid_t new_uid)
 {
     struct umount_tw *tw;
 
-    // if there isn't any module mounted, just ignore it!
-    if (!ksu_module_mounted) {
-        return 0;
-    }
-
     if (!ksu_cred) {
         return 0;
     }
@@ -171,6 +166,11 @@ int ksu_handle_umount(uid_t old_uid, uid_t new_uid)
     // no need check zygote there, because we already check in setuid call
 
     if (!ksu_kernel_umount_enabled) { // in susfs's impl, it ignore ksu_kernel_umount feature, keep same behavior
+        goto do_susfs_logic;
+    }
+
+    // if there isn't any module mounted, just ignore it!
+    if (!ksu_module_mounted) {
         goto do_susfs_logic;
     }
 

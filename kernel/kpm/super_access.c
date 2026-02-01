@@ -253,10 +253,7 @@ int sukisu_super_access(const char *struct_name, const char *member_name,
 EXPORT_SYMBOL(sukisu_super_access);
 
 #define DYNAMIC_CONTAINER_OF(offset, member_ptr)                               \
-    ({                                                                         \
-        (offset != (size_t) - 1) ? (void *)((char *)(member_ptr) - offset) :   \
-                                   NULL;                                       \
-    })
+    ({ (offset != (size_t)-1) ? (void *)((char *)(member_ptr)-offset) : NULL; })
 
 /*
  * Dynamic container_of
