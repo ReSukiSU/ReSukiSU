@@ -106,6 +106,11 @@ pub fn on_post_data_fs() -> Result<()> {
         warn!("exec post-fs-data scripts failed: {e}");
     }
 
+    // exec lua script on post-fs-data
+    if let Err(e) = module::exec_stage_lua("post-fs-data",true,"kernelsu") {
+        warn!("Failed to exec post-fs-data lua: {}", e);
+    }
+
     // load system.prop
     if let Err(e) = module::load_system_prop() {
         warn!("load system.prop failed: {e}");
@@ -154,6 +159,12 @@ fn run_stage(stage: &str, block: bool) {
     if let Err(e) = module::exec_stage_script(stage, block) {
         warn!("Failed to exec {stage} scripts: {e}");
     }
+
+    // run lua stage script
+    if let Err(e) = module::exec_stage_lua(stage,block,"kernelsu") {
+        warn!("Failed to exec {stage} lua: {e}");
+    }
+
 }
 
 pub fn on_services() {
