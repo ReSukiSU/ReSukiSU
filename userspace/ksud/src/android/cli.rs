@@ -264,6 +264,15 @@ enum Module {
         id: String,
     },
 
+    /// module lua runner
+    #[cfg(all(target_os = "android", target_arch = "aarch64"))]
+    Lua {
+        // module id
+        id: String,
+        // lua function
+        function: String,
+    },
+
     /// list all modules
     List,
 
@@ -527,6 +536,10 @@ pub fn run() -> Result<()> {
                 Module::Enable { id } => module::enable_module(&id),
                 Module::Disable { id } => module::disable_module(&id),
                 Module::Action { id } => module::run_action(&id),
+                #[cfg(all(target_os = "android", target_arch = "aarch64"))]
+                Module::Lua { id, function } => {
+                    module::run_lua(&id, &function, false, true).map_err(|e| anyhow::anyhow!("{e}"))
+                }
                 Module::List => module::list_modules(),
                 Module::Config { command } => {
                     // Get module ID from environment variable

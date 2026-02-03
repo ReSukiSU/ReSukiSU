@@ -54,6 +54,9 @@ serde = { version = "1.0", features = ["derive"] }
 [target.'cfg(not(target_os = "android"))'.dependencies]
 env_logger = { version = "0.11.8", default-features = false }
 
+[target.'cfg(all(target_os = "android", target_arch = "aarch64"))'.dependencies]
+mlua = { version = "0.11.6", features = ["lua54", "vendored"] }
+
 [profile.release]
 strip = true
 opt-level = "z"
