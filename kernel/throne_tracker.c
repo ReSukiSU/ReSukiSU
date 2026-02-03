@@ -273,19 +273,29 @@ void track_throne(bool prune_only)
     loff_t line_start = 0;
     char buf[KSU_MAX_PACKAGE_NAME];
     bool need_search = false;
-    bool found_uninstall = false;
 
     // init uid list head
-    DECLARE_BITMAP(curr_app_id_map, MAX_APP_ID);
-    bitmap_zero(curr_app_id_map, MAX_APP_ID);
+    unsigned long *curr_app_id_map = NULL;
+    unsigned long *diff_map = NULL;
 
-    INIT_LIST_HEAD(&uid_list);
+    curr_app_id_map = bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
+    if (!curr_app_id_map) {
+        pr_err("track_throne: failed to allocate curr_app_id_map\n");
+        return;
+    }
+
+    diff_map = bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
+    if (!diff_map) {
+        pr_err("track_throne: failed to allocate diff_map\n");
+        bitmap_free(curr_app_id_map); // Free allocated memory when failed
+        return;
+    }
 
     fp = ksu_filp_open_compat(SYSTEM_PACKAGES_LIST_PATH, O_RDONLY, 0);
     if (IS_ERR(fp)) {
         pr_err("%s: open " SYSTEM_PACKAGES_LIST_PATH " failed: %ld\n", __func__,
                PTR_ERR(fp));
-        return;
+        goto out;
     }
 
     for (;;) {
@@ -344,8 +354,6 @@ void track_throne(bool prune_only)
     // run search_manager when new application installed
     mutex_lock(&app_list_lock);
 
-    DECLARE_BITMAP(diff_map, MAX_APP_ID);
-
     if (bitmap_andnot(diff_map, last_app_id_map, curr_app_id_map, MAX_APP_ID)) {
         int bit = -1;
         while ((bit = find_next_bit(diff_map, MAX_APP_ID, bit + 1)) <
@@ -388,6 +396,11 @@ out:
         list_del(&np->list);
         kfree(np);
     }
+
+    if (curr_app_id_map)
+        bitmap_free(curr_app_id_map);
+    if (diff_map)
+        bitmap_free(diff_map);
 }
 
 void ksu_throne_tracker_init(void)
