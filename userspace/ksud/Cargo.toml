@@ -6,7 +6,6 @@ edition = "2024"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-mlua = { version = "0.11.6", features = ["lua54","vendored"] }
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
 const_format = "0.2"
@@ -54,6 +53,9 @@ serde = { version = "1.0", features = ["derive"] }
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
 env_logger = { version = "0.11.8", default-features = false }
+
+[target.'cfg(all(target_os = "android", target_arch = "aarch64"))'.dependencies]
+mlua = { version = "0.11.6", features = ["lua54", "vendored"] }
 
 [profile.release]
 strip = true

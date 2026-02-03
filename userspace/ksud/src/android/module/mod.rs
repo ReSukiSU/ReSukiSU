@@ -290,18 +290,21 @@ pub fn exec_common_scripts(dir: &str, wait: bool) -> Result<()> {
     Ok(())
 }
 
+#[cfg(all(target_os = "android", target_arch = "aarch64"))]
 pub fn save_text<P: AsRef<Path>>(filename: P, content: &str) -> std::io::Result<()> {
     let _ = ensure_dir_exists("/data/adb/config");
     let path = format!("/data/adb/config/{}", filename.as_ref().display());
     fs::write(&path, content)
 }
 
+#[cfg(all(target_os = "android", target_arch = "aarch64"))]
 pub fn load_text<P: AsRef<Path>>(filename: P) -> std::io::Result<String> {
     let _ = ensure_dir_exists("/data/adb/config");
     let path = format!("/data/adb/config/{}", filename.as_ref().display());
     fs::read_to_string(path)
 }
 
+#[cfg(all(target_os = "android", target_arch = "aarch64"))]
 pub fn load_all_lua_modules(lua: &Lua) -> LuaResult<()> {
     let modules_dir = Path::new("/data/adb/modules");
 
@@ -358,6 +361,7 @@ pub fn load_all_lua_modules(lua: &Lua) -> LuaResult<()> {
     Ok(())
 }
 
+#[cfg(all(target_os = "android", target_arch = "aarch64"))]
 pub fn info_lua(lua: &Lua) -> LuaResult<Function> {
     lua.create_function(|_, msg: String| {
         info!("[Lua] {}", msg);
@@ -365,6 +369,7 @@ pub fn info_lua(lua: &Lua) -> LuaResult<Function> {
     })
 }
 
+#[cfg(all(target_os = "android", target_arch = "aarch64"))]
 pub fn warn_lua(lua: &Lua) -> LuaResult<Function> {
     lua.create_function(|_, msg: String| {
         warn!("[Lua] {}", msg);
@@ -372,12 +377,15 @@ pub fn warn_lua(lua: &Lua) -> LuaResult<Function> {
     })
 }
 
+#[cfg(all(target_os = "android", target_arch = "aarch64"))]
 pub fn install_module_lua(lua: &Lua) -> LuaResult<Function> {
     lua.create_function(|_, zip: String| {
         install_module(&zip)
             .map_err(|e| mlua::Error::external(format!("install_module failed: {}", e)))
     })
 }
+
+#[cfg(all(target_os = "android", target_arch = "aarch64"))]
 pub fn save_text_lua(lua: &Lua) -> LuaResult<Function> {
     lua.create_function(|_, (filename, content): (String, String)| {
         save_text(&filename, &content)
@@ -385,6 +393,8 @@ pub fn save_text_lua(lua: &Lua) -> LuaResult<Function> {
         Ok(())
     })
 }
+
+#[cfg(all(target_os = "android", target_arch = "aarch64"))]
 pub fn read_text_lua(lua: &Lua) -> LuaResult<Function> {
     lua.create_function(|_, filename: String| {
         let content = match load_text(&filename) {
@@ -396,6 +406,7 @@ pub fn read_text_lua(lua: &Lua) -> LuaResult<Function> {
     })
 }
 
+#[cfg(all(target_os = "android", target_arch = "aarch64"))]
 pub fn run_lua(id: &str, function: &str, on_each_module: bool, _wait: bool) -> mlua::Result<()> {
     let lua = unsafe { Lua::unsafe_new() };
 
@@ -727,6 +738,7 @@ pub fn uninstall_module(id: &str) -> Result<()> {
     Ok(())
 }
 
+#[cfg(all(target_os = "android", target_arch = "aarch64"))]
 pub fn exec_stage_lua(stage: &str, wait: bool, superkey: &str) -> Result<()> {
     let stage_safe = stage.replace('-', "_");
     run_lua(&superkey, &stage_safe, true, wait).map_err(|e| anyhow::anyhow!("{}", e))?;
@@ -737,13 +749,19 @@ pub fn run_action(id: &str) -> Result<()> {
     validate_module_id(id)?;
 
     let action_script_path = format!("/data/adb/modules/{id}/action.sh");
-    if Path::new(&action_script_path).exists() {
-        return exec_script(&action_script_path, true, defs::EXEC_STAGE_TIMEOUT);
-    } else {
-        //if no action.sh, try to run lua action
-        run_lua(&id, "action", false, true).map_err(|e| anyhow::anyhow!("{}", e))?;
-        Ok(())
+    #[cfg(all(target_os = "android", target_arch = "aarch64"))]
+    {
+        if Path::new(&action_script_path).exists() {
+            return exec_script(&action_script_path, true, defs::EXEC_STAGE_TIMEOUT);
+        } else {
+            //if no action.sh, try to run lua action
+            run_lua(&id, "action", false, true).map_err(|e| anyhow::anyhow!("{}", e))?;
+            Ok(())
+        }
     }
+
+    #[cfg(not(all(target_os = "android", target_arch = "aarch64")))]
+    exec_script(&action_script_path, true, defs::EXEC_STAGE_TIMEOUT)
 }
 
 pub fn enable_module(id: &str) -> Result<()> {
