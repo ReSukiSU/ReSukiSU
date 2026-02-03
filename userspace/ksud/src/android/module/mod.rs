@@ -19,6 +19,7 @@ use const_format::concatcp;
 use is_executable::is_executable;
 use java_properties::PropertiesIter;
 use log::{debug, info, warn};
+#[cfg(all(target_os = "android", target_arch = "aarch64"))]
 use mlua::{Function, Lua, Result as LuaResult, Table};
 use regex_lite::Regex;
 use wait_timeout::ChildExt;
