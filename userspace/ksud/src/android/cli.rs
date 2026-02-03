@@ -537,8 +537,9 @@ pub fn run() -> Result<()> {
                 Module::Disable { id } => module::disable_module(&id),
                 Module::Action { id } => module::run_action(&id),
                 #[cfg(all(target_os = "android", target_arch = "aarch64"))]
-                Module::Lua { id, function } => module::run_lua(&id, &function, false, true)
-                    .map_err(|e| anyhow::anyhow!("{}", e)),
+                Module::Lua { id, function } => {
+                    module::run_lua(&id, &function, false, true).map_err(|e| anyhow::anyhow!("{e}"))
+                }
                 Module::List => module::list_modules(),
                 Module::Config { command } => {
                     // Get module ID from environment variable

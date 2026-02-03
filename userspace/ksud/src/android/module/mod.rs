@@ -308,49 +308,47 @@ pub fn load_text<P: AsRef<Path>>(filename: P) -> std::io::Result<String> {
 pub fn load_all_lua_modules(lua: &Lua) -> LuaResult<()> {
     let modules_dir = Path::new("/data/adb/modules");
 
-    let modules: Table = match lua.globals().get("modules") {
-        Ok(t) => t,
-        Err(_) => {
-            let t = lua.create_table()?;
-            lua.globals().set("modules", t.clone())?;
-            t
-        }
+    let modules: Table = if let Ok(t) = lua.globals().get("modules") {
+        t
+    } else {
+        let t = lua.create_table()?;
+        lua.globals().set("modules", t.clone())?;
+        t
     };
 
     if modules_dir.exists() {
-        for entry in
-            fs::read_dir(modules_dir).unwrap_or_else(|_| fs::read_dir("/dev/null").unwrap())
+        for entry in fs::read_dir(modules_dir)
+            .unwrap_or_else(|_| fs::read_dir("/dev/null").unwrap())
+            .flatten()
         {
-            if let Ok(entry) = entry {
-                let path = entry.path();
-                if path.is_dir() {
-                    let id = path.file_name().unwrap().to_string_lossy().to_string();
-                    let package: Table = lua.globals().get("package")?;
-                    let old_cpath: String = package.get("cpath")?;
-                    let new_cpath = format!("{}/?.so;{}", path.to_string_lossy(), old_cpath);
-                    package.set("cpath", new_cpath)?;
+            let path = entry.path();
+            if path.is_dir() {
+                let id = path.file_name().unwrap().to_string_lossy().to_string();
+                let package: Table = lua.globals().get("package")?;
+                let old_cpath: String = package.get("cpath")?;
+                let new_cpath = format!("{}/?.so;{old_cpath}", path.to_string_lossy());
+                package.set("cpath", new_cpath)?;
 
-                    let lua_file = path.join(format!("{}.lua", id));
+                let lua_file = path.join(format!("{id}.lua"));
 
-                    if lua_file.exists() {
-                        match fs::read_to_string(&lua_file) {
-                            Ok(code) => {
-                                match lua
-                                    .load(&code)
-                                    .set_name(&*lua_file.to_string_lossy())
-                                    .eval::<Table>()
-                                {
-                                    Ok(module) => {
-                                        modules.set(id.clone(), module.clone())?;
-                                    }
-                                    Err(e) => {
-                                        warn!("Failed to eval Lua {}: {}", lua_file.display(), e);
-                                    }
+                if lua_file.exists() {
+                    match fs::read_to_string(&lua_file) {
+                        Ok(code) => {
+                            match lua
+                                .load(&code)
+                                .set_name(&*lua_file.to_string_lossy())
+                                .eval::<Table>()
+                            {
+                                Ok(module) => {
+                                    modules.set(id.clone(), module.clone())?;
+                                }
+                                Err(e) => {
+                                    warn!("Failed to eval Lua {}: {}", lua_file.display(), e);
                                 }
                             }
-                            Err(e) => {
-                                warn!("Failed to read Lua {}: {}", lua_file.display(), e);
-                            }
+                        }
+                        Err(e) => {
+                            warn!("Failed to read Lua {}: {e}", lua_file.display());
                         }
                     }
                 }
@@ -364,7 +362,7 @@ pub fn load_all_lua_modules(lua: &Lua) -> LuaResult<()> {
 #[cfg(all(target_os = "android", target_arch = "aarch64"))]
 pub fn info_lua(lua: &Lua) -> LuaResult<Function> {
     lua.create_function(|_, msg: String| {
-        info!("[Lua] {}", msg);
+        info!("[Lua] {msg}");
         Ok(())
     })
 }
@@ -372,7 +370,7 @@ pub fn info_lua(lua: &Lua) -> LuaResult<Function> {
 #[cfg(all(target_os = "android", target_arch = "aarch64"))]
 pub fn warn_lua(lua: &Lua) -> LuaResult<Function> {
     lua.create_function(|_, msg: String| {
-        warn!("[Lua] {}", msg);
+        warn!("[Lua] {msg}");
         Ok(())
     })
 }
@@ -381,7 +379,7 @@ pub fn warn_lua(lua: &Lua) -> LuaResult<Function> {
 pub fn install_module_lua(lua: &Lua) -> LuaResult<Function> {
     lua.create_function(|_, zip: String| {
         install_module(&zip)
-            .map_err(|e| mlua::Error::external(format!("install_module failed: {}", e)))
+            .map_err(|e| mlua::Error::external(format!("install_module failed: {e}")))
     })
 }
 
@@ -389,7 +387,7 @@ pub fn install_module_lua(lua: &Lua) -> LuaResult<Function> {
 pub fn save_text_lua(lua: &Lua) -> LuaResult<Function> {
     lua.create_function(|_, (filename, content): (String, String)| {
         save_text(&filename, &content)
-            .map_err(|e| mlua::Error::external(format!("save filed: {}", e)))?;
+            .map_err(|e| mlua::Error::external(format!("save filed: {e}")))?;
         Ok(())
     })
 }
@@ -400,7 +398,7 @@ pub fn read_text_lua(lua: &Lua) -> LuaResult<Function> {
         let content = match load_text(&filename) {
             Ok(s) => s,
             Err(ref e) if e.kind() == std::io::ErrorKind::NotFound => String::new(),
-            Err(e) => return Err(mlua::Error::external(format!("read failed: {}", e))),
+            Err(e) => return Err(mlua::Error::external(format!("read failed: {e}"))),
         };
         Ok(content)
     })
@@ -741,7 +739,7 @@ pub fn uninstall_module(id: &str) -> Result<()> {
 #[cfg(all(target_os = "android", target_arch = "aarch64"))]
 pub fn exec_stage_lua(stage: &str, wait: bool, superkey: &str) -> Result<()> {
     let stage_safe = stage.replace('-', "_");
-    run_lua(&superkey, &stage_safe, true, wait).map_err(|e| anyhow::anyhow!("{}", e))?;
+    run_lua(superkey, &stage_safe, true, wait).map_err(|e| anyhow::anyhow!("{e}"))?;
     Ok(())
 }
 
@@ -752,11 +750,10 @@ pub fn run_action(id: &str) -> Result<()> {
     #[cfg(all(target_os = "android", target_arch = "aarch64"))]
     {
         if Path::new(&action_script_path).exists() {
-            return exec_script(&action_script_path, true, defs::EXEC_STAGE_TIMEOUT);
+            exec_script(&action_script_path, true, defs::EXEC_STAGE_TIMEOUT)
         } else {
             //if no action.sh, try to run lua action
-            run_lua(&id, "action", false, true).map_err(|e| anyhow::anyhow!("{}", e))?;
-            Ok(())
+            run_lua(id, "action", false, true).map_err(|e| anyhow::anyhow!("{e}"))
         }
     }
 
