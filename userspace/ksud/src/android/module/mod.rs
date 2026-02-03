@@ -230,7 +230,7 @@ pub fn exec_script<T: AsRef<Path>>(path: T, wait: bool, timeout: Duration) -> Re
         .arg(path.as_ref())
         .envs(get_common_script_envs());
 
-    // Set KSU_MODULE environment variable if module_id was validated successfully 
+    // Set KSU_MODULE environment variable if module_id was validated successfully
     if let Some(id) = validated_module_id {
         command = command.env("KSU_MODULE", id);
     }
