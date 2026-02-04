@@ -121,9 +121,13 @@ struct ksu_enable_kpm_cmd {
     __u8 enabled; // Output: true if KPM is enabled
 };
 
+#define DYNAMIC_MANAGER_OP_SET 0
+#define DYNAMIC_MANAGER_OP_GET 1
+#define DYNAMIC_MANAGER_OP_CLEAR 2
 struct ksu_dynamic_manager_cmd {
-    struct dynamic_manager_user_config
-        config; // Input/Output: dynamic manager config
+    unsigned int operation;
+    unsigned int size;
+    char hash[65];
 };
 
 struct ksu_get_managers_cmd {

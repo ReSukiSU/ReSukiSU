@@ -278,31 +278,31 @@ put_task:
     return true;
 }
 
-int ksu_handle_dynamic_manager(struct dynamic_manager_user_config *config)
+int ksu_handle_dynamic_manager(struct ksu_dynamic_manager_cmd *cmd)
 {
     unsigned long flags;
     int ret = 0;
     int i;
 
-    if (!config) {
+    if (!cmd) {
         return -EINVAL;
     }
 
-    switch (config->operation) {
+    switch (cmd->operation) {
     case DYNAMIC_MANAGER_OP_SET:
-        if (config->size < 0x100 || config->size > 0x1000) {
-            pr_err("invalid size: 0x%x\n", config->size);
+        if (cmd->size < 0x100 || cmd->size > 0x1000) {
+            pr_err("invalid size: 0x%x\n", cmd->size);
             return -EINVAL;
         }
 
-        if (strlen(config->hash) != 64) {
-            pr_err("invalid hash length: %zu\n", strlen(config->hash));
+        if (strlen(cmd->hash) != 64) {
+            pr_err("invalid hash length: %zu\n", strlen(cmd->hash));
             return -EINVAL;
         }
 
         // Validate hash format
         for (i = 0; i < 64; i++) {
-            char c = config->hash[i];
+            char c = cmd->hash[i];
             if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f'))) {
                 pr_err("invalid hash character at position %d: %c\n", i, c);
                 return -EINVAL;
@@ -314,29 +314,27 @@ int ksu_handle_dynamic_manager(struct dynamic_manager_user_config *config)
                 DYNAMIC_MANAGER_SIGNATURE_INDEX_MAGIC);
         }
 
-        dynamic_manager.size = config->size;
+        dynamic_manager.size = cmd->size;
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)
-        strscpy(dynamic_manager.hash, config->hash,
-                sizeof(dynamic_manager.hash));
+        strscpy(dynamic_manager.hash, cmd->hash, sizeof(dynamic_manager.hash));
 #else
-        strlcpy(dynamic_manager.hash, config->hash,
-                sizeof(dynamic_manager.hash));
+        strlcpy(dynamic_manager.hash, cmd->hash, sizeof(dynamic_manager.hash));
 #endif
         dynamic_manager.is_set = 1;
 
         save_dynamic_manager_and_track_throne();
         pr_info(
             "dynamic manager updated: size=0x%x, hash=%.16s... (multi-manager enabled)\n",
-            config->size, config->hash);
+            cmd->size, cmd->hash);
         break;
 
     case DYNAMIC_MANAGER_OP_GET:
         if (dynamic_manager.is_set) {
-            config->size = dynamic_manager.size;
+            cmd->size = dynamic_manager.size;
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)
-            strscpy(config->hash, dynamic_manager.hash, sizeof(config->hash));
+            strscpy(cmd->hash, dynamic_manager.hash, sizeof(cmd->hash));
 #else
-            strlcpy(config->hash, dynamic_manager.hash, sizeof(config->hash));
+            strlcpy(cmd->hash, dynamic_manager.hash, sizeof(cmd->hash));
 #endif
             ret = 0;
         } else {
@@ -363,7 +361,7 @@ int ksu_handle_dynamic_manager(struct dynamic_manager_user_config *config)
         break;
 
     default:
-        pr_err("Invalid dynamic manager operation: %d\n", config->operation);
+        pr_err("Invalid dynamic manager operation: %d\n", cmd->operation);
         return -EINVAL;
     }
 

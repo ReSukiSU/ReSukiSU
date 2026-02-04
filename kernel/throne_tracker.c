@@ -2,6 +2,7 @@
 #include <linux/fs.h>
 #include <linux/list.h>
 #include <linux/slab.h>
+#include <linux/bitmap.h>
 #include <linux/string.h>
 #include <linux/types.h>
 #include <linux/version.h>
@@ -18,7 +19,7 @@
 #include "dynamic_manager.h"
 
 #define SYSTEM_PACKAGES_LIST_PATH "/data/system/packages.list"
-#define MAX_APP_ID 20000 // FIRST_APPLICATION_UID - LAST_APPLICATION_UID = 19999
+#define MAX_APP_ID 10000 // FIRST_APPLICATION_UID - LAST_APPLICATION_UID = 19999
 
 struct uid_data {
     struct list_head list;
@@ -26,7 +27,7 @@ struct uid_data {
     char package[KSU_MAX_PACKAGE_NAME];
 };
 
-static DECLARE_BITMAP(last_app_id_map, MAX_APP_ID);
+static unsigned long *last_app_id_map = NULL;
 static DEFINE_MUTEX(app_list_lock);
 
 static void crown_manager(const char *apk, struct list_head *uid_data,
@@ -274,22 +275,29 @@ void track_throne(bool prune_only)
     char buf[KSU_MAX_PACKAGE_NAME];
     bool need_search = false;
 
-    // init uid list head
+    // init uid list head, bitmap
     unsigned long *curr_app_id_map = NULL;
     unsigned long *diff_map = NULL;
 
-    curr_app_id_map = bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
+    mutex_lock(&app_list_lock);
+    if (unlikely(!last_app_id_map)) {
+        last_app_id_map = ksu_bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
+    }
+    mutex_unlock(&app_list_lock);
+
+    curr_app_id_map = ksu_bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
     if (!curr_app_id_map) {
         pr_err("track_throne: failed to allocate curr_app_id_map\n");
         return;
     }
 
-    diff_map = bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
+    diff_map = ksu_bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
     if (!diff_map) {
         pr_err("track_throne: failed to allocate diff_map\n");
-        bitmap_free(curr_app_id_map); // Free allocated memory when failed
+        ksu_bitmap_free(curr_app_id_map); // Free allocated memory when failed
         return;
     }
+    INIT_LIST_HEAD(&uid_list);
 
     fp = ksu_filp_open_compat(SYSTEM_PACKAGES_LIST_PATH, O_RDONLY, 0);
     if (IS_ERR(fp)) {
@@ -338,8 +346,9 @@ void track_throne(bool prune_only)
 
         u16 appid = res % PER_USER_RANGE;
 
-        if (appid < MAX_APP_ID) {
-            set_bit(appid, curr_app_id_map);
+        if (appid >= FIRST_APPLICATION_UID &&
+            appid < (FIRST_APPLICATION_UID + MAX_APP_ID)) {
+            set_bit(appid - FIRST_APPLICATION_UID, curr_app_id_map);
         }
         // reset line start
         line_start = pos;
@@ -358,14 +367,15 @@ void track_throne(bool prune_only)
         int bit = -1;
         while ((bit = find_next_bit(diff_map, MAX_APP_ID, bit + 1)) <
                MAX_APP_ID) {
+            u16 appid = bit + FIRST_APPLICATION_UID;
             // we check the uninstalled app is manager or not
             // if it is manager, unregister its appid,
             // because it is invalid for now,
             // if keep them alive, we may grant unknown app manager privillage
-            if (ksu_is_manager_appid(bit)) {
+            if (ksu_is_manager_appid(appid)) {
                 pr_info("Manager APK removed, invalidate previous App ID: %d\n",
-                        bit);
-                ksu_unregister_manager(bit);
+                        appid);
+                ksu_unregister_manager(appid);
             }
         }
     }
@@ -398,9 +408,9 @@ out:
     }
 
     if (curr_app_id_map)
-        bitmap_free(curr_app_id_map);
+        ksu_bitmap_free(curr_app_id_map);
     if (diff_map)
-        bitmap_free(diff_map);
+        ksu_bitmap_free(diff_map);
 }
 
 void ksu_throne_tracker_init(void)

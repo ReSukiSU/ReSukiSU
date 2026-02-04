@@ -685,11 +685,11 @@ static int do_dynamic_manager(void __user *arg)
         return -EFAULT;
     }
 
-    int ret = ksu_handle_dynamic_manager(&cmd.config);
+    int ret = ksu_handle_dynamic_manager(&cmd);
     if (ret)
         return ret;
 
-    if (cmd.config.operation == DYNAMIC_MANAGER_OP_GET &&
+    if (cmd.operation == DYNAMIC_MANAGER_OP_GET &&
         copy_to_user(arg, &cmd, sizeof(cmd))) {
         pr_err("dynamic_manager: copy_to_user failed\n");
         return -EFAULT;

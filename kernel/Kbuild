@@ -31,7 +31,8 @@ kernelsu-objs += selinux/selinux.o
 kernelsu-objs += selinux/sepolicy.o
 kernelsu-objs += selinux/rules.o
 
-ccflags-y += -Wno-implicit-function-declaration -Wno-strict-prototypes -Wno-int-conversion
+ccflags-y += -Wno-implicit-function-declaration -Wno-strict-prototypes 
+ccflags-y += $(call cc-disable-warning, int-conversion)
 ccflags-y += -Wno-declaration-after-statement -Wno-unused-function -Wno-unused-variable -Wno-missing-braces
 ccflags-y += -Wno-int-to-pointer-cast -Wno-declaration-after-statement
 
@@ -211,6 +212,13 @@ endif
 ifeq ($(shell grep -q "struct proc_ops " $(srctree)/include/linux/proc_fs.h; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: proc_ops found)
 ccflags-y += -DKSU_COMPAT_HAS_PROC_OPS
+endif
+
+# Bitmap zalloc
+# https://github.com/torvalds/linux/commit/c42b65e363ce97a828f81b59033c3558f8fa7f70
+ifeq ($(shell grep -q "bitmap_zalloc" $(srctree)/include/linux/bitmap.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: bitmap_zalloc found)
+ccflags-y += -DKSU_COMPAT_HAS_BITMAP_ALLOC_HELPER
 endif
 
 # Custom Signs

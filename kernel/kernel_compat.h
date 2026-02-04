@@ -108,4 +108,19 @@ extern void *ksu_compat_kvrealloc(const void *p, size_t oldsize, size_t newsize,
                                   gfp_t flags);
 #endif
 
+#ifdef KSU_COMPAT_HAS_BITMAP_ALLOC_HELPER
+#define ksu_bitmap_alloc bitmap_alloc
+#define ksu_bitmap_zalloc bitmap_zalloc
+#define ksu_bitmap_free bitmap_free
+#else
+// for kernel not support, impl by ourselves
+/*
+ * Allocation and deallocation of bitmap.
+ * Provided in kernel_compat.c to avoid circular dependency.
+ */
+extern unsigned long *ksu_bitmap_alloc(unsigned int nbits, gfp_t flags);
+extern unsigned long *ksu_bitmap_zalloc(unsigned int nbits, gfp_t flags);
+extern void ksu_bitmap_free(const unsigned long *bitmap);
+#endif
+
 #endif

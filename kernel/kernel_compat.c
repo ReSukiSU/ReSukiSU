@@ -19,6 +19,7 @@
 #include <linux/errno.h>
 #include <linux/cred.h>
 #include <linux/lsm_hooks.h>
+#include <linux/bitmap.h>
 
 extern int install_session_keyring_to_cred(struct cred *, struct key *);
 struct key *init_session_keyring = NULL;
@@ -192,5 +193,24 @@ void *ksu_compat_kvrealloc(const void *p, size_t oldsize, size_t newsize,
     memcpy(newp, p, oldsize);
     kvfree(p);
     return newp;
+}
+#endif
+
+#ifndef KSU_COMPAT_HAS_BITMAP_ALLOC_HELPER
+// kernel below 4.19 maybe not have 3 helper, but impl that is very easy
+// copy from https://github.com/torvalds/linux/commit/c42b65e363ce97a828f81b59033c3558f8fa7f70
+unsigned long *ksu_bitmap_alloc(unsigned int nbits, gfp_t flags)
+{
+    return kmalloc_array(BITS_TO_LONGS(nbits), sizeof(unsigned long), flags);
+}
+
+unsigned long *ksu_bitmap_zalloc(unsigned int nbits, gfp_t flags)
+{
+    return ksu_bitmap_alloc(nbits, flags | __GFP_ZERO);
+}
+
+void ksu_bitmap_free(const unsigned long *bitmap)
+{
+    kfree(bitmap);
 }
 #endif
