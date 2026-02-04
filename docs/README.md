@@ -4,7 +4,7 @@
 
 **English** | [简体中文](./zh/README.md)
 
-A based-on [`SukiSU-Ultra/SukiSU-Ultra`](https://github.com/SukiSU-Ultra/SukiSU-Ultra) fork, forked from [`tiann/KernelSU`](https://github.com/tiann/KernelSU), and added some interesting changes.
+A based-on [`SukiSU-Ultra/SukiSU-Ultra`](https://github.com/SukiSU-Ultra/SukiSU-Ultra) fork, added some interesting changes, also make it more stable and build easily.
 
 [![Latest release](https://img.shields.io/github/v/release/ReSukiSU/ReSukiSU?label=Release&logo=github)](https://github.com/ReSukiSU/ReSukiSU/releases/latest)
 [![Channel](https://img.shields.io/badge/Follow-Telegram-blue.svg?logo=telegram)](https://t.me/ReSukisu)
@@ -34,7 +34,7 @@ A based-on [`SukiSU-Ultra/SukiSU-Ultra`](https://github.com/SukiSU-Ultra/SukiSU-
 ## Integration
 
 ```sh
-curl -LSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash -s builtin
+curl -LSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash
 ```
 
 ## Translation
