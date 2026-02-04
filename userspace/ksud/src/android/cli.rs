@@ -9,7 +9,7 @@ use log::LevelFilter;
 use crate::android::susfs;
 use crate::{
     android::{
-        debug, feature, init_event, ksucalls,
+        debug, dynamic_manager, feature, init_event, ksucalls,
         module::{self, module_config},
         profile, sepolicy, su, umount, utils,
     },
@@ -409,6 +409,11 @@ enum Kernel {
         #[command(subcommand)]
         command: UmountOp,
     },
+    /// Manage dynamic manager
+    DynamicManager {
+        #[command(subcommand)]
+        command: DynamicManagerOp,
+    },
     /// Notify that module is mounted
     NotifyModuleMounted,
 }
@@ -436,6 +441,22 @@ enum Umount {
     Apply,
     /// Clear custom umount paths (wipe kernel list)
     ClearCustom,
+}
+
+#[derive(clap::Subcommand, Debug)]
+enum DynamicManagerOp {
+    /// Get the signature of the current dynamic manager (size+hash)
+    Get,
+    /// Set the signature of the dynamic manager
+    Set {
+        /// the signature size
+        size: u32,
+        /// the signature hash
+        #[arg(value_parser = dynamic_manager::parse_hash)]
+        hash: [u8; 65],
+    },
+    /// Clear the dynamic manager
+    Clear,
 }
 
 #[derive(clap::Subcommand, Debug)]
@@ -742,6 +763,15 @@ pub fn run() -> Result<()> {
                 UmountOp::Add { mnt, flags } => ksucalls::umount_list_add(&mnt, flags),
                 UmountOp::Del { mnt } => ksucalls::umount_list_del(&mnt),
                 UmountOp::Wipe => ksucalls::umount_list_wipe().map_err(Into::into),
+            },
+            Kernel::DynamicManager { command } => match command {
+                DynamicManagerOp::Set { size, hash } => dynamic_manager::set(size, hash),
+                DynamicManagerOp::Get => {
+                    let (size, hash) = ksucalls::dynamic_manager_get()?;
+                    println!("size: {}, hash: {}", size, String::from_utf8_lossy(&hash));
+                    Ok(())
+                }
+                DynamicManagerOp::Clear => ksucalls::dynamic_manager_clear(),
             },
             Kernel::NotifyModuleMounted => {
                 ksucalls::report_module_mounted();

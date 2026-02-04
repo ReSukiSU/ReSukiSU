@@ -7,7 +7,7 @@ use log::{info, warn};
 use crate::android::kpm;
 use crate::{
     android::{
-        ksucalls,
+        dynamic_manager, ksucalls,
         module::{self, handle_updated_modules, metamodule, prune_modules},
         restorecon,
         utils::{self, is_safe_mode},
@@ -46,6 +46,9 @@ pub fn on_post_data_fs() -> Result<()> {
         // Then exec common post-fs-data scripts
         if let Err(e) = crate::android::module::exec_common_scripts("post-fs-data.d", true) {
             warn!("exec common post-fs-data scripts failed: {e}");
+        }
+        if let Err(e) = dynamic_manager::booted_load() {
+            warn!("set dynamic manager failed: {e}");
         }
     }
 
