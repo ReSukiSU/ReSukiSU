@@ -36,7 +36,7 @@ pub fn booted_load() -> Result<()> {
 
     let json: Config = serde_json::from_str(&buf)?;
     let Ok(hash) = json.hash_bytes() else {
-        return Ok({});
+        return Ok(());
     };
 
     ksucalls::dynamic_manager_set(json.size, hash)?;
@@ -47,7 +47,7 @@ pub fn parse_hash(s: &str) -> Result<[u8; 65], String> {
     let bytes = s.as_bytes();
 
     if bytes.len() != 65 {
-        return Err(format!("Incorrect hash"));
+        return Err("Incorrect hash".to_string());
     }
 
     let mut hash = [0u8; 65];
