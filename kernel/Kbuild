@@ -43,9 +43,7 @@ obj-$(CONFIG_KSU) += kernelsu.o
 
 obj-$(CONFIG_KPM) += kpm/
 
-REPO_OWNER := ReSukiSU
 REPO_NAME := ReSukiSU
-REPO_BRANCH := main
 KSU_VERSION_API := 4.1.0
 
 GIT_BIN := /usr/bin/env PATH="$$PATH":/usr/bin:/usr/local/bin git
