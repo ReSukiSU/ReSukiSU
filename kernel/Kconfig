@@ -14,6 +14,19 @@ config KSU_DEBUG
 	  help
 		Enable KernelSU debug mode.
 
+config KSU_FULL_NAME_FORMAT
+          string "KernelSU Full name generate format"
+          depends on KSU
+          default "%TAG_NAME%-%COMMIT_SHA%-%REPO_NAME%@%BRANCH_NAME%"
+          help
+            Change the build time full name generate format
+            It can display in kernelsu manager "version"
+            There have some placeholder
+            %TAG_NAME%    = this branch latest tag name
+            %COMMIT_SHA%  = Git HEAD's sha256
+            %REPO_NAME%   = Project name
+            %BRANCH_NAME% = Git this branch's name
+
 config KSU_ALLOWLIST_WORKAROUND
 	bool "KernelSU Session Keyring Init workaround"
 	depends on KSU
