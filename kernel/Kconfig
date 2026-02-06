@@ -17,7 +17,7 @@ config KSU_DEBUG
 config KSU_FULL_NAME_FORMAT
           string "KernelSU Full name generate format"
           depends on KSU
-          default "%TAG_NAME%-%COMMIT_SHA%-%REPO_NAME%@%BRANCH_NAME%"
+          default "%TAG_NAME%-%COMMIT_SHA%@%REPO_NAME%"
           help
             Change the build time full name generate format
             It can display in kernelsu manager "version"
