@@ -24,7 +24,6 @@ apksign = "1.4"
 compose-material3 = "1.5.0-alpha09"
 compose-ui = "1.9.4"
 documentfile = "1.1.0"
-mmrl = "2bb00b3c2b"
 ndk = "29.0.13599879-beta2"
 foundation = "1.9.4"
 
@@ -89,9 +88,4 @@ markdown = { group = "io.noties.markwon", name = "core", version.ref = "markdown
 lsposed-cxx = { module = "org.lsposed.libcxx:libcxx", version.ref = "ndk" }
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
 
-
-mmrl-webui = { group = "com.github.MMRLApp.MMRL", name = "webui", version.ref = "mmrl" }
-mmrl-platform = { group = "com.github.MMRLApp.MMRL", name = "platform", version.ref = "mmrl" }
-mmrl-ui = { group = "com.github.MMRLApp.MMRL", name = "ui", version.ref = "mmrl" }
-mmrl-hidden-api = { group = "com.github.MMRLApp.MMRL", name = "hidden-api", version.ref = "mmrl" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }

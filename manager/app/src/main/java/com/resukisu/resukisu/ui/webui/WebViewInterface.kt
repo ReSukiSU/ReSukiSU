@@ -11,9 +11,6 @@ import android.widget.Toast
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.dergoogler.mmrl.webui.interfaces.WXInterface
-import com.dergoogler.mmrl.webui.interfaces.WXOptions
-import com.dergoogler.mmrl.webui.model.JavaScriptInterface
 import com.resukisu.resukisu.ui.util.controlKpmModule
 import com.resukisu.resukisu.ui.util.createRootShell
 import com.resukisu.resukisu.ui.util.listKpmModules
@@ -29,21 +26,9 @@ import java.io.File
 import java.util.concurrent.CompletableFuture
 
 @Suppress("unused")
-class WebViewInterface(
-    wxOptions: WXOptions,
-) : WXInterface(wxOptions) {
-    override var name: String = "ksu"
-
-    val state get() = run {
-        if (this@WebViewInterface.context !is WebUIActivity) return@run null
-        val webUIActivity = this@WebViewInterface.context as WebUIActivity
-        webUIActivity.webUIState
-    }
-    val modDir get() = "/data/adb/modules/${modId.id}"
-
-    companion object {
-        fun factory() = JavaScriptInterface(WebViewInterface::class.java)
-    }
+class WebViewInterface(private val state: WebUIState) {
+    private val webView get() = state.webView!!
+    private val modDir get() = state.modDir
 
     @JavascriptInterface
     fun exec(cmd: String): String {
@@ -279,11 +264,7 @@ class WebViewInterface(
 
     @JavascriptInterface
     fun exit() {
-        if (state != null) {
-            state?.requestExit()
-        } else {
-            activity.finish() // in webuix mode, we directly exit activity
-        }
+        state.requestExit()
     }
 
     @JavascriptInterface

@@ -283,8 +283,6 @@
     <string name="show_kpm_info">Скрыть статус KPM</string>
     <string name="show_kpm_info_summary">Скрывать информацию и функции KPM на домашней странице и панели навигации</string>
     <!-- Webui X settings -->
-    <string name="use_webuix_eruda">Вставить Eruda в WebUI X</string>
-    <string name="use_webuix_eruda_summary">Вставьте консоль отладки в WebUI X для упрощения отладки. Для этого требуется включение веб-отладки.</string>
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">Изменить DPI</string>
     <string name="app_dpi_summary">Регулировка плотности экрана только для текущего приложения</string>

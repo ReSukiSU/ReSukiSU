@@ -280,8 +280,6 @@
     <string name="show_kpm_info">隱藏 KPM 功能</string>
     <string name="show_kpm_info_summary">喺主頁同底欄隱藏 KPM 相關功能同信息</string>
     <!-- Webui X settings -->
-    <string name="use_webuix_eruda">將 Eruda 注入 WebUI X</string>
-    <string name="use_webuix_eruda_summary">喺 WebUI X 中注入調試控制台，使調試更容易,需要啟用 WebView 調試</string>
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">應用 DPI</string>
     <string name="app_dpi_summary">僅調整當前應用嘅屏幕顯示密度</string>

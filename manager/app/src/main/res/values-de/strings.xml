@@ -275,8 +275,6 @@
     <string name="show_kpm_info">KPM-Funktion anzeigen</string>
     <string name="show_kpm_info_summary">Versteckt KPM-Informationen und Funktion in der Home- und Unterleiste</string>
     <!-- Webui X settings -->
-    <string name="use_webuix_eruda">Eruda in WebUI X injizieren</string>
-    <string name="use_webuix_eruda_summary">Fügen Sie eine Debug-Konsole in WebUI X ein, um das Debuggen zu vereinfachen. Benötigt Debugging im WebUI X.</string>
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">Angewendeter DPI</string>
     <string name="app_dpi_summary">Bildschirmanzahl nur für die aktuelle Anwendung anpassen</string>

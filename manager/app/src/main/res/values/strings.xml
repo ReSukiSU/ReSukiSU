@@ -314,13 +314,6 @@
     <string name="module_unavailable">Module %s is disabled, updating, or pending removal</string>
     <string name="select_default_webui_engine">Default WebUI engine</string>
     <string name="select_webui_engine_description">Select global default webui engine</string>
-    <string name="webui_engine_default">Follow default settings</string>
-    <string name="webui_engine_webuix" translatable="false">WebUI X</string>
-    <string name="webui_engine_ksu" translatable="false">KSU WebUI</string>
-    <string name="use_webuix_eruda">Inject Eruda into WebUI X</string>
-    <string name="use_webuix_eruda_summary">Inject a debug console into WebUI X to make debugging easier. Requires web debugging to be on</string>
-    <string name="config_modules_webui">Config modules webui engine</string>
-    <string name="config_modules_webui_description">"Specially config modules\'s webui engine"</string>
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">Applied DPI</string>
     <string name="app_dpi_summary">Adjust the screen display density for the current application only</string>

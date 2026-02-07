@@ -310,11 +310,6 @@
     <string name="module_unavailable">模块 %s 被禁用，待更新或待卸载</string>
     <string name="module_webui_alert">来自模块 %s 的消息</string>
     <string name="select_default_webui_engine">默认 WebUI 引擎</string>
-    <string name="webui_engine_default">遵守默认设置</string>
-    <string name="use_webuix_eruda">将 Eruda 注入 WebUI X</string>
-    <string name="use_webuix_eruda_summary">在 WebUI X 中注入调试控制台，使调试更容易,需要启用 WebView 调试</string>
-    <string name="config_modules_webui">配置 WebUI 引擎</string>
-    <string name="config_modules_webui_description">为各模块单独设置 WebUI 引擎</string>
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">应用 DPI</string>
     <string name="app_dpi_summary">仅调整当前应用的屏幕显示密度</string>

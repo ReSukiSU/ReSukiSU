@@ -1274,18 +1274,19 @@ fun FeatureStatusCard(
                 // 状态标签
                 Surface(
                     shape = RoundedCornerShape(6.dp),
-                    color = when {
-                        feature.isEnabled -> MaterialTheme.colorScheme.primary
-                        else -> Color.Gray
-                    }
+                    color =
+                        if (feature.isEnabled)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            Color.Gray,
                 ) {
                     Text(
-                        text = feature.statusText,
+                        text =
+                            if (feature.isEnabled)
+                                stringResource(R.string.susfs_feature_enabled)
+                            else
+                                stringResource(R.string.susfs_feature_disabled),
                         style = MaterialTheme.typography.labelLarge,
-                        color = when {
-                            feature.isEnabled -> MaterialTheme.colorScheme.onPrimary
-                            else -> Color.White
-                        },
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                     )
                 }

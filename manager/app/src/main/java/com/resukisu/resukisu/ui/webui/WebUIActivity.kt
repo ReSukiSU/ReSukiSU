@@ -23,7 +23,6 @@ import com.resukisu.resukisu.ui.theme.KernelSUTheme
 
 @SuppressLint("SetJavaScriptEnabled")
 class WebUIActivity : ComponentActivity() {
-    var webUIState : WebUIState? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
 

@@ -8,29 +8,29 @@ import android.content.pm.PackageInfo
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
-import com.dergoogler.mmrl.platform.Platform.Companion.context
+import androidx.core.content.edit
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.util.getRootShell
+import com.resukisu.resukisu.ui.util.getSuSFSFeatures
+import com.resukisu.resukisu.ui.util.getSuSFSVersion
+import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
 import com.topjohnwu.superuser.Shell
+import com.topjohnwu.superuser.io.SuFile
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import androidx.core.content.edit
-import com.resukisu.resukisu.ui.util.getRootShell
-import com.resukisu.resukisu.ui.util.getSuSFSVersion
-import com.resukisu.resukisu.ui.util.getSuSFSFeatures
-import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
-import com.topjohnwu.superuser.io.SuFile
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import org.json.JSONArray
-import org.json.JSONObject
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 /**
  * SuSFS 配置管理器
@@ -76,7 +76,6 @@ object SuSFSManager {
     data class EnabledFeature(
         val name: String,
         val isEnabled: Boolean,
-        val statusText: String = if (isEnabled) context.getString(R.string.susfs_feature_enabled) else context.getString(R.string.susfs_feature_disabled),
         val canConfigure: Boolean = false
     )
 
@@ -878,7 +877,7 @@ object SuSFSManager {
         return featureMap.map { (configKey, displayName) ->
             val isEnabled = enabledConfigs.contains(configKey)
 
-            val statusText = if (isEnabled) {
+            if (isEnabled) {
                 context.getString(R.string.susfs_feature_enabled)
             } else {
                 context.getString(R.string.susfs_feature_disabled)
@@ -886,7 +885,7 @@ object SuSFSManager {
 
             val canConfigure = displayName == context.getString(R.string.enable_log_feature_label)
 
-            EnabledFeature(displayName, isEnabled, statusText, canConfigure)
+            EnabledFeature(displayName, isEnabled, canConfigure)
         }.sortedBy { it.name }
     }
 
@@ -906,7 +905,6 @@ object SuSFSManager {
             EnabledFeature(
                 name = displayName,
                 isEnabled = false,
-                statusText = context.getString(R.string.susfs_feature_disabled),
                 canConfigure = displayName == context.getString(R.string.enable_log_feature_label)
             )
         }.sortedBy { it.name }

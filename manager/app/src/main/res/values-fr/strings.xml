@@ -275,8 +275,6 @@
     <string name="show_kpm_info">Afficher la fonction KPM</string>
     <string name="show_kpm_info_summary">Masque les informations et fonctions KPM dans la barre d\'accueil et en bas</string>
     <!-- Webui X settings -->
-    <string name="use_webuix_eruda">Injecter Eruda dans WebUI X</string>
-    <string name="use_webuix_eruda_summary">Injectez une console de débogage dans WebUI X pour faciliter le débogage. Nécessite que le débogage soit activé.</string>
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">DPI appliqué</string>
     <string name="app_dpi_summary">Ajuster la densité d\'affichage de l\'écran pour l\'application actuelle uniquement</string>

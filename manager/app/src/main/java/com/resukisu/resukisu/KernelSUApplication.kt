@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import coil.Coil
 import coil.ImageLoader
-import com.dergoogler.mmrl.platform.Platform
 import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
 import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
@@ -43,8 +42,6 @@ class KernelSUApplication : Application(), ViewModelStoreOwner {
             superUserViewModel.fetchAppList()
             moduleViewModel.fetchModuleList()
         }
-
-        Platform.setHiddenApiExemptions()
 
         val context = this
         val iconSize = resources.getDimensionPixelSize(android.R.dimen.app_icon_size)
