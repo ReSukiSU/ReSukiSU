@@ -1,0 +1,24 @@
+diff --git a/kernel/Kbuild b/kernel/Kbuild
+index 23822992..63d9f95b 100644
+--- a/kernel/Kbuild
++++ b/kernel/Kbuild
+@@ -77,6 +77,7 @@ KSU_VERSION_FULL := $(subst %TAG_NAME%,$(KSU_TAG_NAME),$(KSU_VERSION_FULL))
+ KSU_VERSION_FULL := $(subst %COMMIT_SHA%,$(KSU_COMMIT_SHA),$(KSU_VERSION_FULL))
+ KSU_VERSION_FULL := $(subst %REPO_NAME%,$(REPO_NAME),$(KSU_VERSION_FULL))
+ KSU_VERSION_FULL := $(subst %BRANCH_NAME%,$(KSU_BRANCH_NAME),$(KSU_VERSION_FULL))
++KSU_VERSION_FULL := $(subst %KSU_VERSION%,$(KSU_VERSION),$(KSU_VERSION_FULL))
+ 
+ $(info -- $(REPO_NAME) version code: $(KSU_VERSION))
+ $(info -- $(REPO_NAME) version name: $(KSU_VERSION_FULL))
+diff --git a/kernel/Kconfig b/kernel/Kconfig
+index b9d60592..8adfa1c3 100644
+--- a/kernel/Kconfig
++++ b/kernel/Kconfig
+@@ -26,6 +26,7 @@ config KSU_FULL_NAME_FORMAT
+             %COMMIT_SHA%  = Git HEAD's sha256
+             %REPO_NAME%   = Project name
+             %BRANCH_NAME% = Git this branch's name
++            %KSU_VERSION% = ksu version code
+ 
+ config KSU_ALLOWLIST_WORKAROUND
+ 	bool "KernelSU Session Keyring Init workaround"

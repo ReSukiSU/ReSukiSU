@@ -26,6 +26,7 @@ config KSU_FULL_NAME_FORMAT
             %COMMIT_SHA%  = Git HEAD's sha256
             %REPO_NAME%   = Project name
             %BRANCH_NAME% = Git this branch's name
+            %KSU_VERSION% = ksu version code
 
 config KSU_ALLOWLIST_WORKAROUND
 	bool "KernelSU Session Keyring Init workaround"
