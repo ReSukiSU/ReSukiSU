@@ -108,7 +108,8 @@ suspend fun getFeatureStatus(feature: String): String = withContext(Dispatchers.
 
 fun install() {
     val start = SystemClock.elapsedRealtime()
-    val result = execKsud("install", true)
+    val magiskboot = File(ksuApp.applicationInfo.nativeLibraryDir, "libmagiskboot.so").absolutePath
+    val result = execKsud("install --magiskboot $magiskboot", true)
     Log.w(TAG, "install result: $result, cost: ${SystemClock.elapsedRealtime() - start}ms")
 }
 
@@ -232,17 +233,26 @@ fun runModuleAction(
 }
 
 fun restoreBoot(
-    onStdout: (String) -> Unit, onStderr: (String) -> Unit
-): FlashResult {
-    val result = flashWithIO("${getKsuDaemonPath()} boot-restore --flash --stock", onStdout, onStderr)
-    return FlashResult(result)
+    onFinish: (Boolean, Int) -> Unit, onStdout: (String) -> Unit, onStderr: (String) -> Unit
+): Boolean {
+    val magiskboot = File(ksuApp.applicationInfo.nativeLibraryDir, "libmagiskboot.so")
+    val result = flashWithIO(
+        "${getKsuDaemonPath()} boot-restore -f --magiskboot $magiskboot",
+        onStdout,
+        onStderr
+    )
+    onFinish(result.isSuccess, result.code)
+    return result.isSuccess
 }
 
 fun uninstallPermanently(
-    onStdout: (String) -> Unit, onStderr: (String) -> Unit
-): FlashResult {
-    val result = flashWithIO("${getKsuDaemonPath()} uninstall", onStdout, onStderr)
-    return FlashResult(result)
+    onFinish: (Boolean, Int) -> Unit, onStdout: (String) -> Unit, onStderr: (String) -> Unit
+): Boolean {
+    val magiskboot = File(ksuApp.applicationInfo.nativeLibraryDir, "libmagiskboot.so")
+    val result =
+        flashWithIO("${getKsuDaemonPath()} uninstall --magiskboot $magiskboot", onStdout, onStderr)
+    onFinish(result.isSuccess, result.code)
+    return result.isSuccess
 }
 
 @Parcelize
@@ -274,10 +284,12 @@ fun installBoot(
         }
     }
 
-    var cmd = "boot-patch"
+    val magiskboot = File(ksuApp.applicationInfo.nativeLibraryDir, "libmagiskboot.so")
+    var cmd = "boot-patch --magiskboot ${magiskboot.absolutePath}"
 
     cmd += if (bootFile == null) {
-        " --flash"
+        // no boot.img, use -f to force install
+        " -f"
     } else {
         " -b ${bootFile.absolutePath}"
     }
