@@ -1,14 +1,12 @@
 pub mod metamodule;
 pub mod module_config;
 
-#[cfg(all(target_os = "android", target_arch = "aarch64"))]
-use std::fs;
 #[cfg(unix)]
 use std::os::unix::{prelude::PermissionsExt, process::CommandExt};
 use std::{
     collections::HashMap,
     env::var as env_var,
-    fs::{File, Permissions, canonicalize, copy, remove_dir_all, rename, set_permissions},
+    fs::{self, File, Permissions, canonicalize, copy, remove_dir_all, rename, set_permissions},
     io::Cursor,
     path::{Path, PathBuf},
     process::Command,
