@@ -34,7 +34,7 @@ A based-on [`SukiSU-Ultra/SukiSU-Ultra`](https://github.com/SukiSU-Ultra/SukiSU-
 ## Integration
 
 ```sh
-curl -LSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash
+curl -LSs "https://raw.githubusercontent.com/Begitdj/ReSukiSU/main/kernel/setup.sh" | bash
 ```
 
 ## Translation
