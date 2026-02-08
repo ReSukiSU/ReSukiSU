@@ -431,7 +431,7 @@ static struct ksu_file_wrapper *ksu_create_file_wrapper(struct file *fp)
     p->ops.iopoll = fp->f_op->iopoll ? ksu_wrapper_iopoll : NULL;
 #endif
 #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0)
-    p->ops.iterate_shared = fp->f_op->iterate ? ksu_wrapper_iterate : NULL;
+    p->ops.iterate_shared = fp->f_op->iterate_shared ? ksu_wrapper_iterate : NULL;
 #endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 7, 0)
     p->ops.iterate_shared =
