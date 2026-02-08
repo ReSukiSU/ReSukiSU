@@ -237,7 +237,6 @@ pub fn exec_metauninstall_script(module_id: &str) -> Result<()> {
     ensure!(
         result.status.success(),
         "Metamodule metauninstall.sh failed for module {module_id}, Err: {}",
-        String::from_utf8_lossy(&result.stdout),
         String::from_utf8_lossy(&result.stderr)
     );
 
@@ -262,7 +261,6 @@ pub fn exec_mount_script(module_dir: &str) -> Result<()> {
     ensure!(
         result.status.success(),
         "Metamodule mount script failed, Err: {}",
-        String::from_utf8_lossy(&result.stdout),
         String::from_utf8_lossy(&result.stderr)
     );
 
