@@ -307,7 +307,7 @@
     <string name="show_kpm_info_summary">在主页和底栏隐藏 KPM 相关功能和信息</string>
     <!-- WebUI settings -->
     <string name="no_such_module">模块 %s 不存在</string>
-    <string name="module_unavailable">模块 %s 被禁用，待更新或待卸载</string>
+    <string name="module_unavailable">模块 %s 被禁用或待卸载</string>
     <string name="module_webui_alert">来自模块 %s 的消息</string>
     <string name="select_default_webui_engine">默认 WebUI 引擎</string>
     <string name="webui_engine_default">遵守默认设置</string>

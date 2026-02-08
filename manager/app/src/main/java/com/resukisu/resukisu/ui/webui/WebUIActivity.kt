@@ -19,7 +19,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.ui.theme.KernelSUTheme
+import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel
 
 @SuppressLint("SetJavaScriptEnabled")
 class WebUIActivity : ComponentActivity() {
@@ -48,14 +51,16 @@ class WebUIActivity : ComponentActivity() {
 private fun MainContent(activity: ComponentActivity, onFinish: () -> Unit) {
     val moduleId = remember { activity.intent.getStringExtra("id") }
     val webUIState = remember { WebUIState() }
-
+    val moduleViewModel = viewModel<ModuleViewModel>(
+        viewModelStoreOwner = ksuApp
+    )
 
     LaunchedEffect(moduleId) {
         if (moduleId == null) {
             onFinish()
             return@LaunchedEffect
         }
-        prepareWebView(activity, moduleId, webUIState)
+        prepareWebView(activity, moduleId, webUIState, moduleViewModel)
     }
 
     DisposableEffect(Unit) {

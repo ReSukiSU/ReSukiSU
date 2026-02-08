@@ -19,8 +19,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -39,6 +42,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
@@ -54,7 +59,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.NavHostGraphSpec
 import com.ramcosta.composedestinations.utils.rememberDestinationsNavigator
 import com.resukisu.resukisu.Natives
-import com.resukisu.resukisu.ui.activity.component.BottomBar
+import com.resukisu.resukisu.ui.activity.component.NavigationBar
 import com.resukisu.resukisu.ui.activity.util.DisplayUtils
 import com.resukisu.resukisu.ui.activity.util.ThemeChangeContentObserver
 import com.resukisu.resukisu.ui.activity.util.ThemeUtils
@@ -74,6 +79,7 @@ import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
 import com.resukisu.resukisu.ui.webui.WebUIActivity
 import com.resukisu.resukisu.ui.webui.WebUIXActivity
 import com.resukisu.resukisu.ui.webui.initPlatform
+import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -377,26 +383,66 @@ fun MainScreen(navigator: DestinationsNavigator) {
         LocalHandlePageChange provides handlePageChange,
         LocalSelectedPage provides uiSelectedPage
     ) {
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            val isPortrait = maxWidth < maxHeight || (maxHeight / maxWidth > 1.4f)
+            MainScreenContent(
+                isPortrait = isPortrait,
+                pages = pages,
+                hazeState = hazeState,
+                navigator = navigator,
+                userScrollEnabled = userScrollEnabled,
+                pagerState = pagerState,
+            )
+        }
+    }
+}
+
+@Composable
+private fun MainScreenContent(
+    isPortrait: Boolean,
+    pages: List<BottomBarDestination>,
+    hazeState: HazeState?,
+    navigator: DestinationsNavigator,
+    userScrollEnabled: Boolean,
+    pagerState: PagerState
+) {
+    val content = @Composable { paddingBottom: Dp ->
+        HorizontalPager(
+            modifier = Modifier.fillMaxSize(),
+            state = pagerState,
+            beyondViewportPageCount = 2,
+            userScrollEnabled = userScrollEnabled,
+        ) { pageIndex ->
+            val destination = pages[pageIndex]
+            destination.direction(navigator, paddingBottom, hazeState)
+        }
+    }
+
+    if (isPortrait) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             bottomBar = {
-                BottomBar(pages, hazeState)
+                NavigationBar(
+                    destinations = pages,
+                    hazeState = hazeState,
+                    isBottomBar = true,
+                )
             },
             containerColor = Color.Transparent
         ) { innerPadding ->
-            HorizontalPager(
-                modifier = Modifier.fillMaxSize(),
-                state = pagerState,
-                beyondViewportPageCount = 2,
-                userScrollEnabled = userScrollEnabled,
-            ) {
-                val bottomPadding = remember(innerPadding) {
-                    innerPadding.calculateBottomPadding()
-                }
-
-                val destination = pages[it]
-                destination.direction(navigator, bottomPadding, hazeState)
-            }
+            val bottomPadding = remember(innerPadding) { innerPadding.calculateBottomPadding() }
+            content(bottomPadding)
+        }
+    } else {
+        Row(modifier = Modifier.fillMaxSize()) {
+            NavigationBar(
+                destinations = pages,
+                hazeState = hazeState,
+                isBottomBar = false,
+            )
+            content(0.dp)
         }
     }
 }

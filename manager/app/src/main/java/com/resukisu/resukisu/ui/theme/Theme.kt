@@ -52,6 +52,7 @@ import com.kyant.m3color.hct.Hct
 import com.kyant.m3color.scheme.SchemeTonalSpot
 import com.resukisu.resukisu.ui.theme.util.BackgroundTransformation
 import com.resukisu.resukisu.ui.theme.util.saveTransformedBackground
+import com.resukisu.resukisu.ui.webui.MonetColorsProvider
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
 import java.io.File
@@ -283,10 +284,9 @@ fun KernelSUTheme(
         motionScheme = MotionScheme.expressive(),
         typography = Typography
     ) {
+        MonetColorsProvider.UpdateCss()
         Box(modifier = Modifier.fillMaxSize()) {
-            // 背景层
             BackgroundLayer(darkTheme)
-            // 内容层
             content()
         }
     }
