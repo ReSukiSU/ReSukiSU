@@ -1,5 +1,3 @@
-use std::path::Path;
-
 use anyhow::Result;
 use rust_embed::RustEmbed;
 
@@ -46,12 +44,6 @@ struct Asset;
 #[folder = "bin/arm"]
 struct Asset;
 
-pub fn copy_assets_to_file(name: &str, dst: impl AsRef<Path>) -> Result<()> {
-    let asset = Asset::get(name).ok_or_else(|| anyhow::anyhow!("asset not found: {name}"))?;
-    std::fs::write(dst, asset.data)?;
-    Ok(())
-}
-
 pub fn list_supported_kmi() -> std::vec::Vec<std::string::String> {
     let mut list = Vec::new();
     for file in Asset::iter() {
@@ -61,4 +53,9 @@ pub fn list_supported_kmi() -> std::vec::Vec<std::string::String> {
         }
     }
     list
+}
+
+pub fn get_asset(name: &str) -> Result<Box<dyn AsRef<[u8]>>> {
+    let asset = Asset::get(name).ok_or_else(|| anyhow::anyhow!("asset not found: {name}"))?;
+    Ok(Box::new(asset.data))
 }
