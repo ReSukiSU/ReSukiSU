@@ -97,16 +97,9 @@ fn exec_install_script(module_file: &str, is_metamodule: bool) -> Result<()> {
         .envs(get_common_script_envs())
         .env("OUTFD", "1")
         .env("ZIPFILE", realpath)
-        .spawn()?
-        .wait_with_output()?;
+        .status()?;
 
-    let err = String::from_utf8_lossy(&result.stderr);
-
-    if fs::exists(defs::METAMODULE_DEBUG)? {
-        fs::write(defs::METAMODULE_METAINSTALL_SCRIPT_LOG, err.to_string())?;
-    }
-
-    ensure!(result.status.success(), "Failed to install module script");
+    ensure!(result.success(), "Failed to install module script");
     Ok(())
 }
 

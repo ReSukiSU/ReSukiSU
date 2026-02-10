@@ -35,11 +35,9 @@ mod android {
     pub const METAMODULE_MOUNT_SCRIPT: &str = "metamount.sh";
     pub const METAMODULE_METAINSTALL_SCRIPT: &str = "metainstall.sh";
     pub const METAMODULE_METAUNINSTALL_SCRIPT: &str = "metauninstall.sh";
-    pub const METAMODULE_METAINSTALL_SCRIPT_LOG: &str =
-        concatcp!(LOG_DIR, "metamodule_install.log");
-    pub const METAMODULE_MOUNT_SCRIPT_LOG: &str = concatcp!(LOG_DIR, "metamodule_mount.log");
+    pub const METAMODULE_MOUNT_SCRIPT_LOG: &str = concatcp!(LOG_DIR, "metamodule_mount");
     pub const METAMODULE_METAUNINSTALL_SCRIPT_LOG: &str =
-        concatcp!(LOG_DIR, "metamodule_metauninstall.log");
+        concatcp!(LOG_DIR, "metamodule_metauninstall");
     pub const METAMODULE_DEBUG: &str = concatcp!(WORKING_DIR, "metamodule.debug");
 
     pub const KSU_BACKUP_DIR: &str = WORKING_DIR;

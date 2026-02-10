@@ -1,7 +1,6 @@
 package com.resukisu.resukisu.ui
 
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -46,7 +45,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavBackStackEntry
@@ -78,8 +76,6 @@ import com.resukisu.resukisu.ui.util.install
 import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
 import com.resukisu.resukisu.ui.webui.WebUIActivity
-import com.resukisu.resukisu.ui.webui.WebUIXActivity
-import com.resukisu.resukisu.ui.webui.initPlatform
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.Job
@@ -202,10 +198,6 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         }
-                    }
-
-                    LaunchedEffect(Unit) {
-                        initPlatform()
                     }
 
                     ShortcutIntentHandler(
@@ -484,35 +476,7 @@ private fun ShortcutIntentHandler(
                 val moduleId = intent.getStringExtra("module_id") ?: return@LaunchedEffect
                 val moduleName = intent.getStringExtra("module_name") ?: moduleId
 
-                val webuixEngine = Intent(context, WebUIXActivity::class.java)
-                val ksuEngine = Intent(context, WebUIActivity::class.java)
-
-                val prefs = context.getSharedPreferences("settings", MODE_PRIVATE)
-                val moduleSettings = context.getSharedPreferences("module_settings", MODE_PRIVATE)
-                val moduleEngine =
-                    moduleSettings.getString(moduleId + "_webui", "default") ?: "default"
-
-                var defaultEngine = prefs.getString("webui_engine", "custom") ?: "custom"
-
-                if (defaultEngine == "default" || defaultEngine == "wx") { // 旧版兼容
-                    prefs.edit(commit = true) {
-                        putString("webui_engine", "webuix")
-                    }
-                    defaultEngine = "webuix"
-                }
-
-                val selectedEngine =
-                    when (moduleEngine) { // 优先处理模块独立设置，如果为默认，则使用全局设置，参见ModuleWebUIEngineScreen
-                        "webuix" -> webuixEngine
-                        "ksu" -> ksuEngine
-                        else -> when (defaultEngine) {
-                            "webuix" -> webuixEngine
-                            "ksu" -> ksuEngine
-                            else -> ksuEngine
-                        }
-                }
-
-                val webIntent = selectedEngine
+                val webIntent = Intent(context, WebUIActivity::class.java)
                     .setData("kernelsu://webui/$moduleId".toUri())
                     .putExtra("id", moduleId)
                     .putExtra("name", moduleName)

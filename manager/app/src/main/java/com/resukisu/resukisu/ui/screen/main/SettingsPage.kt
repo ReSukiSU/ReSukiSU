@@ -6,11 +6,6 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,7 +30,6 @@ import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.Fence
 import androidx.compose.material.icons.filled.FolderOff
 import androidx.compose.material.icons.filled.Info
@@ -47,11 +41,9 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Update
 import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.WebAsset
 import androidx.compose.material.icons.rounded.FolderDelete
 import androidx.compose.material.icons.rounded.RemoveCircle
 import androidx.compose.material.icons.rounded.RemoveModerator
-import androidx.compose.material.icons.rounded.ViewInAr
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -93,7 +85,6 @@ import com.maxkeppeler.sheets.list.models.ListOption
 import com.ramcosta.composedestinations.generated.destinations.AppProfileTemplateScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.FlashScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.LogViewerScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.ModuleConfigScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.MoreSettingsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.UmountManagerScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -145,18 +136,6 @@ fun SettingsPage(navigator: DestinationsNavigator, bottomPadding: Dp, hazeState:
     val context = LocalContext.current
     val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
     var isSuLogEnabled by remember { mutableStateOf(Natives.isSuLogEnabled()) }
-    var selectedEngine by rememberSaveable {
-        mutableStateOf(
-            prefs.getString("webui_engine", "default") ?: "default"
-        )
-    }
-
-    if (selectedEngine == "default" || selectedEngine == "wx") { // 旧版兼容
-        prefs.edit(commit = true) {
-            putString("webui_engine", "webuix")
-        }
-        selectedEngine = "webuix"
-    }
 
     Scaffold(
         topBar = {
@@ -411,82 +390,6 @@ fun SettingsPage(navigator: DestinationsNavigator, bottomPadding: Dp, hazeState:
                                 checkUpdate = enabled
                             }
                         )
-                    }
-
-                    if (ksuIsValid()) {
-                        item {
-                            // WebUI默认引擎选择
-                            SettingsDropdownWidget(
-                                icon = Icons.Filled.WebAsset,
-                                title = stringResource(R.string.select_default_webui_engine),
-                                items = listOf(
-                                    stringResource(R.string.webui_engine_webuix),
-                                    stringResource(R.string.webui_engine_ksu),
-                                ),
-                                selectedIndex = when (selectedEngine) {
-                                    "webuix" -> 0
-                                    "ksu" -> 1
-                                    else -> throw UnsupportedOperationException("Unknown engine: $selectedEngine")
-                                },
-                                onSelectedIndexChange = { index ->
-                                    val engine = when (index) {
-                                        0 -> "webuix"
-                                        1 -> "ksu"
-                                        else -> throw UnsupportedOperationException("Unknown engine index: $index")
-                                    }
-                                    selectedEngine = engine
-                                    prefs.edit { putString("webui_engine", engine) }
-                                }
-                            )
-                        }
-
-                        item {
-                            SettingsJumpPageWidget(
-                                icon = Icons.Rounded.ViewInAr,
-                                title = stringResource(R.string.config_modules_webui),
-                                description = stringResource(R.string.config_modules_webui_description),
-                                onClick = {
-                                    navigator.navigate(ModuleConfigScreenDestination)
-                                }
-                            )
-                        }
-
-                        item {
-                            // Web调试和Web X Eruda 开关
-                            var enableWebDebugging by rememberSaveable {
-                                mutableStateOf(prefs.getBoolean("enable_web_debugging", false))
-                            }
-                            var useWebUIXEruda by rememberSaveable {
-                                mutableStateOf(prefs.getBoolean("use_webuix_eruda", false))
-                            }
-
-                            SettingsSwitchWidget(
-                                icon = Icons.Filled.DeveloperMode,
-                                title = stringResource(R.string.enable_web_debugging),
-                                description = stringResource(R.string.enable_web_debugging_summary),
-                                checked = enableWebDebugging,
-                                onCheckedChange = { enabled ->
-                                    prefs.edit { putBoolean("enable_web_debugging", enabled) }
-                                    enableWebDebugging = enabled
-                                }
-                            )
-
-                            AnimatedVisibility(
-                                visible = enableWebDebugging && selectedEngine != "ksu",
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically()
-                            ) {
-                                SettingsSwitchWidget(
-                                    title = stringResource(R.string.use_webuix_eruda),
-                                    description = stringResource(R.string.use_webuix_eruda_summary),
-                                    checked = useWebUIXEruda,
-                                    onCheckedChange = { enabled ->
-                                        prefs.edit { putBoolean("use_webuix_eruda", enabled) }
-                                        useWebUIXEruda = enabled
-                                    }
-                                )
-                            }
-                        }
                     }
 
                     item {

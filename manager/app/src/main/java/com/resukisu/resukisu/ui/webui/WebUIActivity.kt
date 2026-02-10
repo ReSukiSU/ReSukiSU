@@ -26,7 +26,6 @@ import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel
 
 @SuppressLint("SetJavaScriptEnabled")
 class WebUIActivity : ComponentActivity() {
-    var webUIState : WebUIState? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
 

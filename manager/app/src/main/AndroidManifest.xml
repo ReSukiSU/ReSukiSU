@@ -101,14 +101,6 @@
             android:configChanges="density|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|locale|layoutDirection|fontScale|keyboard|keyboardHidden"
             />
 
-        <activity
-            android:name=".ui.webui.WebUIXActivity"
-            android:autoRemoveFromRecents="true"
-            android:documentLaunchMode="intoExisting"
-            android:taskAffinity="${applicationId}.webui"
-            android:exported="false"
-            android:theme="@style/Theme.KernelSU.WebUI" />
-
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

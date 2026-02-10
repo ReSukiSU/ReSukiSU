@@ -283,8 +283,6 @@
     <string name="show_kpm_info">KPM 機能を非表示</string>
     <string name="show_kpm_info_summary">ホームとボトムバーから KPM の情報と機能を非表示にします。</string>
     <!-- Webui X settings -->
-    <string name="use_webuix_eruda">WebUI に Eruda をインジェクトする</string>
-    <string name="use_webuix_eruda_summary">デバッグを容易にするために WebUI X にデバッグコンソールを挿入します。Web デバッグが ON になっている必要があります。</string>
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">DPI の変更を適用</string>
     <string name="app_dpi_summary">このアプリのみで画面表示密度を調整します。</string>

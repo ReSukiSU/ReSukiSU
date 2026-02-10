@@ -163,7 +163,6 @@ import com.resukisu.resukisu.ui.util.undoUninstallModule
 import com.resukisu.resukisu.ui.util.uninstallModule
 import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel
 import com.resukisu.resukisu.ui.webui.WebUIActivity
-import com.resukisu.resukisu.ui.webui.WebUIXActivity
 import com.topjohnwu.superuser.io.SuFile
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
@@ -439,42 +438,12 @@ fun ModulePage(navigator: DestinationsNavigator, bottomPadding: Dp, hazeState: H
 
                         if (hasWebUi) {
                             try {
-                                val webuixEngine = Intent(context, WebUIXActivity::class.java)
-                                    .setData("kernelsu://webuix/$id".toUri())
-                                    .putExtra("id", id)
-                                    .putExtra("name", name)
-
-                                val ksuEngine = Intent(context, WebUIActivity::class.java)
+                                context.startActivity(
+                                    Intent(context, WebUIActivity::class.java)
                                     .setData("kernelsu://webui/$id".toUri())
                                     .putExtra("id", id)
-                                    .putExtra("name", name)
-
-                                val moduleSettings =
-                                    context.getSharedPreferences("module_settings", MODE_PRIVATE)
-                                val moduleEngine =
-                                    moduleSettings.getString(id + "_webui", "default") ?: "default"
-
-                                var defaultEngine =
-                                    prefs.getString("webui_engine", "custom") ?: "custom"
-
-                                if (defaultEngine == "default" || defaultEngine == "wx") { // 旧版兼容
-                                    prefs.edit(commit = true) {
-                                        putString("webui_engine", "webuix")
-                                    }
-                                    defaultEngine = "webuix"
-                                }
-
-                                val selectedEngine =
-                                    when (moduleEngine) { // 优先处理模块独立设置，如果为默认，则使用全局设置，参见ModuleWebUIEngineScreen
-                                        "webuix" -> webuixEngine
-                                    "ksu" -> ksuEngine
-                                        else -> when (defaultEngine) {
-                                            "webuix" -> webuixEngine
-                                            "ksu" -> ksuEngine
-                                            else -> ksuEngine
-                                        }
-                                }
-                                context.startActivity(selectedEngine)
+                                        .putExtra("name", name)
+                                )
                             } catch (e: Exception) {
                                 Log.e("ModuleScreen", "Error launching WebUI: ${e.message}", e)
                                 scope.launch {

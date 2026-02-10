@@ -18,8 +18,6 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.webkit.WebViewAssetLoader
-import com.dergoogler.mmrl.platform.model.ModId
-import com.dergoogler.mmrl.webui.interfaces.WXOptions
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.util.createRootShell
 import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel
@@ -159,12 +157,7 @@ internal suspend fun prepareWebView(
             }
 
             // JS Interface
-            (activity as WebUIActivity).webUIState = webUIState
-            val webviewInterface = WebViewInterface(
-                WXOptions(
-                    activity, webView,
-                    ModId(moduleId)
-                ))
+            val webviewInterface = WebViewInterface(webUIState)
             webUIState.webView = webView
             webView.addJavascriptInterface(webviewInterface, "ksu")
             webUIState.uiEvent = WebUIEvent.WebViewReady

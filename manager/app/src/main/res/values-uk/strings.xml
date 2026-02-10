@@ -280,8 +280,6 @@
     <string name="show_kpm_info">Приховати функцію KPM</string>
     <string name="show_kpm_info_summary">Приховує інформацію та функцію KPM на головному екрані та в нижній панелі</string>
     <!-- Webui X settings -->
-    <string name="use_webuix_eruda">Впровадити Eruda у WebUI X</string>
-    <string name="use_webuix_eruda_summary">Впровадити консоль налагодження у WebUI X для полегшення налагодження. Потребує увімкненого веб-налагодження.</string>
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">Застосований DPI</string>
     <string name="app_dpi_summary">Налаштувати щільність відображення екрана лише для поточного додатку</string>

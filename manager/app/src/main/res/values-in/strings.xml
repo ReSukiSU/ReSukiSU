@@ -282,8 +282,6 @@
     <string name="show_kpm_info">Tampilkan fungsi KPM</string>
     <string name="show_kpm_info_summary">Tampilkan fungsi informasi KPM dan menu KPM di bilah navigasi</string>
     <!-- Webui X settings -->
-    <string name="use_webuix_eruda">Suntik Eruda ke WebUI X</string>
-    <string name="use_webuix_eruda_summary">Suntikkan konsol debug ke dalam WebUI X untuk mempermudah proses debugging. Memerlukan pengaktifan web debugging.</string>
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">Ubah DPI</string>
     <string name="app_dpi_summary">Pengaturan DPI hanya untuk aplikasi ini saja</string>

@@ -292,8 +292,6 @@
     <string name="show_kpm_info">KPM İşlevini Gizle</string>
     <string name="show_kpm_info_summary">Ana sayfa ve alt çubuktaki KPM bilgilerini ve işlevini gizler</string>
     <!-- Webui X settings -->
-    <string name="use_webuix_eruda">WebUI X\'e Eruda enjekte et</string>
-    <string name="use_webuix_eruda_summary">WebUI X\'e bir hata ayıklama konsolu enjekte edin, böylece hata ayıklama daha kolay olur. Web hata ayıklamanın açık olması gerekir.</string>
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">Uygulanan DPI</string>
     <string name="app_dpi_summary">Sadece geçerli uygulama için ekran görüntüleme yoğunluğunu ayarlayın</string>

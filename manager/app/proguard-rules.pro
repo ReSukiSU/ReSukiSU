@@ -38,11 +38,4 @@
 -dontwarn javax.lang.model.util.Types
 -dontwarn javax.tools.Diagnostic$Kind
 
-
-# MMRL:webui reflection
--keep class com.dergoogler.mmrl.webui.interfaces.** { *; }
--keep class com.resukisu.resukisu.ui.webui.WebViewInterface { *; }
-
--keep,allowobfuscation class * extends com.dergoogler.mmrl.platform.content.IService { *; }
-
 -keep interface com.resukisu.zako.** { *; }
