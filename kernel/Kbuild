@@ -55,6 +55,9 @@ KSU_SRC := $(realpath $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 LOCAL_GIT_EXISTS := $(shell test -e $(KSU_SRC)/../.git && echo 1 || echo 0)
 
 ifeq ($(LOCAL_GIT_EXISTS),0)
+$(info -- Can't found $(REPO_NAME) git submodule!)
+$(info -- If you are using bazel to build this kernel,)
+$(info -- Please goto Kbuild and change KSU_SRC to the absolute path of ksu kernel folder path)
 $(error You should use $(REPO_NAME) as an git submodule instead of directly copy code)
 endif
 
@@ -379,6 +382,15 @@ ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
       $(error You should integrate $(REPO_NAME) in your kernel.)
     endif
   endif
+endif
+
+ifneq ($(KERNEL_TYPE), GKI 2.0)
+    ifeq ($(KSU_TP_HOOK), y)
+        $(info -- Error: $(REPO_NAME) TP Hooks are only supported on GKI 2.0 kernels.)
+        $(info -- Current Kernel Type: $(KERNEL_TYPE))
+        $(info -- If you really want continue, goto Kbuild and comment out this warning.)
+        $(error TP hooks are incompatible with Non-GKI/GKI 1.0 kernels in this configuration.)
+    endif
 endif
 
 # Keep a new line here!! Because someone may append config
