@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">Disabilitato</string>
     <string name="selinux_status_enforcing">Enforcing</string>
     <string name="selinux_status_permissive">Permissive</string>
-    <string name="selinux_status_unknown">Sconosciuto</string>
+    <string name="unknown">Sconosciuto</string>
     <string name="superuser">Accesso root</string>
     <string name="module_failed_to_enable">Impossibile abilitare il modulo: %s</string>
     <string name="module_failed_to_disable">Impossibile disabilitare il modulo: %s</string>

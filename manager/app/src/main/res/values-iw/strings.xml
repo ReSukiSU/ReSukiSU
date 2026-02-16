@@ -2,7 +2,7 @@
 <resources>
     <string name="reboot_to_apply">הפעל מחדש כדי להכניס לתוקף</string>
     <string name="home_click_to_learn_kernelsu">למד כיצד להתקין את KernelSU ולהשתמש במודולים</string>
-    <string name="selinux_status_unknown">לא ידוע</string>
+    <string name="unknown">לא ידוע</string>
     <string name="show_system_apps">הצג אפליקציות מערכת</string>
     <string name="module_uninstall_success">%s הוסר</string>
     <string name="profile_umount_modules">הסרת טעינת מודולים</string>

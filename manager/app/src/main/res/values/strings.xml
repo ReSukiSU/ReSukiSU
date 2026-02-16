@@ -16,7 +16,7 @@
     <string name="selinux_status_disabled">Disabled</string>
     <string name="selinux_status_enforcing">Enforcing</string>
     <string name="selinux_status_permissive">Permissive</string>
-    <string name="selinux_status_unknown">Unknown</string>
+    <string name="unknown">Unknown</string>
     <string name="superuser">Superuser</string>
     <string name="module_failed_to_enable">Failed to enable module: %s</string>
     <string name="module_failed_to_disable">Failed to disable module: %s</string>
@@ -355,6 +355,8 @@
     <!-- 状态相关 -->
     <string name="no_apps_in_category">No application in this category</string>
     <!-- 标签相关 -->
+    <string name="persistent">Persistent</string>
+    <string name="temporary">Temporary</string>
     <string name="deny_authorization">Delegation of authority</string>
     <string name="grant_authorization">Authorizations</string>
     <string name="unmount_modules">Unmounting Module Mounts</string>
@@ -700,25 +702,21 @@ Important Note:\n
     </string>
     <string name="umount_path_manager">Umount Path Management</string>
     <string name="umount_path_manager_summary">Manage kernel unmount paths</string>
-    <string name="umount_path_restart_notice">A reboot is required for changes to take effect. The system will apply the new configuration on the next boot</string>
     <string name="no_any_umount_path">Not have any umount path</string>
     <string name="add_umount_path">Add Umount Path</string>
     <string name="mount_path">Mount Path</string>
     <string name="umount_flags">Unmount Flags</string>
     <string name="umount_flags_hint">0=Normal unmount, 2=MNT_DETACH</string>
-    <string name="flags">Flags</string>
     <string name="confirm_delete">Confirm Delete</string>
     <string name="confirm_delete_umount_path">Are you sure you want to delete the path %s?</string>
-    <string name="umount_path_added">Path added, will take effect after reboot</string>
-    <string name="umount_path_removed">Path removed, will take effect after reboot</string>
+    <string name="umount_path_added">Umount path added</string>
+    <string name="umount_path_removed">Umount path removed</string>
     <string name="operation_failed">Operation failed</string>
     <string name="confirm_action">Confirm Action</string>
     <string name="confirm_clear_custom_paths">Are you sure you want to clear all custom paths? (default paths will be preserved)</string>
     <string name="custom_paths_cleared">Custom paths cleared</string>
-    <string name="clear_custom_paths">Clear Custom Paths</string>
-    <string name="apply_config">Apply Configuration</string>
+    <string name="changes_take_effect_immediately">All changes will take effect immediately.</string>
     <string name="config_applied">Configuration applied to kernel</string>
-    <string name="mnt_detach">MNT_DETACH</string>
     <string name="group_contains_apps">Contains %d apps</string>
     <string name="meta_module_disabled">module not mounted, because metamodule disabled</string>
     <string name="meta_module_removed">module not mounted, because metamodule being delete</string>

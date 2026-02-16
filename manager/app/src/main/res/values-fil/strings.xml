@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">Hindi pinagana</string>
     <string name="selinux_status_enforcing">Enforcing</string>
     <string name="selinux_status_permissive">Permissive</string>
-    <string name="selinux_status_unknown">Hindi matukoy</string>
+    <string name="unknown">Hindi matukoy</string>
     <string name="superuser">Superuser</string>
     <string name="module_failed_to_enable">Nabigong paganahin ang modyul: %s</string>
     <string name="module_failed_to_disable">Nabigong i-disable ang modyul: %s</string>

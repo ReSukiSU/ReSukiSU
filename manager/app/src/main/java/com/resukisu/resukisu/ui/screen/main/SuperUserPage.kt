@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -40,7 +39,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -113,8 +111,8 @@ import com.resukisu.resukisu.ui.component.SearchAppBar
 import com.resukisu.resukisu.ui.component.VerticalExpandableFab
 import com.resukisu.resukisu.ui.component.pinnedScrollBehavior
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
+import com.resukisu.resukisu.ui.component.settings.splicedLazyColumnGroup
 import com.resukisu.resukisu.ui.screen.LabelText
-import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.module.ModuleModify
 import com.resukisu.resukisu.ui.viewmodel.AppCategory
@@ -401,10 +399,6 @@ private fun SuperUserContent(
             )
         },
     ) {
-        val sharedStiffness = Spring.StiffnessMediumLow
-        val cornerRadius = 16.dp
-        val connectionRadius = 4.dp
-
         LazyColumn(
             state = listState,
             modifier = Modifier
@@ -422,72 +416,40 @@ private fun SuperUserContent(
             item {
                 Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding() + 5.dp))
             }
-            itemsIndexed(
+            splicedLazyColumnGroup(
                 items = filteredAndSortedAppGroups,
                 key = { _, appGroup -> "${appGroup.uid}-${appGroup.mainApp.packageName}" },
                 contentType = { _, _ -> "AppGroupItem" }
-            ) { appGroupIndex, appGroup ->
-                val isFirst = appGroupIndex == 0
-                val isLast = appGroupIndex == filteredAndSortedAppGroups.size - 1
-
-                val targetTopRadius = if (isFirst) cornerRadius else connectionRadius
-                val targetBottomRadius = if (isLast) cornerRadius else connectionRadius
-
-                val animatedTopRadius by animateDpAsState(
-                    targetValue = targetTopRadius,
-                    animationSpec = spring(stiffness = sharedStiffness),
-                    label = "TopCornerRadius"
-                )
-                val animatedBottomRadius by animateDpAsState(
-                    targetValue = targetBottomRadius,
-                    animationSpec = spring(stiffness = sharedStiffness),
-                    label = "BottomCornerRadius"
-                )
-
-                Surface(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 2.dp),
-                    shape = RoundedCornerShape(
-                        topStart = animatedTopRadius,
-                        topEnd = animatedTopRadius,
-                        bottomStart = animatedBottomRadius,
-                        bottomEnd = animatedBottomRadius
-                    ),
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
-                        alpha = CardConfig.cardAlpha
-                    ),
-                ) {
-                    AppGroupItem(
-                        appGroup = appGroup,
-                        isSelected = appGroup.packageNames.any {
-                            viewModel.selectedApps.contains(
+            ) { _, appGroup ->
+                AppGroupItem(
+                    appGroup = appGroup,
+                    isSelected = appGroup.packageNames.any {
+                        viewModel.selectedApps.contains(
+                            it
+                        )
+                    },
+                    onToggleSelection = {
+                        appGroup.packageNames.forEach {
+                            viewModel.toggleAppSelection(
                                 it
                             )
-                        },
-                        onToggleSelection = {
-                            appGroup.packageNames.forEach {
-                                viewModel.toggleAppSelection(
-                                    it
-                                )
-                            }
-                        },
-                        onClick = {
-                            if (viewModel.showBatchActions) {
-                                appGroup.packageNames.forEach { viewModel.toggleAppSelection(it) }
-                            } else {
-                                navigator.navigate(AppProfileScreenDestination(appGroup))
-                            }
-                        },
-                        onLongClick = {
-                            if (!viewModel.showBatchActions) {
-                                viewModel.toggleBatchMode()
-                                appGroup.packageNames.forEach { viewModel.toggleAppSelection(it) }
-                            }
-                        },
-                        viewModel = viewModel
-                    )
-                }
+                        }
+                    },
+                    onClick = {
+                        if (viewModel.showBatchActions) {
+                            appGroup.packageNames.forEach { viewModel.toggleAppSelection(it) }
+                        } else {
+                            navigator.navigate(AppProfileScreenDestination(appGroup))
+                        }
+                    },
+                    onLongClick = {
+                        if (!viewModel.showBatchActions) {
+                            viewModel.toggleBatchMode()
+                            appGroup.packageNames.forEach { viewModel.toggleAppSelection(it) }
+                        }
+                    },
+                    viewModel = viewModel
+                )
             }
             item {
                 Spacer(modifier = Modifier.height(bottomPadding))

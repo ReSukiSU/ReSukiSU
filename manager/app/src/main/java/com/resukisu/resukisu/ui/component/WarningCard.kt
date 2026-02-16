@@ -20,20 +20,23 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.ui.theme.CardConfig
-import com.resukisu.resukisu.ui.theme.getCardColors
 import com.resukisu.resukisu.ui.theme.getCardElevation
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun WarningCard(
+    modifier: Modifier = Modifier,
+    shape: Shape = CardDefaults.elevatedShape,
     message: String,
     color: Color? = null,
     onClick: (() -> Unit)? = null,
@@ -54,11 +57,18 @@ fun WarningCard(
             )
         }
         else -> {
-            getCardColors(color)
+            CardDefaults.cardColors(
+                containerColor = color,
+                contentColor = contentColorFor(color),
+                disabledContainerColor = color,
+                disabledContentColor = contentColorFor(color)
+            )
         }
     }
 
     ElevatedCard(
+        modifier = modifier,
+        shape = shape,
         colors = cardColors,
         elevation = getCardElevation(),
     ) {
@@ -70,7 +80,10 @@ fun WarningCard(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().align(Alignment.CenterStart).padding(end = 40.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterStart)
+                    .padding(end = 40.dp)
             ) {
                 if (icon != null) {
                     icon()
@@ -78,7 +91,6 @@ fun WarningCard(
                     Icon(
                         imageVector = Icons.Default.Error,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onErrorContainer,
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -98,10 +110,12 @@ fun WarningCard(
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = stringResource(android.R.string.cancel),
-                    tint = MaterialTheme.colorScheme.onErrorContainer,
-                    modifier = Modifier.clickable {
-                        onClose()
-                    }.size(18.dp).align(Alignment.TopEnd)
+                    modifier = Modifier
+                        .clickable {
+                            onClose()
+                        }
+                        .size(18.dp)
+                        .align(Alignment.TopEnd)
                 )
             }
         }
@@ -116,7 +130,7 @@ private fun WarningCardPreview() {
         WarningCard(message = "Warning message", onClose = {})
         WarningCard(
             message = "Warning message ",
-            MaterialTheme.colorScheme.outlineVariant,
+            color = MaterialTheme.colorScheme.outlineVariant,
         ) {}
     }
 }

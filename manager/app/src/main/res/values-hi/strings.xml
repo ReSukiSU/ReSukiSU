@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">डिसेबल्ड (बंद)</string>
     <string name="selinux_status_enforcing">एनफोर्सिंग</string>
     <string name="selinux_status_permissive">पर्मिसिव</string>
-    <string name="selinux_status_unknown">अज्ञात</string>
+    <string name="unknown">अज्ञात</string>
     <string name="superuser">सुपरयूजर</string>
     <string name="module_failed_to_enable">%s मॉड्यूल चालू करने में विफल</string>
     <string name="module_failed_to_disable">%s मॉड्यूल बंद करने में विफल</string>

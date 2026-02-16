@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">Выключен</string>
     <string name="selinux_status_enforcing">Принудительный</string>
     <string name="selinux_status_permissive">Разрешающий</string>
-    <string name="selinux_status_unknown">Неизвестно</string>
+    <string name="unknown">Неизвестно</string>
     <string name="superuser">Рут-доступ</string>
     <string name="module_failed_to_enable">Не удалось включить модуль %s</string>
     <string name="module_failed_to_disable">Не удалось отключить модуль %s</string>
@@ -656,22 +656,18 @@
     </string>
     <string name="umount_path_manager">Управление путями размонтирования</string>
     <string name="umount_path_manager_summary">Управления путями размонтирования ядра</string>
-    <string name="umount_path_restart_notice">Для применения изменений необходима перезагрузка. Система применит новый конфиг при следующем запуске.</string>
     <string name="add_umount_path">Добавить путь размонтирования</string>
     <string name="mount_path">Смонтировать путь</string>
     <string name="umount_flags">Флаги размонтирования</string>
     <string name="umount_flags_hint">0=Обычное размонтирование, 8=MNT_DETACH, -1=Автоматически</string>
-    <string name="flags">Флаги</string>
     <string name="confirm_delete">Подтвердите удаление</string>
     <string name="confirm_delete_umount_path">Вы уверены, что хотите удалить путь размонтирования%s?</string>
-    <string name="umount_path_added">Путь добавлен, изменения вступят в силу после перезагрузки</string>
-    <string name="umount_path_removed">Путь удален, изменения вступят в силу после перезагрузки</string>
+    <string name="umount_path_added">Путь добавлен</string>
+    <string name="umount_path_removed">Путь удален</string>
     <string name="operation_failed">Неудача</string>
     <string name="confirm_action">Подтвердите действие</string>
     <string name="confirm_clear_custom_paths">Вы уверены, что хотите удалить все кастомные пути? (Стандартные пути не будут удалены)</string>
     <string name="custom_paths_cleared">Кастомные пути удалены</string>
-    <string name="clear_custom_paths">Удалить кастомные пути</string>
-    <string name="apply_config">Применить конфигурацию</string>
     <string name="config_applied">Конфигурация применена к ядру</string>
     <string name="settings_sucompat">Классическая команда su</string>
     <string name="settings_sucompat_summary">Разрешить root-доступ через /system/bin/su в новых процессах.</string>

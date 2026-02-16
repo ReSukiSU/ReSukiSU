@@ -3,9 +3,6 @@ package com.resukisu.resukisu.ui.screen
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.widget.Toast
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
@@ -72,6 +69,7 @@ import com.ramcosta.composedestinations.result.getOr
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
+import com.resukisu.resukisu.ui.component.settings.splicedLazyColumnGroup
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.viewmodel.TemplateViewModel
@@ -211,45 +209,10 @@ fun AppProfileTemplateScreen(
                     Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
                 }
 
-                viewModel.templateList.forEachIndexed { index, app ->
-                    item(key = app.id) {
-                        val sharedStiffness = Spring.StiffnessMediumLow
-                        val cornerRadius = 16.dp
-                        val connectionRadius = 4.dp
-                        val isFirst = index == 0
-                        val isLast = index == viewModel.templateList.size - 1
-
-                        val targetTopRadius = if (isFirst) cornerRadius else connectionRadius
-                        val targetBottomRadius = if (isLast) cornerRadius else connectionRadius
-
-                        val animatedTopRadius by animateDpAsState(
-                            targetValue = targetTopRadius,
-                            animationSpec = spring(stiffness = sharedStiffness),
-                            label = "TopCornerRadius"
-                        )
-                        val animatedBottomRadius by animateDpAsState(
-                            targetValue = targetBottomRadius,
-                            animationSpec = spring(stiffness = sharedStiffness),
-                            label = "BottomCornerRadius"
-                        )
-
-                        Surface(
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .padding(top = 2.dp),
-                            shape = RoundedCornerShape(
-                                topStart = animatedTopRadius,
-                                topEnd = animatedTopRadius,
-                                bottomStart = animatedBottomRadius,
-                                bottomEnd = animatedBottomRadius
-                            ),
-                            color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
-                                alpha = CardConfig.cardAlpha
-                            ),
-                        ) {
-                            TemplateItem(navigator, app)
-                        }
-                    }
+                splicedLazyColumnGroup(
+                    items = viewModel.templateList,
+                    key = { _, app -> app.id }) { _, app ->
+                    TemplateItem(navigator, app)
                 }
 
                 item {

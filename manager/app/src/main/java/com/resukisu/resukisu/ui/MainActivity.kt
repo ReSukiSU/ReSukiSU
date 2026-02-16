@@ -29,10 +29,12 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -78,9 +80,11 @@ import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
 import com.resukisu.resukisu.ui.webui.WebUIActivity
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.rememberHazeState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import zako.zako.zako.zakoui.screen.moreSettings.util.LocaleHelper
 
 class MainActivity : ComponentActivity() {
@@ -318,8 +322,15 @@ fun MainScreen(navigator: DestinationsNavigator) {
     val activity = LocalActivity.current as MainActivity
     val settings by activity.settingsStateFlow.collectAsState()
 
-    val pages = remember(settings) {
-        BottomBarDestination.getPages(settings)
+    var savedPages by rememberSaveable<MutableState<List<BottomBarDestination>>> {
+        mutableStateOf(emptyList())
+    }
+
+    val pages by produceState(initialValue = savedPages) {
+        value = withContext(Dispatchers.IO) {
+            savedPages = BottomBarDestination.getPages(settings)
+            return@withContext savedPages
+        }
     }
 
     val coroutineScope = rememberCoroutineScope()
@@ -436,7 +447,7 @@ private fun MainScreenContent(
                     isBottomBar = true,
                 )
             },
-            containerColor = Color.Transparent
+            containerColor = Color.Transparent,
         ) { innerPadding ->
             val bottomPadding = remember(innerPadding) { innerPadding.calculateBottomPadding() }
             content(bottomPadding)

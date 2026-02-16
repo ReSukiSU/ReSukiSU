@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">Desactivado</string>
     <string name="selinux_status_enforcing">Estricto</string>
     <string name="selinux_status_permissive">Permisivo</string>
-    <string name="selinux_status_unknown">Desconocido</string>
+    <string name="unknown">Desconocido</string>
     <string name="superuser">Superusuario</string>
     <string name="module_failed_to_enable">Error al activar el módulo: %s</string>
     <string name="module_failed_to_disable">Error al desactivar el módulo: %s</string>

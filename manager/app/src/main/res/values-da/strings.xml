@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">Deaktiveret</string>
     <string name="selinux_status_enforcing">Håndhævende</string>
     <string name="selinux_status_permissive">Tilladende</string>
-    <string name="selinux_status_unknown">Ukendt</string>
+    <string name="unknown">Ukendt</string>
     <string name="superuser">Superbruger</string>
     <string name="module_failed_to_enable">Aktivering af modul fejlede: %s</string>
     <string name="module_failed_to_disable">Deaktivering af modul fejlede: %s</string>

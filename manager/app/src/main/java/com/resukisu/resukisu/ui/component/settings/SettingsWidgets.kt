@@ -37,6 +37,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -60,6 +63,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -885,5 +889,56 @@ object SuperDropdownDefaults {
             selectedContentColor = selectedContentColor,
             selectedBackgroundColor = selectedBackgroundColor
         )
+    }
+}
+
+inline fun <T> LazyListScope.splicedLazyColumnGroup(
+    items: List<T>,
+    noinline key: ((index: Int, item: T) -> Any)? = null,
+    crossinline contentType: (index: Int, item: T) -> Any? = { _, _ -> null },
+    crossinline itemContent: @Composable LazyItemScope.(index: Int, item: T) -> Unit,
+) {
+    val sharedStiffness = Spring.StiffnessMediumLow
+    val cornerRadius = 16.dp
+    val connectionRadius = 4.dp
+
+    itemsIndexed(
+        items = items,
+        key = key,
+        contentType = contentType,
+    ) { index, item ->
+        val isFirst = index == 0
+        val isLast = index == items.size - 1
+
+        val targetTopRadius = if (isFirst) cornerRadius else connectionRadius
+        val targetBottomRadius = if (isLast) cornerRadius else connectionRadius
+
+        val animatedTopRadius by animateDpAsState(
+            targetValue = targetTopRadius,
+            animationSpec = spring(stiffness = sharedStiffness),
+            label = "TopCornerRadius"
+        )
+        val animatedBottomRadius by animateDpAsState(
+            targetValue = targetBottomRadius,
+            animationSpec = spring(stiffness = sharedStiffness),
+            label = "BottomCornerRadius"
+        )
+
+        Surface(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 2.dp),
+            shape = RoundedCornerShape(
+                topStart = animatedTopRadius,
+                topEnd = animatedTopRadius,
+                bottomStart = animatedBottomRadius,
+                bottomEnd = animatedBottomRadius
+            ),
+            color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
+                alpha = CardConfig.cardAlpha
+            ),
+        ) {
+            itemContent(index, item)
+        }
     }
 }

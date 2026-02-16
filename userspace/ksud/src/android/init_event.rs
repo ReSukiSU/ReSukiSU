@@ -82,11 +82,6 @@ pub fn on_post_data_fs() -> Result<()> {
         warn!("load sepolicy.rule failed");
     }
 
-    // load umount list
-    if let Err(e) = crate::android::umount::load_umount_config() {
-        warn!("load umount list failed: {e}");
-    }
-
     if let Err(e) = crate::android::profile::apply_sepolies() {
         warn!("apply root profile sepolicy failed: {e}");
     }
@@ -131,7 +126,7 @@ pub fn on_post_data_fs() -> Result<()> {
     }
 
     // Load umount config and apply to kernel
-    if let Err(e) = crate::android::umount::load_umount_config() {
+    if let Err(e) = crate::android::umount_config::load_umount_config() {
         warn!("load umount config failed: {e}");
     }
 

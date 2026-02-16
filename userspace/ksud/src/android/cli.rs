@@ -9,7 +9,7 @@ use crate::{
     android::{
         debug, dynamic_manager, feature, init_event, ksucalls,
         module::{self, module_config},
-        profile, sepolicy, su, umount, utils,
+        profile, sepolicy, su, umount_config, utils,
     },
     apk_sign, assets,
     boot_patch::{BootPatchArgs, BootRestoreArgs},
@@ -42,10 +42,16 @@ enum Commands {
     BootCompleted,
 
     #[cfg(all(target_arch = "aarch64", target_os = "android"))]
-    /// Susfs
+    /// Manage susfs component
     Susfs {
         #[command(subcommand)]
         command: Susfs,
+    },
+
+    /// Manage auto apply user custom umount configs
+    UmountConfig {
+        #[command(subcommand)]
+        command: UmountConfigOp,
     },
 
     /// Install KernelSU userspace component to system
@@ -104,6 +110,27 @@ enum Commands {
 }
 
 #[derive(clap::Subcommand, Debug)]
+enum UmountConfigOp {
+    /// Add an new umount config to configuration file
+    Add {
+        /// mount point path
+        mnt: String,
+        /// umount flags (default: 0, MNT_DETACH: 2)
+        #[arg(short, long, default_value = "0")]
+        flags: u32,
+    },
+    /// Delete an umount config from configuration file
+    Del {
+        /// mount point path
+        mnt: String,
+    },
+    /// Clear all auto apply umount config from configuration file
+    Clear,
+    /// List all configured auto apply umount configuration
+    List,
+}
+
+#[derive(clap::Subcommand, Debug)]
 enum BootInfo {
     /// show current kmi version
     CurrentKmi,
@@ -133,7 +160,7 @@ enum Debug {
     /// Set the manager app, kernel CONFIG_KSU_DEBUG should be enabled.
     SetManager {
         /// manager package name
-        #[arg(default_value_t = String::from("com.sukisu.ultra"))]
+        #[arg(default_value_t = String::from("com.resukisu.resukisu"))]
         apk: String,
     },
 
@@ -402,24 +429,6 @@ enum Kernel {
     /// Notify that module is mounted
     NotifyModuleMounted,
 }
-/*
-#[derive(clap::Subcommand, Debug)]
-enum Umount {
-    /// Add mount point to umount list
-    Add {
-        /// mount point path
-        mnt: String,
-        /// umount flags (default: 0, MNT_DETACH: 2)
-        #[arg(short, long, default_value = "0")]
-        flags: u32,
-    },
-    /// Remove mount point from umount list
-    Remove {
-        /// mount point path
-        mnt: String,
-    }
-}
-*/
 #[derive(clap::Subcommand, Debug)]
 enum DynamicManagerOp {
     /// Get the signature of the current dynamic manager (size+hash)
@@ -532,6 +541,12 @@ pub fn run() -> Result<()> {
             }
             Ok(())
         }
+        Commands::UmountConfig { command } => match command {
+            UmountConfigOp::Add { mnt, flags } => umount_config::add_umount(&mnt, flags),
+            UmountConfigOp::Del { mnt } => umount_config::del_umount(&mnt),
+            UmountConfigOp::Clear => umount_config::wipe_umount(),
+            UmountConfigOp::List => umount_config::list_umount(),
+        },
         Commands::Module { command } => {
             utils::switch_mnt_ns(1)?;
             match command {
@@ -729,25 +744,17 @@ pub fn run() -> Result<()> {
             }
         },
         Commands::BootRestore(boot_restore) => crate::boot_patch::restore(boot_restore),
-        /*Commands::Umount { command } => match command {
-            Umount::Add { mnt, flags } => ksucalls::umount_list_add(&mnt, flags),
-            Umount::Remove { mnt } => umount::remove_umount_entry_from_config(&mnt),
-            Umount::List => {
-                let list = ksucalls::umount_list_list()?;
-                print!("{list}");
-                Ok(())
-            }
-            Umount::Save => umount::save_umount_config(),
-            Umount::Apply => umount::apply_umount_config(),
-            Umount::ClearCustom => umount::clear_umount_config(),
-        },*/
         Commands::Kernel { command } => match command {
             Kernel::NukeExt4Sysfs { mnt } => ksucalls::nuke_ext4_sysfs(&mnt),
             Kernel::Umount { command } => match command {
-                UmountOp::Add { mnt, flags } => umount::add_umount(&mnt, flags),
-                UmountOp::Del { mnt } => umount::del_umount(&mnt),
-                UmountOp::Wipe => umount::wipe_umount(),
-                UmountOp::List => umount::list_umount(),
+                UmountOp::Add { mnt, flags } => ksucalls::umount_list_add(&mnt, flags),
+                UmountOp::Del { mnt } => ksucalls::umount_list_del(&mnt),
+                UmountOp::Wipe => ksucalls::umount_list_wipe().map_err(Into::into),
+                UmountOp::List => {
+                    let list = ksucalls::umount_list_list()?;
+                    println!("{}", serde_json::to_string(&list)?);
+                    Ok(())
+                }
             },
             Kernel::DynamicManager { command } => match command {
                 DynamicManagerOp::Set { size, hash } => dynamic_manager::set(size, hash),

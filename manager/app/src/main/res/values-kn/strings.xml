@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">Disabled</string>
     <string name="selinux_status_enforcing">Enforcing</string>
     <string name="selinux_status_permissive">Permissive</string>
-    <string name="selinux_status_unknown">ತಿಳಿಯದ</string>
+    <string name="unknown">ತಿಳಿಯದ</string>
     <string name="superuser">ಸೂಪರ್ಯೂಸರ್</string>
     <string name="module_failed_to_enable">ಮಾಡ್ಯೂಲ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲು ವಿಫಲವಾಗಿದೆ: %s</string>
     <string name="module_failed_to_disable">ಮಾಡ್ಯೂಲ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ವಿಫಲವಾಗಿದೆ: %s</string>

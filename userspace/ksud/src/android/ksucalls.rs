@@ -3,6 +3,8 @@ use std::{fs, os::fd::RawFd, sync::OnceLock};
 
 use libc::{_IO, _IOR, _IOW, _IOWR};
 
+use crate::defs::MountInfo;
+
 // Event constants
 const EVENT_POST_FS_DATA: u32 = 1;
 const EVENT_BOOT_COMPLETED: u32 = 2;
@@ -19,7 +21,7 @@ const KSU_IOCTL_SET_FEATURE: i32 = _IOW::<()>(K, 14);
 const KSU_IOCTL_GET_WRAPPER_FD: i32 = _IOW::<()>(K, 15);
 const KSU_IOCTL_MANAGE_MARK: i32 = _IOWR::<()>(K, 16);
 const KSU_IOCTL_NUKE_EXT4_SYSFS: i32 = _IOW::<()>(K, 17);
-const KSU_IOCTL_ADD_TRY_UMOUNT: i32 = _IOW::<()>(K, 18);
+const KSU_IOCTL_MANAGE_TRY_UMOUNT: i32 = _IOW::<()>(K, 18);
 
 const SUKISU_IOCTL_DYNAMIC_MANAGER: i32 = _IOWR::<()>(K, 103);
 
@@ -86,7 +88,7 @@ pub struct NukeExt4SysfsCmd {
 
 #[repr(C)]
 #[derive(Clone, Copy, Default)]
-struct AddTryUmountCmd {
+struct ManageTryUmountCmd {
     arg: u64,   // char ptr, this is the mountpoint
     flags: u32, // this is the flag we use for it
     mode: u8,   // denotes what to do with it 0:wipe_list 1:add_to_list 2:delete_entry
@@ -110,6 +112,8 @@ const KSU_MARK_REFRESH: u32 = 4;
 const KSU_UMOUNT_WIPE: u8 = 0;
 const KSU_UMOUNT_ADD: u8 = 1;
 const KSU_UMOUNT_DEL: u8 = 2;
+const KSU_UMOUNT_GETSIZE_NEW: u8 = 200;
+const KSU_UMOUNT_GETLIST_NEW: u8 = 201;
 
 // Dynamic Manager operation constants
 const SUKISU_DYNAMIC_MANAGER_SET: u32 = 0;
@@ -306,36 +310,36 @@ pub fn nuke_ext4_sysfs(mnt: &str) -> anyhow::Result<()> {
 
 /// Wipe all entries from umount list
 pub fn umount_list_wipe() -> std::io::Result<()> {
-    let mut cmd = AddTryUmountCmd {
+    let mut cmd = ManageTryUmountCmd {
         arg: 0,
         flags: 0,
         mode: KSU_UMOUNT_WIPE,
     };
-    ksuctl(KSU_IOCTL_ADD_TRY_UMOUNT, &raw mut cmd)?;
+    ksuctl(KSU_IOCTL_MANAGE_TRY_UMOUNT, &raw mut cmd)?;
     Ok(())
 }
 
 /// Add mount point to umount list
 pub fn umount_list_add(path: &str, flags: u32) -> anyhow::Result<()> {
     let c_path = std::ffi::CString::new(path)?;
-    let mut cmd = AddTryUmountCmd {
+    let mut cmd = ManageTryUmountCmd {
         arg: c_path.as_ptr() as u64,
         flags,
         mode: KSU_UMOUNT_ADD,
     };
-    ksuctl(KSU_IOCTL_ADD_TRY_UMOUNT, &raw mut cmd)?;
+    ksuctl(KSU_IOCTL_MANAGE_TRY_UMOUNT, &raw mut cmd)?;
     Ok(())
 }
 
 /// Delete mount point from umount list
 pub fn umount_list_del(path: &str) -> anyhow::Result<()> {
     let c_path = std::ffi::CString::new(path)?;
-    let mut cmd = AddTryUmountCmd {
+    let mut cmd = ManageTryUmountCmd {
         arg: c_path.as_ptr() as u64,
         flags: 0,
         mode: KSU_UMOUNT_DEL,
     };
-    ksuctl(KSU_IOCTL_ADD_TRY_UMOUNT, &raw mut cmd)?;
+    ksuctl(KSU_IOCTL_MANAGE_TRY_UMOUNT, &raw mut cmd)?;
     Ok(())
 }
 
@@ -369,27 +373,60 @@ pub fn dynamic_manager_clear() -> anyhow::Result<()> {
     Ok(())
 }
 
-const KSU_IOCTL_LIST_TRY_UMOUNT: i32 = _IOWR::<()>(K, 255);
-
-#[repr(C)]
-#[derive(Clone, Copy, Default)]
-struct ListTryUmountCmd {
-    arg: u64,
-    buf_size: u32,
-}
-
 /// List all mount points in umount list
-pub fn umount_list_list() -> anyhow::Result<String> {
-    const BUF_SIZE: usize = 4096;
-    let mut buffer = vec![0u8; BUF_SIZE];
-    let mut cmd = ListTryUmountCmd {
-        arg: buffer.as_mut_ptr() as u64,
-        buf_size: BUF_SIZE as u32,
+pub fn umount_list_list() -> anyhow::Result<Vec<MountInfo>> {
+    const FLAGS_SIZE: usize = std::mem::size_of::<u32>();
+    let mut total_size: usize = 0;
+    let mut size_cmd = ManageTryUmountCmd {
+        arg: &raw mut total_size as u64,
+        flags: 0,
+        mode: KSU_UMOUNT_GETSIZE_NEW,
     };
-    ksuctl(KSU_IOCTL_LIST_TRY_UMOUNT, &raw mut cmd)?;
+    ksuctl(KSU_IOCTL_MANAGE_TRY_UMOUNT, &raw mut size_cmd)?;
 
-    // Find null terminator or end of buffer
-    let len = buffer.iter().position(|&b| b == 0).unwrap_or(BUF_SIZE);
-    let result = String::from_utf8_lossy(&buffer[..len]).to_string();
-    Ok(result)
+    if total_size == 0 {
+        return Ok(vec![]);
+    }
+
+    let mut buffer = vec![0u8; total_size];
+    let mut list_cmd = ManageTryUmountCmd {
+        arg: buffer.as_mut_ptr() as u64,
+        flags: 0,
+        mode: KSU_UMOUNT_GETLIST_NEW,
+    };
+    ksuctl(KSU_IOCTL_MANAGE_TRY_UMOUNT, &raw mut list_cmd)?;
+
+    let mut list = Vec::new();
+    let mut cursor = 0;
+    let len = buffer.len();
+
+    while cursor < len {
+        use anyhow::Context;
+        let null_pos = buffer[cursor..]
+            .iter()
+            .position(|&b| b == 0)
+            .context("Malformed buffer: missing null terminator")?;
+
+        let end_str = cursor + null_pos;
+
+        let path = String::from_utf8_lossy(&buffer[cursor..end_str]).into_owned();
+
+        cursor = end_str + 1;
+
+        if cursor + 4 > len {
+            break;
+        }
+
+        let flags_bytes: [u8; FLAGS_SIZE] = buffer[cursor..cursor + FLAGS_SIZE]
+            .try_into()
+            .expect("Slice length matches");
+
+        let flags = u32::from_ne_bytes(flags_bytes);
+
+        cursor += FLAGS_SIZE;
+
+        list.push(MountInfo { path, flags });
+    }
+
+    Ok(list)
 }

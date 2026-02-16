@@ -511,10 +511,77 @@ static int do_nuke_ext4_sysfs(void __user *arg)
 struct list_head mount_list = LIST_HEAD_INIT(mount_list);
 DECLARE_RWSEM(mount_list_lock);
 
-static int add_try_umount(void __user *arg)
+static int ksu_umount_list_getsize(struct ksu_manage_try_umount_cmd *cmd,
+                                   bool legacy)
+{
+    // check for pointer first
+    if (!cmd->arg)
+        return -EFAULT;
+
+    struct mount_entry *entry;
+    size_t total_size = 0; // size of list in bytes
+
+    down_read(&mount_list_lock);
+    list_for_each_entry (entry, &mount_list, list) {
+        total_size = total_size + strlen(entry->umountable) + 1; // + 1 for \0
+
+        if (!legacy) {
+            // not legacy, append the size of flags
+            total_size += sizeof(unsigned int);
+        }
+    }
+    up_read(&mount_list_lock);
+
+    // debug
+    pr_info("cmd_manage_try_umount: total_size: %zu\n", total_size);
+
+    if (copy_to_user((size_t __user *)cmd->arg, &total_size,
+                     sizeof(total_size)))
+        return -EFAULT;
+
+    return 0;
+}
+
+static int ksu_umount_list_getlist(struct ksu_manage_try_umount_cmd *cmd,
+                                   bool legacy)
+{
+    if (!cmd->arg)
+        return -EFAULT;
+
+    struct mount_entry *entry;
+    char __user *user_buf = (char __user *)cmd->arg;
+    size_t len;
+
+    down_read(&mount_list_lock);
+
+    list_for_each_entry (entry, &mount_list, list) {
+        len = strlen(entry->umountable) + 1; // +1 for \0
+
+        if (copy_to_user(user_buf, entry->umountable, len)) {
+            up_read(&mount_list_lock);
+            return -EFAULT;
+        }
+        user_buf += len;
+
+        if (!legacy) {
+            // not legacy, we put flags too
+            // userspace can simple use an struct to recv data, because it memory layout are 100% consistent
+            if (copy_to_user(user_buf, &entry->flags, sizeof(entry->flags))) {
+                up_read(&mount_list_lock);
+                return -EFAULT;
+            }
+            user_buf += sizeof(entry->flags);
+        }
+    }
+
+    up_read(&mount_list_lock);
+    return 0;
+}
+
+static int manage_try_umount(void __user *arg)
 {
     struct mount_entry *new_entry, *entry, *tmp;
-    struct ksu_add_try_umount_cmd cmd;
+    struct ksu_manage_try_umount_cmd cmd;
     char buf[256] = { 0 };
 
     if (copy_from_user(&cmd, arg, sizeof cmd))
@@ -559,7 +626,7 @@ static int add_try_umount(void __user *arg)
         // if this gets too many, we can consider moving this whole task to a kthread
         list_for_each_entry (entry, &mount_list, list) {
             if (!strcmp(entry->umountable, buf)) {
-                pr_info("cmd_add_try_umount: %s is already here!\n", buf);
+                pr_info("cmd_manage_try_umount: %s is already here!\n", buf);
                 up_write(&mount_list_lock);
                 kfree(new_entry->umountable);
                 kfree(new_entry);
@@ -577,7 +644,7 @@ static int add_try_umount(void __user *arg)
         // debug
         list_add(&new_entry->list, &mount_list);
         up_write(&mount_list_lock);
-        pr_info("cmd_add_try_umount: %s added!\n", buf);
+        pr_info("cmd_manage_try_umount: %s added!\n", buf);
 
         return 0;
     }
@@ -594,7 +661,7 @@ static int add_try_umount(void __user *arg)
         down_write(&mount_list_lock);
         list_for_each_entry_safe (entry, tmp, &mount_list, list) {
             if (!strcmp(entry->umountable, buf)) {
-                pr_info("cmd_add_try_umount: entry removed: %s\n",
+                pr_info("cmd_manage_try_umount: entry removed: %s\n",
                         entry->umountable);
                 list_del(&entry->list);
                 kfree(entry->umountable);
@@ -606,28 +673,12 @@ static int add_try_umount(void __user *arg)
         return 0;
     }
     // this way userspace can deduce the memory it has to prepare.
-    case KSU_UMOUNT_GETSIZE: {
-        // check for pointer first
-        if (!cmd.arg)
-            return -EFAULT;
+    case KSU_UMOUNT_GETSIZE_LEGACY: {
+        return ksu_umount_list_getsize(&cmd, true);
+    }
 
-        size_t total_size = 0; // size of list in bytes
-
-        down_read(&mount_list_lock);
-        list_for_each_entry (entry, &mount_list, list) {
-            total_size =
-                total_size + strlen(entry->umountable) + 1; // + 1 for \0
-        }
-        up_read(&mount_list_lock);
-
-        // debug
-        pr_info("cmd_add_try_umount: total_size: %zu\n", total_size);
-
-        if (copy_to_user((size_t __user *)cmd.arg, &total_size,
-                         sizeof(total_size)))
-            return -EFAULT;
-
-        return 0;
+    case KSU_UMOUNT_GETSIZE_NEW: {
+        return ksu_umount_list_getsize(&cmd, false);
     }
 
     // WARNING! this is straight up pointerwalking.
@@ -635,33 +686,15 @@ static int add_try_umount(void __user *arg)
     // this also avoids us needing to kmalloc
     // userspace have to send pointer to memory or pointer to a VLA.
     // userspace also has to process the flat blob itself and zero init properly.
-    case KSU_UMOUNT_GETLIST: {
-        // check for pointer first
-        if (!cmd.arg)
-            return -EFAULT;
+    case KSU_UMOUNT_GETLIST_LEGACY: {
+        return ksu_umount_list_getlist(&cmd, true);
+    }
 
-        void *user_buf = (void *)cmd.arg;
-
-        // userspace is resposible for zero init-ing their buffer!
-
-        down_read(&mount_list_lock);
-        list_for_each_entry (entry, &mount_list, list) {
-            //debug
-            pr_info("cmd_add_try_umount: entry: %s\n", entry->umountable);
-
-            if (copy_to_user(user_buf, entry->umountable,
-                             strlen(entry->umountable)))
-                return -EFAULT;
-
-            // walk it! +1 for null terminator
-            user_buf = user_buf + strlen(entry->umountable) + 1;
-        }
-        up_read(&mount_list_lock);
-
-        return 0;
+    case KSU_UMOUNT_GETLIST_NEW: {
+        return ksu_umount_list_getlist(&cmd, false);
     }
     default: {
-        pr_err("cmd_add_try_umount: invalid operation %u\n", cmd.mode);
+        pr_err("cmd_manage_try_umount: invalid operation %u\n", cmd.mode);
         return -EINVAL;
     }
 
@@ -845,9 +878,9 @@ static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
       .name = "NUKE_EXT4_SYSFS",
       .handler = do_nuke_ext4_sysfs,
       .perm_check = manager_or_root },
-    { .cmd = KSU_IOCTL_ADD_TRY_UMOUNT,
-      .name = "ADD_TRY_UMOUNT",
-      .handler = add_try_umount,
+    { .cmd = KSU_IOCTL_MANAGE_TRY_UMOUNT,
+      .name = "MANAGE_TRY_UMOUNT",
+      .handler = manage_try_umount,
       .perm_check = manager_or_root },
     { .cmd = KSU_IOCTL_GET_FULL_VERSION,
       .name = "GET_FULL_VERSION",

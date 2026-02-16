@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">Dinonaktifkan</string>
     <string name="selinux_status_enforcing">Ditegakkan</string>
     <string name="selinux_status_permissive">Permisi</string>
-    <string name="selinux_status_unknown">Tidak Diketahui</string>
+    <string name="unknown">Tidak Diketahui</string>
     <string name="superuser">Superuser</string>
     <string name="module_failed_to_enable">Gagal mengaktifkan modul: %s</string>
     <string name="module_failed_to_disable">Gagal menonaktifkan modul: %s</string>

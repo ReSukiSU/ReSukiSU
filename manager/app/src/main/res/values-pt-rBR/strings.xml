@@ -13,7 +13,7 @@
     <string name="selinux_status_disabled">Desativado</string>
     <string name="selinux_status_enforcing">Impondo</string>
     <string name="selinux_status_permissive">Permissivo</string>
-    <string name="selinux_status_unknown">Desconhecido</string>
+    <string name="unknown">Desconhecido</string>
     <string name="superuser">SuperUsuário</string>
     <string name="module_failed_to_enable">Não foi possível ativar o módulo %s</string>
     <string name="module_failed_to_disable">Não foi possível desativar o módulo %s</string>

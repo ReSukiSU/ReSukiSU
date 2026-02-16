@@ -15,7 +15,7 @@
     <string name="selinux_status_disabled">被禁用</string>
     <string name="selinux_status_enforcing">强制执行</string>
     <string name="selinux_status_permissive">宽容模式</string>
-    <string name="selinux_status_unknown">未知</string>
+    <string name="unknown">未知</string>
     <string name="superuser">超级用户</string>
     <string name="module_failed_to_enable">无法启用模块：%s</string>
     <string name="module_failed_to_disable">无法禁用模块：%s</string>
@@ -689,23 +689,22 @@
     <string name="incompatible_kernel_msg">当前管理器与此内核不兼容！请将内核升级至版本 %2$d 或以上（当前 %1$d）</string>
     <string name="umount_path_manager">Umount 路径管理</string>
     <string name="umount_path_manager_summary">管理内核卸载路径</string>
-    <string name="umount_path_restart_notice">添加或删除路径后需要重启设备才能生效。系统会在下次启动时应用新的配置。</string>
+    <string name="changes_take_effect_immediately">所有修改将即时生效</string>
     <string name="no_any_umount_path">没有任何内核卸载路径</string>
     <string name="add_umount_path">添加 Umount 路径</string>
     <string name="mount_path">挂载路径</string>
     <string name="umount_flags">卸载标志</string>
     <string name="umount_flags_hint">0=正常卸载, 2=MNT_DETACH</string>
-    <string name="flags">标志</string>
+    <string name="persistent">持久</string>
+    <string name="temporary">临时</string>
     <string name="confirm_delete">确认删除</string>
     <string name="confirm_delete_umount_path">确定要删除路径 %s 吗？</string>
-    <string name="umount_path_added">路径已添加，重启后生效</string>
-    <string name="umount_path_removed">路径已删除，重启后生效</string>
+    <string name="umount_path_added">卸载路径已添加</string>
+    <string name="umount_path_removed">卸载路径已删除</string>
     <string name="operation_failed">操作失败</string>
     <string name="confirm_action">确认操作</string>
     <string name="confirm_clear_custom_paths">确定要清除所有自定义路径吗？（默认路径将保留）</string>
     <string name="custom_paths_cleared">自定义路径已清除</string>
-    <string name="clear_custom_paths">清除自定义</string>
-    <string name="apply_config">应用配置</string>
     <string name="config_applied">配置已应用到内核</string>
     <string name="group_contains_apps">包含 %1$d 个应用</string>
     <string name="meta_module_disabled">模块未挂载，因为元模块已禁用</string>

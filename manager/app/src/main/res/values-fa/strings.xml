@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">غیرفعال</string>
     <string name="selinux_status_enforcing">قانونمند</string>
     <string name="selinux_status_permissive">آزاد</string>
-    <string name="selinux_status_unknown">ناشناخته</string>
+    <string name="unknown">ناشناخته</string>
     <string name="superuser">دسترسی روت</string>
     <string name="module_failed_to_enable">فعال کردن ماژول ناموفق بود: %s</string>
     <string name="module_failed_to_disable">غیرفعال کردن ماژول ناموفق بود: %s</string>

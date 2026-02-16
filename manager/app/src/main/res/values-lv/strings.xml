@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">Atspējots</string>
     <string name="selinux_status_enforcing">Izpildīšana</string>
     <string name="selinux_status_permissive">Visatļautība</string>
-    <string name="selinux_status_unknown">Nezināms</string>
+    <string name="unknown">Nezināms</string>
     <string name="superuser">SuperLietotājs</string>
     <string name="module_failed_to_enable">Neizdevās iespējot moduli: %s</string>
     <string name="module_failed_to_disable">Neizdevās atspējot moduli: %s</string>

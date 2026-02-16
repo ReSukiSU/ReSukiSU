@@ -220,7 +220,7 @@ fun HomePage(
                     }
                     if (viewModel.systemStatus.requireNewKernel) {
                         WarningCard(
-                            stringResource(id = R.string.require_kernel_version).format(
+                            message = stringResource(id = R.string.require_kernel_version).format(
                                 Natives.getSimpleVersionFull(),
                                 Natives.MINIMAL_SUPPORTED_KERNEL_FULL
                             )
@@ -229,7 +229,7 @@ fun HomePage(
 
                     if (viewModel.systemStatus.ksuVersion != null && !viewModel.systemStatus.isRootAvailable) {
                         WarningCard(
-                            stringResource(id = R.string.grant_root_failed)
+                            message = stringResource(id = R.string.grant_root_failed)
                         )
                     }
 

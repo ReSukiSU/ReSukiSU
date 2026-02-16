@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="selinux_status_unknown">తెలియదు</string>
+    <string name="unknown">తెలియదు</string>
     <string name="module_failed_to_enable">మాడ్యూల్‌ని ప్రారంభించడంలో విఫలమైంది: %s</string>
     <string name="force_stop_app">బలవంతంగా ఆపడం</string>
     <string name="restart_app">పునఃప్రారంభించండి</string>

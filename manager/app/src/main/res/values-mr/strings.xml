@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">अक्षम</string>
     <string name="selinux_status_enforcing">एनफोर्सिंग</string>
     <string name="selinux_status_permissive">परमिसिव</string>
-    <string name="selinux_status_unknown">अज्ञात</string>
+    <string name="unknown">अज्ञात</string>
     <string name="superuser">सुपरयुझर</string>
     <string name="module_failed_to_enable">मॉड्यूल सक्षम करण्यात अयशस्वी: %s</string>
     <string name="module_failed_to_disable">मॉड्यूल अक्षम करण्यात अयशस्वी: %s</string>

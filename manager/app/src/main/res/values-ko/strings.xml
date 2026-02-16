@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">비활성화됨</string>
     <string name="selinux_status_enforcing">적용</string>
     <string name="selinux_status_permissive">허용</string>
-    <string name="selinux_status_unknown">알 수 없음</string>
+    <string name="unknown">알 수 없음</string>
     <string name="superuser">슈퍼유저</string>
     <string name="module_failed_to_enable">모듈 활성화 실패: %s</string>
     <string name="module_failed_to_disable">모듈 비활성화 실패: %s</string>

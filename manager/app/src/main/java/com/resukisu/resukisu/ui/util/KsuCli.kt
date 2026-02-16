@@ -598,26 +598,26 @@ fun getZygiskImplement(): String {
     return "None"
 }
 
-fun addUmountPath(path: String, flags: Int): Boolean {
+fun addKernelUmountPath(path: String, flags: Int): Boolean {
     val shell = getRootShell()
     val flagsArg = if (flags >= 0) "--flags $flags" else ""
-    val cmd = "${getKsuDaemonPath()} umount add $path $flagsArg"
+    val cmd = "${getKsuDaemonPath()} kernel umount add $path $flagsArg"
     val result = ShellUtils.fastCmdResult(shell, cmd)
     Log.i(TAG, "add umount path $path result: $result")
     return result
 }
 
-fun removeUmountPath(path: String): Boolean {
+fun removeKernelUmountPath(path: String): Boolean {
     val shell = getRootShell()
-    val cmd = "${getKsuDaemonPath()} umount remove $path"
+    val cmd = "${getKsuDaemonPath()} kernel umount del $path"
     val result = ShellUtils.fastCmdResult(shell, cmd)
     Log.i(TAG, "remove umount path $path result: $result")
     return result
 }
 
-fun listUmountPaths(): String {
+fun listKernelUmountPaths(): String {
     val shell = getRootShell()
-    val cmd = "${getKsuDaemonPath()} umount list"
+    val cmd = "${getKsuDaemonPath()} kernel umount list"
     return try {
         runCmd(shell, cmd).trim()
     } catch (e: Exception) {
@@ -626,26 +626,30 @@ fun listUmountPaths(): String {
     }
 }
 
-fun clearCustomUmountPaths(): Boolean {
+fun addUmountConfigUmountPath(path: String, flags: Int): Boolean {
     val shell = getRootShell()
-    val cmd = "${getKsuDaemonPath()} umount clear-custom"
+    val flagsArg = if (flags >= 0) "--flags $flags" else ""
+    val cmd = "${getKsuDaemonPath()} umount-config add $path $flagsArg"
     val result = ShellUtils.fastCmdResult(shell, cmd)
-    Log.i(TAG, "clear custom umount paths result: $result")
+    Log.i(TAG, "add umount path $path result: $result")
     return result
 }
 
-fun saveUmountConfig(): Boolean {
+fun removeUmountConfigUmountPath(path: String): Boolean {
     val shell = getRootShell()
-    val cmd = "${getKsuDaemonPath()} umount save"
+    val cmd = "${getKsuDaemonPath()} umount-config del $path"
     val result = ShellUtils.fastCmdResult(shell, cmd)
-    Log.i(TAG, "save umount config result: $result")
+    Log.i(TAG, "remove umount path $path result: $result")
     return result
 }
 
-fun applyUmountConfigToKernel(): Boolean {
+fun listUmountConfigUmountPaths(): String {
     val shell = getRootShell()
-    val cmd = "${getKsuDaemonPath()} umount apply"
-    val result = ShellUtils.fastCmdResult(shell, cmd)
-    Log.i(TAG, "apply umount config to kernel result: $result")
-    return result
+    val cmd = "${getKsuDaemonPath()} umount-config list"
+    return try {
+        runCmd(shell, cmd).trim()
+    } catch (e: Exception) {
+        Log.e(TAG, "Failed to list umount paths", e)
+        ""
+    }
 }

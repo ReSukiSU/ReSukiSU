@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">Keelatud</string>
     <string name="selinux_status_enforcing">Jõustav</string>
     <string name="selinux_status_permissive">Lubav</string>
-    <string name="selinux_status_unknown">Teadmata</string>
+    <string name="unknown">Teadmata</string>
     <string name="superuser">Superkasutaja</string>
     <string name="module_failed_to_enable">Mooduli lubamine ebaõnnestus: %s</string>
     <string name="module_failed_to_disable">Mooduli keelamine ebaõnnestus: %s</string>

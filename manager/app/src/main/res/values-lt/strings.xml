@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">Išjungta</string>
     <string name="selinux_status_enforcing">Priverstinas</string>
     <string name="selinux_status_permissive">Leistinas</string>
-    <string name="selinux_status_unknown">Nežinomas</string>
+    <string name="unknown">Nežinomas</string>
     <string name="superuser">Supernaudotojai</string>
     <string name="module_failed_to_enable">Nepavyko įjungti modulio: %s</string>
     <string name="module_failed_to_disable">Nepavyko išjungti modulio: %s</string>

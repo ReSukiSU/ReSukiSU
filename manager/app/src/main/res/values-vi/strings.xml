@@ -15,7 +15,7 @@
     <string name="selinux_status_disabled">Vô hiệu hoá</string>
     <string name="selinux_status_enforcing">Enforcing</string>
     <string name="selinux_status_permissive">Permissive</string>
-    <string name="selinux_status_unknown">Không xác định</string>
+    <string name="unknown">Không xác định</string>
     <string name="superuser">Superuser</string>
     <string name="module_failed_to_enable">Không thể kích hoạt module: %s</string>
     <string name="module_failed_to_disable">Không thể vô hiệu hoá module: %s</string>
@@ -670,23 +670,18 @@ Bật: Kích hoạt tính năng giả mạo sus tcontext của \'su\' thành \'u
     <string name="incompatible_kernel_msg">Trình quản lý hiện tại không tương thích với Kernel này! Vui lòng nâng cấp Kernel lên phiên bản %2$d hoặc cao hơn (hiện tại là %1$d)</string>
     <string name="umount_path_manager">Quản lý Đường dẫn Umount</string>
     <string name="umount_path_manager_summary">Quản lý Đường dẫn Kernel Umount</string>
-    <string name="umount_path_restart_notice">Cần khởi động lại để các thay đổi có hiệu lực. Hệ thống sẽ áp dụng cấu hình mới vào lần khởi động tiếp theo</string>
     <string name="add_umount_path">Thêm Đường dẫn Umount</string>
     <string name="mount_path">Đường dẫn Mount</string>
     <string name="umount_flags">Umount Flags</string>
     <string name="umount_flags_hint">0=Normal unmount, 2=MNT_DETACH</string>
-    <string name="flags">Flags</string>
     <string name="confirm_delete">Xác nhận Xoá?</string>
     <string name="confirm_delete_umount_path">Bạn có chắc chắn muốn xóa đường dẫn %s không?</string>
-    <string name="umount_path_added">Đã thêm đường dẫn, sẽ có hiệu lực sau khi khởi động lại</string>
-    <string name="umount_path_removed">Đường dẫn đã bị xóa, sẽ có hiệu lực sau khi khởi động lại</string>
+    <string name="umount_path_added">Đã thêm đường dẫn</string>
+    <string name="umount_path_removed">Đường dẫn đã bị xóa</string>
     <string name="operation_failed">Thao tác thất bại</string>
     <string name="confirm_action">Xác nhận Khởi chạy?</string>
     <string name="confirm_clear_custom_paths">Bạn có chắc chắn muốn xóa tất cả các đường dẫn tùy chỉnh không? (các đường dẫn mặc định sẽ được giữ nguyên)</string>
     <string name="custom_paths_cleared">Đường dẫn tùy chỉnh đã được xóa</string>
-    <string name="clear_custom_paths">Xóa Đường dẫn Tùy chỉnh</string>
-    <string name="apply_config">Áp dụng Cấu hình</string>
     <string name="config_applied">Cấu hình đã được áp dụng cho Kernel</string>
-    <string name="mnt_detach">MNT_DETACH</string>
     <string name="group_contains_apps">Chứa %d ứng dụng</string>
 </resources>

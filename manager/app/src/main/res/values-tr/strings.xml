@@ -15,7 +15,7 @@
     <string name="selinux_status_disabled">Devre dışı</string>
     <string name="selinux_status_enforcing">Enfocing(Etkin)</string>
     <string name="selinux_status_permissive">Permissive(Devre Dışı)</string>
-    <string name="selinux_status_unknown">Bilinmiyor</string>
+    <string name="unknown">Bilinmiyor</string>
     <string name="superuser">SüperKullanıcı</string>
     <string name="module_failed_to_enable">Modül etkinleştirilemedi: %s</string>
     <string name="module_failed_to_disable">Modül devre dışı bırakılamadı: %s</string>
@@ -671,23 +671,18 @@
     <string name="incompatible_kernel_msg">Mevcut yönetici bu çekirdekle uyumsuz! Lütfen çekirdeği %2$d veya daha yüksek bir sürüme yükseltin (mevcut sürüm %1$d)</string>
     <string name="umount_path_manager">Bağlantı Kaldırma Yolu Yönetimi</string>
     <string name="umount_path_manager_summary">Çekirdek bağlantı kaldırma yollarını yönetin</string>
-    <string name="umount_path_restart_notice">Değişikliklerin etkili olması için yeniden başlatma gereklidir. Sistem yeni yapılandırmayı bir sonraki önyüklemede uygulayacaktır</string>
     <string name="add_umount_path">Bağlantı Kaldırma Yolu Ekle</string>
     <string name="mount_path">Bağlama Yolu</string>
     <string name="umount_flags">Bağlantı Kaldırma Bayrakları</string>
     <string name="umount_flags_hint">0=Normal unmount, 2=MNT_DETACH</string>
-    <string name="flags">Bayraklar</string>
     <string name="confirm_delete">Silmeyi Onayla</string>
     <string name="confirm_delete_umount_path">%s yolunu silmek istediğinizden emin misiniz?</string>
-    <string name="umount_path_added">Yol eklendi, yeniden başlattıktan sonra geçerli olacak</string>
-    <string name="umount_path_removed">Yol kaldırıldı, yeniden başlattıktan sonra geçerli olacak</string>
+    <string name="umount_path_added">Yol eklendi</string>
+    <string name="umount_path_removed">Yol kaldırıldı</string>
     <string name="operation_failed">İşlem başarısız oldu</string>
     <string name="confirm_action">Eylemi Onayla</string>
     <string name="confirm_clear_custom_paths">Tüm özel yolları temizlemek istediğinizden emin misiniz? (varsayılan yollar korunacaktır)</string>
     <string name="custom_paths_cleared">Özel yollar temizlendi</string>
-    <string name="clear_custom_paths">Özel Yolları Temizle</string>
-    <string name="apply_config">Yapılandırmayı Uygula</string>
     <string name="config_applied">Yapılandırma çekirdeğe uygulandı</string>
-    <string name="mnt_detach">MNT_DETACH</string>
     <string name="group_contains_apps">%d uygulama içeriyor</string>
 </resources>

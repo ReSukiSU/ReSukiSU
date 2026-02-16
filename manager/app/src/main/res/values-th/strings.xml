@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">ปิดใช้งาน</string>
     <string name="selinux_status_enforcing">Enforcing</string>
     <string name="selinux_status_permissive">Permissive</string>
-    <string name="selinux_status_unknown">ไม่ทราบ</string>
+    <string name="unknown">ไม่ทราบ</string>
     <string name="superuser">สิทธิ์ผู้ใช้ขั้นสูง</string>
     <string name="module_failed_to_enable">ไม่สามารถเปิดใช้งานโมดูล %s</string>
     <string name="module_failed_to_disable">ไม่สามารถปิดใช้งานโมดูล: %s</string>

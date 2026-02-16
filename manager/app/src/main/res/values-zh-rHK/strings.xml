@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">被禁用</string>
     <string name="selinux_status_enforcing">強制執行</string>
     <string name="selinux_status_permissive">寬容模式</string>
-    <string name="selinux_status_unknown">未知</string>
+    <string name="unknown">未知</string>
     <string name="superuser">超級用戶</string>
     <string name="module_failed_to_enable">無法啟用模組：%s</string>
     <string name="module_failed_to_disable">無法禁用模組：%s</string>

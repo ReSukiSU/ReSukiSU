@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">Uitgeschakeld</string>
     <string name="selinux_status_enforcing">Afgedwongen</string>
     <string name="selinux_status_permissive">Permissief</string>
-    <string name="selinux_status_unknown">Niet gekend</string>
+    <string name="unknown">Niet gekend</string>
     <string name="superuser">Supergebruiker</string>
     <string name="module_failed_to_enable">Mislukt om module in te schakelen: %s</string>
     <string name="module_failed_to_disable">Mislukt om module uit te schakelen: %s</string>

@@ -1,6 +1,7 @@
 #[cfg(target_os = "android")]
 mod android {
     use const_format::concatcp;
+    use serde::Serialize;
 
     pub const ADB_DIR: &str = "/data/adb/";
     pub const WORKING_DIR: &str = concatcp!(ADB_DIR, "ksu/");
@@ -46,6 +47,12 @@ mod android {
     pub const UMOUNT_CONFIG_PATH: &str = concatcp!(WORKING_DIR, ".umount");
 
     pub const DYNAMIC_MANAGER: &str = concatcp!(WORKING_DIR, ".dynamic_manager");
+
+    #[derive(Serialize)]
+    pub struct MountInfo {
+        pub path: String,
+        pub flags: u32,
+    }
 }
 
 pub const VERSION_CODE: &str = include_str!(concat!(env!("OUT_DIR"), "/VERSION_CODE"));

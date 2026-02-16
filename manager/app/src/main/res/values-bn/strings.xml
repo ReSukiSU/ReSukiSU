@@ -13,7 +13,7 @@
     <string name="selinux_status_disabled">ডিজেবল</string>
     <string name="selinux_status_enforcing">কার্যকর</string>
     <string name="selinux_status_permissive">অনুমতিমূলক</string>
-    <string name="selinux_status_unknown">অজানা</string>
+    <string name="unknown">অজানা</string>
     <string name="superuser">সুপার ইউজার</string>
     <string name="module_failed_to_enable">মডিউল সক্ষম করতে ব্যর্থ হয়েছে: %s</string>
     <string name="module_failed_to_disable">মডিউল নিষ্ক্রিয় করতে ব্যর্থ হয়েছে: %s</string>

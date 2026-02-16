@@ -13,5 +13,5 @@ mod sepolicy;
 mod su;
 #[cfg(all(target_arch = "aarch64", target_os = "android"))]
 mod susfs;
-mod umount;
+mod umount_config;
 pub mod utils;

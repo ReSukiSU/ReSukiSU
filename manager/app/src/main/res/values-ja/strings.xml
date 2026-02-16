@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">無効</string>
     <string name="selinux_status_enforcing">Enforcing</string>
     <string name="selinux_status_permissive">Permissive</string>
-    <string name="selinux_status_unknown">不明</string>
+    <string name="unknown">不明</string>
     <string name="superuser">スーパーユーザー</string>
     <string name="module_failed_to_enable">%s モジュールを ON にできませんでした</string>
     <string name="module_failed_to_disable">%s モジュールを OFF にできませんでした</string>
@@ -648,15 +648,11 @@
     <string name="mount_path">マウントパス</string>
     <string name="umount_flags">アンマウントフラグ</string>
     <string name="umount_flags_hint">0=通常のアンマウント、2=MNT_DETACH</string>
-    <string name="flags">フラグ</string>
     <string name="confirm_delete">構成を削除</string>
     <string name="operation_failed">操作が失敗しました</string>
     <string name="confirm_action">アクションを確認</string>
     <string name="custom_paths_cleared">カスタムパスを消去しました</string>
-    <string name="clear_custom_paths">カスタムパスを消去</string>
-    <string name="apply_config">構成を適用</string>
     <string name="config_applied">カーネルに適用された構成</string>
-    <string name="mnt_detach">MNT_DETACH</string>
     <string name="group_contains_apps">%d 個のアプリが含まれています</string>
     <string name="settings_sucompat">古典 su 命令</string>
     <string name="settings_sucompat_summary">/system/bin/su 経由での 根源権限（特権）を 許可します（新規 手順/工程 のみ）</string>

@@ -216,8 +216,12 @@ fun SettingsPage(navigator: DestinationsNavigator, bottomPadding: Dp, hazeState:
                                     }
                                 )
                             }
-                            val suStatus by produceState(initialValue = "") {
-                                value = getFeatureStatus("su_compat")
+                            var savedSuStatus by rememberSaveable { mutableStateOf("") }
+                            val suStatus by produceState(initialValue = savedSuStatus) {
+                                value = withContext(Dispatchers.IO) {
+                                    savedSuStatus = getFeatureStatus("su_compat")
+                                    return@withContext savedSuStatus
+                                }
                             }
                             val suSummary = when (suStatus) {
                                 "unsupported" -> {
@@ -266,8 +270,12 @@ fun SettingsPage(navigator: DestinationsNavigator, bottomPadding: Dp, hazeState:
 
                         item {
                             var isKernelUmountEnabled by rememberSaveable { mutableStateOf(Natives.isKernelUmountEnabled()) }
-                            val umountStatus by produceState(initialValue = "") {
-                                value = getFeatureStatus("kernel_umount")
+                            var savedUmountStatus by rememberSaveable { mutableStateOf("") }
+                            val umountStatus by produceState(initialValue = savedUmountStatus) {
+                                value = withContext(Dispatchers.IO) {
+                                    savedUmountStatus = getFeatureStatus("kernel_umount")
+                                    return@withContext savedUmountStatus
+                                }
                             }
                             val umountSummary = when (umountStatus) {
                                 "unsupported" -> stringResource(id = R.string.feature_status_unsupported_summary)
@@ -299,8 +307,12 @@ fun SettingsPage(navigator: DestinationsNavigator, bottomPadding: Dp, hazeState:
                                     }
                                 )
                             }
-                            val suLogStatus by produceState(initialValue = "") {
-                                value = getFeatureStatus("sulog")
+                            var savedSuLogStatus by rememberSaveable { mutableStateOf("") }
+                            val suLogStatus by produceState(initialValue = savedSuLogStatus) {
+                                value = withContext(Dispatchers.IO) {
+                                    savedSuLogStatus = getFeatureStatus("sulog")
+                                    return@withContext savedSuLogStatus
+                                }
                             }
                             val suLogSummary = when (suLogStatus) {
                                 "unsupported" -> {

@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">Letiltva</string>
     <string name="selinux_status_enforcing">Kényszerített</string>
     <string name="selinux_status_permissive">Engedélyezett</string>
-    <string name="selinux_status_unknown">Ismeretlen</string>
+    <string name="unknown">Ismeretlen</string>
     <string name="superuser">Superuser</string>
     <string name="module_failed_to_enable">Nem sikerült engedélyezni a következő modult: %s</string>
     <string name="module_failed_to_disable">Nem sikerült letiltani a következő modult: %s</string>

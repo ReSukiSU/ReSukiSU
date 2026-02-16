@@ -14,7 +14,7 @@
     <string name="selinux_status_disabled">Dezactivat</string>
     <string name="selinux_status_enforcing">Obligatoriu</string>
     <string name="selinux_status_permissive">Permisiv</string>
-    <string name="selinux_status_unknown">Necunoscut</string>
+    <string name="unknown">Necunoscut</string>
     <string name="superuser">Super-Utilizator</string>
     <string name="module_failed_to_enable">Activarea modulului %s a eșuat</string>
     <string name="module_failed_to_disable">Dezactivarea modulului %s a eșuat</string>
