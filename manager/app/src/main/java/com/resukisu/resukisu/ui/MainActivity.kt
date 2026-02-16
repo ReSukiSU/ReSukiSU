@@ -432,6 +432,7 @@ private fun MainScreenContent(
             beyondViewportPageCount = 2,
             userScrollEnabled = userScrollEnabled,
         ) { pageIndex ->
+            if (pages.isEmpty()) return@HorizontalPager
             val destination = pages[pageIndex]
             destination.direction(navigator, paddingBottom, hazeState)
         }
