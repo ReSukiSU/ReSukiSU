@@ -2,36 +2,9 @@ use std::{fs, os::unix::fs::MetadataExt};
 
 use anyhow::Result;
 use clap::Subcommand;
-use libc::{SYS_reboot, c_char, c_int, c_long, c_uint, c_ulong, syscall};
+use libc::{SYS_reboot, syscall};
 
-const KSU_INSTALL_MAGIC1: c_ulong = 0xDEADBEEF;
-const SUSFS_MAGIC: c_ulong = 0xFAFAFAFA;
-
-const CMD_SUSFS_ADD_SUS_PATH: c_ulong = 0x55550;
-const CMD_SUSFS_SET_ANDROID_DATA_ROOT_PATH: c_ulong = 0x55551;
-const CMD_SUSFS_SET_SDCARD_ROOT_PATH: c_ulong = 0x55552;
-const CMD_SUSFS_ADD_SUS_PATH_LOOP: c_ulong = 0x55553;
-const CMD_SUSFS_HIDE_SUS_MNTS_FOR_NON_SU_PROCS: c_ulong = 0x55561;
-const CMD_SUSFS_ADD_SUS_KSTAT: c_ulong = 0x55570;
-const CMD_SUSFS_UPDATE_SUS_KSTAT: c_ulong = 0x55571;
-const CMD_SUSFS_ADD_SUS_KSTAT_STATICALLY: c_ulong = 0x55572;
-const CMD_SUSFS_SET_UNAME: c_ulong = 0x55590;
-const CMD_SUSFS_ENABLE_LOG: c_ulong = 0x555a0;
-const CMD_SUSFS_SET_CMDLINE_OR_BOOTCONFIG: c_ulong = 0x555b0;
-const CMD_SUSFS_ADD_OPEN_REDIRECT: c_ulong = 0x555c0;
-const CMD_SUSFS_SHOW_VERSION: c_ulong = 0x555e1;
-const CMD_SUSFS_SHOW_ENABLED_FEATURES: c_ulong = 0x555e2;
-const CMD_SUSFS_SHOW_VARIANT: c_ulong = 0x555e3;
-const CMD_SUSFS_ENABLE_AVC_LOG_SPOOFING: c_ulong = 0x60010;
-const CMD_SUSFS_ADD_SUS_MAP: c_ulong = 0x60020;
-
-const SUSFS_MAX_LEN_PATHNAME: usize = 256;
-const SUSFS_FAKE_CMDLINE_OR_BOOTCONFIG_SIZE: usize = 8192;
-const SUSFS_ENABLED_FEATURES_SIZE: usize = 8192;
-const SUSFS_MAX_VERSION_BUFSIZE: usize = 16;
-const SUSFS_MAX_VARIANT_BUFSIZE: usize = 16;
-const NEW_UTS_LEN: usize = 64;
-const ERR_CMD_NOT_SUPPORTED: c_int = 126;
+use crate::android::susfs::magic::*;
 
 #[derive(Subcommand, Debug)]
 pub enum SuSFSSubCommands {
@@ -131,10 +104,10 @@ pub enum ShowType {
 
 #[repr(C)]
 struct SusfsSusPath {
-    target_ino: c_ulong,
-    target_pathname: [c_char; SUSFS_MAX_LEN_PATHNAME],
-    i_uid: c_uint,
-    err: c_int,
+    target_ino: u64,
+    target_pathname: [u8; SUSFS_MAX_LEN_PATHNAME],
+    i_uid: u32,
+    err: i32,
 }
 
 impl Default for SusfsSusPath {
@@ -150,10 +123,10 @@ impl Default for SusfsSusPath {
 
 #[repr(C)]
 struct ExternalDir {
-    target_pathname: [c_char; SUSFS_MAX_LEN_PATHNAME],
+    target_pathname: [u8; SUSFS_MAX_LEN_PATHNAME],
     is_inited: bool,
-    cmd: c_int,
-    err: c_int,
+    cmd: i32,
+    err: i32,
 }
 
 impl Default for ExternalDir {
@@ -171,27 +144,27 @@ impl Default for ExternalDir {
 #[derive(Default)]
 struct SusfsHideSusMnts {
     enabled: bool,
-    err: c_int,
+    err: i32,
 }
 
 #[repr(C)]
 struct SusfsSusKstat {
     is_statically: bool,
-    target_ino: c_ulong,
-    target_pathname: [c_char; SUSFS_MAX_LEN_PATHNAME],
-    spoofed_ino: c_ulong,
-    spoofed_dev: c_ulong,
-    spoofed_nlink: c_uint,
-    spoofed_size: libc::c_longlong,
-    spoofed_atime_tv_sec: c_long,
-    spoofed_mtime_tv_sec: c_long,
-    spoofed_ctime_tv_sec: c_long,
-    spoofed_atime_tv_nsec: c_long,
-    spoofed_mtime_tv_nsec: c_long,
-    spoofed_ctime_tv_nsec: c_long,
-    spoofed_blksize: c_ulong,
-    spoofed_blocks: libc::c_ulonglong,
-    err: c_int,
+    target_ino: u64,
+    target_pathname: [u8; SUSFS_MAX_LEN_PATHNAME],
+    spoofed_ino: u64,
+    spoofed_dev: u64,
+    spoofed_nlink: u32,
+    spoofed_size: i64,
+    spoofed_atime_tv_sec: i64,
+    spoofed_mtime_tv_sec: i64,
+    spoofed_ctime_tv_sec: i64,
+    spoofed_atime_tv_nsec: i64,
+    spoofed_mtime_tv_nsec: i64,
+    spoofed_ctime_tv_nsec: i64,
+    spoofed_blksize: u64,
+    spoofed_blocks: u64,
+    err: i32,
 }
 
 impl Default for SusfsSusKstat {
@@ -219,9 +192,9 @@ impl Default for SusfsSusKstat {
 
 #[repr(C)]
 struct SusfsUname {
-    release: [c_char; NEW_UTS_LEN + 1],
-    version: [c_char; NEW_UTS_LEN + 1],
-    err: c_int,
+    release: [u8; NEW_UTS_LEN + 1],
+    version: [u8; NEW_UTS_LEN + 1],
+    err: i32,
 }
 
 impl Default for SusfsUname {
@@ -238,21 +211,21 @@ impl Default for SusfsUname {
 #[derive(Default)]
 struct SusfsLog {
     enabled: bool,
-    err: c_int,
+    err: i32,
 }
 
 #[repr(C)]
 struct SusfsSpoofCmdline {
-    fake_cmdline_or_bootconfig: [c_char; SUSFS_FAKE_CMDLINE_OR_BOOTCONFIG_SIZE],
-    err: c_int,
+    fake_cmdline_or_bootconfig: [u8; SUSFS_FAKE_CMDLINE_OR_BOOTCONFIG_SIZE],
+    err: i32,
 }
 
 #[repr(C)]
 struct SusfsOpenRedirect {
-    target_ino: c_ulong,
-    target_pathname: [c_char; SUSFS_MAX_LEN_PATHNAME],
-    redirected_pathname: [c_char; SUSFS_MAX_LEN_PATHNAME],
-    err: c_int,
+    target_ino: u64,
+    target_pathname: [u8; SUSFS_MAX_LEN_PATHNAME],
+    redirected_pathname: [u8; SUSFS_MAX_LEN_PATHNAME],
+    err: i32,
 }
 
 impl Default for SusfsOpenRedirect {
@@ -268,8 +241,8 @@ impl Default for SusfsOpenRedirect {
 
 #[repr(C)]
 struct SusfsSusMap {
-    target_pathname: [c_char; SUSFS_MAX_LEN_PATHNAME],
-    err: c_int,
+    target_pathname: [u8; SUSFS_MAX_LEN_PATHNAME],
+    err: i32,
 }
 
 impl Default for SusfsSusMap {
@@ -285,28 +258,28 @@ impl Default for SusfsSusMap {
 #[derive(Default)]
 struct SusfsAvcLogSpoofing {
     enabled: bool,
-    err: c_int,
+    err: i32,
 }
 
 #[repr(C)]
 struct SusfsEnabledFeatures {
-    enabled_features: [c_char; SUSFS_ENABLED_FEATURES_SIZE],
-    err: c_int,
+    enabled_features: [u8; SUSFS_ENABLED_FEATURES_SIZE],
+    err: i32,
 }
 
 #[repr(C)]
 struct SusfsVariant {
-    susfs_variant: [c_char; SUSFS_MAX_VARIANT_BUFSIZE],
-    err: c_int,
+    susfs_variant: [u8; SUSFS_MAX_VARIANT_BUFSIZE],
+    err: i32,
 }
 
 #[repr(C)]
 struct SusfsVersion {
-    susfs_version: [c_char; SUSFS_MAX_VERSION_BUFSIZE],
-    err: c_int,
+    susfs_version: [u8; SUSFS_MAX_VERSION_BUFSIZE],
+    err: i32,
 }
 
-fn susfs_ctl<T>(info: &mut T, cmd: c_ulong) {
+fn susfs_ctl<T>(info: &mut T, cmd: u64) {
     unsafe {
         syscall(
             SYS_reboot,
@@ -318,11 +291,11 @@ fn susfs_ctl<T>(info: &mut T, cmd: c_ulong) {
     }
 }
 
-fn str_to_c_array<const N: usize>(s: &str, array: &mut [c_char; N]) {
+fn str_to_c_array<const N: usize>(s: &str, array: &mut [u8; N]) {
     let bytes = s.as_bytes();
     let len = bytes.len().min(N - 1);
     for i in 0..len {
-        array[i] = bytes[i] as c_char;
+        array[i] = bytes[i] as u8;
     }
     array[len] = 0;
 }
@@ -334,21 +307,21 @@ fn fetch_metadata(path: &str) -> Result<fs::Metadata> {
 }
 
 fn copy_metadata_to_sus_kstat(info: &mut SusfsSusKstat, md: &fs::Metadata) {
-    info.spoofed_ino = md.ino() as c_ulong;
-    info.spoofed_dev = md.dev() as c_ulong;
-    info.spoofed_nlink = md.nlink() as c_uint;
-    info.spoofed_size = md.size() as libc::c_longlong;
-    info.spoofed_atime_tv_sec = md.atime() as c_long;
-    info.spoofed_mtime_tv_sec = md.mtime() as c_long;
-    info.spoofed_ctime_tv_sec = md.ctime() as c_long;
-    info.spoofed_atime_tv_nsec = md.atime_nsec() as c_long;
-    info.spoofed_mtime_tv_nsec = md.mtime_nsec() as c_long;
-    info.spoofed_ctime_tv_nsec = md.ctime_nsec() as c_long;
-    info.spoofed_blksize = md.blksize() as c_ulong;
-    info.spoofed_blocks = md.blocks() as libc::c_ulonglong;
+    info.spoofed_ino = md.ino() as u64;
+    info.spoofed_dev = md.dev() as u64;
+    info.spoofed_nlink = md.nlink() as u32;
+    info.spoofed_size = md.size() as i64;
+    info.spoofed_atime_tv_sec = md.atime() as i64;
+    info.spoofed_mtime_tv_sec = md.mtime() as i64;
+    info.spoofed_ctime_tv_sec = md.ctime() as i64;
+    info.spoofed_atime_tv_nsec = md.atime_nsec() as i64;
+    info.spoofed_mtime_tv_nsec = md.mtime_nsec() as i64;
+    info.spoofed_ctime_tv_nsec = md.ctime_nsec() as i64;
+    info.spoofed_blksize = md.blksize() as u64;
+    info.spoofed_blocks = md.blocks() as u64;
 }
 
-fn handle_result(err: c_int, cmd: c_ulong) -> Result<()> {
+fn handle_result(err: i32, cmd: u64) -> Result<()> {
     if err == ERR_CMD_NOT_SUPPORTED {
         println!(
             "[-] CMD: '0x{:x}', SUSFS operation not supported, please enable it in kernel",
@@ -377,8 +350,8 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
             let md = fetch_metadata(&path)?;
             let mut info = SusfsSusPath::default();
             str_to_c_array(&path, &mut info.target_pathname);
-            info.target_ino = md.ino() as c_ulong;
-            info.i_uid = md.uid() as c_uint;
+            info.target_ino = md.ino() as u64;
+            info.i_uid = md.uid() as u32;
             info.err = ERR_CMD_NOT_SUPPORTED;
 
             susfs_ctl(&mut info, CMD_SUSFS_ADD_SUS_PATH);
@@ -388,8 +361,8 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
             let md = fetch_metadata(&path)?;
             let mut info = SusfsSusPath::default();
             str_to_c_array(&path, &mut info.target_pathname);
-            info.target_ino = md.ino() as c_ulong;
-            info.i_uid = md.uid() as c_uint;
+            info.target_ino = md.ino() as u64;
+            info.i_uid = md.uid() as u32;
             info.err = ERR_CMD_NOT_SUPPORTED;
 
             susfs_ctl(&mut info, CMD_SUSFS_ADD_SUS_PATH_LOOP);
@@ -398,7 +371,7 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
         SuSFSSubCommands::SetAndroidDataRootPath { path } => {
             let mut info = ExternalDir::default();
             str_to_c_array(&path, &mut info.target_pathname);
-            info.cmd = CMD_SUSFS_SET_ANDROID_DATA_ROOT_PATH as c_int;
+            info.cmd = CMD_SUSFS_SET_ANDROID_DATA_ROOT_PATH as i32;
             info.err = ERR_CMD_NOT_SUPPORTED;
 
             susfs_ctl(&mut info, CMD_SUSFS_SET_ANDROID_DATA_ROOT_PATH);
@@ -407,7 +380,7 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
         SuSFSSubCommands::SetSdcardRootPath { path } => {
             let mut info = ExternalDir::default();
             str_to_c_array(&path, &mut info.target_pathname);
-            info.cmd = CMD_SUSFS_SET_SDCARD_ROOT_PATH as c_int;
+            info.cmd = CMD_SUSFS_SET_SDCARD_ROOT_PATH as i32;
             info.err = ERR_CMD_NOT_SUPPORTED;
 
             susfs_ctl(&mut info, CMD_SUSFS_SET_SDCARD_ROOT_PATH);
@@ -429,7 +402,7 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
             let mut info = SusfsSusKstat::default();
             str_to_c_array(&path, &mut info.target_pathname);
             info.is_statically = false;
-            info.target_ino = md.ino() as c_ulong;
+            info.target_ino = md.ino() as u64;
             copy_metadata_to_sus_kstat(&mut info, &md);
             info.err = ERR_CMD_NOT_SUPPORTED;
 
@@ -441,9 +414,9 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
             let mut info = SusfsSusKstat::default();
             str_to_c_array(&path, &mut info.target_pathname);
             info.is_statically = false;
-            info.target_ino = md.ino() as c_ulong;
-            info.spoofed_size = md.size() as libc::c_longlong;
-            info.spoofed_blocks = md.blocks() as libc::c_ulonglong;
+            info.target_ino = md.ino() as u64;
+            info.spoofed_size = md.size() as i64;
+            info.spoofed_blocks = md.blocks() as u64;
             info.err = ERR_CMD_NOT_SUPPORTED;
 
             susfs_ctl(&mut info, CMD_SUSFS_UPDATE_SUS_KSTAT);
@@ -454,7 +427,7 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
             let mut info = SusfsSusKstat::default();
             str_to_c_array(&path, &mut info.target_pathname);
             info.is_statically = false;
-            info.target_ino = md.ino() as c_ulong;
+            info.target_ino = md.ino() as u64;
             info.err = ERR_CMD_NOT_SUPPORTED;
 
             susfs_ctl(&mut info, CMD_SUSFS_UPDATE_SUS_KSTAT);
@@ -493,7 +466,7 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
             });
 
             for (i, &b) in content.iter().enumerate() {
-                info.fake_cmdline_or_bootconfig[i] = b as c_char;
+                info.fake_cmdline_or_bootconfig[i] = b as u8;
             }
 
             susfs_ctl(&mut info, CMD_SUSFS_SET_CMDLINE_OR_BOOTCONFIG);
@@ -514,7 +487,7 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
                 abs_redirect.to_str().unwrap(),
                 &mut info.redirected_pathname,
             );
-            info.target_ino = md.ino() as c_ulong;
+            info.target_ino = md.ino() as u64;
             info.err = ERR_CMD_NOT_SUPPORTED;
 
             susfs_ctl(&mut info, CMD_SUSFS_ADD_OPEN_REDIRECT);
@@ -627,7 +600,7 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
             let md = fetch_metadata(&path)?;
             let mut info = SusfsSusKstat::default();
 
-            info.target_ino = md.ino() as c_ulong;
+            info.target_ino = md.ino() as u64;
             info.is_statically = true;
 
             let s_ino = parse_or_default(&ino, md.ino())?;
@@ -645,18 +618,18 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
 
             str_to_c_array(&path, &mut info.target_pathname);
 
-            info.spoofed_ino = s_ino as c_ulong;
-            info.spoofed_dev = s_dev as c_ulong;
-            info.spoofed_nlink = s_nlink as c_uint;
-            info.spoofed_size = s_size as libc::c_longlong;
-            info.spoofed_atime_tv_sec = s_atime as c_long;
-            info.spoofed_mtime_tv_sec = s_mtime as c_long;
-            info.spoofed_ctime_tv_sec = s_ctime as c_long;
-            info.spoofed_atime_tv_nsec = s_atime_nsec as c_long;
-            info.spoofed_mtime_tv_nsec = s_mtime_nsec as c_long;
-            info.spoofed_ctime_tv_nsec = s_ctime_nsec as c_long;
-            info.spoofed_blksize = s_blksize as c_ulong;
-            info.spoofed_blocks = s_blocks as libc::c_ulonglong;
+            info.spoofed_ino = s_ino as u64;
+            info.spoofed_dev = s_dev as u64;
+            info.spoofed_nlink = s_nlink as u32;
+            info.spoofed_size = s_size as i64;
+            info.spoofed_atime_tv_sec = s_atime as i64;
+            info.spoofed_mtime_tv_sec = s_mtime as i64;
+            info.spoofed_ctime_tv_sec = s_ctime as i64;
+            info.spoofed_atime_tv_nsec = s_atime_nsec as i64;
+            info.spoofed_mtime_tv_nsec = s_mtime_nsec as i64;
+            info.spoofed_ctime_tv_nsec = s_ctime_nsec as i64;
+            info.spoofed_blksize = s_blksize as u64;
+            info.spoofed_blocks = s_blocks as u64;
 
             info.err = ERR_CMD_NOT_SUPPORTED;
 
