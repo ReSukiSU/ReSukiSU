@@ -77,8 +77,6 @@
     <string name="module_changelog">Список изменений</string>
     <string name="settings_profile_template">Шаблон профиля приложения</string>
     <string name="settings_profile_template_summary">Управление локальным и онлайн-шаблоном профиля приложения</string>
-    <string name="settings_check_update">Уведомления об обновлениях</string>
-    <string name="settings_check_update_summary">Автоматически проверять обновления модулей и менеджера</string>
     <string name="app_profile_template_create">Создать шаблон</string>
     <string name="app_profile_template_edit">Редактирование шаблона</string>
     <string name="app_profile_template_id">Идентификационный номер</string>
@@ -99,6 +97,8 @@
     <string name="app_profile_template_save_failed">Не удалось сохранить шаблон</string>
     <string name="app_profile_template_import_empty">Буфер обмена пуст!</string>
     <string name="module_changelog_failed">Не удалось получить список изменений: %s</string>
+    <string name="settings_check_update">Уведомления об обновлениях</string>
+    <string name="settings_check_update_summary">Автоматически проверять обновления модулей и менеджера</string>
     <string name="grant_root_failed">Не удалось выдать root!</string>
     <string name="action">Действие</string>
     <string name="close">Закрыть</string>
@@ -159,10 +159,13 @@
     <string name="home_android_version">Версия Android</string>
     <string name="home_device_model">Модель устройства</string>
     <string name="su_not_allowed">Предоставление рут-доступа %s запрещено</string>
+    <string name="settings_sucompat">Классическая команда su</string>
+    <string name="settings_sucompat_summary">Разрешить root-доступ через /system/bin/su в новых процессах.</string>
+    <string name="settings_kernel_umount">Размонтирование модулей</string>
+    <string name="settings_kernel_umount_summary">Размонтировать модули в ядре для профиля приложения</string>
     <string name="settings_mode_default">По умолчанию</string>
     <string name="module_install_multiple_confirm_with_names">Уверены, что хотите установить следующие %1$d модули? \n\n%2$s</string>
     <string name="more_settings">Доп. настройки</string>
-    <string name="selinux">SELinux</string>
     <string name="selinux_enabled">Включено</string>
     <string name="selinux_disabled">Выключен</string>
     <string name="simple_mode">Режим простоты</string>
@@ -202,7 +205,6 @@
     <string name="yes">Да</string>
     <string name="no">Нет</string>
     <string name="failed_reboot">Не удалось перезагрузиться</string>
-    <string name="kpm_title">KPM</string>
     <string name="kpm_empty">На данный момент нет установленных модулей ядра</string>
     <string name="kpm_version">Версия</string>
     <string name="kpm_author">Автор</string>
@@ -282,7 +284,7 @@
     <!-- KPM display settings -->
     <string name="show_kpm_info">Скрыть статус KPM</string>
     <string name="show_kpm_info_summary">Скрывать информацию и функции KPM на домашней странице и панели навигации</string>
-    <!-- Webui X settings -->
+    <!-- Webui settings -->
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">Изменить DPI</string>
     <string name="app_dpi_summary">Регулировка плотности экрана только для текущего приложения</string>
@@ -375,8 +377,6 @@
     <string name="susfs_path_label">Путь</string>
     <string name="susfs_path_placeholder">например: /system/addon.d</string>
     <string name="susfs_no_paths_configured">SUS пути не настроены</string>
-    <!-- SuSFS Umount Mode -->
-    <!-- SuSFS Run Umount -->
     <!-- SuSFS Reset Categories -->
     <string name="susfs_reset_paths_title">Сбросить SUS пути</string>
     <string name="susfs_reset_paths_message">Это очистит все конфигурации пути SUS. Вы уверены, что хотите продолжить?</string>
@@ -414,13 +414,11 @@
     <string name="susfs_execution_location_label">Место выполнения</string>
     <string name="susfs_current_execution_location">Текущее место выполнения: %s</string>
     <string name="susfs_execution_location_service">Сервис</string>
-    <string name="susfs_execution_location_post_fs_data">Post-FS-Data</string>
     <string name="susfs_execution_location_service_description">Выполнить после запуска системных сервисов</string>
     <string name="susfs_execution_location_post_fs_data_description">Выполнить после монтирования файловой системы, но перед полной загрузкой. Может вызвать бутлуп</string>
     <string name="susfs_slot_info_title">Информация о слоте</string>
     <string name="susfs_slot_info_description">Просмотреть информацию о текущем слоте загрузки и скопировать значения</string>
     <string name="susfs_current_active_slot">Текущий слот: %s</string>
-    <string name="susfs_slot_uname">Uname: %s</string>
     <string name="susfs_slot_build_time">Время сборки: %s</string>
     <string name="susfs_slot_current_badge">Текущее</string>
     <string name="susfs_slot_use_uname">Использовать Uname</string>
@@ -543,7 +541,6 @@
     <string name="susfs_reset_loop_paths_title">Сбросить SUS пути</string>
     <string name="susfs_reset_loop_paths_message">Вы уверены, что хотите очистить все пути цикла SUS? Это действие нельзя отменить.</string>
     <string name="susfs_loop_path_label">Циклический путь</string>
-    <string name="susfs_loop_path_placeholder">/data/example/path</string>
     <string name="susfs_loop_path_restriction_warning">Примечание: Только пути НЕ внутри /storage/ и /sdcard/ могут быть добавлены по цикловым путям.</string>
     <string name="susfs_loop_path_invalid_location">Ошибка: пути не могут быть внутри /storage/ или /sdcard/ каталогов</string>
     <string name="loop_paths_section">Циклические пути</string>
@@ -612,9 +609,7 @@
     <string name="description">Описание</string>
     <string name="supported_devices">Поддерживаемые устройства</string>
     <!-- SUS Map related strings -->
-    <string name="susfs_tab_sus_maps">SUS Maps</string>
     <string name="susfs_sus_map_label">Путь к библиотеке</string>
-    <string name="susfs_sus_map_placeholder">/data/adb/modules/my_module/zygisk/arm64-v8a.so</string>
     <string name="susfs_add_sus_map">Добавить SUS Map</string>
     <string name="susfs_edit_sus_map">Изменить SUS Map</string>
     <string name="susfs_sus_map_added_success">SUS map успешно добавлен: %1$s</string>
@@ -669,8 +664,4 @@
     <string name="confirm_clear_custom_paths">Вы уверены, что хотите удалить все кастомные пути? (Стандартные пути не будут удалены)</string>
     <string name="custom_paths_cleared">Кастомные пути удалены</string>
     <string name="config_applied">Конфигурация применена к ядру</string>
-    <string name="settings_sucompat">Классическая команда su</string>
-    <string name="settings_sucompat_summary">Разрешить root-доступ через /system/bin/su в новых процессах.</string>
-    <string name="settings_kernel_umount">Размонтирование модулей</string>
-    <string name="settings_kernel_umount_summary">Размонтировать модули в ядре для профиля приложения</string>
 </resources>
