@@ -5,12 +5,13 @@ use std::path::PathBuf;
 
 use log::{LevelFilter, error, info};
 
-use crate::android::susfs;
 use crate::{
     android::{
         debug, dynamic_manager, feature, init_event, ksucalls,
         module::{self, module_config},
-        profile, sepolicy, su, umount_config, utils,
+        profile, sepolicy, su,
+        susfs::cli::{SuSFSSubCommands, susfs_cli},
+        umount_config, utils,
     },
     apk_sign, assets,
     boot_patch::{BootPatchArgs, BootRestoreArgs},
@@ -60,7 +61,7 @@ enum Commands {
     /// Manage susfs component
     Susfs {
         #[command(subcommand)]
-        command: Susfs,
+        command: SuSFSSubCommands,
     },
 
     /// Manage auto apply user custom umount configs
@@ -526,16 +527,6 @@ mod kpm_cmd {
     }
 }
 
-#[derive(clap::Subcommand, Debug)]
-enum Susfs {
-    /// Get SUSFS Status
-    Status,
-    /// Get SUSFS Version
-    Version,
-    /// Get SUSFS enable Features
-    Features,
-}
-
 pub fn run() -> Result<()> {
     android_logger::init_once(
         Config::default()
@@ -565,13 +556,7 @@ pub fn run() -> Result<()> {
             Ok(())
         }
         Commands::Susfs { command } => {
-            match command {
-                Susfs::Version => println!("{}", susfs::get_susfs_version()),
-
-                Susfs::Status => println!("{}", susfs::get_susfs_status()),
-
-                Susfs::Features => println!("{}", susfs::get_susfs_features()),
-            }
+            susfs_cli(command);
             Ok(())
         }
         Commands::UmountConfig { command } => match command {
