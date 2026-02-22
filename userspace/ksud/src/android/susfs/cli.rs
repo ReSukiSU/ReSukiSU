@@ -1,10 +1,22 @@
+#![allow(clippy::similar_names)]
+
 use std::{fs, os::unix::fs::MetadataExt};
 
 use anyhow::Result;
-use clap::Subcommand;
+use clap::{Args, Subcommand};
 use libc::{SYS_reboot, syscall};
 
-use crate::android::susfs::magic::*;
+use crate::android::susfs::magic::{
+    CMD_SUSFS_ADD_OPEN_REDIRECT, CMD_SUSFS_ADD_SUS_KSTAT, CMD_SUSFS_ADD_SUS_KSTAT_STATICALLY,
+    CMD_SUSFS_ADD_SUS_MAP, CMD_SUSFS_ADD_SUS_PATH, CMD_SUSFS_ADD_SUS_PATH_LOOP,
+    CMD_SUSFS_ENABLE_AVC_LOG_SPOOFING, CMD_SUSFS_ENABLE_LOG,
+    CMD_SUSFS_HIDE_SUS_MNTS_FOR_NON_SU_PROCS, CMD_SUSFS_SET_ANDROID_DATA_ROOT_PATH,
+    CMD_SUSFS_SET_CMDLINE_OR_BOOTCONFIG, CMD_SUSFS_SET_SDCARD_ROOT_PATH, CMD_SUSFS_SET_UNAME,
+    CMD_SUSFS_SHOW_ENABLED_FEATURES, CMD_SUSFS_SHOW_VARIANT, CMD_SUSFS_SHOW_VERSION,
+    CMD_SUSFS_UPDATE_SUS_KSTAT, ERR_CMD_NOT_SUPPORTED, KSU_INSTALL_MAGIC1, NEW_UTS_LEN,
+    SUSFS_ENABLED_FEATURES_SIZE, SUSFS_FAKE_CMDLINE_OR_BOOTCONFIG_SIZE, SUSFS_MAGIC,
+    SUSFS_MAX_LEN_PATHNAME, SUSFS_MAX_VARIANT_BUFSIZE, SUSFS_MAX_VERSION_BUFSIZE,
+};
 
 #[derive(Subcommand, Debug)]
 pub enum SuSFSSubCommands {
@@ -66,33 +78,7 @@ pub enum SuSFSSubCommands {
         info_type: ShowType,
     },
     /// (Advanced) Add sus kstat statically with manual or default values
-    AddSusKstatStatically {
-        path: String,
-        #[arg(default_value = "default")]
-        ino: String,
-        #[arg(default_value = "default")]
-        dev: String,
-        #[arg(default_value = "default")]
-        nlink: String,
-        #[arg(default_value = "default")]
-        size: String,
-        #[arg(default_value = "default")]
-        atime: String,
-        #[arg(default_value = "default")]
-        atime_nsec: String,
-        #[arg(default_value = "default")]
-        mtime: String,
-        #[arg(default_value = "default")]
-        mtime_nsec: String,
-        #[arg(default_value = "default")]
-        ctime: String,
-        #[arg(default_value = "default")]
-        ctime_nsec: String,
-        #[arg(default_value = "default")]
-        blocks: String,
-        #[arg(default_value = "default")]
-        blksize: String,
-    },
+    AddSusKstatStatically(Box<AddSusKstatStaticallyArgs>),
 }
 
 #[derive(Subcommand, Debug)]
@@ -100,6 +86,35 @@ pub enum ShowType {
     Version,
     EnabledFeatures,
     Variant,
+}
+
+#[derive(Debug, Args)]
+pub struct AddSusKstatStaticallyArgs {
+    path: String,
+    #[arg(default_value = "default")]
+    ino: String,
+    #[arg(default_value = "default")]
+    dev: String,
+    #[arg(default_value = "default")]
+    nlink: String,
+    #[arg(default_value = "default")]
+    size: String,
+    #[arg(default_value = "default")]
+    atime: String,
+    #[arg(default_value = "default")]
+    atime_nsec: String,
+    #[arg(default_value = "default")]
+    mtime: String,
+    #[arg(default_value = "default")]
+    mtime_nsec: String,
+    #[arg(default_value = "default")]
+    ctime: String,
+    #[arg(default_value = "default")]
+    ctime_nsec: String,
+    #[arg(default_value = "default")]
+    blocks: String,
+    #[arg(default_value = "default")]
+    blksize: String,
 }
 
 #[repr(C)]
@@ -286,7 +301,7 @@ fn susfs_ctl<T>(info: &mut T, cmd: u64) {
             KSU_INSTALL_MAGIC1,
             SUSFS_MAGIC,
             cmd,
-            info as *mut T,
+            std::ptr::from_mut::<T>(info),
         );
     }
 }
@@ -294,9 +309,7 @@ fn susfs_ctl<T>(info: &mut T, cmd: u64) {
 fn str_to_c_array<const N: usize>(s: &str, array: &mut [u8; N]) {
     let bytes = s.as_bytes();
     let len = bytes.len().min(N - 1);
-    for i in 0..len {
-        array[i] = bytes[i] as u8;
-    }
+    array[..len].copy_from_slice(&bytes[..len]);
     array[len] = 0;
 }
 
@@ -307,29 +320,26 @@ fn fetch_metadata(path: &str) -> Result<fs::Metadata> {
 }
 
 fn copy_metadata_to_sus_kstat(info: &mut SusfsSusKstat, md: &fs::Metadata) {
-    info.spoofed_ino = md.ino() as u64;
-    info.spoofed_dev = md.dev() as u64;
+    info.spoofed_ino = md.ino();
+    info.spoofed_dev = md.dev();
     info.spoofed_nlink = md.nlink() as u32;
     info.spoofed_size = md.size() as i64;
-    info.spoofed_atime_tv_sec = md.atime() as i64;
-    info.spoofed_mtime_tv_sec = md.mtime() as i64;
-    info.spoofed_ctime_tv_sec = md.ctime() as i64;
-    info.spoofed_atime_tv_nsec = md.atime_nsec() as i64;
-    info.spoofed_mtime_tv_nsec = md.mtime_nsec() as i64;
-    info.spoofed_ctime_tv_nsec = md.ctime_nsec() as i64;
-    info.spoofed_blksize = md.blksize() as u64;
-    info.spoofed_blocks = md.blocks() as u64;
+    info.spoofed_atime_tv_sec = md.atime();
+    info.spoofed_mtime_tv_sec = md.mtime();
+    info.spoofed_ctime_tv_sec = md.ctime();
+    info.spoofed_atime_tv_nsec = md.atime_nsec();
+    info.spoofed_mtime_tv_nsec = md.mtime_nsec();
+    info.spoofed_ctime_tv_nsec = md.ctime_nsec();
+    info.spoofed_blksize = md.blksize();
+    info.spoofed_blocks = md.blocks();
 }
 
 fn handle_result(err: i32, cmd: u64) -> Result<()> {
     if err == ERR_CMD_NOT_SUPPORTED {
-        println!(
-            "[-] CMD: '0x{:x}', SUSFS operation not supported, please enable it in kernel",
-            cmd
-        );
+        println!("[-] CMD: '0x{cmd:x}', SUSFS operation not supported, please enable it in kernel",);
     }
     if err != 0 && err != ERR_CMD_NOT_SUPPORTED {
-        return Err(anyhow::format_err!("{err}").into());
+        return Err(anyhow::format_err!("{err}"));
     }
 
     Ok(())
@@ -390,10 +400,10 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
             if enabled > 1 {
                 return Err(anyhow::format_err!("Invalid value for enabled (0 or 1)"));
             }
-            let mut info = SusfsHideSusMnts::default();
-            info.enabled = enabled == 1;
-            info.err = ERR_CMD_NOT_SUPPORTED;
-
+            let mut info = SusfsHideSusMnts {
+                enabled: enabled == 1,
+                err: ERR_CMD_NOT_SUPPORTED,
+            };
             susfs_ctl(&mut info, CMD_SUSFS_HIDE_SUS_MNTS_FOR_NON_SU_PROCS);
             handle_result(info.err, CMD_SUSFS_HIDE_SUS_MNTS_FOR_NON_SU_PROCS)?;
         }
@@ -446,9 +456,10 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
             if enabled > 1 {
                 return Err(anyhow::format_err!("Invalid value for enabled (0 or 1)"));
             }
-            let mut info = SusfsLog::default();
-            info.enabled = enabled == 1;
-            info.err = ERR_CMD_NOT_SUPPORTED;
+            let mut info = SusfsLog {
+                enabled: enabled == 1,
+                err: ERR_CMD_NOT_SUPPORTED,
+            };
 
             susfs_ctl(&mut info, CMD_SUSFS_ENABLE_LOG);
             handle_result(info.err, CMD_SUSFS_ENABLE_LOG)?;
@@ -457,7 +468,7 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
             let abs_path = fs::canonicalize(&path)?;
             let content = fs::read(&abs_path)?;
             if content.len() >= SUSFS_FAKE_CMDLINE_OR_BOOTCONFIG_SIZE {
-                return Err(anyhow::format_err!("file_size too long").into());
+                return Err(anyhow::format_err!("file_size too long"));
             }
 
             let mut info = Box::new(SusfsSpoofCmdline {
@@ -466,7 +477,7 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
             });
 
             for (i, &b) in content.iter().enumerate() {
-                info.fake_cmdline_or_bootconfig[i] = b as u8;
+                info.fake_cmdline_or_bootconfig[i] = b;
             }
 
             susfs_ctl(&mut info, CMD_SUSFS_SET_CMDLINE_OR_BOOTCONFIG);
@@ -505,9 +516,10 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
             if enabled > 1 {
                 return Err(anyhow::format_err!("Invalid status number"));
             }
-            let mut info = SusfsAvcLogSpoofing::default();
-            info.enabled = enabled == 1;
-            info.err = ERR_CMD_NOT_SUPPORTED;
+            let mut info = SusfsAvcLogSpoofing {
+                enabled: enabled == 1,
+                err: ERR_CMD_NOT_SUPPORTED,
+            };
             susfs_ctl(&mut info, CMD_SUSFS_ENABLE_AVC_LOG_SPOOFING);
             handle_result(info.err, CMD_SUSFS_ENABLE_AVC_LOG_SPOOFING)?;
         }
@@ -526,12 +538,11 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
                         .iter()
                         .position(|&b| b == 0)
                         .unwrap_or(SUSFS_MAX_VERSION_BUFSIZE);
-                    let bytes: Vec<u8> =
-                        info.susfs_version[..len].iter().map(|&c| c as u8).collect();
+                    let bytes: Vec<u8> = info.susfs_version[..len].to_vec();
                     let ver = String::from_utf8(bytes).unwrap_or_else(|_| "<invalid>".to_string());
 
                     if ver.starts_with('v') {
-                        println!("{}", ver);
+                        println!("{ver}");
                     } else {
                         println!("unsupport");
                     }
@@ -551,13 +562,10 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
                         .iter()
                         .position(|&b| b == 0)
                         .unwrap_or(SUSFS_ENABLED_FEATURES_SIZE);
-                    let bytes: Vec<u8> = info.enabled_features[..len]
-                        .iter()
-                        .map(|&c| c as u8)
-                        .collect();
+                    let bytes: Vec<u8> = info.enabled_features[..len].to_vec();
                     let features =
                         String::from_utf8(bytes).unwrap_or_else(|_| "<invalid>".to_string());
-                    print!("{}", features);
+                    print!("{features}");
                 }
             }
             ShowType::Variant => {
@@ -574,49 +582,35 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
                         .iter()
                         .position(|&b| b == 0)
                         .unwrap_or(SUSFS_MAX_VARIANT_BUFSIZE);
-                    let bytes: Vec<u8> =
-                        info.susfs_variant[..len].iter().map(|&c| c as u8).collect();
+                    let bytes: Vec<u8> = info.susfs_variant[..len].to_vec();
                     let variant =
                         String::from_utf8(bytes).unwrap_or_else(|_| "<invalid>".to_string());
-                    println!("{}", variant);
+                    println!("{variant}");
                 }
             }
         },
-        SuSFSSubCommands::AddSusKstatStatically {
-            path,
-            ino,
-            dev,
-            nlink,
-            size,
-            atime,
-            atime_nsec,
-            mtime,
-            mtime_nsec,
-            ctime,
-            ctime_nsec,
-            blocks,
-            blksize,
-        } => {
-            let md = fetch_metadata(&path)?;
-            let mut info = SusfsSusKstat::default();
+        SuSFSSubCommands::AddSusKstatStatically(args) => {
+            let md = fetch_metadata(&args.path)?;
+            let mut info = SusfsSusKstat {
+                target_ino: md.ino() as u64,
+                is_statically: true,
+                ..Default::default()
+            };
 
-            info.target_ino = md.ino() as u64;
-            info.is_statically = true;
+            let s_ino = parse_or_default(&args.ino, md.ino())?;
+            let s_dev = parse_or_default(&args.dev, md.dev())?;
+            let s_nlink = parse_or_default(&args.nlink, md.nlink() as u64)?;
+            let s_size = parse_or_default(&args.size, md.size())?;
+            let s_atime = parse_or_default(&args.atime, md.atime())?;
+            let s_atime_nsec = parse_or_default(&args.atime_nsec, md.atime_nsec())?;
+            let s_mtime = parse_or_default(&args.mtime, md.mtime())?;
+            let s_mtime_nsec = parse_or_default(&args.mtime_nsec, md.mtime_nsec())?;
+            let s_ctime = parse_or_default(&args.ctime, md.ctime())?;
+            let s_ctime_nsec = parse_or_default(&args.ctime_nsec, md.ctime_nsec())?;
+            let s_blocks = parse_or_default(&args.blocks, md.blocks())?;
+            let s_blksize = parse_or_default(&args.blksize, md.blksize())?;
 
-            let s_ino = parse_or_default(&ino, md.ino())?;
-            let s_dev = parse_or_default(&dev, md.dev())?;
-            let s_nlink = parse_or_default(&nlink, md.nlink() as u64)?;
-            let s_size = parse_or_default(&size, md.size())?;
-            let s_atime = parse_or_default(&atime, md.atime())?;
-            let s_atime_nsec = parse_or_default(&atime_nsec, md.atime_nsec())?;
-            let s_mtime = parse_or_default(&mtime, md.mtime())?;
-            let s_mtime_nsec = parse_or_default(&mtime_nsec, md.mtime_nsec())?;
-            let s_ctime = parse_or_default(&ctime, md.ctime())?;
-            let s_ctime_nsec = parse_or_default(&ctime_nsec, md.ctime_nsec())?;
-            let s_blocks = parse_or_default(&blocks, md.blocks())?;
-            let s_blksize = parse_or_default(&blksize, md.blksize())?;
-
-            str_to_c_array(&path, &mut info.target_pathname);
+            str_to_c_array(&args.path, &mut info.target_pathname);
 
             info.spoofed_ino = s_ino as u64;
             info.spoofed_dev = s_dev as u64;

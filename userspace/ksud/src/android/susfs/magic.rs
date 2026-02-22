@@ -1,5 +1,5 @@
-pub(super) const KSU_INSTALL_MAGIC1: u64 = 0xDEADBEEF;
-pub(super) const SUSFS_MAGIC: u64 = 0xFAFAFAFA;
+pub(super) const KSU_INSTALL_MAGIC1: u64 = 0xDEAD_BEEF;
+pub(super) const SUSFS_MAGIC: u64 = 0xFAFA_FAFA;
 
 pub(super) const CMD_SUSFS_ADD_SUS_PATH: u64 = 0x55550;
 pub(super) const CMD_SUSFS_SET_ANDROID_DATA_ROOT_PATH: u64 = 0x55551;
