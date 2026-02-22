@@ -115,6 +115,10 @@ struct umount_tw {
     struct callback_head cb;
 };
 
+#ifdef CONFIG_KSU_SUSFS_SUS_PATH
+extern void susfs_run_sus_path_loop(void);
+#endif // #ifdef CONFIG_KSU_SUSFS_SUS_PATH
+
 static void umount_tw_func(struct callback_head *cb)
 {
     struct umount_tw *tw = container_of(cb, struct umount_tw, cb);
@@ -129,14 +133,17 @@ static void umount_tw_func(struct callback_head *cb)
     }
     up_read(&mount_list_lock);
 
+#ifdef CONFIG_KSU_SUSFS_SUS_PATH
+    // susfs_run_sus_path_loop() runs here with ksu_cred so that it can reach all the paths.
+
+    susfs_run_sus_path_loop();
+#endif // #ifdef CONFIG_KSU_SUSFS_SUS_PATH
+
     revert_creds(saved);
 
     kfree(tw);
 }
 
-#ifdef CONFIG_KSU_SUSFS_SUS_PATH
-extern void susfs_run_sus_path_loop(uid_t uid);
-#endif // #ifdef CONFIG_KSU_SUSFS_SUS_PATH
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 extern void susfs_reorder_mnt_id(void);
 #endif // #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
@@ -197,10 +204,6 @@ do_susfs_logic:
     // We can reorder the mnt_id now after all sus mounts are umounted
     susfs_reorder_mnt_id();
 #endif // #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-
-#ifdef CONFIG_KSU_SUSFS_SUS_PATH
-    susfs_run_sus_path_loop(new_uid);
-#endif // #ifdef CONFIG_KSU_SUSFS_SUS_PATH
 
     susfs_set_current_proc_umounted();
 
