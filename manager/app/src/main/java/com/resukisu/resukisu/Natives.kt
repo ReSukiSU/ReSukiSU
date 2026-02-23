@@ -17,7 +17,8 @@ object Natives {
     // 10977: change groups_count and groups to avoid overflow write
     // 11071: Fix the issue of failing to set a custom SELinux type.
     // 12143: breaking: new supercall impl
-    const val MINIMAL_SUPPORTED_KERNEL = 12143
+    // 32243: new get_allow_list ioctl
+    const val MINIMAL_SUPPORTED_KERNEL = 32243
 
     // 12040: Support disable sucompat mode
     const val KERNEL_SU_DOMAIN = "u:r:su:s0"
@@ -63,10 +64,6 @@ object Natives {
     }
 
     val version: Int
-        external get
-
-    // get the uid list of allowed su processes.
-    val allowList: IntArray
         external get
 
     val isSafeMode: Boolean
@@ -147,6 +144,8 @@ object Natives {
     external fun getManagersList(): ManagersList?
 
     external fun getUserName(uid: Int): String?
+
+    external fun getSuperuserCount(): Int
 
     private const val NON_ROOT_DEFAULT_PROFILE_KEY = "$"
     private const val NOBODY_UID = 9999

@@ -147,10 +147,10 @@ struct ksu_check_safemode_cmd {
     uint8_t in_safe_mode; // Output: true if in safe mode, false otherwise
 };
 
-struct ksu_get_allow_list_cmd {
-    uint32_t uids[128]; // Output: array of allowed/denied UIDs
-    uint32_t count; // Output: number of UIDs in array
-    uint8_t allow; // Input: true for allow list, false for deny list
+struct ksu_new_get_allow_list_cmd {
+    uint16_t count; // Input / Output: number of UIDs in array
+    uint16_t total_count; // Output: total number of UIDs in requested list
+    uint32_t uids[0]; // Output: array of allowed/denied UIDs
 };
 
 struct ksu_uid_granted_root_cmd {
@@ -221,8 +221,8 @@ struct ksu_get_managers_cmd {
 #define KSU_IOCTL_REPORT_EVENT _IOC(_IOC_WRITE, 'K', 3, 0)
 #define KSU_IOCTL_SET_SEPOLICY _IOC(_IOC_READ|_IOC_WRITE, 'K', 4, 0)
 #define KSU_IOCTL_CHECK_SAFEMODE _IOC(_IOC_READ, 'K', 5, 0)
-#define KSU_IOCTL_GET_ALLOW_LIST _IOC(_IOC_READ|_IOC_WRITE, 'K', 6, 0)
-#define KSU_IOCTL_GET_DENY_LIST _IOC(_IOC_READ|_IOC_WRITE, 'K', 7, 0)
+#define KSU_IOCTL_NEW_GET_ALLOW_LIST _IOWR('K', 6, struct ksu_new_get_allow_list_cmd)
+#define KSU_IOCTL_NEW_GET_DENY_LIST _IOWR('K', 7, struct ksu_new_get_allow_list_cmd)
 #define KSU_IOCTL_UID_GRANTED_ROOT _IOC(_IOC_READ|_IOC_WRITE, 'K', 8, 0)
 #define KSU_IOCTL_UID_SHOULD_UMOUNT _IOC(_IOC_READ|_IOC_WRITE, 'K', 9, 0)
 #define KSU_IOCTL_GET_MANAGER_APPID _IOC(_IOC_READ, 'K', 10, 0)
@@ -231,7 +231,7 @@ struct ksu_get_managers_cmd {
 #define KSU_IOCTL_GET_FEATURE _IOC(_IOC_READ|_IOC_WRITE, 'K', 13, 0)
 #define KSU_IOCTL_SET_FEATURE _IOC(_IOC_WRITE, 'K', 14, 0)
 
-// Other IOCTL command definitions
+// downstream custom IOCTL command definitions
 #define KSU_IOCTL_GET_FULL_VERSION _IOC(_IOC_READ, 'K', 100, 0)
 #define KSU_IOCTL_HOOK_TYPE _IOC(_IOC_READ, 'K', 101, 0)
 #define KSU_IOCTL_ENABLE_KPM _IOC(_IOC_READ, 'K', 102, 0)
@@ -240,7 +240,7 @@ struct ksu_get_managers_cmd {
 
 bool get_managers_list(struct ksu_get_managers_cmd **out_cmd);
 
-bool get_allow_list(struct ksu_get_allow_list_cmd *);
+bool get_allow_list(struct ksu_new_get_allow_list_cmd *);
 
 // Legacy Compatible
 struct ksu_version_info legacy_get_info();
