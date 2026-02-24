@@ -400,8 +400,8 @@ static ssize_t read_iter_proxy(struct kiocb *iocb, struct iov_iter *to)
     }
 append_ksu_rc:
     // copy_to_iter returns the number of copied bytes
-    append_count =
-        copy_to_iter(KERNEL_SU_RC + ksu_rc_pos, ksu_rc_len - ksu_rc_pos, to);
+    append_count = copy_to_iter((void *)KERNEL_SU_RC + ksu_rc_pos,
+                                ksu_rc_len - ksu_rc_pos, to);
     if (!append_count) {
         pr_info("read_iter_proxy: append error, totally appended %zd\n",
                 ksu_rc_pos);
