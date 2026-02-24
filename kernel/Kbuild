@@ -10,7 +10,7 @@ kernelsu-objs += pkg_observer.o
 kernelsu-objs += setuid_hook.o
 
 ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
-ifeq ($(shell test $(VERSION) -lt 6 || { test $(VERSION) -eq 6 && test $(PATCHLEVEL) -lt 8; } && echo y),y)
+ifeq ($(shell test \( \( $(VERSION) -gt 4 -o \( $(VERSION) -eq 4 -a $(PATCHLEVEL) -ge 2 \) \) -a \( $(VERSION) -lt 6 -o \( $(VERSION) -eq 6 -a $(PATCHLEVEL) -lt 8 \) \) \) && echo y),y)
 kernelsu-objs += lsm_hooks.o
 endif
 endif
@@ -265,13 +265,11 @@ ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
 
   ifeq ($(CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK), y)
     $(info -- $(REPO_NAME)/manual_hook: You are using LSM hooks for setuid hooks.)
-    ifeq ($(VERSION),6)
-      ifeq ($(shell test $(PATCHLEVEL) -ge 8 && echo y),y)
-        $(info -- You can't use LSM hooks for kernel version higher than 6.8)
+    ifeq ($(shell test \( \( $(VERSION) -gt 6 \) -o \( $(VERSION) -eq 6 -a $(PATCHLEVEL) -ge 8 \) \) -o \( \( $(VERSION) -lt 4 \) -o \( $(VERSION) -eq 4 -a $(PATCHLEVEL) -lt 2 \) \) && echo y),y)
+        $(info -- You can't use LSM hooks for kernel version >=6.8 or <4.2)
         $(info -- You should turn off CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK and manually setresuid hook)
         $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
-        $(error You can't use LSM hooks when kernel version >= 6.8)
-      endif
+        $(error You can't use LSM hooks when kernel version >= 6.8 or <4.2)
     endif
   else
     $(info -- $(REPO_NAME)/manual_hook: You are using manually setresuid hook for setuid hooks.)
@@ -287,13 +285,11 @@ ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
 
   ifeq ($(CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK), y)
     $(info -- $(REPO_NAME)/manual_hook: You are using LSM hooks for init rc hooks.)
-    ifeq ($(VERSION),6)
-      ifeq ($(shell test $(PATCHLEVEL) -ge 8 && echo y),y)
-        $(info -- You can't use LSM hooks for kernel version higher than 6.8)
-        $(info -- You should turn off CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK and manually sys_read hook)
+    ifeq ($(shell test \( \( $(VERSION) -gt 6 \) -o \( $(VERSION) -eq 6 -a $(PATCHLEVEL) -ge 8 \) \) -o \( \( $(VERSION) -lt 4 \) -o \( $(VERSION) -eq 4 -a $(PATCHLEVEL) -lt 2 \) \) && echo y),y)
+        $(info -- You can't use LSM hooks for kernel version >=6.8 or <4.2)
+        $(info -- You should turn off CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK and manually setresuid hook)
         $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
-        $(error You can't use LSM hooks when kernel version >= 6.8)
-      endif
+        $(error You can't use LSM hooks when kernel version >= 6.8 or <4.2)
     endif
   else
     $(info -- $(REPO_NAME)/manual_hook: You are using manually sys_read hook for init rc hooks.)
