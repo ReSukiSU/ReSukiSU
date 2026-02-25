@@ -288,7 +288,7 @@ pub fn exec_common_scripts(stage: &str, wait: bool) -> Result<()> {
                 tv_nsec: 0,
             };
             unsafe {
-                libc::clock_gettime(libc::CLOCK_MONOTONIC, &mut now);
+                libc::clock_gettime(libc::CLOCK_MONOTONIC, &raw mut now);
             };
             now.tv_sec += defs::POST_FS_DATA_SCRIPT_MAX_TIME;
 
@@ -310,7 +310,7 @@ pub fn exec_common_scripts(stage: &str, wait: bool) -> Result<()> {
                     libc::clock_nanosleep(
                         libc::CLOCK_MONOTONIC,
                         libc::TIMER_ABSTIME,
-                        &now,
+                        &raw const now,
                         std::ptr::null_mut(),
                     );
                 }
@@ -321,29 +321,25 @@ pub fn exec_common_scripts(stage: &str, wait: bool) -> Result<()> {
         if script_pid == 0 {
             exec_script(path, wait)?;
             std::process::exit(0);
+        } else if pfs {
+            if timer_pid < 0 {
+                continue;
+            }
+            let mut status = 0;
+            let waited_pid = unsafe { libc::waitpid(-1, &raw mut status, 0) };
+            if waited_pid == timer_pid {
+                log::warn!("post-fs-data scripts blocking phase timeout");
+                timer_pid = -1;
+            }
         } else {
-            if pfs {
-                if timer_pid < 0 {
-                    continue;
-                }
-                let mut status = 0;
-                let waited_pid = unsafe { libc::waitpid(-1, &mut status, 0) };
-                if waited_pid == timer_pid {
-                    log::warn!("post-fs-data scripts blocking phase timeout");
-                    timer_pid = -1;
-                }
-            } else {
-                unsafe {
-                    libc::waitpid(script_pid, std::ptr::null_mut(), 0);
-                }
+            unsafe {
+                libc::waitpid(script_pid, std::ptr::null_mut(), 0);
             }
         }
 
-        if pfs {
-            if timer_pid > 0 {
-                unsafe {
-                    libc::kill(timer_pid, libc::SIGKILL);
-                }
+        if pfs && timer_pid > 0 {
+            unsafe {
+                libc::kill(timer_pid, libc::SIGKILL);
             }
         }
     }
