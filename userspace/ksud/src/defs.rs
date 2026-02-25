@@ -48,7 +48,7 @@ mod android {
 
     pub const DYNAMIC_MANAGER: &str = concatcp!(WORKING_DIR, ".dynamic_manager");
 
-    pub const POST_FS_DATA_SCRIPT_MAX_TIME: i64 = 35;
+    pub const POST_FS_DATA_SCRIPT_MAX_TIME: libc::time_t = 35;
 
     #[derive(Serialize)]
     pub struct MountInfo {
