@@ -279,7 +279,7 @@ pub fn exec_common_scripts(stage: &str, wait: bool) -> Result<()> {
             warn!("{} is not executable, skip", path.display());
             continue;
         }
-        let pfs = stage == "post-fs-data";
+        let pfs = stage == "post-fs-data.d";
         let mut timer_pid = -1;
 
         if pfs {
