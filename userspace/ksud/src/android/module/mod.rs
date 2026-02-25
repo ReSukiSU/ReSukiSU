@@ -264,8 +264,8 @@ pub fn exec_stage_script(stage: &str, block: bool) -> Result<()> {
     Ok(())
 }
 
-pub fn exec_common_scripts(dir: &str, wait: bool) -> Result<()> {
-    let script_dir = Path::new(defs::ADB_DIR).join(dir);
+pub fn exec_common_scripts(stage: &str, wait: bool) -> Result<()> {
+    let script_dir = Path::new(defs::ADB_DIR).join(stage);
     if !script_dir.exists() {
         info!("{} not exists, skip", script_dir.display());
         return Ok(());
@@ -279,8 +279,73 @@ pub fn exec_common_scripts(dir: &str, wait: bool) -> Result<()> {
             warn!("{} is not executable, skip", path.display());
             continue;
         }
+        let pfs = stage == "post-fs-data";
+        let mut timer_pid = -1;
 
-        exec_script(path, wait)?;
+        if pfs {
+            let mut now = libc::timespec {
+                tv_sec: 0,
+                tv_nsec: 0,
+            };
+            unsafe {
+                libc::clock_gettime(libc::CLOCK_MONOTONIC, &mut now);
+            };
+            now.tv_sec += defs::POST_FS_DATA_SCRIPT_MAX_TIME;
+
+            let pid = unsafe { libc::fork() };
+
+            if pid != 0 {
+                if pid < 0 {
+                    continue;
+                }
+                unsafe {
+                    libc::waitpid(pid, std::ptr::null_mut(), 0);
+                }
+            }
+
+            timer_pid = unsafe { libc::fork() };
+
+            if timer_pid == 0 {
+                unsafe {
+                    libc::clock_nanosleep(
+                        libc::CLOCK_MONOTONIC,
+                        libc::TIMER_ABSTIME,
+                        &now,
+                        std::ptr::null_mut(),
+                    );
+                }
+            }
+        }
+
+        let script_pid = unsafe { libc::fork() };
+        if script_pid == 0 {
+            exec_script(path, wait)?;
+            std::process::exit(0);
+        } else {
+            if pfs {
+                if timer_pid < 0 {
+                    continue;
+                }
+                let mut status = 0;
+                let waited_pid = unsafe { libc::waitpid(-1, &mut status, 0) };
+                if waited_pid == timer_pid {
+                    log::warn!("post-fs-data scripts blocking phase timeout");
+                    timer_pid = -1;
+                }
+            } else {
+                unsafe {
+                    libc::waitpid(script_pid, std::ptr::null_mut(), 0);
+                }
+            }
+        }
+
+        if pfs {
+            if timer_pid > 0 {
+                unsafe {
+                    libc::kill(timer_pid, libc::SIGKILL);
+                }
+            }
+        }
     }
 
     Ok(())
