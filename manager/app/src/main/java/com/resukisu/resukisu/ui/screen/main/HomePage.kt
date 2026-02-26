@@ -12,6 +12,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -113,6 +115,7 @@ import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.getCardColors
 import com.resukisu.resukisu.ui.theme.getCardElevation
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
+import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.util.InfoCardItem
 import com.resukisu.resukisu.ui.util.checkNewVersion
 import com.resukisu.resukisu.ui.util.module.LatestVersionInfo
@@ -175,6 +178,21 @@ fun HomePage(
                 modifier = Modifier.padding(bottom = bottomPadding),
                 hostState = LocalSnackbarHost.current
             )
+        },
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = viewModel.isEditingInfoCard,
+                enter = scaleIn(),
+                exit = scaleOut()
+            ) {
+                FloatingActionButton(
+                    onClick = { viewModel.saveInfoCardEdits(context) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = bottomPadding)
+                ) {
+                    Icon(Icons.Default.Check, contentDescription = null)
+                }
+            }
         }
     ) { innerPadding ->
         PullToRefreshBox(
@@ -265,23 +283,13 @@ fun HomePage(
                     )
                 }
 
-                // FAB 保存按钮
+                // 编辑卡片
                 AnimatedVisibility(
                     visible = viewModel.isEditingInfoCard,
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        FloatingActionButton(
-                            onClick = { viewModel.saveInfoCardEdits(context) },
-                            containerColor = MaterialTheme.colorScheme.primary
-                        ) {
-                            Icon(Icons.Default.Check, contentDescription = null)
-                        }
-                    }
+                    InfoCardEditCard(viewModel = viewModel, lkmMode = viewModel.systemStatus.lkmMode)
                 }
 
                 // 链接卡片
@@ -683,9 +691,7 @@ private fun InfoCard(
     viewModel: HomeViewModel,
     lkmMode: Boolean?
 ) {
-    val isEditing = viewModel.isEditingInfoCard
-    val hiddenItems = if (isEditing) viewModel.editingHiddenItems else viewModel.hiddenItems
-    val systemInfo = viewModel.systemInfo
+    val hiddenItems = viewModel.hiddenItems
 
     ElevatedCard(
         colors = getCardColors(MaterialTheme.colorScheme.surfaceContainerHighest),
@@ -695,7 +701,7 @@ private fun InfoCard(
             interactionSource = remember { MutableInteractionSource() },
             onClick = {},
             onLongClick = {
-                if (!isEditing) viewModel.startEditingInfoCard()
+                if (!viewModel.isEditingInfoCard) viewModel.startEditingInfoCard()
             }
         )
     ) {
@@ -704,48 +710,58 @@ private fun InfoCard(
                 .fillMaxWidth()
                 .padding(start = 24.dp, top = 24.dp, end = 24.dp, bottom = 16.dp),
         ) {
-            // 编辑模式：显示所有项的复选框
-            AnimatedVisibility(visible = isEditing) {
-                Column {
-                    InfoCardItem.entries.forEach { item ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { viewModel.toggleEditingItem(item) }
-                                .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(
-                                checked = item.key !in viewModel.editingHiddenItems,
-                                onCheckedChange = { viewModel.toggleEditingItem(item) }
-                            )
-                            Icon(
-                                imageVector = item.icon,
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(item.labelRes),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
-                }
-            }
+            InfoCardContent(
+                systemInfo = viewModel.systemInfo,
+                hiddenItems = hiddenItems,
+                lkmMode = lkmMode,
+            )
+        }
+    }
+}
 
-            // 正常模式：显示信息行
-            if (!isEditing) {
-                InfoCardContent(
-                    systemInfo = systemInfo,
-                    hiddenItems = hiddenItems,
-                    lkmMode = lkmMode,
-                )
+@Composable
+private fun InfoCardEditCard(
+    viewModel: HomeViewModel,
+    lkmMode: Boolean?
+) {
+    val systemInfo = viewModel.systemInfo
+    val availableItems = InfoCardItem.entries.filter { item ->
+        when (item) {
+            InfoCardItem.HOOK_TYPE -> !systemInfo.susfsEnabled
+            InfoCardItem.ACTIVE_MANAGERS -> systemInfo.managersList != null
+            InfoCardItem.ZYGISK_IMPLEMENT -> systemInfo.zygiskImplement.isNotEmpty() && systemInfo.zygiskImplement != "None"
+            InfoCardItem.META_MODULE -> systemInfo.metaModuleImplement.isNotEmpty() && systemInfo.metaModuleImplement != "None"
+            InfoCardItem.KPM_VERSION -> lkmMode == false
+            InfoCardItem.SUSFS_VERSION -> systemInfo.susfsEnabled && systemInfo.susfsVersion.isNotEmpty()
+            else -> true
+        }
+    }
+
+    ElevatedCard(
+        colors = getCardColors(MaterialTheme.colorScheme.surfaceContainerHighest),
+        elevation = getCardElevation(),
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            availableItems.forEach { item ->
+                SettingsBaseWidget(
+                    icon = item.icon,
+                    title = stringResource(item.labelRes),
+                    onClick = { _ -> viewModel.toggleEditingItem(item) },
+                    noVerticalPadding = true,
+                    modifier = Modifier.padding(vertical = 2.dp),
+                ) {
+                    Checkbox(
+                        checked = item.key !in viewModel.editingHiddenItems,
+                        onCheckedChange = { viewModel.toggleEditingItem(item) }
+                    )
+                }
             }
         }
     }
 }
+
 @Composable
 private fun InfoCardContent(
     systemInfo: HomeViewModel.SystemInfo,

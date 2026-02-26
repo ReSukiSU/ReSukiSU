@@ -50,7 +50,6 @@ import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material3.Button
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -297,36 +296,15 @@ fun MoreSettingsScreen(
                 }
             }
 
+            // 信息卡片显示提示
             item {
-                // 信息卡片显示提示
-                ElevatedCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.VisibilityOff,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
-                            Text(
-                                text = stringResource(R.string.info_card_display_settings),
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                            Text(
-                                text = stringResource(R.string.info_card_display_settings_summary),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                SplicedColumnGroup(title = stringResource(R.string.info_card_display_settings)) {
+                    item {
+                        SettingsBaseWidget(
+                            icon = Icons.Filled.VisibilityOff,
+                            title = stringResource(R.string.info_card_display_settings),
+                            description = stringResource(R.string.info_card_display_settings_summary),
+                        ) {}
                     }
                 }
             }
