@@ -50,17 +50,8 @@ class MoreSettingsState(
     var showDynamicSignDialog by mutableStateOf(false)
 
 
-    // 各种设置开关状态
-    var isSimpleMode by mutableStateOf(prefs.getBoolean("is_simple_mode", false))
-    var isHideVersion by mutableStateOf(prefs.getBoolean("is_hide_version", false))
-    var isHideOtherInfo by mutableStateOf(prefs.getBoolean("is_hide_other_info", false))
-    var isShowKpmInfo by mutableStateOf(prefs.getBoolean("show_kpm_info", false))
-    var isHideZygiskImplement by mutableStateOf(prefs.getBoolean("is_hide_zygisk_Implement", false))
-    var isHideMetaModuleImplement by mutableStateOf(prefs.getBoolean("is_hide_meta_module_Implement", false))
-    var isHideSusfsStatus by mutableStateOf(prefs.getBoolean("is_hide_susfs_status", false))
-    var isHideLinkCard by mutableStateOf(prefs.getBoolean("is_hide_link_card", false))
-    var isHideTagRow by mutableStateOf(prefs.getBoolean("is_hide_tag_row", false))
-    var isKernelSimpleMode by mutableStateOf(prefs.getBoolean("is_kernel_simple_mode", false))
+    // 信息项隐藏设置
+    var hiddenItems by mutableStateOf(prefs.getStringSet("hidden_info_items", emptySet()) ?: emptySet())
     var showMoreModuleInfo by mutableStateOf(prefs.getBoolean("show_more_module_info", false))
     var useAltIcon by mutableStateOf(prefs.getBoolean("use_alt_icon", false))
 

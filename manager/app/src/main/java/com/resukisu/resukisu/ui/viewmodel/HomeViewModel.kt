@@ -2,17 +2,20 @@ package com.resukisu.resukisu.ui.viewmodel
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Build
 import android.system.Os
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.resukisu.resukisu.KernelVersion
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.getKernelVersion
 import com.resukisu.resukisu.ksuApp
+import com.resukisu.resukisu.ui.util.InfoCardItem
 import com.resukisu.resukisu.ui.susfs.util.SuSFSManager
 import com.resukisu.resukisu.ui.util.checkNewVersion
 import com.resukisu.resukisu.ui.util.getKpmModuleCount
@@ -77,24 +80,37 @@ class HomeViewModel : ViewModel() {
     var latestVersionInfo by mutableStateOf(LatestVersionInfo())
         private set
 
-    var isSimpleMode by mutableStateOf(false)
+    var hiddenItems by mutableStateOf(emptySet<String>())
         private set
-    var isKernelSimpleMode by mutableStateOf(false)
-        private set
-    var isHideVersion by mutableStateOf(false)
-        private set
-    var isHideOtherInfo by mutableStateOf(false)
-        private set
-    var isHideSusfsStatus by mutableStateOf(false)
-        private set
-    var isHideZygiskImplement by mutableStateOf(false)
-        private set
-    var isHideMetaModuleImplement by mutableStateOf(false)
-        private set
-    var isHideLinkCard by mutableStateOf(false)
-        private set
-    var showKpmInfo by mutableStateOf(false)
-        private set
+
+    // InfoCard 编辑模式
+    var isEditingInfoCard by mutableStateOf(false)
+    var editingHiddenItems by mutableStateOf(emptySet<String>())
+
+    fun startEditingInfoCard() {
+        editingHiddenItems = hiddenItems.toSet()
+        isEditingInfoCard = true
+    }
+
+    fun toggleEditingItem(item: InfoCardItem) {
+        val newSet = editingHiddenItems.toMutableSet()
+        if (item.key in newSet) newSet.remove(item.key) else newSet.add(item.key)
+        editingHiddenItems = newSet
+    }
+
+    fun saveInfoCardEdits(context: Context) {
+        hiddenItems = editingHiddenItems.toSet()
+        context.getSharedPreferences("settings", Context.MODE_PRIVATE).edit {
+            putStringSet("hidden_info_items", hiddenItems)
+        }
+        isEditingInfoCard = false
+    }
+
+    fun cancelEditingInfoCard() {
+        isEditingInfoCard = false
+    }
+
+    fun isVisible(item: InfoCardItem) = item.key !in hiddenItems
 
     var isCoreDataLoaded by mutableStateOf(false)
         private set
@@ -108,15 +124,35 @@ class HomeViewModel : ViewModel() {
     fun loadUserSettings(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             val settingsPrefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-            isSimpleMode = settingsPrefs.getBoolean("is_simple_mode", false)
-            isKernelSimpleMode = settingsPrefs.getBoolean("is_kernel_simple_mode", false)
-            isHideVersion = settingsPrefs.getBoolean("is_hide_version", false)
-            isHideOtherInfo = settingsPrefs.getBoolean("is_hide_other_info", false)
-            isHideSusfsStatus = settingsPrefs.getBoolean("is_hide_susfs_status", false)
-            isHideLinkCard = settingsPrefs.getBoolean("is_hide_link_card", false)
-            isHideZygiskImplement = settingsPrefs.getBoolean("is_hide_zygisk_Implement", false)
-            isHideMetaModuleImplement = settingsPrefs.getBoolean("is_hide_meta_module_Implement", false)
-            showKpmInfo = settingsPrefs.getBoolean("show_kpm_info", false)
+            migrateOldSettings(settingsPrefs)
+            hiddenItems = settingsPrefs.getStringSet("hidden_info_items", emptySet()) ?: emptySet()
+        }
+    }
+
+    private fun migrateOldSettings(prefs: SharedPreferences) {
+        if (!prefs.contains("is_simple_mode")) return
+        val hidden = mutableSetOf<String>()
+        if (prefs.getBoolean("is_simple_mode", false)) {
+            hidden.addAll(listOf(
+                "android_version", "hook_type", "active_managers",
+                "zygisk_implement", "meta_module", "kpm_version", "susfs_version"
+            ))
+        }
+        if (prefs.getBoolean("is_hide_version", false)) hidden.add("version_in_status")
+        if (prefs.getBoolean("is_hide_susfs_status", false)) hidden.add("susfs_version")
+        if (prefs.getBoolean("is_hide_zygisk_Implement", false)) hidden.add("zygisk_implement")
+        if (prefs.getBoolean("is_hide_meta_module_Implement", false)) hidden.add("meta_module")
+        if (prefs.getBoolean("show_kpm_info", false)) hidden.add("kpm_version")
+        if (prefs.getBoolean("is_hide_link_card", false)) hidden.add("link_cards")
+        if (prefs.getBoolean("is_hide_tag_row", false)) hidden.add("tag_row")
+        if (prefs.getBoolean("is_kernel_simple_mode", false)) hidden.add("kernel_simple")
+        prefs.edit {
+            putStringSet("hidden_info_items", hidden)
+            remove("is_simple_mode"); remove("is_hide_version")
+            remove("is_hide_other_info"); remove("is_hide_susfs_status")
+            remove("is_hide_zygisk_Implement"); remove("is_hide_meta_module_Implement")
+            remove("show_kpm_info"); remove("is_hide_link_card")
+            remove("is_hide_tag_row"); remove("is_kernel_simple_mode")
         }
     }
 
@@ -140,7 +176,7 @@ class HomeViewModel : ViewModel() {
                     "Unknown"
                 }
 
-                val ksuFullVersion = if (isKernelSimpleMode) {
+                val ksuFullVersion = if (InfoCardItem.KERNEL_SIMPLE.key in hiddenItems) {
                     try {
                         val startIndex = fullVersion.indexOf('v')
                         if (startIndex >= 0) {
@@ -216,29 +252,25 @@ class HomeViewModel : ViewModel() {
                     selinuxStatus = basicInfo.fifth
                 )
 
-                if (!isSimpleMode) {
-                    val moduleInfo = loadModuleInfo()
-                    systemInfo = systemInfo.copy(
-                        kpmVersion = moduleInfo.first,
-                        superuserCount = moduleInfo.second,
-                        moduleCount = moduleInfo.third,
-                        kpmModuleCount = moduleInfo.fourth,
-                        zygiskImplement = moduleInfo.fifth,
-                        metaModuleImplement = moduleInfo.sixth
-                    )
-                }
+                val moduleInfo = loadModuleInfo()
+                systemInfo = systemInfo.copy(
+                    kpmVersion = moduleInfo.first,
+                    superuserCount = moduleInfo.second,
+                    moduleCount = moduleInfo.third,
+                    kpmModuleCount = moduleInfo.fourth,
+                    zygiskImplement = moduleInfo.fifth,
+                    metaModuleImplement = moduleInfo.sixth
+                )
 
-                if (!isHideSusfsStatus) {
-                    val susfsInfo = loadSuSFSInfo()
-                    systemInfo = systemInfo.copy(
-                        susfsEnabled = susfsInfo.first,
-                        susfsVersionSupported = susfsInfo.first && SuSFSManager.isBinaryAvailable(
-                            context
-                        ), // enabled & have binary
-                        susfsVersion = susfsInfo.second,
-                        susfsFeatures = susfsInfo.third,
-                    )
-                }
+                val susfsInfo = loadSuSFSInfo()
+                systemInfo = systemInfo.copy(
+                    susfsEnabled = susfsInfo.first,
+                    susfsVersionSupported = susfsInfo.first && SuSFSManager.isBinaryAvailable(
+                        context
+                    ),
+                    susfsVersion = susfsInfo.second,
+                    susfsFeatures = susfsInfo.third,
+                )
 
                 val managerInfo = loadManagerInfo()
                 systemInfo = systemInfo.copy(

@@ -98,8 +98,7 @@ class MainActivity : ComponentActivity() {
     internal val settingsStateFlow = MutableStateFlow(SettingsState())
 
     data class SettingsState(
-        val isHideOtherInfo: Boolean = false,
-        val showKpmInfo: Boolean = false,
+        val hiddenItems: Set<String> = emptySet(),
         val dpi: Int = 0
     )
 

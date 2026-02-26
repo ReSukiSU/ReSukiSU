@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.ui.MainActivity
 import com.resukisu.resukisu.ui.screen.BottomBarDestination
 import com.resukisu.resukisu.ui.theme.ThemeConfig
+import com.resukisu.resukisu.ui.util.InfoCardItem
 import com.resukisu.resukisu.ui.util.LocalHandlePageChange
 import com.resukisu.resukisu.ui.util.LocalSelectedPage
 import com.resukisu.resukisu.ui.util.getKpmModuleCount
@@ -61,10 +62,10 @@ fun NavigationBar(
 ) {
     val activity = LocalContext.current as MainActivity
 
-    // 是否隐藏 badge
-    val isHideOtherInfo by activity.settingsStateFlow
-        .map { it.isHideOtherInfo }
-        .collectAsState(initial = false)
+    // 隐藏项集合
+    val hiddenItems by activity.settingsStateFlow
+        .map { it.hiddenItems }
+        .collectAsState(initial = emptySet())
 
     // 翻页处理
     val page = LocalSelectedPage.current
@@ -128,7 +129,7 @@ fun NavigationBar(
                     kpmModuleCount = kpmModuleCount,
                     superuserCount = superuserCount,
                     moduleCount = moduleCount,
-                    isHideOtherInfo = isHideOtherInfo,
+                    isHideOtherInfo = hiddenItems,
                 )
             }
         }
@@ -153,7 +154,7 @@ fun NavigationBar(
                     kpmModuleCount = kpmModuleCount,
                     superuserCount = superuserCount,
                     moduleCount = moduleCount,
-                    isHideOtherInfo = isHideOtherInfo,
+                    isHideOtherInfo = hiddenItems,
                 )
             }
         }
@@ -168,7 +169,7 @@ private fun NavigationRailItem(
     kpmModuleCount: Int,
     superuserCount: Int,
     moduleCount: Int,
-    isHideOtherInfo: Boolean
+    isHideOtherInfo: Set<String>
 ) {
     WideNavigationRailItem(
         railExpanded = false,
@@ -210,7 +211,7 @@ private fun RowScope.BottomBarNavigationItem(
     kpmModuleCount: Int,
     superuserCount: Int,
     moduleCount: Int,
-    isHideOtherInfo: Boolean
+    isHideOtherInfo: Set<String>
 ) {
     NavigationBarItem(
         selected = isSelected,
@@ -250,7 +251,7 @@ private fun DestinationBadge(
     superUser: Int,
     module: Int,
     kpm: Int,
-    isHideOtherInfo: Boolean,
+    isHideOtherInfo: Set<String>,
 ) {
     val count = when (dest) {
         BottomBarDestination.Kpm -> kpm
@@ -259,8 +260,13 @@ private fun DestinationBadge(
         else -> 0
     }
 
+    val isBadgeHidden = when (dest) {
+        BottomBarDestination.Kpm -> InfoCardItem.KPM_VERSION.key in isHideOtherInfo
+        else -> false
+    }
+
     AnimatedVisibility(
-        visible = count > 0 && !isHideOtherInfo,
+        visible = count > 0 && !isBadgeHidden,
         enter = fadeIn(),
         exit = fadeOut()
     ) {

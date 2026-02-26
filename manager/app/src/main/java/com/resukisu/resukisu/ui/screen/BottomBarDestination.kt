@@ -25,6 +25,7 @@ import com.resukisu.resukisu.ui.screen.main.KpmPage
 import com.resukisu.resukisu.ui.screen.main.ModulePage
 import com.resukisu.resukisu.ui.screen.main.SettingsPage
 import com.resukisu.resukisu.ui.screen.main.SuperUserPage
+import com.resukisu.resukisu.ui.util.InfoCardItem
 import com.resukisu.resukisu.ui.util.getKpmVersion
 import dev.chrisbanes.haze.HazeState
 
@@ -55,11 +56,11 @@ enum class BottomBarDestination(
                     getKpmVersion()
                 }.getOrNull()
 
-                val showKpmInfo = settings.showKpmInfo
+                val isKpmHidden = InfoCardItem.KPM_VERSION.key in settings.hiddenItems
                 return BottomBarDestination.entries.filter {
                     when (it) {
                         Kpm -> {
-                            kpmVersion?.isNotEmpty() ?: false && !showKpmInfo && Natives.version >= Natives.MINIMAL_SUPPORTED_KPM
+                            kpmVersion?.isNotEmpty() ?: false && !isKpmHidden && Natives.version >= Natives.MINIMAL_SUPPORTED_KPM
                         }
 
                         else -> true

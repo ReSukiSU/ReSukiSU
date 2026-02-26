@@ -13,7 +13,10 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,6 +38,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Adb
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Info
@@ -51,11 +55,13 @@ import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material.icons.twotone.Error
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
@@ -107,6 +113,7 @@ import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.getCardColors
 import com.resukisu.resukisu.ui.theme.getCardElevation
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
+import com.resukisu.resukisu.ui.util.InfoCardItem
 import com.resukisu.resukisu.ui.util.checkNewVersion
 import com.resukisu.resukisu.ui.util.module.LatestVersionInfo
 import com.resukisu.resukisu.ui.util.reboot
@@ -253,18 +260,32 @@ fun HomePage(
                     visible = viewModel.isExtendedDataLoaded
                 ) {
                     InfoCard(
-                        systemInfo = viewModel.systemInfo,
-                        isSimpleMode = viewModel.isSimpleMode,
-                        isHideSusfsStatus = viewModel.isHideSusfsStatus,
-                        isHideZygiskImplement = viewModel.isHideZygiskImplement,
-                        isHideMetaModuleImplement = viewModel.isHideMetaModuleImplement,
-                        showKpmInfo = viewModel.showKpmInfo,
+                        viewModel = viewModel,
                         lkmMode = viewModel.systemStatus.lkmMode,
                     )
                 }
 
+                // FAB 保存按钮
+                AnimatedVisibility(
+                    visible = viewModel.isEditingInfoCard,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        FloatingActionButton(
+                            onClick = { viewModel.saveInfoCardEdits(context) },
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ) {
+                            Icon(Icons.Default.Check, contentDescription = null)
+                        }
+                    }
+                }
+
                 // 链接卡片
-                if (!viewModel.isSimpleMode && !viewModel.isHideLinkCard) {
+                if (InfoCardItem.LINK_CARDS.key !in viewModel.hiddenItems) {
                     DonateCard()
                     LearnMoreCard()
                 }
@@ -510,11 +531,11 @@ private fun StatusCard(
                             }
                         }
 
-                        val isHideVersion = LocalContext.current.getSharedPreferences(
+                        val hiddenSet = LocalContext.current.getSharedPreferences(
                             "settings",
                             Context.MODE_PRIVATE
-                        )
-                            .getBoolean("is_hide_version", false)
+                        ).getStringSet("hidden_info_items", emptySet()) ?: emptySet()
+                        val isHideVersion = InfoCardItem.VERSION_IN_STATUS.key in hiddenSet
 
                         if (!isHideVersion) {
                             Spacer(Modifier.height(4.dp))
@@ -656,27 +677,83 @@ fun DonateCard() {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun InfoCard(
-    systemInfo: HomeViewModel.SystemInfo,
-    isSimpleMode: Boolean,
-    isHideSusfsStatus: Boolean,
-    isHideZygiskImplement: Boolean,
-    isHideMetaModuleImplement: Boolean,
-    showKpmInfo: Boolean,
+    viewModel: HomeViewModel,
     lkmMode: Boolean?
 ) {
+    val isEditing = viewModel.isEditingInfoCard
+    val hiddenItems = if (isEditing) viewModel.editingHiddenItems else viewModel.hiddenItems
+    val systemInfo = viewModel.systemInfo
+
     ElevatedCard(
         colors = getCardColors(MaterialTheme.colorScheme.surfaceContainerHighest),
         elevation = getCardElevation(),
+        modifier = Modifier.combinedClickable(
+            indication = null,
+            interactionSource = remember { MutableInteractionSource() },
+            onClick = {},
+            onLongClick = {
+                if (!isEditing) viewModel.startEditingInfoCard()
+            }
+        )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 24.dp, top = 24.dp, end = 24.dp, bottom = 16.dp),
         ) {
+            // 编辑模式：显示所有项的复选框
+            AnimatedVisibility(visible = isEditing) {
+                Column {
+                    InfoCardItem.entries.forEach { item ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { viewModel.toggleEditingItem(item) }
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = item.key !in viewModel.editingHiddenItems,
+                                onCheckedChange = { viewModel.toggleEditingItem(item) }
+                            )
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(item.labelRes),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+            }
+
+            // 正常模式：显示信息行
+            if (!isEditing) {
+                InfoCardContent(
+                    systemInfo = systemInfo,
+                    hiddenItems = hiddenItems,
+                    lkmMode = lkmMode,
+                )
+            }
+        }
+    }
+}
+@Composable
+private fun InfoCardContent(
+    systemInfo: HomeViewModel.SystemInfo,
+    hiddenItems: Set<String>,
+    lkmMode: Boolean?
+) {
             @Composable
-            fun InfoCardItem(
+            fun InfoRow(
                 label: String,
                 content: String,
                 icon: ImageVector? = null,
@@ -715,34 +792,40 @@ private fun InfoCard(
                 }
             }
 
-            InfoCardItem(
-                stringResource(R.string.home_kernel),
-                systemInfo.kernelRelease,
-                icon = Icons.Default.Memory,
-            )
+            if (InfoCardItem.KERNEL_VERSION.key !in hiddenItems) {
+                InfoRow(
+                    stringResource(R.string.home_kernel),
+                    systemInfo.kernelRelease,
+                    icon = Icons.Default.Memory,
+                )
+            }
 
-            if (!isSimpleMode) {
-                InfoCardItem(
+            if (InfoCardItem.ANDROID_VERSION.key !in hiddenItems) {
+                InfoRow(
                     stringResource(R.string.home_android_version),
                     systemInfo.androidVersion,
                     icon = Icons.Default.Android,
                 )
             }
 
-            InfoCardItem(
-                stringResource(R.string.home_device_model),
-                systemInfo.deviceModel,
-                icon = Icons.Default.PhoneAndroid,
-            )
+            if (InfoCardItem.DEVICE_MODEL.key !in hiddenItems) {
+                InfoRow(
+                    stringResource(R.string.home_device_model),
+                    systemInfo.deviceModel,
+                    icon = Icons.Default.PhoneAndroid,
+                )
+            }
 
-            InfoCardItem(
-                stringResource(R.string.home_manager_version),
-                "${systemInfo.managerVersion.first} (${systemInfo.managerVersion.second.toInt()})",
-                icon = Icons.Default.SettingsSuggest,
-            )
+            if (InfoCardItem.MANAGER_VERSION.key !in hiddenItems) {
+                InfoRow(
+                    stringResource(R.string.home_manager_version),
+                    "${systemInfo.managerVersion.first} (${systemInfo.managerVersion.second.toInt()})",
+                    icon = Icons.Default.SettingsSuggest,
+                )
+            }
 
-            if (!isSimpleMode && !systemInfo.susfsEnabled) {
-                InfoCardItem(
+            if (InfoCardItem.HOOK_TYPE.key !in hiddenItems && !systemInfo.susfsEnabled) {
+                InfoRow(
                     stringResource(R.string.home_hook_type),
                     Natives.getHookType(),
                     icon = Icons.Default.Link
@@ -750,7 +833,7 @@ private fun InfoCard(
             }
 
             // 活跃管理器
-            if (!isSimpleMode && systemInfo.managersList != null) {
+            if (InfoCardItem.ACTIVE_MANAGERS.key !in hiddenItems && systemInfo.managersList != null) {
                 val signatureMap =
                     systemInfo.managersList.managers.groupBy { it.signatureIndex }
 
@@ -774,36 +857,38 @@ private fun InfoCard(
                     }
                 }.trimEnd(' ', '|')
 
-                InfoCardItem(
+                InfoRow(
                     stringResource(R.string.multi_manager_list),
                     managersText.ifEmpty { stringResource(R.string.no_active_manager) },
                     icon = Icons.Default.Group,
                 )
             }
 
-            InfoCardItem(
-                stringResource(R.string.home_selinux_status),
-                systemInfo.selinuxStatus,
-                icon = Icons.Default.Security,
-            )
+            if (InfoCardItem.SELINUX_STATUS.key !in hiddenItems) {
+                InfoRow(
+                    stringResource(R.string.home_selinux_status),
+                    systemInfo.selinuxStatus,
+                    icon = Icons.Default.Security,
+                )
+            }
 
-            if (!isHideZygiskImplement && !isSimpleMode && systemInfo.zygiskImplement.isNotEmpty() && systemInfo.zygiskImplement != "None") {
-                InfoCardItem(
+            if (InfoCardItem.ZYGISK_IMPLEMENT.key !in hiddenItems && systemInfo.zygiskImplement.isNotEmpty() && systemInfo.zygiskImplement != "None") {
+                InfoRow(
                     stringResource(R.string.home_zygisk_implement),
                     systemInfo.zygiskImplement,
                     icon = Icons.Default.Adb,
                 )
             }
 
-            if (!isHideMetaModuleImplement && !isSimpleMode && systemInfo.metaModuleImplement.isNotEmpty() && systemInfo.metaModuleImplement != "None") {
-                InfoCardItem(
+            if (InfoCardItem.META_MODULE.key !in hiddenItems && systemInfo.metaModuleImplement.isNotEmpty() && systemInfo.metaModuleImplement != "None") {
+                InfoRow(
                     stringResource(R.string.home_meta_module_implement),
                     systemInfo.metaModuleImplement,
                     icon = Icons.Default.Extension,
                 )
             }
 
-            if (lkmMode == false && !isSimpleMode && !showKpmInfo) {
+            if (InfoCardItem.KPM_VERSION.key !in hiddenItems && lkmMode == false) {
                 val kpmNotSupport =
                     systemInfo.kpmVersion.isEmpty() || systemInfo.kpmVersion.startsWith("Error")
                 val displayText = when {
@@ -826,25 +911,23 @@ private fun InfoCard(
                     }
                 }
 
-                InfoCardItem(
+                InfoRow(
                     stringResource(R.string.home_kpm_version),
                     displayText,
                     icon = Icons.Default.Archive
                 )
             }
 
-            if (!isSimpleMode && !isHideSusfsStatus && systemInfo.susfsEnabled && systemInfo.susfsVersion.isNotEmpty()) {
+            if (InfoCardItem.SUSFS_VERSION.key !in hiddenItems && systemInfo.susfsEnabled && systemInfo.susfsVersion.isNotEmpty()) {
                 val infoText = SuSFSInfoText(systemInfo)
 
-                InfoCardItem(
+                InfoRow(
                     stringResource(R.string.home_susfs_version),
                     infoText,
                     icon = Icons.Default.Storage
                 )
             }
         }
-    }
-}
 
 @SuppressLint("ComposableNaming")
 @Composable

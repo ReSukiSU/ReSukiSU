@@ -246,6 +246,8 @@
     <string name="kernel_not_patched">内核未进行补丁</string>
     <string name="kernel_not_enabled">内核未配置</string>
     <string name="custom_settings">个性化设置</string>
+    <string name="info_card_display_settings">主页信息卡片显示</string>
+    <string name="info_card_display_settings_summary">长按主页信息卡片即可编辑显示项</string>
     <string name="kpm_install_mode">安装</string>
     <string name="kpm_install_mode_load">加载</string>
     <string name="kpm_install_mode_embed">嵌入</string>

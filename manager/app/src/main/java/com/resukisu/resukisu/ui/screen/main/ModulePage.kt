@@ -1267,7 +1267,7 @@ fun ModuleItem(
 ) {
     val context = LocalContext.current
     val prefs = context.getSharedPreferences("settings", MODE_PRIVATE)
-    val isHideTagRow = prefs.getBoolean("is_hide_tag_row", false)
+    val isHideTagRow = (prefs.getStringSet("hidden_info_items", emptySet()) ?: emptySet()).contains("tag_row")
     // 获取显示更多模块信息的设置
     val showMoreModuleInfo = prefs.getBoolean("show_more_module_info", false)
 

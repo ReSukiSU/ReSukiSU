@@ -12,6 +12,7 @@ import androidx.core.content.edit
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.MainActivity
+import com.resukisu.resukisu.ui.util.InfoCardItem
 import com.resukisu.resukisu.ui.theme.BackgroundManager
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeColors
@@ -271,89 +272,16 @@ class MoreSettingsHandlers(
     }
 
     /**
-     * 处理简洁模式变更
+     * 统一处理信息项显示/隐藏切换
      */
-    fun handleSimpleModeChange(newValue: Boolean) {
-        prefs.edit { putBoolean("is_simple_mode", newValue) }
-        state.isSimpleMode = newValue
-    }
-
-    /**
-     * 处理内核简洁模式变更
-     */
-    fun handleKernelSimpleModeChange(newValue: Boolean) {
-        prefs.edit { putBoolean("is_kernel_simple_mode", newValue) }
-        state.isKernelSimpleMode = newValue
-    }
-
-    /**
-     * 处理隐藏版本变更
-     */
-    fun handleHideVersionChange(newValue: Boolean) {
-        prefs.edit { putBoolean("is_hide_version", newValue) }
-        state.isHideVersion = newValue
-    }
-
-    /**
-     * 处理隐藏其他信息变更
-     */
-    fun handleHideOtherInfoChange(newValue: Boolean) {
-        prefs.edit { putBoolean("is_hide_other_info", newValue) }
-        state.isHideOtherInfo = newValue
+    fun handleToggleInfoItem(item: InfoCardItem) {
+        val newSet = state.hiddenItems.toMutableSet()
+        if (item.key in newSet) newSet.remove(item.key) else newSet.add(item.key)
+        prefs.edit { putStringSet("hidden_info_items", newSet) }
+        state.hiddenItems = newSet
         activity.settingsStateFlow.value = activity.settingsStateFlow.value.copy(
-            isHideOtherInfo = newValue
+            hiddenItems = newSet
         )
-    }
-
-    /**
-     * 处理显示KPM信息变更
-     */
-    fun handleShowKpmInfoChange(newValue: Boolean) {
-        prefs.edit { putBoolean("show_kpm_info", newValue) }
-        state.isShowKpmInfo = newValue
-        activity.settingsStateFlow.value = activity.settingsStateFlow.value.copy(
-            showKpmInfo = newValue
-        )
-    }
-
-    /**
-     * 处理隐藏SuSFS状态变更
-     */
-    fun handleHideSusfsStatusChange(newValue: Boolean) {
-        prefs.edit { putBoolean("is_hide_susfs_status", newValue) }
-        state.isHideSusfsStatus = newValue
-    }
-
-    /**
-     * 处理隐藏Zygisk实现变更
-     */
-    fun handleHideZygiskImplementChange(newValue: Boolean) {
-        prefs.edit { putBoolean("is_hide_zygisk_Implement", newValue) }
-        state.isHideZygiskImplement = newValue
-    }
-
-    /**
-     * 处理隐藏元模块实现变更
-     */
-    fun handleHideMetaModuleImplementChange(newValue: Boolean) {
-        prefs.edit { putBoolean("is_hide_meta_module_Implement", newValue) }
-        state.isHideMetaModuleImplement = newValue
-    }
-
-    /**
-     * 处理隐藏链接卡片变更
-     */
-    fun handleHideLinkCardChange(newValue: Boolean) {
-        prefs.edit { putBoolean("is_hide_link_card", newValue) }
-        state.isHideLinkCard = newValue
-    }
-
-    /**
-     * 处理隐藏标签行变更
-     */
-    fun handleHideTagRowChange(newValue: Boolean) {
-        prefs.edit { putBoolean("is_hide_tag_row", newValue) }
-        state.isHideTagRow = newValue
     }
 
     /**

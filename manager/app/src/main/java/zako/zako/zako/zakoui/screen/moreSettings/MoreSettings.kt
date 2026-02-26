@@ -50,6 +50,7 @@ import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material3.Button
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -297,6 +298,40 @@ fun MoreSettingsScreen(
             }
 
             item {
+                // 信息卡片显示提示
+                ElevatedCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.VisibilityOff,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = stringResource(R.string.info_card_display_settings),
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                            Text(
+                                text = stringResource(R.string.info_card_display_settings_summary),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+
+            item {
                 // 系统导航栏padding计算
                 Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
             }
@@ -394,124 +429,6 @@ private fun CustomizationSettings(
                 onCheckedChange = handlers::handleShowMoreModuleInfoChange
             )
         }
-
-        item {
-            // 简洁模式开关
-            SettingsSwitchWidget(
-                icon = Icons.Filled.Brush,
-                title = stringResource(R.string.simple_mode),
-                description = stringResource(R.string.simple_mode_summary),
-                checked = state.isSimpleMode,
-                onCheckedChange = handlers::handleSimpleModeChange
-            )
-        }
-
-        item {
-            SettingsSwitchWidget(
-                icon = Icons.Filled.Brush,
-                title = stringResource(R.string.kernel_simple_kernel),
-                description = stringResource(R.string.kernel_simple_kernel_summary),
-                checked = state.isKernelSimpleMode,
-                onCheckedChange = handlers::handleKernelSimpleModeChange
-            )
-        }
-
-        hideOptionsSettings(state = state, handlers = handlers)
-    }
-}
-
-private fun SplicedGroupScope.hideOptionsSettings(
-    state: MoreSettingsState,
-    handlers: MoreSettingsHandlers
-) {
-    item {
-        // 隐藏内核版本号
-        SettingsSwitchWidget(
-            icon = Icons.Filled.VisibilityOff,
-            title = stringResource(R.string.hide_kernel_kernelsu_version),
-            description = stringResource(R.string.hide_kernel_kernelsu_version_summary),
-            checked = state.isHideVersion,
-            onCheckedChange = handlers::handleHideVersionChange
-        )
-    }
-
-    item {
-        // 隐藏模块数量等信息
-        SettingsSwitchWidget(
-            icon = Icons.Filled.VisibilityOff,
-            title = stringResource(R.string.hide_other_info),
-            description = stringResource(R.string.hide_other_info_summary),
-            checked = state.isHideOtherInfo,
-            onCheckedChange = handlers::handleHideOtherInfoChange
-        )
-    }
-
-    item {
-        // SuSFS 状态信息
-        SettingsSwitchWidget(
-            icon = Icons.Filled.VisibilityOff,
-            title = stringResource(R.string.hide_susfs_status),
-            description = stringResource(R.string.hide_susfs_status_summary),
-            checked = state.isHideSusfsStatus,
-            onCheckedChange = handlers::handleHideSusfsStatusChange
-        )
-    }
-
-    item {
-        // Zygisk 实现状态信息
-        SettingsSwitchWidget(
-            icon = Icons.Filled.VisibilityOff,
-            title = stringResource(R.string.hide_zygisk_implement),
-            description = stringResource(R.string.hide_zygisk_implement_summary),
-            checked = state.isHideZygiskImplement,
-            onCheckedChange = handlers::handleHideZygiskImplementChange
-        )
-    }
-
-    item {
-        // 元模块实现状态信息
-        SettingsSwitchWidget(
-            icon = Icons.Filled.VisibilityOff,
-            title = stringResource(R.string.hide_meta_module_implement),
-            description = stringResource(R.string.hide_meta_module_implement_summary),
-            checked = state.isHideMetaModuleImplement,
-            onCheckedChange = handlers::handleHideMetaModuleImplementChange
-        )
-    }
-
-    // KPM 状态信息隐藏
-    if (Natives.version >= Natives.MINIMAL_SUPPORTED_KPM) {
-        item {
-            SettingsSwitchWidget(
-                icon = Icons.Filled.VisibilityOff,
-                title = stringResource(R.string.show_kpm_info),
-                description = stringResource(R.string.show_kpm_info_summary),
-                checked = state.isShowKpmInfo,
-                onCheckedChange = handlers::handleShowKpmInfoChange
-            )
-        }
-    }
-
-    item {
-        // 隐藏链接信息
-        SettingsSwitchWidget(
-            icon = Icons.Filled.VisibilityOff,
-            title = stringResource(R.string.hide_link_card),
-            description = stringResource(R.string.hide_link_card_summary),
-            checked = state.isHideLinkCard,
-            onCheckedChange = handlers::handleHideLinkCardChange
-        )
-    }
-
-    item {
-        // 隐藏标签行
-        SettingsSwitchWidget(
-            icon = Icons.Filled.VisibilityOff,
-            title = stringResource(R.string.hide_tag_card),
-            description = stringResource(R.string.hide_tag_card_summary),
-            checked = state.isHideTagRow,
-            onCheckedChange = handlers::handleHideTagRowChange
-        )
     }
 }
 

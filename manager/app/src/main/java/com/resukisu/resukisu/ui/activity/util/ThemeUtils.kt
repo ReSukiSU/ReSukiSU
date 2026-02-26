@@ -27,8 +27,7 @@ object ThemeUtils {
         val isFirstRun = prefs.getBoolean("is_first_run", true)
 
         settingsStateFlow.value = MainActivity.SettingsState(
-            isHideOtherInfo = prefs.getBoolean("is_hide_other_info", false),
-            showKpmInfo = prefs.getBoolean("show_kpm_info", false),
+            hiddenItems = prefs.getStringSet("hidden_info_items", emptySet()) ?: emptySet(),
             dpi = prefs.getInt("app_dpi", 0),
         )
 
