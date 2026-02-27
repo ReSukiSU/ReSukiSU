@@ -32,7 +32,9 @@ jobs:
 
       - name: Run Clippy
         run: |
-          cargo ndk -t arm64-v8a --manifest-path userspace/ksud/Cargo.toml clippy
-          cargo ndk -t arm64-v8a --manifest-path userspace/ksuinit/Cargo.toml clippy
-          cargo ndk -t x86_64 --manifest-path userspace/ksud/Cargo.toml clippy
-          cargo ndk -t x86_64 --manifest-path userspace/ksuinit/Cargo.toml clippy
+          cd userspace/ksud
+          cargo ndk -t arm64-v8a clippy
+          cargo ndk -t x86_64 clippy
+          cd ../ksuinit
+          cargo ndk -t arm64-v8a clippy
+          cargo ndk -t x86_64 clippy
