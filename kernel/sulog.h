@@ -5,10 +5,6 @@
 #include <linux/version.h>
 #include <linux/crc32.h> // needed for function dedup_calc_hash
 
-#define __SULOG_GATE 1
-
-#if __SULOG_GATE
-
 extern struct timezone sys_tz;
 
 #define SULOG_PATH "/data/adb/ksu/log/sulog.log"
@@ -93,6 +89,5 @@ void ksu_sulog_report_syscall(uid_t uid, const char *comm, const char *syscall,
 
 int ksu_sulog_init(void);
 void ksu_sulog_exit(void);
-#endif // __SULOG_GATE
 
 #endif /* __KSU_SULOG_H */

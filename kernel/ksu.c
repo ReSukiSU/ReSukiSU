@@ -69,14 +69,6 @@ bool ksu_late_loaded;
 #include "sucompat.h"
 #include "setuid_hook.h"
 
-void sukisu_exit(void)
-{
-    ksu_dynamic_manager_exit();
-#if __SULOG_GATE
-    ksu_sulog_exit();
-#endif
-}
-
 // dispatcher of ksu hooks
 #if defined(KSU_TP_HOOK)
 #include "syscall_hook_manager.h"
@@ -84,7 +76,8 @@ void sukisu_exit(void)
 #define ksu_hook_exit() ksu_syscall_hook_manager_exit()
 #elif defined(CONFIG_KSU_MANUAL_HOOK)
 // only lsm hook need call init
-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0) &&                            \
+    LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)
 #define ksu_hook_init() ksu_lsm_hook_init()
 #else
 #define ksu_hook_init()                                                        \
@@ -156,9 +149,7 @@ int __init kernelsu_init(void)
         ksu_observer_init();
         ksu_file_wrapper_init();
 
-#if __SULOG_GATE
         ksu_sulog_init();
-#endif
         ksu_dynamic_manager_init();
 
         ksu_boot_completed = true;
@@ -203,7 +194,8 @@ void kernelsu_exit(void)
     ksu_sucompat_exit();
     ksu_setuid_hook_exit();
 
-    sukisu_exit();
+    ksu_dynamic_manager_exit();
+    ksu_sulog_exit();
 
     ksu_supercalls_exit();
 
