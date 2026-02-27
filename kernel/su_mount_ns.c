@@ -150,7 +150,12 @@ try_setns:
     }
     revert_creds(saved);
 #endif
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 6, 0) || defined(KSU_COMPAT_HAS_MODERN_DENTRY_OPEN)
     struct file *ns_file = dentry_open(&ns_path, O_RDONLY, ksu_cred);
+#else
+    struct file *ns_file =
+        dentry_open(ns_path.dentry, ns_path.mnt, O_RDONLY, ksu_cred);
+#endif
 
     path_put(&ns_path);
     if (IS_ERR(ns_file)) {
