@@ -231,6 +231,17 @@ $(info -- $(REPO_NAME)/compat: bitmap_zalloc found)
 ccflags-y += -DKSU_COMPAT_HAS_BITMAP_ALLOC_HELPER
 endif
 
+# Now let's handle some unexpected backports by some noob maintainers.
+ifeq ($(shell grep -wq "iterate" $(srctree)/include/linux/fs.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: struct file_operations.iterate found)
+ccflags-y += -DKSU_COMPAT_HAS_FOPS_ITERATE
+endif
+
+ifeq ($(shell grep -wq "iterate_shared" $(srctree)/include/linux/fs.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: struct file_operations.iterate_shared found)
+ccflags-y += -DKSU_COMPAT_HAS_FOPS_ITERATE_SHARED
+endif
+
 # Custom Signs
 ifdef KSU_EXPECTED_SIZE
 ccflags-y += -DEXPECTED_SIZE=$(KSU_EXPECTED_SIZE)

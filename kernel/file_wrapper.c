@@ -110,7 +110,7 @@ static int ksu_wrapper_iopoll(struct kiocb *kiocb, bool spin)
 }
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0)
+#ifdef KSU_COMPAT_HAS_FOPS_ITERATE
 static int ksu_wrapper_iterate(struct file *fp, struct dir_context *dc)
 {
     struct ksu_file_wrapper *data = fp->private_data;
@@ -119,7 +119,7 @@ static int ksu_wrapper_iterate(struct file *fp, struct dir_context *dc)
 }
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 7, 0)
+#ifdef KSU_COMPAT_HAS_FOPS_ITERATE_SHARED
 static int ksu_wrapper_iterate_shared(struct file *fp, struct dir_context *dc)
 {
     struct ksu_file_wrapper *data = fp->private_data;
@@ -430,10 +430,10 @@ static struct ksu_file_wrapper *ksu_create_file_wrapper(struct file *fp)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)
     p->ops.iopoll = fp->f_op->iopoll ? ksu_wrapper_iopoll : NULL;
 #endif
-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0)
+#ifdef KSU_COMPAT_HAS_FOPS_ITERATE
     p->ops.iterate = fp->f_op->iterate ? ksu_wrapper_iterate : NULL;
 #endif
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 7, 0)
+#ifdef KSU_COMPAT_HAS_FOPS_ITERATE_SHARED
     p->ops.iterate_shared =
         fp->f_op->iterate_shared ? ksu_wrapper_iterate_shared : NULL;
 #endif
