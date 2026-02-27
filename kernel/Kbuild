@@ -155,11 +155,6 @@ $(info -- $(REPO_NAME)/compat: kernel_write found)
 ccflags-y += -DKSU_OPTIONAL_KERNEL_WRITE
 endif
 
-ifeq ($(shell grep -q "int\s\+path_mount" $(srctree)/fs/namespace.c; echo $$?),0)
-$(info -- $(REPO_NAME)/compat: path_mount found)
-ccflags-y += -DKSU_HAS_PATH_MOUNT
-endif
-
 ifeq ($(shell grep -q "int\s\+path_umount" $(srctree)/fs/namespace.c; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: path_umount found)
 ccflags-y += -DKSU_HAS_PATH_UMOUNT

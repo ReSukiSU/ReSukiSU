@@ -127,10 +127,10 @@ long ksu_strncpy_from_user_nofault(char *dst, const void __user *unsafe_addr,
 }
 #endif
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 9, 0) &&                           \
-     !defined(KSU_HAS_PATH_MOUNT))
-int path_mount(const char *dev_name, struct path *path, const char *type_page,
-               unsigned long flags, void *data_page)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 9, 0)
+__weak int path_mount(const char *dev_name, struct path *path,
+                      const char *type_page, unsigned long flags,
+                      void *data_page)
 {
     // 384 is enough
     char buf[384] = { 0 };
