@@ -77,16 +77,6 @@ __attribute__((naked)) int __init kernelsu_init_early(void)
 struct cred *ksu_cred;
 bool ksu_late_loaded;
 
-void sukisu_exit(void)
-{
-#ifndef CONFIG_KSU_DISABLE_MANAGER
-    ksu_dynamic_manager_exit();
-#endif
-#if __SULOG_GATE
-    ksu_sulog_exit();
-#endif
-}
-
 // dispatcher of ksu hooks
 #ifdef KSU_TP_HOOK
 #include "hook/syscall_hook_manager.h"
@@ -99,7 +89,8 @@ static inline void ksu_hook_init(void)
     ksu_syscall_hook_init();
     ksu_syscall_hook_manager_init();
 #elif defined(CONFIG_KSU_MANUAL_HOOK)
-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
+// only lsm hook need call init
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0) && LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)
     ksu_lsm_hook_init();
 #endif
 #elif defined(CONFIG_KSU_SUSFS)
@@ -187,9 +178,7 @@ int __init kernelsu_init(void)
         ksu_observer_init();
         ksu_file_wrapper_init();
 
-#if __SULOG_GATE
         ksu_sulog_init();
-#endif
 #ifndef CONFIG_KSU_DISABLE_MANAGER
         ksu_dynamic_manager_init();
 #endif
@@ -229,7 +218,10 @@ void kernelsu_exit(void)
     ksu_supercalls_exit();
     if (!ksu_late_loaded)
         ksu_ksud_exit();
-    sukisu_exit();
+#ifndef CONFIG_KSU_DISABLE_MANAGER
+    ksu_dynamic_manager_exit();
+#endif
+    ksu_sulog_exit();
 
     // Wait for any in-flight RCU readers (e.g. handler traversing allow_list)
     synchronize_rcu();

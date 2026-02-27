@@ -82,9 +82,7 @@ static int do_report_event(void __user *arg)
             } else {
                 pr_info("post-fs-data triggered\n");
                 on_post_fs_data();
-#if __SULOG_GATE
                 ksu_sulog_init();
-#endif
 #ifndef CONFIG_KSU_DISABLE_MANAGER
                 ksu_dynamic_manager_init();
 #endif
@@ -1070,10 +1068,8 @@ static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
 
 static inline void ksu_ioctl_audit(unsigned int cmd, const char *cmd_name, uid_t uid, int ret)
 {
-#if __SULOG_GATE
     const char *result = (ret == 0) ? "SUCCESS" : (ret == -EPERM) ? "DENIED" : "FAILED";
     ksu_sulog_report_syscall(uid, NULL, cmd_name, result);
-#endif
 }
 
 long ksu_supercall_handle_ioctl(unsigned int cmd, void __user *argp)

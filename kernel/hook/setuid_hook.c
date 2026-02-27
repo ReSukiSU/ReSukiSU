@@ -84,9 +84,7 @@ int ksu_handle_setuid(uid_t new_uid, uid_t old_uid)
 
     if (old_uid != new_uid) {
         pr_info("handle_setresuid from %d to %d\n", old_uid, new_uid);
-#if __SULOG_GATE
         ksu_sulog_report_syscall(new_uid, NULL, "setuid", NULL);
-#endif
     }
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)

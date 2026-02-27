@@ -276,13 +276,6 @@ $(info -- $(REPO_NAME)/compat: proc_ops found)
 ccflags-y += -DKSU_COMPAT_HAS_PROC_OPS
 endif
 
-# Bitmap zalloc
-# https://github.com/torvalds/linux/commit/c42b65e363ce97a828f81b59033c3558f8fa7f70
-ifeq ($(shell grep -q "bitmap_zalloc" $(srctree)/include/linux/bitmap.h; echo $$?),0)
-$(info -- $(REPO_NAME)/compat: bitmap_zalloc found)
-ccflags-y += -DKSU_COMPAT_HAS_BITMAP_ALLOC_HELPER
-endif
-
 # policy mutex
 # kernel 5.10+
 ifeq ($(shell grep -q "policy_mutex" $(srctree)/security/selinux/include/security.h; echo $$?),0)

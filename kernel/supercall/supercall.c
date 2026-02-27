@@ -75,9 +75,7 @@ int ksu_install_fd(void)
     // Install fd
     fd_install(fd, filp);
 
-#if __SULOG_GATE
     ksu_sulog_report_permission_check(current_uid().val, current->comm, fd >= 0);
-#endif
 
     pr_info("ksu fd installed: %d for pid %d\n", fd, current->pid);
 

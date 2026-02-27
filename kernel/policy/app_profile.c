@@ -216,9 +216,7 @@ int escape_with_root_profile(void)
 
     disable_seccomp();
 
-#if __SULOG_GATE
     ksu_sulog_report_su_grant(current_euid().val, NULL, "escape_to_root");
-#endif
 
 #ifdef KSU_TP_HOOK
     struct task_struct *t;

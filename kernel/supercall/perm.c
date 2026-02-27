@@ -28,8 +28,7 @@ bool always_allow(void)
 bool allowed_for_su(void)
 {
     bool is_allowed = is_manager() || ksu_is_allow_uid_for_current(current_uid().val);
-#if __SULOG_GATE
     ksu_sulog_report_permission_check(current_uid().val, current->comm, is_allowed);
-#endif
+
     return is_allowed;
 }
