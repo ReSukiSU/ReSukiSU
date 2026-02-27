@@ -53,11 +53,18 @@ static const struct ksu_feature_handler sulog_handler = {
 
 static void get_timestamp(char *buf, size_t len)
 {
-    struct timespec64 ts;
     struct tm tm;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 8, 0) || defined(KSU_HAS_TIME64)
+    struct timespec64 ts;
 
     ktime_get_real_ts64(&ts);
     time64_to_tm(ts.tv_sec - sys_tz.tz_minuteswest * 60, 0, &tm);
+#else
+    struct timespec ts;
+
+    ktime_get_real_ts(&ts);
+    time_to_tm(ts.tv_sec - sys_tz.tz_minuteswest * 60, 0, &tm);
+#endif
 
     snprintf(buf, len, "%04ld-%02d-%02d %02d:%02d:%02d", tm.tm_year + 1900,
              tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);

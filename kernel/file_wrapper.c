@@ -29,7 +29,8 @@ static struct ksu_file_wrapper *ksu_create_file_wrapper(struct file *fp);
 static int ksu_wrapper_open(struct inode *ino, struct file *fp)
 {
     struct path *orig_path = fp->f_path.dentry->d_fsdata;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 6, 0) || defined(KSU_COMPAT_HAS_MODERN_DENTRY_OPEN)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 6, 0) ||                           \
+    defined(KSU_COMPAT_HAS_MODERN_DENTRY_OPEN)
     struct file *orig_file =
         dentry_open(orig_path, fp->f_flags, current_cred());
 #else

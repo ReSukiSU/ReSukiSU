@@ -239,6 +239,14 @@ $(info -- $(REPO_NAME)/compat: ext4_unregister_sysfs found)
 ccflags-y += -DKSU_HAS_MODERN_EXT4
 endif
 
+# The FUCKING Sulog logic require that
+# it need the whole rewrite
+# Introduce in linux kernel 4.8
+ifeq ($(shell grep -q "time64_to_tm" $(srctree)/include/linux/time.h 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: time64_to_tm found)
+ccflags-y += -DKSU_HAS_TIME64
+endif
+
 # Custom Signs
 ifdef KSU_EXPECTED_SIZE
 ccflags-y += -DEXPECTED_SIZE=$(KSU_EXPECTED_SIZE)
@@ -378,9 +386,21 @@ ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
   ifeq ($(shell grep -q "ksu_handle_sys_reboot" $(srctree)/kernel/reboot.c; echo $$?),0)
     $(info -- $(REPO_NAME)/manual_hook: ksu_handle_sys_reboot found)
   else
-    $(info -- You lost ksu_handle_sys_reboot hook in your kernel)
-    $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
-    $(error You should integrate $(REPO_NAME) in your kernel.)
+    ifeq ($(shell test \( $(VERSION) -lt 3 -o \( $(VERSION) -eq 3 -a $(PATCHLEVEL) -le 11 \) \) && echo y),y)
+      # https://github.com/torvalds/linux/commit/15d94b82565ebfb0cf27830b96e6cf5ed2d12a9a
+      # when 3.11-, it maybe in kernel/sys.c
+      ifeq ($(shell grep -q "ksu_handle_sys_reboot" $(srctree)/kernel/sys.c; echo $$?),0)
+        $(info -- $(REPO_NAME)/manual_hook: ksu_handle_sys_reboot found)
+      else
+        $(info -- You lost ksu_handle_sys_reboot hook in your kernel)
+        $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
+        $(error You should integrate $(REPO_NAME) in your kernel.)
+      endif
+    else
+      $(info -- You lost ksu_handle_sys_reboot hook in your kernel)
+      $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
+      $(error You should integrate $(REPO_NAME) in your kernel.)
+    endif
   endif
 endif
 

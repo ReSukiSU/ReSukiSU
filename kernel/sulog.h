@@ -29,24 +29,6 @@ static inline size_t strlcpy(char *dest, const char *src, size_t size)
         }                                                                      \
     } while (0)
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 8, 0)
-#include <linux/rtc.h>
-
-static inline void time64_to_tm(time64_t totalsecs, int offset,
-                                struct tm *result)
-{
-    struct rtc_time rtc_tm;
-    rtc_time64_to_tm(totalsecs, &rtc_tm);
-
-    result->tm_sec = rtc_tm.tm_sec;
-    result->tm_min = rtc_tm.tm_min;
-    result->tm_hour = rtc_tm.tm_hour;
-    result->tm_mday = rtc_tm.tm_mday;
-    result->tm_mon = rtc_tm.tm_mon;
-    result->tm_year = rtc_tm.tm_year;
-}
-#endif
-
 struct dedup_key {
     u32 crc;
     uid_t uid;
