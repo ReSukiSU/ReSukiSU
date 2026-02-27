@@ -336,10 +336,9 @@ fn copy_metadata_to_sus_kstat(info: &mut SusfsSusKstat, md: &fs::Metadata) {
 
 fn handle_result(err: i32, cmd: u64) -> Result<()> {
     if err == ERR_CMD_NOT_SUPPORTED {
-        eprintln!(
-            "[-] CMD: '0x{cmd:x}', SUSFS operation not supported, please enable it in kernel",
-        );
-        return Err(anyhow::format_err!("SUSFS operation not supported"));
+        return Err(anyhow::format_err!(
+            "unsupported susfs operation, cmd: 0x{cmd:x}"
+        ));
     }
     if err != 0 && err != ERR_CMD_NOT_SUPPORTED {
         return Err(anyhow::format_err!("{err}"));
