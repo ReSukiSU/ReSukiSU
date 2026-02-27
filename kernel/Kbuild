@@ -220,9 +220,18 @@ ccflags-y += -DKSU_COMPAT_HAS_PROC_OPS
 endif
 
 # Function ns_get_path check
+# for kernel 3.19-
 ifeq ($(shell grep -q "ns_get_path" $(srctree)/fs/nsfs.c; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: ns_get_path found)
 ccflags-y += -DKSU_COMPAT_HAS_NS_GET_PATH
+endif
+
+# Modern dentry_open check
+# add . to skip (, avoid build failed
+# for kernel 3.6-
+ifeq ($(shell grep -q "dentry_open.const struct path" $(srctree)/include/linux/fs.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: modern dentry_open found)
+ccflags-y += -DKSU_COMPAT_HAS_MODERN_DENTRY_OPEN
 endif
 
 # Custom Signs
