@@ -231,7 +231,7 @@ $(info -- $(REPO_NAME)/compat: bitmap_zalloc found)
 ccflags-y += -DKSU_COMPAT_HAS_BITMAP_ALLOC_HELPER
 endif
 
-# Now let's handle some unexpected backports by some noob maintainers.
+# Now let's handle or avoid some unexpected backports by some noob maintainers.
 ifeq ($(shell grep -wq "iterate" $(srctree)/include/linux/fs.h; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: struct file_operations.iterate found)
 ccflags-y += -DKSU_COMPAT_HAS_FOPS_ITERATE
@@ -242,6 +242,60 @@ $(info -- $(REPO_NAME)/compat: struct file_operations.iterate_shared found)
 ccflags-y += -DKSU_COMPAT_HAS_FOPS_ITERATE_SHARED
 endif
 
+ifeq ($(shell grep -wq "copy_file_range" $(srctree)/include/linux/fs.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: struct file_operations.copy_file_range found)
+ccflags-y += -DKSU_COMPAT_HAS_FOPS_COPY_FILE_RANGE
+endif
+
+ifeq ($(shell grep -wq "remap_file_range" $(srctree)/include/linux/fs.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: struct file_operations.remap_file_range found)
+ccflags-y += -DKSU_COMPAT_HAS_FOPS_REMAP_FILE_RANGE
+endif
+
+ifeq ($(shell grep -wq "fadvise" $(srctree)/include/linux/fs.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: struct file_operations.fadvise found)
+ccflags-y += -DKSU_COMPAT_HAS_FOPS_FADVISE
+endif
+
+ifeq ($(shell grep -q "sendpage" $(srctree)/include/linux/fs.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: struct file_operations.sendpage found)
+ccflags-y += -DKSU_COMPAT_HAS_FOPS_SENDPAGE
+endif
+
+ifeq ($(shell grep -q "struct file_operations.splice_eof" $(srctree)/include/linux/fs.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: struct file_operations.splice_eof found)
+ccflags-y += -DKSU_COMPAT_HAS_FOPS_SPLICE_EOF
+endif
+
+ifeq ($(shell grep -q "put_task_struct" $(srctree)/include/linux/sched/task.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: put_task_struct found in task.h)
+ccflags-y += -DKSU_COMPAT_PUT_TASK_STRUCT_IN_TASK_H
+endif
+
+ifeq ($(shell grep -q "signal_struct" $(srctree)/include/linux/sched/signal.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: signal_struct found)
+ccflags-y += -DKSU_COMPAT_HAS_SIGNAL_STRUCT
+endif
+
+ifeq ($(shell grep -q "REFCOUNT_INIT" $(srctree)/include/linux/refcount.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: REFCOUNT_INIT found)
+ccflags-y += -DKSU_COMPAT_HAS_REFCOUNT_INIT
+endif
+
+ifeq ($(shell grep -q "clear_syscall_work" $(srctree)/include/linux/thread_info.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: clear_syscall_work found)
+ccflags-y += -DKSU_COMPAT_HAS_CLEAR_SYSCALL_WORK
+endif
+
+ifeq ($(shell grep -q "GROUP_AT" $(srctree)/include/linux/cred.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: GROUP_AT found)
+ccflags-y += -DKSU_COMPAT_HAS_GROUP_AT
+endif
+
+ifeq ($(shell grep -q "__user" $(srctree)/include/linux/compiler_types.h | grep -q "iopoll"; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: compiler_types.h found)
+ccflags-y += -DKSU_COMPAT_HAS_COMPILER_TYPES_H
+endif
 # Custom Signs
 ifdef KSU_EXPECTED_SIZE
 ccflags-y += -DEXPECTED_SIZE=$(KSU_EXPECTED_SIZE)
