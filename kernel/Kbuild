@@ -224,6 +224,12 @@ $(info -- $(REPO_NAME)/compat: proc_ops found)
 ccflags-y += -DKSU_COMPAT_HAS_PROC_OPS
 endif
 
+# Function ns_get_path check
+ifeq ($(shell grep -q "ns_get_path" $(srctree)/fs/nsfs.c; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: ns_get_path found)
+ccflags-y += -DKSU_COMPAT_HAS_NS_GET_PATH
+endif
+
 # Custom Signs
 ifdef KSU_EXPECTED_SIZE
 ccflags-y += -DEXPECTED_SIZE=$(KSU_EXPECTED_SIZE)

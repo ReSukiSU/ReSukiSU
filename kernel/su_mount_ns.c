@@ -107,7 +107,7 @@ static void ksu_mnt_ns_global(void)
     }
 
 try_setns:
-
+#ifdef KSU_COMPAT_HAS_NS_GET_PATH
     rcu_read_lock();
     // &init_task is not init, but swapper/idle, which forks the init process
     // so we need find init process
@@ -131,6 +131,25 @@ try_setns:
         pr_warn("failed get path for init mount namespace: %ld\n", ret);
         goto out;
     }
+#else
+    barrier(); // to shutup declaration after label
+
+    // on UL kernels we can try to just feed it with struct path of /proc/1/ns/mnt
+    // we do NOT have ns_get_path. if it works, GOOD. if it doesn't I don't care.
+
+    struct path ns_path;
+    const struct cred *saved = override_creds(ksu_cred);
+
+    // make sure to LOOKUP_FOLLOW
+    // /proc/1/ns/mnt -> 'mnt:[4026531840]'
+    long ret = kern_path("/proc/1/ns/mnt", LOOKUP_FOLLOW, &ns_path);
+    if (ret) {
+        revert_creds(saved);
+        pr_warn("kern_path /proc/1/ns/mnt fail! ret: %ld\n", ret);
+        goto out;
+    }
+    revert_creds(saved);
+#endif
     struct file *ns_file = dentry_open(&ns_path, O_RDONLY, ksu_cred);
 
     path_put(&ns_path);
