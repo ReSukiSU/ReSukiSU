@@ -59,10 +59,8 @@ bool allowed_for_su(void)
 {
     bool is_allowed =
         is_manager() || ksu_is_allow_uid_for_current(current_uid().val);
-#if __SULOG_GATE
     ksu_sulog_report_permission_check(current_uid().val, current->comm,
                                       is_allowed);
-#endif
     return is_allowed;
 }
 
@@ -111,9 +109,7 @@ static int do_report_event(void __user *arg)
             post_fs_data_lock = true;
             pr_info("post-fs-data triggered\n");
             on_post_fs_data();
-#if __SULOG_GATE
             ksu_sulog_init();
-#endif
             ksu_dynamic_manager_init();
         }
         break;
@@ -1176,12 +1172,10 @@ void ksu_supercalls_exit(void)
 static inline void ksu_ioctl_audit(unsigned int cmd, const char *cmd_name,
                                    uid_t uid, int ret)
 {
-#if __SULOG_GATE
     const char *result = (ret == 0)      ? "SUCCESS" :
                          (ret == -EPERM) ? "DENIED" :
                                            "FAILED";
     ksu_sulog_report_syscall(uid, NULL, cmd_name, result);
-#endif
 }
 
 // IOCTL dispatcher
@@ -1258,10 +1252,8 @@ int ksu_install_fd(void)
     // Install fd
     fd_install(fd, filp);
 
-#if __SULOG_GATE
     ksu_sulog_report_permission_check(current_uid().val, current->comm,
                                       fd >= 0);
-#endif
 
     pr_info("ksu fd installed: %d for pid %d\n", fd, current->pid);
 

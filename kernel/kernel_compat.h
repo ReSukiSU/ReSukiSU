@@ -108,25 +108,44 @@ extern void *ksu_compat_kvrealloc(const void *p, size_t oldsize, size_t newsize,
                                   gfp_t flags);
 #endif
 
-#ifdef KSU_COMPAT_HAS_BITMAP_ALLOC_HELPER
-#define ksu_bitmap_alloc bitmap_alloc
-#define ksu_bitmap_zalloc bitmap_zalloc
-#define ksu_bitmap_free bitmap_free
-#else
-// for kernel not support, impl by ourselves
-/*
- * Allocation and deallocation of bitmap.
- * Provided in kernel_compat.c to avoid circular dependency.
- */
-extern unsigned long *ksu_bitmap_alloc(unsigned int nbits, gfp_t flags);
-extern unsigned long *ksu_bitmap_zalloc(unsigned int nbits, gfp_t flags);
-extern void ksu_bitmap_free(const unsigned long *bitmap);
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 19, 0)
+// kernel below 4.19 maybe not have 3 helper, but impl that is very easy
+// copy from https://github.com/torvalds/linux/commit/c42b65e363ce97a828f81b59033c3558f8fa7f70
+__weak unsigned long *bitmap_alloc(unsigned int nbits, gfp_t flags)
+{
+    return kmalloc_array(BITS_TO_LONGS(nbits), sizeof(unsigned long), flags);
+}
+
+__weak unsigned long *bitmap_zalloc(unsigned int nbits, gfp_t flags)
+{
+    return bitmap_alloc(nbits, flags | __GFP_ZERO);
+}
+
+__weak void bitmap_free(const unsigned long *bitmap)
+{
+    kfree(bitmap);
+}
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 15, 0)
 __weak void groups_sort(struct group_info *group_info)
 {
     return;
+}
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0)
+// https://github.com/torvalds/linux/commit/5955102c9984fa081b2d570cfac75c97eecf8f3b
+// for setuid_hooks only
+// it will remove when we impl dynamic-manager feature init out of replaceable ksud
+__weak void inode_lock(struct inode *inode)
+{
+    mutex_lock(&inode->i_mutex);
+}
+
+__weak void inode_unlock(struct inode *inode)
+{
+    mutex_unlock(&inode->i_mutex);
 }
 #endif
 

@@ -30,18 +30,6 @@ struct cred *ksu_cred;
 #include "sucompat.h"
 #include "setuid_hook.h"
 
-void sukisu_custom_config_init(void)
-{
-}
-
-void sukisu_custom_config_exit(void)
-{
-    ksu_dynamic_manager_exit();
-#if __SULOG_GATE
-    ksu_sulog_exit();
-#endif
-}
-
 int __init kernelsu_init(void)
 {
     pr_info("Initialized on: %s (%s) with driver version: %u\n", UTS_RELEASE,
@@ -64,15 +52,14 @@ int __init kernelsu_init(void)
 
     ksu_feature_init();
 
-#ifdef CONFIG_KSU_MANUAL_HOOK
-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
+#if defined(CONFIG_KSU_MANUAL_HOOK) &&                                         \
+    LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0) &&                            \
+    LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)
     ksu_lsm_hook_init();
-#endif
 #endif
 
     ksu_supercalls_init();
 
-    sukisu_custom_config_init();
 #ifdef KSU_TP_HOOK
     ksu_syscall_hook_manager_init();
 #endif
@@ -115,7 +102,8 @@ void kernelsu_exit(void)
     ksu_sucompat_exit();
     ksu_setuid_hook_exit();
 
-    sukisu_custom_config_exit();
+    ksu_dynamic_manager_exit();
+    ksu_sulog_exit();
 
     ksu_supercalls_exit();
 

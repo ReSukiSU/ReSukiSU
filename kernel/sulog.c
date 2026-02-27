@@ -25,8 +25,6 @@
 #include "ksu.h"
 #include "feature.h"
 
-#if __SULOG_GATE
-
 struct dedup_entry dedup_tbl[SULOG_COMM_LEN];
 static DEFINE_SPINLOCK(dedup_lock);
 static LIST_HEAD(sulog_queue);
@@ -405,5 +403,3 @@ void ksu_sulog_exit(void)
 
     pr_info("sulog: cleaned up successfully\n");
 }
-
-#endif // __SULOG_GATE

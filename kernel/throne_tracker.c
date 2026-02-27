@@ -290,20 +290,20 @@ void track_throne(bool prune_only, bool force_search_manager)
 
     mutex_lock(&app_list_lock);
     if (unlikely(!last_app_id_map)) {
-        last_app_id_map = ksu_bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
+        last_app_id_map = bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
     }
     mutex_unlock(&app_list_lock);
 
-    curr_app_id_map = ksu_bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
+    curr_app_id_map = bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
     if (!curr_app_id_map) {
         pr_err("track_throne: failed to allocate curr_app_id_map\n");
         return;
     }
 
-    diff_map = ksu_bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
+    diff_map = bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
     if (!diff_map) {
         pr_err("track_throne: failed to allocate diff_map\n");
-        ksu_bitmap_free(curr_app_id_map); // Free allocated memory when failed
+        bitmap_free(curr_app_id_map); // Free allocated memory when failed
         return;
     }
     INIT_LIST_HEAD(&uid_list);
@@ -417,9 +417,9 @@ out:
     }
 
     if (curr_app_id_map)
-        ksu_bitmap_free(curr_app_id_map);
+        bitmap_free(curr_app_id_map);
     if (diff_map)
-        ksu_bitmap_free(diff_map);
+        bitmap_free(diff_map);
 }
 
 void ksu_throne_tracker_init(void)
