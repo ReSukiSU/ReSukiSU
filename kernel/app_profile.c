@@ -7,7 +7,7 @@
 #include <linux/fs.h>
 #include <linux/proc_ns.h>
 #include <linux/pid.h>
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0) || defined(KSU_COMPAT_HAS_SIGNAL_STRUCT)
 #include <linux/sched/signal.h> // signal_struct
 #include <linux/sched/task.h>
 #endif
@@ -70,7 +70,7 @@ static void setup_groups(struct root_profile *profile, struct cred *cred)
             put_group_info(group_info);
             return;
         }
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0) || !defined(KSU_COMPAT_HAS_GROUP_AT)
         group_info->gid[i] = kgid;
 #else
         GROUP_AT(group_info, i) = kgid;

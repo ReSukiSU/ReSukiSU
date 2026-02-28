@@ -11,7 +11,7 @@
 #include <linux/pid.h>
 #include <linux/cred.h>
 #include <linux/sched.h>
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0) || defined(KSU_COMPAT_PUT_TASK_STRUCT_IN_TASK_H)
 #include <linux/sched/task.h>
 #endif
 #include <linux/mm.h>

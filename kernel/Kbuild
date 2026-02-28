@@ -277,9 +277,9 @@ $(info -- $(REPO_NAME)/compat: signal_struct found)
 ccflags-y += -DKSU_COMPAT_HAS_SIGNAL_STRUCT
 endif
 
-ifeq ($(shell grep -q "REFCOUNT_INIT" $(srctree)/include/linux/refcount.h; echo $$?),0)
-$(info -- $(REPO_NAME)/compat: REFCOUNT_INIT found)
-ccflags-y += -DKSU_COMPAT_HAS_REFCOUNT_INIT
+ifeq ($(shell grep -q "handle_inode_event" $(srctree)/include/linux/fsnotify_backend.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: handle_inode_event found)
+ccflags-y += -DKSU_COMPAT_HAS_HANDLE_INODE_EVENT
 endif
 
 ifeq ($(shell grep -q "clear_syscall_work" $(srctree)/include/linux/thread_info.h; echo $$?),0)
