@@ -193,3 +193,57 @@ void *ksu_compat_kvrealloc(const void *p, size_t oldsize, size_t newsize,
     return newp;
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 15, 0) &&                           \
+    !defined(KSU_HAS_GET_CMDLINE)
+// for the fucking sulog again
+// https://github.com/torvalds/linux/commit/a90902531a06a030a252a07fbff7f45a189a64fe
+
+/**
+ * get_cmdline() - copy the cmdline value to a buffer.
+ * @task:     the task whose cmdline value to copy.
+ * @buffer:   the buffer to copy to.
+ * @buflen:   the length of the buffer. Larger cmdline values are truncated
+ *            to this length.
+ * Returns the size of the cmdline field copied. Note that the copy does
+ * not guarantee an ending NULL byte.
+ */
+int get_cmdline(struct task_struct *task, char *buffer, int buflen)
+{
+    int res = 0;
+    unsigned int len;
+    struct mm_struct *mm = get_task_mm(task);
+    if (!mm)
+        goto out;
+    if (!mm->arg_end)
+        goto out_mm; /* Shh! No looking before we're done */
+
+    len = mm->arg_end - mm->arg_start;
+
+    if (len > buflen)
+        len = buflen;
+
+    res = access_process_vm(task, mm->arg_start, buffer, len, 0);
+
+    /*
+	 * If the nul at the end of args has been overwritten, then
+	 * assume application is using setproctitle(3).
+	 */
+    if (res > 0 && buffer[res - 1] != '\0' && len < buflen) {
+        len = strnlen(buffer, res);
+        if (len < res) {
+            res = len;
+        } else {
+            len = mm->env_end - mm->env_start;
+            if (len > buflen - res)
+                len = buflen - res;
+            res += access_process_vm(task, mm->env_start, buffer + res, len, 0);
+            res = strnlen(buffer, res);
+        }
+    }
+out_mm:
+    mmput(mm);
+out:
+    return res;
+}
+#endif

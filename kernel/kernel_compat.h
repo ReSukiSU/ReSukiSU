@@ -166,4 +166,12 @@ __weak char *bin2hex(char *dst, const void *src, size_t count)
 }
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 15, 0) &&                           \
+    !defined(KSU_HAS_GET_CMDLINE)
+// for the fucking sulog again
+// https://github.com/torvalds/linux/commit/a90902531a06a030a252a07fbff7f45a189a64fe
+
+int get_cmdline(struct task_struct *task, char *buffer, int buflen);
+#endif
+
 #endif

@@ -258,6 +258,16 @@ $(info -- $(REPO_NAME)/compat: time64_to_tm found)
 ccflags-y += -DKSU_HAS_TIME64
 endif
 
+ifeq ($(shell grep -q "ktime_get_ns" $(srctree)/include/linux/timekeeping.h 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: ktime_get_ns found)
+ccflags-y += -DKSU_HAS_TIME_HELPER
+endif
+
+ifeq ($(shell grep -q "get_cmdline" $(srctree)/mm/util.c 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: get_cmdline found)
+ccflags-y += -DKSU_HAS_GET_CMDLINE
+endif
+
 # https://github.com/torvalds/linux/commit/5955102c9984fa081b2d570cfac75c97eecf8f3b
 # for setuid_hooks only
 # it will remove when we impl dynamic-manager feature init out of replaceable ksud
