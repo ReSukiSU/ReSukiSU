@@ -1,9 +1,12 @@
 #include <linux/slab.h>
 #include <linux/rculist.h>
 #include <linux/uaccess.h>
+#include <linux/cred.h>
+#include <linux/sched.h>
 #include "manager_identity.h"
 #include "ksu.h"
 #include "uapi/supercall.h"
+#include "compat/kernel_compat.h"
 
 u16 ksu_last_manager_appid = KSU_INVALID_APPID;
 
