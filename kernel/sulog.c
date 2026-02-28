@@ -140,7 +140,12 @@ static bool dedup_should_print(uid_t uid, u8 type, const char *content,
         .uid = uid,
         .type = type,
     };
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0) ||                          \
+    defined(KSU_HAS_TIME_HELPER)
     u64 now = ktime_get_ns();
+#else
+    u64 now = ktime_to_ns(ktime_get());
+#endif
     u64 delta_ns = (u64)DEDUP_SECS * (u64)NSEC_PER_SEC;
 
     u32 idx = key.crc & (SULOG_COMM_LEN - 1);
