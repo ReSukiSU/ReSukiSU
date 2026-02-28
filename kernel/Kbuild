@@ -254,7 +254,7 @@ endif
 # https://github.com/torvalds/linux/commit/5955102c9984fa081b2d570cfac75c97eecf8f3b
 # for setuid_hooks only
 # it will remove when we impl dynamic-manager feature init out of replaceable ksud
-ifeq ($(shell grep -q "inode_lock" $(srctree)/include/linux/fs.h 2>/dev/null; echo $$?),0)
+ifeq ($(shell grep -q "inode_lock.struct inode" $(srctree)/include/linux/fs.h 2>/dev/null; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: inode_lock found)
 ccflags-y += -DKSU_HAS_INODE_LOCK_UNLOCK
 endif

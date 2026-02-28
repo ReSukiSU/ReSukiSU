@@ -134,7 +134,8 @@ __weak void groups_sort(struct group_info *group_info)
 }
 #endif
 
-#ifndef KSU_HAS_INODE_LOCK_UNLOCK
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0) &&                            \
+    !defined(KSU_HAS_INODE_LOCK_UNLOCK)
 // https://github.com/torvalds/linux/commit/5955102c9984fa081b2d570cfac75c97eecf8f3b
 // for setuid_hooks only
 // it will remove when we impl dynamic-manager feature init out of replaceable ksud
