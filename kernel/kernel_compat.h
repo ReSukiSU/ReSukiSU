@@ -134,16 +134,16 @@ __weak void groups_sort(struct group_info *group_info)
 }
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0)
+#ifndef KSU_HAS_INODE_LOCK_UNLOCK
 // https://github.com/torvalds/linux/commit/5955102c9984fa081b2d570cfac75c97eecf8f3b
 // for setuid_hooks only
 // it will remove when we impl dynamic-manager feature init out of replaceable ksud
-__weak void inode_lock(struct inode *inode)
+static inline void inode_lock(struct inode *inode)
 {
     mutex_lock(&inode->i_mutex);
 }
 
-__weak void inode_unlock(struct inode *inode)
+static inline void inode_unlock(struct inode *inode)
 {
     mutex_unlock(&inode->i_mutex);
 }
