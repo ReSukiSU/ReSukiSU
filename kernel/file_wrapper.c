@@ -24,6 +24,17 @@ struct ksu_file_wrapper {
     struct file_operations ops;
 };
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 13, 0)
+#ifndef replace_fops
+#define replace_fops(f, fops)                                                  \
+    do {                                                                       \
+        struct file *__file = (f);                                             \
+        fops_put(__file->f_op);                                                \
+        BUG_ON(!(__file->f_op = (fops)));                                      \
+    } while (0)
+#endif
+#endif
+
 static struct ksu_file_wrapper *ksu_create_file_wrapper(struct file *fp);
 
 static int ksu_wrapper_open(struct inode *ino, struct file *fp)
