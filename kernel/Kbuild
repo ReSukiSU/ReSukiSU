@@ -290,6 +290,20 @@ $(info -- $(REPO_NAME)/compat: modern proc ns header file found)
 ccflags-y += -DKSU_HAS_MODERN_PROC_NS
 endif
 
+# for kernel version below 3.8, fsnotify_destroy_mark may don't have fsnotify_group param
+# https://github.com/torvalds/linux/commit/e2a29943e9a2ee2aa737a77f550f46ba72269db4
+ifeq ($(shell grep -q "given a group and a mark" $(srctree)/include/linux/fsnotify_backend.h 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: modern fsnotify_destroy_mark found)
+ccflags-y += -DKSU_HAS_MODERN_FSNOTIFY_DESTROY_MARK
+endif
+
+# for kernel version below 4.0, d_inode may not found
+# https://github.com/torvalds/linux/commit/155e35d4daa804582f75acaa2c74ec797a89c615
+ifeq ($(shell grep -q "static inline struct inode..d_inode" $(srctree)/include/linux/dcache.h 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: d_inode found)
+ccflags-y += -DKSU_HAS_D_INODE
+endif
+
 # Custom Signs
 ifdef KSU_EXPECTED_SIZE
 ccflags-y += -DEXPECTED_SIZE=$(KSU_EXPECTED_SIZE)

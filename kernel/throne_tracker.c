@@ -8,6 +8,7 @@
 #include <linux/version.h>
 #include <linux/stat.h>
 #include <linux/namei.h>
+#include <linux/kernel.h> // for container_of in UL
 
 #include "allowlist.h"
 #include "apk_sign.h"

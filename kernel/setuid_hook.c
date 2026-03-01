@@ -44,7 +44,11 @@ static inline void ksu_set_file_immutable(const char *path_name, bool immutable)
         return;
     }
 
-    inode = d_inode(path.dentry);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0) || defined(KSU_HAS_D_INODE)
+    inode = d_inode(wd->kpath.dentry);
+#else
+    inode = path.dentry->d_inode;
+#endif
 
     error = mnt_want_write(path.mnt);
     if (error) {
