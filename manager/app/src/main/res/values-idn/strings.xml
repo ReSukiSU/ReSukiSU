@@ -15,7 +15,6 @@
     <string name="selinux_status_enforcing">Ditegakkan</string>
     <string name="selinux_status_permissive">Permisi</string>
     <string name="unknown">Tidak Diketahui</string>
-    <string name="superuser">Superuser</string>
     <string name="module_failed_to_enable">Gagal mengaktifkan modul: %s</string>
     <string name="module_failed_to_disable">Gagal menonaktifkan modul: %s</string>
     <string name="module_empty">Tidak ada modul terpasang</string>
@@ -46,12 +45,10 @@
     <string name="reboot_to_apply">Muat ulang untuk menerapkan</string>
     <string name="module_magisk_conflict">Modul tidak tersedia karena konflik dengan Magisk!</string>
     <string name="home_learn_kernelsu">Pelajari tentang KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">Pelajari cara memasang KernelSU dan menggunakan modul</string>
     <string name="home_support_title">Dukung Kami</string>
     <string name="home_support_content">KernelSU bersifat gratis dan open source, sekarang dan selamanya. Namun, Anda dapat menunjukkan dukungan Anda dengan melakukan donasi.</string>
     <string name="about_source_code"><![CDATA[Lihat kode sumber di %1$s<br/>Gabung ke saluran %2$s kami]]></string>
-    <string name="profile">Profil Aplikasi</string>
     <string name="profile_default">Bawaan</string>
     <string name="profile_template">Templat</string>
     <string name="profile_custom">Khusus</string>
@@ -65,7 +62,6 @@
     <string name="settings_umount_modules_default">Lepas kait modul secara bawaan</string>
     <string name="settings_umount_modules_default_summary">Nilai bawaan global untuk \"Lepas Kait Modul\" dalam profil aplikasi. Jika diaktifkan, ini akan menghapus semua perubahan sistem yang dibuat oleh modul untuk aplikasi tanpa profil yang ditetapkan.</string>
     <string name="profile_umount_modules_summary">Mengaktifkan opsi ini akan memungkinkan KernelSU untuk memulihkan file yang diubah oleh modul untuk aplikasi ini.</string>
-    <string name="profile_selinux_domain">Domain</string>
     <string name="profile_selinux_rules">Aturan</string>
     <string name="module_update">Perbarui</string>
     <string name="module_downloading">Mengunduh modul: %s</string>
@@ -78,11 +74,8 @@
     <string name="module_changelog">Catatan Perubahan</string>
     <string name="settings_profile_template">Templat Profil Aplikasi</string>
     <string name="settings_profile_template_summary">Kelola templat profil aplikasi lokal dan daring</string>
-    <string name="settings_check_update">Notifikasi pembaruan</string>
-    <string name="settings_check_update_summary">Periksa otomatis pembaruan modul dan manajer</string>
     <string name="app_profile_template_create">Buat Templat</string>
     <string name="app_profile_template_edit">Edit Templat</string>
-    <string name="app_profile_template_id">ID</string>
     <string name="app_profile_template_id_invalid">ID Templat Tidak Valid</string>
     <string name="app_profile_template_name">Nama</string>
     <string name="app_profile_template_description">Deskripsi</string>
@@ -100,6 +93,8 @@
     <string name="app_profile_template_save_failed">Gagal menyimpan templat</string>
     <string name="app_profile_template_import_empty">Papan klip kosong!</string>
     <string name="module_changelog_failed">Gagal memuat catatan perubahan: %s</string>
+    <string name="settings_check_update">Notifikasi pembaruan</string>
+    <string name="settings_check_update_summary">Periksa otomatis pembaruan modul dan manajer</string>
     <string name="grant_root_failed">Gagal memberikan hak akses root!</string>
     <string name="action">Aksi</string>
     <string name="close">Tutup</string>
@@ -160,7 +155,6 @@ Lanjutkan?</string>
     <string name="module_install_multiple_confirm_with_names">Apakah Anda yakin ingin memasang %1$d modul berikut?
 %2$s</string>
     <string name="more_settings">Pengaturan Lainnya</string>
-    <string name="selinux">SELinux</string>
     <string name="selinux_enabled">Diaktifkan</string>
     <string name="selinux_disabled">Dinonaktifkan</string>
     <string name="simple_mode">Mode Sederhana</string>
@@ -198,7 +192,6 @@ Lanjutkan?</string>
     <string name="yes">Ya</string>
     <string name="no">Tidak</string>
     <string name="failed_reboot">Gagal memuat ulang</string>
-    <string name="kpm_title">KPM</string>
     <string name="kpm_empty">Saat ini tidak ada modul kernel yang terpasang</string>
     <string name="kpm_version">Versi</string>
     <string name="kpm_author">Penulis</string>
@@ -245,8 +238,6 @@ Tanamkan: Secara permanen memasang ke sistem</string>
     <!-- Slot selection related strings -->
     <string name="select_slot_title">Pilih Slot untuk Flash</string>
     <string name="select_slot_description">Silakan pilih slot target untuk flashing boot</string>
-    <string name="slot_a">Slot A</string>
-    <string name="slot_b">Slot B</string>
     <string name="selected_slot">Slot Terpilih: %1$s</string>
     <string name="horizon_getting_original_slot">Mendapatkan slot asli</string>
     <string name="horizon_setting_target_slot">Mengatur slot target</string>
@@ -280,7 +271,7 @@ Tanamkan: Secara permanen memasang ke sistem</string>
     <!-- KPM display settings -->
     <string name="show_kpm_info">Sembunyikan Fungsi KPM</string>
     <string name="show_kpm_info_summary">Menyembunyikan informasi dan fungsi KPM di layar utama dan panel bawah</string>
-    <!-- Webui X settings -->
+    <!-- Webui settings -->
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">DPI yang Diterapkan</string>
     <string name="app_dpi_summary">Sesuaikan kepadatan layar hanya untuk aplikasi saat ini</string>
@@ -305,7 +296,6 @@ Tanamkan: Secara permanen memasang ke sistem</string>
     <string name="kernel_flashing">Mem-flash Kernel</string>
     <!-- 分类相关 -->
     <string name="category_all_apps">Semua</string>
-    <string name="category_root_apps">Root</string>
     <string name="category_custom_apps">Khusus</string>
     <string name="category_default_apps">Bawaan</string>
     <!-- 排序相关 -->
@@ -374,8 +364,6 @@ Tanamkan: Secara permanen memasang ke sistem</string>
     <string name="susfs_path_label">Jalur</string>
     <string name="susfs_path_placeholder">misalnya: /system/addon.d</string>
     <string name="susfs_no_paths_configured">Tidak ada jalur SUS yang dikonfigurasi</string>
-    <!-- SuSFS Umount Mode -->
-    <!-- SuSFS Run Umount -->
     <!-- SuSFS Reset Categories -->
     <string name="susfs_reset_paths_title">Atur Ulang Jalur SUS</string>
     <string name="susfs_reset_paths_message">Ini akan menghapus semua konfigurasi jalur SUS. Apakah Anda yakin ingin melanjutkan?</string>
@@ -393,7 +381,6 @@ Tanamkan: Secara permanen memasang ke sistem</string>
     <!-- Feature Labels -->
     <string name="sus_path_feature_label">Dukungan Jalur SUS</string>
     <string name="spoof_uname_feature_label">Dukungan Spoof Uname</string>
-    <string name="spoof_cmdline_feature_label">Spoof Cmdline/Bootconfig</string>
     <string name="open_redirect_feature_label">Dukungan Open Redirect</string>
     <string name="enable_log_feature_label">Dukungan Logging</string>
     <string name="hide_symbols_feature_label">Sembunyikan Simbol KSU SUSFS</string>
@@ -413,13 +400,11 @@ Tanamkan: Secara permanen memasang ke sistem</string>
     <string name="susfs_execution_location_label">Lokasi Eksekusi</string>
     <string name="susfs_current_execution_location">Lokasi Eksekusi Saat Ini: %s</string>
     <string name="susfs_execution_location_service">Layanan</string>
-    <string name="susfs_execution_location_post_fs_data">Post-FS-Data</string>
     <string name="susfs_execution_location_service_description">Jalankan setelah layanan sistem dimulai</string>
     <string name="susfs_execution_location_post_fs_data_description">Jalankan setelah sistem file dikaitkan tetapi sebelum sistem sepenuhnya dinyalakan. Dapat menyebabkan bootloop</string>
     <string name="susfs_slot_info_title">Informasi Slot</string>
     <string name="susfs_slot_info_description">Lihat informasi slot boot saat ini dan salin nilainya</string>
     <string name="susfs_current_active_slot">Slot Aktif Saat Ini: %s</string>
-    <string name="susfs_slot_uname">Uname: %s</string>
     <string name="susfs_slot_build_time">Waktu Build: %s</string>
     <string name="susfs_slot_current_badge">Saat Ini</string>
     <string name="susfs_slot_use_uname">Gunakan Uname</string>
@@ -492,4 +477,14 @@ Tanamkan: Secara permanen memasang ke sistem</string>
     <string name="hide_bl_script_description">Timpa properti status bootloader dalam layanan late_start</string>
     <string name="cleanup_residue">Bersihkan Sisa-sisa</string>
     <string name="cleanup_residue_description">Bersihkan file dan direktori sisa dari berbagai modul dan alat (dapat menyebabkan penghapusan yang tidak disengaja, kehilangan data, dan gagal boot, gunakan dengan hati-hati)</string>
+    <!-- 循环路径相关 -->
+    <!-- 循环路径功能描述 -->
+    <!-- KPM patching related strings -->
+    <!-- KPM workflow related -->
+    <!-- KPM error messages -->
+    <!-- KPM option radio group strings -->
+    <!-- UID Scanner Settings -->
+    <!-- 确认安装相关字符串 -->
+    <!-- SUS Map related strings -->
+    <!-- Log Viewer -->
 </resources>

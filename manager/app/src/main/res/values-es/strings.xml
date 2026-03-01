@@ -46,7 +46,6 @@
     <string name="reboot_to_apply">Reinicia para aplicar cambios</string>
     <string name="module_magisk_conflict">¡Los módulos no están disponibles debido a un conflicto con Magisk!</string>
     <string name="home_learn_kernelsu">Aprende KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">Aprende a instalar KernelSU y a utilizar módulos</string>
     <string name="home_support_title">Apóyanos</string>
     <string name="home_support_content">KernelSU es, y siempre será, gratuito y de código abierto. Sin embargo, puedes demostrarnos que te importamos haciendo una donación.</string>
@@ -77,11 +76,8 @@
     <string name="module_changelog">Registro de cambios</string>
     <string name="settings_profile_template">Plantilla de perfil de aplicación</string>
     <string name="settings_profile_template_summary">Gestionar la plantilla local y en línea de App Profile</string>
-    <string name="settings_check_update">Notificaciones de actualización</string>
-    <string name="settings_check_update_summary">Comprobar automáticamente las actualizaciones de módulos y del administrador</string>
     <string name="app_profile_template_create">Crear plantilla</string>
     <string name="app_profile_template_edit">Editar plantilla</string>
-    <string name="app_profile_template_id">ID</string>
     <string name="app_profile_template_id_invalid">ID de plantilla no válida</string>
     <string name="app_profile_template_name">Nombre</string>
     <string name="app_profile_template_description">Descripción</string>
@@ -99,6 +95,8 @@
     <string name="app_profile_template_save_failed">No se ha podido guardar la plantilla</string>
     <string name="app_profile_template_import_empty">¡El portapapeles está vacío!</string>
     <string name="module_changelog_failed">Fallo en la obtención del registro de cambios: %s</string>
+    <string name="settings_check_update">Notificaciones de actualización</string>
+    <string name="settings_check_update_summary">Comprobar automáticamente las actualizaciones de módulos y del administrador</string>
     <string name="grant_root_failed">¡No se ha podido conceder el acceso root!</string>
     <string name="action">Aktion</string>
     <string name="close">Cancelar</string>
@@ -154,9 +152,12 @@
     <string name="home_android_version">Versión de Android</string>
     <string name="home_device_model">Modelo del dispositivo</string>
     <string name="su_not_allowed">No se permite conceder superusuario a %s</string>
+    <string name="settings_sucompat">Redirigir binario su</string>
+    <string name="settings_sucompat_summary">Permite que las aplicaciones con permiso de Superusuario en el perfil de la aplicación obtengan un shell de superusuario ejecutando /system/bin/su; efectivo solo para nuevos procesos.</string>
+    <string name="settings_kernel_umount">Desmontaje del kernel</string>
+    <string name="settings_kernel_umount_summary">Comportamiento de desmontaje a nivel de kernel controlado por KernelSU</string>
     <string name="module_install_multiple_confirm_with_names">¿Seguro que quieres instalar los siguientes módulos %1$d ? \n\n%2$s</string>
     <string name="more_settings">Opciones avanzadas</string>
-    <string name="selinux">SELinux</string>
     <string name="selinux_enabled">Habilitado</string>
     <string name="selinux_disabled">Desactivado</string>
     <string name="simple_mode">Modo de simplicidad</string>
@@ -184,15 +185,12 @@
     <string name="color_pink">Rosa</string>
     <string name="color_gray">Gris</string>
     <string name="color_yellow">Amarillo</string>
-    <string name="horizon_kernel">Install Anykernel3</string>
     <string name="horizon_kernel_summary">Flash archivo del kernel AnyKernel3</string>
     <string name="root_required">Requiere privilegios de root</string>
     <string name="reboot_complete_title">Desguace completo</string>
     <string name="reboot_complete_msg">¿Reiniciar inmediatamente?</string>
     <string name="yes">Si</string>
-    <string name="no">No</string>
     <string name="failed_reboot">Reinicio fallido</string>
-    <string name="kpm_title">KPM</string>
     <string name="kpm_empty">No hay módulos del núcleo instalados en este momento</string>
     <string name="kpm_version">Versión</string>
     <string name="kpm_author">Autor</string>
@@ -213,7 +211,6 @@
     <string name="kernel_not_patched">Kernel no parcheado</string>
     <string name="kernel_not_enabled">Kernel no configurado</string>
     <string name="custom_settings">Ajustes personalizados</string>
-    <string name="kpm_install_mode">KPM Install</string>
     <string name="kpm_install_mode_load">Cargar</string>
     <string name="kpm_install_mode_embed">Insertar</string>
     <string name="kpm_install_mode_description">Por favor seleccione: %1\$s Modo de instalación del Módulo \n\nCarga: Cargar temporalmente el módulo \nInsertar: Instalar permanentemente en el sistema</string>
@@ -237,8 +234,6 @@
     <!-- Slot selection related strings -->
     <string name="select_slot_title">Seleccionar Ranura Flash</string>
     <string name="select_slot_description">Por favor, seleccione la ranura de destino para flashear el arranque</string>
-    <string name="slot_a">Slot A</string>
-    <string name="slot_b">Slot B</string>
     <string name="selected_slot">Slot selectionada</string>
     <string name="horizon_getting_original_slot">Obteniendo la ranura original</string>
     <string name="horizon_setting_target_slot">Establecer la ranura especificada</string>
@@ -272,7 +267,7 @@
     <!-- KPM display settings -->
     <string name="show_kpm_info">Mostrar función KPM</string>
     <string name="show_kpm_info_summary">Oculta la información y función del KPM en la barra de inicio e inferior</string>
-    <!-- Webui X settings -->
+    <!-- Webui settings -->
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">DPI aplicado</string>
     <string name="app_dpi_summary">Ajustar la densidad de pantalla para la aplicación actual</string>
@@ -295,38 +290,44 @@
     <string name="module_download_error">La descarga del modelo falló</string>
     <string name="kernel_flashing">Parpadeo Kernel</string>
     <!-- 分类相关 -->
-    <string name="category_all_apps">All</string>
-    <string name="category_root_apps">Root</string>
-    <string name="category_custom_apps">Custom</string>
-    <string name="category_default_apps">Default</string>
     <!-- 排序相关 -->
-    <string name="sort_name_asc">Ascending order of name</string>
-    <string name="sort_name_desc">Name descending</string>
     <string name="sort_install_time_new">Installation time (new)</string>
     <string name="sort_install_time_old">Installation time (old)</string>
     <string name="sort_size_desc">descending order of size</string>
     <string name="sort_size_asc">ascending order of size</string>
     <string name="sort_usage_freq">frequency of use</string>
     <!-- 状态相关 -->
-    <string name="no_apps_in_category">No application in this category</string>
     <!-- 标签相关 -->
-    <!-- FAB菜单相关 -->
-    <string name="deny_authorization">Delegation of authority</string>
-    <string name="grant_authorization">Authorizations</string>
-    <string name="unmount_modules">Unmounting Module Mounts</string>
-    <string name="disable_unmount">Disable uninstall module mounting</string>
-    <string name="expand_menu">Expand menu</string>
-    <string name="collapse_menu">Put away the menu</string>
     <string name="scroll_to_top">Arriba</string>
     <string name="scroll_to_bottom">Abajo</string>
     <string name="selected">Seleccionados</string>
     <string name="select">opción</string>
     <!-- BottomSheet相关 -->
-    <string name="menu_options">Menu Options</string>
-    <string name="sort_options">Sort by</string>
-    <string name="app_categories">Application Type Selection</string>
-    <string name="settings_sucompat">Redirigir binario su</string>
-    <string name="settings_sucompat_summary">Permite que las aplicaciones con permiso de Superusuario en el perfil de la aplicación obtengan un shell de superusuario ejecutando /system/bin/su; efectivo solo para nuevos procesos.</string>
-    <string name="settings_kernel_umount">Desmontaje del kernel</string>
-    <string name="settings_kernel_umount_summary">Comportamiento de desmontaje a nivel de kernel controlado por KernelSU</string>
+    <!-- SuSFS Configuration -->
+    <!-- SuSFS Reset Confirmation -->
+    <!-- SuSFS Toast Messages -->
+    <!-- SuSFS Settings Item -->
+    <!-- 开机自启动相关 -->
+    <!-- SuSFS Tab Titles -->
+    <!-- SuSFS Path Management -->
+    <!-- SuSFS Reset Categories -->
+    <!-- SuSFS Path Settings -->
+    <!-- SuSFS Enabled Features -->
+    <!-- Feature Labels -->
+    <!-- 可切换状态 -->
+    <!-- Settings related strings -->
+    <!-- SuSFS 自启动相关字符串 -->
+    <!-- SuSFS Kstat相关字符串 -->
+    <!-- SuSFS Mount Hiding Control Related Strings -->
+    <!-- 备份和还原相关字符串 -->
+    <!-- 循环路径相关 -->
+    <!-- 循环路径功能描述 -->
+    <!-- KPM patching related strings -->
+    <!-- KPM workflow related -->
+    <!-- KPM error messages -->
+    <!-- KPM option radio group strings -->
+    <!-- UID Scanner Settings -->
+    <!-- 确认安装相关字符串 -->
+    <!-- SUS Map related strings -->
+    <!-- Log Viewer -->
 </resources>

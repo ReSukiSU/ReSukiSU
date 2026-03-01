@@ -12,8 +12,6 @@
     <string name="home_manager_version">Version du gestionnaire</string>
     <string name="home_selinux_status">Mode SELinux</string>
     <string name="selinux_status_disabled">Désactivé</string>
-    <string name="selinux_status_enforcing">Enforcing</string>
-    <string name="selinux_status_permissive">Permissive</string>
     <string name="unknown">Inconnu</string>
     <string name="superuser">Super-utilisateur</string>
     <string name="module_failed_to_enable">Échec de l\'activation du module : %s</string>
@@ -36,7 +34,6 @@
     <string name="module_uninstall_confirm">Êtes-vous sûr(e) de vouloir désinstaller le module %s \?</string>
     <string name="module_uninstall_success">%s a été désinstallé</string>
     <string name="module_uninstall_failed">Échec de la désinstallation : %s</string>
-    <string name="module_version">Version</string>
     <string name="module_author">Auteur</string>
     <string name="refresh">Rafraîchir</string>
     <string name="show_system_apps">Afficher les applications système</string>
@@ -46,7 +43,6 @@
     <string name="reboot_to_apply">Redémarrez pour appliquer les modifications</string>
     <string name="module_magisk_conflict">Les modules sont indisponibles en raison d\'un conflit avec Magisk !</string>
     <string name="home_learn_kernelsu">Découvrir KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">Découvrez comment installer KernelSU et utiliser les modules</string>
     <string name="home_support_title">Soutenez-nous</string>
     <string name="home_support_content">KernelSU est, et restera toujours, gratuit et open source. Vous pouvez cependant nous témoigner de votre soutien en nous faisant un don.</string>
@@ -77,14 +73,10 @@
     <string name="module_changelog">Journal des modifications</string>
     <string name="settings_profile_template">Modèles de profils d\'application</string>
     <string name="settings_profile_template_summary">Gérer les modèles de profils d\'application locaux et en ligne</string>
-    <string name="settings_check_update">Notifications de mise à jour</string>
-    <string name="settings_check_update_summary">Vérifier automatiquement les mises à jour du module et du gestionnaire</string>
     <string name="app_profile_template_create">Créer un modèle</string>
     <string name="app_profile_template_edit">Modifier le modèle</string>
-    <string name="app_profile_template_id">ID</string>
     <string name="app_profile_template_id_invalid">ID de modèle invalide</string>
     <string name="app_profile_template_name">Nom</string>
-    <string name="app_profile_template_description">Description</string>
     <string name="app_profile_template_save">Enregistrer</string>
     <string name="app_profile_template_delete">Supprimer</string>
     <string name="app_profile_template_view">Voir le modèle</string>
@@ -99,8 +91,9 @@
     <string name="app_profile_template_save_failed">Échec de l\'enregistrement du modèle</string>
     <string name="app_profile_template_import_empty">Le presse-papiers est vide !</string>
     <string name="module_changelog_failed">Échec de récupération du journal des modifications : %s</string>
+    <string name="settings_check_update">Notifications de mise à jour</string>
+    <string name="settings_check_update_summary">Vérifier automatiquement les mises à jour du module et du gestionnaire</string>
     <string name="grant_root_failed">Échec de l\'octroi des privilèges root !</string>
-    <string name="action">Action</string>
     <string name="close">Fermer</string>
     <string name="enable_web_debugging">Activer le débogage WebView</string>
     <string name="enable_web_debugging_summary">Peut être utilisé pour déboguer WebUI. Activez uniquement cette option si nécessaire.</string>
@@ -156,9 +149,12 @@
     <string name="home_android_version">Version Android</string>
     <string name="home_device_model">Modèle du téléphone</string>
     <string name="su_not_allowed">Donner un super-utilisateur à %s n\'est pas autorisé</string>
+    <string name="settings_sucompat">Rediriger le binaire su</string>
+    <string name="settings_sucompat_summary">Permet aux applications ayant l\'autorisation Superutilisateur dans le profil d\'application d\'obtenir un shell superutilisateur en exécutant /system/bin/su; effectif uniquement pour les nouveaux processus.</string>
+    <string name="settings_kernel_umount">Démontage du noyau</string>
+    <string name="settings_kernel_umount_summary">Comportement de démontage au niveau du noyau contrôlé par KernelSU</string>
     <string name="module_install_multiple_confirm_with_names">Êtes-vous sûr de vouloir installer les modules %1$d suivants ? \n\n%2$s</string>
     <string name="more_settings">Autres configurations</string>
-    <string name="selinux">SELinux</string>
     <string name="selinux_enabled">Activé</string>
     <string name="selinux_disabled">Désactivé</string>
     <string name="simple_mode">Me simple</string>
@@ -182,11 +178,9 @@
     <string name="color_default">Bleu</string>
     <string name="color_green">Vert</string>
     <string name="color_purple">Violet</string>
-    <string name="color_orange">Orange</string>
     <string name="color_pink">Rose</string>
     <string name="color_gray">Gris</string>
     <string name="color_yellow">Jaune</string>
-    <string name="horizon_kernel">Install Anykernel3</string>
     <string name="horizon_kernel_summary">Fichier noyau AnyKernel3</string>
     <string name="root_required">Nécessite les privilèges root</string>
     <string name="reboot_complete_title">Traitement terminé</string>
@@ -194,9 +188,7 @@
     <string name="yes">Oui</string>
     <string name="no">Non</string>
     <string name="failed_reboot">Échec du redémarrage</string>
-    <string name="kpm_title">KPM</string>
     <string name="kpm_empty">Aucun module de noyau installé pour le moment</string>
-    <string name="kpm_version">Version</string>
     <string name="kpm_author">Auteur</string>
     <string name="kpm_uninstall">Désinstaller</string>
     <string name="kpm_uninstall_success">Désinstallé avec succès</string>
@@ -239,8 +231,6 @@
     <!-- Slot selection related strings -->
     <string name="select_slot_title">Sélectionnez l\'emplacement de Flash</string>
     <string name="select_slot_description">Veuillez sélectionner l\'emplacement cible pour le démarrage du flash</string>
-    <string name="slot_a">Slot A</string>
-    <string name="slot_b">Slot B</string>
     <string name="selected_slot">LKM sélectionné : %1$s</string>
     <string name="horizon_getting_original_slot">Obtention de l\'emplacement original</string>
     <string name="horizon_setting_target_slot">Définition de l\'emplacement spécifié</string>
@@ -274,7 +264,7 @@
     <!-- KPM display settings -->
     <string name="show_kpm_info">Afficher la fonction KPM</string>
     <string name="show_kpm_info_summary">Masque les informations et fonctions KPM dans la barre d\'accueil et en bas</string>
-    <!-- Webui X settings -->
+    <!-- Webui settings -->
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">DPI appliqué</string>
     <string name="app_dpi_summary">Ajuster la densité d\'affichage de l\'écran pour l\'application actuelle uniquement</string>
@@ -297,38 +287,44 @@
     <string name="module_download_error">Le téléchargement du modèle a échoué</string>
     <string name="kernel_flashing">Clignotement du noyau</string>
     <!-- 分类相关 -->
-    <string name="category_all_apps">All</string>
-    <string name="category_root_apps">Root</string>
-    <string name="category_custom_apps">Custom</string>
-    <string name="category_default_apps">Default</string>
     <!-- 排序相关 -->
-    <string name="sort_name_asc">Ascending order of name</string>
-    <string name="sort_name_desc">Name descending</string>
     <string name="sort_install_time_new">Installation time (new)</string>
     <string name="sort_install_time_old">Installation time (old)</string>
     <string name="sort_size_desc">descending order of size</string>
     <string name="sort_size_asc">ascending order of size</string>
     <string name="sort_usage_freq">frequency of use</string>
     <!-- 状态相关 -->
-    <string name="no_apps_in_category">No application in this category</string>
     <!-- 标签相关 -->
-    <!-- FAB菜单相关 -->
-    <string name="deny_authorization">Delegation of authority</string>
-    <string name="grant_authorization">Authorizations</string>
-    <string name="unmount_modules">Unmounting Module Mounts</string>
-    <string name="disable_unmount">Disable uninstall module mounting</string>
-    <string name="expand_menu">Expand menu</string>
-    <string name="collapse_menu">Put away the menu</string>
     <string name="scroll_to_top">En haut</string>
     <string name="scroll_to_bottom">En Bas</string>
     <string name="selected">Sélectionné</string>
     <string name="select">option</string>
     <!-- BottomSheet相关 -->
-    <string name="menu_options">Menu Options</string>
-    <string name="sort_options">Sort by</string>
-    <string name="app_categories">Application Type Selection</string>
-    <string name="settings_sucompat">Rediriger le binaire su</string>
-    <string name="settings_sucompat_summary">Permet aux applications ayant l\'autorisation Superutilisateur dans le profil d\'application d\'obtenir un shell superutilisateur en exécutant /system/bin/su; effectif uniquement pour les nouveaux processus.</string>
-    <string name="settings_kernel_umount">Démontage du noyau</string>
-    <string name="settings_kernel_umount_summary">Comportement de démontage au niveau du noyau contrôlé par KernelSU</string>
+    <!-- SuSFS Configuration -->
+    <!-- SuSFS Reset Confirmation -->
+    <!-- SuSFS Toast Messages -->
+    <!-- SuSFS Settings Item -->
+    <!-- 开机自启动相关 -->
+    <!-- SuSFS Tab Titles -->
+    <!-- SuSFS Path Management -->
+    <!-- SuSFS Reset Categories -->
+    <!-- SuSFS Path Settings -->
+    <!-- SuSFS Enabled Features -->
+    <!-- Feature Labels -->
+    <!-- 可切换状态 -->
+    <!-- Settings related strings -->
+    <!-- SuSFS 自启动相关字符串 -->
+    <!-- SuSFS Kstat相关字符串 -->
+    <!-- SuSFS Mount Hiding Control Related Strings -->
+    <!-- 备份和还原相关字符串 -->
+    <!-- 循环路径相关 -->
+    <!-- 循环路径功能描述 -->
+    <!-- KPM patching related strings -->
+    <!-- KPM workflow related -->
+    <!-- KPM error messages -->
+    <!-- KPM option radio group strings -->
+    <!-- UID Scanner Settings -->
+    <!-- 确认安装相关字符串 -->
+    <!-- SUS Map related strings -->
+    <!-- Log Viewer -->
 </resources>
