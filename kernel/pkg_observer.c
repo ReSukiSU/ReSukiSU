@@ -38,7 +38,8 @@ static KSU_DECL_FSNOTIFY_OPS(ksu_handle_generic_event)
 }
 
 static const struct fsnotify_ops ksu_ops = {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0) ||                           \
+    defined(KSU_COMPAT_HAS_HANDLE_INODE_EVENT)
     .handle_inode_event = ksu_handle_generic_event,
 #else
     .handle_event = ksu_handle_generic_event,
