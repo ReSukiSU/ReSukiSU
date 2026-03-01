@@ -176,4 +176,10 @@ __weak char *bin2hex(char *dst, const void *src, size_t count)
 int get_cmdline(struct task_struct *task, char *buffer, int buflen);
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 14, 0)
+// https://github.com/torvalds/linux/commit/89a0714106aac7309c7dfa0f004b39e1e89d2942
+// app_profile require U16_MAX, define here
+#define U16_MAX ((u16)~0U)
+#endif
+
 #endif
