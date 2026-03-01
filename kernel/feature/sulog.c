@@ -138,8 +138,7 @@ static bool dedup_should_print(uid_t uid, u8 type, const char *content, size_t l
         .uid = uid,
         .type = type,
     };
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0) ||                          \
-    defined(KSU_HAS_TIME_HELPER)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0) || defined(KSU_HAS_TIME_HELPER)
     u64 now = ktime_get_ns();
 #else
     u64 now = ktime_to_ns(ktime_get());

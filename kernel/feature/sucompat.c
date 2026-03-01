@@ -1,6 +1,5 @@
 #include <linux/version.h>
 #include <linux/preempt.h>
-#include <linux/printk.h>
 #include <linux/mm.h>
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 8, 0)
 #include <linux/pgtable.h>

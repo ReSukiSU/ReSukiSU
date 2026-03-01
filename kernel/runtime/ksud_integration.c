@@ -13,7 +13,7 @@
 #endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0)
 #include <linux/input-event-codes.h>
-#else
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 7, 0)
 #include <uapi/linux/input.h>
 #endif
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 1, 0)
@@ -239,8 +239,7 @@ void ksu_handle_execveat_ksud(const char *filename, struct user_arg_ptr *argv, s
 }
 
 static ssize_t (*orig_read)(struct file *, char __user *, size_t, loff_t *);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 0) ||                          \
-    defined(KSU_HAS_FOP_READ_ITER)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 0) || defined(KSU_HAS_FOP_READ_ITER)
 static ssize_t (*orig_read_iter)(struct kiocb *, struct iov_iter *);
 #endif
 static struct file_operations fops_proxy;
@@ -285,8 +284,7 @@ append_ksu_rc:
     return ret;
 }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 0) ||                          \
-    defined(KSU_HAS_FOP_READ_ITER)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 0) || defined(KSU_HAS_FOP_READ_ITER)
 static ssize_t read_iter_proxy(struct kiocb *iocb, struct iov_iter *to)
 {
     ssize_t ret = 0;
@@ -496,8 +494,7 @@ void ksu_handle_initrc(struct file *file)
     if (orig_read) {
         fops_proxy.read = read_proxy;
     }
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 0) ||                          \
-    defined(KSU_HAS_FOP_READ_ITER)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 0) || defined(KSU_HAS_FOP_READ_ITER)
     orig_read_iter = file->f_op->read_iter;
     if (orig_read_iter) {
         fops_proxy.read_iter = read_iter_proxy;
