@@ -33,10 +33,15 @@ typedef const unsigned char *ksu_fname_t;
              struct fsnotify_mark *vfsmount_mark, u32 mask, const void *data,  \
              int data_type, ksu_fname_t file_name, u32 cookie,                 \
              struct fsnotify_iter_info *iter_info)
-#else
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0)
 #define KSU_DECL_FSNOTIFY_OPS(name)                                            \
     int name(struct fsnotify_group *group, struct inode *inode,                \
              struct fsnotify_mark *inode_mark,                                 \
              struct fsnotify_mark *vfsmount_mark, u32 mask, void *data,        \
              int data_type, ksu_fname_t file_name, u32 cookie)
+#else
+#define KSU_DECL_FSNOTIFY_OPS(name)                                            \
+    int name(struct fsnotify_group *group, struct fsnotify_mark *inode_mark,   \
+             struct fsnotify_mark *vfsmount_mark,                              \
+             struct fsnotify_event *event)
 #endif
