@@ -15,7 +15,7 @@
 #include "feature.h"
 #include "klog.h" // IWYU pragma: keep
 #include "throne_tracker.h"
-#ifndef KSU_TP_HOOK
+#ifdef KSU_TP_HOOK
 #include "syscall_hook_manager.h"
 #endif
 #include "ksud.h"

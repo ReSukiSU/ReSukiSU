@@ -1,6 +1,8 @@
 #include <linux/rcupdate.h>
 #include <linux/slab.h>
+#ifdef KSU_TP_HOOK
 #include <linux/task_work.h>
+#endif
 #include <asm/current.h>
 #include <linux/cred.h>
 #include <linux/dcache.h>
@@ -202,6 +204,7 @@ static int __maybe_unused count(struct user_arg_ptr argv, int max)
     return i;
 }
 
+#ifdef KSU_TP_HOOK
 static void on_post_fs_data_cbfun(struct callback_head *cb)
 {
     on_post_fs_data();
@@ -209,6 +212,7 @@ static void on_post_fs_data_cbfun(struct callback_head *cb)
 
 static struct callback_head on_post_fs_data_cb = { .func =
                                                        on_post_fs_data_cbfun };
+#endif
 
 static bool check_argv(struct user_arg_ptr argv, int index,
                        const char *expected, char *buf, size_t buf_len)
@@ -335,10 +339,15 @@ int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
             pr_info("exec zygote, /data prepared, second_stage: %d\n",
                     init_second_stage_executed);
             rcu_read_lock();
+#ifdef KSU_TP_HOOK
             struct task_struct *init_task =
                 rcu_dereference(current->real_parent);
             if (init_task)
                 task_work_add(init_task, &on_post_fs_data_cb, TWA_RESUME);
+#else
+            // Not in tracepoint hook, directly call on_post_fs_data
+            on_post_fs_data();
+#endif
             rcu_read_unlock();
             first_zygote = false;
             stop_execve_hook();

@@ -3,7 +3,9 @@
 #include <linux/printk.h>
 #include <linux/slab.h>
 #include <linux/string.h>
+#ifdef KSU_TP_HOOK
 #include <linux/task_work.h>
+#endif
 #include <linux/time.h>
 #include <linux/types.h>
 #include <linux/uaccess.h>
@@ -212,6 +214,7 @@ revert_creds_out:
     }
 }
 
+#ifdef KSU_TP_HOOK
 static void sulog_task_work_handler(struct callback_head *work)
 {
     sulog_process_queue();
@@ -247,6 +250,7 @@ static void sulog_schedule_task_work(void)
 put_task:
     put_task_struct(tsk);
 }
+#endif
 
 static void sulog_add_entry(char *log_buf, size_t len, uid_t uid, u8 dedup_type)
 {
@@ -269,7 +273,7 @@ static void sulog_add_entry(char *log_buf, size_t len, uid_t uid, u8 dedup_type)
     list_add_tail(&entry->list, &sulog_queue);
     spin_unlock_irqrestore(&dedup_lock, flags);
 
-    sulog_schedule_task_work();
+    sulog_process_queue();
 }
 
 void ksu_sulog_report_su_grant(uid_t uid, const char *comm, const char *method)

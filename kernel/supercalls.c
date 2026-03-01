@@ -8,7 +8,9 @@
 #include <linux/slab.h>
 #include <linux/kprobes.h>
 #include <linux/syscalls.h>
+#ifdef KSU_TP_HOOK
 #include <linux/task_work.h>
+#endif
 #include <linux/uaccess.h>
 #include <linux/version.h>
 
@@ -977,6 +979,20 @@ static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
     { .cmd = 0, .name = NULL, .handler = NULL, .perm_check = NULL } // Sentine
 };
 
+static void ksu_install_fd_to_user(int __user *outp)
+{
+    int fd = ksu_install_fd();
+    pr_info("[%d] install ksu fd: %d\n", current->pid, fd);
+
+    if (copy_to_user(outp, &fd, sizeof(fd))) {
+        pr_err("install ksu fd reply err\n");
+        do_close_fd(fd);
+    }
+}
+
+#ifdef KSU_TP_HOOK
+// I think only when Tracepoint hook are call ksu_handle_sys_reboot when atomic context
+// skip task work create because it is unnessary
 struct ksu_install_fd_tw {
     struct callback_head cb;
     int __user *outp;
@@ -986,22 +1002,20 @@ static void ksu_install_fd_tw_func(struct callback_head *cb)
 {
     struct ksu_install_fd_tw *tw =
         container_of(cb, struct ksu_install_fd_tw, cb);
-    int fd = ksu_install_fd();
-    pr_info("[%d] install ksu fd: %d\n", current->pid, fd);
 
-    if (copy_to_user(tw->outp, &fd, sizeof(fd))) {
-        pr_err("install ksu fd reply err\n");
-        do_close_fd(fd);
-    }
+    ksu_install_fd_to_user(tw->outp);
 
     kfree(tw);
 }
+#endif
 
 // downstream: make sure to pass arg as reference, this can allow us to extend things.
 int ksu_handle_sys_reboot(int magic1, int magic2, unsigned int cmd,
                           void __user **arg)
 {
+#ifdef KSU_TP_HOOK
     struct ksu_install_fd_tw *tw;
+#endif
 
     if (magic1 != KSU_INSTALL_MAGIC1)
         return -EINVAL;
@@ -1013,6 +1027,7 @@ int ksu_handle_sys_reboot(int magic1, int magic2, unsigned int cmd,
 
     // Check if this is a request to install KSU fd
     if (magic2 == KSU_INSTALL_MAGIC2) {
+#ifdef KSU_TP_HOOK
         tw = kzalloc(sizeof(*tw), GFP_ATOMIC);
         if (!tw)
             return 0;
@@ -1024,6 +1039,9 @@ int ksu_handle_sys_reboot(int magic1, int magic2, unsigned int cmd,
             kfree(tw);
             pr_warn("install fd add task_work failed\n");
         }
+#else
+        ksu_install_fd_to_user((int __user *)*arg);
+#endif
 
         return 0;
     }

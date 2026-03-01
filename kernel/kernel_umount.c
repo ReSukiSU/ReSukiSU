@@ -1,6 +1,8 @@
 #include <linux/sched.h>
 #include <linux/slab.h>
+#ifdef KSU_TP_HOOK
 #include <linux/task_work.h>
+#endif
 #include <linux/version.h>
 #include <linux/cred.h>
 #include <linux/fs.h>
@@ -111,19 +113,13 @@ void try_umount(const char *mnt, int flags)
     ksu_umount_mnt(mnt, &path, flags);
 }
 
-struct umount_tw {
-    struct callback_head cb;
-};
-
 #ifdef CONFIG_KSU_SUSFS_SUS_PATH
 extern void susfs_run_sus_path_loop(void);
 #endif // #ifdef CONFIG_KSU_SUSFS_SUS_PATH
 
-static void umount_tw_func(struct callback_head *cb)
+static void do_umount_for_current_task()
 {
-    struct umount_tw *tw = container_of(cb, struct umount_tw, cb);
     const struct cred *saved = override_creds(ksu_cred);
-
     struct mount_entry *entry;
     down_read(&mount_list_lock);
     list_for_each_entry (entry, &mount_list, list) {
@@ -140,13 +136,26 @@ static void umount_tw_func(struct callback_head *cb)
 #endif // #ifdef CONFIG_KSU_SUSFS_SUS_PATH
 
     revert_creds(saved);
+}
 
+#ifdef KSU_TP_HOOK
+struct umount_tw {
+    struct callback_head cb;
+};
+
+static void umount_tw_func(struct callback_head *cb)
+{
+    struct umount_tw *tw = container_of(cb, struct umount_tw, cb);
+    do_umount_for_current_task();
     kfree(tw);
 }
+#endif
 
 int ksu_handle_umount(uid_t old_uid, uid_t new_uid)
 {
+#ifdef KSU_TP_HOOK
     struct umount_tw *tw;
+#endif
 
     if (!ksu_cred) {
         return 0;
@@ -180,6 +189,7 @@ int ksu_handle_umount(uid_t old_uid, uid_t new_uid)
     // umount the target mnt
     pr_info("handle umount for uid: %d, pid: %d\n", new_uid, current->pid);
 
+#ifdef KSU_TP_HOOK
     tw = kzalloc(sizeof(*tw), GFP_ATOMIC);
     if (!tw)
         return 0;
@@ -191,6 +201,11 @@ int ksu_handle_umount(uid_t old_uid, uid_t new_uid)
         kfree(tw);
         pr_warn("unmount add task_work failed\n");
     }
+#else
+    // manual hook, directly call umount,
+    // because there are not have the problem about atomic context
+    do_umount_for_current_task();
+#endif
 
 skip_umount_task:
     // do susfs setuid when susfs enabled
