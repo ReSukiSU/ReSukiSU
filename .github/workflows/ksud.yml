@@ -32,7 +32,7 @@ jobs:
         fetch-depth: 0
 
     - name: Download artifacts
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v8
     
     - name: Prepare LKM fies
       if: ${{ inputs.pack_lkm }}
@@ -66,7 +66,7 @@ jobs:
         cargo ndk b -t ${{ inputs.target }} -r
 
     - name: Upload ksud artifact
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: ksud-${{ inputs.target }}
         path: userspace/ksud/target/**/release/ksud*
