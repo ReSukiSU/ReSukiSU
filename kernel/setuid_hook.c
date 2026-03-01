@@ -1,7 +1,9 @@
 #include <linux/compiler.h>
 #include <linux/version.h>
 #include <linux/slab.h>
+#ifdef KSU_TP_HOOK
 #include <linux/task_work.h>
+#endif
 #include <linux/thread_info.h>
 #include <linux/seccomp.h>
 #include <linux/printk.h>
@@ -42,7 +44,11 @@ static inline void ksu_set_file_immutable(const char *path_name, bool immutable)
         return;
     }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0) || defined(KSU_HAS_D_INODE)
     inode = d_inode(path.dentry);
+#else
+    inode = path.dentry->d_inode;
+#endif
 
     error = mnt_want_write(path.mnt);
     if (error) {
@@ -62,11 +68,6 @@ static inline void ksu_set_file_immutable(const char *path_name, bool immutable)
     path_put(&path);
 }
 
-struct ksud_status_tw {
-    struct callback_head cb;
-    uid_t new_uid;
-};
-
 static inline void do_ksu_set_ksud_status(uid_t new_uid)
 {
     u16 appid = new_uid % PER_USER_RANGE;
@@ -81,6 +82,11 @@ static inline void do_ksu_set_ksud_status(uid_t new_uid)
 }
 
 #ifdef KSU_TP_HOOK
+struct ksud_status_tw {
+    struct callback_head cb;
+    uid_t new_uid;
+};
+
 static void ksud_status_tw_func(struct callback_head *cb)
 {
     struct ksud_status_tw *tw = container_of(cb, struct ksud_status_tw, cb);
@@ -121,9 +127,7 @@ int ksu_handle_setuid(uid_t new_uid, uid_t old_uid, uid_t euid) // (new_euid)
 
     if (old_uid != new_uid) {
         pr_info("handle_setresuid from %d to %d\n", old_uid, new_uid);
-#if __SULOG_GATE
         ksu_sulog_report_syscall(new_uid, NULL, "setuid", NULL);
-#endif
     }
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
@@ -187,7 +191,7 @@ int ksu_handle_setresuid(uid_t ruid, uid_t euid, uid_t suid)
     return 0; // dummy hook here
 #else
     // we rely on the fact that zygote always call setresuid(3) with same uids
-    return ksu_handle_setuid(ruid, current_uid().val, euid);
+    return ksu_handle_setuid(ruid, ksu_get_uid_t(current_uid()), euid);
 #endif
 }
 

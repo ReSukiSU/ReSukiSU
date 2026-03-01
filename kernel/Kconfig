@@ -28,15 +28,6 @@ config KSU_FULL_NAME_FORMAT
             %BRANCH_NAME% = Git this branch's name
             %KSU_VERSION% = ksu version code
 
-config KSU_ALLOWLIST_WORKAROUND
-	bool "KernelSU Session Keyring Init workaround"
-	depends on KSU
-	default n
-	help
-	  Enable session keyring init workaround for problematic devices.
-	  Useful for situations where the SU allowlist is not kept after a reboot
-
-
 config KSU_MULTI_MANAGER_SUPPORT
 	bool "Multi KernelSU manager support"
 	depends on KSU

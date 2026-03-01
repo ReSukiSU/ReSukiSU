@@ -1,9 +1,12 @@
 #include <linux/slab.h>
 #include <linux/rculist.h>
 #include <linux/uaccess.h>
+#include <linux/cred.h>
+#include <linux/sched.h>
 #include "supercalls.h"
 #include "manager.h"
 #include "ksu.h"
+#include "kernel_compat.h"
 
 u16 ksu_last_manager_appid = KSU_INVALID_APPID;
 
@@ -43,7 +46,7 @@ bool ksu_is_manager_uid(u32 uid)
 
 bool is_manager(void)
 {
-    return ksu_is_manager_uid(current_uid().val);
+    return ksu_is_manager_uid(ksu_get_uid_t(current_uid()));
 }
 
 void ksu_register_manager(u32 uid, u8 signature_index)

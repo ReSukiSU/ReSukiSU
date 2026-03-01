@@ -1,6 +1,8 @@
 #include <linux/rcupdate.h>
 #include <linux/slab.h>
+#ifdef KSU_TP_HOOK
 #include <linux/task_work.h>
+#endif
 #include <asm/current.h>
 #include <linux/cred.h>
 #include <linux/dcache.h>
@@ -15,7 +17,7 @@
 #endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0)
 #include <linux/input-event-codes.h>
-#else
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 7, 0)
 #include <uapi/linux/input.h>
 #endif
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 1, 0)
@@ -96,10 +98,12 @@ void on_post_fs_data(void)
     stop_input_hook();
 }
 
+#if defined(CONFIG_EXT4_FS) &&                                                 \
+    (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) ||                          \
+     defined(KSU_HAS_MODERN_EXT4))
 extern void ext4_unregister_sysfs(struct super_block *sb);
 int nuke_ext4_sysfs(const char *mnt)
 {
-#ifdef CONFIG_EXT4_FS
     struct path path;
     struct super_block *sb = NULL;
     const char *name = NULL;
@@ -123,8 +127,14 @@ int nuke_ext4_sysfs(const char *mnt)
     path_put(&path);
 
     return 0;
-#endif
 }
+#else
+int nuke_ext4_sysfs(const char *mnt)
+{
+    pr_info("%s: feature not implemented!\n", __func__);
+    return 0;
+}
+#endif
 
 void on_module_mounted(void)
 {
@@ -194,6 +204,7 @@ static int __maybe_unused count(struct user_arg_ptr argv, int max)
     return i;
 }
 
+#ifdef KSU_TP_HOOK
 static void on_post_fs_data_cbfun(struct callback_head *cb)
 {
     on_post_fs_data();
@@ -201,6 +212,7 @@ static void on_post_fs_data_cbfun(struct callback_head *cb)
 
 static struct callback_head on_post_fs_data_cb = { .func =
                                                        on_post_fs_data_cbfun };
+#endif
 
 static bool check_argv(struct user_arg_ptr argv, int index,
                        const char *expected, char *buf, size_t buf_len)
@@ -327,10 +339,15 @@ int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
             pr_info("exec zygote, /data prepared, second_stage: %d\n",
                     init_second_stage_executed);
             rcu_read_lock();
+#ifdef KSU_TP_HOOK
             struct task_struct *init_task =
                 rcu_dereference(current->real_parent);
             if (init_task)
                 task_work_add(init_task, &on_post_fs_data_cb, TWA_RESUME);
+#else
+            // Not in tracepoint hook, directly call on_post_fs_data
+            on_post_fs_data();
+#endif
             rcu_read_unlock();
             first_zygote = false;
             stop_execve_hook();
@@ -341,7 +358,10 @@ int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
 }
 
 static ssize_t (*orig_read)(struct file *, char __user *, size_t, loff_t *);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 0) ||                          \
+    defined(KSU_HAS_FOP_READ_ITER)
 static ssize_t (*orig_read_iter)(struct kiocb *, struct iov_iter *);
+#endif
 static struct file_operations fops_proxy;
 static ssize_t ksu_rc_pos = 0;
 const size_t ksu_rc_len = sizeof(KERNEL_SU_RC) - 1;
@@ -385,6 +405,8 @@ append_ksu_rc:
     return ret;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 0) ||                          \
+    defined(KSU_HAS_FOP_READ_ITER)
 static ssize_t read_iter_proxy(struct kiocb *iocb, struct iov_iter *to)
 {
     ssize_t ret = 0;
@@ -400,8 +422,8 @@ static ssize_t read_iter_proxy(struct kiocb *iocb, struct iov_iter *to)
     }
 append_ksu_rc:
     // copy_to_iter returns the number of copied bytes
-    append_count =
-        copy_to_iter(KERNEL_SU_RC + ksu_rc_pos, ksu_rc_len - ksu_rc_pos, to);
+    append_count = copy_to_iter((void *)KERNEL_SU_RC + ksu_rc_pos,
+                                ksu_rc_len - ksu_rc_pos, to);
     if (!append_count) {
         pr_info("read_iter_proxy: append error, totally appended %zd\n",
                 ksu_rc_pos);
@@ -416,6 +438,7 @@ append_ksu_rc:
     }
     return ret;
 }
+#endif
 
 static bool is_init_rc(struct file *fp)
 {
@@ -424,7 +447,7 @@ static bool is_init_rc(struct file *fp)
         return false;
     }
 
-    if (!d_is_reg(fp->f_path.dentry)) {
+    if (!S_ISREG(fp->f_path.dentry->d_inode->i_mode)) {
         return false;
     }
 
@@ -602,10 +625,13 @@ void ksu_handle_initrc(struct file *file)
     if (orig_read) {
         fops_proxy.read = read_proxy;
     }
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 0) ||                          \
+    defined(KSU_HAS_FOP_READ_ITER)
     orig_read_iter = file->f_op->read_iter;
     if (orig_read_iter) {
         fops_proxy.read_iter = read_iter_proxy;
     }
+#endif
     // replace the file_operations
     file->f_op = &fops_proxy;
 }

@@ -3,7 +3,9 @@
 
 #include <linux/fs.h>
 #include <linux/version.h>
+#ifdef KSU_TP_HOOK
 #include <linux/task_work.h>
+#endif
 #include <linux/fdtable.h>
 #include "ss/policydb.h"
 #include "linux/key.h"
@@ -40,11 +42,6 @@ extern ssize_t ksu_kernel_read_compat(struct file *p, void *buf, size_t count,
                                       loff_t *pos);
 extern ssize_t ksu_kernel_write_compat(struct file *p, const void *buf,
                                        size_t count, loff_t *pos);
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0) ||                           \
-    defined(CONFIG_IS_HW_HISI) || defined(CONFIG_KSU_ALLOWLIST_WORKAROUND)
-extern struct key *init_session_keyring;
-#endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0)
 #define ksu_access_ok(addr, size) access_ok(addr, size)
@@ -108,19 +105,142 @@ extern void *ksu_compat_kvrealloc(const void *p, size_t oldsize, size_t newsize,
                                   gfp_t flags);
 #endif
 
-#ifdef KSU_COMPAT_HAS_BITMAP_ALLOC_HELPER
-#define ksu_bitmap_alloc bitmap_alloc
-#define ksu_bitmap_zalloc bitmap_zalloc
-#define ksu_bitmap_free bitmap_free
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 19, 0)
+// kernel below 4.19 maybe not have 3 helper, but impl that is very easy
+// copy from https://github.com/torvalds/linux/commit/c42b65e363ce97a828f81b59033c3558f8fa7f70
+__weak unsigned long *bitmap_alloc(unsigned int nbits, gfp_t flags)
+{
+    return kmalloc_array(BITS_TO_LONGS(nbits), sizeof(unsigned long), flags);
+}
+
+__weak unsigned long *bitmap_zalloc(unsigned int nbits, gfp_t flags)
+{
+    return bitmap_alloc(nbits, flags | __GFP_ZERO);
+}
+
+__weak void bitmap_free(const unsigned long *bitmap)
+{
+    kfree(bitmap);
+}
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 15, 0)
+__weak void groups_sort(struct group_info *group_info)
+{
+    return;
+}
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0) &&                            \
+    !defined(KSU_HAS_INODE_LOCK_UNLOCK)
+// https://github.com/torvalds/linux/commit/5955102c9984fa081b2d570cfac75c97eecf8f3b
+// for setuid_hooks only
+// it will remove when we impl dynamic-manager feature init out of replaceable ksud
+static inline void inode_lock(struct inode *inode)
+{
+    mutex_lock(&inode->i_mutex);
+}
+
+static inline void inode_unlock(struct inode *inode)
+{
+    mutex_unlock(&inode->i_mutex);
+}
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 14, 0)
+#define ksu_get_uid_t(x) *(unsigned int *)&(x)
 #else
-// for kernel not support, impl by ourselves
-/*
- * Allocation and deallocation of bitmap.
- * Provided in kernel_compat.c to avoid circular dependency.
- */
-extern unsigned long *ksu_bitmap_alloc(unsigned int nbits, gfp_t flags);
-extern unsigned long *ksu_bitmap_zalloc(unsigned int nbits, gfp_t flags);
-extern void ksu_bitmap_free(const unsigned long *bitmap);
+#define ksu_get_uid_t(x) (x.val)
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 18, 0)
+__weak char *bin2hex(char *dst, const void *src, size_t count)
+{
+    const unsigned char *_src = src;
+    while (count--)
+        dst = pack_hex_byte(dst, *_src++);
+    return dst;
+}
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 15, 0) &&                           \
+    !defined(KSU_HAS_GET_CMDLINE)
+// for the fucking sulog again
+// https://github.com/torvalds/linux/commit/a90902531a06a030a252a07fbff7f45a189a64fe
+
+int get_cmdline(struct task_struct *task, char *buffer, int buflen);
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 14, 0)
+// https://github.com/torvalds/linux/commit/89a0714106aac7309c7dfa0f004b39e1e89d2942
+// app_profile require U16_MAX, define here
+#define U16_MAX ((u16)~0U)
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 11, 0) &&                           \
+    !defined(KSU_HAS_ITERATE_DIR)
+struct dir_context {
+    const filldir_t actor;
+    loff_t pos;
+};
+
+static int iterate_dir(struct file *file, struct dir_context *ctx)
+{
+    return vfs_readdir(file, ctx->actor, ctx);
+}
+#endif // KSU_HAS_ITERATE_DIR
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 8, 0)
+__weak long vfs_truncate(struct path *path, loff_t length)
+{
+    struct inode *inode;
+    long error;
+
+    inode = path->dentry->d_inode;
+
+    /* For directories it's -EISDIR, for other non-regulars - -EINVAL */
+    if (S_ISDIR(inode->i_mode))
+        return -EISDIR;
+    if (!S_ISREG(inode->i_mode))
+        return -EINVAL;
+
+    error = mnt_want_write(path->mnt);
+    if (error)
+        goto out;
+
+    error = inode_permission(inode, MAY_WRITE);
+    if (error)
+        goto mnt_drop_write_and_out;
+
+    error = -EPERM;
+    if (IS_APPEND(inode))
+        goto mnt_drop_write_and_out;
+
+    error = get_write_access(inode);
+    if (error)
+        goto mnt_drop_write_and_out;
+
+    /*
+	 * Make sure that there are no leases.  get_write_access() protects
+	 * against the truncate racing with a lease-granting setlease().
+	 */
+    error = break_lease(inode, O_WRONLY);
+    if (error)
+        goto put_write_and_out;
+
+    error = locks_verify_truncate(inode, NULL, length);
+    if (!error)
+        error = security_path_truncate(path);
+    if (!error)
+        error = do_truncate(path->dentry, length, 0, NULL);
+
+put_write_and_out:
+    put_write_access(inode);
+mnt_drop_write_and_out:
+    mnt_drop_write(path->mnt);
+out:
+    return error;
+}
 #endif
 
 #endif
