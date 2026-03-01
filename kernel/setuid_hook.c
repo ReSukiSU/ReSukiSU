@@ -1,7 +1,9 @@
 #include <linux/compiler.h>
 #include <linux/version.h>
 #include <linux/slab.h>
+#ifdef KSU_TP_HOOK
 #include <linux/task_work.h>
+#endif
 #include <linux/thread_info.h>
 #include <linux/seccomp.h>
 #include <linux/printk.h>
@@ -62,11 +64,6 @@ static inline void ksu_set_file_immutable(const char *path_name, bool immutable)
     path_put(&path);
 }
 
-struct ksud_status_tw {
-    struct callback_head cb;
-    uid_t new_uid;
-};
-
 static inline void do_ksu_set_ksud_status(uid_t new_uid)
 {
     u16 appid = new_uid % PER_USER_RANGE;
@@ -81,6 +78,11 @@ static inline void do_ksu_set_ksud_status(uid_t new_uid)
 }
 
 #ifdef KSU_TP_HOOK
+struct ksud_status_tw {
+    struct callback_head cb;
+    uid_t new_uid;
+};
+
 static void ksud_status_tw_func(struct callback_head *cb)
 {
     struct ksud_status_tw *tw = container_of(cb, struct ksud_status_tw, cb);

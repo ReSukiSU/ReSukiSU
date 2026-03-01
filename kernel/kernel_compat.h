@@ -3,7 +3,9 @@
 
 #include <linux/fs.h>
 #include <linux/version.h>
+#ifdef KSU_TP_HOOK
 #include <linux/task_work.h>
+#endif
 #include <linux/fdtable.h>
 #include "ss/policydb.h"
 #include "linux/key.h"
