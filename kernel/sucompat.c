@@ -1,6 +1,5 @@
 #include <linux/version.h>
 #include <linux/preempt.h>
-#include <linux/printk.h>
 #include <linux/mm.h>
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 8, 0)
 #include <linux/pgtable.h>
@@ -31,7 +30,6 @@
 #include "allowlist.h"
 #include "feature.h"
 #include "klog.h" // IWYU pragma: keep
-#include "ksud.h"
 #include "sucompat.h"
 #include "app_profile.h"
 #include "util.h"
