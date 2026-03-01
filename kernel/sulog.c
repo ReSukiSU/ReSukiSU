@@ -190,12 +190,12 @@ static void sulog_process_queue(void)
         goto revert_creds_out;
     }
 
-    if (fp->f_inode->i_size > SULOG_MAX_SIZE) {
+    if (file_inode(fp)->i_size > SULOG_MAX_SIZE) {
         if (vfs_truncate(&fp->f_path, 0))
             pr_err("sulog: failed to truncate log file\n");
         pos = 0;
     } else {
-        pos = fp->f_inode->i_size;
+        pos = file_inode(fp)->i_size;
     }
 
     list_for_each_entry (entry, &local_queue, list)
