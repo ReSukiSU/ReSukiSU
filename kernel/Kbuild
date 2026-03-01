@@ -43,7 +43,6 @@ ccflags-y += -Wno-declaration-after-statement -Wno-unused-function -Wno-unused-v
 ccflags-y += -Wno-int-to-pointer-cast -Wno-declaration-after-statement
 
 ccflags-y += -I$(srctree)/security/selinux -I$(srctree)/security/selinux/include
-ccflags-y += -I$(objtree)/security/selinux -include $(srctree)/include/uapi/asm-generic/errno.h
 
 obj-$(CONFIG_KSU) += kernelsu.o
 
@@ -274,6 +273,21 @@ endif
 ifeq ($(shell grep -q "inode_lock.struct inode" $(srctree)/include/linux/fs.h 2>/dev/null; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: inode_lock found)
 ccflags-y += -DKSU_HAS_INODE_LOCK_UNLOCK
+endif
+
+# for kernel version below 3.7, uapi/asm-generic/errno.h maybe not found
+ifneq ($(wildcard $(srctree)/include/uapi/asm-generic/errno.h),)
+$(info -- $(REPO_NAME)/compat: modern errno file found)
+ccflags-y += -I$(objtree)/security/selinux -include $(srctree)/include/uapi/asm-generic/errno.h
+else
+ccflags-y += -I$(objtree)/security/selinux -include $(srctree)/include/asm-generic/errno.h
+endif
+
+# for kernel version below 3.14, linux/proc_ns.h maybe not found
+# https://github.com/torvalds/linux/commit/0bb80f240520c4148b623161e7856858c021696d
+ifneq ($(wildcard $(srctree)/include/linux/proc_ns.h),)
+$(info -- $(REPO_NAME)/compat: modern proc ns header file found)
+ccflags-y += -DKSU_HAS_MODERN_PROC_NS
 endif
 
 # Custom Signs

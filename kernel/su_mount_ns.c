@@ -6,22 +6,30 @@
 #include <linux/fs_struct.h>
 #include <linux/limits.h>
 #include <linux/namei.h>
+#include <linux/version.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0) ||                          \
+    defined(KSU_HAS_MODERN_PROC_NS)
 #include <linux/proc_ns.h>
+#else
+#include <linux/proc_fs.h>
+#endif
 #include <linux/pid.h>
 #include <linux/slab.h>
 #include <linux/syscalls.h>
 #ifdef KSU_TP_HOOK
 #include <linux/task_work.h>
 #endif
-#include <linux/version.h>
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0)
 #include <linux/sched/task.h>
 #else
 #include <linux/sched.h>
 #endif
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0)
 #include <uapi/linux/mount.h>
-#else
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 7, 0)
+// https://github.com/torvalds/linux/commit/607ca46e97a1b6594b29647d98a32d545c24bdff
+// for kernel before this commit, include linux/fs.h is enough
 #include <uapi/linux/fs.h>
 #endif
 

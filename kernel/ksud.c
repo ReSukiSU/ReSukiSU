@@ -17,7 +17,7 @@
 #endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0)
 #include <linux/input-event-codes.h>
-#else
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 7, 0)
 #include <uapi/linux/input.h>
 #endif
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 1, 0)
