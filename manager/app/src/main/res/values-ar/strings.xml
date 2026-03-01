@@ -46,7 +46,6 @@
     <string name="reboot_to_apply">إعادة التشغيل لتطبيق التغييرات</string>
     <string name="module_magisk_conflict">الوحدات غير متاحة بسبب تعارضها مع Magisk!</string>
     <string name="home_learn_kernelsu">تعلم KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">تعرف على كيفية تثبيت KernelSU واستخدام الإضافات</string>
     <string name="home_support_title">إدعمنا</string>
     <string name="home_support_content">KernelSU سيظل دائماً مجانياً ومفتوح المصدر. مع ذلك، يمكنك أن تظهر لنا أنك تهتم بالتبرع.</string>
@@ -77,8 +76,6 @@
     <string name="module_changelog">سجل التغييرات</string>
     <string name="settings_profile_template">قالب ملف تعريف التطبيق</string>
     <string name="settings_profile_template_summary">إدارة القالب المحلي وعبر الإنترنت لملف تعريف التطبيق</string>
-    <string name="settings_check_update">إشعارات التحديث</string>
-    <string name="settings_check_update_summary">تحقق تلقائيًا من تحديثات الوحدة والمدير</string>
     <string name="app_profile_template_create">إنشاء قالب</string>
     <string name="app_profile_template_edit">تحرير القالب</string>
     <string name="app_profile_template_id">المعرف</string>
@@ -99,6 +96,8 @@
     <string name="app_profile_template_save_failed">فشل في حفظ القالب</string>
     <string name="app_profile_template_import_empty">الحافظة فارغة!</string>
     <string name="module_changelog_failed">فشل في جلب سجل التغيير: %s</string>
+    <string name="settings_check_update">إشعارات التحديث</string>
+    <string name="settings_check_update_summary">تحقق تلقائيًا من تحديثات الوحدة والمدير</string>
     <string name="grant_root_failed">فشل في منح صلاحية الجذر!</string>
     <string name="action">إجراء</string>
     <string name="close">إغلاق</string>
@@ -156,9 +155,12 @@
     <string name="home_android_version">‏إصدار Android</string>
     <string name="home_device_model">نوع الجهاز</string>
     <string name="su_not_allowed">لا يسمح بمنح المستخدم المتميز ل %s</string>
+    <string name="settings_sucompat">إعادة توجيه ثنائي su</string>
+    <string name="settings_sucompat_summary">يسمح للتطبيقات التي تم منحها صلاحيات Superuser في ملف تعريف التطبيق بالحصول على shell superuser من خلال تنفيذ /system/bin/su؛ فعال فقط للعمليات الجديدة.</string>
+    <string name="settings_kernel_umount">إلغاء تحميل النواة</string>
+    <string name="settings_kernel_umount_summary">سلوك إلغاء تحميل مستوى النواة الذي يسيطر عليه KernelSU</string>
     <string name="module_install_multiple_confirm_with_names">هل أنت متأكد من أنك تريد تثبيت وحدات %1$d التالية؟ \n\n%2$s</string>
     <string name="more_settings">المزيد من الإعدادات</string>
-    <string name="selinux">SELinux</string>
     <string name="selinux_enabled">مفعّل</string>
     <string name="selinux_disabled">رفض</string>
     <string name="simple_mode">وضع البساطة</string>
@@ -194,7 +196,6 @@
     <string name="yes">نعم</string>
     <string name="no">لايوجد</string>
     <string name="failed_reboot">فشل إعادة التشغيل</string>
-    <string name="kpm_title">KPM</string>
     <string name="kpm_empty">لا توجد وحدات نواة مثبتة في هذا الوقت</string>
     <string name="kpm_version">الإصدار</string>
     <string name="kpm_author">المؤلف</string>
@@ -215,7 +216,6 @@
     <string name="kernel_not_patched">النواة غير مصحوبة</string>
     <string name="kernel_not_enabled">لم يتم تكوين النواة</string>
     <string name="custom_settings">الإعدادات المُخصصة</string>
-    <string name="kpm_install_mode">KPM Install</string>
     <string name="kpm_install_mode_load">التحميل</string>
     <string name="kpm_install_mode_embed">فسيفساء</string>
     <string name="kpm_install_mode_description">الرجاء التحديد: %1\$s وضع تثبيت الوحدة \n\nالتحميل: قم بتحميل الوحدة \nمؤقتا: تثبيت دائم في النظام</string>
@@ -268,13 +268,11 @@
     <string name="back">عد مرة أخرى</string>
     <string name="background_set_success">تم تعيين الخلفية بنجاح</string>
     <string name="background_removed">إزالة خلفيات مخصصة</string>
-    <string name="icon_switch_title">Alternate icon</string>
     <string name="icon_switch_summary">Change the launcher icon to KernelSU\'s icon.</string>
-    <string name="icon_switched">Icon switched</string>
     <!-- KPM display settings -->
     <string name="show_kpm_info">عرض وظيفة KPM</string>
     <string name="show_kpm_info_summary">إخفاء معلومات KPM ووظيفتها في الشريط المنزلي والأسفل</string>
-    <!-- Webui X settings -->
+    <!-- Webui settings -->
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">تم تطبيق DPI</string>
     <string name="app_dpi_summary">ضبط كثافة عرض الشاشة للتطبيق الحالي فقط</string>
@@ -297,38 +295,44 @@
     <string name="module_download_error">فشل تحميل الوحدة</string>
     <string name="kernel_flashing">ضرب النواة</string>
     <!-- 分类相关 -->
-    <string name="category_all_apps">All</string>
-    <string name="category_root_apps">Root</string>
-    <string name="category_custom_apps">Custom</string>
-    <string name="category_default_apps">Default</string>
     <!-- 排序相关 -->
-    <string name="sort_name_asc">Ascending order of name</string>
-    <string name="sort_name_desc">Name descending</string>
     <string name="sort_install_time_new">Installation time (new)</string>
     <string name="sort_install_time_old">Installation time (old)</string>
     <string name="sort_size_desc">descending order of size</string>
     <string name="sort_size_asc">ascending order of size</string>
     <string name="sort_usage_freq">frequency of use</string>
     <!-- 状态相关 -->
-    <string name="no_apps_in_category">No application in this category</string>
     <!-- 标签相关 -->
-    <!-- FAB菜单相关 -->
-    <string name="deny_authorization">Delegation of authority</string>
-    <string name="grant_authorization">Authorizations</string>
-    <string name="unmount_modules">Unmounting Module Mounts</string>
-    <string name="disable_unmount">Disable uninstall module mounting</string>
-    <string name="expand_menu">Expand menu</string>
-    <string name="collapse_menu">Put away the menu</string>
     <string name="scroll_to_top">في الأعلى</string>
     <string name="scroll_to_bottom">أسفل</string>
     <string name="selected">محدد</string>
     <string name="select">خيار</string>
     <!-- BottomSheet相关 -->
-    <string name="menu_options">Menu Options</string>
-    <string name="sort_options">Sort by</string>
-    <string name="app_categories">Application Type Selection</string>
-    <string name="settings_sucompat">إعادة توجيه ثنائي su</string>
-    <string name="settings_sucompat_summary">يسمح للتطبيقات التي تم منحها صلاحيات Superuser في ملف تعريف التطبيق بالحصول على shell superuser من خلال تنفيذ /system/bin/su؛ فعال فقط للعمليات الجديدة.</string>
-    <string name="settings_kernel_umount">إلغاء تحميل النواة</string>
-    <string name="settings_kernel_umount_summary">سلوك إلغاء تحميل مستوى النواة الذي يسيطر عليه KernelSU</string>
+    <!-- SuSFS Configuration -->
+    <!-- SuSFS Reset Confirmation -->
+    <!-- SuSFS Toast Messages -->
+    <!-- SuSFS Settings Item -->
+    <!-- 开机自启动相关 -->
+    <!-- SuSFS Tab Titles -->
+    <!-- SuSFS Path Management -->
+    <!-- SuSFS Reset Categories -->
+    <!-- SuSFS Path Settings -->
+    <!-- SuSFS Enabled Features -->
+    <!-- Feature Labels -->
+    <!-- 可切换状态 -->
+    <!-- Settings related strings -->
+    <!-- SuSFS 自启动相关字符串 -->
+    <!-- SuSFS Kstat相关字符串 -->
+    <!-- SuSFS Mount Hiding Control Related Strings -->
+    <!-- 备份和还原相关字符串 -->
+    <!-- 循环路径相关 -->
+    <!-- 循环路径功能描述 -->
+    <!-- KPM patching related strings -->
+    <!-- KPM workflow related -->
+    <!-- KPM error messages -->
+    <!-- KPM option radio group strings -->
+    <!-- UID Scanner Settings -->
+    <!-- 确认安装相关字符串 -->
+    <!-- SUS Map related strings -->
+    <!-- Log Viewer -->
 </resources>

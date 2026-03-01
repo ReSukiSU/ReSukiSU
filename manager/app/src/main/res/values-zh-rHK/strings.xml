@@ -77,8 +77,6 @@
     <string name="module_changelog">更新日誌</string>
     <string name="settings_profile_template">App Profile 模版</string>
     <string name="settings_profile_template_summary">管理本地同在線嘅 App Profile 模版</string>
-    <string name="settings_check_update">更新提醒</string>
-    <string name="settings_check_update_summary">自動檢查模塊和管理器更新</string>
     <string name="app_profile_template_create">創建模版</string>
     <string name="app_profile_template_edit">編輯模版</string>
     <string name="app_profile_template_id">模版 ID</string>
@@ -99,6 +97,8 @@
     <string name="app_profile_template_save_failed">模版存儲失敗</string>
     <string name="app_profile_template_import_empty">剪貼板為空！</string>
     <string name="module_changelog_failed">獲取更新日誌失敗：%s</string>
+    <string name="settings_check_update">更新提醒</string>
+    <string name="settings_check_update_summary">自動檢查模塊和管理器更新</string>
     <string name="grant_root_failed">獲取 root 失敗！</string>
     <string name="action">執行</string>
     <string name="close">關閉</string>
@@ -161,7 +161,6 @@
     <string name="settings_kernel_umount_summary">在核心為需要的應用程式解除掛載模組</string>
     <string name="module_install_multiple_confirm_with_names">確定要安裝以下 %1$d 個模組嗎？\n\n%2$s</string>
     <string name="more_settings">更多配置</string>
-    <string name="selinux">SELinux</string>
     <string name="selinux_enabled">強制執行</string>
     <string name="selinux_disabled">寬容模式</string>
     <string name="simple_mode">簡潔模式</string>
@@ -180,7 +179,6 @@
     <string name="theme_follow_system">跟隨系統</string>
     <string name="theme_light">淺色</string>
     <string name="theme_dark">深色</string>
-    <string name="manual_hook">Manual Hook</string>
     <string name="dynamic_color_title">動態顏色</string>
     <string name="dynamic_color_summary">使用系統主題嘅動態顏色</string>
     <string name="choose_theme_color">選擇主題色</string>
@@ -279,7 +277,7 @@
     <!-- KPM display settings -->
     <string name="show_kpm_info">隱藏 KPM 功能</string>
     <string name="show_kpm_info_summary">喺主頁同底欄隱藏 KPM 相關功能同信息</string>
-    <!-- Webui X settings -->
+    <!-- Webui settings -->
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">應用 DPI</string>
     <string name="app_dpi_summary">僅調整當前應用嘅屏幕顯示密度</string>
@@ -305,7 +303,6 @@
     <string name="kernel_flashing">核心刷寫</string>
     <!-- 分类相关 -->
     <string name="category_all_apps">全部</string>
-    <string name="category_root_apps">Root</string>
     <string name="category_custom_apps">自定義</string>
     <string name="category_default_apps">默認</string>
     <!-- 排序相关 -->
@@ -374,8 +371,6 @@
     <string name="susfs_path_label">路徑</string>
     <string name="susfs_path_placeholder">例如: /system/addon.d</string>
     <string name="susfs_no_paths_configured">暫冇 SuS 路徑配置</string>
-    <!-- SuSFS Umount Mode -->
-    <!-- SuSFS Run Umount -->
     <!-- SuSFS Reset Categories -->
     <string name="susfs_reset_paths_title">重置 SuS 路徑</string>
     <string name="susfs_reset_paths_message">這將清除所有 SuS 路徑配置，確定要繼續嗎？</string>
@@ -412,8 +407,6 @@
     <string name="show_more_module_info_summary">顯示額外嘅模組信息，如更新配置 URL 等</string>
     <string name="susfs_execution_location_label">執行位置</string>
     <string name="susfs_current_execution_location">當前執行位置：%s</string>
-    <string name="susfs_execution_location_service">Service</string>
-    <string name="susfs_execution_location_post_fs_data">Post-FS-Data</string>
     <string name="susfs_execution_location_service_description">喺系統服務啟動後執行</string>
     <string name="susfs_execution_location_post_fs_data_description">喺文件系統掛載後但系統完全啟動前執行,可能會導致循環重新啟動</string>
     <string name="susfs_slot_info_title">槽位信息</string>
@@ -541,6 +534,14 @@
     <string name="avc_log_spoofing_warning">重要提示：\n
 - 核心入面嘅預設設定係 \'0\'。\n
 - 啟用呢個功能有時會令到開發人員喺除錯權限或者 SELinux 問題嗰陣難以搵出原因，所以建議用戶喺除錯時禁用呢個功能。</string>
+    <!-- KPM patching related strings -->
+    <!-- KPM workflow related -->
+    <!-- KPM error messages -->
+    <!-- KPM option radio group strings -->
+    <!-- UID Scanner Settings -->
+    <!-- 确认安装相关字符串 -->
+    <!-- SUS Map related strings -->
+    <!-- Log Viewer -->
     <string name="module_shortcut_title">建立捷徑</string>
     <string name="module_shortcut_name_label">捷徑名稱</string>
     <string name="module_shortcut_icon_pick">選擇自訂圖示</string>
