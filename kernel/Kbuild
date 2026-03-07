@@ -10,15 +10,8 @@ kernelsu-objs += hook/setuid_hook.o
 ifndef CONFIG_KSU_DISABLE_MANAGER
 kernelsu-objs += feature/dynamic_manager.o
 kernelsu-objs += manager/apk_sign.o
-kernelsu-objs += manager/pkg_observer.o
 kernelsu-objs += manager/throne_tracker.o
 kernelsu-objs += manager/manager.o
-endif
-
-ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
-ifeq ($(shell test \( \( $(VERSION) -gt 4 -o \( $(VERSION) -eq 4 -a $(PATCHLEVEL) -ge 2 \) \) -a \( $(VERSION) -lt 6 -o \( $(VERSION) -eq 6 -a $(PATCHLEVEL) -lt 8 \) \) \) && echo y),y)
-kernelsu-objs += hook/lsm_hooks.o
-endif
 endif
 
 kernelsu-objs += compat/kernel_compat.o
@@ -148,24 +141,44 @@ $(info -- KPM is disabled)
 endif
 
 ifeq ($(KSU_TP_HOOK), y)
-kernelsu-objs += infra/symbol_resolver.o
-kernelsu-objs += hook/lsm_hook_magic.o
-kernelsu-objs += hook/syscall_hook_manager.o
-kernelsu-objs += hook/syscall_event_bridge.o
-kernelsu-objs += hook/tp_marker.o
-ifeq ($(CONFIG_ARM64),y)
-kernelsu-objs += hook/arm64/patch_memory.o
-kernelsu-objs += hook/arm64/syscall_hook.o
-else ifeq ($(CONFIG_X86_64),y)
-kernelsu-objs += hook/x86_64/patch_memory.o
-kernelsu-objs += hook/x86_64/syscall_hook.o
+  ifndef CONFIG_KSU_DISABLE_MANAGER
+    kernelsu-objs += manager/pkg_observer.o
+  endif
+
+  kernelsu-objs += infra/symbol_resolver.o
+  kernelsu-objs += hook/lsm_hook_magic.o
+  kernelsu-objs += hook/syscall_hook_manager.o
+  kernelsu-objs += hook/syscall_event_bridge.o
+  kernelsu-objs += hook/tp_marker.o
+  ifeq ($(CONFIG_ARM64),y)
+    kernelsu-objs += hook/arm64/patch_memory.o
+    kernelsu-objs += hook/arm64/syscall_hook.o
+  else ifeq ($(CONFIG_X86_64),y)
+    kernelsu-objs += hook/x86_64/patch_memory.o
+    kernelsu-objs += hook/x86_64/syscall_hook.o
+  else
+    ifeq ($(CONFIG_KSU), y)
+      $(info -- Unsupported arch)
+      $(info -- Only arm64-v8a and x86-64 support for tracepoint hook)
+      $(error Unsupported arch for tracepoint hook)
+    endif
+  endif
 else
-ifeq ($(CONFIG_KSU), y)
-$(info -- Unsupported arch)
-$(info -- Only arm64-v8a and x86-64 support for tracepoint hook)
-$(error Unsupported arch for tracepoint hook)
-endif
-endif
+  # For old kernel, pkg observer maybe let system freeze
+  # https://github.com/ReSukiSU/ReSukiSU/issues/82#issuecomment-4015396974
+  #
+  # 4.2- we let user manual hook security.c to call ksu_handle_rename
+  # 4.2-6.7 we use lsm_hooks to call ksu_handle_rename
+  # 6.8+ we use pkg_observer to track_throne
+  ifeq ($(shell test \( $(VERSION) -gt 4 -o \( $(VERSION) -eq 4 -a $(PATCHLEVEL) -ge 2 \) \) && echo y),y)
+      ifeq ($(shell test \( $(VERSION) -lt 6 -o \( $(VERSION) -eq 6 -a $(PATCHLEVEL) -lt 8 \) \) && echo y),y)
+          kernelsu-objs += hook/lsm_hooks.o
+      else
+        ifndef CONFIG_KSU_DISABLE_MANAGER
+          kernelsu-objs += pkg_observer.o
+        endif
+      endif
+  endif
 endif
 
 # SELinux drivers check
@@ -506,6 +519,24 @@ ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
       $(info -- You lost ksu_handle_sys_reboot hook in your kernel)
       $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
       $(error You should integrate $(REPO_NAME) in your kernel.)
+    endif
+  endif
+
+  ifeq ($(shell test \( $(VERSION) -lt 4 -o \( $(VERSION) -eq 4 -a $(PATCHLEVEL) -le 2 \) \) && echo y),y)
+    # 4.2-, check ksu_handle_rename manual hook
+    ifeq ($(shell grep -q "ksu_handle_rename" $(srctree)/security/security.c; echo $$?),0)
+      $(info -- $(REPO_NAME)/manual_hook: ksu_handle_rename found)
+    else
+      $(info -- You lost ksu_handle_rename hook in your kernel)
+      $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
+      $(error You should integrate $(REPO_NAME) in your kernel.)
+    endif
+  else
+    # 4.2+, user manual hook ksu_handle_rename will let track_throne scan twice
+    ifeq ($(shell grep -q "ksu_handle_rename" $(srctree)/security/security.c; echo $$?),0)
+      $(info -- ksu_handle_rename is incompatible hook)
+      $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
+      $(error You should integrate $(REPO_NAME) in your kernel correctly.)
     endif
   endif
 endif
