@@ -94,7 +94,10 @@ void on_post_fs_data(void)
     pr_info("on_post_fs_data!\n");
 
     ksu_load_allow_list();
+// in 6.8- manual hook, we use LSM rename hook
+#if LINUX_VERSION_CODE > KERNEL_VERSION(6, 8, 0) || defined(KSU_TP_HOOK)
     ksu_observer_init();
+#endif
     // sanity check, this may influence the performance
     stop_input_hook();
 }

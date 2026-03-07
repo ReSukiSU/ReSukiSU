@@ -26,12 +26,6 @@ static struct fsnotify_group *g;
 #include "pkg_observer_defs.h" // KSU_DECL_FSNOTIFY_OPS
 static KSU_DECL_FSNOTIFY_OPS(ksu_handle_generic_event)
 {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 14, 0)
-    const unsigned char *file_name = event->file_name;
-    __u32 mask = event->mask;
-#undef ksu_fname_len
-#define ksu_fname_len(ignore) (event->name_len)
-#endif
     if (!file_name || (mask & FS_ISDIR))
         return 0;
 
@@ -98,11 +92,7 @@ static int watch_one_dir(struct watch_dir *wd)
         pr_info("path not ready: %s (%d)\n", wd->path, ret);
         return ret;
     }
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0) || defined(KSU_HAS_D_INODE)
     wd->inode = d_inode(wd->kpath.dentry);
-#else
-    wd->inode = wd->kpath.dentry->d_inode;
-#endif
     ihold(wd->inode);
 
     ret = add_mark_on_inode(wd->inode, wd->mask, &wd->mark);

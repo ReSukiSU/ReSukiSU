@@ -9,6 +9,7 @@
 #include <linux/kernel.h>
 #include <linux/uidgid.h>
 
+#include "throne_tracker.h"
 #include "kernel_compat.h"
 #include "ksu.h"
 
@@ -39,7 +40,16 @@ static int ksu_file_permission(struct file *file, int mask)
 }
 #endif
 
+static int ksu_inode_rename(struct inode *old_inode, struct dentry *old_dentry,
+                            struct inode *new_inode, struct dentry *new_dentry)
+{
+    ksu_handle_rename(old_dentry, new_dentry);
+
+    return 0;
+}
+
 static struct security_hook_list ksu_hooks[] = {
+    LSM_HOOK_INIT(inode_rename, ksu_inode_rename),
 #ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK
     LSM_HOOK_INIT(task_fix_setuid, ksu_task_fix_setuid),
 #endif

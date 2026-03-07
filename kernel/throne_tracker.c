@@ -18,6 +18,7 @@
 #include "apk_sign.h"
 #include "kernel_compat.h"
 #include "dynamic_manager.h"
+#include "ksud.h"
 
 #define SYSTEM_PACKAGES_LIST_PATH "/data/system/packages.list"
 #define MAX_APP_ID 10000 // FIRST_APPLICATION_UID - LAST_APPLICATION_UID = 19999
@@ -427,6 +428,48 @@ out:
     if (diff_map)
         bitmap_free(diff_map);
 }
+
+// for 6.8- kernel, we can use LSM hook in manual hook
+// 6.8+, we use pkg_observer
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0) && !defined(KSU_TP_HOOK)
+void ksu_handle_rename(struct dentry *old_dentry, struct dentry *new_dentry)
+{
+    // skip kernel threads
+    if (!current->mm) {
+        return;
+    }
+
+    // skip non system uid
+    if (ksu_get_uid_t(current_uid()) != 1000) {
+        return;
+    }
+
+    if (!old_dentry || !new_dentry) {
+        return;
+    }
+
+    // /data/system/packages.list.tmp -> /data/system/packages.list
+    if (strcmp(new_dentry->d_iname, "packages.list")) {
+        return;
+    }
+
+    char path[128];
+    char *buf = dentry_path_raw(new_dentry, path, sizeof(path));
+    if (IS_ERR(buf)) {
+        pr_err("dentry_path_raw failed.\n");
+        return;
+    }
+
+    if (!strstr(buf, "/system/packages.list")) {
+        return;
+    }
+
+    pr_info("renameat: %s -> %s, new path: %s\n", old_dentry->d_iname,
+            new_dentry->d_iname, buf);
+
+    track_throne(false, false);
+}
+#endif
 
 void ksu_throne_tracker_init(void)
 {
