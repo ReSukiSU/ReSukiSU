@@ -1,5 +1,5 @@
 # ReSukiSU
-<img align='right' src='SukiSU-mini.svg' width='220px' alt="sukisu logo">
+<img align='right' src='ReSukiSU_blue.svg' width='220px' alt="sukisu logo">
 
 
 **English** | [简体中文](./zh/README.md)
