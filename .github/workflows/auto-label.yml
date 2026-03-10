@@ -12,12 +12,20 @@ jobs:
         with:
           script: |
             const body = context.payload.issue.body || "";
-            const labelsToAdd = [];
-            if (body.match(/### Kernel Version Category \/ 内核版本分类\s+5\.10-/)) labelsToAdd.push("nongki");
-            if (body.match(/### Kernel Version Category \/ 内核版本分类\s+5\.10\+/)) labelsToAdd.push("gki");
-            if (body.match(/### Hook Type \/ Hook 类型\s+susfs/)) labelsToAdd.push("susfs");
-            if (body.match(/### Hook Type \/ Hook 类型\s+tracepoint/)) labelsToAdd.push("tracepoint");
-            if (body.match(/### Hook Type \/ Hook 类型\s+manual/)) labelsToAdd.push("manual");
+            const expectedLabels = [];
+            
+            if (body.match(/### Kernel Version Category \/ 内核版本分类\s+5\.10-/)) expectedLabels.push("nongki");
+            if (body.match(/### Kernel Version Category \/ 内核版本分类\s+5\.10\+/)) expectedLabels.push("gki");
+            if (body.match(/### Hook Type \/ Hook 类型\s+susfs/)) expectedLabels.push("susfs");
+            if (body.match(/### Hook Type \/ Hook 类型\s+tracepoint/)) expectedLabels.push("tracepoint");
+            if (body.match(/### Hook Type \/ Hook 类型\s+manual/)) expectedLabels.push("manual");
+            
+            const managedLabels = ["nongki", "gki", "susfs", "tracepoint", "manual"];
+            const currentLabels = context.payload.issue.labels.map(l => l.name);
+            
+            const labelsToAdd = expectedLabels.filter(l => !currentLabels.includes(l));
+            const labelsToRemove = currentLabels.filter(l => managedLabels.includes(l) && !expectedLabels.includes(l));
+            
             if (labelsToAdd.length > 0) {
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
@@ -25,4 +33,17 @@ jobs:
                 issue_number: context.issue.number,
                 labels: labelsToAdd
               });
+            }
+            
+            for (const label of labelsToRemove) {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  name: label
+                });
+              } catch (error) {
+                console.error(error);
+              }
             }

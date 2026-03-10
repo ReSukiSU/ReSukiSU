@@ -1,6 +1,6 @@
 name: Bug report / 错误报告
 description: Create a report to help us improve KernelSU / 创建报告以帮助我们改进 KernelSU
-labels: [Bug]
+labels: [bug]
 
 body:
   - type: checkboxes
@@ -42,12 +42,11 @@ body:
     id: hook_type
     attributes:
       label: Hook Type / Hook 类型
-      description: If you selected "Yes" for LKM Mode above, please select "N/A". / 如果上面选择了 LKM 模式，请在此处选择 "N/A"。
+      description: If you selected "Yes" for LKM Mode above, please select "tracepoint". / 如果上面选择了 LKM 模式，请在此处选择 "tracepoint"。
       options:
         - "susfs"
         - "tracepoint"
         - "manual"
-        - "N/A"
     validations:
       required: true
 
