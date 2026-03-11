@@ -23,8 +23,8 @@ body:
     attributes:
       label: Kernel Version Category / 内核版本分类
       options:
-        - "5.10-"
         - "5.10+"
+        - "5.10-"
     validations:
       required: true
 
