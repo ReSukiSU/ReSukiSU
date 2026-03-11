@@ -23,7 +23,6 @@
 #include "ksu.h"
 #include "file_wrapper.h"
 
-#ifdef MODULE
 // workaround for A12-5.10 kernel
 // Some third-party kernel (e.g. linegaeOS) uses wrong toolchain, which supports
 // CC_HAVE_STACKPROTECTOR_SYSREG while gki's toolchain doesn't.
@@ -31,15 +30,34 @@
 // while those third-party kernel can't provide.
 // Thus, we manually provide it instead of using kernel's
 #if defined(CONFIG_STACKPROTECTOR) &&                                          \
-    (defined(CONFIG_ARM64) && !defined(CONFIG_STACKPROTECTOR_PER_TASK))
+    (defined(CONFIG_ARM64) && defined(MODULE) &&                               \
+     !defined(CONFIG_STACKPROTECTOR_PER_TASK))
 #include <linux/stackprotector.h>
 #include <linux/random.h>
 unsigned long __stack_chk_guard __ro_after_init
     __attribute__((visibility("hidden")));
-#define NO_STACK_PROTECTOR_WORKAROUND __attribute__((no_stack_protector))
+
+__attribute__((no_stack_protector)) void ksu_setup_stack_chk_guard()
+{
+    unsigned long canary;
+
+    /* Try to get a semi random initial value. */
+    get_random_bytes(&canary, sizeof(canary));
+    canary ^= LINUX_VERSION_CODE;
+    canary &= CANARY_MASK;
+    __stack_chk_guard = canary;
+}
+
+__attribute__((naked)) int __init kernelsu_init_early(void)
+{
+    asm("mov x19, x30;\n"
+        "bl ksu_setup_stack_chk_guard;\n"
+        "mov x30, x19;\n"
+        "b kernelsu_init;\n");
+}
+#define NEED_OWN_STACKPROTECTOR 1
 #else
-#define NO_STACK_PROTECTOR_WORKAROUND
-#endif
+#define NEED_OWN_STACKPROTECTOR 0
 #endif
 
 struct cred *ksu_cred;
@@ -61,25 +79,10 @@ void sukisu_custom_config_exit(void)
 #endif
 }
 
-#ifdef MODULE
-NO_STACK_PROTECTOR_WORKAROUND
-#endif
 int __init kernelsu_init(void)
 {
     pr_info("Initialized on: %s (%s) with driver version: %u\n", UTS_RELEASE,
             UTS_MACHINE, KSU_VERSION);
-#ifdef MODULE
-#if defined(CONFIG_STACKPROTECTOR) &&                                          \
-    (defined(CONFIG_ARM64) && !defined(CONFIG_STACKPROTECTOR_PER_TASK))
-    unsigned long canary;
-
-    /* Try to get a semi random initial value. */
-    get_random_bytes(&canary, sizeof(canary));
-    canary ^= LINUX_VERSION_CODE;
-    canary &= CANARY_MASK;
-    __stack_chk_guard = canary;
-#endif
-#endif
 
 #ifdef CONFIG_KSU_DEBUG
     pr_alert("*************************************************************");
@@ -160,7 +163,11 @@ void kernelsu_exit(void)
     }
 }
 
+#if NEED_OWN_STACKPROTECTOR
+module_init(kernelsu_init_early);
+#else
 module_init(kernelsu_init);
+#endif
 module_exit(kernelsu_exit);
 
 MODULE_LICENSE("GPL");
