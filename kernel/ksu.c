@@ -15,9 +15,6 @@
 #include "feature.h"
 #include "klog.h" // IWYU pragma: keep
 #include "throne_tracker.h"
-#ifndef KSU_TP_HOOK
-#include "syscall_hook_manager.h"
-#endif
 #include "ksud.h"
 #include "supercalls.h"
 #include "ksu.h"
@@ -67,17 +64,40 @@ struct cred *ksu_cred;
 #include "sucompat.h"
 #include "setuid_hook.h"
 
-void sukisu_custom_config_init(void)
-{
-}
-
-void sukisu_custom_config_exit(void)
+void sukisu_exit(void)
 {
     ksu_dynamic_manager_exit();
 #if __SULOG_GATE
     ksu_sulog_exit();
 #endif
 }
+
+// dispatcher of ksu hooks
+#if defined(KSU_TP_HOOK)
+#include "syscall_hook_manager.h"
+#define ksu_hook_init() ksu_syscall_hook_manager_init()
+#define ksu_hook_exit() ksu_syscall_hook_manager_exit()
+#elif defined(CONFIG_KSU_MANUAL_HOOK)
+// only lsm hook need call init
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
+#define ksu_hook_init() ksu_lsm_hook_init()
+#else
+#define ksu_hook_init()                                                        \
+    do {                                                                       \
+    } while (0)
+#endif
+#define ksu_hook_exit()                                                        \
+    do {                                                                       \
+    } while (0)
+#elif defined(CONFIG_KSU_SUSFS)
+// susfs doesn't have exit
+#define ksu_hook_init() susfs_init()
+#define ksu_hook_exit()                                                        \
+    do {                                                                       \
+    } while (0)
+#else
+#error Unsupport hook type
+#endif
 
 int __init kernelsu_init(void)
 {
@@ -101,18 +121,8 @@ int __init kernelsu_init(void)
 
     ksu_feature_init();
 
-#ifdef CONFIG_KSU_MANUAL_HOOK
-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
-    ksu_lsm_hook_init();
-#endif
-#endif
-
     ksu_supercalls_init();
 
-    sukisu_custom_config_init();
-#ifdef KSU_TP_HOOK
-    ksu_syscall_hook_manager_init();
-#endif
     ksu_setuid_hook_init();
     ksu_sucompat_init();
 
@@ -120,9 +130,7 @@ int __init kernelsu_init(void)
 
     ksu_throne_tracker_init();
 
-#ifdef CONFIG_KSU_SUSFS
-    susfs_init();
-#endif
+    ksu_hook_init();
 
     ksu_ksud_init();
 
@@ -145,14 +153,12 @@ void kernelsu_exit(void)
 
     ksu_throne_tracker_exit();
 
-#ifdef KSU_TP_HOOK
     ksu_ksud_exit();
-    ksu_syscall_hook_manager_exit();
-#endif
+    ksu_hook_exit();
     ksu_sucompat_exit();
     ksu_setuid_hook_exit();
 
-    sukisu_custom_config_exit();
+    sukisu_exit();
 
     ksu_supercalls_exit();
 
