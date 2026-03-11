@@ -495,6 +495,14 @@ private fun StatusCard(
                                 containerColor = MaterialTheme.colorScheme.primary
                             )
 
+                            if (Natives.isLateLoadMode) {
+                                LabelText(
+                                    label = stringResource(id = R.string.jailbreak_mode),
+                                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                                    containerColor = MaterialTheme.colorScheme.primary
+                                )
+                            }
+
                             Spacer(Modifier.width(6.dp))
 
                             // 架构标签

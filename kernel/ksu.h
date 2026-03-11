@@ -20,5 +20,6 @@
 void ksu_lsm_hook_init(void);
 
 extern struct cred *ksu_cred;
+extern bool ksu_late_loaded;
 
 #endif

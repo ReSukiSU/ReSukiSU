@@ -131,7 +131,7 @@ pub fn on_post_data_fs() -> Result<()> {
     Ok(())
 }
 
-fn run_stage(stage: &str, block: bool) {
+pub fn run_stage(stage: &str, block: bool) {
     utils::umask(0);
 
     if utils::has_magisk() {
