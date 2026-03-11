@@ -44,8 +44,8 @@ body:
       label: Hook Type / Hook 类型
       description: If you selected "Yes" for LKM Mode above, please select "tracepoint". / 如果上面选择了 LKM 模式，请在此处选择 "tracepoint"。
       options:
-        - "susfs"
         - "tracepoint"
+        - "susfs"
         - "manual"
     validations:
       required: true
