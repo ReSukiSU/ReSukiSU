@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use log::{info, warn};
 
-use crate::android::module::{handle_updated_modules, prune_modules, metamodule};
+use crate::android::module::{handle_updated_modules, metamodule, prune_modules};
 use crate::android::{init_event, restorecon, utils};
 use crate::{assets, defs};
 
