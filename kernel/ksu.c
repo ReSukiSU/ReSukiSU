@@ -34,7 +34,7 @@
      !defined(CONFIG_STACKPROTECTOR_PER_TASK))
 #include <linux/stackprotector.h>
 #include <linux/random.h>
-    unsigned long __stack_chk_guard __ro_after_init
+unsigned long __stack_chk_guard __ro_after_init
     __attribute__((visibility("hidden")));
 
 __attribute__((no_stack_protector)) void ksu_setup_stack_chk_guard()
