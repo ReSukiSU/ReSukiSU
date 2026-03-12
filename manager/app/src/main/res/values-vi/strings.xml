@@ -13,15 +13,17 @@
     <string name="home_manager_version">Phiên bản Trình quản lý</string>
     <string name="home_selinux_status">Trạng thái SELinux</string>
     <string name="selinux_status_disabled">Vô hiệu hoá</string>
-    <string name="selinux_status_enforcing">Enforcing</string>
-    <string name="selinux_status_permissive">Permissive</string>
+    <string name="selinux_status_enforcing">Thực thi</string>
+    <string name="selinux_status_permissive">Cho phép</string>
     <string name="unknown">Không xác định</string>
-    <string name="superuser">Superuser</string>
+    <string name="superuser">Siêu người dùng</string>
     <string name="module_failed_to_enable">Không thể kích hoạt module: %s</string>
     <string name="module_failed_to_disable">Không thể vô hiệu hoá module: %s</string>
     <string name="module_empty">Chưa cài đặt module nào</string>
-    <string name="module">Module</string>
+    <string name="module">Mô-đun</string>
+    <string name="module_repo">Nguồn mô-đum</string>
     <string name="module_sort_action_first">Sắp xếp (Theo hành động)</string>
+    <string name="module_sort_star_first">Sắp xếp (Số sao trước)</string>
     <string name="module_sort_enabled_first">Sắp xếp (Theo trạng thái)</string>
     <string name="uninstall">Gỡ cài đặt</string>
     <string name="module_install">Cài đặt</string>
@@ -34,6 +36,16 @@
     <string name="reboot_download">Khởi động lại vào Download</string>
     <string name="reboot_edl">Khởi động lại vào EDL</string>
     <string name="about">Thông tin</string>
+    <string name="about_anime_character_sticker"><![CDATA[Hình ảnh trong các tập tin có hình dán nhân vật anime thuộc bản quyền của %1$s, quyền sở hữu trí tuệ thương hiệu trong các hình ảnh thuộc sở hữu của %2$s. Trước khi sử dụng các tập tin này, ngoài việc tuân thủ quy định của %3$s, bạn cũng cần phải được sự cho phép của hai tác giả để sử dụng các nội dung nghệ thuật này.]]></string>
+    <string name="get_source_code">Kiểm tra mã nguồn</string>
+    <string name="get_source_code_detail">Kiểm tra mã nguồn trên GitHub</string>
+    <string name="join_telegram_group">Tham gia cộng đồng</string>
+    <string name="join_telegram_group_detail">Tham gia nhóm Telegram của chúng tôi</string>
+    <string name="open_source_license">Giấy phép mã nguồn mở</string>
+    <string name="open_source_license_settings_description">Xem các thư viện mã nguồn mở của bên thứ ba và giấy phép</string>
+    <string name="visit_home_page">Truy cập trang chủ</string>
+    <string name="license">Giấy phép: %s</string>
+    <string name="no_license_text">Không có văn bản giấy phép nào có sẵn.</string>
     <string name="module_uninstall_confirm">Bạn có THẬT SỰ muốn gỡ cài đặt module %s không?</string>
     <string name="metamodule_uninstall_confirm">Bạn có chắc chắn muốn gỡ cài đặt module %s không? Thao tác này sẽ ảnh hưởng đến tất cả các module và một số tính năng do siêu module cung cấp (chẳng hạn như mount) sẽ không còn hoạt động nữa</string>
     <string name="module_uninstall_success">%s đã được gỡ cài đặt</string>
@@ -60,7 +72,6 @@
     <string name="profile_groups">Nhóm</string>
     <string name="profile_capabilities">Tính tương thích</string>
     <string name="profile_selinux_context">Bối cảnh SELinux</string>
-    <string name="profile_umount_modules">Umount modules</string>
     <string name="failed_to_update_app_profile">Cập nhật Hồ sơ ứng dụng cho %s thất bại</string>
     <string name="require_kernel_version" formatted="false">Phiên bản SukiSU Ultra hiện tại %s quá thấp để Trình quản lý hoạt động bình thường. Vui lòng cập nhật lên phiên bản %s hoặc cao hơn!</string>
     <string name="settings_umount_modules_default">Umount modules</string>
@@ -76,14 +87,10 @@
     <string name="force_stop_app" formatted="false">Buộc dừng</string>
     <string name="restart_app">Khởi động lại</string>
     <string name="failed_to_update_sepolicy">Cập nhật quy tắc SELinux cho %s thất bại</string>
-    <string name="module_changelog">Changelog</string>
     <string name="settings_profile_template">Mẫu Hồ sơ ứng dụng</string>
     <string name="settings_profile_template_summary">Quản lý mẫu cục bộ và trực tuyến của Hồ sơ ứng dụng</string>
-    <string name="settings_check_update">Thông báo cập nhật</string>
-    <string name="settings_check_update_summary">Tự động kiểm tra bản cập nhật của mô-đun và trình quản lý</string>
     <string name="app_profile_template_create">Tạo mẫu</string>
     <string name="app_profile_template_edit">Chỉnh sửa mẫu</string>
-    <string name="app_profile_template_id">ID</string>
     <string name="app_profile_template_id_invalid">ID mẫu không hợp lệ</string>
     <string name="app_profile_template_name">Tên</string>
     <string name="app_profile_template_description">Mô tả</string>
@@ -101,6 +108,8 @@
     <string name="app_profile_template_save_failed">Lưu mẫu thất bại</string>
     <string name="app_profile_template_import_empty">Bộ nhớ tạm đang trống!</string>
     <string name="module_changelog_failed">Lấy changelog thất bại: %s</string>
+    <string name="settings_check_update">Thông báo cập nhật</string>
+    <string name="settings_check_update_summary">Tự động kiểm tra bản cập nhật của mô-đun và trình quản lý</string>
     <string name="grant_root_failed">Cấp quyền root thất bại!</string>
     <string name="action">Khởi chạy</string>
     <string name="close">Đóng</string>
@@ -114,10 +123,6 @@
     <string name="install_select_partition">Chọn phân vùng</string>
     <string name="install_upload_lkm_file">Sử dụng file LKM cục bộ</string>
     <string name="install_only_support_ko_file">Chỉ hỗ trợ các file .ko</string>
-    <string name="settings_sucompat">Lệnh su truyền thống</string>
-    <string name="settings_sucompat_summary">Cho phép truy cập root qua /system/bin/su, trong các quy trình mới.</string>
-    <string name="settings_kernel_umount">Gỡ kết nối mô-đun</string>
-    <string name="settings_kernel_umount_summary">Gỡ kết nối các mô-đun khỏi hạt nhân trong Hồ sơ ứng dụng</string>
     <string name="select_file_tip">Phân vùng %1$s được khuyến nghị</string>
     <string name="select_kmi">Chọn KMI</string>
     <string name="settings_uninstall">Gỡ cài đặt</string>
@@ -163,12 +168,15 @@
     <string name="home_android_version">Phiên bản Android</string>
     <string name="home_device_model">Model thiết bị</string>
     <string name="su_not_allowed">Không thể cấp quyền Superuser cho %s</string>
+    <string name="settings_sucompat">Lệnh su truyền thống</string>
+    <string name="settings_sucompat_summary">Cho phép truy cập root qua /system/bin/su, trong các quy trình mới.</string>
+    <string name="settings_kernel_umount">Gỡ kết nối mô-đun</string>
+    <string name="settings_kernel_umount_summary">Gỡ kết nối các mô-đun khỏi hạt nhân trong Hồ sơ ứng dụng</string>
     <string name="feature_status_unsupported_summary">Kernel không hỗ trợ tính năng này</string>
     <string name="feature_status_managed_summary">Tính năng này được quản lý bởi một module</string>
     <string name="settings_mode_default">Mặc định</string>
     <string name="module_install_multiple_confirm_with_names">Bạn có chắc muốn cài đặt các module %1$d không? \n\n%2$s</string>
     <string name="more_settings">Nhiều cài đặt hơn</string>
-    <string name="selinux">SELinux</string>
     <string name="selinux_enabled">Đang bật</string>
     <string name="selinux_disabled">Đang tắt</string>
     <string name="simple_mode">Chế độ đơn giản</string>
@@ -192,7 +200,6 @@
     <string name="theme_light">Sáng</string>
     <string name="theme_dark">Tối</string>
     <string name="manual_hook">Hook thủ công</string>
-    <string name="inline_hook">Inline Hook</string>
     <string name="dynamic_color_title">Màu sắc động</string>
     <string name="dynamic_color_summary">Sử dụng màu sắc động làm chủ đề hệ thống</string>
     <string name="choose_theme_color">Chọn màu chủ đề</string>
@@ -233,7 +240,6 @@
     <string name="kernel_not_enabled">Kernel chưa được cấu hình</string>
     <string name="custom_settings">Cài đặt giản lược</string>
     <string name="kpm_install_mode">Cài đặt KPM</string>
-    <string name="kpm_install_mode_load">Load</string>
     <string name="kpm_install_mode_embed">Nhúng</string>
     <string name="kpm_install_mode_description">Vui lòng chọn: %1\$s Chế Độ Cài Đặt Module \n\nTải: Tải tạm thời module \nNhúng: Cài đặt vĩnh viễn vào hệ thống</string>
     <string name="snackbar_failed_to_check_module_file">Không thể kiểm tra file module</string>
@@ -256,8 +262,6 @@
     <!-- Slot selection related strings -->
     <string name="select_slot_title">Chọn Slot Flash</string>
     <string name="select_slot_description">Vui lòng chọn Slot để Flash Boot</string>
-    <string name="slot_a">Slot A</string>
-    <string name="slot_b">Slot B</string>
     <string name="selected_slot">Slot đã chọn: %1$s</string>
     <string name="horizon_getting_original_slot">Lấy Slot ban đầu</string>
     <string name="horizon_setting_target_slot">Cài đặt Slot được chỉ định</string>
@@ -269,7 +273,6 @@
     <string name="flash_failed_message">Flash thất bại</string>
     <!-- lkm/gki install -->
     <string name="Lkm_install_methods">LKM cài đặt</string>
-    <string name="GKI_install_methods">Flashing AnyKernel3</string>
     <string name="kernel_version_log">Phiên bản Kernel: %1$s</string>
     <string name="tool_version_log">Sử dụng công cụ vá lỗi: %1$s</string>
     <string name="configuration">Cấu hình</string>
@@ -291,7 +294,7 @@
     <!-- KPM display settings -->
     <string name="show_kpm_info">Ẩn chức năng KPM</string>
     <string name="show_kpm_info_summary">Ẩn thông tin và chức năng của KPM ở trang chủ và thanh điều hướng</string>
-    <!-- Webui X settings -->
+    <!-- Webui settings -->
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">Tuỳ chỉnh DPI</string>
     <string name="app_dpi_summary">Điều chỉnh DPI hiển thị</string>
@@ -312,12 +315,10 @@
     <string name="installing_module">Đang cài đặt module %1$d/%2$d</string>
     <string name="module_failed_count">Cài đặt module %d thất bại</string>
     <string name="module_download_error">Tải xuống module thất bại</string>
-    <string name="kernel_flashing">Kernel Flashing</string>
     <string name="warning_of_meta_module_title">Yêu cầu Siêu Module</string>
     <string name="warning_of_meta_module_summary">Module này muốn mount /system, Siêu Module sẽ xử lý việc đó. Nếu không, nó có thể không hoạt động</string>
     <!-- 分类相关 -->
     <string name="category_all_apps">Tất cả</string>
-    <string name="category_root_apps">Root</string>
     <string name="category_custom_apps">Tuỳ chỉnh</string>
     <string name="category_default_apps">Mặc định</string>
     <!-- 排序相关 -->
@@ -423,14 +424,11 @@
     <string name="show_more_module_info_summary">Hiển thị thông tin đường dẫn cập nhật \"JSON URLs\" của module</string>
     <string name="susfs_execution_location_label">Vị trí thực thi</string>
     <string name="susfs_current_execution_location">Vị trí thực thi hiện tại: %s</string>
-    <string name="susfs_execution_location_service">Service</string>
-    <string name="susfs_execution_location_post_fs_data">Post-FS-Data</string>
     <string name="susfs_execution_location_service_description">Thực thi sau khi dịch vụ hệ thống khởi động</string>
     <string name="susfs_execution_location_post_fs_data_description">Thực thi sau khi file hệ thống được mount nhưng trước khi hệ thống khởi động hoàn toàn, có thể gây ra boot loop</string>
     <string name="susfs_slot_info_title">Thông tin Slot</string>
     <string name="susfs_slot_info_description">Xem thông tin Slot khởi động hiện tại và sao chép giá trị</string>
     <string name="susfs_current_active_slot">Slot hiện tại: %s</string>
-    <string name="susfs_slot_uname">Uname: %s</string>
     <string name="susfs_slot_build_time">Thời gian xây dựng: %s</string>
     <string name="susfs_slot_current_badge">Hiện tại</string>
     <string name="susfs_slot_use_uname">Sử dụng Uname</string>
@@ -554,7 +552,6 @@
     <string name="susfs_reset_loop_paths_title">Đặt lại Đường dẫn Vòng lặp SuS</string>
     <string name="susfs_reset_loop_paths_message">Bạn có chắc chắn muốn xóa tất cả các Đường dẫn Vòng lặp SuS không? Thao tác này không thể hoàn tác</string>
     <string name="susfs_loop_path_label">Đường dẫn Vòng lặp</string>
-    <string name="susfs_loop_path_placeholder">/data/example/path</string>
     <string name="susfs_loop_path_restriction_warning">Lưu ý: Chỉ những đường dẫn KHÔNG nằm trong /storage/ và /sdcard/ mới có thể được thêm vào thông qua Đường dẫn Vòng lặp</string>
     <string name="susfs_loop_path_invalid_location">Lỗi: Đường dẫn Vòng lặp không thể nằm trong thư mục /storage/ hoặc /sdcard/</string>
     <string name="loop_paths_section">Đường dẫn Vòng lặp</string>
@@ -614,8 +611,6 @@ Bật: Kích hoạt tính năng giả mạo sus tcontext của \'su\' thành \'u
     <string name="confirm_installation">Xác nhận cài đặt</string>
     <string name="confirm_multiple_installation">Xác nhận cài đặt (%d files)</string>
     <string name="install_confirm">Cài đặt</string>
-    <string name="module_package">Module</string>
-    <string name="kernel_package">Kernel</string>
     <string name="unknown_package">Không xác định</string>
     <string name="unknown_kernel">Kernel không xác định</string>
     <string name="unknown_file">Tệp không xác định</string>
@@ -626,7 +621,6 @@ Bật: Kích hoạt tính năng giả mạo sus tcontext của \'su\' thành \'u
     <!-- SUS Map related strings -->
     <string name="susfs_tab_sus_maps">SuS Maps</string>
     <string name="susfs_sus_map_label">Đường dẫn thư viện</string>
-    <string name="susfs_sus_map_placeholder">/data/adb/modules/my_module/zygisk/arm64-v8a.so</string>
     <string name="susfs_add_sus_map">Thêm SuS Map</string>
     <string name="susfs_edit_sus_map">Chỉnh sửa SuS Map</string>
     <string name="susfs_sus_map_added_success">Đã thêm SuS Map thành công: %1$s</string>
@@ -653,7 +647,6 @@ Bật: Kích hoạt tính năng giả mạo sus tcontext của \'su\' thành \'u
     <string name="log_viewer_no_logs">Không tìm thấy nhật ký nào</string>
     <string name="log_viewer_no_matching_logs">Không tìm thấy nhật ký nào phù hợp</string>
     <string name="log_viewer_refresh">Làm mới</string>
-    <string name="log_viewer_raw_log">Raw Log</string>
     <string name="log_viewer_search_placeholder">Tìm kiếm theo UID, lệnh hoặc chi tiết…</string>
     <string name="log_viewer_clear_search">Xoá tìm kiếm</string>
     <string name="log_viewer_view_logs">Xem nhật ký sử dụng</string>
@@ -664,16 +657,12 @@ Bật: Kích hoạt tính năng giả mạo sus tcontext của \'su\' thành \'u
     <string name="log_viewer_too_many_logs">Quá nhiều nhật ký, chỉ hiển thị %1$d nhật ký mới nhất</string>
     <string name="log_viewer_load_more">Đang load thêm nhật ký</string>
     <string name="log_viewer_all_logs_loaded">Tất cả nhật ký đã được hiển thị</string>
-    <!-- MiUI Uninstall Desc -->
-    <string name="miui_uninstall_title">Bạn muốn Gỡ cài đặt SukiSU sao 😭?</string>
-    <string name="miui_uninstall_content">Hừm, được rồi. Tôi sẽ bị bạn Gỡ cài đặt. Chức năng root sẽ không ngừng hoạt động chỉ vì bạn mất một Trình quản lý. Đừng lo chỉ Gỡ cài đặt Trình quản lý thôi thì không thể mất quyền truy cập root được đâu, zako~❤️.</string>
     <string name="incompatible_kernel_msg">Trình quản lý hiện tại không tương thích với Kernel này! Vui lòng nâng cấp Kernel lên phiên bản %2$d hoặc cao hơn (hiện tại là %1$d)</string>
     <string name="umount_path_manager">Quản lý Đường dẫn Umount</string>
     <string name="umount_path_manager_summary">Quản lý Đường dẫn Kernel Umount</string>
     <string name="add_umount_path">Thêm Đường dẫn Umount</string>
     <string name="mount_path">Đường dẫn Mount</string>
     <string name="umount_flags">Umount Flags</string>
-    <string name="umount_flags_hint">0=Normal unmount, 2=MNT_DETACH</string>
     <string name="confirm_delete">Xác nhận Xoá?</string>
     <string name="confirm_delete_umount_path">Bạn có chắc chắn muốn xóa đường dẫn %s không?</string>
     <string name="umount_path_added">Đã thêm đường dẫn</string>
