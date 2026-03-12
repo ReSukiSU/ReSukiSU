@@ -166,7 +166,7 @@ int ksu_handle_umount(uid_t old_uid, uid_t new_uid)
     // no need to check zygote here, because we already check it in the setuid call.
 
     // in susfs's implementation, ksu_kernel_umount is ignored, so this keeps the same behavior.
-    if (!ksu_kernel_umount_enabled) { 
+    if (!ksu_kernel_umount_enabled) {
         goto skip_umount_task;
     }
 
