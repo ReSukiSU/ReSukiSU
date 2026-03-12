@@ -1,9 +1,12 @@
 package com.resukisu.resukisu.ui.screen.main
 
 import android.annotation.SuppressLint
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -42,6 +45,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Update
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.rounded.ElectricalServices
 import androidx.compose.material.icons.rounded.FolderDelete
 import androidx.compose.material.icons.rounded.RemoveCircle
 import androidx.compose.material.icons.rounded.RemoveModerator
@@ -86,6 +90,8 @@ import com.maxkeppeler.sheets.list.models.ListOption
 import com.resukisu.resukisu.BuildConfig
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ksuApp
+import com.resukisu.resukisu.magica.BootCompletedReceiver
 import com.resukisu.resukisu.ui.component.ConfirmResult
 import com.resukisu.resukisu.ui.component.DialogHandle
 import com.resukisu.resukisu.ui.component.ksuIsValid
@@ -297,6 +303,45 @@ fun SettingsPage(bottomPadding: Dp, hazeState: HazeState?) {
                                             execKsud("feature save", true)
                                             isKernelUmountEnabled = checked
                                         }
+                                    }
+                                )
+                            }
+
+                            item(
+                                visible = Natives.isLateLoadMode
+                            ) {
+                                var savedAutoJailbreakStatus by rememberSaveable {
+                                    mutableStateOf(
+                                        prefs.getBoolean("auto_jailbreak", false)
+                                    )
+                                }
+
+                                SettingsSwitchWidget(
+                                    icon = Icons.Rounded.ElectricalServices,
+                                    title = stringResource(id = R.string.settings_auto_jailbreak),
+                                    description = stringResource(id = R.string.settings_auto_jailbreak_summary),
+                                    checked = savedAutoJailbreakStatus,
+                                    onCheckedChange = { value ->
+                                        runCatching {
+                                            ksuApp.packageManager.setComponentEnabledSetting(
+                                                ComponentName(
+                                                    ksuApp,
+                                                    BootCompletedReceiver::class.java
+                                                ),
+                                                if (value) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                                                PackageManager.DONT_KILL_APP
+                                            )
+                                        }.onFailure {
+                                            Log.e(
+                                                "Settings",
+                                                "failed to change boot receiver state to $value",
+                                                it
+                                            )
+                                        }
+                                        prefs.edit {
+                                            putBoolean("auto_jailbreak", value)
+                                        }
+                                        savedAutoJailbreakStatus = value
                                     }
                                 )
                             }

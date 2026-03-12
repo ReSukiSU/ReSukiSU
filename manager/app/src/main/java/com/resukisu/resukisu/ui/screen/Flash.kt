@@ -52,6 +52,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -59,6 +60,7 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -77,6 +79,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.KeyEventBlocker
 import com.resukisu.resukisu.ui.component.rememberCustomDialog
@@ -95,6 +98,7 @@ import com.resukisu.resukisu.ui.util.uninstallPermanently
 import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel
 import com.topjohnwu.superuser.io.SuFile
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
@@ -334,12 +338,25 @@ fun FlashScreen(flashIt: FlashIt) {
         }
     }
 
+    var flashEnabled by rememberSaveable { mutableStateOf(false) }
+
+    val needJailbreakWarning = flashIt is FlashIt.FlashBoot && Natives.isLateLoadMode
+
+    if (needJailbreakWarning && !flashEnabled) {
+        JailbreakFlashWarningDialog(
+            onConfirm = { flashEnabled = true },
+            onDismiss = { navigator.pop() }
+        )
+    }
+
     // 安装但排除更新模块
-    LaunchedEffect(flashIt) {
+    LaunchedEffect(flashIt, flashEnabled) {
         if (flashIt is FlashIt.FlashModuleUpdate) return@LaunchedEffect
         if (hasExecuted || hasFlashCompleted || text.isNotEmpty()) {
             return@LaunchedEffect
         }
+
+        if (needJailbreakWarning && !flashEnabled) return@LaunchedEffect
 
         hasExecuted = true
 
@@ -420,7 +437,7 @@ fun FlashScreen(flashIt: FlashIt) {
                         currentIndex = flashIt.currentIndex + 1
                     )
                     scope.launch {
-                        kotlinx.coroutines.delay(500)
+                        delay(500)
                         navigator.replace(Route.Flash(nextFlashIt))
                     }
                 }
@@ -556,6 +573,52 @@ fun FlashScreen(flashIt: FlashIt) {
             }
         }
     }
+}
+
+private const val JAILBREAK_WARNING_COUNTDOWN = 10
+
+@Composable
+fun JailbreakFlashWarningDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    var countdown by remember { mutableIntStateOf(JAILBREAK_WARNING_COUNTDOWN) }
+
+    LaunchedEffect(Unit) {
+        while (countdown > 0) {
+            delay(1000)
+            countdown--
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(android.R.string.dialog_alert_title)) },
+        text = {
+            Text(
+                stringResource(R.string.jailbreak_flash_warning),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                enabled = countdown == 0
+            ) {
+                Text(
+                    if (countdown > 0)
+                        stringResource(R.string.jailbreak_flash_warning_countdown, countdown)
+                    else
+                        stringResource(R.string.install_next)
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(android.R.string.cancel))
+            }
+        }
+    )
 }
 
 // 显示模块安装进度条和状态

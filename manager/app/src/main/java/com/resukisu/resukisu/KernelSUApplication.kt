@@ -1,6 +1,7 @@
 package com.resukisu.resukisu
 
 import android.app.Application
+import android.os.Build
 import android.system.Os
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
@@ -32,6 +33,14 @@ class KernelSUApplication : Application(), ViewModelStoreOwner {
     override fun onCreate() {
         super.onCreate()
         ksuApp = this
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val processName = getProcessName()
+            if (processName.endsWith("MagicaService")) {
+                // avoid loading unnecessary thing when starting MagicaService
+                return
+            }
+        }
 
         // For faster response when first entering superuser or webui activity
         val superUserViewModel = ViewModelProvider(this)[SuperUserViewModel::class.java]

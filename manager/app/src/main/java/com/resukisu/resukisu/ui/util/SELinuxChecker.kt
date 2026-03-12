@@ -2,7 +2,17 @@ package com.resukisu.resukisu.ui.util
 
 import android.content.Context
 import com.resukisu.resukisu.R
+import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.io.SuFile
+
+fun isSELinuxPermissive(): Boolean {
+    val shell = Shell.Builder.create().build("sh")
+    val stdoutList = ArrayList<String>()
+    val result = shell.use {
+        it.newJob().add("getenforce").to(stdoutList).exec()
+    }
+    return result.isSuccess && stdoutList.joinToString("").trim() == "Permissive"
+}
 
 fun getSELinuxStatus(context: Context) = SuFile("/sys/fs/selinux/enforce").run {
     when {

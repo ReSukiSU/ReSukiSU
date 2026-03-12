@@ -228,6 +228,43 @@ fail:
     return false;
 }
 
+static void ksu_apply_rules(void)
+{
+    apply_kernelsu_rules();
+    cache_sid();
+    setup_ksu_cred();
+}
+
+#ifdef KSU_TP_HOOK
+static void ksu_initialize_selinux_tw_func(struct callback_head *cb)
+{
+    ksu_apply_rules();
+    kfree(cb);
+}
+#endif
+
+static void ksu_initialize_selinux(void)
+{
+#ifdef KSU_TP_HOOK
+    // When tracepoint hook, we maybe in atomic context
+    // use task_work to escape that
+    struct callback_head *cb = kzalloc(sizeof(*cb), GFP_ATOMIC);
+    if (cb) {
+        cb->func = ksu_initialize_selinux_tw_func;
+        if (task_work_add(current, cb, TWA_RESUME)) {
+            kfree(cb);
+            pr_warn("ksu_initialize_selinux failed to add task work\n");
+        }
+    } else {
+        pr_warn("ksu_initialize_selinux failed to allocate task work\n");
+    }
+#else
+    // for manual hook, we NEVER in atomic context
+    // no need use task_work to escape
+    ksu_apply_rules();
+#endif
+}
+
 // IMPORTANT NOTE: the call from execve_handler_pre WON'T provided correct value for envp and flags in GKI version
 int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
                              struct user_arg_ptr *argv,
@@ -260,9 +297,7 @@ int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
         if (!init_second_stage_executed &&
             check_argv(*argv, 1, "second_stage", buf, sizeof(buf))) {
             pr_info("/system/bin/init second_stage executed via argv1 check\n");
-            apply_kernelsu_rules();
-            cache_sid();
-            setup_ksu_cred();
+            ksu_initialize_selinux();
             init_second_stage_executed = true;
         }
     } else if (unlikely(!memcmp(filename->name, old_system_init,
@@ -277,9 +312,7 @@ int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
             if (!init_second_stage_executed &&
                 check_argv(*argv, 1, "--second-stage", buf, sizeof(buf))) {
                 pr_info("/init second_stage executed via argv1 check\n");
-                apply_kernelsu_rules();
-                cache_sid();
-                setup_ksu_cred();
+                ksu_initialize_selinux();
                 init_second_stage_executed = true;
             }
         } else if (argc == 1 && !init_second_stage_executed && envp) {
@@ -308,9 +341,7 @@ int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
                         (!strcmp(env_value, "1") ||
                          !strcmp(env_value, "true"))) {
                         pr_info("/init second_stage executed via envp check\n");
-                        apply_kernelsu_rules();
-                        cache_sid();
-                        setup_ksu_cred();
+                        ksu_initialize_selinux();
                         init_second_stage_executed = true;
                         break;
                     }

@@ -8,6 +8,8 @@
 #include <linux/capability.h>
 #include <pwd.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 NativeBridgeNP(getVersion, jint) {
     uint32_t version = get_version();
@@ -151,7 +153,7 @@ NativeBridge(getAppProfile, jobject, jstring pkg, jint uid) {
 	if (useDefaultProfile) {
 		// no profile found, so just use default profile:
 		// don't allow root and use default profile!
-		LogDebug("use default profile for: %s, %d", key, uid);
+        LOGD("use default profile for: %s, %d", key, uid);
 
 		// allow_su = false
 		// non root use default = true
@@ -176,7 +178,7 @@ NativeBridge(getAppProfile, jobject, jstring pkg, jint uid) {
 		jobject groupList = GetEnvironment()->GetObjectField(env, obj, groupsField);
 		int groupCount = profile.rp_config.profile.groups_count;
 		if (groupCount > KSU_MAX_GROUPS) {
-			LogDebug("kernel group count too large: %d???", groupCount);
+            LOGD("kernel group count too large: %d???", groupCount);
 			groupCount = KSU_MAX_GROUPS;
 		}
 		fillIntArray(env, groupList, profile.rp_config.profile.groups, groupCount);
@@ -264,7 +266,7 @@ NativeBridge(setAppProfile, jboolean, jobject profile) {
 
 		int groups_count = getListSize(env, groups);
 		if (groups_count > KSU_MAX_GROUPS) {
-			LogDebug("groups count too large: %d", groups_count);
+            LOGD("groups count too large: %d", groups_count);
 			return false;
 		}
 		p.rp_config.profile.groups_count = groups_count;
@@ -336,7 +338,7 @@ NativeBridgeNP(getHookType, jstring) {
 // dynamic manager
 NativeBridge(setDynamicManager, jboolean, jint size, jstring hash) {
 	if (!hash) {
-		LogDebug("setDynamicManager: hash is null");
+        LOGD("setDynamicManager: hash is null");
 		return false;
 	}
 
@@ -344,7 +346,7 @@ NativeBridge(setDynamicManager, jboolean, jint size, jstring hash) {
 	bool result = set_dynamic_manager((unsigned int)size, chash);
 	GetEnvironment()->ReleaseStringUTFChars(env, hash, chash);
 
-	LogDebug("setDynamicManager: size=0x%x, result=%d", size, result);
+    LOGD("setDynamicManager: size=0x%x, result=%d", size, result);
 	return result;
 }
 
@@ -353,7 +355,7 @@ NativeBridgeNP(getDynamicManager, jobject) {
 	bool result = get_dynamic_manager(&config);
 
 	if (!result) {
-		LogDebug("getDynamicManager: failed to get dynamic manager config");
+        LOGD("getDynamicManager: failed to get dynamic manager config");
 		return NULL;
 	}
 
@@ -363,13 +365,13 @@ NativeBridgeNP(getDynamicManager, jobject) {
 	SET_INT_FIELD(obj, cls, size, (jint)config.size);
 	SET_STRING_FIELD(obj, cls, hash, config.hash);
 
-	LogDebug("getDynamicManager: size=0x%x, hash=%.16s...", config.size, config.hash);
+    LOGD("getDynamicManager: size=0x%x, hash=%.16s...", config.size, config.hash);
 	return obj;
 }
 
 NativeBridgeNP(clearDynamicManager, jboolean) {
 	bool result = clear_dynamic_manager();
-	LogDebug("clearDynamicManager: result=%d", result);
+    LOGD("clearDynamicManager: result=%d", result);
 	return result;
 }
 
@@ -380,7 +382,7 @@ NativeBridgeNP(getManagersList, jobject) {
     bool result = get_managers_list(&cmd);
 
     if (!result) {
-        LogDebug("getManagersList: failed to get active managers list");
+        LOGD("getManagersList: failed to get active managers list");
         return NULL;
     }
 
@@ -408,11 +410,48 @@ NativeBridgeNP(getManagersList, jobject) {
 
     SET_OBJECT_FIELD(obj, managerListCls, managers, managersList);
 
-    LogDebug("getManagersList: count=%d", count);
+    LOGD("getManagersList: count=%d", count);
 
     if (cmd) {
         free(cmd);
     }
 
     return obj;
+}
+
+int fork_dont_care() {
+    int pid = fork();
+    if (pid < 0) {
+        PLOGE("fork");
+        return pid;
+    } else if (pid > 0) {
+        TEMP_FAILURE_RETRY(waitpid(pid, nullptr, 0));
+        return pid;
+    }
+    // child
+
+    pid = fork();
+    if (pid < 0) {
+        PLOGE("fork 2");
+        _exit(1);
+    } else if (pid > 0) {
+        _exit(0);
+    }
+
+    // grandchild
+    return 0;
+}
+
+JNIEXPORT void JNICALL
+Java_com_resukisu_resukisu_magica_AppZygotePreload_forkDontCareAndExecKsud(JNIEnv *env,
+                                                                           jclass clazz,
+                                                                           jstring ksud_path) {
+    const char *path = GetEnvironment()->GetStringUTFChars(env, ksud_path, nullptr);
+    LOGD("executing magica %s", path);
+    if (fork_dont_care() == 0) {
+        execl(path, "ksud", "late-load", "--magica", "5555", nullptr);
+        PLOGE("exec magica");
+        _exit(1);
+    }
+    GetEnvironment()->ReleaseStringUTFChars(env, ksud_path, path);
 }

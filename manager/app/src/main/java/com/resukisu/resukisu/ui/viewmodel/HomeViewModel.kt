@@ -25,6 +25,7 @@ import com.resukisu.resukisu.ui.util.getSuSFSStatus
 import com.resukisu.resukisu.ui.util.getSuSFSVersion
 import com.resukisu.resukisu.ui.util.getSuperuserCount
 import com.resukisu.resukisu.ui.util.getZygiskImplement
+import com.resukisu.resukisu.ui.util.isSELinuxPermissive
 import com.resukisu.resukisu.ui.util.module.LatestVersionInfo
 import com.resukisu.resukisu.ui.util.rootAvailable
 import kotlinx.coroutines.Dispatchers
@@ -43,7 +44,8 @@ class HomeViewModel : ViewModel() {
         val kernelVersion: KernelVersion = getKernelVersion(),
         val isRootAvailable: Boolean = false,
         val isKpmConfigured: Boolean = false,
-        val requireNewKernel: Boolean = false
+        val requireNewKernel: Boolean = false,
+        val isSELinuxPermissive: Boolean = false,
     )
 
     // 系统信息
@@ -184,6 +186,12 @@ class HomeViewModel : ViewModel() {
                     false
                 }
 
+                val isSELinuxPermissive = try {
+                    isSELinuxPermissive()
+                } catch (_: Exception) {
+                    false
+                }
+
                 systemStatus = SystemStatus(
                     isManager = isManager,
                     ksuVersion = ksuVersion,
@@ -192,7 +200,8 @@ class HomeViewModel : ViewModel() {
                     kernelVersion = kernelVersion,
                     isRootAvailable = isRootAvailable,
                     isKpmConfigured = isKpmConfigured,
-                    requireNewKernel = requireNewKernel
+                    requireNewKernel = requireNewKernel,
+                    isSELinuxPermissive = isSELinuxPermissive
                 )
 
                 isCoreDataLoaded = true

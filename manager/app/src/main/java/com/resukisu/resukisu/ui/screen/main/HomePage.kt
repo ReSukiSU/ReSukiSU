@@ -2,9 +2,11 @@ package com.resukisu.resukisu.ui.screen.main
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.PowerManager
 import android.system.Os
+import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
@@ -50,6 +52,8 @@ import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material.icons.twotone.Error
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -95,9 +99,11 @@ import com.resukisu.resukisu.KernelSUApplication
 import com.resukisu.resukisu.KernelVersion
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.magica.MagicaService
 import com.resukisu.resukisu.ui.component.KsuIsValid
 import com.resukisu.resukisu.ui.component.WarningCard
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
+import com.resukisu.resukisu.ui.component.rememberLoadingDialog
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.LabelText
@@ -116,6 +122,7 @@ import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -147,6 +154,8 @@ fun HomePage(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     val scrollState = rememberScrollState()
     val navigator = LocalNavigator.current
+    val loadingDialog = rememberLoadingDialog()
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -199,6 +208,23 @@ fun HomePage(
                         systemStatus = viewModel.systemStatus,
                         onClickInstall = {
                             navigator.push(Route.Install(preselectedKernelUri = null))
+                        },
+                        onClickJailbreak = {
+                            loadingDialog.showLoading()
+                            context.startService(Intent(context, MagicaService::class.java))
+                            // Manager will be force-stopped and restarted by late-load on success.
+                            // If that doesn't happen within timeout, jailbreak likely failed.
+                            scope.launch(Dispatchers.IO) {
+                                delay(30_000)
+                                withContext(Dispatchers.Main) {
+                                    loadingDialog.hide()
+                                    Toast.makeText(
+                                        context,
+                                        R.string.jailbreak_timeout,
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
                         }
                     )
 
@@ -431,7 +457,8 @@ private fun TopBar(
 @Composable
 private fun StatusCard(
     systemStatus: HomeViewModel.SystemStatus,
-    onClickInstall: () -> Unit = {}
+    onClickInstall: () -> Unit = {},
+    onClickJailbreak: () -> Unit = {}
 ) {
     ElevatedCard(
         colors = getCardColors(
@@ -546,7 +573,7 @@ private fun StatusCard(
                             ),
                     )
 
-                    Column(Modifier.padding(start = 20.dp)) {
+                    Column(Modifier.padding(start = 20.dp).weight(1f)) {
                         Text(
                             text = stringResource(R.string.home_not_installed),
                             style = MaterialTheme.typography.titleMedium,
@@ -559,6 +586,18 @@ private fun StatusCard(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onErrorContainer
                         )
+                    }
+
+                    if (systemStatus.isSELinuxPermissive) {
+                        Button(
+                            onClick = onClickJailbreak,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError
+                            )
+                        ) {
+                            Text(stringResource(R.string.home_jailbreak))
+                        }
                     }
                 }
 

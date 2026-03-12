@@ -7,6 +7,7 @@ mod init_event;
 mod kpm;
 mod ksucalls;
 mod late_load;
+mod magica;
 mod module;
 mod profile;
 mod restorecon;
