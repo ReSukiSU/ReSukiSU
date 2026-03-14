@@ -43,6 +43,18 @@ def get_caption():
         return COMMIT_URL
     return msg
 
+def get_caption_for_debug():
+    msg = MSG_TEMPLATE.format(
+        title=f"{TITLE} (Debug)",
+        branch=BRANCH,
+        version=VERSION,
+        commit_message=COMMIT_MESSAGE,
+        commit_url=COMMIT_URL,
+        run_url=RUN_URL,
+    )
+    if len(msg) > 1024:
+        return COMMIT_URL
+    return msg
 
 def check_environ():
     global CHAT_ID, MESSAGE_THREAD_ID
@@ -96,19 +108,26 @@ async def main():
     print("[+] Logging in Telegram with bot")
     bot = Bot(token=BOT_TOKEN)
     caption = get_caption()
-    upload_files = []
+    upload_release_files = []
+    upload_debug_files = []
     for index, file in enumerate(files):
+        if os.path.basename(file).find("debug") != -1:
+            # If the filename contains "debug", treat it as a debug file and add caption to it
+            upload_debug_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=get_caption_for_debug(), parse_mode=ParseMode.MARKDOWN_V2))
         if index == len(files) - 1:
             # Only add caption to the last file
-            upload_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=caption, parse_mode=ParseMode.MARKDOWN_V2))
+            upload_release_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=caption, parse_mode=ParseMode.MARKDOWN_V2))
             continue
-        upload_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file)))
+        upload_release_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file)))
     print("[+] Caption: ")
     print("---")
     print(caption)
     print("---")
     print("[+] Sending")
-    await bot.send_media_group(chat_id=CHAT_ID, media=upload_files, message_thread_id=MESSAGE_THREAD_ID, parse_mode=ParseMode.MARKDOWN_V2)
+    await bot.send_media_group(chat_id=CHAT_ID, media=upload_release_files, message_thread_id=MESSAGE_THREAD_ID)
+    print("[+] Release files uploaded, now uploading debug files (if any)")
+    if len(upload_debug_files) > 0:
+        await bot.send_media_group(chat_id=CHAT_ID, media=upload_debug_files, message_thread_id=MESSAGE_THREAD_ID)
     print("[+] Done!")
 
 if __name__ == "__main__":
