@@ -128,10 +128,11 @@ async def main():
     print(caption)
     print("---")
     print("[+] Sending")
-    await send_media_group(bot=bot, chat_id=CHAT_ID, media=upload_release_files, message_thread_id=MESSAGE_THREAD_ID)
-    print("[+] Release files uploaded, now uploading debug files (if any)")
     if len(upload_debug_files) > 0:
         await send_media_group(bot=bot, chat_id=CHAT_ID, media=upload_debug_files, message_thread_id=MESSAGE_THREAD_ID)
+    print("[+] Debug files uploaded,starting to upload release files")
+    if len(upload_release_files) > 0:
+        await send_media_group(bot=bot, chat_id=CHAT_ID, media=upload_release_files, message_thread_id=MESSAGE_THREAD_ID)
     print("[+] Done!")
 
 if __name__ == "__main__":
