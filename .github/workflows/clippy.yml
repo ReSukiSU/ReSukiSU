@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - run: |
-          rustup update stable
+          rustup update nightly
           rustup target install aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
       - uses: Swatinem/rust-cache@v2
         with:

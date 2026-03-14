@@ -47,7 +47,7 @@ jobs:
     - name: Setup Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        toolchain: stable
+        toolchain: nightly
         targets: ${{ inputs.target }}
         components: rust-src
         
@@ -63,7 +63,7 @@ jobs:
     - name: Build ksud
       run: |
         cd userspace/ksud/
-        cargo ndk b -t ${{ inputs.target }} -r
+        cargo ndk b -t ${{ inputs.target }} -r -Z build-std=std,core,panic_abort -Z build-std-features="optimize_for_size" -Z trim-paths
 
     - name: Upload ksud artifact
       uses: actions/upload-artifact@v7
