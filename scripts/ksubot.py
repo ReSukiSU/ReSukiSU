@@ -12,8 +12,8 @@ API_HASH = "d524b414d21f4d37f08684c1df41ac9c"
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHAT_ID = os.environ.get("CHAT_ID")
 MESSAGE_THREAD_ID = os.environ.get("MESSAGE_THREAD_ID")
-COMMIT_URL = os.environ.get("COMMIT_URL")
-COMMIT_MESSAGE = os.environ.get("COMMIT_MESSAGE")
+COMMIT_URL = os.environ.get("COMMIT_URL",f"{os.environ.get('GITHUB_SERVER_URL')}/{os.environ.get('GITHUB_REPOSITORY')}/commit/{os.environ.get('GITHUB_SHA')}")
+COMMIT_MESSAGE = os.environ.get("COMMIT_MESSAGE",f"{os.environ.get('GITHUB_EVENT_NAME')} by {os.environ.get('GITHUB_ACTOR')}")
 RUN_URL = os.environ.get("RUN_URL")
 TITLE = os.environ.get("TITLE")
 VERSION = os.environ.get("VERSION")
@@ -65,12 +65,10 @@ def check_environ():
             CHAT_ID = int(CHAT_ID)
         except:
             pass
-    if COMMIT_URL is None:
-        print("[-] Invalid COMMIT_URL")
-        exit(1)
-    if COMMIT_MESSAGE is None:
-        print("[-] Invalid COMMIT_MESSAGE")
-        exit(1)
+    if COMMIT_URL is None or COMMIT_URL == "":
+        COMMIT_URL = f"{os.environ.get('GITHUB_SERVER_URL')}/{os.environ.get('GITHUB_REPOSITORY')}/commit/{os.environ.get('GITHUB_SHA')}"
+    if COMMIT_MESSAGE is None or COMMIT_MESSAGE == "":
+        COMMIT_MESSAGE = f"{os.environ.get('GITHUB_EVENT_NAME')} by {os.environ.get('GITHUB_ACTOR')}"
     if RUN_URL is None:
         print("[-] Invalid RUN_URL")
         exit(1)
