@@ -114,6 +114,7 @@ async def main():
         if os.path.basename(file).find("debug") != -1:
             # If the filename contains "debug", treat it as a debug file and add caption to it
             upload_debug_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=get_caption_for_debug(), parse_mode=ParseMode.MARKDOWN_V2))
+            continue
         if index == len(files) - 1:
             # Only add caption to the last file
             upload_release_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=caption, parse_mode=ParseMode.MARKDOWN_V2))
