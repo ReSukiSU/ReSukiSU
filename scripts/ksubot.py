@@ -95,11 +95,14 @@ async def main():
         exit(1)
     print("[+] Logging in Telegram with bot")
     bot = Bot(token=BOT_TOKEN)
+    caption = get_caption()
     upload_files = []
     for index, file in enumerate(files):
+        if index == len(files) - 1:
+            # Only add caption to the last file
+            upload_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=caption, parse_mode=ParseMode.MARKDOWN_V2))
+            continue
         upload_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file)))
-    caption = get_caption()
-    upload_files[-1].caption = caption
     print("[+] Caption: ")
     print("---")
     print(caption)
