@@ -54,6 +54,7 @@ def get_caption_for_debug():
 
 def check_environ():
     global CHAT_ID, MESSAGE_THREAD_ID
+    global COMMIT_URL, COMMIT_MESSAGE
     if BOT_TOKEN is None:
         print("[-] Invalid BOT_TOKEN")
         exit(1)
