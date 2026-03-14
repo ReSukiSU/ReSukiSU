@@ -45,7 +45,7 @@ def get_caption():
 
 def get_caption_for_debug():
     msg = MSG_TEMPLATE.format(
-        title=f"{TITLE} (Debug)",
+        title=f"{TITLE}-Debug",
         branch=BRANCH,
         version=VERSION,
         commit_message=COMMIT_MESSAGE,
@@ -113,11 +113,11 @@ async def main():
     for index, file in enumerate(files):
         if os.path.basename(file).find("debug") != -1:
             # If the filename contains "debug", treat it as a debug file and add caption to it
-            upload_debug_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=get_caption_for_debug(), parse_mode=ParseMode.MARKDOWN_V2))
+            upload_debug_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=get_caption_for_debug(), parse_mode=ParseMode.MARKDOWN))
             continue
         if index == len(files) - 1:
             # Only add caption to the last file
-            upload_release_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=caption, parse_mode=ParseMode.MARKDOWN_V2))
+            upload_release_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=caption, parse_mode=ParseMode.MARKDOWN))
             continue
         upload_release_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file)))
     print("[+] Caption: ")
