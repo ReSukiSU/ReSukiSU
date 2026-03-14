@@ -213,14 +213,6 @@ jobs:
           name: ${{ steps.determine.outputs.title }}-release
           path: .
 
-      - name: Bot session cache
-        if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true'
-        id: bot_session_cache
-        uses: actions/cache@v5
-        with:
-          path: scripts/ksubot.session
-          key: ${{ runner.os }}-bot-session
-
       - name: Upload to Telegram
         if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true' && steps.determine.outputs.SKIP != 'true'
         env:
