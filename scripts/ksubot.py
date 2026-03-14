@@ -19,14 +19,14 @@ TITLE = os.environ.get("TITLE")
 VERSION = os.environ.get("VERSION")
 BRANCH = os.environ.get("BRANCH")
 MSG_TEMPLATE = """
-**{title}**
+<b>{title}</b>
 Branch: {branch}
 #ci_{version}
-```
+<pre>
 {commit_message}
-```
-[Commit]({commit_url})
-[Workflow run]({run_url})
+</pre>
+<a href="{commit_url}">Commit</a>
+<a href="{run_url}">Workflow run</a>
 """.strip()
 
 
@@ -113,11 +113,11 @@ async def main():
     for index, file in enumerate(files):
         if os.path.basename(file).find("debug") != -1:
             # If the filename contains "debug", treat it as a debug file and add caption to it
-            upload_debug_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=get_caption_for_debug(), parse_mode=ParseMode.MARKDOWN))
+            upload_debug_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=get_caption_for_debug(), parse_mode=ParseMode.HTML))
             continue
-        if index == len(files) - 1:
+        elif index == len(files) - 1:
             # Only add caption to the last file
-            upload_release_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=caption, parse_mode=ParseMode.MARKDOWN))
+            upload_release_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=caption, parse_mode=ParseMode.HTML))
             continue
         upload_release_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file)))
     print("[+] Caption: ")
