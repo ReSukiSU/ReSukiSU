@@ -1,8 +1,9 @@
 import asyncio
 import os
 import sys
-from telethon import TelegramClient
-from telethon.sessions import StringSession
+from telegram import Bot,InputMediaDocument
+from telegram.constants import ParseMode
+from telegram.error import BadRequest
 
 API_ID = 611335
 API_HASH = "d524b414d21f4d37f08684c1df41ac9c"
@@ -93,16 +94,19 @@ async def main():
         print("[-] No files to upload")
         exit(1)
     print("[+] Logging in Telegram with bot")
-    async with await TelegramClient(StringSession(), API_ID, API_HASH).start(bot_token=BOT_TOKEN) as bot:
-        caption = [""] * len(files)
-        caption[-1] = get_caption()
-        print("[+] Caption: ")
-        print("---")
-        print(caption)
-        print("---")
-        print("[+] Sending")
-        await bot.send_file(entity=CHAT_ID, file=files, caption=caption, reply_to=MESSAGE_THREAD_ID, parse_mode="markdown")
-        print("[+] Done!")
+    bot = Bot(token=BOT_TOKEN)
+    upload_files = []
+    for index, file in enumerate(files):
+        upload_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file)))
+    caption = get_caption()
+    upload_files[-1].caption = caption
+    print("[+] Caption: ")
+    print("---")
+    print(caption)
+    print("---")
+    print("[+] Sending")
+    await bot.send_media_group(chat_id=CHAT_ID, media=upload_files, message_thread_id=MESSAGE_THREAD_ID, parse_mode=ParseMode.MARKDOWN_V2)
+    print("[+] Done!")
 
 if __name__ == "__main__":
     try:

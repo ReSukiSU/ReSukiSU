@@ -231,7 +231,7 @@ jobs:
           TITLE: ${{ steps.determine.outputs.title }}
           BRANCH: ${{ github.ref_name }}
         run: |
-          pip3 install telethon
+          pip3 install python-telegram-bot
           export VERSION=$(git rev-list --count HEAD)
           APK_DEBUG=apk/debug/*.apk
           APK_RELEASE=apk/release/*.apk
