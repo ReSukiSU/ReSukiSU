@@ -11,6 +11,7 @@ on:
       - 'manager/**'
       - 'kernel/**'
       - 'userspace/**'
+      - 'scripts/ksubot.py'
   pull_request:
     branches: [ "main", "dev", "miuix" , "new-manager" ]
     paths:
@@ -20,6 +21,7 @@ on:
       - 'manager/**'
       - 'kernel/**'
       - 'userspace/**'
+      - 'scripts/ksubot.py'
   workflow_call:
 
 jobs:

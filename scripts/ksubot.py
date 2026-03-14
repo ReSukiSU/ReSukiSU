@@ -96,6 +96,9 @@ def check_environ():
     else:
         MESSAGE_THREAD_ID = None
 
+async def send_media_group(bot: Bot, chat_id: int, media: list, message_thread_id=None):
+    return await bot.send_media_group(chat_id=chat_id, media=media, message_thread_id=message_thread_id,
+                                   read_timeout=350,write_timeout=350,connect_timeout=350,pool_timeout=350)
 
 async def main():
     print("[+] Uploading to telegram")
@@ -125,10 +128,10 @@ async def main():
     print(caption)
     print("---")
     print("[+] Sending")
-    await bot.send_media_group(chat_id=CHAT_ID, media=upload_release_files, message_thread_id=MESSAGE_THREAD_ID)
+    await send_media_group(bot=bot, chat_id=CHAT_ID, media=upload_release_files, message_thread_id=MESSAGE_THREAD_ID)
     print("[+] Release files uploaded, now uploading debug files (if any)")
     if len(upload_debug_files) > 0:
-        await bot.send_media_group(chat_id=CHAT_ID, media=upload_debug_files, message_thread_id=MESSAGE_THREAD_ID)
+        await send_media_group(bot=bot, chat_id=CHAT_ID, media=upload_debug_files, message_thread_id=MESSAGE_THREAD_ID)
     print("[+] Done!")
 
 if __name__ == "__main__":
