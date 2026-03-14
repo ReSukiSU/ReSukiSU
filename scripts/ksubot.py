@@ -39,8 +39,6 @@ def get_caption():
         commit_url=COMMIT_URL,
         run_url=RUN_URL,
     )
-    if len(msg) > 1024:
-        return COMMIT_URL
     return msg
 
 def get_caption_for_debug():
@@ -52,8 +50,6 @@ def get_caption_for_debug():
         commit_url=COMMIT_URL,
         run_url=RUN_URL,
     )
-    if len(msg) > 1024:
-        return COMMIT_URL
     return msg
 
 def check_environ():
@@ -109,25 +105,34 @@ async def main():
         print("[-] No files to upload")
         exit(1)
     print("[+] Logging in Telegram with bot")
+    no_caption=False
     bot = Bot(token=BOT_TOKEN)
     caption = get_caption()
+    caption_debug = get_caption_for_debug()
+    if len(caption) > 1024 or len(caption_debug) > 1024:
+        print("[-] Caption is too long,so it will be sent as a separate message without caption for files")
+        no_caption = True
     upload_release_files = []
     upload_debug_files = []
+
     for index, file in enumerate(files):
         if os.path.basename(file).find("debug") != -1:
             # If the filename contains "debug", treat it as a debug file and add caption to it
-            upload_debug_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=get_caption_for_debug(), parse_mode=ParseMode.HTML))
+            upload_debug_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=f"{caption_debug if not no_caption else '<b>DEBUG Manager</b>'}", parse_mode=ParseMode.HTML))
             continue
         elif index == len(files) - 1:
             # Only add caption to the last file
-            upload_release_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=caption, parse_mode=ParseMode.HTML))
+            upload_release_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=f"{caption if not no_caption else '<b>Release Manager</b>'}", parse_mode=ParseMode.HTML))
             continue
         upload_release_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file)))
+
     print("[+] Caption: ")
     print("---")
     print(caption)
     print("---")
     print("[+] Sending")
+    if no_caption:
+        await bot.send_message(chat_id=CHAT_ID, text=caption, parse_mode=ParseMode.HTML, message_thread_id=MESSAGE_THREAD_ID)
     if len(upload_debug_files) > 0:
         await send_media_group(bot=bot, chat_id=CHAT_ID, media=upload_debug_files, message_thread_id=MESSAGE_THREAD_ID)
     print("[+] Debug files uploaded,starting to upload release files")
