@@ -1,18 +1,63 @@
 import asyncio
-import os
-import sys
+import os,re
+import sys,json
 from telegram import Bot,InputMediaDocument
 from telegram.constants import ParseMode
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHAT_ID = os.environ.get("CHAT_ID")
 MESSAGE_THREAD_ID = os.environ.get("MESSAGE_THREAD_ID")
-COMMIT_URL = os.environ.get("COMMIT_URL",f"{os.environ.get('GITHUB_SERVER_URL')}/{os.environ.get('GITHUB_REPOSITORY')}/commit/{os.environ.get('GITHUB_SHA')}")
-COMMIT_MESSAGE = os.environ.get("COMMIT_MESSAGE",f"{os.environ.get('GITHUB_EVENT_NAME')} by {os.environ.get('GITHUB_ACTOR')}")
 RUN_URL = os.environ.get("RUN_URL")
 TITLE = os.environ.get("TITLE")
 VERSION = os.environ.get("VERSION")
 BRANCH = os.environ.get("BRANCH")
+
+GITHUB_EVENT = json.loads(os.environ.get("GITHUB_EVENT"))
+
+commit_message = ''
+commit_line = ''
+try:
+    if 'commits' in GITHUB_EVENT:
+        commits = GITHUB_EVENT['commits']
+        commit_message = ''
+        i = len(commits)
+        for commit in commits[::-1]:
+            msg_line = commit['message'].split('\n')
+            msg = msg_line[0].strip()
+            if len(msg_line) > 1:
+                msg += ' [..]'
+            if len(msg) > 100:
+                msg = msg[:97] + '...'
+            msg += ' by ' + commit['author']['username']
+            if len(msg) + 1 + len(commit_message) > 3192:
+                commit_message = f'(other {i} commits)\n{commit_message}'
+                break
+            else:
+                commit_message = f'{msg}\n{commit_message}'
+            i -= 1
+        commit_message = f'<pre>{commit_message.strip()}\n</pre>'
+        last_commit = commits[-1]
+
+    elif 'head_commit' in GITHUB_EVENT:
+        msg = GITHUB_EVENT["head_commt"]["msg"]
+        if len(msg) > 3192:
+            msg = msg[:3189] + '...'
+        commit_message = f'\n{msg.strip()}\n'
+    else:
+        commit_message = ''
+except:
+    from traceback import print_exc
+    print_exc()
+
+if 'compare' in GITHUB_EVENT:
+    commit_url = GITHUB_EVENT['compare']
+    commit_line = '<a href="' + commit_url + '">Compare</a>\n'
+elif 'head_commit' in GITHUB_EVENT:
+    commit_url = GITHUB_EVENT['head_commit']['url']
+    commit_line = '<a href="' + commit_url + '">Commit</a>\n'
+else:
+    commit_line = ''
+
 MSG_TEMPLATE = """
 <b>{title}</b>
 Branch: {branch}
@@ -20,18 +65,17 @@ Branch: {branch}
 <pre>
 {commit_message}
 </pre>
-<a href="{commit_url}">Commit</a>
+{commit_line}
 <a href="{run_url}">Workflow run</a>
 """.strip()
-
 
 def get_caption():
     msg = MSG_TEMPLATE.format(
         title=TITLE,
         branch=BRANCH,
         version=VERSION,
-        commit_message=COMMIT_MESSAGE,
-        commit_url=COMMIT_URL,
+        commit_message=commit_message,
+        commit_line=commit_line,
         run_url=RUN_URL,
     )
     return msg
@@ -61,10 +105,6 @@ def check_environ():
             CHAT_ID = int(CHAT_ID)
         except:
             pass
-    if COMMIT_URL is None or COMMIT_URL == "":
-        COMMIT_URL = f"{os.environ.get('GITHUB_SERVER_URL')}/{os.environ.get('GITHUB_REPOSITORY')}/commit/{os.environ.get('GITHUB_SHA')}"
-    if COMMIT_MESSAGE is None or COMMIT_MESSAGE == "":
-        COMMIT_MESSAGE = f"{os.environ.get('GITHUB_EVENT_NAME')} by {os.environ.get('GITHUB_ACTOR')}"
     if RUN_URL is None:
         print("[-] Invalid RUN_URL")
         exit(1)
