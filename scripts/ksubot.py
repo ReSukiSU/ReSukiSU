@@ -81,8 +81,8 @@ def get_caption_for_debug():
         title=f"{TITLE}-Debug",
         branch=BRANCH,
         version=VERSION,
-        commit_message=COMMIT_MESSAGE,
-        commit_url=COMMIT_URL,
+        commit_message=commit_message,
+        commit_line=commit_line,
         run_url=RUN_URL,
     )
     return msg
