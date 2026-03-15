@@ -25,11 +25,9 @@ A based-on [`SukiSU-Ultra/SukiSU-Ultra`](https://github.com/SukiSU-Ultra/SukiSU-
 
 - ReSukiSU officially supports Android GKI 2.0 devices (kernel 5.10+).
 
-- Older kernels (4.4+) are also compatible, but the kernel will have to be built manually.
+- Older kernels (3.4+) are also compatible, but the kernel will have to be built manually.
 
-- With more backports, SukiSU can support 3.x kernel (3.4-3.18).
-
-- Currently, only `arm64-v8a`, `armeabi-v7a (bare)` and `X86_64`(some) are supported.
+- Currently, only `arm64-v8a`, `armeabi-v7a` and `X86_64`(some) are supported.
 
 ## Integration
 
