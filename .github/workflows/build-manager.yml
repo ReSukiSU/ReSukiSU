@@ -11,6 +11,7 @@ on:
       - 'manager/**'
       - 'kernel/**'
       - 'userspace/**'
+      - 'scripts/ksubot.py'
   pull_request:
     branches: [ "main", "dev", "miuix" , "new-manager" ]
     paths:
@@ -20,6 +21,7 @@ on:
       - 'manager/**'
       - 'kernel/**'
       - 'userspace/**'
+      - 'scripts/ksubot.py'
   workflow_call:
 
 jobs:
@@ -211,27 +213,17 @@ jobs:
           name: ${{ steps.determine.outputs.title }}-release
           path: .
 
-      - name: Bot session cache
-        if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true'
-        id: bot_session_cache
-        uses: actions/cache@v5
-        with:
-          path: scripts/ksubot.session
-          key: ${{ runner.os }}-bot-session
-
       - name: Upload to Telegram
         if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true' && steps.determine.outputs.SKIP != 'true'
         env:
           CHAT_ID: ${{ vars.CHAT_ID }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           MESSAGE_THREAD_ID: ${{ steps.determine.outputs.topicid }}
-          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-          COMMIT_URL: ${{ github.event.head_commit.url }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           TITLE: ${{ steps.determine.outputs.title }}
           BRANCH: ${{ github.ref_name }}
         run: |
-          pip3 install telethon
+          pip3 install python-telegram-bot
           export VERSION=$(git rev-list --count HEAD)
           APK_DEBUG=apk/debug/*.apk
           APK_RELEASE=apk/release/*.apk
