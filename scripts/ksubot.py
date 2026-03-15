@@ -12,7 +12,7 @@ TITLE = os.environ.get("TITLE")
 VERSION = os.environ.get("VERSION")
 BRANCH = os.environ.get("BRANCH")
 
-GITHUB_EVENT = json.loads(os.environ.get("GITHUB_EVENT"))
+GITHUB_EVENT = json.loads(open(os.environ.get("GITHUB_EVENT_PATH"), "r").read())
 
 commit_message = ''
 commit_line = ''
