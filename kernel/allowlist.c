@@ -1,5 +1,7 @@
 #include <linux/mutex.h>
+#ifdef KSU_TP_HOOK
 #include <linux/task_work.h>
+#endif
 #include <linux/capability.h>
 #include <linux/compiler.h>
 #include <linux/fs.h>
@@ -391,8 +393,7 @@ bool ksu_get_allow_list(int *array, u16 length, u16 *out_length, u16 *out_total,
     return true;
 }
 
-// TODO: move to kernel thread or work queue
-static void do_persistent_allow_list(struct callback_head *_cb)
+static void persistent_allow_list()
 {
     u32 magic = FILE_MAGIC;
     u32 version = FILE_FORMAT_VERSION;
@@ -405,20 +406,20 @@ static void do_persistent_allow_list(struct callback_head *_cb)
                               0644);
     if (IS_ERR(fp)) {
         pr_err("save_allow_list create file failed: %ld\n", PTR_ERR(fp));
-        goto out;
+        return;
     }
 
     // store magic and version
     if (ksu_kernel_write_compat(fp, &magic, sizeof(magic), &off) !=
         sizeof(magic)) {
         pr_err("save_allow_list write magic failed.\n");
-        goto close_file;
+        goto out;
     }
 
     if (ksu_kernel_write_compat(fp, &version, sizeof(version), &off) !=
         sizeof(version)) {
         pr_err("save_allow_list write version failed.\n");
-        goto close_file;
+        goto out;
     }
 
     mutex_lock(&allowlist_mutex);
@@ -430,15 +431,23 @@ static void do_persistent_allow_list(struct callback_head *_cb)
     }
     mutex_unlock(&allowlist_mutex);
 
-close_file:
-    filp_close(fp, 0);
 out:
     revert_creds(saved);
+    filp_close(fp, 0);
+}
+
+#ifdef KSU_TP_HOOK
+// TODO: move to kernel thread or work queue
+static void do_persistent_allow_list(struct callback_head *_cb)
+{
+    persistent_allow_list();
     kfree(_cb);
 }
+#endif
 
 void ksu_persistent_allow_list(void)
 {
+#ifdef KSU_TP_HOOK
     struct task_struct *tsk;
     struct callback_head *cb;
 
@@ -458,6 +467,9 @@ void ksu_persistent_allow_list(void)
 
 put_task:
     put_task_struct(tsk);
+#else
+    persistent_allow_list();
+#endif
 }
 
 void ksu_load_allow_list(void)

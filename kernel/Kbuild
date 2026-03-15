@@ -6,14 +6,7 @@ kernelsu-objs += apk_sign.o
 kernelsu-objs += sucompat.o
 
 kernelsu-objs += throne_tracker.o
-kernelsu-objs += pkg_observer.o
 kernelsu-objs += setuid_hook.o
-
-ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
-ifeq ($(shell test $(VERSION) -lt 6 || { test $(VERSION) -eq 6 && test $(PATCHLEVEL) -lt 8; } && echo y),y)
-kernelsu-objs += lsm_hooks.o
-endif
-endif
 
 kernelsu-objs += kernel_compat.o
 kernelsu-objs += kernel_umount.o
@@ -31,17 +24,20 @@ kernelsu-objs += selinux/selinux.o
 kernelsu-objs += selinux/sepolicy.o
 kernelsu-objs += selinux/rules.o
 
+ifeq ($(CONFIG_KPM), y)
+kernelsu-objs += kpm/kpm.o
+kernelsu-objs += kpm/compact.o
+kernelsu-objs += kpm/super_access.o
+endif
+
 ccflags-y += -Wno-implicit-function-declaration -Wno-strict-prototypes 
 ccflags-y += $(call cc-disable-warning, int-conversion)
 ccflags-y += -Wno-declaration-after-statement -Wno-unused-function -Wno-unused-variable -Wno-missing-braces
 ccflags-y += -Wno-int-to-pointer-cast -Wno-declaration-after-statement
 
 ccflags-y += -I$(srctree)/security/selinux -I$(srctree)/security/selinux/include
-ccflags-y += -I$(objtree)/security/selinux -include $(srctree)/include/uapi/asm-generic/errno.h
 
 obj-$(CONFIG_KSU) += kernelsu.o
-
-obj-$(CONFIG_KPM) += kpm/
 
 REPO_NAME := ReSukiSU
 
@@ -125,8 +121,23 @@ $(info -- KPM is disabled)
 endif
 
 ifeq ($(KSU_TP_HOOK), y)
+kernelsu-objs += pkg_observer.o
 kernelsu-objs += syscall_hook_manager.o
 kernelsu-objs += util.o
+else
+# For old kernel, pkg observer maybe let system freeze
+# https://github.com/ReSukiSU/ReSukiSU/issues/82#issuecomment-4015396974
+#
+# 4.2- we let user manual hook security.c to call ksu_handle_rename
+# 4.2-6.7 we use lsm_hooks to call ksu_handle_rename
+# 6.8+ we use pkg_observer to track_throne
+ifeq ($(shell test \( $(VERSION) -gt 4 -o \( $(VERSION) -eq 4 -a $(PATCHLEVEL) -ge 2 \) \) && echo y),y)
+    ifeq ($(shell test \( $(VERSION) -lt 6 -o \( $(VERSION) -eq 6 -a $(PATCHLEVEL) -lt 8 \) \) && echo y),y)
+        kernelsu-objs += lsm_hooks.o
+    else
+        kernelsu-objs += pkg_observer.o
+    endif
+endif
 endif
 
 # SELinux drivers check
@@ -153,11 +164,6 @@ endif
 ifeq ($(shell grep "ssize_t kernel_write" $(srctree)/fs/read_write.c | grep -q "const void" ; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: kernel_write found)
 ccflags-y += -DKSU_OPTIONAL_KERNEL_WRITE
-endif
-
-ifeq ($(shell grep -q "int\s\+path_mount" $(srctree)/fs/namespace.c; echo $$?),0)
-$(info -- $(REPO_NAME)/compat: path_mount found)
-ccflags-y += -DKSU_HAS_PATH_MOUNT
 endif
 
 ifeq ($(shell grep -q "int\s\+path_umount" $(srctree)/fs/namespace.c; echo $$?),0)
@@ -224,13 +230,6 @@ $(info -- $(REPO_NAME)/compat: proc_ops found)
 ccflags-y += -DKSU_COMPAT_HAS_PROC_OPS
 endif
 
-# Bitmap zalloc
-# https://github.com/torvalds/linux/commit/c42b65e363ce97a828f81b59033c3558f8fa7f70
-ifeq ($(shell grep -q "bitmap_zalloc" $(srctree)/include/linux/bitmap.h; echo $$?),0)
-$(info -- $(REPO_NAME)/compat: bitmap_zalloc found)
-ccflags-y += -DKSU_COMPAT_HAS_BITMAP_ALLOC_HELPER
-endif
-
 # policy mutex
 # kernel 5.10+
 ifeq ($(shell grep -q "policy_mutex" $(srctree)/security/selinux/include/security.h; echo $$?),0)
@@ -243,6 +242,100 @@ endif
 ifeq ($(shell grep -q "^DEFINE_RWLOCK(policy_rwlock);" $(srctree)/security/selinux/ss/services.c; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: exported policy_rwlock found!)
 ccflags-y += -DKSU_COMPAT_HAS_EXPORTED_POLICY_RWLOCK
+endif
+
+# Function ns_get_path check
+# for kernel 3.19-
+ifeq ($(shell grep -q "ns_get_path" $(srctree)/fs/nsfs.c; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: ns_get_path found)
+ccflags-y += -DKSU_COMPAT_HAS_NS_GET_PATH
+endif
+
+# Modern dentry_open check
+# add . to skip (, avoid build failed
+# for kernel 3.6-
+ifeq ($(shell grep -q "dentry_open.const struct path" $(srctree)/include/linux/fs.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: modern dentry_open found)
+ccflags-y += -DKSU_COMPAT_HAS_MODERN_DENTRY_OPEN
+endif
+
+# UL, look for "ext4_unregister_sysfs" on fs/ext4
+ifeq ($(shell grep -q "^extern void ext4_unregister_sysfs" $(srctree)/fs/ext4/ext4.h 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: ext4_unregister_sysfs found)
+ccflags-y += -DKSU_HAS_MODERN_EXT4
+endif
+
+# UL, look for read_iter on f_op struct
+ifeq ($(shell grep -q "read_iter" $(srctree)/include/linux/fs.h 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: f_op->read_iter found)
+ccflags-y += -DKSU_HAS_FOP_READ_ITER
+endif
+
+# UL, look for iterate_dir on fs/readdir.c
+ifeq ($(shell grep -q "^int iterate_dir" $(srctree)/fs/readdir.c 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: iterate_dir found)
+ccflags-y += -DKSU_HAS_ITERATE_DIR
+endif
+
+# UL, look for modern alloc_uid on include/linux/sched.h
+ifeq ($(shell grep -q "alloc_uid.kuid_t" $(srctree)/include/linux/sched.c 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: modern alloc_Uid found)
+ccflags-y += -DKSU_HAS_MODERN_ALLOC_UID
+endif
+
+# The FUCKING Sulog logic require that
+# it need the whole rewrite
+# Introduce in linux kernel 4.8
+ifeq ($(shell grep -q "time64_to_tm" $(srctree)/include/linux/time.h 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: time64_to_tm found)
+ccflags-y += -DKSU_HAS_TIME64
+endif
+
+ifeq ($(shell grep -q "ktime_get_ns" $(srctree)/include/linux/timekeeping.h 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: ktime_get_ns found)
+ccflags-y += -DKSU_HAS_TIME_HELPER
+endif
+
+ifeq ($(shell grep -q "get_cmdline" $(srctree)/mm/util.c 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: get_cmdline found)
+ccflags-y += -DKSU_HAS_GET_CMDLINE
+endif
+
+# https://github.com/torvalds/linux/commit/5955102c9984fa081b2d570cfac75c97eecf8f3b
+# for setuid_hooks only
+# it will remove when we impl dynamic-manager feature init out of replaceable ksud
+ifeq ($(shell grep -q "inode_lock.struct inode" $(srctree)/include/linux/fs.h 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: inode_lock found)
+ccflags-y += -DKSU_HAS_INODE_LOCK_UNLOCK
+endif
+
+# for kernel version below 3.7, uapi/asm-generic/errno.h maybe not found
+ifneq ($(wildcard $(srctree)/include/uapi/asm-generic/errno.h),)
+$(info -- $(REPO_NAME)/compat: modern errno file found)
+ccflags-y += -I$(objtree)/security/selinux -include $(srctree)/include/uapi/asm-generic/errno.h
+else
+ccflags-y += -I$(objtree)/security/selinux -include $(srctree)/include/asm-generic/errno.h
+endif
+
+# for kernel version below 3.14, linux/proc_ns.h maybe not found
+# https://github.com/torvalds/linux/commit/0bb80f240520c4148b623161e7856858c021696d
+ifneq ($(wildcard $(srctree)/include/linux/proc_ns.h),)
+$(info -- $(REPO_NAME)/compat: modern proc ns header file found)
+ccflags-y += -DKSU_HAS_MODERN_PROC_NS
+endif
+
+# for kernel version below 3.8, fsnotify_destroy_mark may don't have fsnotify_group param
+# https://github.com/torvalds/linux/commit/e2a29943e9a2ee2aa737a77f550f46ba72269db4
+ifeq ($(shell grep -q "given a group and a mark" $(srctree)/include/linux/fsnotify_backend.h 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: modern fsnotify_destroy_mark found)
+ccflags-y += -DKSU_HAS_MODERN_FSNOTIFY_DESTROY_MARK
+endif
+
+# for kernel version below 4.0, d_inode may not found
+# https://github.com/torvalds/linux/commit/155e35d4daa804582f75acaa2c74ec797a89c615
+ifeq ($(shell grep -q "static inline struct inode..d_inode" $(srctree)/include/linux/dcache.h 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: d_inode found)
+ccflags-y += -DKSU_HAS_D_INODE
 endif
 
 # Custom Signs
@@ -279,13 +372,11 @@ ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
 
   ifeq ($(CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK), y)
     $(info -- $(REPO_NAME)/manual_hook: You are using LSM hooks for setuid hooks.)
-    ifeq ($(VERSION),6)
-      ifeq ($(shell test $(PATCHLEVEL) -ge 8 && echo y),y)
-        $(info -- You can't use LSM hooks for kernel version higher than 6.8)
+    ifeq ($(shell test \( \( $(VERSION) -gt 6 \) -o \( $(VERSION) -eq 6 -a $(PATCHLEVEL) -ge 8 \) \) -o \( \( $(VERSION) -lt 4 \) -o \( $(VERSION) -eq 4 -a $(PATCHLEVEL) -lt 2 \) \) && echo y),y)
+        $(info -- You can't use LSM hooks for kernel version >=6.8 or <4.2)
         $(info -- You should turn off CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK and hook setresuid manually)
         $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
-        $(error You can't use LSM hooks when kernel version >= 6.8)
-      endif
+        $(error You can't use LSM hooks when kernel version >= 6.8 or <4.2)
     endif
   else
     $(info -- $(REPO_NAME)/manual_hook: You are using a manual setresuid hook for setuid hooks.)
@@ -301,13 +392,11 @@ ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
 
   ifeq ($(CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK), y)
     $(info -- $(REPO_NAME)/manual_hook: You are using LSM hooks for init rc hooks.)
-    ifeq ($(VERSION),6)
-      ifeq ($(shell test $(PATCHLEVEL) -ge 8 && echo y),y)
-        $(info -- You can't use LSM hooks for kernel version higher than 6.8)
+    ifeq ($(shell test \( \( $(VERSION) -gt 6 \) -o \( $(VERSION) -eq 6 -a $(PATCHLEVEL) -ge 8 \) \) -o \( \( $(VERSION) -lt 4 \) -o \( $(VERSION) -eq 4 -a $(PATCHLEVEL) -lt 2 \) \) && echo y),y)
+        $(info -- You can't use LSM hooks for kernel version >=6.8 or <4.2)
         $(info -- You should turn off CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK and hook sys_read manually.)
         $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
-        $(error You can't use LSM hooks when kernel version >= 6.8)
-      endif
+        $(error You can't use LSM hooks when kernel version >= 6.8 or <4.2)
     endif
   else
     $(info -- $(REPO_NAME)/manual_hook: You are using a manual sys_read hook for init rc hooks.)
@@ -348,9 +437,21 @@ ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
   ifeq ($(shell grep -q "ksu_handle_execveat" $(srctree)/fs/exec.c; echo $$?),0)
     $(info -- $(REPO_NAME)/manual_hook: ksu_handle_execveat found)
   else
-    $(info -- You lost ksu_handle_execveat hook in your kernel)
-    $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
-    $(error You should integrate $(REPO_NAME) in your kernel.)
+    ifeq ($(shell test \( $(VERSION) -lt 3 -o \( $(VERSION) -eq 3 -a $(PATCHLEVEL) -le 14 \) \) && echo y),y)
+      # https://github.com/torvalds/linux/commit/c4ad8f98bef77c7356aa6a9ad9188a6acc6b849d
+      # when 3.14-, we should use ksu_handle_execve 
+      ifeq ($(shell grep -q "ksu_handle_execve" $(srctree)/fs/exec.c; echo $$?),0)
+        $(info -- $(REPO_NAME)/manual_hook: ksu_handle_execve found)
+      else
+        $(info -- You lost ksu_handle_execve hook in your kernel)
+        $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
+        $(error You should integrate $(REPO_NAME) in your kernel.)
+      endif
+    else
+      $(info -- You lost ksu_handle_execveat hook in your kernel)
+      $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
+      $(error You should integrate $(REPO_NAME) in your kernel.)
+    endif
   endif
 
   ifeq ($(shell grep -q "ksu_handle_faccessat" $(srctree)/fs/open.c; echo $$?),0)
@@ -388,9 +489,39 @@ ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
   ifeq ($(shell grep -q "ksu_handle_sys_reboot" $(srctree)/kernel/reboot.c; echo $$?),0)
     $(info -- $(REPO_NAME)/manual_hook: ksu_handle_sys_reboot found)
   else
-    $(info -- You lost ksu_handle_sys_reboot hook in your kernel)
-    $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
-    $(error You should integrate $(REPO_NAME) in your kernel.)
+    ifeq ($(shell test \( $(VERSION) -lt 3 -o \( $(VERSION) -eq 3 -a $(PATCHLEVEL) -le 11 \) \) && echo y),y)
+      # https://github.com/torvalds/linux/commit/15d94b82565ebfb0cf27830b96e6cf5ed2d12a9a
+      # when 3.11-, it maybe in kernel/sys.c
+      ifeq ($(shell grep -q "ksu_handle_sys_reboot" $(srctree)/kernel/sys.c; echo $$?),0)
+        $(info -- $(REPO_NAME)/manual_hook: ksu_handle_sys_reboot found)
+      else
+        $(info -- You lost ksu_handle_sys_reboot hook in your kernel)
+        $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
+        $(error You should integrate $(REPO_NAME) in your kernel.)
+      endif
+    else
+      $(info -- You lost ksu_handle_sys_reboot hook in your kernel)
+      $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
+      $(error You should integrate $(REPO_NAME) in your kernel.)
+    endif
+  endif
+
+  ifeq ($(shell test \( $(VERSION) -lt 4 -o \( $(VERSION) -eq 4 -a $(PATCHLEVEL) -le 2 \) \) && echo y),y)
+    # 4.2-, check ksu_handle_rename manual hook
+    ifeq ($(shell grep -q "ksu_handle_rename" $(srctree)/security/security.c; echo $$?),0)
+      $(info -- $(REPO_NAME)/manual_hook: ksu_handle_rename found)
+    else
+      $(info -- You lost ksu_handle_rename hook in your kernel)
+      $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
+      $(error You should integrate $(REPO_NAME) in your kernel.)
+    endif
+  else
+    # 4.2+, user manual hook ksu_handle_rename will let track_throne scan twice
+    ifeq ($(shell grep -q "ksu_handle_rename" $(srctree)/security/security.c; echo $$?),0)
+      $(info -- ksu_handle_rename is incompatible hook)
+      $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
+      $(error You should integrate $(REPO_NAME) in your kernel correctly.)
+    endif
   endif
 endif
 
