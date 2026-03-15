@@ -181,11 +181,10 @@ int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user,
 
 // the call from execve_handler_pre does not provide correct values for __never_use_* arguments.
 // keep these arguments for consistency with manually patched code after execve_handler_pre is fixed.
-int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
+int ksu_handle_execveat_sucompat(int *fd, const char *filename,
                                  void *__never_use_argv, void *__never_use_envp,
                                  int *__never_use_flags)
 {
-    struct filename *filename;
     bool is_allowed =
         ksu_is_allow_uid_for_current(ksu_get_uid_t(current_uid()));
 
@@ -193,18 +192,10 @@ int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
         return 0;
     }
 
-    if (unlikely(!filename_ptr))
-        return 0;
-
     if (!is_allowed)
         return 0;
 
-    filename = *filename_ptr;
-    if (IS_ERR(filename)) {
-        return 0;
-    }
-
-    if (likely(memcmp(filename->name, su_path, sizeof(su_path))))
+    if (likely(memcmp(filename, su_path, sizeof(su_path))))
         return 0;
 
     ksu_sulog_report_syscall(ksu_get_uid_t(current_uid()), NULL, "execve",
@@ -213,7 +204,7 @@ int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
                                 is_allowed);
 
     pr_info("do_execveat_common su found\n");
-    memcpy((void *)filename->name, ksud_path, sizeof(ksud_path));
+    memcpy((void *)filename, ksud_path, sizeof(ksud_path));
 
     escape_with_root_profile();
 
@@ -221,28 +212,22 @@ int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
 }
 
 #if defined(CONFIG_KSU_SUSFS) || defined(CONFIG_KSU_MANUAL_HOOK)
-static inline void ksu_handle_execveat_init(struct filename **filename_ptr)
+static inline void ksu_handle_execveat_init(const char *name)
 {
-    struct filename *filename;
-    filename = *filename_ptr;
-    if (IS_ERR(filename)) {
-        return;
-    }
-
     if (current->pid != 1 && is_init(get_current_cred())) {
-        if (unlikely(strcmp(filename->name, KSUD_PATH) == 0)) {
+        if (unlikely(strcmp(name, KSUD_PATH) == 0)) {
             pr_info(
                 "hook_manager: escape to root for init executing ksud: %d\n",
                 current->pid);
             escape_to_root_for_init();
         }
 #ifdef CONFIG_KSU_SUSFS
-        else if (likely(strstr(filename->name, "/app_process") == NULL &&
-                        strstr(filename->name, "/adbd") == NULL) &&
+        else if (likely(strstr(name, "/app_process") == NULL &&
+                        strstr(name, "/adbd") == NULL) &&
                  !susfs_is_current_proc_umounted()) {
             pr_info(
                 "susfs: mark no sucompat checks for pid: '%d', exec: '%s'\n",
-                current->pid, filename->name);
+                current->pid, name);
             susfs_set_current_proc_umounted();
         }
 #endif
@@ -250,18 +235,32 @@ static inline void ksu_handle_execveat_init(struct filename **filename_ptr)
 }
 
 extern bool ksu_execveat_hook __read_mostly;
-int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv,
-                        void *envp, int *flags)
+
+int ksu_handle_execve(int *fd, const char *filename, void *argv, void *envp,
+                      int *flags)
 {
-    ksu_handle_execveat_init(filename_ptr);
+    ksu_handle_execveat_init(filename);
 
     if (unlikely(ksu_execveat_hook)) {
-        if (ksu_handle_execveat_ksud(fd, filename_ptr, argv, envp, flags)) {
+        if (ksu_handle_execveat_ksud(fd, filename, argv, envp, flags)) {
             return 0;
         }
     }
 
-    return ksu_handle_execveat_sucompat(fd, filename_ptr, argv, envp, flags);
+    return ksu_handle_execveat_sucompat(fd, filename, argv, envp, flags);
+}
+
+// old hook, link to ksu_handle_execve
+int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv,
+                        void *envp, int *flags)
+{
+    struct filename *filename;
+    filename = *filename_ptr;
+    if (IS_ERR(filename)) {
+        return 0;
+    }
+
+    return ksu_handle_execve(fd, filename->name, argv, envp, flags);
 }
 #endif
 
