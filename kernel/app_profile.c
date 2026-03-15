@@ -170,7 +170,12 @@ void escape_with_root_profile(void)
      * https://github.com/torvalds/linux/blob/v5.14/kernel/sys.c
      * https://github.com/torvalds/linux/blob/v5.14/kernel/cred.c
      */
+#if defined(KSU_HAS_MODERN_ALLOC_UID) ||                                       \
+    LINUX_VERSION_CODE >= KERNEL_VERSION(3, 5, 0)
     new_user = alloc_uid(cred->uid);
+#else
+    new_user = alloc_uid(current_user_ns(), cred->uid);
+#endif
     if (!new_user) {
         goto out_abort_creds;
     }
