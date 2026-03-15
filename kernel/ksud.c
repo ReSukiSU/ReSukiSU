@@ -270,12 +270,10 @@ static void ksu_initialize_selinux(void)
 }
 
 // IMPORTANT NOTE: the call from execve_handler_pre WON'T provided correct value for envp and flags in GKI version
-int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
+int ksu_handle_execveat_ksud(int *fd, const char *filename,
                              struct user_arg_ptr *argv,
                              struct user_arg_ptr *envp, int *flags)
 {
-    struct filename *filename;
-
     static const char app_process[] = "/system/bin/app_process";
     static bool first_zygote = true;
 
@@ -285,17 +283,9 @@ int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
     static const char old_system_init[] = "/init";
     static bool init_second_stage_executed = false;
 
-    if (!filename_ptr)
-        return 0;
-
-    filename = *filename_ptr;
-    if (IS_ERR(filename)) {
-        return 0;
-    }
-
-    if (unlikely(!memcmp(filename->name, system_bin_init,
-                         sizeof(system_bin_init) - 1) &&
-                 argv)) {
+    if (unlikely(
+            !memcmp(filename, system_bin_init, sizeof(system_bin_init) - 1) &&
+            argv)) {
         // /system/bin/init executed
         char buf[16];
         if (!init_second_stage_executed &&
@@ -304,7 +294,7 @@ int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
             ksu_initialize_selinux();
             init_second_stage_executed = true;
         }
-    } else if (unlikely(!memcmp(filename->name, old_system_init,
+    } else if (unlikely(!memcmp(filename, old_system_init,
                                 sizeof(old_system_init) - 1) &&
                         argv)) {
         // /init executed
@@ -354,10 +344,9 @@ int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
         }
     }
 
-    if (unlikely(
-            first_zygote &&
-            !memcmp(filename->name, app_process, sizeof(app_process) - 1) &&
-            argv)) {
+    if (unlikely(first_zygote &&
+                 !memcmp(filename, app_process, sizeof(app_process) - 1) &&
+                 argv)) {
         char buf[16];
         if (check_argv(*argv, 1, "-Xzygote", buf, sizeof(buf))) {
             pr_info("exec zygote, /data prepared, second_stage: %d\n",
@@ -851,7 +840,6 @@ static int sys_execve_handler_pre(struct kprobe *p, struct pt_regs *regs)
     const char __user *const __user *__argv =
         (const char __user *const __user *)PT_REGS_PARM2(real_regs);
     struct user_arg_ptr argv = { .ptr.native = __argv };
-    struct filename filename_in, *filename_p;
     char path[32];
     long ret;
     unsigned long addr;
@@ -874,10 +862,7 @@ static int sys_execve_handler_pre(struct kprobe *p, struct pt_regs *regs)
         pr_err("Access filename failed for execve_handler_pre\n");
         return 0;
     }
-    filename_in.name = path;
-
-    filename_p = &filename_in;
-    return ksu_handle_execveat_ksud(&fd, &filename_p, &argv, NULL, NULL);
+    return ksu_handle_execveat_ksud(&fd, path, &argv, NULL, NULL);
 }
 
 static int sys_read_handler_pre(struct kprobe *p, struct pt_regs *regs)
