@@ -219,8 +219,6 @@ jobs:
           CHAT_ID: ${{ vars.CHAT_ID }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           MESSAGE_THREAD_ID: ${{ steps.determine.outputs.topicid }}
-          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-          COMMIT_URL: ${{ github.event.head_commit.url }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           TITLE: ${{ steps.determine.outputs.title }}
           BRANCH: ${{ github.ref_name }}
