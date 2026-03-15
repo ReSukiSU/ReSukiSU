@@ -35,10 +35,10 @@ try:
         last_commit = commits[-1]
 
     elif 'head_commit' in GITHUB_EVENT:
-        msg = GITHUB_EVENT["head_commt"]["msg"]
+        msg = GITHUB_EVENT["head_commit"]["msg"]
         if len(msg) > 3192:
             msg = msg[:3189] + '...'
-        commit_message = f'\n{msg.strip()}\n'
+        commit_message = f'{msg.strip()}'
     else:
         commit_message = ''
 except:
