@@ -24,10 +24,6 @@ try:
         for commit in commits[::-1]:
             msg_line = commit['message'].split('\n')
             msg = msg_line[0].strip()
-            if len(msg_line) > 1:
-                msg += ' [..]'
-            if len(msg) > 100:
-                msg = msg[:97] + '...'
             msg += ' by ' + commit['author']['username']
             if len(msg) + 1 + len(commit_message) > 3192:
                 commit_message = f'(other {i} commits)\n{commit_message}'
@@ -35,7 +31,7 @@ try:
             else:
                 commit_message = f'{msg}\n{commit_message}'
             i -= 1
-        commit_message = f'<pre>{commit_message.strip()}\n</pre>'
+        commit_message = f'{commit_message.strip()}\n'
         last_commit = commits[-1]
 
     elif 'head_commit' in GITHUB_EVENT:
