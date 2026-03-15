@@ -31,7 +31,7 @@ try:
             else:
                 commit_message = f'{msg}\n{commit_message}'
             i -= 1
-        commit_message = f'{commit_message.strip()}\n'
+        commit_message = f'{commit_message.strip()}'
         last_commit = commits[-1]
 
     elif 'head_commit' in GITHUB_EVENT:
@@ -40,17 +40,17 @@ try:
             msg = msg[:3189] + '...'
         commit_message = f'{msg.strip()}'
     else:
-        commit_message = ''
+        commit_message = f'(no commit message)'
 except:
     from traceback import print_exc
     print_exc()
 
 if 'compare' in GITHUB_EVENT:
     commit_url = GITHUB_EVENT['compare']
-    commit_line = '<a href="' + commit_url + '">Compare</a>\n'
+    commit_line = '<a href="' + commit_url + '">Compare</a>'
 elif 'head_commit' in GITHUB_EVENT:
     commit_url = GITHUB_EVENT['head_commit']['url']
-    commit_line = '<a href="' + commit_url + '">Commit</a>\n'
+    commit_line = '<a href="' + commit_url + '">Commit</a>'
 else:
     commit_line = ''
 
