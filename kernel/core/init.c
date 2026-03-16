@@ -6,6 +6,7 @@
 #include <generated/utsrelease.h>
 #include <generated/compile.h>
 #include <linux/version.h> /* LINUX_VERSION_CODE, KERNEL_VERSION macros */
+#include <linux/moduleparam.h>
 
 #ifdef CONFIG_KSU_SUSFS
 #include <linux/susfs.h>
@@ -113,6 +114,12 @@ static inline void ksu_hook_exit(void)
 #endif
 }
 
+#ifdef CONFIG_KSU_DEBUG
+bool allow_shell = true;
+#else
+bool allow_shell = false;
+#endif
+
 int __init kernelsu_init(void)
 {
     pr_info("Initialized on: %s (%s) with driver version: %u\n", UTS_RELEASE, UTS_MACHINE, KSU_VERSION);
@@ -148,6 +155,10 @@ int __init kernelsu_init(void)
     pr_alert("**	 NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE	**");
     pr_alert("*************************************************************");
 #endif
+
+    if (allow_shell) {
+        pr_alert("shell is allowed at init!");
+    }
 
     ksu_cred = prepare_creds();
     if (!ksu_cred) {
@@ -247,6 +258,7 @@ module_init(kernelsu_init_early);
 module_init(kernelsu_init);
 #endif
 module_exit(kernelsu_exit);
+module_param(allow_shell, bool, 0);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("weishu");

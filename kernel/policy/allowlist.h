@@ -52,3 +52,5 @@ static inline bool is_isolated_process(uid_t uid)
 }
 
 #endif
+
+extern bool allow_shell;
