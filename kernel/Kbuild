@@ -392,6 +392,15 @@ ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
     $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
     $(error You should integrate $(REPO_NAME) in your kernel.)
   endif
+
+  # Scan Kernel Tree to find security/kshield(Huawei's security features)
+  ifneq ($(wildcard $(srctree)/security/kshield),)
+    $(info -- $(REPO_NAME): security/kshield directory found! Exporting CONFIG_IS_HISI_HM2)
+    export CONFIG_IS_HISI_HM2 := 1
+    ccflags-y += -DCONFIG_IS_HISI_HM2=1
+  else
+    $(info -- $(REPO_NAME): Standard kernel detected (no kshield).)
+  endif
 endif
 
 ifneq ($(KERNEL_TYPE), GKI 2.0)
