@@ -678,77 +678,6 @@ static bool add_type(struct policydb *db, const char *type_name, bool attr)
 
     return true;
 
-#elif defined(CONFIG_IS_HW_HISI_LEGACY_HM2)
-    /*
-     * EMUI 10+ or HarmonyOS2 Based EMUI10+ Code
-     * It uses pointers similar to Linux 5.1 at the underlying level, but ebitmap requires two parameters.
-     */
-    struct flex_array *new_type_attr_map_array = flex_array_alloc(
-        sizeof(struct ebitmap), db->p_types.nprim, GFP_ATOMIC | __GFP_ZERO);
-
-    struct flex_array *new_type_val_to_struct =
-        flex_array_alloc(sizeof(struct type_datum *), db->p_types.nprim,
-                         GFP_ATOMIC | __GFP_ZERO);
-
-    struct flex_array *new_val_to_name_types = flex_array_alloc(
-        sizeof(char *), db->symtab[SYM_TYPES].nprim, GFP_ATOMIC | __GFP_ZERO);
-
-    if (!new_type_attr_map_array || !new_type_val_to_struct || !new_val_to_name_types) {
-        return false;
-    }
-
-    if (flex_array_prealloc(new_type_attr_map_array, 0, db->p_types.nprim, GFP_ATOMIC | __GFP_ZERO) ||
-        flex_array_prealloc(new_type_val_to_struct, 0, db->p_types.nprim, GFP_ATOMIC | __GFP_ZERO) ||
-        flex_array_prealloc(new_val_to_name_types, 0, db->symtab[SYM_TYPES].nprim, GFP_ATOMIC | __GFP_ZERO)) {
-        return false;
-    }
-
-    int j;
-    void *old_elem;
-    for (j = 0; j < db->type_attr_map_array->total_nr_elements; j++) {
-        old_elem = flex_array_get(db->type_attr_map_array, j);
-        if (old_elem)
-            flex_array_put(new_type_attr_map_array, j, old_elem, GFP_ATOMIC | __GFP_ZERO);
-    }
-
-    for (j = 0; j < db->type_val_to_struct_array->total_nr_elements; j++) {
-        old_elem = flex_array_get_ptr(db->type_val_to_struct_array, j);
-        if (old_elem)
-            flex_array_put_ptr(new_type_val_to_struct, j, old_elem, GFP_ATOMIC | __GFP_ZERO);
-    }
-
-    for (j = 0; j < db->symtab[SYM_TYPES].nprim; j++) {
-        old_elem = flex_array_get_ptr(db->sym_val_to_name[SYM_TYPES], j);
-        if (old_elem)
-            flex_array_put_ptr(new_val_to_name_types, j, old_elem, GFP_ATOMIC | __GFP_ZERO);
-    }
-
-    struct flex_array *old_fa;
-
-    old_fa = db->type_attr_map_array;
-    db->type_attr_map_array = new_type_attr_map_array;
-    if (old_fa) {
-        flex_array_free(old_fa);
-    }
-
-    ebitmap_init(flex_array_get(db->type_attr_map_array, value - 1), HISI_SELINUX_EBITMAP_RO);
-    
-    ebitmap_set_bit(flex_array_get(db->type_attr_map_array, value - 1), value - 1, 1);
-
-    old_fa = db->type_val_to_struct_array;
-    db->type_val_to_struct_array = new_type_val_to_struct;
-    if (old_fa) {
-        flex_array_free(old_fa);
-    }
-    flex_array_put_ptr(db->type_val_to_struct_array, value - 1, type, GFP_ATOMIC | __GFP_ZERO);
-
-    old_fa = db->sym_val_to_name[SYM_TYPES];
-    db->sym_val_to_name[SYM_TYPES] = new_val_to_name_types;
-    if (old_fa) {
-        flex_array_free(old_fa);
-    }
-    flex_array_put_ptr(db->sym_val_to_name[SYM_TYPES], value - 1, key, GFP_ATOMIC | __GFP_ZERO);
-
 #elif defined(CONFIG_IS_HW_HISI_LEGACY)
     /*
    * Huawei use type_attr_map and type_val_to_struct.
@@ -878,7 +807,12 @@ static bool add_type(struct policydb *db, const char *type_name, bool attr)
         flex_array_free(old_fa);
     }
 
+    // Huawei's EMUI 10+ / HM2 HKIP is closed, use the original flex_array_get and HISI_SELINUX_EBITMAP_RO(false)
+    #if defined(CONFIG_IS_HW_HISI_LEGACY_HM2)
+    ebitmap_init(flex_array_get(db->type_attr_map_array, value - 1), HISI_SELINUX_EBITMAP_RO);
+    #else
     ebitmap_init(flex_array_get(db->type_attr_map_array, value - 1));
+    #endif
     ebitmap_set_bit(flex_array_get(db->type_attr_map_array, value - 1),
                     value - 1, 1);
 
