@@ -14,8 +14,8 @@
 #include "kernel_compat.h"
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0) ||                           \
-    defined(KSU_COMPAT_IS_HISI_LEGACY) ||                                       \
-    defined(KSU_COMPAT_IS_HISI_LEGACY_HM2) ||                                   \
+    defined(KSU_COMPAT_IS_HISI_LEGACY) ||                                      \
+    defined(KSU_COMPAT_IS_HISI_LEGACY_HM2) ||                                  \
     defined(CONFIG_KSU_ALLOWLIST_WORKAROUND)
 #include <linux/key.h>
 #include <linux/errno.h>
@@ -48,8 +48,8 @@ static int install_session_keyring(struct key *keyring)
 struct file *ksu_filp_open_compat(const char *filename, int flags, umode_t mode)
 {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0) ||                           \
-    defined(KSU_COMPAT_IS_HISI_LEGACY) ||                                       \
-    defined(KSU_COMPAT_IS_HISI_LEGACY_HM2) ||                                   \
+    defined(KSU_COMPAT_IS_HISI_LEGACY) ||                                      \
+    defined(KSU_COMPAT_IS_HISI_LEGACY_HM2) ||                                  \
     defined(CONFIG_KSU_ALLOWLIST_WORKAROUND)
     if (init_session_keyring != NULL && !current_cred()->session_keyring &&
         (current->flags & PF_WQ_WORKER)) {
