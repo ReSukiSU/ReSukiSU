@@ -274,6 +274,16 @@ $(error You should integrate susfs in your kernel.)
 endif
 endif
 
+## For Huawei EMUI10+ Cheak  
+# Scan Kernel Tree to find CONFIG_HKIP_SELINUX_PROT in ebitmap.h
+ifeq ($(shell grep -q "CONFIG_HKIP_SELINUX_PROT" $(srctree)/security/selinux/ss/ebitmap.h 2>/dev/null; echo $$?),0)
+  $(info -- $(REPO_NAME): CONFIG_HKIP_SELINUX_PROT found! Exporting CONFIG_IS_HISI_HM2)
+  export CONFIG_IS_HISI_HM2 := 1
+  ccflags-y += -DCONFIG_IS_HISI_HM2=1
+else
+  $(info -- $(REPO_NAME): Standard kernel detected (no CONFIG_HKIP_SELINUX_PROT).)
+endif
+
 # manual hook check
 ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
 
@@ -391,15 +401,6 @@ ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
     $(info -- You lost ksu_handle_sys_reboot hook in your kernel)
     $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
     $(error You should integrate $(REPO_NAME) in your kernel.)
-  endif
-
-  # Scan Kernel Tree to find security/kshield(Huawei's security features)
-  ifneq ($(wildcard $(srctree)/security/kshield),)
-    $(info -- $(REPO_NAME): security/kshield directory found! Exporting CONFIG_IS_HISI_HM2)
-    export CONFIG_IS_HISI_HM2 := 1
-    ccflags-y += -DCONFIG_IS_HISI_HM2=1
-  else
-    $(info -- $(REPO_NAME): Standard kernel detected (no kshield).)
   endif
 endif
 
