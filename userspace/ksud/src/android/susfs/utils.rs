@@ -29,7 +29,7 @@ pub(super) fn str_to_c_array<const N: usize>(s: &str, array: &mut [u8; N]) {
 
 pub(super) fn fetch_metadata(path: &str) -> Result<fs::Metadata> {
     fs::metadata(path).map_err(|e| {
-        anyhow::format_err!("[-] Failed to get metadata from path: '{path}', error: {e}",)
+        anyhow::format_err!("[-] Failed to get metadata from path: '{path}', error: {e}")
     })
 }
 
