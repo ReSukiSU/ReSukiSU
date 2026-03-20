@@ -10,6 +10,7 @@ mod late_load;
 mod magica;
 mod module;
 mod profile;
+mod resetprop;
 mod restorecon;
 mod sepolicy;
 mod su;
