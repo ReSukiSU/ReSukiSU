@@ -31,13 +31,13 @@
     <string name="reboot">重新啟動</string>
     <string name="settings">設定</string>
     <string name="reboot_soft">軟重啟</string>
-    <string name="reboot_userspace">用用戶空間重新啟動</string>
+    <string name="reboot_userspace">以用戶空間重新啟動</string>
     <string name="reboot_recovery">重新啟動到 Recovery</string>
     <string name="reboot_bootloader">重新啟動到 Bootloader</string>
     <string name="reboot_download">重新啟動到 Download</string>
     <string name="reboot_edl">重新啟動到 EDL</string>
     <string name="about">關於</string>
-    <string name="about_anime_character_sticker"><![CDATA[有動漫人物圖片表情包嘅圖讓片版權為%1$s所有，圖像中嘅知識產權由%2$s 所有。喺使用呢啲文檔之前，除咗必須遵守 %3$s 以外，仲需要遵守向前兩者攞要使用呢啲藝術內容嘅授權。]]></string>
+    <string name="about_anime_character_sticker"><![CDATA[有動漫人物圖片表情包嘅圖讓片版權為%1$s所有，圖像中嘅知識產權由%2$s 所有。喺使用呢啲文檔之前，除咗必須遵守 %3$s 以外，仲需要遵守向前兩者攞使用呢啲藝術內容嘅授權。]]></string>
     <string name="get_source_code">查看源程式碼</string>
     <string name="get_source_code_detail">喺 GitHub 上查看源程式碼</string>
     <string name="join_telegram_group">加入社區</string>
@@ -72,7 +72,7 @@
     <string name="home_click_to_learn_kernelsu">瞭解如何安装 KernelSU 以及如何開發模組</string>
     <string name="home_support_title">支援開發</string>
     <string name="home_support_content">KernelSU 將保持免费開源，向開發者捐贈以表示支援。</string>
-    <string name="about_source_code"><![CDATA[喺 %1$s 查看程式碼<br/>加入我哋嘅 %2$s 頻道<br/><br/>有動漫人物圖片表情包嘅圖像版權爲%3$s所有，圖像中嘅知識產權由%4$s 所有。喺使用呢啲文檔之前，除咗必須遵守 %5$s 以外，仲需要遵守向前兩者索要使用呢啲藝術內容嘅授權。]]></string>
+    <string name="about_source_code"><![CDATA[喺 %1$s 查看程式碼<br/>加入我哋嘅 %2$s 頻道<br/><br/>有動漫人物圖片表情包嘅圖像版權爲%3$s所有，圖像中嘅知識產權由%4$s 所有。喺使用呢啲文檔之前，除咗必須遵守 %5$s 以外，仲需要遵守向前兩者攞使用呢啲藝術內容嘅授權。]]></string>
     <string name="profile_default">預設</string>
     <string name="profile_template">模板</string>
     <string name="profile_custom">自定義</string>
@@ -272,7 +272,7 @@
     <string name="confirm_uninstall_title_with_filename">卸載</string>
     <string name="confirm_uninstall_content">將解除安裝以下 KPM 模組：\n%s</string>
     <string name="image_editor_hint">使用双指缩放圖片，單指拖動調整位置</string>
-    <string name="reprovision">重置</string>
+    <string name="reprovision">還原</string>
     <!-- Kernel Flash Progress Related -->
     <string name="horizon_flash_complete">刷寫完成</string>
     <!-- Flash Status Related -->
@@ -306,7 +306,7 @@
     <string name="app_settings">應用程式配置</string>
     <string name="tools">工具</string>
     <!--  String resources used in SuperUser -->
-    <string name="no_apps_found">揾唔到應用程式</string>
+    <string name="no_apps_found">搵唔到應用程式</string>
     <string name="selinux_enabled_toast">SELinux 已配置爲啟用狀態</string>
     <string name="selinux_disabled_toast">SELinux 已配置爲禁用狀態</string>
     <string name="selinux_change_failed">SELinux 狀態更改失敗</string>
@@ -392,12 +392,12 @@
     <string name="susfs_build_time_placeholder">請輸入構建時間僞装值</string>
     <string name="susfs_current_value">當前值: %s</string>
     <string name="susfs_current_build_time">當前構建時間: %s</string>
-    <string name="susfs_reset_to_default">重置爲預設值</string>
+    <string name="susfs_reset_to_default">還原爲預設值</string>
     <string name="susfs_apply">應用</string>
     <!-- SuSFS Reset Confirmation -->
-    <string name="susfs_reset_confirm_title">確認重置</string>
+    <string name="susfs_reset_confirm_title">確認還原</string>
     <!-- SuSFS Toast Messages -->
-    <string name="susfs_binary_not_found">無法揾到 ksu_susfs 文檔</string>
+    <string name="susfs_binary_not_found">無法搵到 ksu_susfs 文檔</string>
     <string name="susfs_command_failed">SuSFS 命令執行失敗</string>
     <string name="susfs_command_error">執行 SuSFS 命令時出錯: %s</string>
     <string name="susfs_uname_set_success" formatted="false">SuSFS 核心名稱和構建時間配置成功: %s, %s</string>
@@ -419,14 +419,14 @@
     <!-- SuSFS Path Management -->
     <string name="susfs_add_sus_path">添加 SuS 路徑</string>
     <string name="susfs_sus_path_added_success">SuS 路徑添加成功</string>
-    <string name="susfs_path_not_found_error">路徑揾唔到錯誤</string>
+    <string name="susfs_path_not_found_error">路徑搵唔到錯誤</string>
     <string name="susfs_path_label">路徑</string>
     <string name="susfs_path_placeholder">例如: /system/addon.d</string>
     <string name="susfs_no_paths_configured">暫無 SuS 路徑配置</string>
     <!-- SuSFS Reset Categories -->
-    <string name="susfs_reset_paths_title">重置 SuS 路徑</string>
+    <string name="susfs_reset_paths_title">還原 SuS 路徑</string>
     <string name="susfs_reset_paths_message">這將清除所有 SuS 路徑配置，確定要繼續嗎？</string>
-    <string name="susfs_reset_path_title">重置路徑配置</string>
+    <string name="susfs_reset_path_title">還原路徑配置</string>
     <!-- SuSFS Path Settings -->
     <string name="susfs_android_data_path_label">Android Data 路徑</string>
     <string name="susfs_sdcard_path_label">SDCard 路徑</string>
@@ -434,7 +434,7 @@
     <string name="susfs_set_sdcard_path">配置 SDCard 路徑</string>
     <!-- SuSFS Enabled Features -->
     <string name="susfs_enabled_features_description">顯示當前 SuSFS 啟用嘅功能狀態</string>
-    <string name="susfs_no_features_found">揾唔到功能狀態資訊</string>
+    <string name="susfs_no_features_found">搵唔到功能狀態資訊</string>
     <string name="susfs_feature_enabled">已啟用</string>
     <string name="susfs_feature_disabled">已禁用</string>
     <!-- Feature Labels -->
@@ -487,7 +487,7 @@
     <string name="hint_use_default_value">提示：可以使用 “default” 來使用原始值</string>
     <string name="add_kstat_path_title">添加 Kstat 路徑</string>
     <string name="add">添加</string>
-    <string name="reset_kstat_config_title">重置 Kstat 配置</string>
+    <string name="reset_kstat_config_title">還原 Kstat 配置</string>
     <string name="reset_kstat_config_message">確定要清除所有 Kstat 配置嗎？此操作唔可撤銷</string>
     <string name="kstat_config_description_title">Kstat 配置說明</string>
     <string name="kstat_config_description_add_statically">• add_sus_kstat_statically: 靜態配置文檔/目錄嘅 stat 資訊</string>
@@ -520,7 +520,7 @@
     <string name="susfs_backup_create">創建備份</string>
     <string name="susfs_backup_success">備份創建成功：%s</string>
     <string name="susfs_backup_failed">備份創建失敗：%s</string>
-    <string name="susfs_backup_file_not_found">備份文檔揾唔到</string>
+    <string name="susfs_backup_file_not_found">備份文檔搵唔到</string>
     <string name="susfs_backup_invalid_format">無效嘅備份文檔格式</string>
     <string name="susfs_backup_version_mismatch">備份版本唔匹配，但將嚐試還原</string>
     <string name="restore">還原</string>
@@ -589,16 +589,16 @@
     <string name="susfs_loop_path_removed">SuS 循環路徑已移除: %1$s</string>
     <string name="susfs_loop_path_updated">SuS 循環路徑已更新: %1$s -&gt; %2$s</string>
     <string name="susfs_no_loop_paths_configured">未配置 SuS 循環路徑</string>
-    <string name="susfs_reset_loop_paths_title">重置循環路徑</string>
+    <string name="susfs_reset_loop_paths_title">還原循環路徑</string>
     <string name="susfs_reset_loop_paths_message">確定要清空所有 SuS 循環路徑嗎？此操作無法撤銷。</string>
     <string name="susfs_loop_path_label">循環路徑</string>
-    <string name="susfs_loop_path_restriction_warning">注意：祗有唔喺 /storage/ 和 /sdcard/ 內嘅路徑才能通過循環路徑添加。</string>
+    <string name="susfs_loop_path_restriction_warning">注意：祗有唔喺 /storage/ 和 /sdcard/ 入面嘅路徑才能通過循環路徑添加。</string>
     <string name="susfs_loop_path_invalid_location">錯誤：循環路徑唔可以位於 /storage/ 或 /sdcard/ 目錄內</string>
     <string name="loop_paths_section">循環路徑</string>
     <string name="add_loop_path">添加循環路徑</string>
     <!-- 循環路徑功能描述 -->
     <string name="sus_loop_paths_description_title">循環路徑配置</string>
-    <string name="sus_loop_paths_description_text">循環路徑會喺每次非 root 用戶應用程式或隔離服務啟動時重新標記爲 SUS_PATH。這有助於解决添加嘅路徑可能因 inode 狀態重置或核心中 inode 重新創建而失效嘅問題</string>
+    <string name="sus_loop_paths_description_text">循環路徑會喺每次非 root 用戶應用程式或隔離服務啟動時重新標記爲 SUS_PATH。這有助於解决添加嘅路徑可能因 inode 狀態還原或核心中 inode 重新創建而失效嘅問題</string>
     <string name="avc_log_spoofing">AVC 日誌欺騙</string>
     <string name="avc_log_spoofing_enabled">AVC 日誌欺騙已啟用</string>
     <string name="avc_log_spoofing_disabled">AVC 日誌欺騙已禁用</string>
@@ -623,13 +623,13 @@
     <string name="kpm_preparing_tools">準備 KPM 修補工具</string>
     <string name="kpm_applying_patch">正在應用 KPM 修補</string>
     <string name="kpm_undoing_patch">正在撤銷 KPM 修補</string>
-    <string name="kpm_found_image_file">揾到 Image 文檔: %s</string>
+    <string name="kpm_found_image_file">搵到 Image 文檔: %s</string>
     <string name="kpm_patch_success">KPM 修補成功</string>
     <string name="kpm_undo_patch_success">KPM 撤銷修補成功</string>
     <string name="kpm_file_repacked">文檔重新打包完成</string>
     <!-- KPM error messages -->
     <string name="kpm_extract_zip_failed">解壓壓缩包失敗</string>
-    <string name="kpm_image_file_not_found">揾唔到 Image 文檔</string>
+    <string name="kpm_image_file_not_found">搵唔到 Image 文檔</string>
     <string name="kpm_patch_failed">KPM 修補失敗</string>
     <string name="kpm_undo_patch_failed">KPM 撤銷修補失敗</string>
     <string name="kpm_patch_operation_failed">KPM 修補操作失敗: %s</string>
@@ -638,7 +638,7 @@
     <string name="kpm_follow_kernel_description">原样使用核心，唔進行任何 KPM 修改</string>
     <!-- UID Scanner Settings -->
     <string name="uid_auto_scan_title">用戶態掃描應用程式列表</string>
-    <string name="uid_auto_scan_summary">開啟後將使用用戶態掃描應用程式列表，提高稳定性 (因核心掃描應用程式列表出现卡死等問題可以嚐試打開此選項) </string>
+    <string name="uid_auto_scan_summary">開啟後將使以用戶態掃描應用程式列表，提高稳定性 (因核心掃描應用程式列表出现卡死等問題可以嚐試打開此選項) </string>
     <string name="uid_multi_user_scan_title">多用戶應用程式掃描</string>
     <string name="uid_multi_user_scan_summary">開啟後將掃描所有用戶嘅應用程式，包括工作資料等</string>
     <string name="uid_scanner_setting_failed">配置失敗，請檢查權限</string>
@@ -669,7 +669,7 @@
     <string name="susfs_sus_map_removed">SUS映射已移除: %1$s</string>
     <string name="susfs_sus_map_updated">SUS映射已更新: %1$s -&gt; %2$s</string>
     <string name="susfs_no_sus_maps_configured">未配置SUS映射</string>
-    <string name="susfs_reset_sus_maps_title">重置SUS映射</string>
+    <string name="susfs_reset_sus_maps_title">還原SUS映射</string>
     <string name="susfs_reset_sus_maps_message">這將移除所有已配置嘅SUS映射。此操作無法撤銷。</string>
     <string name="sus_maps_section">內存映射隱藏</string>
     <string name="sus_maps_description_title">隱藏/proc/self/中各種映射中嘅mmap真實文檔</string>
@@ -686,8 +686,8 @@
     <string name="log_viewer_filter_type">按類型篩選</string>
     <string name="log_viewer_all_types">所有類型</string>
     <string name="log_viewer_showing_entries">顯示 %1$d / %2$d 條記錄</string>
-    <string name="log_viewer_no_logs">揾唔到日誌</string>
-    <string name="log_viewer_no_matching_logs">揾唔到匹配嘅日誌</string>
+    <string name="log_viewer_no_logs">搵唔到日誌</string>
+    <string name="log_viewer_no_matching_logs">搵唔到匹配嘅日誌</string>
     <string name="log_viewer_refresh">刷新</string>
     <string name="log_viewer_raw_log">原始日誌</string>
     <string name="log_viewer_search_placeholder">按 UID、命令或詳情搜索…</string>
