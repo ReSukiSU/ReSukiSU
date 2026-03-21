@@ -37,13 +37,13 @@
     <string name="reboot_download">重新啟動到 Download</string>
     <string name="reboot_edl">重新啟動到 EDL</string>
     <string name="about">關於</string>
-    <string name="about_anime_character_sticker"><![CDATA[有動漫人物圖片表情包嘅圖讓片版權為%1$s所有，圖像中嘅知識產權由%2$s 所有。喺使用呢啲文檔之前，除咗必須遵守 %3$s 以外，仲需要遵守向前兩者攞使用呢啲藝術內容嘅授權。]]></string>
+    <string name="about_anime_character_sticker"><![CDATA[有動漫人物圖片表情包嘅圖讓片版權為%1$s所有，圖像中嘅知識產權由%2$s 所有。喺使用呢啲檔案之前，除咗必須遵守 %3$s 以外，仲需要遵守向前兩者索要使用呢啲藝術內容嘅授權。]]></string>
     <string name="get_source_code">查看源程式碼</string>
     <string name="get_source_code_detail">喺 GitHub 上查看源程式碼</string>
     <string name="join_telegram_group">加入社區</string>
     <string name="join_telegram_group_detail">加入我哋嘅 Telegram 頻道</string>
     <string name="open_source_license">開放源程式碼許可</string>
-    <string name="open_source_license_settings_description">查看本應用程式所使用嘅第三方開源庫及其許可證資訊</string>
+    <string name="open_source_license_settings_description">查看本應用程式所使用嘅第三方開源庫同埋佢哋嘅許可證資訊</string>
     <string name="visit_home_page">訪問主頁</string>
     <string name="license">許可證：%s</string>
     <string name="no_license_text">許可證內容唔可用。</string>
@@ -72,7 +72,7 @@
     <string name="home_click_to_learn_kernelsu">瞭解如何安装 KernelSU 以及如何開發模組</string>
     <string name="home_support_title">支援開發</string>
     <string name="home_support_content">KernelSU 將保持免费開源，向開發者捐贈以表示支援。</string>
-    <string name="about_source_code"><![CDATA[喺 %1$s 查看程式碼<br/>加入我哋嘅 %2$s 頻道<br/><br/>有動漫人物圖片表情包嘅圖像版權爲%3$s所有，圖像中嘅知識產權由%4$s 所有。喺使用呢啲文檔之前，除咗必須遵守 %5$s 以外，仲需要遵守向前兩者攞使用呢啲藝術內容嘅授權。]]></string>
+    <string name="about_source_code"><![CDATA[喺 %1$s 查看程式碼<br/>加入我哋嘅 %2$s 頻道<br/><br/>有動漫人物圖片表情包嘅圖像版權為%3$s所有，圖像中嘅知識產權由%4$s 所有。喺使用呢啲檔案之前，除咗必須遵守 %5$s 以外，仲需要遵守向前兩者索要使用呢啲藝術內容嘅授權。]]></string>
     <string name="profile_default">預設</string>
     <string name="profile_template">模板</string>
     <string name="profile_custom">自定義</string>
@@ -85,26 +85,26 @@
     <string name="profile_capabilities">權能</string>
     <string name="profile_selinux_context">SELinux</string>
     <string name="profile_umount_modules">解除安裝模組</string>
-    <string name="failed_to_update_app_profile">爲 %s 更新 App Profile 失敗</string>
+    <string name="failed_to_update_app_profile">為 %s 更新 App Profile 失敗</string>
     <string name="debug_version_notice">"你正在使用管理器嘅 DEBUG 構建，如果你唔知道乜嘢係 DEBUG 構建，請立即切换至 RELEASE 構建"</string>
     <string name="unofficial_version_notice">"您使用嘅管理器並非 %s 官方管理器，您可能無法獲得權限。"</string>
     <string name="settings_umount_modules_default">預設卸載模組</string>
-    <string name="settings_umount_modules_default_summary">App Profile 中\"卸載模組\"嘅全局預設值，如果啟用，將會爲冇配置 Profile 嘅應用程式移除所有模組針對系統嘅修改。</string>
-    <string name="profile_umount_modules_summary">啟用該選項後將允許 KernelSU 爲本應用程式還原被模組修改過嘅文檔。</string>
+    <string name="settings_umount_modules_default_summary">App Profile 中\"卸載模組\"嘅全局預設值，如果啟用，將會為冇配置 Profile 嘅應用程式移除所有模組針對系統嘅修改。</string>
+    <string name="profile_umount_modules_summary">啟用該選項後將允許 KernelSU 為本應用程式還原被模組修改過嘅檔案。</string>
     <string name="profile_selinux_domain">域</string>
     <string name="profile_selinux_rules">規則</string>
     <string name="module_update">更新</string>
     <string name="module_downloading">正在下載模組：%s</string>
     <string name="module_start_downloading">開始下載：%s</string>
-    <string name="module_action_success">模組Action腳本執行成功.</string>
+    <string name="module_action_success">模組Action腳本執行成功。</string>
     <string name="new_version_available">發現新版本：%s，點擊升級。</string>
     <string name="launch_app">啟動</string>
     <string name="force_stop_app" formatted="false">強制停止</string>
     <string name="restart_app">重新啟動</string>
-    <string name="failed_to_update_sepolicy">爲：%s 更新 SELinux 規則失敗</string>
+    <string name="failed_to_update_sepolicy">為：%s 更新 SELinux 規則失敗</string>
     <string name="module_changelog">更新日誌</string>
     <string name="settings_profile_template">App Profile 模板</string>
-    <string name="settings_profile_template_summary">管理本地和在線嘅 App Profile 模板</string>
+    <string name="settings_profile_template_summary">管理本地和線上嘅 App Profile 模板</string>
     <string name="app_profile_template_create">創建模板</string>
     <string name="app_profile_template_edit">編輯模板</string>
     <string name="app_profile_template_id">模板 ID</string>
@@ -114,16 +114,16 @@
     <string name="app_profile_template_save">儲存</string>
     <string name="app_profile_template_delete">刪除</string>
     <string name="app_profile_template_view">查看模板</string>
-    <string name="app_profile_template_readonly">祗讀</string>
+    <string name="app_profile_template_readonly">只讀</string>
     <string name="app_profile_template_id_exist">模板 ID 已存在！</string>
     <string name="app_profile_import_export">導入/導出</string>
     <string name="app_profile_import_from_clipboard">從剪貼簿導入</string>
     <string name="app_profile_export_to_clipboard">導出到剪貼簿</string>
     <string name="app_profile_template_export_empty">冇可以導出嘅本地模板！</string>
     <string name="app_profile_template_import_success">導入成功</string>
-    <string name="app_profile_template_sync">同步在線規則</string>
+    <string name="app_profile_template_sync">同步線上規則</string>
     <string name="app_profile_template_save_failed">模板儲存失敗</string>
-    <string name="app_profile_template_import_empty">剪貼簿爲空！</string>
+    <string name="app_profile_template_import_empty">剪貼簿為空！</string>
     <string name="affected_applications">受影響嘅應用程式</string>
     <string name="module_changelog_failed">獲取更新日誌失敗：%s</string>
     <string name="settings_check_update">更新提醒</string>
@@ -139,8 +139,8 @@
     <string name="install_inactive_slot_warning">將喺重新啟動後強制切换到另一個槽位！注意祗能喺 OTA 更新完成後嘅重新啟動之前使用。</string>
     <string name="install_next">下一步</string>
     <string name="install_select_partition">選擇分區</string>
-    <string name="install_upload_lkm_file">使用本地 LKM 文檔</string>
-    <string name="install_only_support_ko_file">僅支援選擇 .ko 文檔</string>
+    <string name="install_upload_lkm_file">使用本地 LKM 檔案</string>
+    <string name="install_only_support_ko_file">僅支援選擇 .ko 檔案</string>
     <string name="select_file_tip">建議選擇 %1$s 分區映像檔</string>
     <string name="select_kmi">選擇 KMI</string>
     <string name="settings_uninstall">卸載</string>
@@ -182,7 +182,7 @@
     <string name="backup_allowlist">備份應用程式列表</string>
     <string name="restore_allowlist">還原應用程式列表</string>
     <string name="settings_custom_background">自定義背景</string>
-    <string name="settings_custom_background_summary">選擇一张圖片作爲應用程式背景</string>
+    <string name="settings_custom_background_summary">選擇一张圖片作為應用程式背景</string>
     <string name="settings_card_alpha">卡片唔透明度</string>
     <string name="home_android_version">Android 版本</string>
     <string name="home_device_model">裝置</string>
@@ -218,7 +218,7 @@
     <string name="hide_link_card">隱藏鏈接卡片</string>
     <string name="hide_link_card_summary">隱藏主頁上嘅鏈接卡片資訊</string>
     <string name="hide_tag_card">隱藏模組標籤行</string>
-    <string name="hide_tag_card_summary">隱藏模組卡片中嘅文檔夾名稱、大小標籤和是唔係爲元模組</string>
+    <string name="hide_tag_card_summary">隱藏模組卡片中嘅檔案夾名稱、大小標籤和是唔係為元模組</string>
     <string name="theme_mode">主題模式</string>
     <string name="theme_follow_system">跟隨系統</string>
     <string name="theme_light">淺色</string>
@@ -266,9 +266,9 @@
     <string name="kpm_install_mode_load">加載</string>
     <string name="kpm_install_mode_embed">嵌入</string>
     <string name="kpm_install_mode_description">請選擇: %1\$s 模組嘅安装模式 \n\n加載：臨時加載模組\n嵌入：永久安装到系統</string>
-    <string name="snackbar_failed_to_check_module_file">無法檢查模組文檔是唔係存在</string>
+    <string name="snackbar_failed_to_check_module_file">無法檢查模組檔案是唔係存在</string>
     <string name="theme_color">主題顏色</string>
-    <string name="invalid_file_type">文檔類型唔正確，請選擇 .kpm 文檔</string>
+    <string name="invalid_file_type">檔案類型唔正確，請選擇 .kpm 檔案</string>
     <string name="confirm_uninstall_title_with_filename">卸載</string>
     <string name="confirm_uninstall_content">將解除安裝以下 KPM 模組：\n%s</string>
     <string name="image_editor_hint">使用双指缩放圖片，單指拖動調整位置</string>
@@ -277,8 +277,8 @@
     <string name="horizon_flash_complete">刷寫完成</string>
     <!-- Flash Status Related -->
     <string name="horizon_preparing">準備中…</string>
-    <string name="horizon_cleaning_files">清理文檔…</string>
-    <string name="horizon_copying_files">複製文檔…</string>
+    <string name="horizon_cleaning_files">清理檔案…</string>
+    <string name="horizon_copying_files">複製檔案…</string>
     <string name="horizon_extracting_tool">提取刷寫工具…</string>
     <string name="horizon_patching_script">修補刷寫腳本…</string>
     <string name="horizon_flashing">刷寫核心中…</string>
@@ -307,8 +307,8 @@
     <string name="tools">工具</string>
     <!--  String resources used in SuperUser -->
     <string name="no_apps_found">搵唔到應用程式</string>
-    <string name="selinux_enabled_toast">SELinux 已配置爲啟用狀態</string>
-    <string name="selinux_disabled_toast">SELinux 已配置爲禁用狀態</string>
+    <string name="selinux_enabled_toast">SELinux 已配置為啟用狀態</string>
+    <string name="selinux_disabled_toast">SELinux 已配置為禁用狀態</string>
     <string name="selinux_change_failed">SELinux 狀態更改失敗</string>
     <string name="advanced_settings">高級配置</string>
     <string name="appearance_settings">外观配置</string>
@@ -316,7 +316,7 @@
     <string name="background_set_success">背景配置成功</string>
     <string name="background_removed">已移除自定義背景</string>
     <string name="icon_switch_title">備選圖標</string>
-    <string name="icon_switch_summary">更换爲 KernelSU 圖標</string>
+    <string name="icon_switch_summary">更换為 KernelSU 圖標</string>
     <string name="icon_switched">已切换圖標</string>
     <!-- KPM display settings -->
     <string name="show_kpm_info">隱藏 KPM 功能</string>
@@ -336,8 +336,8 @@
     <string name="dpi_size_custom">自定義</string>
     <string name="dpi_apply_settings">應用 DPI 配置</string>
     <string name="dpi_confirm_title">確認更改 DPI</string>
-    <string name="dpi_confirm_message">你確定要將應用 DPI 從 %1$d 更改爲 %2$d 嗎？</string>
-    <string name="dpi_applied_success">DPI 已配置爲 %1$d</string>
+    <string name="dpi_confirm_message">你確定要將應用 DPI 從 %1$d 更改為 %2$d 嗎？</string>
+    <string name="dpi_applied_success">DPI 已配置為 %1$d</string>
     <!-- Language settings related strings -->
     <string name="settings_language">應用语言</string>
     <string name="language_system_default">跟隨系統</string>
@@ -350,7 +350,7 @@
     <string name="module_download_error">模組下載失敗</string>
     <string name="kernel_flashing">核心刷寫</string>
     <string name="warning_of_meta_module_title">需要元模組</string>
-    <string name="warning_of_meta_module_summary">這個模組需要掛載一些文檔。需要安装元模組，使它正常工作</string>
+    <string name="warning_of_meta_module_summary">這個模組需要掛載一些檔案。需要安装元模組，使它正常工作</string>
     <!-- 分類相關 -->
     <string name="category_all_apps">全部</string>
     <string name="category_custom_apps">自定義</string>
@@ -392,12 +392,12 @@
     <string name="susfs_build_time_placeholder">請輸入構建時間僞装值</string>
     <string name="susfs_current_value">當前值: %s</string>
     <string name="susfs_current_build_time">當前構建時間: %s</string>
-    <string name="susfs_reset_to_default">還原爲預設值</string>
+    <string name="susfs_reset_to_default">還原為預設值</string>
     <string name="susfs_apply">應用</string>
     <!-- SuSFS Reset Confirmation -->
     <string name="susfs_reset_confirm_title">確認還原</string>
     <!-- SuSFS Toast Messages -->
-    <string name="susfs_binary_not_found">無法搵到 ksu_susfs 文檔</string>
+    <string name="susfs_binary_not_found">無法搵到 ksu_susfs 檔案</string>
     <string name="susfs_command_failed">SuSFS 命令執行失敗</string>
     <string name="susfs_command_error">執行 SuSFS 命令時出錯: %s</string>
     <string name="susfs_uname_set_success" formatted="false">SuSFS 核心名稱和構建時間配置成功: %s, %s</string>
@@ -461,7 +461,7 @@
     <string name="susfs_execution_location_label">執行位置</string>
     <string name="susfs_current_execution_location">當前執行位置：%s</string>
     <string name="susfs_execution_location_service_description">喺系統服務啟動後執行</string>
-    <string name="susfs_execution_location_post_fs_data_description">喺文檔系統掛載後但系統完全啟動前執行,可能會導致循環重新啟動</string>
+    <string name="susfs_execution_location_post_fs_data_description">喺檔案系統掛載後但系統完全啟動前執行,可能會導致循環重新啟動</string>
     <string name="susfs_slot_info_title">槽位資訊</string>
     <string name="susfs_slot_info_description">查看當前啟動槽位資訊並複製數值</string>
     <string name="susfs_current_active_slot">當前活動槽位：%s</string>
@@ -483,14 +483,14 @@
     <string name="kstat_updated">Kstat 已更新：%1$s</string>
     <string name="kstat_full_clone_updated">Kstat 完整克隆已更新：%1$s</string>
     <string name="add_kstat_statically_title">添加 Kstat 靜態配置</string>
-    <string name="file_or_directory_path_label">文檔/目錄路徑</string>
+    <string name="file_or_directory_path_label">檔案/目錄路徑</string>
     <string name="hint_use_default_value">提示：可以使用 “default” 來使用原始值</string>
     <string name="add_kstat_path_title">添加 Kstat 路徑</string>
     <string name="add">添加</string>
     <string name="reset_kstat_config_title">還原 Kstat 配置</string>
     <string name="reset_kstat_config_message">確定要清除所有 Kstat 配置嗎？此操作唔可撤銷</string>
     <string name="kstat_config_description_title">Kstat 配置說明</string>
-    <string name="kstat_config_description_add_statically">• add_sus_kstat_statically: 靜態配置文檔/目錄嘅 stat 資訊</string>
+    <string name="kstat_config_description_add_statically">• add_sus_kstat_statically: 靜態配置檔案/目錄嘅 stat 資訊</string>
     <string name="kstat_config_description_add">• add_sus_kstat: 喺綁定掛載前添加路徑，儲存原始 stat 資訊</string>
     <string name="kstat_config_description_update">• update_sus_kstat: 更新目標 ino，保持 size 和 blocks 唔变</string>
     <string name="kstat_config_description_update_full_clone">• update_sus_kstat_full_clone: 僅更新 ino，其他保持原始值</string>
@@ -499,33 +499,33 @@
     <string name="no_kstat_config_message">暫無 Kstat 配置，點击下方按钮添加配置</string>
     <!-- SuSFS Mount Hiding Control Related Strings -->
     <string name="susfs_hide_mounts_control_title">SuS 掛載隱藏控制</string>
-    <string name="susfs_hide_mounts_control_description">控制 SuS 掛載對進程嘅隱藏行爲</string>
+    <string name="susfs_hide_mounts_control_description">控制 SuS 掛載對進程嘅隱藏行為</string>
     <string name="susfs_hide_mounts_for_all_procs_label">對所有進程隱藏 SuS 掛載</string>
     <string name="susfs_hide_mounts_for_all_procs_enabled_description">啟用後，SuS 掛載將對所有進程隱藏，包括 KSU 進程</string>
     <string name="susfs_hide_mounts_for_all_procs_disabled_description">禁用後，SuS 掛載僅對非 KSU 進程隱藏，KSU 進程可以看到掛載</string>
     <string name="susfs_hide_mounts_all_enabled">已啟用對所有進程隱藏 SuS 掛載</string>
     <string name="susfs_hide_mounts_all_disabled">已禁用對所有進程隱藏 SuS 掛載</string>
-    <string name="susfs_hide_mounts_recommendation">建議喺螢幕解鎖後或喺 service.sh 或 boot-completed.sh 階段配置爲禁用，這可以修復一些依赖 KSU 進程掛載嘅 root 應用程式嘅問題</string>
+    <string name="susfs_hide_mounts_recommendation">建議喺螢幕解鎖後或喺 service.sh 或 boot-completed.sh 階段配置為禁用，這可以修復一些依赖 KSU 進程掛載嘅 root 應用程式嘅問題</string>
     <string name="susfs_hide_mounts_current_setting">當前配置: %s</string>
     <string name="susfs_hide_mounts_setting_all">對所有進程隱藏</string>
     <string name="susfs_hide_mounts_setting_non_ksu">僅對非 KSU 進程隱藏</string>
     <string name="kernel_simple_kernel">核心版本簡潔模式</string>
     <string name="kernel_simple_kernel_summary">啟用或禁用 SukiSU 核心版本顯示嘅簡潔模式</string>
-    <string name="susfs_android_data_path_set">Android Data 路徑已配置爲: %s</string>
-    <string name="susfs_sdcard_path_set">SDCard 路徑已配置爲: %s</string>
+    <string name="susfs_android_data_path_set">Android Data 路徑已配置為: %s</string>
+    <string name="susfs_sdcard_path_set">SDCard 路徑已配置為: %s</string>
     <string name="susfs_path_setup_warning">路徑配置可能未完全成功，但將繼續添加 SuS 路徑</string>
     <!-- 備份和還原相關字元串 -->
     <string name="susfs_backup_title">備份</string>
-    <string name="susfs_backup_description">創建所有 SuSFS 配置嘅備份。備份文檔將包含所有配置、路徑和配置資訊。</string>
+    <string name="susfs_backup_description">創建所有 SuSFS 配置嘅備份。備份檔案將包含所有配置、路徑和配置資訊。</string>
     <string name="susfs_backup_create">創建備份</string>
     <string name="susfs_backup_success">備份創建成功：%s</string>
     <string name="susfs_backup_failed">備份創建失敗：%s</string>
-    <string name="susfs_backup_file_not_found">備份文檔搵唔到</string>
-    <string name="susfs_backup_invalid_format">無效嘅備份文檔格式</string>
+    <string name="susfs_backup_file_not_found">搵唔到備份檔案</string>
+    <string name="susfs_backup_invalid_format">無效嘅備份檔案格式</string>
     <string name="susfs_backup_version_mismatch">備份版本唔匹配，但將嚐試還原</string>
     <string name="restore">還原</string>
-    <string name="susfs_restore_description">從備份文檔還原 SuSFS 配置。這將覆蓋所有當前配置。</string>
-    <string name="susfs_restore_select_file">選擇備份文檔</string>
+    <string name="susfs_restore_description">從備份檔案還原 SuSFS 配置。這將覆蓋所有當前配置。</string>
+    <string name="susfs_restore_select_file">選擇備份檔案</string>
     <string name="susfs_restore_success" formatted="false">配置還原成功，備份創建於 %s，來自裝置：%s</string>
     <string name="susfs_restore_failed">還原失敗：%s</string>
     <string name="susfs_restore_confirm_title">確認還原</string>
@@ -538,7 +538,7 @@
     <string name="hide_bl_script_description">覆蓋引導鎖狀態属性於 late_start 服務模式</string>
     <string name="clear">清空</string>
     <string name="cleanup_residue">清理工具残留</string>
-    <string name="cleanup_residue_description">清理各種模組以及工具嘅残留文檔和目錄（可能會誤刪導致丢失以及無法啟動，謹慎使用）</string>
+    <string name="cleanup_residue_description">清理各種模組以及工具嘅残留檔案和目錄（可能會誤刪導致丢失以及無法啟動，謹慎使用）</string>
     <string name="susfs_edit_sus_path">編輯 SuS 路徑</string>
     <string name="edit_kstat_statically_title">編輯 Kstat 靜態配置</string>
     <string name="edit_kstat_path_title">編輯 Kstat 路徑</string>
@@ -598,14 +598,14 @@
     <string name="add_loop_path">添加循環路徑</string>
     <!-- 循環路徑功能描述 -->
     <string name="sus_loop_paths_description_title">循環路徑配置</string>
-    <string name="sus_loop_paths_description_text">循環路徑會喺每次非 root 用戶應用程式或隔離服務啟動時重新標記爲 SUS_PATH。這有助於解决添加嘅路徑可能因 inode 狀態還原或核心中 inode 重新創建而失效嘅問題</string>
+    <string name="sus_loop_paths_description_text">循環路徑會喺每次非 root 用戶應用程式或隔離服務啟動時重新標記為 SUS_PATH。這有助於解决添加嘅路徑可能因 inode 狀態還原或核心中 inode 重新創建而失效嘅問題</string>
     <string name="avc_log_spoofing">AVC 日誌欺騙</string>
     <string name="avc_log_spoofing_enabled">AVC 日誌欺騙已啟用</string>
     <string name="avc_log_spoofing_disabled">AVC 日誌欺騙已禁用</string>
     <string name="avc_log_spoofing_description">禁用: 禁用喺核心 AVC 日誌中欺騙 \'su\' 嘅 sus tcontext。\n
-啟用: 啟用喺核心 AVC 日誌中將 \'su\' 嘅 sus tcontext 欺騙爲 \'u:r:priv_app:s0:c512,c768\'</string>
+啟用: 啟用喺核心 AVC 日誌中將 \'su\' 嘅 sus tcontext 欺騙為 \'u:r:priv_app:s0:c512,c768\'</string>
     <string name="avc_log_spoofing_warning">重要提示：\n
-- 核心中預設配置爲 \'0\'\n
+- 核心中預設配置為 \'0\'\n
 - 啟用此功能有時會使開發人员喺調試權限或 SELinux 問題時难以識別原因，因此建議用戶喺調試時禁用此功能。</string>
     <string name="home_hook_type">鉤子類型</string>
     <!-- KPM patching related strings -->
@@ -623,13 +623,13 @@
     <string name="kpm_preparing_tools">準備 KPM 修補工具</string>
     <string name="kpm_applying_patch">正在應用 KPM 修補</string>
     <string name="kpm_undoing_patch">正在撤銷 KPM 修補</string>
-    <string name="kpm_found_image_file">搵到 Image 文檔: %s</string>
+    <string name="kpm_found_image_file">搵到 Image 檔案: %s</string>
     <string name="kpm_patch_success">KPM 修補成功</string>
     <string name="kpm_undo_patch_success">KPM 撤銷修補成功</string>
-    <string name="kpm_file_repacked">文檔重新打包完成</string>
+    <string name="kpm_file_repacked">檔案重新打包完成</string>
     <!-- KPM error messages -->
     <string name="kpm_extract_zip_failed">解壓壓缩包失敗</string>
-    <string name="kpm_image_file_not_found">搵唔到 Image 文檔</string>
+    <string name="kpm_image_file_not_found">搵唔到 Image 檔案</string>
     <string name="kpm_patch_failed">KPM 修補失敗</string>
     <string name="kpm_undo_patch_failed">KPM 撤銷修補失敗</string>
     <string name="kpm_patch_operation_failed">KPM 修補操作失敗: %s</string>
@@ -643,26 +643,26 @@
     <string name="uid_multi_user_scan_summary">開啟後將掃描所有用戶嘅應用程式，包括工作資料等</string>
     <string name="uid_scanner_setting_failed">配置失敗，請檢查權限</string>
     <string name="clean_runtime_environment">清理運行環境</string>
-    <string name="clean_runtime_environment_summary">清理運行時文檔並停止掃描服務</string>
-    <string name="clean_runtime_environment_confirm">您確定要清理運行環境嗎？這將停止掃描服務並刪除相關文檔</string>
+    <string name="clean_runtime_environment_summary">清理運行時檔案並停止掃描服務</string>
+    <string name="clean_runtime_environment_confirm">您確定要清理運行環境嗎？這將停止掃描服務並刪除相關檔案</string>
     <string name="clean_runtime_environment_success">運行環境清理成功</string>
     <string name="clean_runtime_environment_failed">運行環境清理失敗</string>
     <!-- 確認安装相關字元串 -->
     <string name="confirm_installation">確認安装</string>
-    <string name="confirm_multiple_installation">確認安装（%d 個文檔）</string>
+    <string name="confirm_multiple_installation">確認安装（%d 個檔案）</string>
     <string name="install_confirm">確認安装</string>
     <string name="module_package">模組</string>
     <string name="kernel_package">核心</string>
     <string name="unknown_package">未知類型</string>
     <string name="unknown_kernel">未知核心</string>
-    <string name="unknown_file">未知文檔</string>
+    <string name="unknown_file">未知檔案</string>
     <string name="version">版本</string>
     <string name="author">作者</string>
     <string name="description">描述</string>
     <string name="supported_devices">支援裝置</string>
     <!-- SUS Map related strings -->
     <string name="susfs_tab_sus_maps">SUS映射</string>
-    <string name="susfs_sus_map_label">庫文檔路徑</string>
+    <string name="susfs_sus_map_label">庫檔案路徑</string>
     <string name="susfs_add_sus_map">添加SUS映射</string>
     <string name="susfs_edit_sus_map">編輯SUS映射</string>
     <string name="susfs_sus_map_added_success">SUS映射添加成功: %1$s</string>
@@ -672,8 +672,8 @@
     <string name="susfs_reset_sus_maps_title">還原SUS映射</string>
     <string name="susfs_reset_sus_maps_message">這將移除所有已配置嘅SUS映射。此操作無法撤銷。</string>
     <string name="sus_maps_section">內存映射隱藏</string>
-    <string name="sus_maps_description_title">隱藏/proc/self/中各種映射中嘅mmap真實文檔</string>
-    <string name="sus_maps_description_text">從 /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap] 中隱藏內存映射嘅真實文檔路徑。請注意：此功能唔支援隱藏匿名內存映射，也無法隱藏由注入庫本身產生嘅內联鉤子或 PLT 鉤子。</string>
+    <string name="sus_maps_description_title">隱藏/proc/self/中各種映射中嘅mmap真實檔案</string>
+    <string name="sus_maps_description_text">從 /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap] 中隱藏內存映射嘅真實檔案路徑。請注意：此功能唔支援隱藏匿名內存映射，也無法隱藏由注入庫本身產生嘅內联鉤子或 PLT 鉤子。</string>
     <string name="sus_maps_warning">重要提示：對於具備完善注入檢測機制嘅應用程式，此功能可能無法有效繞過檢測。</string>
     <string name="sus_maps_debug_info">首先通過 ps -enf 查找目標應用程式嘅 PID 和 UID，然後檢查 /proc/&lt;pid&gt;/maps 中嘅相關路徑，並同 /proc/1/mountinfo 中嘅裝置號進行比對以確保一致性。祗有當裝置號一致時，隱藏映射才能正常工作。</string>
     <!-- Log Viewer -->
@@ -681,7 +681,7 @@
     <string name="log_viewer_back">返回</string>
     <string name="log_viewer_search">搜索</string>
     <string name="log_viewer_clear_logs">清空日誌</string>
-    <string name="log_viewer_clear_logs_confirm">確定要清空選中嘅日誌文檔嗎？此操作無法撤銷。</string>
+    <string name="log_viewer_clear_logs_confirm">確定要清空選中嘅日誌檔案嗎？此操作無法撤銷。</string>
     <string name="log_viewer_logs_cleared">日誌清空成功</string>
     <string name="log_viewer_filter_type">按類型篩選</string>
     <string name="log_viewer_all_types">所有類型</string>
@@ -719,9 +719,9 @@
     <string name="changes_take_effect_immediately">所有修改將即時生效</string>
     <string name="config_applied">配置已應用到核心</string>
     <string name="group_contains_apps">包含 %1$d 個應用程式</string>
-    <string name="meta_module_disabled">模組未掛載，因爲元模組已禁用</string>
-    <string name="meta_module_removed">模組未掛載，因爲元模組即將刪除</string>
-    <string name="no_meta_module_installed">模組未掛載，因爲未安装元模組</string>
+    <string name="meta_module_disabled">模組未掛載，因為元模組已禁用</string>
+    <string name="meta_module_removed">模組未掛載，因為元模組即將刪除</string>
+    <string name="no_meta_module_installed">模組未掛載，因為未安装元模組</string>
     <string name="network_offline">您處於離線狀態</string>
     <string name="network_retry">重試</string>
     <string name="please_check_network">請檢查網絡连接情況，然後稍後重試</string>
@@ -731,7 +731,7 @@
     <string name="assets_multiple_select_dialog_warning">冇任何附件被選擇</string>
     <string name="installed">已安装</string>
     <string name="open_module_home_page">喺浏览器中打開模組主頁</string>
-    <string name="readme">自述文檔</string>
+    <string name="readme">自述檔案</string>
     <string name="release">版本</string>
     <string name="info">資訊</string>
     <string name="author_link">模組作者鏈接</string>
@@ -745,12 +745,12 @@
     <string name="module_shortcut_icon_pick">選擇自定義圖標</string>
     <string name="module_shortcut_add">添加快捷方式</string>
     <string name="module_shortcut_not_supported">啟動器唔支援桌面快捷方式。</string>
-    <string name="module_shortcut_should_not_empty">"桌面快捷方式名稱唔得爲空"</string>
+    <string name="module_shortcut_should_not_empty">"桌面快捷方式名稱唔得為空"</string>
     <string name="module_shortcut_created">已喺桌面創建快捷方式。</string>
     <string name="module_shortcut_updated">快捷方式已更新。</string>
     <string name="module_shortcut_delete">刪除快捷方式</string>
     <string name="module_shortcut_type_title">選擇類型</string>
-    <string name="module_shortcut_permission_tip_xiaomi">請喺 Xiaomi 配置中爲本應用程式啟用“創建桌面快捷方式”權限。</string>
-    <string name="module_shortcut_permission_tip_oppo">請喺 OPPO 配置中爲本應用程式啟用“桌面快捷方式”權限。</string>
-    <string name="module_shortcut_permission_tip_default">若創建快捷方式失敗，請喺系統配置中爲本應用程式啟用桌面快捷方式權限。</string>
+    <string name="module_shortcut_permission_tip_xiaomi">請喺 Xiaomi 配置中為本應用程式啟用“創建桌面快捷方式”權限。</string>
+    <string name="module_shortcut_permission_tip_oppo">請喺 OPPO 配置中為本應用程式啟用“桌面快捷方式”權限。</string>
+    <string name="module_shortcut_permission_tip_default">若創建快捷方式失敗，請喺系統配置中為本應用程式啟用桌面快捷方式權限。</string>
 </resources>
