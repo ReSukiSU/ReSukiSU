@@ -96,7 +96,7 @@
     <string name="module_update">更新</string>
     <string name="module_downloading">正在下載模組：%s</string>
     <string name="module_start_downloading">開始下載：%s</string>
-    <string name="module_action_success">模組Action脚本執行成功.</string>
+    <string name="module_action_success">模組Action腳本執行成功.</string>
     <string name="new_version_available">發现新版本：%s，点击升級。</string>
     <string name="launch_app">啟動</string>
     <string name="force_stop_app" formatted="false">強制停止</string>
@@ -280,7 +280,7 @@
     <string name="horizon_cleaning_files">清理文檔…</string>
     <string name="horizon_copying_files">複製文檔…</string>
     <string name="horizon_extracting_tool">提取刷寫工具…</string>
-    <string name="horizon_patching_script">修補刷寫脚本…</string>
+    <string name="horizon_patching_script">修補刷寫腳本…</string>
     <string name="horizon_flashing">刷寫核心中…</string>
     <string name="horizon_flash_complete_status">刷寫完成</string>
     <!-- Slot selection related strings -->
