@@ -1,10 +1,12 @@
 package com.resukisu.resukisu.ui.component
 
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -40,10 +42,16 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorProducer
 import androidx.compose.ui.graphics.Shape
@@ -57,6 +65,8 @@ import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.haze
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private fun Modifier.textFieldBackground(color: ColorProducer, shape: Shape): Modifier =
     this.drawWithCache {
@@ -79,13 +89,44 @@ private fun CompactSearchBar(
     val focusManager = LocalFocusManager.current
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
+    val pressed by interactionSource.collectIsPressedAsState()
     val colors = inputFieldColors()
+    val coroutineScope = rememberCoroutineScope()
 
     val isImeVisible = WindowInsets.isImeVisible
+    val hasFocusReassignBug = Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1
+    var allowFocus by remember { mutableStateOf(!hasFocusReassignBug) }
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(pressed) {
+        if (pressed && hasFocusReassignBug && !allowFocus) {
+            allowFocus = true
+        }
+    }
+
+    LaunchedEffect(allowFocus) {
+        if (allowFocus && hasFocusReassignBug) {
+            delay(100)
+            focusRequester.requestFocus()
+        }
+    }
+
+    LaunchedEffect(focused) {
+        if (!focused && hasFocusReassignBug) {
+            allowFocus = false
+        }
+    }
 
     LaunchedEffect(isImeVisible) {
-        if (!isImeVisible && focused)
-            focusManager.clearFocus()
+        if (!isImeVisible && focused) {
+            if (hasFocusReassignBug) {
+                allowFocus = false
+                delay(100)
+                focusManager.clearFocus()
+            } else {
+                focusManager.clearFocus()
+            }
+        }
     }
 
     BackHandler(enabled = textFieldState.text.isNotEmpty()) {
@@ -100,12 +141,27 @@ private fun CompactSearchBar(
             .background(
                 MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = CardConfig.cardAlpha)
             )
-            .heightIn(0.dp, 45.dp),
+            .heightIn(0.dp, 45.dp)
+            .focusRequester(focusRequester)
+            .focusProperties {
+                canFocus = allowFocus
+            },
         textStyle = MaterialTheme.typography.bodyMedium.copy(
             color = MaterialTheme.colorScheme.onSurface
         ),
         interactionSource = interactionSource,
-        onKeyboardAction = { onSearch(textFieldState.text.toString()) },
+        onKeyboardAction = {
+            onSearch(textFieldState.text.toString())
+            if (hasFocusReassignBug) {
+                coroutineScope.launch {
+                    allowFocus = false
+                    delay(100)
+                    focusManager.clearFocus()
+                }
+            } else {
+                focusManager.clearFocus()
+            }
+        },
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         lineLimits = TextFieldLineLimits.SingleLine,
         decorator = TextFieldDefaults.decorator(
@@ -158,7 +214,6 @@ fun SearchAppBar(
 ) {
     val textFieldState = rememberTextFieldState(initialText = searchText)
     val keyboardController = LocalSoftwareKeyboardController.current
-    val focusManager = LocalFocusManager.current
 
     LaunchedEffect(textFieldState.text) {
         onSearchTextChange(textFieldState.text.toString())
@@ -218,7 +273,6 @@ fun SearchAppBar(
             textFieldState = textFieldState,
             onSearch = {
                 keyboardController?.hide()
-                focusManager.clearFocus()
             },
             placeholder = {
                 Text(
