@@ -7,25 +7,17 @@ use clap::{Args, Subcommand};
 
 use crate::android::susfs::{
     api::{
-        ExternalDir, SusfsAvcLogSpoofing, SusfsEnabledFeatures, SusfsHideSusMnts, SusfsLog,
-        SusfsOpenRedirect, SusfsSpoofCmdline, SusfsSusKstat, SusfsSusMap, SusfsSusPath, SusfsUname,
-        SusfsVariant, SusfsVersion,
+        self, SusfsEnabledFeatures, SusfsOpenRedirect, SusfsSpoofCmdline, SusfsSusKstat,
+        SusfsSusMap, SusfsUname, SusfsVariant, SusfsVersion,
     },
     magic::{
-        CMD_SUSFS_ADD_OPEN_REDIRECT, CMD_SUSFS_ADD_SUS_KSTAT, CMD_SUSFS_ADD_SUS_KSTAT_STATICALLY,
-        CMD_SUSFS_ADD_SUS_MAP, CMD_SUSFS_ADD_SUS_PATH, CMD_SUSFS_ADD_SUS_PATH_LOOP,
-        CMD_SUSFS_ENABLE_AVC_LOG_SPOOFING, CMD_SUSFS_ENABLE_LOG,
-        CMD_SUSFS_HIDE_SUS_MNTS_FOR_NON_SU_PROCS, CMD_SUSFS_SET_ANDROID_DATA_ROOT_PATH,
-        CMD_SUSFS_SET_CMDLINE_OR_BOOTCONFIG, CMD_SUSFS_SET_SDCARD_ROOT_PATH, CMD_SUSFS_SET_UNAME,
-        CMD_SUSFS_SHOW_ENABLED_FEATURES, CMD_SUSFS_SHOW_VARIANT, CMD_SUSFS_SHOW_VERSION,
-        CMD_SUSFS_UPDATE_SUS_KSTAT, ERR_CMD_NOT_SUPPORTED, SUSFS_ENABLED_FEATURES_SIZE,
-        SUSFS_FAKE_CMDLINE_OR_BOOTCONFIG_SIZE, SUSFS_MAX_VARIANT_BUFSIZE,
-        SUSFS_MAX_VERSION_BUFSIZE,
+        CMD_SUSFS_ADD_OPEN_REDIRECT, CMD_SUSFS_ADD_SUS_KSTAT_STATICALLY, CMD_SUSFS_ADD_SUS_MAP,
+        CMD_SUSFS_SET_CMDLINE_OR_BOOTCONFIG, CMD_SUSFS_SET_UNAME, CMD_SUSFS_SHOW_ENABLED_FEATURES,
+        CMD_SUSFS_SHOW_VARIANT, CMD_SUSFS_SHOW_VERSION, ERR_CMD_NOT_SUPPORTED,
+        SUSFS_ENABLED_FEATURES_SIZE, SUSFS_FAKE_CMDLINE_OR_BOOTCONFIG_SIZE,
+        SUSFS_MAX_VARIANT_BUFSIZE, SUSFS_MAX_VERSION_BUFSIZE,
     },
-    utils::{
-        copy_metadata_to_sus_kstat, fetch_metadata, handle_result, parse_or_default,
-        str_to_c_array, susfs_ctl,
-    },
+    utils::{fetch_metadata, handle_result, parse_or_default, str_to_c_array, susfs_ctl},
 };
 
 #[derive(Subcommand, Debug)]
@@ -130,91 +122,28 @@ pub struct AddSusKstatStaticallyArgs {
 pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
     match sub_commmand {
         SuSFSSubCommands::AddSusPath { path } => {
-            let md = fetch_metadata(&path)?;
-            let mut info = SusfsSusPath::default();
-            str_to_c_array(&path, &mut info.target_pathname);
-            info.target_ino = md.ino() as u64;
-            info.i_uid = md.uid() as u32;
-            info.err = ERR_CMD_NOT_SUPPORTED;
-
-            susfs_ctl(&mut info, CMD_SUSFS_ADD_SUS_PATH);
-            handle_result(info.err, CMD_SUSFS_ADD_SUS_PATH)?;
+            api::add_sus_path(&api::SusPathType::Normal, &path)?;
         }
         SuSFSSubCommands::AddSusPathLoop { path } => {
-            let md = fetch_metadata(&path)?;
-            let mut info = SusfsSusPath::default();
-            str_to_c_array(&path, &mut info.target_pathname);
-            info.target_ino = md.ino() as u64;
-            info.i_uid = md.uid() as u32;
-            info.err = ERR_CMD_NOT_SUPPORTED;
-
-            susfs_ctl(&mut info, CMD_SUSFS_ADD_SUS_PATH_LOOP);
-            handle_result(info.err, CMD_SUSFS_ADD_SUS_PATH_LOOP)?;
+            api::add_sus_path(&api::SusPathType::Loop, &path)?;
         }
         SuSFSSubCommands::SetAndroidDataRootPath { path } => {
-            let mut info = ExternalDir::default();
-            str_to_c_array(&path, &mut info.target_pathname);
-            info.cmd = CMD_SUSFS_SET_ANDROID_DATA_ROOT_PATH as i32;
-            info.err = ERR_CMD_NOT_SUPPORTED;
-
-            susfs_ctl(&mut info, CMD_SUSFS_SET_ANDROID_DATA_ROOT_PATH);
-            handle_result(info.err, CMD_SUSFS_SET_ANDROID_DATA_ROOT_PATH)?;
+            api::set_external_dir(&api::ExternalDirType::AndroidData, &path)?;
         }
         SuSFSSubCommands::SetSdcardRootPath { path } => {
-            let mut info = ExternalDir::default();
-            str_to_c_array(&path, &mut info.target_pathname);
-            info.cmd = CMD_SUSFS_SET_SDCARD_ROOT_PATH as i32;
-            info.err = ERR_CMD_NOT_SUPPORTED;
-
-            susfs_ctl(&mut info, CMD_SUSFS_SET_SDCARD_ROOT_PATH);
-            handle_result(info.err, CMD_SUSFS_SET_SDCARD_ROOT_PATH)?;
+            api::set_external_dir(&api::ExternalDirType::Sdcard, &path)?;
         }
         SuSFSSubCommands::HideSusMntsForNonSuProcs { enabled } => {
-            if enabled > 1 {
-                return Err(anyhow::format_err!("Invalid value for enabled (0 or 1)"));
-            }
-            let mut info = SusfsHideSusMnts {
-                enabled: enabled == 1,
-                err: ERR_CMD_NOT_SUPPORTED,
-            };
-            susfs_ctl(&mut info, CMD_SUSFS_HIDE_SUS_MNTS_FOR_NON_SU_PROCS);
-            handle_result(info.err, CMD_SUSFS_HIDE_SUS_MNTS_FOR_NON_SU_PROCS)?;
+            api::bool_enable(&api::BoolEnable::HideSusMntsForNonSuProcs, enabled)?;
         }
         SuSFSSubCommands::AddSusKstat { path } => {
-            let md = fetch_metadata(&path)?;
-            let mut info = SusfsSusKstat::default();
-            str_to_c_array(&path, &mut info.target_pathname);
-            info.is_statically = false;
-            info.target_ino = md.ino() as u64;
-            copy_metadata_to_sus_kstat(&mut info, &md);
-            info.err = ERR_CMD_NOT_SUPPORTED;
-
-            susfs_ctl(&mut info, CMD_SUSFS_ADD_SUS_KSTAT);
-            handle_result(info.err, CMD_SUSFS_ADD_SUS_KSTAT)?;
+            api::set_kstat(&api::SusKstatType::Add, &path)?;
         }
         SuSFSSubCommands::UpdateSusKstat { path } => {
-            let md = fetch_metadata(&path)?;
-            let mut info = SusfsSusKstat::default();
-            str_to_c_array(&path, &mut info.target_pathname);
-            info.is_statically = false;
-            info.target_ino = md.ino() as u64;
-            info.spoofed_size = md.size() as i64;
-            info.spoofed_blocks = md.blocks() as u64;
-            info.err = ERR_CMD_NOT_SUPPORTED;
-
-            susfs_ctl(&mut info, CMD_SUSFS_UPDATE_SUS_KSTAT);
-            handle_result(info.err, CMD_SUSFS_UPDATE_SUS_KSTAT)?;
+            api::set_kstat(&api::SusKstatType::Update, &path)?;
         }
         SuSFSSubCommands::UpdateSusKstatFullClone { path } => {
-            let md = fetch_metadata(&path)?;
-            let mut info = SusfsSusKstat::default();
-            str_to_c_array(&path, &mut info.target_pathname);
-            info.is_statically = false;
-            info.target_ino = md.ino() as u64;
-            info.err = ERR_CMD_NOT_SUPPORTED;
-
-            susfs_ctl(&mut info, CMD_SUSFS_UPDATE_SUS_KSTAT);
-            handle_result(info.err, CMD_SUSFS_UPDATE_SUS_KSTAT)?;
+            api::set_kstat(&api::SusKstatType::FullClone, &path)?;
         }
         SuSFSSubCommands::SetUname { release, version } => {
             let mut info = SusfsUname::default();
@@ -226,16 +155,7 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
             handle_result(info.err, CMD_SUSFS_SET_UNAME)?;
         }
         SuSFSSubCommands::EnableLog { enabled } => {
-            if enabled > 1 {
-                return Err(anyhow::format_err!("Invalid value for enabled (0 or 1)"));
-            }
-            let mut info = SusfsLog {
-                enabled: enabled == 1,
-                err: ERR_CMD_NOT_SUPPORTED,
-            };
-
-            susfs_ctl(&mut info, CMD_SUSFS_ENABLE_LOG);
-            handle_result(info.err, CMD_SUSFS_ENABLE_LOG)?;
+            api::bool_enable(&api::BoolEnable::Log, enabled)?;
         }
         SuSFSSubCommands::SetCmdlineOrBootconfig { path } => {
             let abs_path = fs::canonicalize(&path)?;
@@ -286,15 +206,7 @@ pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
             handle_result(info.err, CMD_SUSFS_ADD_SUS_MAP)?;
         }
         SuSFSSubCommands::EnableAvcLogSpoofing { enabled } => {
-            if enabled > 1 {
-                return Err(anyhow::format_err!("Invalid status number"));
-            }
-            let mut info = SusfsAvcLogSpoofing {
-                enabled: enabled == 1,
-                err: ERR_CMD_NOT_SUPPORTED,
-            };
-            susfs_ctl(&mut info, CMD_SUSFS_ENABLE_AVC_LOG_SPOOFING);
-            handle_result(info.err, CMD_SUSFS_ENABLE_AVC_LOG_SPOOFING)?;
+            api::bool_enable(&api::BoolEnable::AvcLogSpoofing, enabled)?;
         }
         SuSFSSubCommands::Show { info_type } => match info_type {
             ShowType::Version => {
