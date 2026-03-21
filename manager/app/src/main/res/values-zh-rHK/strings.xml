@@ -114,7 +114,7 @@
     <string name="app_profile_template_save">存儲</string>
     <string name="app_profile_template_delete">刪除</string>
     <string name="app_profile_template_view">查看模版</string>
-    <string name="app_profile_template_readonly">只读</string>
+    <string name="app_profile_template_readonly">祗讀</string>
     <string name="app_profile_template_id_exist">模版 ID 已存在！</string>
     <string name="app_profile_import_export">遵入/遵出</string>
     <string name="app_profile_import_from_clipboard">从剪切板遵入</string>
@@ -136,7 +136,7 @@
     <string name="direct_install">直接安装（推荐）</string>
     <string name="select_file">選擇一個需要修補嘅镜像</string>
     <string name="install_inactive_slot">安装到未使用嘅槽位（OTA 後）</string>
-    <string name="install_inactive_slot_warning">將喺重新啟動後強制切换到另一個槽位！注意只能喺 OTA 更新完成後嘅重新啟動之前使用。</string>
+    <string name="install_inactive_slot_warning">將喺重新啟動後強制切换到另一個槽位！注意祗能喺 OTA 更新完成後嘅重新啟動之前使用。</string>
     <string name="install_next">下一步</string>
     <string name="install_select_partition">選擇分區</string>
     <string name="install_upload_lkm_file">使用本地 LKM 文檔</string>
@@ -592,7 +592,7 @@
     <string name="susfs_reset_loop_paths_title">重置循環路徑</string>
     <string name="susfs_reset_loop_paths_message">確定要清空所有 SuS 循環路徑嗎？此操作無法撤銷。</string>
     <string name="susfs_loop_path_label">循環路徑</string>
-    <string name="susfs_loop_path_restriction_warning">注意：只有唔喺 /storage/ 和 /sdcard/ 內嘅路徑才能通過循環路徑添加。</string>
+    <string name="susfs_loop_path_restriction_warning">注意：祗有唔喺 /storage/ 和 /sdcard/ 內嘅路徑才能通過循環路徑添加。</string>
     <string name="susfs_loop_path_invalid_location">錯誤：循環路徑唔可以位於 /storage/ 或 /sdcard/ 目錄內</string>
     <string name="loop_paths_section">循環路徑</string>
     <string name="add_loop_path">添加循環路徑</string>
@@ -675,7 +675,7 @@
     <string name="sus_maps_description_title">隠藏/proc/self/中各种映射中嘅mmap真實文檔</string>
     <string name="sus_maps_description_text">从 /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap] 中隠藏內存映射嘅真實文檔路徑。請注意：此功能唔支援隠藏匿名內存映射，也無法隠藏由注入庫本身产生嘅內联鉤子或 PLT 鉤子。</string>
     <string name="sus_maps_warning">重要提示：對於具備完善注入檢測機制嘅應用程式，此功能可能無法有效繞過檢測。</string>
-    <string name="sus_maps_debug_info">首先通過 ps -enf 查找目標應用程式嘅 PID 和 UID，然後檢查 /proc/&lt;pid&gt;/maps 中嘅相關路徑，並與 /proc/1/mountinfo 中嘅裝置號進行比對以確保一致性。只有當裝置號一致時，隠藏映射才能正常工作。</string>
+    <string name="sus_maps_debug_info">首先通過 ps -enf 查找目標應用程式嘅 PID 和 UID，然後檢查 /proc/&lt;pid&gt;/maps 中嘅相關路徑，並與 /proc/1/mountinfo 中嘅裝置號進行比對以確保一致性。祗有當裝置號一致時，隠藏映射才能正常工作。</string>
     <!-- Log Viewer -->
     <string name="log_viewer_title">日誌查看器</string>
     <string name="log_viewer_back">返回</string>
