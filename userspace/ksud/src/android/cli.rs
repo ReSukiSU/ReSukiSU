@@ -5,8 +5,6 @@ use std::path::PathBuf;
 
 use log::{LevelFilter, error, info};
 
-#[cfg(all(target_arch = "aarch64", target_os = "android"))]
-use crate::android::susfs;
 use crate::{
     android::{
         debug, dynamic_manager, feature, init_event, ksucalls,
@@ -52,13 +50,6 @@ enum Commands {
         /// Restore adb properties after magica late-load
         #[arg(long)]
         post_magica: bool,
-    },
-
-    #[cfg(all(target_arch = "aarch64", target_os = "android"))]
-    /// Manage susfs component
-    Susfs {
-        #[command(subcommand)]
-        command: Susfs,
     },
 
     /// Manage auto apply user custom umount configs
@@ -124,6 +115,13 @@ enum Commands {
     /// Resetprop - Magisk-compatible system property tool
     Resetprop {
         /// Arguments passed to resetprop
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
+    },
+
+    #[cfg(all(target_arch = "aarch64", target_os = "android"))]
+    /// Manage susfs component
+    Susfs {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
         args: Vec<String>,
     },
@@ -515,17 +513,6 @@ mod kpm_cmd {
     }
 }
 
-#[cfg(all(target_arch = "aarch64", target_os = "android"))]
-#[derive(clap::Subcommand, Debug)]
-enum Susfs {
-    /// Get SUSFS Status
-    Status,
-    /// Get SUSFS Version
-    Version,
-    /// Get SUSFS enable Features
-    Features,
-}
-
 pub fn run() -> Result<()> {
     android_logger::init_once(
         Config::default()
@@ -544,25 +531,28 @@ pub fn run() -> Result<()> {
         crate::android::resetprop::resetprop_main(&all_args);
     }
 
+    #[cfg(all(target_arch = "aarch64", target_os = "android"))]
+    {
+        if arg0.ends_with("ksu_susfs") {
+            let all_args: Vec<String> = std::env::args().collect();
+            return crate::android::susfs::cli::run_from_args(&all_args);
+        }
+    }
+
     let cli = Args::parse();
 
     log::info!("command: {:?}", cli.command);
 
     let result = match cli.command {
+        #[cfg(all(target_arch = "aarch64", target_os = "android"))]
+        Commands::Susfs { args } => {
+            let mut full_args = vec!["ksu_susfs".to_string()];
+            full_args.extend(args);
+            crate::android::susfs::cli::run_from_args(&full_args)
+        }
         Commands::PostFsData => init_event::on_post_data_fs(),
         Commands::BootCompleted => {
             init_event::on_boot_completed();
-            Ok(())
-        }
-        #[cfg(all(target_arch = "aarch64", target_os = "android"))]
-        Commands::Susfs { command } => {
-            match command {
-                Susfs::Version => println!("{}", susfs::get_susfs_version()),
-
-                Susfs::Status => println!("{}", susfs::get_susfs_status()),
-
-                Susfs::Features => println!("{}", susfs::get_susfs_features()),
-            }
             Ok(())
         }
         Commands::UmountConfig { command } => match command {
