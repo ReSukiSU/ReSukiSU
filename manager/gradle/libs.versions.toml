@@ -2,7 +2,7 @@
 accompanist-drawablepainter = "0.37.3"
 agp = "9.1.0"
 gson = "2.13.2"
-kotlin = "2.3.10"
+kotlin = "2.3.20"
 m3color = "2025.4"
 haze = "1.7.2"
 capsule = "2.1.3"
