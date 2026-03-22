@@ -8,6 +8,7 @@
 #include <linux/version.h>
 #include <linux/stat.h>
 #include <linux/namei.h>
+#include <linux/kernel.h> // for container_of in UL
 
 #include "allowlist.h"
 #include "apk_sign.h"
@@ -17,6 +18,7 @@
 #include "apk_sign.h"
 #include "kernel_compat.h"
 #include "dynamic_manager.h"
+#include "ksud.h"
 
 #define SYSTEM_PACKAGES_LIST_PATH "/data/system/packages.list"
 #define MAX_APP_ID 10000 // FIRST_APPLICATION_UID - LAST_APPLICATION_UID = 19999
@@ -67,8 +69,6 @@ struct apk_path_hash {
     struct list_head list;
 };
 
-static struct list_head apk_path_hash_list = LIST_HEAD_INIT(apk_path_hash_list);
-
 struct my_dir_context {
     struct dir_context ctx;
     struct list_head *data_path_list;
@@ -88,13 +88,25 @@ struct my_dir_context {
 #define FILLDIR_ACTOR_STOP -EINVAL
 #endif
 
-FILLDIR_RETURN_TYPE my_actor(struct dir_context *ctx, const char *name,
-                             int namelen, loff_t off, u64 ino,
-                             unsigned int d_type)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)
+#define MY_ACTOR_CTX_ARG struct dir_context *ctx
+#else
+#define MY_ACTOR_CTX_ARG void *ctx_void
+#endif
+
+FILLDIR_RETURN_TYPE my_actor(MY_ACTOR_CTX_ARG, const char *name, int namelen,
+                             loff_t off, u64 ino, unsigned int d_type)
 {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0)
+    // then pull it out of the void
+    struct dir_context *ctx = (struct dir_context *)ctx_void;
+#endif
     struct my_dir_context *my_ctx =
         container_of(ctx, struct my_dir_context, ctx);
     char dirpath[DATA_PATH_LEN];
+
+    // we put the apk path we collected here
+    char *candidate_path = (char *)my_ctx->private_data;
 
     if (!my_ctx) {
         pr_err("Invalid context\n");
@@ -124,51 +136,27 @@ FILLDIR_RETURN_TYPE my_actor(struct dir_context *ctx, const char *name,
             return FILLDIR_ACTOR_CONTINUE;
         }
 
-        strscpy(data->dirpath, dirpath, DATA_PATH_LEN);
+        strncpy(data->dirpath, dirpath, DATA_PATH_LEN - 1);
         data->depth = my_ctx->depth - 1;
         list_add_tail(&data->list, my_ctx->data_path_list);
-    } else {
-        if ((namelen == 8) && (strncmp(name, "base.apk", namelen) == 0)) {
-            struct apk_path_hash *pos, *n;
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 8, 0)
-            unsigned int hash = full_name_hash(dirpath, strlen(dirpath));
-#else
-            unsigned int hash = full_name_hash(NULL, dirpath, strlen(dirpath));
-#endif
-            u8 signature_index = 0;
-            struct apk_path_hash *apk_data = NULL;
-            bool manager = is_manager_apk(dirpath, &signature_index);
+        return FILLDIR_ACTOR_CONTINUE;
+    }
 
-            list_for_each_entry (pos, &apk_path_hash_list, list) {
-                if (hash == pos->hash) {
-                    pos->exists = true;
-                    return FILLDIR_ACTOR_CONTINUE;
-                }
-            }
-
-            pr_info("Found new base.apk at path: %s\n", dirpath);
-
-            apk_data = kzalloc(sizeof(*apk_data), GFP_ATOMIC);
-            if (apk_data) {
-                apk_data->hash = hash;
-                apk_data->exists = true;
-                list_add_tail(&apk_data->list, &apk_path_hash_list);
-            }
-
-            if (manager) {
-                crown_manager(dirpath, my_ctx->private_data, signature_index);
-
-                // Manager found, clear APK cache list
-                list_for_each_entry_safe (pos, n, &apk_path_hash_list, list) {
-                    list_del(&pos->list);
-                    kfree(pos);
-                }
-            }
-        }
+    // now put this on candidate_path
+    if (d_type == DT_REG && !strncmp(name, "base.apk", 8)) {
+        snprintf(candidate_path, DATA_PATH_LEN, "%s/%.*s", my_ctx->parent_dir,
+                 namelen, name);
     }
 
     return FILLDIR_ACTOR_CONTINUE;
 }
+
+// compat: https://elixir.bootlin.com/linux/v3.9/source/include/linux/fs.h#L771
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 9, 0)
+#define S_MAGIC_COMPAT(x) ((x)->f_inode->i_sb->s_magic)
+#else
+#define S_MAGIC_COMPAT(x) ((x)->f_path.dentry->d_inode->i_sb->s_magic)
+#endif
 
 void search_manager(const char *path, int depth, struct list_head *uid_data)
 {
@@ -176,19 +164,17 @@ void search_manager(const char *path, int depth, struct list_head *uid_data)
     unsigned long data_app_magic = 0;
     struct apk_path_hash *pos, *n;
     struct list_head data_path_list;
-    struct data_path data;
+    struct data_path data = {};
 
     INIT_LIST_HEAD(&data_path_list);
 
-    // Initialize APK cache list
-    list_for_each_entry (pos, &apk_path_hash_list, list) {
-        pos->exists = false;
-    }
-
     // First depth
-    strscpy(data.dirpath, path, DATA_PATH_LEN);
+    strncpy(data.dirpath, path, DATA_PATH_LEN - 1);
     data.depth = depth;
     list_add_tail(&data.list, &data_path_list);
+
+    // we put the apk path we collected here
+    char candidate_path[DATA_PATH_LEN];
 
     for (i = depth; i >= 0; i--) {
         struct data_path *pos, *n;
@@ -198,10 +184,14 @@ void search_manager(const char *path, int depth, struct list_head *uid_data)
                 .ctx.actor = my_actor,
                 .data_path_list = &data_path_list,
                 .parent_dir = pos->dirpath,
-                .private_data = uid_data,
+                .private_data = candidate_path,
                 .depth = pos->depth,
             };
             struct file *file;
+            u8 signature_index = 0;
+
+            // make sure to clean buffer on every iteration
+            memset(candidate_path, 0, DATA_PATH_LEN);
 
             file = ksu_filp_open_compat(pos->dirpath, O_RDONLY | O_NOFOLLOW, 0);
             if (IS_ERR(file)) {
@@ -212,8 +202,8 @@ void search_manager(const char *path, int depth, struct list_head *uid_data)
 
             // grab magic on first folder, which is /data/app
             if (!data_app_magic) {
-                if (file->f_inode->i_sb->s_magic) {
-                    data_app_magic = file->f_inode->i_sb->s_magic;
+                if (S_MAGIC_COMPAT(file)) {
+                    data_app_magic = S_MAGIC_COMPAT(file);
                     pr_info("%s: dir: %s got magic! 0x%lx\n", __func__,
                             pos->dirpath, data_app_magic);
                 } else {
@@ -222,28 +212,36 @@ void search_manager(const char *path, int depth, struct list_head *uid_data)
                 }
             }
 
-            if (file->f_inode->i_sb->s_magic != data_app_magic) {
+            if (S_MAGIC_COMPAT(file) != data_app_magic) {
                 pr_info("%s: skip: %s magic: 0x%lx expected: 0x%lx\n", __func__,
-                        pos->dirpath, file->f_inode->i_sb->s_magic,
-                        data_app_magic);
+                        pos->dirpath, S_MAGIC_COMPAT(file), data_app_magic);
                 filp_close(file, NULL);
                 goto skip_iterate;
             }
 
             iterate_dir(file, &ctx.ctx);
             filp_close(file, NULL);
+
+            // ^ oh so thats the issue!
+            // we were calling is_manager_apk inside iterate_dir
+            // now we defer file opens after iterate_dir
+            // this way we dont open apks while inside that
+            if (!strstarts(candidate_path, "/data/ap"))
+                goto skip_iterate;
+
+            bool is_manager = is_manager_apk(candidate_path, &signature_index);
+            pr_info("Found new base.apk at path: %s, is_manager: %d\n",
+                    candidate_path, is_manager);
+
+            if (likely(!is_manager))
+                goto skip_iterate;
+
+            crown_manager(candidate_path, uid_data, signature_index);
+
         skip_iterate:
             list_del(&pos->list);
             if (pos != &data)
                 kfree(pos);
-        }
-    }
-
-    // Remove stale cached APK entries
-    list_for_each_entry_safe (pos, n, &apk_path_hash_list, list) {
-        if (!pos->exists) {
-            list_del(&pos->list);
-            kfree(pos);
         }
     }
 }
@@ -281,20 +279,20 @@ void track_throne(bool prune_only, bool force_search_manager)
 
     mutex_lock(&app_list_lock);
     if (unlikely(!last_app_id_map)) {
-        last_app_id_map = ksu_bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
+        last_app_id_map = bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
     }
     mutex_unlock(&app_list_lock);
 
-    curr_app_id_map = ksu_bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
+    curr_app_id_map = bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
     if (!curr_app_id_map) {
         pr_err("track_throne: failed to allocate curr_app_id_map\n");
         return;
     }
 
-    diff_map = ksu_bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
+    diff_map = bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
     if (!diff_map) {
         pr_err("track_throne: failed to allocate diff_map\n");
-        ksu_bitmap_free(curr_app_id_map); // Free allocated memory when failed
+        bitmap_free(curr_app_id_map); // Free allocated memory when failed
         return;
     }
     INIT_LIST_HEAD(&uid_list);
@@ -407,10 +405,52 @@ out:
     }
 
     if (curr_app_id_map)
-        ksu_bitmap_free(curr_app_id_map);
+        bitmap_free(curr_app_id_map);
     if (diff_map)
-        ksu_bitmap_free(diff_map);
+        bitmap_free(diff_map);
 }
+
+// for 6.8- kernel, we can use LSM hook in manual hook
+// 6.8+, we use pkg_observer
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0) && !defined(KSU_TP_HOOK)
+void ksu_handle_rename(struct dentry *old_dentry, struct dentry *new_dentry)
+{
+    // skip kernel threads
+    if (!current->mm) {
+        return;
+    }
+
+    // skip non system uid
+    if (ksu_get_uid_t(current_uid()) != 1000) {
+        return;
+    }
+
+    if (!old_dentry || !new_dentry) {
+        return;
+    }
+
+    // /data/system/packages.list.tmp -> /data/system/packages.list
+    if (strcmp(new_dentry->d_iname, "packages.list")) {
+        return;
+    }
+
+    char path[128];
+    char *buf = dentry_path_raw(new_dentry, path, sizeof(path));
+    if (IS_ERR(buf)) {
+        pr_err("dentry_path_raw failed.\n");
+        return;
+    }
+
+    if (!strstr(buf, "/system/packages.list")) {
+        return;
+    }
+
+    pr_info("renameat: %s -> %s, new path: %s\n", old_dentry->d_iname,
+            new_dentry->d_iname, buf);
+
+    track_throne(false, true);
+}
+#endif
 
 void ksu_throne_tracker_init(void)
 {

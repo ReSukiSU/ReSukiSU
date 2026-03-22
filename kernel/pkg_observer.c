@@ -110,7 +110,13 @@ static int watch_one_dir(struct watch_dir *wd)
 static void unwatch_one_dir(struct watch_dir *wd)
 {
     if (wd->mark) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0) ||                           \
+    defined(KSU_HAS_MODERN_FSNOTIFY_DESTROY_MARK)
+        // https://github.com/torvalds/linux/commit/e2a29943e9a2ee2aa737a77f550f46ba72269db4
         fsnotify_destroy_mark(wd->mark, g);
+#else
+        fsnotify_destroy_mark(wd->mark);
+#endif
         fsnotify_put_mark(wd->mark);
         wd->mark = NULL;
     }
