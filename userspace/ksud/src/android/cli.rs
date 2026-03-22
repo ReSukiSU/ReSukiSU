@@ -118,6 +118,13 @@ enum Commands {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
         args: Vec<String>,
     },
+
+    #[cfg(all(target_arch = "aarch64", target_os = "android"))]
+    /// Manage susfs component
+    Susfs {
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
+    },
 }
 
 #[derive(clap::Subcommand, Debug)]
@@ -525,8 +532,8 @@ pub fn run() -> Result<()> {
     }
 
     if arg0.ends_with("ksu_susfs") {
-        let _all_args: Vec<String> = std::env::args().collect();
-        return crate::android::susfs::cli::susfs_cli();
+        let all_args: Vec<String> = std::env::args().collect();
+        return crate::android::susfs::cli::run_from_args(&all_args);
     }
 
     let cli = Args::parse();
@@ -534,6 +541,11 @@ pub fn run() -> Result<()> {
     log::info!("command: {:?}", cli.command);
 
     let result = match cli.command {
+        Commands::Susfs { args } => {
+            let mut full_args = vec!["ksu_susfs".to_string()];
+            full_args.extend(args);
+            crate::android::susfs::cli::run_from_args(&full_args)
+        }
         Commands::PostFsData => init_event::on_post_data_fs(),
         Commands::BootCompleted => {
             init_event::on_boot_completed();

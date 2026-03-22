@@ -89,8 +89,8 @@ pub struct AddSusKstatStaticallyArgs {
     blksize: String,
 }
 
-pub fn susfs_cli() -> Result<()> {
-    let command = SuSFSSubCommands::parse();
+pub fn run_from_args(args: &[String]) -> Result<()> {
+    let command = SuSFSSubCommands::try_parse_from(args)?;
     match command {
         SuSFSSubCommands::AddSusPath { path } => {
             api::add_sus_path(&api::SusPathType::Normal, &path)?;

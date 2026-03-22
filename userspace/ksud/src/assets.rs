@@ -31,7 +31,7 @@ mod android {
         // Create ksu_susfs -> ksud symlink
         let ksu_susfs = KSU_SUSFS;
         let _ = std::fs::remove_file(ksu_susfs);
-        std::os::unix::fs::symlink("/data/adb/ksud", ksu_susfs);
+        std::os::unix::fs::symlink("/data/adb/ksud", ksu_susfs)?;
 
         Ok(())
     }
