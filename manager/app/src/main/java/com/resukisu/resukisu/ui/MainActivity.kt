@@ -316,16 +316,18 @@ class MainActivity : ComponentActivity() {
                         val navigationScope = rememberCoroutineScope()
                         val onBack: (() -> Unit) -> Unit = { callBack ->
                             navigationScope.launch {
-                                exitingPageKey = navigator.current().toString()
-                                exitAnimatable.animateTo(
-                                    targetValue = 1f,
-                                    animationSpec = tween(
-                                        durationMillis = 200,
-                                        easing = FastOutSlowInEasing
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                                    exitingPageKey = navigator.current().toString()
+                                    exitAnimatable.animateTo(
+                                        targetValue = 1f,
+                                        animationSpec = tween(
+                                            durationMillis = 200,
+                                            easing = FastOutSlowInEasing
+                                        )
                                     )
-                                )
+                                    exitAnimatable.snapTo(0f)
+                                }
 
-                                exitAnimatable.snapTo(0f)
                                 callBack()
 
                                 when (val top = navigator.current()) {
