@@ -5,8 +5,6 @@ use std::path::PathBuf;
 
 use log::{LevelFilter, error, info};
 
-#[cfg(all(target_arch = "aarch64", target_os = "android"))]
-use crate::android::susfs::cli::{SuSFSSubCommands, susfs_cli};
 use crate::{
     android::{
         debug, dynamic_manager, feature, init_event, ksucalls,
@@ -52,13 +50,6 @@ enum Commands {
         /// Restore adb properties after magica late-load
         #[arg(long)]
         post_magica: bool,
-    },
-
-    #[cfg(all(target_arch = "aarch64", target_os = "android"))]
-    /// Manage susfs component
-    Susfs {
-        #[command(subcommand)]
-        command: SuSFSSubCommands,
     },
 
     /// Manage auto apply user custom umount configs
@@ -533,6 +524,11 @@ pub fn run() -> Result<()> {
         crate::android::resetprop::resetprop_main(&all_args);
     }
 
+    if arg0.ends_with("ksu_susfs") {
+        let _all_args: Vec<String> = std::env::args().collect();
+        return crate::android::susfs::cli::susfs_cli();
+    }
+
     let cli = Args::parse();
 
     log::info!("command: {:?}", cli.command);
@@ -543,8 +539,6 @@ pub fn run() -> Result<()> {
             init_event::on_boot_completed();
             Ok(())
         }
-        #[cfg(all(target_arch = "aarch64", target_os = "android"))]
-        Commands::Susfs { command } => susfs_cli(command),
         Commands::UmountConfig { command } => match command {
             UmountConfigOp::Add { mnt, flags } => umount_config::add_umount(&mnt, flags),
             UmountConfigOp::Del { mnt } => umount_config::del_umount(&mnt),

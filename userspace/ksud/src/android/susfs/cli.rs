@@ -1,9 +1,10 @@
 use anyhow::Result;
-use clap::{Args, Subcommand};
+use clap::{Args, Parser, Subcommand};
 
 use crate::android::susfs::api::{self};
 
-#[derive(Subcommand, Debug)]
+#[derive(Parser, Debug)]
+#[command(long_about = None)]
 pub enum SuSFSSubCommands {
     /// Added path and all its sub-paths will be hidden from several syscalls
     AddSusPath {
@@ -88,8 +89,9 @@ pub struct AddSusKstatStaticallyArgs {
     blksize: String,
 }
 
-pub fn susfs_cli(sub_commmand: SuSFSSubCommands) -> Result<()> {
-    match sub_commmand {
+pub fn susfs_cli() -> Result<()> {
+    let command = SuSFSSubCommands::parse();
+    match command {
         SuSFSSubCommands::AddSusPath { path } => {
             api::add_sus_path(&api::SusPathType::Normal, &path)?;
         }
