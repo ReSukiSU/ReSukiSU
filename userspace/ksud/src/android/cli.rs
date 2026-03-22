@@ -73,6 +73,9 @@ enum Commands {
     /// Uninstall KernelSU modules and itself(LKM Only)
     Uninstall,
 
+    /// Unload KernelSU kernel module (LKM Only)
+    Unload,
+
     /// SELinux policy Patch tool
     Sepolicy {
         #[command(subcommand)]
@@ -670,6 +673,7 @@ pub fn run() -> Result<()> {
         }
         Commands::Install => utils::install(),
         Commands::Uninstall => utils::uninstall(),
+        Commands::Unload => crate::android::unload::unload(),
         Commands::Sepolicy { command } => match command {
             Sepolicy::Patch { sepolicy } => sepolicy::live_patch(&sepolicy),
             Sepolicy::Apply { file } => sepolicy::apply_file(file),
@@ -695,6 +699,10 @@ pub fn run() -> Result<()> {
             result
         }
         Commands::Services => {
+            if ksucalls::get_version() <= 0 {
+                info!("KernelSU not available, exiting services");
+                std::process::exit(0);
+            }
             init_event::on_services();
             Ok(())
         }

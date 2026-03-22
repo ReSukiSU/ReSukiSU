@@ -419,5 +419,10 @@ void ksu_throne_tracker_init(void)
 
 void ksu_throne_tracker_exit(void)
 {
-    // nothing to do
+    struct apk_path_hash *pos, *n;
+
+    list_for_each_entry_safe (pos, n, &apk_path_hash_list, list) {
+        list_del(&pos->list);
+        kfree(pos);
+    }
 }

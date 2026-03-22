@@ -1189,9 +1189,19 @@ void ksu_supercalls_init(void)
 
 void ksu_supercalls_exit(void)
 {
+    struct mount_entry *entry, *tmp;
+
 #ifdef KSU_TP_HOOK
     unregister_kprobe(&reboot_kp);
 #endif
+
+    down_write(&mount_list_lock);
+    list_for_each_entry_safe (entry, tmp, &mount_list, list) {
+        list_del(&entry->list);
+        kfree(entry->umountable);
+        kfree(entry);
+    }
+    up_write(&mount_list_lock);
 }
 
 static inline void ksu_ioctl_audit(unsigned int cmd, const char *cmd_name,

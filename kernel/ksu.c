@@ -2,6 +2,7 @@
 #include <linux/fs.h>
 #include <linux/kobject.h>
 #include <linux/module.h>
+#include <linux/rcupdate.h>
 #include <generated/utsrelease.h>
 #include <generated/compile.h>
 #include <linux/version.h> /* LINUX_VERSION_CODE, KERNEL_VERSION macros */
@@ -103,6 +104,9 @@ static inline void ksu_hook_exit(void)
 {
 #if defined(KSU_TP_HOOK)
     ksu_syscall_hook_manager_exit();
+#else
+    ksu_sucompat_exit();
+    ksu_setuid_hook_exit();
 #endif
 }
 
@@ -193,21 +197,22 @@ int __init kernelsu_init(void)
 extern void ksu_observer_exit(void);
 void kernelsu_exit(void)
 {
-    ksu_allowlist_exit();
+    // Phase 1: Stop all hooks first to prevent new callbacks
+    ksu_hook_exit();
+    ksu_supercalls_exit();
+    if (!ksu_late_loaded)
+        ksu_ksud_exit();
+    sukisu_exit();
 
+    // Wait for any in-flight RCU readers (e.g. handler traversing allow_list)
+    synchronize_rcu();
+
+    // Phase 2: Now safe to release data structures
     ksu_observer_exit();
 
     ksu_throne_tracker_exit();
-    if (!ksu_late_loaded)
-        ksu_ksud_exit();
 
-    ksu_hook_exit();
-    ksu_sucompat_exit();
-    ksu_setuid_hook_exit();
-
-    sukisu_exit();
-
-    ksu_supercalls_exit();
+    ksu_allowlist_exit();
 
     ksu_feature_exit();
 
@@ -221,8 +226,7 @@ module_init(kernelsu_init_early);
 #else
 module_init(kernelsu_init);
 #endif
-// TODO: exit safely
-// module_exit(kernelsu_exit);
+module_exit(kernelsu_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("weishu");
