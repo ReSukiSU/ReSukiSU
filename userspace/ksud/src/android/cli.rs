@@ -67,6 +67,9 @@ enum Commands {
         command: UmountConfigOp,
     },
 
+    /// Emulate system reboot
+    SoftReboot,
+
     /// Install KernelSU userspace component to system
     Install,
 
@@ -574,6 +577,7 @@ pub fn run() -> Result<()> {
             UmountConfigOp::Clear => umount_config::wipe_umount(),
             UmountConfigOp::List => umount_config::list_umount(),
         },
+        Commands::SoftReboot => init_event::soft_reboot(),
         Commands::Module { command } => {
             utils::switch_mnt_ns(1)?;
             match command {
