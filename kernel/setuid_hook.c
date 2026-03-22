@@ -21,11 +21,10 @@
 #include "setuid_hook.h"
 #include "klog.h" // IWYU pragma: keep
 #include "manager.h"
-#include "selinux/selinux.h"
 #include "seccomp_cache.h"
 #include "supercalls.h"
 #ifdef KSU_TP_HOOK
-#include "syscall_hook_manager.h"
+#include "tp_marker.h"
 #endif
 #include "kernel_compat.h"
 #include "kernel_umount.h"
@@ -64,7 +63,7 @@ static inline void ksu_set_file_immutable(const char *path_name, bool immutable)
     path_put(&path);
 }
 
-static inline void do_ksu_set_ksud_status(uid_t new_uid)
+static inline void ksu_set_ksud_status(uid_t new_uid)
 {
     u16 appid = new_uid % PER_USER_RANGE;
     int signature_index = ksu_get_manager_signature_index_by_appid(appid);
@@ -77,44 +76,7 @@ static inline void do_ksu_set_ksud_status(uid_t new_uid)
     }
 }
 
-#ifdef KSU_TP_HOOK
-struct ksud_status_tw {
-    struct callback_head cb;
-    uid_t new_uid;
-};
-
-static void ksud_status_tw_func(struct callback_head *cb)
-{
-    struct ksud_status_tw *tw = container_of(cb, struct ksud_status_tw, cb);
-    do_ksu_set_ksud_status(tw->new_uid);
-    kfree(tw);
-}
-
-#endif
-
-static inline void ksu_set_ksud_status(uid_t new_uid)
-{
-#ifndef KSU_TP_HOOK
-    do_ksu_set_ksud_status(new_uid);
-#else
-    struct ksud_status_tw *tw;
-
-    tw = kzalloc(sizeof(*tw), GFP_ATOMIC);
-    if (!tw)
-        return;
-
-    tw->cb.func = ksud_status_tw_func;
-    tw->new_uid = new_uid;
-
-    int err = task_work_add(current, &tw->cb, TWA_RESUME);
-    if (err) {
-        kfree(tw);
-        pr_warn("ksud lock add task_work failed\n");
-    }
-#endif
-}
-
-int ksu_handle_setuid(uid_t new_uid, uid_t old_uid, uid_t euid) // (new_euid)
+int ksu_handle_setuid(uid_t new_uid, uid_t old_uid)
 {
     // We are only interested in processes spawned by zygote.
     if (!is_zygote(current_cred())) {
@@ -189,7 +151,7 @@ int ksu_handle_setresuid(uid_t ruid, uid_t euid, uid_t suid)
     return 0; // dummy hook here
 #else
     // we rely on the fact that zygote always call setresuid(3) with same uids
-    return ksu_handle_setuid(ruid, current_uid().val, euid);
+    return ksu_handle_setuid(ruid, current_uid().val);
 #endif
 }
 

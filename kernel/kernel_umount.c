@@ -132,27 +132,10 @@ static void do_umount_for_current_task()
     revert_creds(saved);
 }
 
-#ifdef KSU_TP_HOOK
-struct umount_tw {
-    struct callback_head cb;
-};
-
-static void umount_tw_func(struct callback_head *cb)
-{
-    struct umount_tw *tw = container_of(cb, struct umount_tw, cb);
-    do_umount_for_current_task();
-    kfree(tw);
-}
-#endif
-
 int ksu_handle_umount(uid_t old_uid, uid_t new_uid)
 {
-#ifdef KSU_TP_HOOK
-    struct umount_tw *tw;
-#endif
-#ifdef CONFIG_KSU_SUSFS
     const struct cred *saved;
-#endif
+    struct mount_entry *entry;
 
     if (!ksu_cred) {
         return 0;
@@ -187,23 +170,17 @@ int ksu_handle_umount(uid_t old_uid, uid_t new_uid)
     // umount the target mnt
     pr_info("handle umount for uid: %d, pid: %d\n", new_uid, current->pid);
 
-#ifdef KSU_TP_HOOK
-    tw = kzalloc(sizeof(*tw), GFP_ATOMIC);
-    if (!tw)
-        return 0;
+    saved = override_creds(ksu_cred);
 
-    tw->cb.func = umount_tw_func;
-
-    int err = task_work_add(current, &tw->cb, TWA_RESUME);
-    if (err) {
-        kfree(tw);
-        pr_warn("unmount add task_work failed\n");
+    down_read(&mount_list_lock);
+    list_for_each_entry (entry, &mount_list, list) {
+        pr_info("%s: unmounting: %s flags 0x%x\n", __func__, entry->umountable,
+                entry->flags);
+        try_umount(entry->umountable, entry->flags);
     }
-#else
-    // manual hook, directly call umount,
-    // because there are not have the problem about atomic context
-    do_umount_for_current_task();
-#endif
+    up_read(&mount_list_lock);
+
+    revert_creds(saved);
 
 skip_umount_task:
     // do susfs setuid when susfs enabled

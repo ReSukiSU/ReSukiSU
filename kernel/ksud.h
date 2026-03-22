@@ -34,10 +34,7 @@ struct user_arg_ptr {
     } ptr;
 };
 
-#ifdef CONFIG_KSU_SUSFS
-int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
-                             struct user_arg_ptr *argv,
-                             struct user_arg_ptr *envp, int *flags);
-#endif // #ifdef CONFIG_KSU_SUSFS
+void ksu_handle_execveat_ksud(const char *filename, struct user_arg_ptr *argv,
+                              struct user_arg_ptr *envp, int *flags);
 
 #endif

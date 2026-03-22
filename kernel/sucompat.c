@@ -34,10 +34,6 @@
 #include "ksud.h"
 #include "sucompat.h"
 #include "app_profile.h"
-#include "util.h"
-#ifdef KSU_TP_HOOK
-#include "syscall_hook_manager.h"
-#endif // #ifdef KSU_TP_HOOK
 
 #include "sulog.h"
 
@@ -121,20 +117,7 @@ int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user,
     addr = untagged_addr((unsigned long)*filename_user);
     fn = (const char __user *)addr;
     memset(path, 0, sizeof(path));
-    ret = strncpy_from_user_nofault(path, fn, sizeof(path));
-
-    if (ret < 0 && try_set_access_flag(addr)) {
-        ret = strncpy_from_user_nofault(path, fn, sizeof(path));
-    }
-
-    if (ret < 0 && preempt_count()) {
-        /* This is crazy, but we know what we are doing:
-         * Temporarily exit atomic context to handle page faults, then restore it */
-        pr_info("Access filename failed, try rescue..\n");
-        preempt_enable_no_resched_notrace();
-        ret = strncpy_from_user(path, fn, sizeof(path));
-        preempt_disable_notrace();
-    }
+    ret = strncpy_from_user(path, fn, sizeof(path));
 
     if (ret < 0) {
         pr_warn("Access filename when execve failed: %ld", ret);
@@ -152,9 +135,7 @@ int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user,
     pr_info("sys_execve su found\n");
     *filename_user = ksud_user_path();
 
-    escape_with_root_profile();
-
-    return 0;
+    return escape_with_root_profile();
 }
 #endif
 
@@ -220,9 +201,7 @@ int ksu_handle_execve(int *fd, const char *filename, void *argv, void *envp,
     ksu_handle_execveat_init(filename);
 
     if (unlikely(ksu_execveat_hook)) {
-        if (ksu_handle_execveat_ksud(fd, filename, argv, envp, flags)) {
-            return 0;
-        }
+        ksu_handle_execveat_ksud(filename, argv, envp, flags);
     }
 
     return ksu_handle_execveat_sucompat(fd, filename, argv, envp, flags);

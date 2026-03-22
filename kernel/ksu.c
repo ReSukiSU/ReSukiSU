@@ -78,31 +78,33 @@ void sukisu_exit(void)
 }
 
 // dispatcher of ksu hooks
-#if defined(KSU_TP_HOOK)
+#ifdef KSU_TP_HOOK
 #include "syscall_hook_manager.h"
-#define ksu_hook_init() ksu_syscall_hook_manager_init()
-#define ksu_hook_exit() ksu_syscall_hook_manager_exit()
+#include "hook/syscall_hook.h"
+#endif
+
+static inline void ksu_hook_init(void)
+{
+#if defined(KSU_TP_HOOK)
+    ksu_syscall_hook_init();
+    ksu_syscall_hook_manager_init();
 #elif defined(CONFIG_KSU_MANUAL_HOOK)
-// only lsm hook need call init
 #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
-#define ksu_hook_init() ksu_lsm_hook_init()
-#else
-#define ksu_hook_init()                                                        \
-    do {                                                                       \
-    } while (0)
+    ksu_lsm_hook_init();
 #endif
-#define ksu_hook_exit()                                                        \
-    do {                                                                       \
-    } while (0)
 #elif defined(CONFIG_KSU_SUSFS)
-// susfs doesn't have exit
-#define ksu_hook_init() susfs_init()
-#define ksu_hook_exit()                                                        \
-    do {                                                                       \
-    } while (0)
+    susfs_init();
 #else
-#error Unsupport hook type
+#error "Unsupported hook type"
 #endif
+}
+
+static inline void ksu_hook_exit(void)
+{
+#if defined(KSU_TP_HOOK)
+    ksu_syscall_hook_manager_exit();
+#endif
+}
 
 int __init kernelsu_init(void)
 {
@@ -219,7 +221,8 @@ module_init(kernelsu_init_early);
 #else
 module_init(kernelsu_init);
 #endif
-module_exit(kernelsu_exit);
+// TODO: exit safely
+// module_exit(kernelsu_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("weishu");

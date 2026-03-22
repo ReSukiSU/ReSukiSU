@@ -32,7 +32,7 @@
 #include "selinux/selinux.h"
 #include "file_wrapper.h"
 #ifdef KSU_TP_HOOK
-#include "syscall_hook_manager.h"
+#include "tp_marker.h"
 #endif
 #include "dynamic_manager.h"
 

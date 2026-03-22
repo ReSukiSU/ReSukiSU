@@ -28,9 +28,6 @@
 #include "allowlist.h"
 #include "manager.h"
 #include "kernel_compat.h"
-#ifdef KSU_TP_HOOK
-#include "syscall_hook_manager.h"
-#endif // #ifdef KSU_TP_HOOK
 #include "su_mount_ns.h"
 
 #define FILE_MAGIC 0x7f4b5355 // ' KSU', u32
@@ -393,7 +390,7 @@ bool ksu_get_allow_list(int *array, u16 length, u16 *out_length, u16 *out_total,
     return true;
 }
 
-static void persistent_allow_list()
+void ksu_persistent_allow_list(void)
 {
     u32 magic = FILE_MAGIC;
     u32 version = FILE_FORMAT_VERSION;
@@ -434,42 +431,6 @@ static void persistent_allow_list()
 out:
     revert_creds(saved);
     filp_close(fp, 0);
-}
-
-#ifdef KSU_TP_HOOK
-// TODO: move to kernel thread or work queue
-static void do_persistent_allow_list(struct callback_head *_cb)
-{
-    persistent_allow_list();
-    kfree(_cb);
-}
-#endif
-
-void ksu_persistent_allow_list(void)
-{
-#ifdef KSU_TP_HOOK
-    struct task_struct *tsk;
-    struct callback_head *cb;
-
-    tsk = get_pid_task(find_vpid(1), PIDTYPE_PID);
-    if (!tsk) {
-        pr_err("save_allow_list find init task err\n");
-        return;
-    }
-
-    cb = kzalloc(sizeof(struct callback_head), GFP_KERNEL);
-    if (!cb) {
-        pr_err("save_allow_list alloc cb err\b");
-        goto put_task;
-    }
-    cb->func = do_persistent_allow_list;
-    task_work_add(tsk, cb, TWA_RESUME);
-
-put_task:
-    put_task_struct(tsk);
-#else
-    persistent_allow_list();
-#endif
 }
 
 void ksu_load_allow_list(void)

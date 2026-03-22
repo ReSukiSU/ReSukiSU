@@ -30,7 +30,7 @@
 #include "selinux/selinux.h"
 #include "su_mount_ns.h"
 #ifdef KSU_TP_HOOK
-#include "syscall_hook_manager.h"
+#include "tp_marker.h"
 #endif
 #include "sulog.h"
 
@@ -125,8 +125,9 @@ void disable_seccomp(struct task_struct *tsk)
 #endif
 }
 
-void escape_with_root_profile(void)
+int escape_with_root_profile(void)
 {
+    int ret = 0;
     struct cred *cred;
     // a bit useless, but we just want less ifdefs
     struct task_struct *p = current;
@@ -136,7 +137,7 @@ void escape_with_root_profile(void)
     cred = prepare_creds();
     if (!cred) {
         pr_warn("prepare_creds failed!\n");
-        return;
+        return -ENOMEM;
     }
 
     if (cred->euid.val == 0) {
@@ -173,6 +174,7 @@ void escape_with_root_profile(void)
      */
     new_user = alloc_uid(cred->uid);
     if (!new_user) {
+        ret = -ENOMEM;
         goto out_abort_creds;
     }
 
@@ -220,10 +222,11 @@ void escape_with_root_profile(void)
     }
 #endif
     setup_mount_ns(profile.namespaces);
-    return;
+    return 0;
 
 out_abort_creds:
     abort_creds(cred);
+    return ret;
 }
 
 void escape_to_root_for_init(void)

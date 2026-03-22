@@ -1,8 +1,5 @@
 #include <linux/rcupdate.h>
 #include <linux/slab.h>
-#ifdef KSU_TP_HOOK
-#include <linux/task_work.h>
-#endif
 #include <asm/current.h>
 #include <linux/cred.h>
 #include <linux/dcache.h>
@@ -38,10 +35,12 @@
 #include "klog.h" // IWYU pragma: keep
 #include "ksu.h"
 #include "ksud.h"
-#include "util.h"
 #include "kernel_compat.h"
 #include "selinux/selinux.h"
 #include "throne_tracker.h"
+#ifdef KSU_TP_HOOK
+#include "hook/syscall_hook.h"
+#endif
 
 bool ksu_module_mounted __read_mostly = false;
 bool ksu_boot_completed __read_mostly = false;
@@ -74,8 +73,6 @@ static void stop_execve_hook(void);
 static void stop_input_hook(void);
 
 #ifdef KSU_TP_HOOK
-static struct work_struct stop_init_rc_hook_work;
-static struct work_struct stop_execve_hook_work;
 static struct work_struct stop_input_hook_work;
 #else
 bool ksu_init_rc_hook __read_mostly = true;
@@ -197,16 +194,6 @@ static int __maybe_unused count(struct user_arg_ptr argv, int max)
     return i;
 }
 
-#ifdef KSU_TP_HOOK
-static void on_post_fs_data_cbfun(struct callback_head *cb)
-{
-    on_post_fs_data();
-}
-
-static struct callback_head on_post_fs_data_cb = { .func =
-                                                       on_post_fs_data_cbfun };
-#endif
-
 static bool check_argv(struct user_arg_ptr argv, int index,
                        const char *expected, char *buf, size_t buf_len)
 {
@@ -232,47 +219,9 @@ fail:
     return false;
 }
 
-static void ksu_apply_rules(void)
-{
-    apply_kernelsu_rules();
-    cache_sid();
-    setup_ksu_cred();
-}
-
-#ifdef KSU_TP_HOOK
-static void ksu_initialize_selinux_tw_func(struct callback_head *cb)
-{
-    ksu_apply_rules();
-    kfree(cb);
-}
-#endif
-
-static void ksu_initialize_selinux(void)
-{
-#ifdef KSU_TP_HOOK
-    // When tracepoint hook, we maybe in atomic context
-    // use task_work to escape that
-    struct callback_head *cb = kzalloc(sizeof(*cb), GFP_ATOMIC);
-    if (cb) {
-        cb->func = ksu_initialize_selinux_tw_func;
-        if (task_work_add(current, cb, TWA_RESUME)) {
-            kfree(cb);
-            pr_warn("ksu_initialize_selinux failed to add task work\n");
-        }
-    } else {
-        pr_warn("ksu_initialize_selinux failed to allocate task work\n");
-    }
-#else
-    // for manual hook, we NEVER in atomic context
-    // no need use task_work to escape
-    ksu_apply_rules();
-#endif
-}
-
 // IMPORTANT NOTE: the call from execve_handler_pre WON'T provided correct value for envp and flags in GKI version
-int ksu_handle_execveat_ksud(int *fd, const char *filename,
-                             struct user_arg_ptr *argv,
-                             struct user_arg_ptr *envp, int *flags)
+void ksu_handle_execveat_ksud(const char *filename, struct user_arg_ptr *argv,
+                              struct user_arg_ptr *envp, int *flags)
 {
     static const char app_process[] = "/system/bin/app_process";
     static bool first_zygote = true;
@@ -283,6 +232,7 @@ int ksu_handle_execveat_ksud(int *fd, const char *filename,
     static const char old_system_init[] = "/init";
     static bool init_second_stage_executed = false;
 
+    // https://cs.android.com/android/platform/superproject/+/android-16.0.0_r2:system/core/init/main.cpp;l=77
     if (unlikely(
             !memcmp(filename, system_bin_init, sizeof(system_bin_init) - 1) &&
             argv)) {
@@ -291,7 +241,9 @@ int ksu_handle_execveat_ksud(int *fd, const char *filename,
         if (!init_second_stage_executed &&
             check_argv(*argv, 1, "second_stage", buf, sizeof(buf))) {
             pr_info("/system/bin/init second_stage executed via argv1 check\n");
-            ksu_initialize_selinux();
+            apply_kernelsu_rules();
+            cache_sid();
+            setup_ksu_cred();
             init_second_stage_executed = true;
         }
     } else if (unlikely(!memcmp(filename, old_system_init,
@@ -306,7 +258,9 @@ int ksu_handle_execveat_ksud(int *fd, const char *filename,
             if (!init_second_stage_executed &&
                 check_argv(*argv, 1, "--second-stage", buf, sizeof(buf))) {
                 pr_info("/init second_stage executed via argv1 check\n");
-                ksu_initialize_selinux();
+                apply_kernelsu_rules();
+                cache_sid();
+                setup_ksu_cred();
                 init_second_stage_executed = true;
             }
         } else if (argc == 1 && !init_second_stage_executed && envp) {
@@ -335,7 +289,9 @@ int ksu_handle_execveat_ksud(int *fd, const char *filename,
                         (!strcmp(env_value, "1") ||
                          !strcmp(env_value, "true"))) {
                         pr_info("/init second_stage executed via envp check\n");
-                        ksu_initialize_selinux();
+                        apply_kernelsu_rules();
+                        cache_sid();
+                        setup_ksu_cred();
                         init_second_stage_executed = true;
                         break;
                     }
@@ -351,23 +307,11 @@ int ksu_handle_execveat_ksud(int *fd, const char *filename,
         if (check_argv(*argv, 1, "-Xzygote", buf, sizeof(buf))) {
             pr_info("exec zygote, /data prepared, second_stage: %d\n",
                     init_second_stage_executed);
-            rcu_read_lock();
-#ifdef KSU_TP_HOOK
-            struct task_struct *init_task =
-                rcu_dereference(current->real_parent);
-            if (init_task)
-                task_work_add(init_task, &on_post_fs_data_cb, TWA_RESUME);
-#else
-            // Not in tracepoint hook, directly call on_post_fs_data
             on_post_fs_data();
-#endif
-            rcu_read_unlock();
             first_zygote = false;
             stop_execve_hook();
         }
     }
-
-    return 0;
 }
 
 static ssize_t (*orig_read)(struct file *, char __user *, size_t, loff_t *);
@@ -612,11 +556,11 @@ void ksu_handle_initrc(struct file *file)
     // we only process the first read
     static bool rc_hooked = false;
     if (rc_hooked) {
-        // we don't need these kprobe, unregister it!
-        stop_init_rc_hook();
+        // we don't need these hooks, unregister it!
         return;
     }
     rc_hooked = true;
+    stop_init_rc_hook();
 
     // now we can sure that the init process is reading
     // `/init.rc` or `/system/etc/init/init.rc`
@@ -831,75 +775,68 @@ bool ksu_is_safe_mode()
 }
 
 #ifdef KSU_TP_HOOK
-
-static int sys_execve_handler_pre(struct kprobe *p, struct pt_regs *regs)
+static long (*orig_sys_execve)(const struct pt_regs *regs);
+static long ksu_sys_execve(const struct pt_regs *regs)
 {
-    struct pt_regs *real_regs = PT_REAL_REGS(regs);
-    const char __user **filename_user =
-        (const char **)&PT_REGS_PARM1(real_regs);
+    const char __user **filename_user = (const char **)&PT_REGS_PARM1(regs);
     const char __user *const __user *__argv =
-        (const char __user *const __user *)PT_REGS_PARM2(real_regs);
+        (const char __user *const __user *)PT_REGS_PARM2(regs);
     struct user_arg_ptr argv = { .ptr.native = __argv };
     char path[32];
     long ret;
     unsigned long addr;
     const char __user *fn;
 
-    int fd = AT_FDCWD;
-
     if (!filename_user)
-        return 0;
+        goto do_orig;
 
     addr = untagged_addr((unsigned long)*filename_user);
     fn = (const char __user *)addr;
 
     memset(path, 0, sizeof(path));
-    ret = strncpy_from_user_nofault(path, fn, 32);
-    if (ret < 0 && try_set_access_flag(addr)) {
-        ret = strncpy_from_user_nofault(path, fn, 32);
-    }
+    ret = strncpy_from_user(path, fn, 32);
     if (ret < 0) {
         pr_err("Access filename failed for execve_handler_pre\n");
-        return 0;
+        goto do_orig;
     }
-    return ksu_handle_execveat_ksud(&fd, path, &argv, NULL, NULL);
+
+    ksu_handle_execveat_ksud(path, &argv, NULL, NULL);
+
+do_orig:
+    return orig_sys_execve(regs);
 }
 
-static int sys_read_handler_pre(struct kprobe *p, struct pt_regs *regs)
+static long (*orig_sys_read)(const struct pt_regs *regs);
+static long ksu_sys_read(const struct pt_regs *regs)
 {
-    struct pt_regs *real_regs = PT_REAL_REGS(regs);
-    unsigned int fd = PT_REGS_PARM1(real_regs);
+    unsigned int fd = PT_REGS_PARM1(regs);
+    char __user **buf_ptr = (char __user **)&PT_REGS_PARM2(regs);
+    size_t *count_ptr = (size_t *)&PT_REGS_PARM3(regs);
 
-    ksu_handle_sys_read_fd(fd);
-    return 0;
+    ksu_handle_sys_read(fd, buf_ptr, count_ptr);
+    return orig_sys_read(regs);
 }
 
-static int sys_fstat_handler_pre(struct kretprobe_instance *p,
-                                 struct pt_regs *regs)
+static long (*orig_sys_fstat)(const struct pt_regs *regs);
+static long ksu_sys_fstat(const struct pt_regs *regs)
 {
-    struct pt_regs *real_regs = PT_REAL_REGS(regs);
-    unsigned int fd = PT_REGS_PARM1(real_regs);
-    void *statbuf = PT_REGS_PARM2(real_regs);
-    *(void **)&p->data = NULL;
+    unsigned int fd = PT_REGS_PARM1(regs);
+    void __user *statbuf = (void __user *)PT_REGS_PARM2(regs);
+    bool is_rc = false;
+    long ret;
 
     struct file *file = fget(fd);
-    if (!file)
-        return 1;
-    if (is_init_rc(file)) {
-        pr_info("stat init.rc");
+    if (file) {
+        if (is_init_rc(file)) {
+            pr_info("stat init.rc");
+            is_rc = true;
+        }
         fput(file);
-        *(void **)&p->data = statbuf;
-        return 0;
     }
-    fput(file);
-    return 1;
-}
 
-static int sys_fstat_handler_post(struct kretprobe_instance *p,
-                                  struct pt_regs *regs)
-{
-    void __user *statbuf = *(void **)&p->data;
-    if (statbuf) {
+    ret = orig_sys_fstat(regs);
+
+    if (is_rc) {
         void __user *st_size_ptr = statbuf + offsetof(struct stat, st_size);
         long size, new_size;
         if (!copy_from_user_nofault(&size, st_size_ptr, sizeof(long))) {
@@ -916,7 +853,7 @@ static int sys_fstat_handler_post(struct kretprobe_instance *p,
         }
     }
 
-    return 0;
+    return ret;
 }
 
 static int input_handle_event_handler_pre(struct kprobe *p,
@@ -928,38 +865,10 @@ static int input_handle_event_handler_pre(struct kprobe *p,
     return ksu_handle_input_handle_event(type, code, value);
 }
 
-static struct kprobe execve_kp = {
-    .symbol_name = SYS_EXECVE_SYMBOL,
-    .pre_handler = sys_execve_handler_pre,
-};
-
-static struct kprobe sys_read_kp = {
-    .symbol_name = SYS_READ_SYMBOL,
-    .pre_handler = sys_read_handler_pre,
-};
-
-static struct kretprobe sys_fstat_kp = {
-    .kp.symbol_name = SYS_FSTAT_SYMBOL,
-    .entry_handler = sys_fstat_handler_pre,
-    .handler = sys_fstat_handler_post,
-    .data_size = sizeof(void *),
-};
-
 static struct kprobe input_event_kp = {
     .symbol_name = "input_event",
     .pre_handler = input_handle_event_handler_pre,
 };
-
-static void do_stop_init_rc_hook(struct work_struct *work)
-{
-    unregister_kprobe(&sys_read_kp);
-    unregister_kretprobe(&sys_fstat_kp);
-}
-
-static void do_stop_execve_hook(struct work_struct *work)
-{
-    unregister_kprobe(&execve_kp);
-}
 
 static void do_stop_input_hook(struct work_struct *work)
 {
@@ -970,8 +879,9 @@ static void do_stop_input_hook(struct work_struct *work)
 static void stop_init_rc_hook(void)
 {
 #ifdef KSU_TP_HOOK
-    bool ret = schedule_work(&stop_init_rc_hook_work);
-    pr_info("unregister init_rc_hook kprobe: %d!\n", ret);
+    ksu_syscall_table_unhook(__NR_read);
+    ksu_syscall_table_unhook(__NR_fstat);
+    pr_info("unregister init_rc syscall hook\n");
 #else
     ksu_init_rc_hook = false;
     pr_info("stop init_rc_hook!\n");
@@ -981,8 +891,8 @@ static void stop_init_rc_hook(void)
 static void stop_execve_hook(void)
 {
 #ifdef KSU_TP_HOOK
-    bool ret = schedule_work(&stop_execve_hook_work);
-    pr_info("unregister execve kprobe: %d!\n", ret);
+    ksu_syscall_table_unhook(__NR_execve);
+    pr_info("unhook sys_execve\n");
 #else
     ksu_execveat_hook = false;
     pr_info("stop execve_hook\n");
@@ -1015,20 +925,13 @@ void ksu_ksud_init(void)
 #ifdef KSU_TP_HOOK
     int ret;
 
-    ret = register_kprobe(&execve_kp);
-    pr_info("ksud: execve_kp: %d\n", ret);
-
-    ret = register_kprobe(&sys_read_kp);
-    pr_info("ksud: sys_read_kp: %d\n", ret);
-
-    ret = register_kretprobe(&sys_fstat_kp);
-    pr_info("ksud: sys_fstat_kp: %d\n", ret);
+    ksu_syscall_table_hook(__NR_execve, ksu_sys_execve, &orig_sys_execve);
+    ksu_syscall_table_hook(__NR_read, ksu_sys_read, &orig_sys_read);
+    ksu_syscall_table_hook(__NR_fstat, ksu_sys_fstat, &orig_sys_fstat);
 
     ret = register_kprobe(&input_event_kp);
     pr_info("ksud: input_event_kp: %d\n", ret);
 
-    INIT_WORK(&stop_init_rc_hook_work, do_stop_init_rc_hook);
-    INIT_WORK(&stop_execve_hook_work, do_stop_execve_hook);
     INIT_WORK(&stop_input_hook_work, do_stop_input_hook);
 #endif
 #ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_INPUT_HOOK
@@ -1039,11 +942,13 @@ void ksu_ksud_init(void)
 void ksu_ksud_exit(void)
 {
 #ifdef KSU_TP_HOOK
-    unregister_kprobe(&execve_kp);
-    // this should be done before unregister sys_read_kp
-    // unregister_kprobe(&sys_read_kp);
+    stop_execve_hook();
+    // TODO:
+    // this should be done before unregister vfs_read_kp
+    // stop_init_rc_hook();
     unregister_kprobe(&input_event_kp);
 #endif
+
 #ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_INPUT_HOOK
     vol_detector_exit();
 #endif
