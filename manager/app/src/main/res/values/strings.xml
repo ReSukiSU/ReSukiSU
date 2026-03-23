@@ -735,7 +735,7 @@
     <string name="please_check_network">Please check your internet connection and try again</string>
     <string name="confirm_install_module_title">Do you want to install module %s?</string>
     <string name="assets_multiple_select_dialog_title">Select assets to install</string>
-    <string name="assets_multiple_select_dialog_content_description">Size: %s, Download count: %s</string>
+    <string name="assets_multiple_select_dialog_content_description">Size: %1$s, Download count: %2$s</string>
     <string name="assets_multiple_select_dialog_warning">No assets selected</string>
     <string name="installed">Installed</string>
     <string name="open_module_home_page">Open module homepage in browser</string>

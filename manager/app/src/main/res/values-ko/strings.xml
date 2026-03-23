@@ -718,7 +718,7 @@
     <string name="please_check_network">인터넷 연결을 확인하고 다시 시도하세요.</string>
     <string name="confirm_install_module_title">%s 모듈을 설치할까요?</string>
     <string name="assets_multiple_select_dialog_title">설치할 애셋 선택</string>
-    <string name="assets_multiple_select_dialog_content_description">크기: %s, 다운로드 수: %s</string>
+    <string name="assets_multiple_select_dialog_content_description">크기: %1$s, 다운로드 수: %2$s</string>
     <string name="assets_multiple_select_dialog_warning">선택된 애셋 없음</string>
     <string name="installed">설치됨</string>
     <string name="open_module_home_page">브라우저에서 모듈 홈페이지 열기</string>
