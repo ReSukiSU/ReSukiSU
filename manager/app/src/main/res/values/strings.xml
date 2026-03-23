@@ -89,7 +89,7 @@
     <string name="profile_umount_modules">Umount modules</string>
     <string name="failed_to_update_app_profile">Failed to update app profile for %s</string>
     <string name="debug_version_notice">"You are using DEBUG build of the manager, if you don't know what DEBUG version is, switch to a RELEASE build immediately"</string>
-    <string name="unofficial_version_notice">"The manager you are using is not the official %s manager, and you may not be able to obtain permissions</string>
+    <string name="unofficial_version_notice">"The manager you are using is not the official %s manager, and you may not be able to obtain permissions"</string>
     <string name="settings_umount_modules_default">Umount modules by default</string>
     <string name="settings_umount_modules_default_summary">The global default value for \"Umount modules\" in App Profile. If enabled, it removes all module modifications from the system for apps that don\'t have a profile set</string>
     <string name="profile_umount_modules_summary">Enabling this option will allow KernelSU to restore any modified files by the modules for this app</string>
@@ -270,7 +270,7 @@
     <string name="kpm_install_mode">KPM install</string>
     <string name="kpm_install_mode_load">Load</string>
     <string name="kpm_install_mode_embed">Embed</string>
-    <string name="kpm_install_mode_description">Please select %1\$s module installation mode\n\nLoad: temporarily load the module\nEmbedded: permanently install into the system</string>
+    <string name="kpm_install_mode_description">Please select %1$s module installation mode\n\nLoad: temporarily load the module\nEmbedded: permanently install into the system</string>
     <string name="snackbar_failed_to_check_module_file">Unable to check if module file exists</string>
     <string name="theme_color">Theme color</string>
     <string name="invalid_file_type">Incorrect file type! Please select .kpm file</string>
@@ -297,7 +297,7 @@
     <string name="horizon_getting_original_slot">Getting the original slot</string>
     <string name="horizon_setting_target_slot">Setting the specified slot</string>
     <string name="horizon_restoring_original_slot">Restore default slot</string>
-    <string name="current_slot">Current system default slot: %1$s </string>
+    <string name="current_slot">Current system default slot: %1$s</string>
     <!-- Error Messages -->
     <string name="horizon_copy_failed">Copy failed</string>
     <string name="horizon_unknown_error">Unknown error</string>
