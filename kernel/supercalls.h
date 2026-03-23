@@ -194,6 +194,7 @@ struct ksu_get_managers_cmd {
 #define KSU_IOCTL_MANAGE_MARK _IOC(_IOC_READ | _IOC_WRITE, 'K', 16, 0)
 #define KSU_IOCTL_NUKE_EXT4_SYSFS _IOC(_IOC_WRITE, 'K', 17, 0)
 #define KSU_IOCTL_MANAGE_TRY_UMOUNT _IOC(_IOC_WRITE, 'K', 18, 0)
+#define KSU_IOCTL_SET_INIT_PGRP _IO('K', 19)
 
 // Other IOCTL command definitions
 #define KSU_IOCTL_GET_FULL_VERSION _IOC(_IOC_READ, 'K', 100, 0)

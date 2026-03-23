@@ -22,6 +22,7 @@ const KSU_IOCTL_GET_WRAPPER_FD: i32 = _IOW::<()>(K, 15);
 const KSU_IOCTL_MANAGE_MARK: i32 = _IOWR::<()>(K, 16);
 const KSU_IOCTL_NUKE_EXT4_SYSFS: i32 = _IOW::<()>(K, 17);
 const KSU_IOCTL_MANAGE_TRY_UMOUNT: i32 = _IOW::<()>(K, 18);
+const KSU_IOCTL_SET_INIT_PGRP: i32 = _IO(K, 19);
 
 const SUKISU_IOCTL_DYNAMIC_MANAGER: i32 = _IOWR::<()>(K, 103);
 
@@ -350,6 +351,14 @@ pub fn umount_list_del(path: &str) -> anyhow::Result<()> {
     ksuctl(KSU_IOCTL_MANAGE_TRY_UMOUNT, &raw mut cmd)?;
     Ok(())
 }
+
+/// Set current process's process group to init_group (pgid = 0)
+pub fn set_init_pgrp() -> std::io::Result<()> {
+    ksuctl(KSU_IOCTL_SET_INIT_PGRP, std::ptr::null_mut::<u8>())?;
+    Ok(())
+}
+
+// downstream begin
 
 pub fn dynamic_manager_set(size: u32, hash: [u8; 64]) -> anyhow::Result<()> {
     let mut cmd = DynamicManage {

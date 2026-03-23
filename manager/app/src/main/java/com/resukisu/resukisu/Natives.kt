@@ -19,7 +19,8 @@ object Natives {
     // 12143: breaking: new supercall impl
     // 32310: new get_allow_list ioctl
     // 34634(upstream 32336): new set_sepolicy ioctl 
-    const val MINIMAL_SUPPORTED_KERNEL = 34634
+    // 34685(upstream 32377): add set_init_pgrp ioctl
+    const val MINIMAL_SUPPORTED_KERNEL = 34685
 
     const val KERNEL_SU_DOMAIN = "u:r:su:s0"
 
