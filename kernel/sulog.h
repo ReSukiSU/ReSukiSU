@@ -24,20 +24,19 @@ static inline size_t strlcpy(char *dest, const char *src, size_t size)
 }
 #endif
 
-#define KSU_STRSCPY(dst, src, size)                                            \
-    do {                                                                       \
-        if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)) {                  \
-            strscpy(dst, src, size);                                           \
-        } else {                                                               \
-            strlcpy(dst, src, size);                                           \
-        }                                                                      \
+#define KSU_STRSCPY(dst, src, size)                                                                                    \
+    do {                                                                                                               \
+        if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)) {                                                          \
+            strscpy(dst, src, size);                                                                                   \
+        } else {                                                                                                       \
+            strlcpy(dst, src, size);                                                                                   \
+        }                                                                                                              \
     } while (0)
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 8, 0)
 #include <linux/rtc.h>
 
-static inline void time64_to_tm(time64_t totalsecs, int offset,
-                                struct tm *result)
+static inline void time64_to_tm(time64_t totalsecs, int offset, struct tm *result)
 {
     struct rtc_time rtc_tm;
     rtc_time64_to_tm(totalsecs, &rtc_tm);
@@ -82,14 +81,10 @@ struct sulog_entry {
 };
 
 void ksu_sulog_report_su_grant(uid_t uid, const char *comm, const char *method);
-void ksu_sulog_report_su_attempt(uid_t uid, const char *comm,
-                                 const char *target_path, bool success);
-void ksu_sulog_report_permission_check(uid_t uid, const char *comm,
-                                       bool allowed);
-void ksu_sulog_report_manager_operation(const char *operation,
-                                        uid_t manager_uid, uid_t target_uid);
-void ksu_sulog_report_syscall(uid_t uid, const char *comm, const char *syscall,
-                              const char *args);
+void ksu_sulog_report_su_attempt(uid_t uid, const char *comm, const char *target_path, bool success);
+void ksu_sulog_report_permission_check(uid_t uid, const char *comm, bool allowed);
+void ksu_sulog_report_manager_operation(const char *operation, uid_t manager_uid, uid_t target_uid);
+void ksu_sulog_report_syscall(uid_t uid, const char *comm, const char *syscall, const char *args);
 
 int ksu_sulog_init(void);
 void ksu_sulog_exit(void);

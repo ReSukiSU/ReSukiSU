@@ -97,10 +97,8 @@ extern bool ksu_kernel_umount_enabled;
 // WARNING!!!! THIS SHOULDN'T BE CALLED BY UNTRUSTED CONTEXT
 // IT IS DESIGNED ONLY FOR TRACEPOINT HOOK, BECAUSE CHECKS ALREADY COMPLETE WHEN TP REGISTER
 // ESPECIALLY DON'T CALL THAT IN MANUAL HOOK
-int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user,
-                                           void *__never_use_argv,
-                                           void *__never_use_envp,
-                                           int *__never_use_flags)
+int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user, void *__never_use_argv,
+                                           void *__never_use_envp, int *__never_use_flags)
 {
     const char su[] = SU_PATH;
     const char __user *fn;
@@ -141,8 +139,7 @@ int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user,
 
 // the call from execve_handler_pre does not provide correct values for __never_use_* arguments.
 // keep these arguments for consistency with manually patched code after execve_handler_pre is fixed.
-int ksu_handle_execveat_sucompat(int *fd, const char *filename,
-                                 void *__never_use_argv, void *__never_use_envp,
+int ksu_handle_execveat_sucompat(int *fd, const char *filename, void *__never_use_argv, void *__never_use_envp,
                                  int *__never_use_flags)
 {
     bool is_allowed = ksu_is_allow_uid_for_current(current_uid().val);
@@ -175,18 +172,13 @@ static inline void ksu_handle_execveat_init(const char *name)
 {
     if (current->pid != 1 && is_init(get_current_cred())) {
         if (unlikely(strcmp(name, KSUD_PATH) == 0)) {
-            pr_info(
-                "hook_manager: escape to root for init executing ksud: %d\n",
-                current->pid);
+            pr_info("hook_manager: escape to root for init executing ksud: %d\n", current->pid);
             escape_to_root_for_init();
         }
 #ifdef CONFIG_KSU_SUSFS
-        else if (likely(strstr(name, "/app_process") == NULL &&
-                        strstr(name, "/adbd") == NULL) &&
+        else if (likely(strstr(name, "/app_process") == NULL && strstr(name, "/adbd") == NULL) &&
                  !susfs_is_current_proc_umounted()) {
-            pr_info(
-                "susfs: mark no sucompat checks for pid: '%d', exec: '%s'\n",
-                current->pid, name);
+            pr_info("susfs: mark no sucompat checks for pid: '%d', exec: '%s'\n", current->pid, name);
             susfs_set_current_proc_umounted();
         }
 #endif
@@ -195,8 +187,7 @@ static inline void ksu_handle_execveat_init(const char *name)
 
 extern bool ksu_execveat_hook __read_mostly;
 
-int ksu_handle_execve(int *fd, const char *filename, void *argv, void *envp,
-                      int *flags)
+int ksu_handle_execve(int *fd, const char *filename, void *argv, void *envp, int *flags)
 {
     ksu_handle_execveat_init(filename);
 
@@ -208,8 +199,7 @@ int ksu_handle_execve(int *fd, const char *filename, void *argv, void *envp,
 }
 
 // old hook, link to ksu_handle_execve
-int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv,
-                        void *envp, int *flags)
+int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv, void *envp, int *flags)
 {
     struct filename *filename;
     filename = *filename_ptr;
@@ -221,8 +211,7 @@ int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv,
 }
 #endif
 
-int ksu_handle_faccessat(int *dfd, const char __user **filename_user, int *mode,
-                         int *__unused_flags)
+int ksu_handle_faccessat(int *dfd, const char __user **filename_user, int *mode, int *__unused_flags)
 {
     char path[sizeof(su_path) + 1] = { 0 };
 
@@ -265,8 +254,7 @@ int ksu_handle_stat(int *dfd, struct filename **filename, int *flags)
     }
 
 #if __SULOG_GATE
-    ksu_sulog_report_syscall(current_uid().val, NULL, "newfstatat",
-                             (*filename)->name);
+    ksu_sulog_report_syscall(current_uid().val, NULL, "newfstatat", (*filename)->name);
 #endif
     pr_info("ksu_handle_stat: su->sh!\n");
     memcpy((void *)((*filename)->name), sh_path, sizeof(sh_path));

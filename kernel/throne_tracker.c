@@ -30,8 +30,7 @@ struct uid_data {
 static unsigned long *last_app_id_map = NULL;
 static DEFINE_MUTEX(app_list_lock);
 
-static void crown_manager(const char *apk, struct list_head *uid_data,
-                          u8 signature_index)
+static void crown_manager(const char *apk, struct list_head *uid_data, u8 signature_index)
 {
     char pkg[KSU_MAX_PACKAGE_NAME];
     struct uid_data *np;
@@ -44,8 +43,7 @@ static void crown_manager(const char *apk, struct list_head *uid_data,
 
     list_for_each_entry (np, uid_data, list) {
         if (strncmp(np->package, pkg, KSU_MAX_PACKAGE_NAME) == 0) {
-            pr_info("Crowning manager: %s uid=%d, signature_index=%d\n", pkg,
-                    np->uid, signature_index);
+            pr_info("Crowning manager: %s uid=%d, signature_index=%d\n", pkg, np->uid, signature_index);
 
             ksu_register_manager(np->uid, signature_index);
             break;
@@ -88,12 +86,10 @@ struct my_dir_context {
 #define FILLDIR_ACTOR_STOP -EINVAL
 #endif
 
-FILLDIR_RETURN_TYPE my_actor(struct dir_context *ctx, const char *name,
-                             int namelen, loff_t off, u64 ino,
+FILLDIR_RETURN_TYPE my_actor(struct dir_context *ctx, const char *name, int namelen, loff_t off, u64 ino,
                              unsigned int d_type)
 {
-    struct my_dir_context *my_ctx =
-        container_of(ctx, struct my_dir_context, ctx);
+    struct my_dir_context *my_ctx = container_of(ctx, struct my_dir_context, ctx);
     char dirpath[DATA_PATH_LEN];
 
     if (!my_ctx) {
@@ -104,14 +100,12 @@ FILLDIR_RETURN_TYPE my_actor(struct dir_context *ctx, const char *name,
     if (!strncmp(name, "..", namelen) || !strncmp(name, ".", namelen))
         return FILLDIR_ACTOR_CONTINUE; // Skip "." and ".."
 
-    if (d_type == DT_DIR && namelen >= 8 && !strncmp(name, "vmdl", 4) &&
-        !strncmp(name + namelen - 4, ".tmp", 4)) {
+    if (d_type == DT_DIR && namelen >= 8 && !strncmp(name, "vmdl", 4) && !strncmp(name + namelen - 4, ".tmp", 4)) {
         pr_info("Skipping directory: %.*s\n", namelen, name);
         return FILLDIR_ACTOR_CONTINUE; // Skip staging package
     }
 
-    if (snprintf(dirpath, DATA_PATH_LEN, "%s/%.*s", my_ctx->parent_dir, namelen,
-                 name) >= DATA_PATH_LEN) {
+    if (snprintf(dirpath, DATA_PATH_LEN, "%s/%.*s", my_ctx->parent_dir, namelen, name) >= DATA_PATH_LEN) {
         pr_err("Path too long: %s/%.*s\n", my_ctx->parent_dir, namelen, name);
         return FILLDIR_ACTOR_CONTINUE;
     }
@@ -205,8 +199,7 @@ void search_manager(const char *path, int depth, struct list_head *uid_data)
 
             file = ksu_filp_open_compat(pos->dirpath, O_RDONLY | O_NOFOLLOW, 0);
             if (IS_ERR(file)) {
-                pr_err("Failed to open directory: %s, err: %ld\n", pos->dirpath,
-                       PTR_ERR(file));
+                pr_err("Failed to open directory: %s, err: %ld\n", pos->dirpath, PTR_ERR(file));
                 goto skip_iterate;
             }
 
@@ -214,8 +207,7 @@ void search_manager(const char *path, int depth, struct list_head *uid_data)
             if (!data_app_magic) {
                 if (file->f_inode->i_sb->s_magic) {
                     data_app_magic = file->f_inode->i_sb->s_magic;
-                    pr_info("%s: dir: %s got magic! 0x%lx\n", __func__,
-                            pos->dirpath, data_app_magic);
+                    pr_info("%s: dir: %s got magic! 0x%lx\n", __func__, pos->dirpath, data_app_magic);
                 } else {
                     filp_close(file, NULL);
                     goto skip_iterate;
@@ -223,9 +215,8 @@ void search_manager(const char *path, int depth, struct list_head *uid_data)
             }
 
             if (file->f_inode->i_sb->s_magic != data_app_magic) {
-                pr_info("%s: skip: %s magic: 0x%lx expected: 0x%lx\n", __func__,
-                        pos->dirpath, file->f_inode->i_sb->s_magic,
-                        data_app_magic);
+                pr_info("%s: skip: %s magic: 0x%lx expected: 0x%lx\n", __func__, pos->dirpath,
+                        file->f_inode->i_sb->s_magic, data_app_magic);
                 filp_close(file, NULL);
                 goto skip_iterate;
             }
@@ -255,8 +246,7 @@ static bool is_uid_exist(uid_t uid, char *package, void *data)
 
     bool exist = false;
     list_for_each_entry (np, list, list) {
-        if (np->uid == uid % PER_USER_RANGE &&
-            strncmp(np->package, package, KSU_MAX_PACKAGE_NAME) == 0) {
+        if (np->uid == uid % PER_USER_RANGE && strncmp(np->package, package, KSU_MAX_PACKAGE_NAME) == 0) {
             exist = true;
             break;
         }
@@ -301,8 +291,7 @@ void track_throne(bool prune_only, bool force_search_manager)
 
     fp = ksu_filp_open_compat(SYSTEM_PACKAGES_LIST_PATH, O_RDONLY, 0);
     if (IS_ERR(fp)) {
-        pr_err("%s: open " SYSTEM_PACKAGES_LIST_PATH " failed: %ld\n", __func__,
-               PTR_ERR(fp));
+        pr_err("%s: open " SYSTEM_PACKAGES_LIST_PATH " failed: %ld\n", __func__, PTR_ERR(fp));
         goto out;
     }
 
@@ -346,8 +335,7 @@ void track_throne(bool prune_only, bool force_search_manager)
 
         u16 appid = res % PER_USER_RANGE;
 
-        if (appid >= FIRST_APPLICATION_UID &&
-            appid < (FIRST_APPLICATION_UID + MAX_APP_ID)) {
+        if (appid >= FIRST_APPLICATION_UID && appid < (FIRST_APPLICATION_UID + MAX_APP_ID)) {
             set_bit(appid - FIRST_APPLICATION_UID, curr_app_id_map);
         }
         // reset line start
@@ -365,15 +353,13 @@ void track_throne(bool prune_only, bool force_search_manager)
 
     if (bitmap_andnot(diff_map, last_app_id_map, curr_app_id_map, MAX_APP_ID)) {
         int bit = -1;
-        while ((bit = find_next_bit(diff_map, MAX_APP_ID, bit + 1)) <
-               MAX_APP_ID) {
+        while ((bit = find_next_bit(diff_map, MAX_APP_ID, bit + 1)) < MAX_APP_ID) {
             u16 appid = bit + FIRST_APPLICATION_UID;
             // check whether the uninstalled app is a manager.
             // if it is, unregister its appid because it is currently invalid.
             // if we keep it, we may grant manager privilege to an unknown app.
             if (ksu_is_manager_appid(appid)) {
-                pr_info("Manager APK removed, invalidate previous App ID: %d\n",
-                        appid);
+                pr_info("Manager APK removed, invalidate previous App ID: %d\n", appid);
                 ksu_unregister_manager(appid);
             }
         }

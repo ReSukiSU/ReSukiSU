@@ -71,9 +71,7 @@ unsigned long sukisu_compact_find_symbol(const char *name)
     int i;
     unsigned long addr;
 
-    for (i = 0;
-         i < (sizeof(address_symbol) / sizeof(struct CompactAddressSymbol));
-         i++) {
+    for (i = 0; i < (sizeof(address_symbol) / sizeof(struct CompactAddressSymbol)); i++) {
         struct CompactAddressSymbol *symbol = &address_symbol[i];
 
         if (strcmp(name, symbol->symbol_name) == 0)

@@ -13,12 +13,9 @@
 #include "ksu.h"
 
 // kernel 4.4 and 4.9
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0) ||                           \
-    defined(KSU_COMPAT_IS_HISI_LEGACY) ||                                      \
-    defined(KSU_COMPAT_IS_HISI_LEGACY_HM2) ||                                  \
-    defined(CONFIG_KSU_ALLOWLIST_WORKAROUND)
-static int ksu_key_permission(key_ref_t key_ref, const struct cred *cred,
-                              unsigned perm)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0) || defined(KSU_COMPAT_IS_HISI_LEGACY) ||                             \
+    defined(KSU_COMPAT_IS_HISI_LEGACY_HM2) || defined(CONFIG_KSU_ALLOWLIST_WORKAROUND)
+static int ksu_key_permission(key_ref_t key_ref, const struct cred *cred, unsigned perm)
 {
     if (init_session_keyring != NULL) {
         return 0;
@@ -36,8 +33,7 @@ static int ksu_key_permission(key_ref_t key_ref, const struct cred *cred,
 #ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK
 #include "setuid_hook.h"
 
-static int ksu_task_fix_setuid(struct cred *new, const struct cred *old,
-                               int flags)
+static int ksu_task_fix_setuid(struct cred *new, const struct cred *old, int flags)
 {
     uid_t new_uid = new->uid.val;
     uid_t old_uid = old->uid.val;
@@ -61,10 +57,8 @@ static int ksu_file_permission(struct file *file, int mask)
 #endif
 
 static struct security_hook_list ksu_hooks[] = {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0) ||                           \
-    defined(KSU_COMPAT_IS_HISI_LEGACY) ||                                      \
-    defined(KSU_COMPAT_IS_HISI_LEGACY_HM2) ||                                  \
-    defined(CONFIG_KSU_ALLOWLIST_WORKAROUND)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0) || defined(KSU_COMPAT_IS_HISI_LEGACY) ||                             \
+    defined(KSU_COMPAT_IS_HISI_LEGACY_HM2) || defined(CONFIG_KSU_ALLOWLIST_WORKAROUND)
     LSM_HOOK_INIT(key_permission, ksu_key_permission),
 #endif
 

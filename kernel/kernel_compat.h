@@ -17,10 +17,8 @@
  * Huawei Hisi Kernel EBITMAP Enable or Disable Flag ,
  * From ss/ebitmap.h
  */
-#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0)) &&                        \
-     (LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0))) ||                       \
-    ((LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)) &&                       \
-     (LINUX_VERSION_CODE < KERNEL_VERSION(4, 15, 0)))
+#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0))) ||            \
+    ((LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(4, 15, 0)))
 #if defined(HISI_SELINUX_EBITMAP_RO) && !defined(KSU_COMPAT_IS_HISI_HM2)
 #define KSU_COMPAT_IS_HISI_LEGACY 1
 #endif
@@ -29,8 +27,7 @@
 /* 
 * For EMUI 10+ or HarmonyOS2 Based EMUI10+ Devices
 */
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)) &&                        \
-    (LINUX_VERSION_CODE < KERNEL_VERSION(4, 15, 0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(4, 15, 0))
 #if defined(KSU_COMPAT_IS_HISI_HM2)
 #define KSU_COMPAT_IS_HISI_LEGACY_HM2 1
 #endif
@@ -43,26 +40,19 @@
 // Checks for UH, KDP and RKP
 #ifdef SAMSUNG_UH_DRIVER_EXIST
 #if defined(CONFIG_UH) || defined(CONFIG_KDP) || defined(CONFIG_RKP)
-#error                                                                         \
+#error                                                                                                                 \
     "CONFIG_UH, CONFIG_KDP and CONFIG_RKP is enabled! Please disable or remove it before compile a kernel with KernelSU!"
 #endif
 #endif
 
-extern long ksu_strncpy_from_user_nofault(char *dst,
-                                          const void __user *unsafe_addr,
-                                          long count);
+extern long ksu_strncpy_from_user_nofault(char *dst, const void __user *unsafe_addr, long count);
 
-extern struct file *ksu_filp_open_compat(const char *filename, int flags,
-                                         umode_t mode);
-extern ssize_t ksu_kernel_read_compat(struct file *p, void *buf, size_t count,
-                                      loff_t *pos);
-extern ssize_t ksu_kernel_write_compat(struct file *p, const void *buf,
-                                       size_t count, loff_t *pos);
+extern struct file *ksu_filp_open_compat(const char *filename, int flags, umode_t mode);
+extern ssize_t ksu_kernel_read_compat(struct file *p, void *buf, size_t count, loff_t *pos);
+extern ssize_t ksu_kernel_write_compat(struct file *p, const void *buf, size_t count, loff_t *pos);
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0) ||                           \
-    defined(KSU_COMPAT_IS_HISI_LEGACY) ||                                      \
-    defined(KSU_COMPAT_IS_HISI_LEGACY_HM2) ||                                  \
-    defined(CONFIG_KSU_ALLOWLIST_WORKAROUND)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0) || defined(KSU_COMPAT_IS_HISI_LEGACY) ||                             \
+    defined(KSU_COMPAT_IS_HISI_LEGACY_HM2) || defined(CONFIG_KSU_ALLOWLIST_WORKAROUND)
 extern struct key *init_session_keyring;
 #endif
 
@@ -98,25 +88,21 @@ static inline int do_close_fd(unsigned int fd)
 #endif
 }
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 9, 0) &&                            \
-    !defined(KSU_UL_HAS_FILE_INODE)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 9, 0) && !defined(KSU_UL_HAS_FILE_INODE)
 static inline struct inode *file_inode(struct file *f)
 {
     return f->f_path.dentry->d_inode;
 }
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 1, 0) &&                            \
-    !defined(KSU_OPTIONAL_SELINUX_INODE)
-static inline struct inode_security_struct *
-selinux_inode(const struct inode *inode)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 1, 0) && !defined(KSU_OPTIONAL_SELINUX_INODE)
+static inline struct inode_security_struct *selinux_inode(const struct inode *inode)
 {
     return inode->i_security;
 }
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 1, 0) &&                            \
-    !defined(KSU_OPTIONAL_SELINUX_CRED)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 1, 0) && !defined(KSU_OPTIONAL_SELINUX_CRED)
 static inline struct task_security_struct *selinux_cred(const struct cred *cred)
 {
     return cred->security;
@@ -124,8 +110,7 @@ static inline struct task_security_struct *selinux_cred(const struct cred *cred)
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 12, 0)
-extern void *ksu_compat_kvrealloc(const void *p, size_t oldsize, size_t newsize,
-                                  gfp_t flags);
+extern void *ksu_compat_kvrealloc(const void *p, size_t oldsize, size_t newsize, gfp_t flags);
 #endif
 
 #ifdef KSU_COMPAT_HAS_BITMAP_ALLOC_HELPER

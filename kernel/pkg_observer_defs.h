@@ -13,30 +13,25 @@ typedef const unsigned char *ksu_fname_t;
 #endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
-#define KSU_DECL_FSNOTIFY_OPS(name)                                            \
-    int name(struct fsnotify_mark *mark, u32 mask, struct inode *inode,        \
-             struct inode *dir, const struct qstr *file_name, u32 cookie)
+#define KSU_DECL_FSNOTIFY_OPS(name)                                                                                    \
+    int name(struct fsnotify_mark *mark, u32 mask, struct inode *inode, struct inode *dir,                             \
+             const struct qstr *file_name, u32 cookie)
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(5, 2, 0)
-#define KSU_DECL_FSNOTIFY_OPS(name)                                            \
-    int name(struct fsnotify_group *group, struct inode *inode, u32 mask,      \
-             const void *data, int data_type, ksu_fname_t file_name,           \
-             u32 cookie, struct fsnotify_iter_info *iter_info)
+#define KSU_DECL_FSNOTIFY_OPS(name)                                                                                    \
+    int name(struct fsnotify_group *group, struct inode *inode, u32 mask, const void *data, int data_type,             \
+             ksu_fname_t file_name, u32 cookie, struct fsnotify_iter_info *iter_info)
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 18, 0)
-#define KSU_DECL_FSNOTIFY_OPS(name)                                            \
-    int name(struct fsnotify_group *group, struct inode *inode, u32 mask,      \
-             const void *data, int data_type, ksu_fname_t file_name,           \
-             u32 cookie, struct fsnotify_iter_info *iter_info)
+#define KSU_DECL_FSNOTIFY_OPS(name)                                                                                    \
+    int name(struct fsnotify_group *group, struct inode *inode, u32 mask, const void *data, int data_type,             \
+             ksu_fname_t file_name, u32 cookie, struct fsnotify_iter_info *iter_info)
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0)
-#define KSU_DECL_FSNOTIFY_OPS(name)                                            \
-    int name(struct fsnotify_group *group, struct inode *inode,                \
-             struct fsnotify_mark *inode_mark,                                 \
-             struct fsnotify_mark *vfsmount_mark, u32 mask, const void *data,  \
-             int data_type, ksu_fname_t file_name, u32 cookie,                 \
-             struct fsnotify_iter_info *iter_info)
+#define KSU_DECL_FSNOTIFY_OPS(name)                                                                                    \
+    int name(struct fsnotify_group *group, struct inode *inode, struct fsnotify_mark *inode_mark,                      \
+             struct fsnotify_mark *vfsmount_mark, u32 mask, const void *data, int data_type, ksu_fname_t file_name,    \
+             u32 cookie, struct fsnotify_iter_info *iter_info)
 #else
-#define KSU_DECL_FSNOTIFY_OPS(name)                                            \
-    int name(struct fsnotify_group *group, struct inode *inode,                \
-             struct fsnotify_mark *inode_mark,                                 \
-             struct fsnotify_mark *vfsmount_mark, u32 mask, void *data,        \
-             int data_type, ksu_fname_t file_name, u32 cookie)
+#define KSU_DECL_FSNOTIFY_OPS(name)                                                                                    \
+    int name(struct fsnotify_group *group, struct inode *inode, struct fsnotify_mark *inode_mark,                      \
+             struct fsnotify_mark *vfsmount_mark, u32 mask, void *data, int data_type, ksu_fname_t file_name,          \
+             u32 cookie)
 #endif

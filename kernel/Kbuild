@@ -116,6 +116,19 @@ endif
 $(info -- KERNEL_VERSION: $(KERNEL_VERSION))
 $(info -- KERNEL_TYPE: $(KERNEL_TYPE))
 
+ifeq ($(CONFIG_KSU),y)
+  ifneq ($(KERNEL_TYPE), GKI 2.0)
+      ifeq ($(KSU_TP_HOOK), y)
+          $(info -- $(REPO_NAME) TP Hooks are only supported on GKI 2.0 kernels.)
+          $(info -- Current Kernel Type: $(KERNEL_TYPE))
+          $(info -- If you really want to continue, go to Kbuild and comment out this warning.)
+          $(info -- Usually, this error occurs because you forgot to enable some kernel configurations.)
+          $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
+          $(error TP hooks are incompatible with Non-GKI/GKI 1.0 kernels in this configuration.)
+      endif
+  endif
+endif
+
 # Check if KPM is enabled
 ifeq ($(CONFIG_KPM), y)
 $(info -- KPM is enabled)
@@ -127,8 +140,19 @@ endif
 ifeq ($(KSU_TP_HOOK), y)
 kernelsu-objs += syscall_hook_manager.o
 kernelsu-objs += tp_marker.o
-kernelsu-objs += hook/patch_memory.o
-kernelsu-objs += hook/syscall_hook.o
+ifeq ($(CONFIG_ARM64),y)
+kernelsu-objs += hook/arm64/patch_memory.o
+kernelsu-objs += hook/arm64/syscall_hook.o
+else ifeq ($(CONFIG_X86_64),y)
+kernelsu-objs += hook/x86_64/patch_memory.o
+kernelsu-objs += hook/x86_64/syscall_hook.o
+else
+ifeq ($(CONFIG_KSU), y)
+$(info -- Unsupported arch)
+$(info -- Only arm64-v8a and x86-64 support for tracepoint hook)
+$(error Unsupported arch for tracepoint hook)
+endif
+endif
 endif
 
 # SELinux drivers check
@@ -405,19 +429,6 @@ ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
     $(info -- You lost ksu_handle_sys_reboot hook in your kernel)
     $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
     $(error You should integrate $(REPO_NAME) in your kernel.)
-  endif
-endif
-
-ifeq ($(CONFIG_KSU),y)
-  ifneq ($(KERNEL_TYPE), GKI 2.0)
-      ifeq ($(KSU_TP_HOOK), y)
-          $(info -- $(REPO_NAME) TP Hooks are only supported on GKI 2.0 kernels.)
-          $(info -- Current Kernel Type: $(KERNEL_TYPE))
-          $(info -- If you really want to continue, go to Kbuild and comment out this warning.)
-          $(info -- Usually, this error occurs because you forgot to enable some kernel configurations.)
-          $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
-          $(error TP hooks are incompatible with Non-GKI/GKI 1.0 kernels in this configuration.)
-      endif
   endif
 endif
 

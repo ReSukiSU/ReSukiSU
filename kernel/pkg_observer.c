@@ -29,8 +29,7 @@ static KSU_DECL_FSNOTIFY_OPS(ksu_handle_generic_event)
     if (!file_name || (mask & FS_ISDIR))
         return 0;
 
-    if (ksu_fname_len(file_name) == 13 &&
-        !memcmp(ksu_fname_arg(file_name), "packages.list", 13)) {
+    if (ksu_fname_len(file_name) == 13 && !memcmp(ksu_fname_arg(file_name), "packages.list", 13)) {
         pr_info("packages.list detected: %d\n", mask);
         track_throne(false, false);
     }
@@ -52,8 +51,7 @@ static void __maybe_unused m_free(struct fsnotify_mark *m)
     }
 }
 
-static int add_mark_on_inode(struct inode *inode, u32 mask,
-                             struct fsnotify_mark **out)
+static int add_mark_on_inode(struct inode *inode, u32 mask, struct fsnotify_mark **out)
 {
     struct fsnotify_mark *m;
     int ret;
@@ -124,8 +122,7 @@ static void unwatch_one_dir(struct watch_dir *wd)
     }
 }
 
-static struct watch_dir g_watch = { .path = "/data/system",
-                                    .mask = MASK_SYSTEM };
+static struct watch_dir g_watch = { .path = "/data/system", .mask = MASK_SYSTEM };
 
 int ksu_observer_init(void)
 {

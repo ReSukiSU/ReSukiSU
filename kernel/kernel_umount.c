@@ -61,11 +61,9 @@ static const struct ksu_feature_handler kernel_umount_handler = {
 extern bool susfs_is_log_enabled;
 #endif // #ifdef CONFIG_KSU_SUSFS
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0) ||                           \
-    defined(KSU_HAS_PATH_UMOUNT)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0) || defined(KSU_HAS_PATH_UMOUNT)
 extern int path_umount(struct path *path, int flags);
-static void ksu_umount_mnt(const char *__never_use_mnt, struct path *path,
-                           int flags)
+static void ksu_umount_mnt(const char *__never_use_mnt, struct path *path, int flags)
 {
     int err = path_umount(path, flags);
     if (err) {
@@ -88,10 +86,10 @@ static void ksu_sys_umount(const char *mnt, int flags)
     set_fs(old_fs);
 }
 
-#define ksu_umount_mnt(mnt, __unused, flags)                                   \
-    ({                                                                         \
-        path_put(__unused);                                                    \
-        ksu_sys_umount(mnt, flags);                                            \
+#define ksu_umount_mnt(mnt, __unused, flags)                                                                           \
+    ({                                                                                                                 \
+        path_put(__unused);                                                                                            \
+        ksu_sys_umount(mnt, flags);                                                                                    \
     })
 
 #endif
@@ -123,8 +121,7 @@ static void do_umount_for_current_task()
     struct mount_entry *entry;
     down_read(&mount_list_lock);
     list_for_each_entry (entry, &mount_list, list) {
-        pr_info("%s: unmounting: %s flags 0x%x\n", __func__, entry->umountable,
-                entry->flags);
+        pr_info("%s: unmounting: %s flags 0x%x\n", __func__, entry->umountable, entry->flags);
         try_umount(entry->umountable, entry->flags);
     }
     up_read(&mount_list_lock);
@@ -174,8 +171,7 @@ int ksu_handle_umount(uid_t old_uid, uid_t new_uid)
 
     down_read(&mount_list_lock);
     list_for_each_entry (entry, &mount_list, list) {
-        pr_info("%s: unmounting: %s flags 0x%x\n", __func__, entry->umountable,
-                entry->flags);
+        pr_info("%s: unmounting: %s flags 0x%x\n", __func__, entry->umountable, entry->flags);
         try_umount(entry->umountable, entry->flags);
     }
     up_read(&mount_list_lock);

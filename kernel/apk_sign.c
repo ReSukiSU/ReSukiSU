@@ -53,8 +53,7 @@ static struct sdesc *init_sdesc(struct crypto_shash *alg)
     return sdesc;
 }
 
-static int calc_hash(struct crypto_shash *alg, const unsigned char *data,
-                     unsigned int datalen, unsigned char *digest)
+static int calc_hash(struct crypto_shash *alg, const unsigned char *data, unsigned int datalen, unsigned char *digest)
 {
     struct sdesc *sdesc;
     int ret;
@@ -70,8 +69,7 @@ static int calc_hash(struct crypto_shash *alg, const unsigned char *data,
     return ret;
 }
 
-static int ksu_sha256(const unsigned char *data, unsigned int datalen,
-                      unsigned char *digest)
+static int ksu_sha256(const unsigned char *data, unsigned int datalen, unsigned char *digest)
 {
     struct crypto_shash *alg;
     char *hash_alg_name = "sha256";
@@ -87,8 +85,7 @@ static int ksu_sha256(const unsigned char *data, unsigned int datalen,
     return ret;
 }
 
-static bool check_block(struct file *fp, u32 *size4, loff_t *pos, u32 *offset,
-                        u8 *matched_index)
+static bool check_block(struct file *fp, u32 *size4, loff_t *pos, u32 *offset, u8 *matched_index)
 {
     u8 i;
     apk_sign_key_t sign_key;
@@ -126,9 +123,8 @@ static bool check_block(struct file *fp, u32 *size4, loff_t *pos, u32 *offset,
     bin2hex(hash_str, digest, SHA256_DIGEST_SIZE);
     hash_str[SHA256_DIGEST_SIZE * 2] = '\0';
 
-    BUILD_BUG_ON(
-        ARRAY_SIZE(apk_sign_keys) >=
-        255); // keep 255, because i want use 255 as the magic number of dynamic manager
+    BUILD_BUG_ON(ARRAY_SIZE(apk_sign_keys) >=
+                 255); // keep 255, because i want use 255 as the magic number of dynamic manager
     for (i = 0; i < ARRAY_SIZE(apk_sign_keys); i++) {
         sign_key = apk_sign_keys[i];
         if (*size4 == sign_key.size && strcmp(sign_key.sha256, hash_str) == 0) {
@@ -175,8 +171,8 @@ static bool has_v1_signature_file(struct file *fp)
 
     loff_t pos = 0;
 
-    while (ksu_kernel_read_compat(fp, &header, sizeof(struct zip_entry_header),
-                                  &pos) == sizeof(struct zip_entry_header)) {
+    while (ksu_kernel_read_compat(fp, &header, sizeof(struct zip_entry_header), &pos) ==
+           sizeof(struct zip_entry_header)) {
         if (header.signature != 0x04034b50) {
             // ZIP magic: 'PK'
             return false;
@@ -274,8 +270,7 @@ static __always_inline bool check_v2_signature(char *path, u8 *signature_index)
         offset = 4;
         if (id == 0x7109871au) {
             v2_signing_blocks++;
-            bool result =
-                check_block(fp, &size4, &pos, &offset, &matched_index);
+            bool result = check_block(fp, &size4, &pos, &offset, &matched_index);
             if (result) {
                 v2_signing_valid = true;
             }
@@ -347,8 +342,7 @@ static struct kernel_param_ops expected_size_ops = {
     .get = param_get_uint,
 };
 
-module_param_cb(ksu_debug_manager_appid, &expected_size_ops,
-                &ksu_debug_manager_appid, S_IRUSR | S_IWUSR);
+module_param_cb(ksu_debug_manager_appid, &expected_size_ops, &ksu_debug_manager_appid, S_IRUSR | S_IWUSR);
 
 #endif
 

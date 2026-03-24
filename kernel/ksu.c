@@ -25,19 +25,26 @@
 #include "file_wrapper.h"
 #include "selinux/selinux.h"
 
+// if we are using the upstream hook, check x86-64 compatible
+#if defined(KSU_TP_HOOK) && defined(__x86_64__)
+#include <asm/cpufeature.h>
+#include <linux/version.h>
+#ifndef X86_FEATURE_INDIRECT_SAFE
+#error "FATAL: Your kernel is missing the indirect syscall bypass patches!"
+#endif
+#endif
+
 // workaround for A12-5.10 kernel
 // Some third-party kernel (e.g. LineageOS) uses wrong toolchain, which supports
 // CC_HAVE_STACKPROTECTOR_SYSREG while gki's toolchain doesn't.
 // Therefore, ksu lkm, which uses gki toolchain, requires this __stack_chk_guard,
 // while those third-party kernel can't provide.
 // Thus, we manually provide it instead of using kernel's
-#if defined(CONFIG_STACKPROTECTOR) &&                                          \
-    (defined(CONFIG_ARM64) && defined(MODULE) &&                               \
-     !defined(CONFIG_STACKPROTECTOR_PER_TASK))
+#if defined(CONFIG_STACKPROTECTOR) &&                                                                                  \
+    (defined(CONFIG_ARM64) && defined(MODULE) && !defined(CONFIG_STACKPROTECTOR_PER_TASK))
 #include <linux/stackprotector.h>
 #include <linux/random.h>
-unsigned long __stack_chk_guard __ro_after_init
-    __attribute__((visibility("hidden")));
+unsigned long __stack_chk_guard __ro_after_init __attribute__((visibility("hidden")));
 
 __attribute__((no_stack_protector)) void ksu_setup_stack_chk_guard()
 {
@@ -112,12 +119,28 @@ static inline void ksu_hook_exit(void)
 
 int __init kernelsu_init(void)
 {
-    pr_info("Initialized on: %s (%s) with driver version: %u\n", UTS_RELEASE,
-            UTS_MACHINE, KSU_VERSION);
+    pr_info("Initialized on: %s (%s) with driver version: %u\n", UTS_RELEASE, UTS_MACHINE, KSU_VERSION);
 #ifdef MODULE
     ksu_late_loaded = (current->pid != 1);
 #else
     ksu_late_loaded = false;
+#endif
+
+    // If we are in tracepoint hook, remember to check x86-64 compatible
+#if defined(KSU_Tp_HOOK) && defined(__x86_64__)
+    // If the kernel has the hardening patch, X86_FEATURE_INDIRECT_SAFE must be set
+    if (!boot_cpu_has(X86_FEATURE_INDIRECT_SAFE)) {
+        pr_alert("*************************************************************");
+        pr_alert("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **");
+        pr_alert("**                                                         **");
+        pr_alert("**        X86_FEATURE_INDIRECT_SAFE is not enabled!        **");
+        pr_alert("**      KernelSU will abort initialization to prevent      **");
+        pr_alert("**                     kernel panic.                       **");
+        pr_alert("**                                                         **");
+        pr_alert("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **");
+        pr_alert("*************************************************************");
+        return -ENOSYS;
+    }
 #endif
 
 #ifdef CONFIG_KSU_DEBUG

@@ -9,10 +9,16 @@
 #include <linux/types.h>
 #include "linux/version.h"
 
+#ifdef __aarch64__
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 14, 0)
 #include "asm/patching.h" // IWYU pragma: keep
 #else
 #include "asm/insn.h" // IWYU pragma: keep
+#endif
+#elif __x86_64__
+#include "asm/text-patching.h" // IWYU pragma: keep
+#else
+#error "Unsupported arch"
 #endif
 
 #define KSU_PATCH_TEXT_FLUSH_DCACHE 1

@@ -13,10 +13,8 @@
 #include "klog.h" // IWYU pragma: keep
 #include "kernel_compat.h"
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0) ||                           \
-    defined(KSU_COMPAT_IS_HISI_LEGACY) ||                                      \
-    defined(KSU_COMPAT_IS_HISI_LEGACY_HM2) ||                                  \
-    defined(CONFIG_KSU_ALLOWLIST_WORKAROUND)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0) || defined(KSU_COMPAT_IS_HISI_LEGACY) ||                             \
+    defined(KSU_COMPAT_IS_HISI_LEGACY_HM2) || defined(CONFIG_KSU_ALLOWLIST_WORKAROUND)
 #include <linux/key.h>
 #include <linux/errno.h>
 #include <linux/cred.h>
@@ -47,12 +45,9 @@ static int install_session_keyring(struct key *keyring)
 
 struct file *ksu_filp_open_compat(const char *filename, int flags, umode_t mode)
 {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0) ||                           \
-    defined(KSU_COMPAT_IS_HISI_LEGACY) ||                                      \
-    defined(KSU_COMPAT_IS_HISI_LEGACY_HM2) ||                                  \
-    defined(CONFIG_KSU_ALLOWLIST_WORKAROUND)
-    if (init_session_keyring != NULL && !current_cred()->session_keyring &&
-        (current->flags & PF_WQ_WORKER)) {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0) || defined(KSU_COMPAT_IS_HISI_LEGACY) ||                             \
+    defined(KSU_COMPAT_IS_HISI_LEGACY_HM2) || defined(CONFIG_KSU_ALLOWLIST_WORKAROUND)
+    if (init_session_keyring != NULL && !current_cred()->session_keyring && (current->flags & PF_WQ_WORKER)) {
         pr_info("installing init session keyring for older kernel\n");
         install_session_keyring(init_session_keyring);
     }
@@ -60,11 +55,9 @@ struct file *ksu_filp_open_compat(const char *filename, int flags, umode_t mode)
     return filp_open(filename, flags, mode);
 }
 
-ssize_t ksu_kernel_read_compat(struct file *p, void *buf, size_t count,
-                               loff_t *pos)
+ssize_t ksu_kernel_read_compat(struct file *p, void *buf, size_t count, loff_t *pos)
 {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0) ||                          \
-    defined(KSU_OPTIONAL_KERNEL_READ)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0) || defined(KSU_OPTIONAL_KERNEL_READ)
     return kernel_read(p, buf, count, pos);
 #else
     loff_t offset = pos ? *pos : 0;
@@ -76,11 +69,9 @@ ssize_t ksu_kernel_read_compat(struct file *p, void *buf, size_t count,
 #endif
 }
 
-ssize_t ksu_kernel_write_compat(struct file *p, const void *buf, size_t count,
-                                loff_t *pos)
+ssize_t ksu_kernel_write_compat(struct file *p, const void *buf, size_t count, loff_t *pos)
 {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0) ||                          \
-    defined(KSU_OPTIONAL_KERNEL_WRITE)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0) || defined(KSU_OPTIONAL_KERNEL_WRITE)
     return kernel_write(p, buf, count, pos);
 #else
     loff_t offset = pos ? *pos : 0;
@@ -92,23 +83,19 @@ ssize_t ksu_kernel_write_compat(struct file *p, const void *buf, size_t count,
 #endif
 }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 8, 0) ||                           \
-    defined(KSU_OPTIONAL_STRNCPY)
-long ksu_strncpy_from_user_nofault(char *dst, const void __user *unsafe_addr,
-                                   long count)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 8, 0) || defined(KSU_OPTIONAL_STRNCPY)
+long ksu_strncpy_from_user_nofault(char *dst, const void __user *unsafe_addr, long count)
 {
     return strncpy_from_user_nofault(dst, unsafe_addr, count);
 }
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)
-long ksu_strncpy_from_user_nofault(char *dst, const void __user *unsafe_addr,
-                                   long count)
+long ksu_strncpy_from_user_nofault(char *dst, const void __user *unsafe_addr, long count)
 {
     return strncpy_from_unsafe_user(dst, unsafe_addr, count);
 }
 #else
 // Copied from: https://elixir.bootlin.com/linux/v4.9.337/source/mm/maccess.c#L201
-long ksu_strncpy_from_user_nofault(char *dst, const void __user *unsafe_addr,
-                                   long count)
+long ksu_strncpy_from_user_nofault(char *dst, const void __user *unsafe_addr, long count)
 {
     mm_segment_t old_fs = get_fs();
     long ret;
@@ -133,10 +120,8 @@ long ksu_strncpy_from_user_nofault(char *dst, const void __user *unsafe_addr,
 }
 #endif
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 9, 0) &&                           \
-     !defined(KSU_HAS_PATH_MOUNT))
-int path_mount(const char *dev_name, struct path *path, const char *type_page,
-               unsigned long flags, void *data_page)
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 9, 0) && !defined(KSU_HAS_PATH_MOUNT))
+int path_mount(const char *dev_name, struct path *path, const char *type_page, unsigned long flags, void *data_page)
 {
     // 384 is enough
     char buf[384] = { 0 };
@@ -151,8 +136,7 @@ int path_mount(const char *dev_name, struct path *path, const char *type_page,
 
     old_fs = get_fs();
     set_fs(KERNEL_DS);
-    ret = do_mount(dev_name, (const char __user *)realpath, type_page, flags,
-                   data_page);
+    ret = do_mount(dev_name, (const char __user *)realpath, type_page, flags, data_page);
     set_fs(old_fs);
     return ret;
 }
@@ -184,8 +168,7 @@ static void *__kvmalloc(size_t size, gfp_t flags)
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 12, 0)
 // https://elixir.bootlin.com/linux/v5.10.247/source/mm/util.c#L664
-void *ksu_compat_kvrealloc(const void *p, size_t oldsize, size_t newsize,
-                           gfp_t flags)
+void *ksu_compat_kvrealloc(const void *p, size_t oldsize, size_t newsize, gfp_t flags)
 {
     void *newp;
 
