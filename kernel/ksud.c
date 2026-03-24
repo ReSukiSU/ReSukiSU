@@ -27,6 +27,8 @@
 #include <linux/workqueue.h>
 #include <linux/uio.h>
 #include <linux/module.h>
+#include <linux/jump_label.h>
+#include <linux/static_key.h>
 
 #include "manager.h"
 #include "allowlist.h"
@@ -295,7 +297,7 @@ void ksu_handle_execveat_ksud(const char *filename, struct user_arg_ptr *argv, s
             pr_info("exec zygote, /data prepared, second_stage: %d\n", init_second_stage_executed);
             on_post_fs_data();
             first_zygote = false;
-            stop_execve_hook();
+            ksu_stop_ksud_execve_hook();
         }
     }
 }
@@ -719,6 +721,19 @@ static void vol_detector_exit()
 }
 #endif
 
+DEFINE_STATIC_KEY_TRUE(ksud_execve_key);
+
+void ksu_stop_ksud_execve_hook(void)
+{
+    static_branch_disable(&ksud_execve_key);
+
+#ifndef KSU_TP_HOOK
+    // We actually not use this bool, but the fucking susfs are using that in hook
+    // let's compatible with that
+    ksu_execveat_hook = false;
+#endif
+}
+
 bool ksu_is_safe_mode()
 {
     static bool safe_mode = false;
@@ -746,8 +761,7 @@ bool ksu_is_safe_mode()
 }
 
 #ifdef KSU_TP_HOOK
-static long (*orig_sys_execve)(const struct pt_regs *regs);
-static long ksu_sys_execve(const struct pt_regs *regs)
+void ksu_execve_hook_ksud(const struct pt_regs *regs)
 {
     const char __user **filename_user = (const char **)&PT_REGS_PARM1(regs);
     const char __user *const __user *__argv = (const char __user *const __user *)PT_REGS_PARM2(regs);
@@ -758,7 +772,7 @@ static long ksu_sys_execve(const struct pt_regs *regs)
     const char __user *fn;
 
     if (!filename_user)
-        goto do_orig;
+        return;
 
     addr = untagged_addr((unsigned long)*filename_user);
     fn = (const char __user *)addr;
@@ -767,13 +781,10 @@ static long ksu_sys_execve(const struct pt_regs *regs)
     ret = strncpy_from_user(path, fn, 32);
     if (ret < 0) {
         pr_err("Access filename failed for execve_handler_pre\n");
-        goto do_orig;
+        return;
     }
 
     ksu_handle_execveat_ksud(path, &argv, NULL, NULL);
-
-do_orig:
-    return orig_sys_execve(regs);
 }
 
 static long (*orig_sys_read)(const struct pt_regs *regs);
@@ -856,17 +867,6 @@ static void stop_init_rc_hook(void)
 #endif
 }
 
-static void stop_execve_hook(void)
-{
-#ifdef KSU_TP_HOOK
-    ksu_syscall_table_unhook(__NR_execve);
-    pr_info("unhook sys_execve\n");
-#else
-    ksu_execveat_hook = false;
-    pr_info("stop execve_hook\n");
-#endif
-}
-
 static void stop_input_hook(void)
 {
     static bool input_hook_stopped = false;
@@ -893,7 +893,6 @@ void ksu_ksud_init(void)
 #ifdef KSU_TP_HOOK
     int ret;
 
-    ksu_syscall_table_hook(__NR_execve, ksu_sys_execve, &orig_sys_execve);
     ksu_syscall_table_hook(__NR_read, ksu_sys_read, &orig_sys_read);
     ksu_syscall_table_hook(__NR_fstat, ksu_sys_fstat, &orig_sys_fstat);
 
@@ -910,7 +909,6 @@ void ksu_ksud_init(void)
 void ksu_ksud_exit(void)
 {
 #ifdef KSU_TP_HOOK
-    stop_execve_hook();
     // TODO:
     // this should be done before unregister vfs_read_kp
     // stop_init_rc_hook();

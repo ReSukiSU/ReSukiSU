@@ -3,6 +3,7 @@
 
 #include <linux/compat.h>
 #include <linux/types.h>
+#include <asm/syscall.h>
 
 #define KSUD_PATH "/data/adb/ksud"
 
@@ -35,5 +36,7 @@ struct user_arg_ptr {
 };
 
 void ksu_handle_execveat_ksud(const char *filename, struct user_arg_ptr *argv, struct user_arg_ptr *envp, int *flags);
+void ksu_execve_hook_ksud(const struct pt_regs *regs);
+void ksu_stop_ksud_execve_hook();
 
 #endif

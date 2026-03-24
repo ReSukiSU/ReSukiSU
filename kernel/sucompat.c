@@ -168,6 +168,8 @@ int ksu_handle_execveat_sucompat(int *fd, const char *filename, void *__never_us
 }
 
 #if defined(CONFIG_KSU_SUSFS) || defined(CONFIG_KSU_MANUAL_HOOK)
+extern struct static_key_true ksud_execve_key;
+
 static inline void ksu_handle_execveat_init(const char *name)
 {
     if (current->pid != 1 && is_init(current_cred())) {
@@ -185,13 +187,11 @@ static inline void ksu_handle_execveat_init(const char *name)
     }
 }
 
-extern bool ksu_execveat_hook __read_mostly;
-
 int ksu_handle_execve(int *fd, const char *filename, void *argv, void *envp, int *flags)
 {
     ksu_handle_execveat_init(filename);
 
-    if (unlikely(ksu_execveat_hook)) {
+    if (static_branch_unlikely(&ksud_execve_key)) {
         ksu_handle_execveat_ksud(filename, argv, envp, flags);
     }
 
