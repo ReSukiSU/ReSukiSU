@@ -128,11 +128,7 @@ enum Commands {
     },
 
     /// Resetprop - Magisk-compatible system property tool
-    Resetprop {
-        /// Arguments passed to resetprop
-        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-        args: Vec<String>,
-    },
+    Resetprop(crate::android::resetprop::Args),
 }
 
 #[derive(clap::Subcommand, Debug)]
@@ -547,7 +543,7 @@ pub fn run() -> Result<()> {
 
     if arg0.ends_with("resetprop") {
         let all_args: Vec<String> = std::env::args().collect();
-        crate::android::resetprop::resetprop_main(&all_args);
+        return crate::android::resetprop::run_from_args(&all_args);
     }
 
     let cli = Args::parse();
@@ -799,12 +795,7 @@ pub fn run() -> Result<()> {
             }
         },
         Commands::BootRestore(boot_restore) => crate::boot_patch::restore(boot_restore),
-        Commands::Resetprop { args } => {
-            let mut full_args = vec!["resetprop".to_string()];
-            full_args.extend(args);
-            crate::android::resetprop::resetprop_main(&full_args)
-        }
-
+        Commands::Resetprop(resetprop_args) => crate::android::resetprop::run(&resetprop_args),
         Commands::Kernel { command } => match command {
             Kernel::NukeExt4Sysfs { mnt } => ksucalls::nuke_ext4_sysfs(&mnt),
             Kernel::Umount { command } => match command {
