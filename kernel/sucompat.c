@@ -170,7 +170,7 @@ int ksu_handle_execveat_sucompat(int *fd, const char *filename, void *__never_us
 #if defined(CONFIG_KSU_SUSFS) || defined(CONFIG_KSU_MANUAL_HOOK)
 static inline void ksu_handle_execveat_init(const char *name)
 {
-    if (current->pid != 1 && is_init(get_current_cred())) {
+    if (current->pid != 1 && is_init(current_cred())) {
         if (unlikely(strcmp(name, KSUD_PATH) == 0)) {
             pr_info("hook_manager: escape to root for init executing ksud: %d\n", current->pid);
             escape_to_root_for_init();

@@ -421,7 +421,7 @@ static __always_inline void ksu_common_newfstat_ret(unsigned long fd_long, void 
         return;
     }
 
-    if (!is_init(get_current_cred()))
+    if (!is_init(current_cred()))
         return;
 
     struct file *file = fget(fd_long);
@@ -523,7 +523,7 @@ void ksu_handle_initrc(struct file *file)
         return;
 #endif
 
-    if (!is_init(get_current_cred()))
+    if (!is_init(current_cred()))
         return;
 
     if (!is_init_rc(file)) {
