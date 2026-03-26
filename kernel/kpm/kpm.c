@@ -37,7 +37,7 @@
 #endif
 #include "kpm.h"
 #include "compact.h"
-#include "../kernel_compat.h"
+#include "compat/kernel_compat.h"
 
 #define KPM_NAME_LEN 32
 #define KPM_ARGS_LEN 1024

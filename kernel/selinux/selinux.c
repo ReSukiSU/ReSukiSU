@@ -3,9 +3,9 @@
 #include "linux/security.h"
 #include "linux/version.h"
 #include "selinux_defs.h"
-#include "../klog.h" // IWYU pragma: keep
-#include "../ksu.h"
-#include "../kernel_compat.h"
+#include "klog.h" // IWYU pragma: keep
+#include "ksu.h"
+#include "compat/kernel_compat.h"
 
 /*
  * Cached SID values for frequently checked contexts.

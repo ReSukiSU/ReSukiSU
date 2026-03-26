@@ -54,4 +54,6 @@ bool susfs_is_current_init_domain(void);
 void susfs_set_priv_app_sid(void);
 #endif // #ifdef CONFIG_KSU_SUSFS
 
+extern u32 ksu_file_sid;
+
 #endif

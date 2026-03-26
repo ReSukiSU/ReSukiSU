@@ -1,31 +1,33 @@
-kernelsu-objs := ksu.o
-kernelsu-objs += allowlist.o
-kernelsu-objs += dynamic_manager.o
-kernelsu-objs += app_profile.o
-kernelsu-objs += apk_sign.o
-kernelsu-objs += sucompat.o
+kernelsu-objs := core/init.o
+kernelsu-objs += policy/allowlist.o
+kernelsu-objs += feature/dynamic_manager.o
+kernelsu-objs += policy/app_profile.o
+kernelsu-objs += manager/apk_sign.o
+kernelsu-objs += feature/sucompat.o
 
-kernelsu-objs += throne_tracker.o
-kernelsu-objs += pkg_observer.o
-kernelsu-objs += setuid_hook.o
+kernelsu-objs += manager/pkg_observer.o
+kernelsu-objs += hook/setuid_hook.o
 
 ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
 ifeq ($(shell test $(VERSION) -lt 6 || { test $(VERSION) -eq 6 && test $(PATCHLEVEL) -lt 8; } && echo y),y)
-kernelsu-objs += lsm_hooks.o
+kernelsu-objs += hook/lsm_hooks.o
 endif
 endif
 
-kernelsu-objs += kernel_compat.o
-kernelsu-objs += kernel_umount.o
-kernelsu-objs += supercalls.o
-kernelsu-objs += su_mount_ns.o
-kernelsu-objs += feature.o
-kernelsu-objs += throne_tracker.o
-kernelsu-objs += ksud.o
-kernelsu-objs += seccomp_cache.o
-kernelsu-objs += file_wrapper.o
-kernelsu-objs += sulog.o
-kernelsu-objs += manager.o
+kernelsu-objs += compat/kernel_compat.o
+kernelsu-objs += feature/kernel_umount.o
+kernelsu-objs += uapi/supercall.o
+kernelsu-objs += uapi/supercall_dispatch.o
+kernelsu-objs += uapi/supercall_perm.o
+kernelsu-objs += infra/su_mount_ns.o
+kernelsu-objs += policy/feature.o
+kernelsu-objs += manager/throne_tracker.o
+kernelsu-objs += runtime/boot_event.o
+kernelsu-objs += runtime/ksud_integration.o
+kernelsu-objs += infra/seccomp_cache.o
+kernelsu-objs += infra/file_wrapper.o
+kernelsu-objs += feature/sulog.o
+kernelsu-objs += manager/manager.o
 
 kernelsu-objs += selinux/selinux.o
 kernelsu-objs += selinux/sepolicy.o
@@ -44,6 +46,8 @@ ccflags-y += -Wno-int-to-pointer-cast -Wno-declaration-after-statement
 
 ccflags-y += -I$(srctree)/security/selinux -I$(srctree)/security/selinux/include
 ccflags-y += -I$(objtree)/security/selinux -include $(srctree)/include/uapi/asm-generic/errno.h
+ccflags-y += -I$(srctree)/drivers/kernelsu/include -I$(srctree)/drivers/kernelsu/
+ccflags-y += -I$(src) -I$(src)/include
 
 obj-$(CONFIG_KSU) += kernelsu.o
 
@@ -142,8 +146,9 @@ $(info -- KPM is disabled)
 endif
 
 ifeq ($(KSU_TP_HOOK), y)
-kernelsu-objs += syscall_hook_manager.o
-kernelsu-objs += tp_marker.o
+kernelsu-objs += hook/syscall_hook_manager.o
+kernelsu-objs += hook/syscall_event_bridge.o
+kernelsu-objs += hook/tp_marker.o
 ifeq ($(CONFIG_ARM64),y)
 kernelsu-objs += hook/arm64/patch_memory.o
 kernelsu-objs += hook/arm64/syscall_hook.o
