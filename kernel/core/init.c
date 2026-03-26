@@ -79,7 +79,9 @@ bool ksu_late_loaded;
 
 void sukisu_exit(void)
 {
+#ifndef CONFIG_KSU_DISABLE_MANAGER
     ksu_dynamic_manager_exit();
+#endif
 #if __SULOG_GATE
     ksu_sulog_exit();
 #endif
@@ -188,7 +190,9 @@ int __init kernelsu_init(void)
 #if __SULOG_GATE
         ksu_sulog_init();
 #endif
+#ifndef CONFIG_KSU_DISABLE_MANAGER
         ksu_dynamic_manager_init();
+#endif
 
         ksu_boot_completed = true;
         track_throne(false, true);

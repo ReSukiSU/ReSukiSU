@@ -1,12 +1,16 @@
 kernelsu-objs := core/init.o
 kernelsu-objs += policy/allowlist.o
-kernelsu-objs += feature/dynamic_manager.o
 kernelsu-objs += policy/app_profile.o
-kernelsu-objs += manager/apk_sign.o
 kernelsu-objs += feature/sucompat.o
-
-kernelsu-objs += manager/pkg_observer.o
 kernelsu-objs += hook/setuid_hook.o
+
+ifndef CONFIG_KSU_DISABLE_MANAGER
+kernelsu-objs += feature/dynamic_manager.o
+kernelsu-objs += manager/apk_sign.o
+kernelsu-objs += manager/pkg_observer.o
+kernelsu-objs += manager/throne_tracker.o
+kernelsu-objs += manager/manager.o
+endif
 
 ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
 ifeq ($(shell test $(VERSION) -lt 6 || { test $(VERSION) -eq 6 && test $(PATCHLEVEL) -lt 8; } && echo y),y)
@@ -21,13 +25,11 @@ kernelsu-objs += uapi/supercall_dispatch.o
 kernelsu-objs += uapi/supercall_perm.o
 kernelsu-objs += infra/su_mount_ns.o
 kernelsu-objs += policy/feature.o
-kernelsu-objs += manager/throne_tracker.o
 kernelsu-objs += runtime/boot_event.o
 kernelsu-objs += runtime/ksud_integration.o
 kernelsu-objs += infra/seccomp_cache.o
 kernelsu-objs += infra/file_wrapper.o
 kernelsu-objs += feature/sulog.o
-kernelsu-objs += manager/manager.o
 
 kernelsu-objs += selinux/selinux.o
 kernelsu-objs += selinux/sepolicy.o

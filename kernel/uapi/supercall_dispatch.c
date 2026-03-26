@@ -81,7 +81,9 @@ static int do_report_event(void __user *arg)
 #if __SULOG_GATE
                 ksu_sulog_init();
 #endif
+#ifndef CONFIG_KSU_DISABLE_MANAGER
                 ksu_dynamic_manager_init();
+#endif
             }
         }
         break;
@@ -289,7 +291,11 @@ static int do_get_manager_appid(void __user *arg)
 {
     struct ksu_get_manager_appid_cmd cmd;
 
+#ifndef CONFIG_KSU_DISABLE_MANAGER
     cmd.appid = ksu_last_manager_appid;
+#else
+    cmd.appid = 0;
+#endif
 
     if (copy_to_user(arg, &cmd, sizeof(cmd))) {
         pr_err("get_manager_appid: copy_to_user failed\n");
@@ -301,6 +307,10 @@ static int do_get_manager_appid(void __user *arg)
 
 static int do_get_app_profile(void __user *arg)
 {
+#ifdef CONFIG_KSU_DISABLE_POLICY
+    return -EOPNOTSUPP;
+#endif
+
     struct ksu_get_app_profile_cmd cmd;
 
     if (copy_from_user(&cmd, arg, sizeof(cmd))) {
@@ -322,6 +332,10 @@ static int do_get_app_profile(void __user *arg)
 
 static int do_set_app_profile(void __user *arg)
 {
+#ifdef CONFIG_KSU_DISABLE_POLICY
+    return -EOPNOTSUPP;
+#endif
+
     struct ksu_set_app_profile_cmd cmd;
     int ret;
 
@@ -821,6 +835,9 @@ static int do_enable_kpm(void __user *arg)
 
 static int do_dynamic_manager(void __user *arg)
 {
+#ifdef CONFIG_KSU_DISABLE_MANAGER
+    return -EOPNOTSUPP;
+#else
     struct ksu_dynamic_manager_cmd cmd;
 
     if (copy_from_user(&cmd, arg, sizeof(cmd))) {
@@ -838,9 +855,12 @@ static int do_dynamic_manager(void __user *arg)
     }
 
     return 0;
+#endif
 }
 
+#ifndef CONFIG_KSU_DISABLE_MANAGER
 extern int ksu_handle_get_managers_cmd(struct ksu_get_managers_cmd __user *arg, struct ksu_get_managers_cmd *cmd);
+#endif
 
 static int do_get_managers(void __user *arg)
 {
@@ -850,10 +870,15 @@ static int do_get_managers(void __user *arg)
         return -EFAULT;
     }
 
+#ifndef CONFIG_KSU_DISABLE_MANAGER
     int ret = ksu_handle_get_managers_cmd(arg, &cmd);
     if (ret) {
         return ret;
     }
+#else
+    cmd.count = 0;
+    cmd.total_count = 0;
+#endif
 
     if (copy_to_user(arg, &cmd, sizeof(struct ksu_get_managers_cmd))) {
         return -EFAULT;

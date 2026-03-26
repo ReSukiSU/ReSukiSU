@@ -65,8 +65,7 @@ int ksu_install_fd(void)
     }
 
     // Create anonymous inode file
-    filp = anon_inode_getfile("[ksu_driver]", &anon_ksu_fops, NULL,
-                              O_RDWR | O_CLOEXEC);
+    filp = anon_inode_getfile("[ksu_driver]", &anon_ksu_fops, NULL, O_RDWR | O_CLOEXEC);
     if (IS_ERR(filp)) {
         pr_err("ksu_install_fd: failed to create anon inode file\n");
         put_unused_fd(fd);
@@ -77,8 +76,7 @@ int ksu_install_fd(void)
     fd_install(fd, filp);
 
 #if __SULOG_GATE
-    ksu_sulog_report_permission_check(current_uid().val, current->comm,
-                                      fd >= 0);
+    ksu_sulog_report_permission_check(current_uid().val, current->comm, fd >= 0);
 #endif
 
     pr_info("ksu fd installed: %d for pid %d\n", fd, current->pid);
