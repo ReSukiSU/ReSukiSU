@@ -9,7 +9,7 @@ endif
 .PHONY: all compdb clean format check-format
 
 all:
-	make -C $(KDIR) M=$(MDIR) modules
+	make -C $(KDIR) M=$(MDIR) modules -j$(shell nproc)
 compdb:
 	python3 $(MDIR)/.vscode/generate_compdb.py -O $(KDIR) $(MDIR)
 clean:
