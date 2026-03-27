@@ -1,7 +1,10 @@
 kernelsu-objs := core/init.o
 kernelsu-objs += policy/allowlist.o
 kernelsu-objs += policy/app_profile.o
+kernelsu-objs += policy/feature.o
 kernelsu-objs += feature/sucompat.o
+kernelsu-objs += feature/kernel_umount.o
+kernelsu-objs += feature/sulog.o
 kernelsu-objs += hook/setuid_hook.o
 
 ifndef CONFIG_KSU_DISABLE_MANAGER
@@ -19,21 +22,19 @@ endif
 endif
 
 kernelsu-objs += compat/kernel_compat.o
-kernelsu-objs += feature/kernel_umount.o
-kernelsu-objs += uapi/supercall.o
-kernelsu-objs += uapi/supercall_dispatch.o
-kernelsu-objs += uapi/supercall_perm.o
 kernelsu-objs += infra/su_mount_ns.o
-kernelsu-objs += policy/feature.o
-kernelsu-objs += runtime/boot_event.o
-kernelsu-objs += runtime/ksud_integration.o
 kernelsu-objs += infra/seccomp_cache.o
 kernelsu-objs += infra/file_wrapper.o
-kernelsu-objs += feature/sulog.o
+kernelsu-objs += runtime/boot_event.o
+kernelsu-objs += runtime/ksud_integration.o
 
 kernelsu-objs += selinux/selinux.o
 kernelsu-objs += selinux/sepolicy.o
 kernelsu-objs += selinux/rules.o
+
+kernelsu-objs += supercall/dispatch.o
+kernelsu-objs += supercall/perm.o
+kernelsu-objs += supercall/supercall.o
 
 ifeq ($(CONFIG_KPM), y)
 kernelsu-objs += kpm/kpm.o
@@ -148,8 +149,8 @@ $(info -- KPM is disabled)
 endif
 
 ifeq ($(KSU_TP_HOOK), y)
-kernelsu-objs += hook/lsm_hook_magic.o
 kernelsu-objs += infra/symbol_resolver.o
+kernelsu-objs += hook/lsm_hook_magic.o
 kernelsu-objs += hook/syscall_hook_manager.o
 kernelsu-objs += hook/syscall_event_bridge.o
 kernelsu-objs += hook/tp_marker.o

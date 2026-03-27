@@ -260,32 +260,32 @@ void get_hook_type(char *buff) {
 bool set_dynamic_manager(unsigned int size, const char *hash)
 {
 	struct ksu_dynamic_manager_cmd cmd = {0};
-	cmd.config.operation = DYNAMIC_MANAGER_OP_SET;
-	cmd.config.size	  = size;
-	strlcpy(cmd.config.hash, hash, sizeof(cmd.config.hash));
+	cmd.operation = DYNAMIC_MANAGER_OP_SET;
+	cmd.size	  = size;
+	strlcpy((char *) cmd.hash, hash, sizeof(cmd.hash));
 
 	return ksuctl(KSU_IOCTL_DYNAMIC_MANAGER, &cmd) == 0;
 }
 
-bool get_dynamic_manager(struct dynamic_manager_user_config *cfg)
+bool get_dynamic_manager(struct ksu_dynamic_manager_cmd *cfg)
 {
 	if (!cfg) 
 		return false;
 
 	struct ksu_dynamic_manager_cmd cmd = {0};
-	cmd.config.operation = DYNAMIC_MANAGER_OP_GET;
+	cmd.operation = DYNAMIC_MANAGER_OP_GET;
 
 	if (ksuctl(KSU_IOCTL_DYNAMIC_MANAGER, &cmd) != 0)
 		return false;
 
-	*cfg = cmd.config;
+	*cfg = cmd;
 	return true;
 }
 
 bool clear_dynamic_manager(void)
 {
 	struct ksu_dynamic_manager_cmd cmd = {0};
-	cmd.config.operation = DYNAMIC_MANAGER_OP_CLEAR;
+	cmd.operation = DYNAMIC_MANAGER_OP_WIPE;
 	return ksuctl(KSU_IOCTL_DYNAMIC_MANAGER, &cmd) == 0;
 }
 

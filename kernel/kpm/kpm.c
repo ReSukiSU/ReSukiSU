@@ -38,6 +38,7 @@
 #include "kpm.h"
 #include "compact.h"
 #include "compat/kernel_compat.h"
+#include "uapi/supercall.h"
 
 #define KPM_NAME_LEN 32
 #define KPM_ARGS_LEN 1024
@@ -120,7 +121,7 @@ noinline int sukisu_handle_kpm(unsigned long control_code, unsigned long arg1, u
                                unsigned long result_code)
 {
     int res = -1;
-    if (control_code == SUKISU_KPM_LOAD) {
+    if (control_code == KSU_KPM_LOAD) {
         char kernel_load_path[256] = { 0 };
         char kernel_args_buffer[256] = { 0 };
 
@@ -144,7 +145,7 @@ noinline int sukisu_handle_kpm(unsigned long control_code, unsigned long arg1, u
         }
 
         sukisu_kpm_load_module_path((const char *)&kernel_load_path, (const char *)&kernel_args_buffer, NULL, &res);
-    } else if (control_code == SUKISU_KPM_UNLOAD) {
+    } else if (control_code == KSU_KPM_UNLOAD) {
         char kernel_name_buffer[256] = { 0 };
 
         if (arg1 == 0) {
@@ -159,9 +160,9 @@ noinline int sukisu_handle_kpm(unsigned long control_code, unsigned long arg1, u
         strncpy_from_user((char *)&kernel_name_buffer, (const char *)arg1, sizeof(kernel_name_buffer));
 
         sukisu_kpm_unload_module((const char *)&kernel_name_buffer, NULL, &res);
-    } else if (control_code == SUKISU_KPM_NUM) {
+    } else if (control_code == KSU_KPM_NUM) {
         sukisu_kpm_num(&res);
-    } else if (control_code == SUKISU_KPM_INFO) {
+    } else if (control_code == KSU_KPM_INFO) {
         char kernel_name_buffer[256] = { 0 };
         char buf[256] = { 0 };
         int size;
@@ -185,7 +186,7 @@ noinline int sukisu_handle_kpm(unsigned long control_code, unsigned long arg1, u
 
         res = copy_to_user(arg2, &buf, size);
 
-    } else if (control_code == SUKISU_KPM_LIST) {
+    } else if (control_code == KSU_KPM_LIST) {
         char buf[1024] = { 0 };
         int len = (int)arg2;
 
@@ -208,7 +209,7 @@ noinline int sukisu_handle_kpm(unsigned long control_code, unsigned long arg1, u
         if (copy_to_user(arg1, &buf, len) != 0)
             pr_info("kpm: Copy to user failed.");
 
-    } else if (control_code == SUKISU_KPM_CONTROL) {
+    } else if (control_code == KSU_KPM_CONTROL) {
         char kpm_name[KPM_NAME_LEN] = { 0 };
         char kpm_args[KPM_ARGS_LEN] = { 0 };
 
@@ -230,7 +231,7 @@ noinline int sukisu_handle_kpm(unsigned long control_code, unsigned long arg1, u
 
         sukisu_kpm_control((const char *)&kpm_name, (const char *)&kpm_args, arg_len, &res);
 
-    } else if (control_code == SUKISU_KPM_VERSION) {
+    } else if (control_code == KSU_KPM_VERSION) {
         char buffer[256] = { 0 };
 
         sukisu_kpm_version((char *)&buffer, sizeof(buffer));

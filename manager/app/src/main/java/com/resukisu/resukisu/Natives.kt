@@ -20,7 +20,8 @@ object Natives {
     // 32310: new get_allow_list ioctl
     // 34634(upstream 32336): new set_sepolicy ioctl 
     // 34685(upstream 32377): add set_init_pgrp ioctl
-    const val MINIMAL_SUPPORTED_KERNEL = 34685
+    // 34709 (breaking) unify uapi
+    const val MINIMAL_SUPPORTED_KERNEL = 34709
 
     const val KERNEL_SU_DOMAIN = "u:r:su:s0"
 

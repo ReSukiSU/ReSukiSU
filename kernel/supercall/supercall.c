@@ -17,8 +17,8 @@
 
 #include "compat/kernel_compat.h"
 #include "feature/sulog.h"
-#include "supercall_internal.h"
-#include "supercalls.h"
+#include "uapi/supercall.h"
+#include "supercall/internal.h"
 #include "arch.h"
 #include "klog.h" // IWYU pragma: keep
 

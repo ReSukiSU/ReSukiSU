@@ -1,9 +1,9 @@
-#[cfg(unix)]
-use std::os::unix::prelude::PermissionsExt;
 use anyhow::{Context, Error, Ok, Result, bail};
 use rustix::fs::{Mode, OFlags, open};
 use rustix::process::setpgid;
 use rustix::stdio::{dup2_stderr, dup2_stdin, dup2_stdout};
+#[cfg(unix)]
+use std::os::unix::prelude::PermissionsExt;
 use std::{
     fs::{File, OpenOptions, Permissions, create_dir_all, remove_file, set_permissions, write},
     io::{

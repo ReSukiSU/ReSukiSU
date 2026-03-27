@@ -125,9 +125,7 @@ pub fn run_from_args(args: &[String]) -> Result<()> {
 /// NOTE, This function may exit!!!
 pub fn run(cli: &Args) -> Result<()> {
     execute(cli).inspect_err(|e| {
-        if e.downcast_ref::<WaitTimeoutError>()
-            .is_some()
-        {
+        if e.downcast_ref::<WaitTimeoutError>().is_some() {
             std::process::exit(2);
         }
     })

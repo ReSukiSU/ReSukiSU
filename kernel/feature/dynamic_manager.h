@@ -3,8 +3,8 @@
 
 #include <linux/types.h>
 #include "ksu.h"
-#include "uapi/supercalls.h"
 #include "manager/manager_sign.h"
+#include "uapi/supercall.h"
 
 #define DYNAMIC_MANAGER_SIGNATURE_INDEX_MAGIC 255
 

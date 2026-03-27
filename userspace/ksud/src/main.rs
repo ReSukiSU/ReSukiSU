@@ -19,6 +19,10 @@ mod boot_patch;
 mod cli_non_android;
 mod defs;
 
+#[cfg(target_os = "android")]
+#[allow(nonstandard_style, unused, unsafe_op_in_unsafe_fn)]
+mod ksu_uapi;
+
 fn main() -> anyhow::Result<()> {
     #[cfg(target_os = "android")]
     {

@@ -1,9 +1,9 @@
 #include <linux/slab.h>
 #include <linux/rculist.h>
 #include <linux/uaccess.h>
-#include "uapi/supercalls.h"
 #include "manager_identity.h"
 #include "ksu.h"
+#include "uapi/supercall.h"
 
 u16 ksu_last_manager_appid = KSU_INVALID_APPID;
 
