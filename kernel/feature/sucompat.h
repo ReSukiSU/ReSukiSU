@@ -1,5 +1,6 @@
 #ifndef __KSU_H_SUCOMPAT
 #define __KSU_H_SUCOMPAT
+#include <asm/ptrace.h>
 #include <linux/types.h>
 
 extern bool ksu_su_compat_enabled;
@@ -16,11 +17,9 @@ int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
 #endif // #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0) && defined(CONFIG_KSU_SUSFS)
 
 #ifdef KSU_TP_HOOK
-// WARNING!!!! THIS SHOULDN'T BE CALLED BY UNTRUSTED CONTEXT
-// IT IS DESIGNED ONLY FOR TRACEPOINT HOOK, BECAUSE CHECKS ALREADY COMPLETE WHEN TP REGISTER
-// ESPECIALLY DON'T CALL THAT IN MANUAL HOOK
-int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user, void *__never_use_argv,
-                                           void *__never_use_envp, int *__never_use_flags);
+// WARNING! THERE HAVE TRYING TO CALL SYSCALL INTERNALLY
+// ENSURE CALL IT ONLY IN TRACEPOINT SYSCALL REDIRECT
+int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user, int orig_nr, const struct pt_regs *regs);
 #endif
 
 #endif

@@ -33,6 +33,9 @@
 #include "runtime/ksud.h"
 #include "feature/sucompat.h"
 #include "policy/app_profile.h"
+#ifdef KSU_TP_HOOK
+#include "hook/syscall_hook.h"
+#endif
 
 #include "sulog.h"
 
@@ -93,11 +96,9 @@ extern bool ksu_kernel_umount_enabled;
 
 #ifdef KSU_TP_HOOK
 
-// WARNING!!!! THIS SHOULDN'T BE CALLED BY UNTRUSTED CONTEXT
-// IT IS DESIGNED ONLY FOR TRACEPOINT HOOK, BECAUSE CHECKS ALREADY COMPLETE WHEN TP REGISTER
-// ESPECIALLY DON'T CALL THAT IN MANUAL HOOK
-int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user, void *__never_use_argv,
-                                           void *__never_use_envp, int *__never_use_flags)
+// WARNING! THERE HAVE TRYING TO CALL SYSCALL INTERNALLY
+// ENSURE CALL IT ONLY IN TRACEPOINT SYSCALL REDIRECT
+int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user, int orig_nr, const struct pt_regs *regs)
 {
     const char su[] = SU_PATH;
     const char __user *fn;
@@ -106,23 +107,24 @@ int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user, vo
     unsigned long addr;
 
     if (unlikely(!filename_user))
-        return 0;
+        goto do_orig_execve;
 
     if (!ksu_is_allow_uid_for_current(current_uid().val))
-        return 0;
+        goto do_orig_execve;
 
     addr = untagged_addr((unsigned long)*filename_user);
     fn = (const char __user *)addr;
     memset(path, 0, sizeof(path));
+
     ret = strncpy_from_user(path, fn, sizeof(path));
 
     if (ret < 0) {
         pr_warn("Access filename when execve failed: %ld", ret);
-        return 0;
+        goto do_orig_execve;
     }
 
     if (likely(memcmp(path, su, sizeof(su))))
-        return 0;
+        goto do_orig_execve;
 
 #if __SULOG_GATE
     ksu_sulog_report_syscall(current_uid().val, NULL, "execve", su_path);
@@ -132,15 +134,29 @@ int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user, vo
     pr_info("sys_execve su found\n");
     *filename_user = ksud_user_path();
 
-    return escape_with_root_profile();
+    ret = escape_with_root_profile();
+    if (ret) {
+        pr_err("escape_with_root_profile failed: %ld\n", ret);
+        goto do_orig_execve;
+    }
+
+    ret = ksu_syscall_table[orig_nr](regs);
+    if (ret < 0) {
+        pr_err("failed to execve ksud as su: %ld, fallback to sh\n", ret);
+        *filename_user = sh_user_path();
+    } else {
+        return ret;
+    }
+
+do_orig_execve:
+    return ksu_syscall_table[orig_nr](regs);
 }
 #endif
 
-// the call from execve_handler_pre does not provide correct values for __never_use_* arguments.
-// keep these arguments for consistency with manually patched code after execve_handler_pre is fixed.
-int ksu_handle_execveat_sucompat(int *fd, const char *filename, void *__never_use_argv, void *__never_use_envp,
-                                 int *__never_use_flags)
+// This is only used when we are in manual hook/susfs inline hook
+int ksu_handle_execveat_sucompat(int *fd, const char *filename)
 {
+    struct path kpath;
     bool is_allowed = ksu_is_allow_uid_for_current(current_uid().val);
 
     if (!ksu_su_compat_enabled) {
@@ -159,8 +175,17 @@ int ksu_handle_execveat_sucompat(int *fd, const char *filename, void *__never_us
 #endif
 
     pr_info("do_execveat_common su found\n");
-    memcpy((void *)filename, ksud_path, sizeof(ksud_path));
 
+    // We are only check ksud exists
+    // In manual hook, we can't try exec ksud, and detect exec success or not
+    if (kern_path(KSUD_PATH, 0, &kpath)) {
+        memcpy((void *)filename, sh_path, sizeof(sh_path));
+        goto out;
+    }
+
+    path_put(&kpath);
+    memcpy((void *)filename, ksud_path, sizeof(ksud_path));
+out:
     escape_with_root_profile();
 
     return 0;
@@ -194,7 +219,7 @@ int ksu_handle_execve(int *fd, const char *filename, void *argv, void *envp, int
         ksu_handle_execveat_ksud(filename, argv, envp, flags);
     }
 
-    return ksu_handle_execveat_sucompat(fd, filename, argv, envp, flags);
+    return ksu_handle_execveat_sucompat(fd, filename);
 }
 
 // old hook, link to ksu_handle_execve
