@@ -149,6 +149,7 @@ endif
 
 ifeq ($(KSU_TP_HOOK), y)
 kernelsu-objs += hook/lsm_hook_magic.o
+kernelsu-objs += infra/symbol_resolver.o
 kernelsu-objs += hook/syscall_hook_manager.o
 kernelsu-objs += hook/syscall_event_bridge.o
 kernelsu-objs += hook/tp_marker.o
