@@ -12,31 +12,40 @@ pub struct SusfsArgs {
 #[derive(Debug, Subcommand)]
 pub enum SuSFSSubCommands {
     /// Added path and all its sub-paths will be hidden from several syscalls
+    #[command(name = "add_sus_path")]
     AddSusPath {
         #[arg(help = "Path of file or directory")]
         path: String,
     },
     /// Similar to add_sus_path but flagged as SUS_PATH per zygote spawned process (not for sdcard)
+    #[command(name = "add_sus_path_loop")]
     AddSusPathLoop {
         #[arg(help = "Path not inside sdcard")]
         path: String,
     },
     /// Add path to store original stat info in kernel memory (before bind mount/overlay)
+    #[command(name = "add_sus_kstat")]
     AddSusKstat { path: String },
     /// Update the target ino for a path added via add_sus_kstat
+    #[command(name = "update_sus_kstat")]
     UpdateSusKstat { path: String },
     /// Update target ino only, other stat members remain same as original
+    #[command(name = "update_sus_kstat_full_clone")]
     UpdateSusKstatFullClone { path: String },
     /// Spoof uname release and version
+    #[command(name = "set_uname")]
     SetUname { release: String, version: String },
     /// Enable/Disable susfs log in kernel
+    #[command(name = "enable_log")]
     EnableLog {
         #[arg(help = "0: disable, 1: enable")]
         enabled: u8,
     },
     /// Spoof /proc/cmdline or /proc/bootconfig
+    #[command(name = "set_cmdline_or_bootconfig")]
     SetCmdlineOrBootconfig { path: String },
     /// Redirect target path to be opened with user defined path
+    #[command(name = "add_open_redirect")]
     AddOpenRedirect {
         target_path: String,
         redirected_path: String,
@@ -48,8 +57,10 @@ pub enum SuSFSSubCommands {
         uid_scheme: u64,
     },
     /// Hidden from /proc/self/maps etc.
+    #[command(name = "add_sus_map")]
     AddSusMap { path: String },
     /// Enable/Disable spoofing sus 'su' context in avc log
+    #[command(name = "enable_avc_log_spoofing")]
     EnableAvcLogSpoofing {
         #[arg(help = "0: disable, 1: enable")]
         enabled: u8,
@@ -60,6 +71,7 @@ pub enum SuSFSSubCommands {
         info_type: ShowType,
     },
     /// (Advanced) Add sus kstat statically with manual or default values
+    #[command(name = "add_sus_kstat_statically")]
     AddSusKstatStatically(Box<AddSusKstatStaticallyArgs>),
 }
 
