@@ -27,7 +27,14 @@ fn parse_bracket_objs(input: &str) -> IResult<&str, SeObject<'_>> {
         tag("}"),
     )
         .parse(input)?;
-    Ok((input, words.split_whitespace().collect()))
+    let objs: SeObject<'_> = words.split_whitespace().collect();
+    if objs.is_empty() {
+        return Err(nom::Err::Error(nom::error::Error::new(
+            input,
+            nom::error::ErrorKind::Many1,
+        )));
+    }
+    Ok((input, objs))
 }
 
 fn parse_single_obj(input: &str) -> IResult<&str, SeObject<'_>> {
@@ -75,7 +82,7 @@ struct XPerm<'a> {
     target: SeObject<'a>,
     class: SeObject<'a>,
     operation: &'a str,
-    perm_set: &'a str,
+    perm_set: SeObject<'a>,
 }
 
 #[derive(Debug, PartialEq, Eq, new)]
@@ -173,13 +180,13 @@ impl<'a> SeObjectParser<'a> for NormalPerm<'a> {
         ))
         .parse(input)?;
 
-        let (input, _) = space0(input)?;
+        let (input, _) = space1(input)?;
         let (input, source) = parse_seobj(input)?;
-        let (input, _) = space0(input)?;
+        let (input, _) = space1(input)?;
         let (input, target) = parse_seobj(input)?;
-        let (input, _) = space0(input)?;
+        let (input, _) = space1(input)?;
         let (input, class) = parse_seobj(input)?;
-        let (input, _) = space0(input)?;
+        let (input, _) = space1(input)?;
         let (input, perm) = parse_seobj(input)?;
         Ok((input, NormalPerm::new(op, source, target, class, perm)))
     }
@@ -194,16 +201,16 @@ impl<'a> SeObjectParser<'a> for XPerm<'a> {
         ))
         .parse(input)?;
 
-        let (input, _) = space0(input)?;
+        let (input, _) = space1(input)?;
         let (input, source) = parse_seobj(input)?;
-        let (input, _) = space0(input)?;
+        let (input, _) = space1(input)?;
         let (input, target) = parse_seobj(input)?;
-        let (input, _) = space0(input)?;
+        let (input, _) = space1(input)?;
         let (input, class) = parse_seobj(input)?;
-        let (input, _) = space0(input)?;
+        let (input, _) = space1(input)?;
         let (input, operation) = parse_single_word(input)?;
-        let (input, _) = space0(input)?;
-        let (input, perm_set) = parse_single_word(input)?;
+        let (input, _) = space1(input)?;
+        let (input, perm_set) = parse_seobj(input)?;
 
         Ok((
             input,
@@ -449,17 +456,19 @@ impl<'a> TryFrom<&'a XPerm<'a>> for Vec<AtomicStatement> {
         for &s in &perm.source {
             for &t in &perm.target {
                 for &c in &perm.class {
-                    result.push(AtomicStatement {
-                        cmd: crate::ksu_uapi::KSU_SEPOLICY_CMD_XPERM,
-                        subcmd,
-                        sepol1: s.try_into()?,
-                        sepol2: t.try_into()?,
-                        sepol3: c.try_into()?,
-                        sepol4: perm.operation.try_into()?,
-                        sepol5: perm.perm_set.try_into()?,
-                        sepol6: PolicyObject::None,
-                        sepol7: PolicyObject::None,
-                    });
+                    for &r in &perm.perm_set {
+                        result.push(AtomicStatement {
+                            cmd: crate::ksu_uapi::KSU_SEPOLICY_CMD_XPERM,
+                            subcmd,
+                            sepol1: s.try_into()?,
+                            sepol2: t.try_into()?,
+                            sepol3: c.try_into()?,
+                            sepol4: perm.operation.try_into()?,
+                            sepol5: r.try_into()?,
+                            sepol6: PolicyObject::None,
+                            sepol7: PolicyObject::None,
+                        });
+                    }
                 }
             }
         }
