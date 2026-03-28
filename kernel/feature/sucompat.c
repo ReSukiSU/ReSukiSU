@@ -154,7 +154,9 @@ do_orig_execve:
 #endif
 
 // This is only used when we are in manual hook/susfs inline hook
-int ksu_handle_execveat_sucompat(int *fd, const char *filename)
+// We can't remove __never_use params, because it were using by the fucking susfs
+int ksu_handle_execveat_sucompat(int *fd, const char *filename, void *__never_use_argv, void *__never_use_envp,
+                                 int *__never_use_flags)
 {
     struct path kpath;
     bool is_allowed = ksu_is_allow_uid_for_current(current_uid().val);
@@ -219,7 +221,7 @@ int ksu_handle_execve(int *fd, const char *filename, void *argv, void *envp, int
         ksu_handle_execveat_ksud(filename, argv, envp, flags);
     }
 
-    return ksu_handle_execveat_sucompat(fd, filename);
+    return ksu_handle_execveat_sucompat(fd, filename, argv, envp, flags);
 }
 
 // old hook, link to ksu_handle_execve
