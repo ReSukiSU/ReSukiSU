@@ -662,12 +662,6 @@ DEFINE_STATIC_KEY_TRUE(ksud_execve_key);
 void ksu_stop_ksud_execve_hook(void)
 {
     static_branch_disable(&ksud_execve_key);
-
-#ifndef KSU_TP_HOOK
-    // We actually not use this bool, but the fucking susfs are using that in hook
-    // let's compatible with that
-    ksu_execveat_hook = false;
-#endif
 }
 
 bool ksu_is_safe_mode()
