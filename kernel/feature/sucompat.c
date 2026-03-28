@@ -13,6 +13,7 @@
 #include <linux/fs.h>
 #include <linux/types.h>
 #include <linux/ptrace.h>
+#include <linux/namei.h>
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
 #include <linux/sched/task_stack.h>
 #else
@@ -178,17 +179,18 @@ int ksu_handle_execveat_sucompat(int *fd, const char *filename, void *__never_us
 
     pr_info("do_execveat_common su found\n");
 
+    escape_with_root_profile();
+
     // We are only check ksud exists
     // In manual hook, we can't try exec ksud, and detect exec success or not
-    if (kern_path(KSUD_PATH, 0, &kpath)) {
+    if (kern_path(KSUD_PATH, LOOKUP_FOLLOW, &kpath)) {
+        pr_info("sucompat: /data/adb/ksud not found, fallback to /system/bin/sh");
         memcpy((void *)filename, sh_path, sizeof(sh_path));
-        goto out;
+        return 0;
     }
 
     path_put(&kpath);
     memcpy((void *)filename, ksud_path, sizeof(ksud_path));
-out:
-    escape_with_root_profile();
 
     return 0;
 }
