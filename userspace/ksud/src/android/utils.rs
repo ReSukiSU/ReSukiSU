@@ -231,6 +231,14 @@ pub fn uninstall() -> Result<()> {
     Ok(())
 }
 
+pub fn reset_std() -> Result<()> {
+    let null_fd = open("/dev/null", OFlags::RDWR, Mode::empty())?;
+    dup2_stdin(&null_fd)?;
+    dup2_stdout(&null_fd)?;
+    dup2_stderr(&null_fd)?;
+    Ok(())
+}
+
 pub fn daemonize<F: FnOnce() -> Result<()>>(configure: F) -> Result<()> {
     unsafe {
         let pid = libc::fork();
@@ -253,12 +261,7 @@ pub fn daemonize<F: FnOnce() -> Result<()>>(configure: F) -> Result<()> {
     setpgid(None, None)?;
     switch_cgroups();
     configure()?;
-    {
-        let null_fd = open("/dev/null", OFlags::RDWR, Mode::empty())?;
-        dup2_stdin(&null_fd)?;
-        dup2_stdout(&null_fd)?;
-        dup2_stderr(&null_fd)?;
-    }
+    reset_std()?;
 
     unsafe {
         let pid = libc::fork();
