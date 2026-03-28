@@ -17,6 +17,7 @@
 #include <linux/uidgid.h>
 #include <linux/namei.h>
 
+#include "policy/app_profile.h"
 #include "policy/allowlist.h"
 #include "hook/setuid_hook.h"
 #include "klog.h" // IWYU pragma: keep
@@ -29,8 +30,6 @@
 #include "compat/kernel_compat.h"
 #include "feature/kernel_umount.h"
 #include "feature/sulog.h"
-
-extern void disable_seccomp(struct task_struct *tsk);
 
 static inline void ksu_set_file_immutable(const char *path_name, bool immutable)
 {
@@ -123,9 +122,7 @@ int ksu_handle_setuid(uid_t new_uid, uid_t old_uid)
 
 #else // #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
     if (ksu_is_allow_uid_for_current(new_uid)) {
-        spin_lock_irq(&current->sighand->siglock);
-        disable_seccomp(current);
-        spin_unlock_irq(&current->sighand->siglock);
+        disable_seccomp();
 
         if (ksu_is_manager_uid(new_uid)) {
             pr_info("install fd for ksu manager(uid=%d)\n", new_uid);
