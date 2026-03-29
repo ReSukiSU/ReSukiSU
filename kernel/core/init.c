@@ -20,6 +20,7 @@
 #include "manager/throne_tracker.h"
 #include "runtime/ksud.h"
 #include "runtime/ksud_boot.h"
+#include "feature/sulog.h"
 #include "supercall/supercall.h"
 #include "ksu.h"
 #include "infra/file_wrapper.h"
@@ -154,6 +155,7 @@ int __init kernelsu_init(void)
     }
 
     ksu_feature_init();
+    ksu_sulog_init();
 
     ksu_supercalls_init();
 
@@ -236,6 +238,7 @@ void kernelsu_exit(void)
 
     ksu_allowlist_exit();
 
+    ksu_sulog_exit();
     ksu_feature_exit();
 
     if (ksu_cred) {

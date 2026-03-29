@@ -196,6 +196,21 @@ else
 ccflags-y += -I$(objtree)/security/selinux -include $(srctree)/include/asm-generic/errno.h
 endif
 
+# for kernel version below 5.10, include/linux/minmax.h maybe not found
+# https://github.com/torvalds/linux/commit/b296a6d53339a79082c1d2c1761e948e8b3def69
+ifneq ($(wildcard $(srctree)/include/linux/minmax.h),)
+$(info -- $(REPO_NAME)/compat: minmax.h found)
+ccflags-y += -DKSU_COMPAT_HAS_MINMAX_H
+endif
+
+# for kernel version below 4.18, include/linux/overflow.h maybe not found
+# https://github.com/torvalds/linux/commit/f0907827a8a9152aedac2833ed1b674a7b2a44f2
+ifneq ($(wildcard $(srctree)/include/linux/overflow.h),)
+$(info -- $(REPO_NAME)/compat: overflow.h found)
+ccflags-y += -DKSU_COMPAT_HAS_OVERFLOW_H
+endif
+
+
 # for kernel version below 3.14, linux/proc_ns.h maybe not found
 # https://github.com/torvalds/linux/commit/0bb80f240520c4148b623161e7856858c021696d
 ifneq ($(wildcard $(srctree)/include/linux/proc_ns.h),)
