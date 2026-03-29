@@ -129,7 +129,7 @@ int __init kernelsu_init(void)
 #endif
 
     // If we are in tracepoint hook, remember to check x86-64 compatible
-#if defined(KSU_Tp_HOOK) && defined(__x86_64__)
+#if defined(KSU_TP_HOOK) && defined(__x86_64__)
     // If the kernel has the hardening patch, X86_FEATURE_INDIRECT_SAFE must be set
     if (!boot_cpu_has(X86_FEATURE_INDIRECT_SAFE)) {
         pr_alert("*************************************************************");
