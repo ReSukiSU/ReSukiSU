@@ -17,4 +17,5 @@ mod su;
 mod susfs;
 mod umount_config;
 mod unload;
+mod sulog;
 pub mod utils;

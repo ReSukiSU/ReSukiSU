@@ -5,6 +5,7 @@ use crate::{
         dynamic_manager, ksucalls,
         module::{self, handle_updated_modules, metamodule, prune_modules},
         restorecon,
+        sulog,
         utils::{self, is_safe_mode, switch_mnt_ns},
     },
     assets, defs,
@@ -99,6 +100,10 @@ pub fn on_post_data_fs() -> Result<()> {
     #[cfg(all(target_arch = "aarch64", target_os = "android"))]
     if let Err(e) = kpm::booted_load() {
         warn!("KPM: Failed to start KPM watcher: {e}");
+    }
+
+    if let Err(err) = sulog::ensure_sulogd_running() {
+        warn!("failed to ensure sulogd is running after feature init: {err:#}");
     }
 
     // execute metamodule post-fs-data script first (priority)
