@@ -136,8 +136,7 @@ FILLDIR_RETURN_TYPE my_actor(MY_ACTOR_CTX_ARG, const char *name, int namelen, lo
 
     // now put this on candidate_path
     if (d_type == DT_REG && !strncmp(name, "base.apk", 8)) {
-        snprintf(candidate_path, DATA_PATH_LEN, "%s/%.*s", my_ctx->parent_dir,
-                 namelen, name);
+        snprintf(candidate_path, DATA_PATH_LEN, "%s/%.*s", my_ctx->parent_dir, namelen, name);
     }
 
     return FILLDIR_ACTOR_CONTINUE;
@@ -220,8 +219,7 @@ void search_manager(const char *path, int depth, struct list_head *uid_data)
                 goto skip_iterate;
 
             bool is_manager = is_manager_apk(candidate_path, &signature_index);
-            pr_info("Found new base.apk at path: %s, is_manager: %d\n",
-                    candidate_path, is_manager);
+            pr_info("Found new base.apk at path: %s, is_manager: %d\n", candidate_path, is_manager);
 
             if (likely(!is_manager))
                 goto skip_iterate;
@@ -430,8 +428,7 @@ void ksu_handle_rename(struct dentry *old_dentry, struct dentry *new_dentry)
         return;
     }
 
-    pr_info("renameat: %s -> %s, new path: %s\n", old_dentry->d_iname,
-            new_dentry->d_iname, buf);
+    pr_info("renameat: %s -> %s, new path: %s\n", old_dentry->d_iname, new_dentry->d_iname, buf);
 
     track_throne(false, true);
 }
@@ -444,10 +441,7 @@ void ksu_throne_tracker_init(void)
 
 void ksu_throne_tracker_exit(void)
 {
-    struct apk_path_hash *pos, *n;
-
-    list_for_each_entry_safe (pos, n, &apk_path_hash_list, list) {
-        list_del(&pos->list);
-        kfree(pos);
-    }
+    mutex_lock(&app_list_lock);
+    bitmap_free(last_app_id_map);
+    mutex_unlock(&app_list_lock);
 }

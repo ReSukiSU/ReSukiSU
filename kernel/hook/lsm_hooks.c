@@ -39,8 +39,8 @@ static int ksu_file_permission(struct file *file, int mask)
 }
 #endif
 
-static int ksu_inode_rename(struct inode *old_inode, struct dentry *old_dentry,
-                            struct inode *new_inode, struct dentry *new_dentry)
+static int ksu_inode_rename(struct inode *old_inode, struct dentry *old_dentry, struct inode *new_inode,
+                            struct dentry *new_dentry)
 {
     ksu_handle_rename(old_dentry, new_dentry);
 
