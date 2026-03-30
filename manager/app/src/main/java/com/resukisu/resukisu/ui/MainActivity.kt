@@ -48,8 +48,6 @@ import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -207,7 +205,10 @@ class MainActivity : ComponentActivity() {
             }
 
             setContent {
-                KernelSUTheme {
+                val settings by settingsStateFlow.collectAsState()
+                KernelSUTheme(
+                    dpi = settings.dpi
+                ) {
                     val context = LocalContext.current
                     val snackBarHostState = remember { SnackbarHostState() }
 
@@ -230,24 +231,11 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    val settings by settingsStateFlow.collectAsState()
-                    val systemDensity = LocalDensity.current
-
-                    val density = remember(systemDensity, settings.dpi) {
-                        if (settings.dpi <= 0f) {
-                            systemDensity
-                        } else {
-                            val targetDensity = settings.dpi / 160f
-                            Density(density = targetDensity, fontScale = systemDensity.fontScale)
-                        }
-                    }
-
                     val navigator = rememberNavigator(Route.Main)
 
                     CompositionLocalProvider(
                         LocalNavigator provides navigator,
                         LocalSnackbarHost provides snackBarHostState,
-                        LocalDensity provides density
                     ) {
                         HandleDeepLink(
                             intentState = intentState.collectAsState()
