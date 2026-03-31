@@ -471,8 +471,6 @@
     <string name="susfs_hide_mounts_current_setting">Cài đặt hiện tại: %s</string>
     <string name="susfs_hide_mounts_setting_all">Ẩn khỏi tất cả các tiến trình</string>
     <string name="susfs_hide_mounts_setting_non_ksu">Chỉ ẩn đối với các tiến trình không phải KSU</string>
-    <string name="kernel_simple_kernel">Hiển thị tóm tắt \"Phiên bản Kernel\"</string>
-    <string name="kernel_simple_kernel_summary">Tóm tắt hiển thị phiên bản Kernel cho ngắn gọn</string>
     <string name="susfs_android_data_path_set">Đường dẫn Android Data đã được đặt thành: %s</string>
     <string name="susfs_sdcard_path_set">Đường dẫn SD Card đã được đặt thành: %s</string>
     <string name="susfs_path_setup_warning">Thiết lập đường dẫn có thể không thành công hoàn toàn, nhưng đường dẫn SuS sẽ tiếp tục được thêm vào</string>

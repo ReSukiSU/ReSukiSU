@@ -279,14 +279,6 @@ class MoreSettingsHandlers(
     }
 
     /**
-     * 处理内核简洁模式变更
-     */
-    fun handleKernelSimpleModeChange(newValue: Boolean) {
-        prefs.edit { putBoolean("is_kernel_simple_mode", newValue) }
-        state.isKernelSimpleMode = newValue
-    }
-
-    /**
      * 处理隐藏版本变更
      */
     fun handleHideVersionChange(newValue: Boolean) {

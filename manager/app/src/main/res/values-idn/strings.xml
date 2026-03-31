@@ -473,8 +473,6 @@ Tanamkan: Secara permanen memasang ke sistem</string>
     <string name="susfs_hide_mounts_current_setting">Pengaturan Saat Ini: %s</string>
     <string name="susfs_hide_mounts_setting_all">Sembunyikan untuk Semua Proses</string>
     <string name="susfs_hide_mounts_setting_non_ksu">Sembunyikan Hanya untuk Proses Non-KSU</string>
-    <string name="kernel_simple_kernel">Mode Versi Kernel Sederhana</string>
-    <string name="kernel_simple_kernel_summary">Aktifkan atau nonaktifkan tampilan versi kernel SukiSU sederhana</string>
     <string name="susfs_android_data_path_set">Jalur Data Android diatur ke: %s</string>
     <string name="susfs_sdcard_path_set">Jalur Kartu SD diatur ke: %s</string>
     <string name="susfs_path_setup_warning">Pengaturan jalur mungkin tidak sepenuhnya berhasil, tetapi jalur SUS akan tetap ditambahkan</string>

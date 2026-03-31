@@ -467,8 +467,6 @@
     <string name="susfs_hide_mounts_current_setting">Mevcut ayar: %s</string>
     <string name="susfs_hide_mounts_setting_all">Tüm işlemler için gizle</string>
     <string name="susfs_hide_mounts_setting_non_ksu">Sadece KSU dışı işlemler için gizle</string>
-    <string name="kernel_simple_kernel">Çekirdek Sürümü Özet Modu</string>
-    <string name="kernel_simple_kernel_summary">SukiSU çekirdek sürümünün gösterdiği sade modu etkinleştirin veya devre dışı bırakın</string>
     <string name="susfs_android_data_path_set">Android Veri yolu şuna ayarlandı: %s</string>
     <string name="susfs_sdcard_path_set">SD kart yolu şuna ayarlandı: %s</string>
     <string name="susfs_path_setup_warning">Yol kurulumu tam olarak başarılı olmayabilir, ancak SUS yolları eklenmeye devam edecektir</string>

@@ -393,16 +393,6 @@ private fun CustomizationSettings(
             )
         }
 
-        item {
-            SettingsSwitchWidget(
-                icon = Icons.Filled.Brush,
-                title = stringResource(R.string.kernel_simple_kernel),
-                description = stringResource(R.string.kernel_simple_kernel_summary),
-                checked = state.isKernelSimpleMode,
-                onCheckedChange = handlers::handleKernelSimpleModeChange
-            )
-        }
-
         hideOptionsSettings(state = state, handlers = handlers)
     }
 }

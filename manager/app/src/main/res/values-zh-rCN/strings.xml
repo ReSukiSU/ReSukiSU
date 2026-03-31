@@ -508,8 +508,6 @@
     <string name="susfs_hide_mounts_current_setting">当前设置: %s</string>
     <string name="susfs_hide_mounts_setting_all">对所有进程隐藏</string>
     <string name="susfs_hide_mounts_setting_non_ksu">仅对非 KSU 进程隐藏</string>
-    <string name="kernel_simple_kernel">内核版本简洁模式</string>
-    <string name="kernel_simple_kernel_summary">启用或禁用 SukiSU 内核版本显示的简洁模式</string>
     <string name="susfs_android_data_path_set">Android Data 路径已设置为: %s</string>
     <string name="susfs_sdcard_path_set">SDCard 路径已设置为: %s</string>
     <string name="susfs_path_setup_warning">路径设置可能未完全成功，但将继续添加 SuS 路径</string>

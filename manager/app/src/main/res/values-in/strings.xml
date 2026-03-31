@@ -459,8 +459,6 @@
     <string name="susfs_hide_mounts_current_setting">Pengaturan saat ini: %s</string>
     <string name="susfs_hide_mounts_setting_all">Sembunyikan untuk semua proses</string>
     <string name="susfs_hide_mounts_setting_non_ksu">Sembunyikan hanya untuk proses non-KSU</string>
-    <string name="kernel_simple_kernel">Mode Ringkas Versi Kernel</string>
-    <string name="kernel_simple_kernel_summary">Aktifkan atau nonaktifkan mode bersih yang ditampilkan oleh versi kernel SukiSU</string>
     <string name="susfs_android_data_path_set">Jalur Data Android telah diatur ke: %s</string>
     <string name="susfs_sdcard_path_set">Jalur SD card telah diatur ke: %s</string>
     <string name="susfs_path_setup_warning">Penyiapan jalur mungkin tidak sepenuhnya berhasil, tetapi jalur SUS akan terus ditambahkan</string>

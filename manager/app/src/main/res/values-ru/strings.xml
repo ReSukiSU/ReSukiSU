@@ -461,8 +461,6 @@
     <string name="susfs_hide_mounts_current_setting">Текущие настройки: %s</string>
     <string name="susfs_hide_mounts_setting_all">Скрыть для всех процессов</string>
     <string name="susfs_hide_mounts_setting_non_ksu">Скрыть только для процессов, не связанных с KSU</string>
-    <string name="kernel_simple_kernel">Скрыть доп. информацию о ядре</string>
-    <string name="kernel_simple_kernel_summary">Включить или отключить чистый режим, отображаемой версии ядра SukiSU</string>
     <string name="susfs_android_data_path_set">Путь к данным Android был установлен на: %s</string>
     <string name="susfs_sdcard_path_set">Путь к SD-карте был установлен на: %s</string>
     <string name="susfs_path_setup_warning">Установка пути может быть не вполне успешной, но SUS пути будут добавлены</string>

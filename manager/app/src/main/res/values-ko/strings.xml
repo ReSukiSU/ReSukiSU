@@ -476,8 +476,6 @@
     <string name="susfs_hide_mounts_current_setting">현재 설정: %s</string>
     <string name="susfs_hide_mounts_setting_all">모든 프로세스에서 숨기기</string>
     <string name="susfs_hide_mounts_setting_non_ksu">비-KSU 프로세스에서만 숨기기</string>
-    <string name="kernel_simple_kernel">커널 버전 간소화 모드</string>
-    <string name="kernel_simple_kernel_summary">SukiSU 커널 버전이 표시되는 정리 모드를 활성화 또는 비활성화합니다.</string>
     <string name="susfs_android_data_path_set">Android Data 경로 설정됨: %s</string>
     <string name="susfs_sdcard_path_set">SD 카드 경로 설정됨: %s</string>
     <string name="susfs_path_setup_warning">경로 설정이 완전히 성공하지 않을 수 있지만 SUS 경로는 계속 추가됩니다.</string>

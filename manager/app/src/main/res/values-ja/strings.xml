@@ -474,8 +474,6 @@
     <string name="susfs_hide_mounts_current_setting">現在の設定: %s</string>
     <string name="susfs_hide_mounts_setting_all">すべてのプロセスを非表示</string>
     <string name="susfs_hide_mounts_setting_non_ksu">非 KSU プロセスのみ非表示</string>
-    <string name="kernel_simple_kernel">簡潔モードなカーネル バージョン</string>
-    <string name="kernel_simple_kernel_summary">SukiSU のカーネル バージョンによって表示されるクリーンモードを有効または無効します。</string>
     <string name="susfs_android_data_path_set">Android データパスが設定されました: %s</string>
     <string name="susfs_sdcard_path_set">SD カードのパスは次のように設定済みです: %s</string>
     <string name="susfs_path_setup_warning">パスの設定は完全に成功しない可能性がありますが、SUS パスは引き続き追加されます。</string>

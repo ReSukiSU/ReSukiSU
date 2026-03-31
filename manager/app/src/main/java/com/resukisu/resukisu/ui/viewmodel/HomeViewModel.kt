@@ -83,8 +83,6 @@ class HomeViewModel : ViewModel() {
 
     var isSimpleMode by mutableStateOf(false)
         private set
-    var isKernelSimpleMode by mutableStateOf(false)
-        private set
     var isHideVersion by mutableStateOf(false)
         private set
     var isHideOtherInfo by mutableStateOf(false)
@@ -113,7 +111,6 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             val settingsPrefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
             isSimpleMode = settingsPrefs.getBoolean("is_simple_mode", false)
-            isKernelSimpleMode = settingsPrefs.getBoolean("is_kernel_simple_mode", false)
             isHideVersion = settingsPrefs.getBoolean("is_hide_version", false)
             isHideOtherInfo = settingsPrefs.getBoolean("is_hide_other_info", false)
             isHideSusfsStatus = settingsPrefs.getBoolean("is_hide_susfs_status", false)
@@ -142,28 +139,6 @@ class HomeViewModel : ViewModel() {
                     Natives.getFullVersion()
                 } catch (_: Exception) {
                     "Unknown"
-                }
-
-                val ksuFullVersion = if (isKernelSimpleMode) {
-                    try {
-                        val startIndex = fullVersion.indexOf('v')
-                        if (startIndex >= 0) {
-                            val endIndex = fullVersion.indexOf('-', startIndex)
-                            val versionStr = if (endIndex > startIndex) {
-                                fullVersion.substring(startIndex, endIndex)
-                            } else {
-                                fullVersion.substring(startIndex)
-                            }
-                            val numericVersion = "v" + (Regex("""\d+(\.\d+)*""").find(versionStr)?.value ?: versionStr)
-                            numericVersion
-                        } else {
-                            fullVersion
-                        }
-                    } catch (_: Exception) {
-                        fullVersion
-                    }
-                } else {
-                    fullVersion
                 }
 
                 val lkmMode = ksuVersion?.let {
@@ -203,7 +178,7 @@ class HomeViewModel : ViewModel() {
                 systemStatus = SystemStatus(
                     isManager = isManager,
                     ksuVersion = ksuVersion,
-                    ksuFullVersion = ksuFullVersion,
+                    ksuFullVersion = "$fullVersion (${Natives.version})",
                     lkmMode = lkmMode,
                     kernelVersion = kernelVersion,
                     isRootAvailable = isRootAvailable,

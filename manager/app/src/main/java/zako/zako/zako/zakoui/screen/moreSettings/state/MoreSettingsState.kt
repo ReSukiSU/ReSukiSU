@@ -60,7 +60,6 @@ class MoreSettingsState(
     var isHideSusfsStatus by mutableStateOf(prefs.getBoolean("is_hide_susfs_status", false))
     var isHideLinkCard by mutableStateOf(prefs.getBoolean("is_hide_link_card", false))
     var isHideTagRow by mutableStateOf(prefs.getBoolean("is_hide_tag_row", false))
-    var isKernelSimpleMode by mutableStateOf(prefs.getBoolean("is_kernel_simple_mode", false))
     var showMoreModuleInfo by mutableStateOf(prefs.getBoolean("show_more_module_info", false))
     var useAltIcon by mutableStateOf(prefs.getBoolean("use_alt_icon", false))
 
