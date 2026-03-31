@@ -250,6 +250,17 @@ pub fn daemonize(use_init_pgrp: bool) -> Result<()> {
     daemonize_with(use_init_pgrp, || Ok(()))
 }
 
+pub fn create_daemon(use_init_pgrp: bool) -> Result<bool> {
+    create_daemon_with(use_init_pgrp, || Ok(()))
+}
+
+pub fn create_daemon_with<F: FnOnce() -> Result<()>>(
+    use_init_pgrp: bool,
+    configure: F,
+) -> Result<bool> {
+    create_daemon_impl(use_init_pgrp, configure)
+}
+
 fn create_daemon_impl<F: FnOnce() -> Result<()>>(
     use_init_pgrp: bool,
     configure: F,
@@ -259,8 +270,9 @@ fn create_daemon_impl<F: FnOnce() -> Result<()>>(
         if pid < 0 {
             bail!("fork error {}", std::io::Error::last_os_error());
         } else if pid > 0 {
+            let mut status: i32 = -1;
             loop {
-                if libc::waitpid(pid, std::ptr::null_mut(), 0) < 0 {
+                if libc::waitpid(pid, &raw mut status, 0) < 0 {
                     if *libc::__errno() != libc::EINTR {
                         libc::_exit(1);
                     }
@@ -268,7 +280,10 @@ fn create_daemon_impl<F: FnOnce() -> Result<()>>(
                     break;
                 }
             }
-            libc::_exit(0);
+            if !libc::WIFEXITED(status) || libc::WEXITSTATUS(status) != 0 {
+                bail!("child exited with unexpected status {status}")
+            }
+            return Ok(false);
         }
     }
 
