@@ -181,7 +181,9 @@ static bool profile_valid(struct app_profile *profile)
         static const size_t domain_len = sizeof(profile->rp_config.profile.selinux_domain);
         if (unlikely(need_migrate_su_domain)) {
             if (strncmp(domain, "u:r:su:s0", domain_len) == 0) {
-                strscpy_pad(domain, KSU_DEFAULT_SELINUX_DOMAIN, domain_len);
+                memset(domain, 0, domain_len);
+                // domain_len - 1 as implicit null termination
+                strncpy(domain, KSU_DEFAULT_SELINUX_DOMAIN, domain_len - 1);
                 pr_info("migrated profile domain: %s\n", profile->key);
             }
         }
