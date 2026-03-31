@@ -214,7 +214,12 @@ int ksu_handle_execveat_sucompat(int *fd, const char *filename, void *__never_us
 }
 
 #if defined(CONFIG_KSU_SUSFS) || defined(CONFIG_KSU_MANUAL_HOOK)
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 3, 0) || defined(KSU_HAS_MODERN_STATIC_KEY_INTERFACE)
 extern struct static_key_true ksud_execve_key;
+#else
+extern bool ksud_execve_key;
+#endif
 
 static inline void ksu_handle_execveat_init(const char *name)
 {
@@ -237,9 +242,15 @@ int ksu_handle_execve(int *fd, const char *filename, void *argv, void *envp, int
 {
     ksu_handle_execveat_init(filename);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 3, 0) || defined(KSU_HAS_MODERN_STATIC_KEY_INTERFACE)
     if (static_branch_unlikely(&ksud_execve_key)) {
         ksu_handle_execveat_ksud(filename, argv, envp, flags);
     }
+#else
+    if (ksud_execve_key) {
+        ksu_handle_execveat_ksud(filename, argv, envp, flags);
+    }
+#endif
 
     return ksu_handle_execveat_sucompat(fd, filename, argv, envp, flags);
 }

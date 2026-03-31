@@ -81,6 +81,9 @@ long __nocfi ksu_hook_faccessat(int orig_nr, const struct pt_regs *regs)
     return ksu_syscall_table[orig_nr](regs);
 }
 
+// there are for tracepoint syscall redirect hook
+// It are only support for GKI2 kernel
+// I think we no need ifdef 4.3- kernel compatible in there?
 extern struct static_key_true ksud_execve_key;
 
 long __nocfi ksu_hook_execve(int orig_nr, const struct pt_regs *regs)

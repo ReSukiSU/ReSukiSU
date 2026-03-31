@@ -7,7 +7,9 @@
 #include <linux/pid.h>
 #include <linux/slab.h>
 #include <linux/syscalls.h>
+#ifdef KSU_TP_HOOK
 #include <linux/task_work.h>
+#endif
 #include <linux/uaccess.h>
 #include <linux/version.h>
 #ifdef CONFIG_KSU_SUSFS
