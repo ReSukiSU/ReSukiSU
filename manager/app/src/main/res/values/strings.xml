@@ -302,7 +302,7 @@
     <string name="horizon_copy_failed">Copy failed</string>
     <string name="horizon_unknown_error">Unknown error</string>
     <string name="flash_failed_message">Flash failed</string>
-    <!-- lkm/gki install -->
+    <!-- LKM/GKI install -->
     <string name="Lkm_install_methods">LKM repair/installation</string>
     <string name="GKI_install_methods">Flashing AnyKernel3</string>
     <string name="kernel_version_log">Kernel version: %1$s</string>
@@ -601,7 +601,7 @@
     <string name="susfs_reset_loop_paths_title">Reset loop paths</string>
     <string name="susfs_reset_loop_paths_message">Are you sure you want to clear all SUS loop paths? This action cannot be undone!</string>
     <string name="susfs_loop_path_label">Loop path</string>
-    <string name="susfs_loop_path_placeholder">/data/example/path</string>
+    <string name="susfs_loop_path_placeholder" translatable="false">/data/example/path</string>
     <string name="susfs_loop_path_restriction_warning">Note: Only paths NOT inside /storage/ and /sdcard/ can be added via loop paths</string>
     <string name="susfs_loop_path_invalid_location">Error: Loop paths cannot be inside /storage/ or /sdcard/ directories!</string>
     <string name="loop_paths_section">Loop paths</string>
@@ -677,7 +677,7 @@ Important Note:\n
     <!-- SUS Map related strings -->
     <string name="susfs_tab_sus_maps">SUS maps</string>
     <string name="susfs_sus_map_label">Library path</string>
-    <string name="susfs_sus_map_placeholder">/data/adb/modules/my_module/zygisk/arm64-v8a.so</string>
+    <string name="susfs_sus_map_placeholder" translatable="false">/data/adb/modules/my_module/zygisk/arm64-v8a.so</string>
     <string name="susfs_add_sus_map">Add SUS map</string>
     <string name="susfs_edit_sus_map">Edit SUS map</string>
     <string name="susfs_sus_map_added_success">SUS map added successfully: %1$s</string>

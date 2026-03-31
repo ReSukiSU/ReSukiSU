@@ -50,11 +50,9 @@
     <string name="reboot_to_apply">다시 시작하여 변경 사항 적용</string>
     <string name="module_magisk_conflict">Magisk와 충돌로 모듈을 사용할 수 없습니다!</string>
     <string name="home_learn_kernelsu">KernelSU 알아보기</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">KernelSU 설치 방법과 모듈 사용 방법을 확인합니다</string>
     <string name="home_support_title">지원이 필요합니다</string>
     <string name="home_support_content">KernelSU는 지금도, 앞으로도 항상 무료이며 오픈 소스로 유지됩니다. 기부를 통해 여러분의 관심을 보여주세요.</string>
-    <string name="about_source_code"><![CDATA[View source code at %1$s<br/>Join our %2$s channel]]></string>
     <string name="profile_default">기본값</string>
     <string name="profile_template">템플릿</string>
     <string name="profile_custom">사용자 지정</string>
@@ -152,10 +150,7 @@
     <string name="restart_now">지금 다시 시작</string>
     <string name="unknown_error">알 수 없는 오류</string>
     <!-- Command related -->
-    <string name="command_execution_failed">Command execution failed: %1$s</string>
     <!-- Allowlist related -->
-    <string name="allowlist_backup_success">Allowlist backup successful</string>
-    <string name="allowlist_backup_failed">Allowlist backup failed: %1$s</string>
     <string name="allowlist_restore_confirm_title">허용 목록 복원 확인</string>
     <string name="allowlist_restore_confirm_message">이 작업은 현재 허용 목록을 덮어씁니다. 계속할까요?</string>
     <string name="allowlist_restore_success">허용 목록 복원됨</string>
@@ -190,7 +185,6 @@
     <string name="hide_kernel_kernelsu_version">커널 버전 숨기기</string>
     <string name="hide_kernel_kernelsu_version_summary">커널 버전을 숨깁니다.</string>
     <string name="hide_other_info">기타 정보 숨기기</string>
-    <string name="hide_other_info_summary">Hides information about the number of super users, modules and KPM modules on the home page</string>
     <string name="hide_susfs_status">SuSFS 상태 숨기기</string>
     <string name="hide_susfs_status_summary">홈 화면에서 SuSFS 상태 정보를 숨깁니다.</string>
     <string name="hide_zygisk_implement">Zygisk 상태 숨기기</string>
@@ -226,14 +220,11 @@
     <string name="no">아니오</string>
     <string name="failed_reboot">다시 시작 실패</string>
     <string name="kpm_title">KPM</string>
-    <string name="kpm_empty">No installed kernel modules at this time</string>
     <string name="kpm_version">버전</string>
     <string name="kpm_author">제작자</string>
     <string name="kpm_uninstall">제거</string>
     <string name="kpm_uninstall_success">제거됨</string>
     <string name="kpm_uninstall_failed">제거 실패</string>
-    <string name="kpm_install_success">Load of kpm module successful</string>
-    <string name="kpm_install_failed">Load of kpm module failed</string>
     <string name="kpm_args">매개변수</string>
     <string name="kpm_control">실행</string>
     <string name="home_kpm_version">KPM 버전</string>
@@ -252,7 +243,6 @@
     <string name="kpm_install_mode_description">선택하세요: %1\$s 모듈 설치 모드 \n\n불러오기: 모듈을 임시로 불러옵니다. \n내장: 시스템에 영구적으로 설치합니다.</string>
     <string name="snackbar_failed_to_check_module_file">모듈 파일이 존재하는지 확인할 수 없습니다.</string>
     <string name="theme_color">테마 색상</string>
-    <string name="invalid_file_type">Incorrect file type! Please select .kpm file.</string>
     <string name="confirm_uninstall_title_with_filename">제거</string>
     <string name="confirm_uninstall_content">다음 KPM이 제거됩니다: %s</string>
     <string name="image_editor_hint">두 손가락으로 이미지를 확대하고, 한 손가락으로 드래그하여 위치를 조정하세요.</string>
@@ -300,11 +290,8 @@
     <string name="background_set_success">배경 설정됨</string>
     <string name="background_removed">사용자 지정 배경 제거됨</string>
     <string name="icon_switch_title">대체 아이콘</string>
-    <string name="icon_switch_summary">Change the launcher icon to KernelSU\'s icon.</string>
     <string name="icon_switched">아이콘 변경됨</string>
     <!-- KPM display settings -->
-    <string name="show_kpm_info">Display KPM Function</string>
-    <string name="show_kpm_info_summary">Display KPM information and Function in home and bottom bar (Need to reopen the app)</string>
     <!-- Webui settings -->
     <string name="module_webui_alert">%s 모듈의 메시지</string>
     <string name="no_such_module">%s 모듈이 존재하지 않습니다.</string>
@@ -317,9 +304,6 @@
     <string name="dpi_size_small">작게 </string>
     <string name="dpi_size_medium">보통 </string>
     <string name="dpi_size_large">크게</string>
-    <string name="dpi_size_extra_large">oversize</string>
-    <string name="dpi_size_custom">customizable</string>
-    <string name="dpi_apply_settings">Applying DPI settings</string>
     <string name="dpi_confirm_title">DPI 변경 확인</string>
     <string name="dpi_confirm_message">앱 DPI를 %1$d에서 %2$d(으)로 변경할까요?</string>
     <string name="dpi_applied_success">DPI가 %1$d(으)로 설정됨</string>
@@ -344,11 +328,6 @@
     <!-- 排序相关 -->
     <string name="sort_name_asc">이름 오름차순</string>
     <string name="sort_name_desc">이름 내림차순</string>
-    <string name="sort_install_time_new">Installation time (new)</string>
-    <string name="sort_install_time_old">Installation time (old)</string>
-    <string name="sort_size_desc">descending order of size</string>
-    <string name="sort_size_asc">ascending order of size</string>
-    <string name="sort_usage_freq">frequency of use</string>
     <!-- 状态相关 -->
     <string name="no_apps_in_category">이 카테고리에 앱이 없습니다.</string>
     <!-- 标签相关 -->
@@ -580,7 +559,6 @@
     <string name="susfs_reset_loop_paths_title">루프 경로 초기화</string>
     <string name="susfs_reset_loop_paths_message">모든 SUS 루프 경로를 지울까요? 이 작업은 실행 취소할 수 없습니다.</string>
     <string name="susfs_loop_path_label">루프 경로</string>
-    <string name="susfs_loop_path_placeholder">/data/example/path</string>
     <string name="susfs_loop_path_restriction_warning">참고: /storage/ 및 /sdcard/ 내의 경로는 루프 경로로 추가할 수 없습니다.</string>
     <string name="susfs_loop_path_invalid_location">오류: 루프 경로는 /storage/ 또는 /sdcard/ 디렉터리 내에 있을 수 없습니다.</string>
     <string name="loop_paths_section">루프 경로</string>
@@ -652,7 +630,6 @@
     <!-- SUS Map related strings -->
     <string name="susfs_tab_sus_maps">SUS Map</string>
     <string name="susfs_sus_map_label">라이브러리 경로</string>
-    <string name="susfs_sus_map_placeholder">/data/adb/modules/my_module/zygisk/arm64-v8a.so</string>
     <string name="susfs_add_sus_map">SUS Map 추가</string>
     <string name="susfs_edit_sus_map">SUS Map 편집</string>
     <string name="susfs_sus_map_added_success">SUS Map 추가됨: %1$s</string>

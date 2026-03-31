@@ -68,7 +68,6 @@
     <string name="reboot_to_apply">重新啟動後生效</string>
     <string name="module_magisk_conflict">與 Magisk 發生衝突，無法使用模組功能！</string>
     <string name="home_learn_kernelsu">了解 KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/zh_TW/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">了解如何安裝 KernelSU 以及使用模組功能</string>
     <string name="home_support_title">支持我們</string>
     <string name="home_support_content">KernelSU 將保持免費開源，您可以向開發者捐款以表支持</string>
@@ -599,7 +598,6 @@
     <string name="susfs_reset_loop_paths_title">重設循環路徑</string>
     <string name="susfs_reset_loop_paths_message">確定要清除所有 SuS 循環路徑嗎？此作業無法還原</string>
     <string name="susfs_loop_path_label">循環路徑</string>
-    <string name="susfs_loop_path_placeholder">/data/example/path</string>
     <string name="susfs_loop_path_restriction_warning">注意：只有不在 /storage/ 和 /sdcard/ 底下的路徑才能透過循環路徑新增</string>
     <string name="susfs_loop_path_invalid_location">錯誤：循環路徑不能位於 /storage/ 或 /sdcard/ 目錄內</string>
     <string name="loop_paths_section">循環路徑</string>
@@ -671,7 +669,6 @@
     <!-- SUS Map related strings -->
     <string name="susfs_tab_sus_maps">SUS 映射</string>
     <string name="susfs_sus_map_label">程式庫路徑</string>
-    <string name="susfs_sus_map_placeholder">/data/adb/modules/my_module/zygisk/arm64-v8a.so</string>
     <string name="susfs_add_sus_map">新增 SUS 映射</string>
     <string name="susfs_edit_sus_map">編輯 SUS 映射</string>
     <string name="susfs_sus_map_added_success">已成功新增 SUS 映射：%1$s</string>

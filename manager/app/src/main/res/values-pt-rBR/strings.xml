@@ -45,7 +45,6 @@
     <string name="reboot_to_apply">Reinicie para entrar em vigor</string>
     <string name="module_magisk_conflict">Os módulos estão indisponíveis devido a um conflito com Magisk!</string>
     <string name="home_learn_kernelsu">Saiba mais sobre o KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/pt_BR/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">Saiba como instalar o KernelSU e usar os módulos</string>
     <string name="home_support_title">Apoie-nos</string>
     <string name="home_support_content">KernelSU sempre foi e sempre será, gratuito e de código aberto. No entanto, você pode nos ajudar enviando uma pequena doação.</string>

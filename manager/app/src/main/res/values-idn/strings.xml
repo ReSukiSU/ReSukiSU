@@ -68,7 +68,6 @@
     <string name="reboot_to_apply">Muat ulang untuk menerapkan</string>
     <string name="module_magisk_conflict">Modul tidak tersedia karena konflik dengan Magisk!</string>
     <string name="home_learn_kernelsu">Pelajari tentang KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">Pelajari cara memasang KernelSU dan menggunakan modul</string>
     <string name="home_support_title">Dukung Kami</string>
     <string name="home_support_content">KernelSU bersifat gratis dan open source, sekarang dan selamanya. Namun, Anda dapat menunjukkan dukungan Anda dengan melakukan donasi.</string>

@@ -68,7 +68,6 @@
     <string name="reboot_to_apply">重新啟動生效</string>
     <string name="module_magisk_conflict">因同 Magisk 有衝突，所有模組唔可用！</string>
     <string name="home_learn_kernelsu">瞭解 KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/zh_TW/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">瞭解如何安裝 KernelSU 以及如何開發模組</string>
     <string name="home_support_title">支持開發</string>
     <string name="home_support_content">KernelSU 將保持免費開源，向開發者捐贈以表示支持。</string>

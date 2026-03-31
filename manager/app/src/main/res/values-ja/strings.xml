@@ -48,7 +48,6 @@
     <string name="reboot_to_apply">再起動すると有効化されます</string>
     <string name="module_magisk_conflict">モジュールが Magisk との競合により利用できません！</string>
     <string name="home_learn_kernelsu">KernelSU について学ぶ</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/ja_JP/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">KernelSU のインストール方法やモジュールの使い方を学習できます。</string>
     <string name="home_support_title">支援する</string>
     <string name="home_support_content">KernelSU は今後も無料でオープンソースです。ですが、寄付をして頂けると開発者への貢献になります。</string>
@@ -554,7 +553,6 @@
     <string name="susfs_reset_loop_paths_title">ループパスをリセット</string>
     <string name="susfs_reset_loop_paths_message">すべての SUS ループパスを消去してもよろしいですか？この操作は元に戻せません。</string>
     <string name="susfs_loop_path_label">ループパス</string>
-    <string name="susfs_loop_path_placeholder">/data/example/path</string>
     <string name="susfs_loop_path_restriction_warning">注意: ループパス経由で追加できるのは「/storage/」と「/sdcard/」内にないパスのみです。</string>
     <string name="susfs_loop_path_invalid_location">エラー: ループパスは「/storage/」または「/sdcard/」のディレクトリ内に配置できません。</string>
     <string name="loop_paths_section">ループパス</string>
@@ -625,7 +623,6 @@
     <!-- SUS Map related strings -->
     <string name="susfs_tab_sus_maps">SUS マップ</string>
     <string name="susfs_sus_map_label">ライブラリのパス</string>
-    <string name="susfs_sus_map_placeholder">/data/adb/modules/my_module/zygisk/arm64-v8a.so</string>
     <string name="susfs_add_sus_map">SUS マップを追加</string>
     <string name="susfs_edit_sus_map">SUS マップを編集</string>
     <string name="susfs_sus_map_added_success">SUS マップを追加しました: %1$s</string>

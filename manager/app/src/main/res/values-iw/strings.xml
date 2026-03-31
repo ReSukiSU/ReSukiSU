@@ -65,7 +65,6 @@
     <string name="home_kernel">Kernel</string>
     <string name="home_not_installed">לא מותקן</string>
     <string name="failed_to_update_app_profile">נכשל עדכון פרופיל האפליקציה עבור %s</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
     <string name="failed_to_update_sepolicy">נכשל עדכון כללי SELinux עבור: %s</string>
     <string name="reboot_bootloader">הפעלה מחדש לבוטלאודר</string>
     <string name="home_manager_version">גרסת מנהל</string>
