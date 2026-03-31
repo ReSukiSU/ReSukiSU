@@ -716,13 +716,13 @@ Important Note:\n
     <string name="log_viewer_load_more">Load more logs</string>
     <string name="log_viewer_all_logs_loaded">All logs displayed</string>
     <string name="incompatible_kernel_msg">The current manager is incompatible with this kernel! Please upgrade the kernel to version %2$d or higher (currently %1$d)</string>
-    <string name="umount_path_manager">Unmount path management</string>
-    <string name="umount_path_manager_summary">Manage kernel unmount paths</string>
-    <string name="no_any_umount_path">No unmount paths</string>
-    <string name="add_umount_path">Add unmount path</string>
+    <string name="umount_path_manager">Umount path management</string>
+    <string name="umount_path_manager_summary">Manage kernel umount paths</string>
+    <string name="no_any_umount_path">No umount paths</string>
+    <string name="add_umount_path">Add umount path</string>
     <string name="mount_path">Mount path</string>
-    <string name="umount_flags">Unmount flags</string>
-    <string name="umount_flags_hint">0=Normal unmount, 2=MNT_DETACH</string>
+    <string name="umount_flags">Umount flags</string>
+    <string name="umount_flags_hint">0=Normal umount, 2=MNT_DETACH</string>
     <string name="confirm_delete">Confirm delete</string>
     <string name="confirm_delete_umount_path">Are you sure you want to delete the path %s?</string>
     <string name="umount_path_added">Umount path added</string>

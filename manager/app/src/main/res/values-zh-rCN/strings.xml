@@ -264,7 +264,7 @@
     <string name="kpm_install_mode">安装</string>
     <string name="kpm_install_mode_load">加载</string>
     <string name="kpm_install_mode_embed">嵌入</string>
-    <string name="kpm_install_mode_description">请选择: %1\$s 模块的安装模式 \n\n加载：临时加载模块\n嵌入：永久安装到系统</string>
+    <string name="kpm_install_mode_description">请选择: %1$s 模块的安装模式 \n\n加载：临时加载模块\n嵌入：永久安装到系统</string>
     <string name="snackbar_failed_to_check_module_file">无法检查模块文件是否存在</string>
     <string name="theme_color">主题颜色</string>
     <string name="invalid_file_type">文件类型不正确，请选择 .kpm 文件</string>

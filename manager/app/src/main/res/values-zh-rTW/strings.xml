@@ -267,7 +267,7 @@
     <string name="kpm_install_mode">安裝</string>
     <string name="kpm_install_mode_load">載入</string>
     <string name="kpm_install_mode_embed">嵌入</string>
-    <string name="kpm_install_mode_description">請選擇：%1\$s 模組的安裝模式\n\n載入：臨時載入模組\n嵌入：永久安裝至系統</string>
+    <string name="kpm_install_mode_description">請選擇：%1$s 模組的安裝模式\n\n載入：臨時載入模組\n嵌入：永久安裝至系統</string>
     <string name="snackbar_failed_to_check_module_file">無法檢查模組檔案是否存在</string>
     <string name="theme_color">主題色彩</string>
     <string name="invalid_file_type">檔案類型不正確，請選擇 .kpm 檔案</string>
@@ -733,7 +733,7 @@
     <string name="please_check_network">請檢查網路連線後重試</string>
     <string name="confirm_install_module_title">您是否要安裝 %s 模組？</string>
     <string name="assets_multiple_select_dialog_title">請選擇您要安裝的附件</string>
-    <string name="assets_multiple_select_dialog_content_description">大小: %s ，下載數量：%s</string>
+    <string name="assets_multiple_select_dialog_content_description">大小: %1$s ，下載數量：%2$s</string>
     <string name="assets_multiple_select_dialog_warning">未選擇任何附件</string>
     <string name="installed">已安裝</string>
     <string name="open_module_home_page">在瀏覽器開啟模組首頁</string>
