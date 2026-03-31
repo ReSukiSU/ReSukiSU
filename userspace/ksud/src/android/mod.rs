@@ -17,4 +17,5 @@ mod su;
 #[cfg(all(target_arch = "aarch64", target_os = "android"))]
 mod susfs;
 mod umount_config;
+mod unload;
 pub mod utils;

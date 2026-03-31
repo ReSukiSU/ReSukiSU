@@ -1,3 +1,7 @@
+use anyhow::{Context, Error, Ok, Result, bail};
+use rustix::fs::{Mode, OFlags, open};
+use rustix::process::setpgid;
+use rustix::stdio::{dup2_stderr, dup2_stdin, dup2_stdout};
 #[cfg(unix)]
 use std::os::unix::prelude::PermissionsExt;
 use std::{
@@ -10,7 +14,6 @@ use std::{
     process::Command,
 };
 
-use anyhow::{Context, Error, Ok, Result, bail};
 use rustix::{
     process,
     thread::{LinkNameSpaceType, move_into_link_name_space},
@@ -225,5 +228,49 @@ pub fn uninstall() -> Result<()> {
     println!("- Rebooting in 5 seconds..");
     std::thread::sleep(std::time::Duration::from_secs(5));
     Command::new("reboot").spawn()?;
+    Ok(())
+}
+
+pub fn reset_std() -> Result<()> {
+    let null_fd = open("/dev/null", OFlags::RDWR, Mode::empty())?;
+    dup2_stdin(&null_fd)?;
+    dup2_stdout(&null_fd)?;
+    dup2_stderr(&null_fd)?;
+    Ok(())
+}
+
+pub fn daemonize<F: FnOnce() -> Result<()>>(configure: F) -> Result<()> {
+    unsafe {
+        let pid = libc::fork();
+        if pid < 0 {
+            bail!("fork error {}", std::io::Error::last_os_error());
+        } else if pid > 0 {
+            loop {
+                if libc::waitpid(pid, std::ptr::null_mut(), 0) < 0 {
+                    if *libc::__errno() != libc::EINTR {
+                        libc::_exit(1);
+                    }
+                } else {
+                    break;
+                }
+            }
+            libc::_exit(0);
+        }
+    }
+
+    setpgid(None, None)?;
+    switch_cgroups();
+    configure()?;
+    reset_std()?;
+
+    unsafe {
+        let pid = libc::fork();
+        if pid < 0 {
+            bail!("fork error {}", std::io::Error::last_os_error());
+        } else if pid > 0 {
+            libc::_exit(0);
+        }
+    }
+
     Ok(())
 }

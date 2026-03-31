@@ -36,6 +36,7 @@ fn dump_process_info(label: &str) {
 }
 
 pub fn run() -> Result<()> {
+    utils::daemonize(|| Ok(()))?;
     info!("late-load command triggered!");
     dump_process_info("late-load start");
 
@@ -59,6 +60,10 @@ pub fn run() -> Result<()> {
         info!("kernelsu.ko loaded successfully!");
         dump_process_info("after load_module");
     }
+
+    // We need to reset stdin/stdout/stderr; otherwise, sending file descriptors via cmd transactions
+    // will be blocked by SELinux because its fsec->sid is still u:r:su:s0 instead of u:r:ksu:s0.
+    utils::reset_std()?;
 
     utils::umask(0);
 

@@ -351,8 +351,8 @@ NativeBridge(setDynamicManager, jboolean, jint size, jstring hash) {
 }
 
 NativeBridgeNP(getDynamicManager, jobject) {
-	struct dynamic_manager_user_config config;
-	bool result = get_dynamic_manager(&config);
+	struct ksu_dynamic_manager_cmd cmd;
+	bool result = get_dynamic_manager(&cmd);
 
 	if (!result) {
         LOGD("getDynamicManager: failed to get dynamic manager config");
@@ -362,10 +362,10 @@ NativeBridgeNP(getDynamicManager, jobject) {
 	jobject obj = CREATE_JAVA_OBJECT("com/resukisu/resukisu/Natives$DynamicManagerConfig");
 	jclass cls = GetEnvironment()->FindClass(env, "com/resukisu/resukisu/Natives$DynamicManagerConfig");
 
-	SET_INT_FIELD(obj, cls, size, (jint)config.size);
-	SET_STRING_FIELD(obj, cls, hash, config.hash);
+	SET_INT_FIELD(obj, cls, size, (jint)cmd.size);
+	SET_STRING_FIELD(obj, cls, hash, (const char *)cmd.hash);
 
-    LOGD("getDynamicManager: size=0x%x, hash=%.16s...", config.size, config.hash);
+    LOGD("getDynamicManager: size=0x%x, hash=%.16s...", cmd.size, cmd.hash);
 	return obj;
 }
 

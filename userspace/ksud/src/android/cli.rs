@@ -67,11 +67,17 @@ enum Commands {
         command: UmountConfigOp,
     },
 
+    /// Emulate system reboot
+    SoftReboot,
+
     /// Install KernelSU userspace component to system
     Install,
 
     /// Uninstall KernelSU modules and itself(LKM Only)
     Uninstall,
+
+    /// Unload KernelSU kernel module (LKM Only)
+    Unload,
 
     /// SELinux policy Patch tool
     Sepolicy {
@@ -122,11 +128,7 @@ enum Commands {
     },
 
     /// Resetprop - Magisk-compatible system property tool
-    Resetprop {
-        /// Arguments passed to resetprop
-        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-        args: Vec<String>,
-    },
+    Resetprop(crate::android::resetprop::Args),
 }
 
 #[derive(clap::Subcommand, Debug)]
@@ -209,6 +211,12 @@ enum Debug {
         name: String,
         /// destination file path
         path: PathBuf,
+    },
+
+    /// Load a kernel module from disk
+    Insmod {
+        /// kernel module path
+        module: PathBuf,
     },
 
     /// Process mark management
@@ -541,7 +549,7 @@ pub fn run() -> Result<()> {
 
     if arg0.ends_with("resetprop") {
         let all_args: Vec<String> = std::env::args().collect();
-        crate::android::resetprop::resetprop_main(&all_args);
+        return crate::android::resetprop::run_from_args(&all_args);
     }
 
     let cli = Args::parse();
@@ -571,6 +579,7 @@ pub fn run() -> Result<()> {
             UmountConfigOp::Clear => umount_config::wipe_umount(),
             UmountConfigOp::List => umount_config::list_umount(),
         },
+        Commands::SoftReboot => init_event::soft_reboot(),
         Commands::Module { command } => {
             utils::switch_mnt_ns(1)?;
             match command {
@@ -670,6 +679,7 @@ pub fn run() -> Result<()> {
         }
         Commands::Install => utils::install(),
         Commands::Uninstall => utils::uninstall(),
+        Commands::Unload => crate::android::unload::unload(),
         Commands::Sepolicy { command } => match command {
             Sepolicy::Patch { sepolicy } => sepolicy::live_patch(&sepolicy),
             Sepolicy::Apply { file } => sepolicy::apply_file(file),
@@ -695,6 +705,10 @@ pub fn run() -> Result<()> {
             result
         }
         Commands::Services => {
+            if ksucalls::get_version() <= 0 {
+                info!("KernelSU not available, exiting services");
+                std::process::exit(0);
+            }
             init_event::on_services();
             Ok(())
         }
@@ -736,6 +750,7 @@ pub fn run() -> Result<()> {
                 let data = assets::get_asset(&name)?;
                 utils::ensure_binary(&path, data.as_ref().as_ref(), false)
             }
+            Debug::Insmod { module } => debug::insmod(&module),
             Debug::Mark { command } => match command {
                 MarkCommand::Get { pid } => debug::mark_get(pid),
                 MarkCommand::Mark { pid } => debug::mark_set(pid),
@@ -787,12 +802,7 @@ pub fn run() -> Result<()> {
             }
         },
         Commands::BootRestore(boot_restore) => crate::boot_patch::restore(boot_restore),
-        Commands::Resetprop { args } => {
-            let mut full_args = vec!["resetprop".to_string()];
-            full_args.extend(args);
-            crate::android::resetprop::resetprop_main(&full_args)
-        }
-
+        Commands::Resetprop(resetprop_args) => crate::android::resetprop::run(&resetprop_args),
         Commands::Kernel { command } => match command {
             Kernel::NukeExt4Sysfs { mnt } => ksucalls::nuke_ext4_sysfs(&mnt),
             Kernel::Umount { command } => match command {
