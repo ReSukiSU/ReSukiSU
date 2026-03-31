@@ -444,12 +444,12 @@ void ksu_handle_rename(struct dentry *old_dentry, struct dentry *new_dentry)
 }
 #endif
 
-void ksu_throne_tracker_init(void)
+void __init ksu_throne_tracker_init(void)
 {
     // nothing to do
 }
 
-void ksu_throne_tracker_exit(void)
+void __exit ksu_throne_tracker_exit(void)
 {
     mutex_lock(&app_list_lock);
     bitmap_free(last_app_id_map);

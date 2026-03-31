@@ -241,7 +241,7 @@ static struct kprobe reboot_kp = {
 };
 #endif
 
-void ksu_supercalls_init(void)
+void __init ksu_supercalls_init(void)
 {
     int rc;
 
@@ -257,7 +257,7 @@ void ksu_supercalls_init(void)
 #endif
 }
 
-void ksu_supercalls_exit(void)
+void __exit ksu_supercalls_exit(void)
 {
 #ifdef KSU_TP_HOOK
     unregister_kprobe(&reboot_kp);

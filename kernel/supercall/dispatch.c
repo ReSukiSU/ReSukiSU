@@ -85,9 +85,6 @@ static int do_report_event(void __user *arg)
             } else {
                 pr_info("post-fs-data triggered\n");
                 on_post_fs_data();
-#ifndef CONFIG_KSU_DISABLE_MANAGER
-                ksu_dynamic_manager_init();
-#endif
             }
         }
         break;
@@ -1116,7 +1113,7 @@ long ksu_supercall_handle_ioctl(unsigned int cmd, void __user *argp)
     return -ENOTTY;
 }
 
-void ksu_supercall_dump_commands(void)
+void __init ksu_supercall_dump_commands(void)
 {
     int i;
 

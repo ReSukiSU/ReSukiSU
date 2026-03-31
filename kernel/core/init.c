@@ -51,7 +51,7 @@
 #include <linux/random.h>
 unsigned long __stack_chk_guard __ro_after_init __attribute__((visibility("hidden")));
 
-__attribute__((no_stack_protector)) void ksu_setup_stack_chk_guard()
+__attribute__((no_stack_protector)) void __init ksu_setup_stack_chk_guard()
 {
     unsigned long canary;
 
@@ -185,10 +185,6 @@ int __init kernelsu_init(void)
         ksu_observer_init();
         ksu_file_wrapper_init();
 
-#ifndef CONFIG_KSU_DISABLE_MANAGER
-        ksu_dynamic_manager_init();
-#endif
-
         ksu_boot_completed = true;
         track_throne(false, true, false);
 
@@ -217,16 +213,13 @@ int __init kernelsu_init(void)
     return 0;
 }
 
-void kernelsu_exit(void)
+void __exit kernelsu_exit(void)
 {
     // Phase 1: Stop all hooks first to prevent new callbacks
     ksu_hook_exit();
     ksu_supercalls_exit();
     if (!ksu_late_loaded)
         ksu_ksud_exit();
-#ifndef CONFIG_KSU_DISABLE_MANAGER
-    ksu_dynamic_manager_exit();
-#endif
 
     // Wait for any in-flight RCU readers (e.g. handler traversing allow_list)
     synchronize_rcu();

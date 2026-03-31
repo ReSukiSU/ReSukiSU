@@ -833,7 +833,7 @@ void ksu_stop_input_hook_runtime(void)
 }
 
 // ksud: module support
-void ksu_ksud_init(void)
+void __init ksu_ksud_init(void)
 {
 #ifdef KSU_TP_HOOK
     int ret;
@@ -851,7 +851,7 @@ void ksu_ksud_init(void)
 #endif
 }
 
-void ksu_ksud_exit(void)
+void __exit ksu_ksud_exit(void)
 {
 #ifdef KSU_TP_HOOK
     // TODO:

@@ -111,13 +111,3 @@ int ksu_handle_dynamic_manager(struct ksu_dynamic_manager_cmd *cmd)
 
     return ret;
 }
-
-void ksu_dynamic_manager_init(void)
-{
-    // do nothing
-}
-
-void ksu_dynamic_manager_exit(void)
-{
-    // do nothing
-}

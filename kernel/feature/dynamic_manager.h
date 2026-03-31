@@ -21,8 +21,6 @@ struct manager_info {
 };
 
 // Dynamic sign operations
-void ksu_dynamic_manager_init(void);
-void ksu_dynamic_manager_exit(void);
 int ksu_handle_dynamic_manager(struct ksu_dynamic_manager_cmd *cmd);
 bool ksu_load_dynamic_manager(void);
 bool ksu_is_dynamic_manager_enabled(void);

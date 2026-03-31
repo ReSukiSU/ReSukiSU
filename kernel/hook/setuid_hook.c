@@ -151,12 +151,12 @@ int ksu_handle_setresuid(uid_t ruid, uid_t euid, uid_t suid)
 #endif
 }
 
-void ksu_setuid_hook_init(void)
+void __init ksu_setuid_hook_init(void)
 {
     ksu_kernel_umount_init();
 }
 
-void ksu_setuid_hook_exit(void)
+void __exit ksu_setuid_hook_exit(void)
 {
     pr_info("ksu_setuid_hook_exit\n");
     ksu_kernel_umount_exit();
