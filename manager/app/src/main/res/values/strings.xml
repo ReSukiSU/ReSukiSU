@@ -88,8 +88,8 @@
     <string name="profile_selinux_context">SELinux context</string>
     <string name="profile_umount_modules">Umount modules</string>
     <string name="failed_to_update_app_profile">Failed to update app profile for %s</string>
-    <string name="debug_version_notice">"You are using DEBUG build of the manager, if you don't know what DEBUG version is, switch to a RELEASE build immediately"</string>
-    <string name="unofficial_version_notice">"The manager you are using is not the official %s manager, and you may not be able to obtain permissions"</string>
+    <string name="debug_version_notice">You are using DEBUG build of the manager, if you don't know what DEBUG version is, switch to a RELEASE build immediately</string>
+    <string name="unofficial_version_notice">The manager you are using is not the official %s manager, and you may not be able to obtain permissions</string>
     <string name="settings_umount_modules_default">Umount modules by default</string>
     <string name="settings_umount_modules_default_summary">The global default value for \"Umount modules\" in App Profile. If enabled, it removes all module modifications from the system for apps that don\'t have a profile set</string>
     <string name="profile_umount_modules_summary">Enabling this option will allow KernelSU to restore any modified files by the modules for this app</string>
@@ -201,7 +201,7 @@
     <string name="settings_sulog_summary">Enable kernel-level logging of superuser access</string>
     <string name="feature_status_managed_summary">This feature is managed by a module</string>
     <string name="settings_mode_default">Default</string>
-    <string name="module_install_multiple_confirm_with_names">Are you sure you want to install the following %1$d modules? \n\n%2$s</string>
+    <string name="module_install_multiple_confirm_with_names">Are you sure you want to install the following %1$d modules?\n\n%2$s</string>
     <string name="more_settings">More settings</string>
     <string name="selinux">SELinux</string>
     <string name="selinux_enabled">Enabled</string>
