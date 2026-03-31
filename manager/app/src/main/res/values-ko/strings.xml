@@ -66,7 +66,7 @@
     <string name="profile_selinux_context">SELinux 컨텍스트</string>
     <string name="profile_umount_modules">모듈 사용 해제</string>
     <string name="failed_to_update_app_profile">%s에 대한 앱 프로필 업데이트 실패</string>
-    <string name="debug_version_notice">현재 매니저의 DEBUG 빌드를 사용 중입니다. DEBUG 버전이 무엇인지 모른다면 즉시 RELEASE 빌드로 전환하세요.</string>
+    <string name="debug_version_notice">"현재 매니저의 DEBUG 빌드를 사용 중입니다. DEBUG 버전이 무엇인지 모른다면 즉시 RELEASE 빌드로 전환하세요."</string>
     <string name="settings_umount_modules_default">기본값으로 모듈 사용 해제</string>
     <string name="settings_umount_modules_default_summary">앱 프로필 메뉴의 \"모듈 마운트 해제\" 설정에 대한 전역 기본값을 설정합니다. 활성화 시, 개별 프로필이 설정되지 않은 앱은 시스템에 대한 모듈의 모든 수정사항이 적용되지 않습니다.</string>
     <string name="profile_umount_modules_summary">이 옵션이 활성화되면, KernelSU는 이 앱에 대한 모듈의 모든 수정사항을 복구합니다.</string>

@@ -85,7 +85,7 @@
     <string name="profile_selinux_context">SELinux</string>
     <string name="profile_umount_modules">解除安裝模組</string>
     <string name="failed_to_update_app_profile">為 %s 更新 App Profile 失敗</string>
-    <string name="debug_version_notice">你正在使用管理器嘅 DEBUG 構建，如果你唔知道乜嘢係 DEBUG 構建，請立即切換至 RELEASE 構建</string>
+    <string name="debug_version_notice">"你正在使用管理器嘅 DEBUG 構建，如果你唔知道乜嘢係 DEBUG 構建，請立即切換至 RELEASE 構建"</string>
     <string name="unofficial_version_notice">您使用嘅管理器並非 %s 官方管理器，您可能無法獲得權限。</string>
     <string name="settings_umount_modules_default">預設卸載模組</string>
     <string name="settings_umount_modules_default_summary">App Profile 中\"卸載模組\"嘅全局預設值，如果啟用，將會為冇設定 Profile 嘅應用程式移除所有模組針對系統嘅修改。</string>
