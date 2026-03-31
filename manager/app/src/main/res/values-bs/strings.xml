@@ -73,26 +73,58 @@
     <string name="failed_to_update_sepolicy">Neuspješno ažuriranje SELinux pravila za: %s</string>
     <string name="settings_check_update">Obavijesti o ažuriranju</string>
     <string name="settings_check_update_summary">Automatski provjeri ažuriranja modula i menadžera</string>
-    <!-- Kernel Flash Progress Related -->
     <string name="horizon_flash_complete">Flash Complete</string>
-    <!-- Flash Status Related -->
-    <!-- Slot selection related strings -->
-    <!-- Error Messages -->
-    <!-- lkm/gki install -->
-    <!--  String resources used in SuperUser -->
-    <!-- KPM display settings -->
-    <!-- Webui X settings -->
-    <!-- DPI setting related strings -->
-    <!-- Language settings related strings -->
-    <!-- Flash related -->
-    <!-- 分类相关 -->
-    <!-- 排序相关 -->
-    <!-- 状态相关 -->
-    <!-- 标签相关 -->
-    <!-- FAB菜单相关 -->
-    <!-- BottomSheet相关 -->
+    <!-- Module related -->
+    <!-- Restore related -->
+    <!-- Backup related -->
+    <!-- Restore related messages -->
+    <!-- Command related -->
+    <!-- Allowlist related -->
     <string name="settings_sucompat">Preusmjeri su binarnu datoteku</string>
     <string name="settings_sucompat_summary">Preusmjeri /system/bin/su na ksud za aplikacije kojima je dodijeljeno dopuštenje Superuser u Profilu aplikacije; učinkovito samo za nove procese.</string>
     <string name="settings_kernel_umount">Kernel umount</string>
     <string name="settings_kernel_umount_summary">Ponašanje umount na razini kernela kontrolira KernelSU</string>
+    <!-- Kernel flash progress related -->
+    <!-- Flash status related strings -->
+    <!-- Slot selection related strings -->
+    <!-- Error messages -->
+    <!-- LKM/GKI install -->
+    <!-- String resources used in superuser -->
+    <!-- KPM display settings -->
+    <!-- WebUI settings -->
+    <!-- DPI setting related strings -->
+    <!-- Language settings related strings -->
+    <!-- Flash related -->
+    <!-- Categories related strings -->
+    <!-- Sort related strings -->
+    <!-- State related strings -->
+    <!-- Tag related strings -->
+    <!-- BottomSheet related -->
+    <!-- SuSFS configuration -->
+    <!-- SuSFS reset confirmation -->
+    <!-- SuSFS toast Messages -->
+    <!-- SuSFS settings Item -->
+    <!-- Autostart related strings -->
+    <!-- SuSFS tab titles -->
+    <!-- SuSFS path management -->
+    <!-- SuSFS reset categories -->
+    <!-- SuSFS path settings -->
+    <!-- SuSFS enabled features -->
+    <!-- Feature labels -->
+    <!-- Configurable states -->
+    <!-- Settings related strings -->
+    <!-- SuSFS autostart related strings -->
+    <!-- SuSFS Kstat related strings -->
+    <!-- SuSFS mount hiding control related strings -->
+    <!-- Backup and restore related strings -->
+    <!-- Loop path function related strings -->
+    <!-- Loop path function description -->
+    <!-- KPM patching related strings -->
+    <!-- KPM workflow related -->
+    <!-- KPM error messages -->
+    <!-- KPM option radio group strings -->
+    <!-- UID Scanner Settings -->
+    <!-- Confirm installation related strings -->
+    <!-- SUS Map related strings -->
+    <!-- Log viewer -->
 </resources>

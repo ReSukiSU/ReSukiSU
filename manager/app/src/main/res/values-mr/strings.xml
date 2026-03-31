@@ -80,25 +80,51 @@
     <!-- Restore related messages -->
     <!-- Command related -->
     <!-- Allowlist related -->
-    <!-- Kernel Flash Progress Related -->
-    <!-- Flash Status Related -->
-    <!-- Slot selection related strings -->
-    <!-- Error Messages -->
-    <!-- lkm/gki install -->
-    <!--  String resources used in SuperUser -->
-    <!-- KPM display settings -->
-    <!-- Webui X settings -->
-    <!-- DPI setting related strings -->
-    <!-- Language settings related strings -->
-    <!-- Flash related -->
-    <!-- 分类相关 -->
-    <!-- 排序相关 -->
-    <!-- 状态相关 -->
-    <!-- 标签相关 -->
-    <!-- FAB菜单相关 -->
-    <!-- BottomSheet相关 -->
     <string name="settings_sucompat">su बाइनरी पुन्हा मार्गस्थ करा</string>
     <string name="settings_sucompat_summary">ॲप प्रोफाईलमध्ये सुपरयुझर परवानगी दिलेल्या ॲप्ससाठी /system/bin/su ला ksud वर पुनर्निर्देशित करा; फक्त नवीन प्रक्रियांसाठी प्रभावी.</string>
     <string name="settings_kernel_umount">कर्नल अनमाउंट</string>
     <string name="settings_kernel_umount_summary">KernelSU द्वारे नियंत्रित कर्नल-स्तरीय अनमाउंट वर्तन</string>
+    <!-- Kernel flash progress related -->
+    <!-- Flash status related strings -->
+    <!-- Slot selection related strings -->
+    <!-- Error messages -->
+    <!-- LKM/GKI install -->
+    <!-- String resources used in superuser -->
+    <!-- KPM display settings -->
+    <!-- WebUI settings -->
+    <!-- DPI setting related strings -->
+    <!-- Language settings related strings -->
+    <!-- Flash related -->
+    <!-- Categories related strings -->
+    <!-- Sort related strings -->
+    <!-- State related strings -->
+    <!-- Tag related strings -->
+    <!-- BottomSheet related -->
+    <!-- SuSFS configuration -->
+    <!-- SuSFS reset confirmation -->
+    <!-- SuSFS toast Messages -->
+    <!-- SuSFS settings Item -->
+    <!-- Autostart related strings -->
+    <!-- SuSFS tab titles -->
+    <!-- SuSFS path management -->
+    <!-- SuSFS reset categories -->
+    <!-- SuSFS path settings -->
+    <!-- SuSFS enabled features -->
+    <!-- Feature labels -->
+    <!-- Configurable states -->
+    <!-- Settings related strings -->
+    <!-- SuSFS autostart related strings -->
+    <!-- SuSFS Kstat related strings -->
+    <!-- SuSFS mount hiding control related strings -->
+    <!-- Backup and restore related strings -->
+    <!-- Loop path function related strings -->
+    <!-- Loop path function description -->
+    <!-- KPM patching related strings -->
+    <!-- KPM workflow related -->
+    <!-- KPM error messages -->
+    <!-- KPM option radio group strings -->
+    <!-- UID Scanner Settings -->
+    <!-- Confirm installation related strings -->
+    <!-- SUS Map related strings -->
+    <!-- Log viewer -->
 </resources>

@@ -18,8 +18,57 @@
     <string name="save_log">లాగ్‌లు సేవ్ చేయండి</string>
     <string name="settings_check_update">అప్‌డేట్ నోటిఫికేషన్‌లు</string>
     <string name="settings_check_update_summary">మాడ్యూల్ మరియు మేనేజర్ అప్‌డేట్‌ల కోసం ఆటోమేటిక్‌గా తనిఖీ చేయండి</string>
+    <!-- Module related -->
+    <!-- Restore related -->
+    <!-- Backup related -->
+    <!-- Restore related messages -->
+    <!-- Command related -->
+    <!-- Allowlist related -->
     <string name="settings_sucompat">su బైనరీని మళ్ళించండి</string>
     <string name="settings_sucompat_summary">యాప్ ప్రొఫైల్‌లో సూపర్‌యూజర్ అనుమతి ఉన్న యాప్‌ల కోసం /system/bin/su ని ksud కి మళ్ళించండి; కొత్త ప్రాసెస్‌లకు మాత్రమే పని చేస్తుంది.</string>
     <string name="settings_kernel_umount">కెర్నల్ అన్‌మౌంట్</string>
     <string name="settings_kernel_umount_summary">KernelSU ద్వారా నియంత్రించబడే కెర్నల్-స్థాయి అన్‌మౌంట్ ప్రవర్తన</string>
+    <!-- Kernel flash progress related -->
+    <!-- Flash status related strings -->
+    <!-- Slot selection related strings -->
+    <!-- Error messages -->
+    <!-- LKM/GKI install -->
+    <!-- String resources used in superuser -->
+    <!-- KPM display settings -->
+    <!-- WebUI settings -->
+    <!-- DPI setting related strings -->
+    <!-- Language settings related strings -->
+    <!-- Flash related -->
+    <!-- Categories related strings -->
+    <!-- Sort related strings -->
+    <!-- State related strings -->
+    <!-- Tag related strings -->
+    <!-- BottomSheet related -->
+    <!-- SuSFS configuration -->
+    <!-- SuSFS reset confirmation -->
+    <!-- SuSFS toast Messages -->
+    <!-- SuSFS settings Item -->
+    <!-- Autostart related strings -->
+    <!-- SuSFS tab titles -->
+    <!-- SuSFS path management -->
+    <!-- SuSFS reset categories -->
+    <!-- SuSFS path settings -->
+    <!-- SuSFS enabled features -->
+    <!-- Feature labels -->
+    <!-- Configurable states -->
+    <!-- Settings related strings -->
+    <!-- SuSFS autostart related strings -->
+    <!-- SuSFS Kstat related strings -->
+    <!-- SuSFS mount hiding control related strings -->
+    <!-- Backup and restore related strings -->
+    <!-- Loop path function related strings -->
+    <!-- Loop path function description -->
+    <!-- KPM patching related strings -->
+    <!-- KPM workflow related -->
+    <!-- KPM error messages -->
+    <!-- KPM option radio group strings -->
+    <!-- UID Scanner Settings -->
+    <!-- Confirm installation related strings -->
+    <!-- SUS Map related strings -->
+    <!-- Log viewer -->
 </resources>

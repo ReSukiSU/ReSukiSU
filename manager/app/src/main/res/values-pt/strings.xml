@@ -222,9 +222,9 @@
     <string name="confirm_uninstall_content">O seguinte KPM será desinstalado: %s</string>
     <string name="image_editor_hint">Use dois dedos para ampliar a imagem e um dedo para arrastá-la para ajustar a posição</string>
     <string name="reprovision">Restituição</string>
-    <!-- Kernel Flash Progress Related -->
+    <!-- Kernel flash progress related -->
     <string name="horizon_flash_complete">Flash concluído</string>
-    <!-- Flash Status Related -->
+    <!-- Flash status related strings -->
     <string name="horizon_preparing">Preparando…</string>
     <string name="horizon_cleaning_files">limpando arquivos…</string>
     <string name="horizon_copying_files">Copiando arquivo…</string>
@@ -242,11 +242,11 @@
     <string name="horizon_setting_target_slot">Configurando o slot especificado</string>
     <string name="horizon_restoring_original_slot">Restaurar Slot Padrão</string>
     <string name="current_slot">Slot padrão do sistema atual：%1$s </string>
-    <!-- Error Messages -->
+    <!-- Error messages -->
     <string name="horizon_copy_failed">Falha ao copiar</string>
     <string name="horizon_unknown_error">Você parece estar convertendo de um formato com degradação para&#10;&#10;um sem perdas. Esteja ciente que a perda de qualidade não pode ser desfeita,&#10;&#10;então este processo não melhorará a qualidade do áudio e provavelmente&#10;&#10;aumentará o tamanho do arquivo. Continuar assim mesmo?</string>
     <string name="flash_failed_message">Flash falhou</string>
-    <!-- lkm/gki install -->
+    <!-- LKM/GKI install -->
     <string name="Lkm_install_methods">LKM reparo/instalação</string>
     <string name="GKI_install_methods">Flasheando kernel</string>
     <string name="kernel_version_log">Kernel</string>
@@ -254,7 +254,7 @@
     <string name="configuration">Configurar</string>
     <string name="app_settings">Configurações Do Aplicativo</string>
     <string name="tools">Ferramentas</string>
-    <!--  String resources used in SuperUser -->
+    <!-- String resources used in superuser -->
     <string name="no_apps_found">Aplicativo não encontrado</string>
     <string name="selinux_enabled_toast">SELinux habilitado</string>
     <string name="selinux_disabled_toast">SELinux Desativado</string>
@@ -270,7 +270,7 @@
     <!-- KPM display settings -->
     <string name="show_kpm_info">Exibir função KPM</string>
     <string name="show_kpm_info_summary">Oculta as informações e funções do KPM na barra inicial e inferior</string>
-    <!-- Webui X settings -->
+    <!-- WebUI settings -->
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">DPI aplicado</string>
     <string name="app_dpi_summary">Ajustar a densidade de exibição da tela apenas para o aplicativo atual</string>
@@ -291,18 +291,44 @@
     <string name="installing_module">Módulo sendo instalado %1$d/%2$d</string>
     <string name="module_failed_count">%d Falha ao instalar um novo módulo</string>
     <string name="module_download_error">Falha ao baixar módulo</string>
-    <!-- 分类相关 -->
-    <!-- 排序相关 -->
-    <!-- 状态相关 -->
-    <!-- 标签相关 -->
-    <!-- FAB菜单相关 -->
+    <!-- Categories related strings -->
+    <!-- Sort related strings -->
+    <!-- State related strings -->
+    <!-- Tag related strings -->
     <string name="scroll_to_top">Mais votados</string>
     <string name="scroll_to_bottom">Parte Inferior</string>
     <string name="selected">Selecionado</string>
     <string name="select">opção</string>
-    <!-- BottomSheet相关 -->
     <string name="settings_sucompat">Redirecionar binário su</string>
     <string name="settings_sucompat_summary">Permite que apps com permissão de Superutilizador no Perfil da App obtenham um shell de superutilizador executando /system/bin/su; eficaz apenas para novos processos.</string>
     <string name="settings_kernel_umount">Desmontar kernel</string>
     <string name="settings_kernel_umount_summary">Comportamento de desmontagem ao nível do kernel controlado pelo KernelSU</string>
+    <!-- BottomSheet related -->
+    <!-- SuSFS configuration -->
+    <!-- SuSFS reset confirmation -->
+    <!-- SuSFS toast Messages -->
+    <!-- SuSFS settings Item -->
+    <!-- Autostart related strings -->
+    <!-- SuSFS tab titles -->
+    <!-- SuSFS path management -->
+    <!-- SuSFS reset categories -->
+    <!-- SuSFS path settings -->
+    <!-- SuSFS enabled features -->
+    <!-- Feature labels -->
+    <!-- Configurable states -->
+    <!-- Settings related strings -->
+    <!-- SuSFS autostart related strings -->
+    <!-- SuSFS Kstat related strings -->
+    <!-- SuSFS mount hiding control related strings -->
+    <!-- Backup and restore related strings -->
+    <!-- Loop path function related strings -->
+    <!-- Loop path function description -->
+    <!-- KPM patching related strings -->
+    <!-- KPM workflow related -->
+    <!-- KPM error messages -->
+    <!-- KPM option radio group strings -->
+    <!-- UID Scanner Settings -->
+    <!-- Confirm installation related strings -->
+    <!-- SUS Map related strings -->
+    <!-- Log viewer -->
 </resources>

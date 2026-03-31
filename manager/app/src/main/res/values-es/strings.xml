@@ -220,9 +220,9 @@
     <string name="confirm_uninstall_content">El siguiente KPM será desinstalado: %s</string>
     <string name="image_editor_hint">Usa dos dedos para acercar la imagen, y un dedo para arrastrarla para ajustar la posición</string>
     <string name="reprovision">Reaprovisionamiento</string>
-    <!-- Kernel Flash Progress Related -->
+    <!-- Kernel flash progress related -->
     <string name="horizon_flash_complete">Flashear completo</string>
-    <!-- Flash Status Related -->
+    <!-- Flash status related strings -->
     <string name="horizon_preparing">Preparando…</string>
     <string name="horizon_cleaning_files">Limpiando archivos…</string>
     <string name="horizon_copying_files">Copiando archivos…</string>
@@ -238,11 +238,11 @@
     <string name="horizon_setting_target_slot">Establecer la ranura especificada</string>
     <string name="horizon_restoring_original_slot">Restaurar Ranura Predeterminada</string>
     <string name="current_slot">Ranura predeterminada del sistema actual：%1$s </string>
-    <!-- Error Messages -->
+    <!-- Error messages -->
     <string name="horizon_copy_failed">Hubo un fallo al copiar</string>
     <string name="horizon_unknown_error">Error desconocido</string>
     <string name="flash_failed_message">Flash falló</string>
-    <!-- lkm/gki install -->
+    <!-- LKM/GKI install -->
     <string name="Lkm_install_methods">Reparación/instalación de LKM</string>
     <string name="GKI_install_methods">Flashear kernel</string>
     <string name="kernel_version_log">Versión del kernel</string>
@@ -250,7 +250,7 @@
     <string name="configuration">Configurar</string>
     <string name="app_settings">Configuración de la Aplicación</string>
     <string name="tools">Herramientas</string>
-    <!--  String resources used in SuperUser -->
+    <!-- String resources used in superuser -->
     <string name="no_apps_found">No se ha encontrado la solicitud</string>
     <string name="selinux_enabled_toast">SELinux habilitado</string>
     <string name="selinux_disabled_toast">SELinux desactivado</string>
@@ -266,7 +266,7 @@
     <!-- KPM display settings -->
     <string name="show_kpm_info">Mostrar función KPM</string>
     <string name="show_kpm_info_summary">Oculta la información y función del KPM en la barra de inicio e inferior</string>
-    <!-- Webui settings -->
+    <!-- WebUI settings -->
     <!-- DPI setting related strings -->
     <string name="app_dpi_title">DPI aplicado</string>
     <string name="app_dpi_summary">Ajustar la densidad de pantalla para la aplicación actual</string>
@@ -280,36 +280,36 @@
     <string name="dpi_confirm_message">¿Estás seguro de que quieres cambiar el DPI de la aplicación de %1$d a %2$d?</string>
     <!-- Language settings related strings -->
     <!-- Flash related -->
-    <!-- 分类相关 -->
-    <!-- 排序相关 -->
-    <!-- 状态相关 -->
-    <!-- 标签相关 -->
-    <!-- BottomSheet相关 -->
-    <!-- SuSFS Configuration -->
-    <!-- SuSFS Reset Confirmation -->
-    <!-- SuSFS Toast Messages -->
-    <!-- SuSFS Settings Item -->
-    <!-- 开机自启动相关 -->
-    <!-- SuSFS Tab Titles -->
-    <!-- SuSFS Path Management -->
-    <!-- SuSFS Reset Categories -->
-    <!-- SuSFS Path Settings -->
-    <!-- SuSFS Enabled Features -->
-    <!-- Feature Labels -->
-    <!-- 可切换状态 -->
+    <!-- Categories related strings -->
+    <!-- Sort related strings -->
+    <!-- State related strings -->
+    <!-- Tag related strings -->
+    <!-- BottomSheet related -->
+    <!-- SuSFS configuration -->
+    <!-- SuSFS reset confirmation -->
+    <!-- SuSFS toast Messages -->
+    <!-- SuSFS settings Item -->
+    <!-- Autostart related strings -->
+    <!-- SuSFS tab titles -->
+    <!-- SuSFS path management -->
+    <!-- SuSFS reset categories -->
+    <!-- SuSFS path settings -->
+    <!-- SuSFS enabled features -->
+    <!-- Feature labels -->
+    <!-- Configurable states -->
     <!-- Settings related strings -->
-    <!-- SuSFS 自启动相关字符串 -->
-    <!-- SuSFS Kstat相关字符串 -->
-    <!-- SuSFS Mount Hiding Control Related Strings -->
-    <!-- 备份和还原相关字符串 -->
-    <!-- 循环路径相关 -->
-    <!-- 循环路径功能描述 -->
+    <!-- SuSFS autostart related strings -->
+    <!-- SuSFS Kstat related strings -->
+    <!-- SuSFS mount hiding control related strings -->
+    <!-- Backup and restore related strings -->
+    <!-- Loop path function related strings -->
+    <!-- Loop path function description -->
     <!-- KPM patching related strings -->
     <!-- KPM workflow related -->
     <!-- KPM error messages -->
     <!-- KPM option radio group strings -->
     <!-- UID Scanner Settings -->
-    <!-- 确认安装相关字符串 -->
+    <!-- Confirm installation related strings -->
     <!-- SUS Map related strings -->
-    <!-- Log Viewer -->
+    <!-- Log viewer -->
 </resources>

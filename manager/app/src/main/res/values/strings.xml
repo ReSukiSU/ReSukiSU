@@ -310,7 +310,7 @@
     <string name="configuration">Configure</string>
     <string name="app_settings">Application settings</string>
     <string name="tools">Tools</string>
-    <!--  String resources used in superuser -->
+    <!-- String resources used in superuser -->
     <string name="no_apps_found">No applications found</string>
     <string name="selinux_enabled_toast">SELinux enabled</string>
     <string name="selinux_disabled_toast">SELinux disabled</string>

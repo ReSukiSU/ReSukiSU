@@ -68,48 +68,48 @@
     <string name="settings_sucompat_summary">ಆಪ್ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ ಸೂಪರ್‌ಯೂಸರ್ ಅನುಮತಿ ಪಡೆದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ /system/bin/su ಅನ್ನು ksud ಗೆ ಮರು ನಿರ್ದೇಶಿಸಿ; ಹೊಸ ಪ್ರಕ್ರಿಯೆಗಳಿಗೆ ಮಾತ್ರ ಪರಿಣಾಮಕಾರಿ.</string>
     <string name="settings_kernel_umount">ಕರ್ನಲ್ ಅನ್‌ಮೌಂಟ್</string>
     <string name="settings_kernel_umount_summary">KernelSU ನಿಂದ ನಿಯಂತ್ರಿಸಲ್ಪಡುವ ಕರ್ನಲ್-ಮಟ್ಟದ ಅನ್‌ಮೌಂಟ್ ನಡವಳಿಕೆ</string>
-    <!-- Kernel Flash Progress Related -->
-    <!-- Flash Status Related -->
+    <!-- Kernel flash progress related -->
+    <!-- Flash status related strings -->
     <!-- Slot selection related strings -->
-    <!-- Error Messages -->
-    <!-- lkm/gki install -->
-    <!--  String resources used in SuperUser -->
+    <!-- Error messages -->
+    <!-- LKM/GKI install -->
+    <!-- String resources used in superuser -->
     <!-- KPM display settings -->
-    <!-- Webui settings -->
+    <!-- WebUI settings -->
     <!-- DPI setting related strings -->
     <!-- Language settings related strings -->
     <!-- Flash related -->
-    <!-- 分类相关 -->
-    <!-- 排序相关 -->
-    <!-- 状态相关 -->
-    <!-- 标签相关 -->
+    <!-- Categories related strings -->
+    <!-- Sort related strings -->
+    <!-- State related strings -->
+    <!-- Tag related strings -->
     <string name="select">option</string>
-    <!-- BottomSheet相关 -->
-    <!-- SuSFS Configuration -->
-    <!-- SuSFS Reset Confirmation -->
-    <!-- SuSFS Toast Messages -->
-    <!-- SuSFS Settings Item -->
-    <!-- 开机自启动相关 -->
-    <!-- SuSFS Tab Titles -->
-    <!-- SuSFS Path Management -->
-    <!-- SuSFS Reset Categories -->
-    <!-- SuSFS Path Settings -->
-    <!-- SuSFS Enabled Features -->
-    <!-- Feature Labels -->
-    <!-- 可切换状态 -->
+    <!-- BottomSheet related -->
+    <!-- SuSFS configuration -->
+    <!-- SuSFS reset confirmation -->
+    <!-- SuSFS toast Messages -->
+    <!-- SuSFS settings Item -->
+    <!-- Autostart related strings -->
+    <!-- SuSFS tab titles -->
+    <!-- SuSFS path management -->
+    <!-- SuSFS reset categories -->
+    <!-- SuSFS path settings -->
+    <!-- SuSFS enabled features -->
+    <!-- Feature labels -->
+    <!-- Configurable states -->
     <!-- Settings related strings -->
-    <!-- SuSFS 自启动相关字符串 -->
-    <!-- SuSFS Kstat相关字符串 -->
-    <!-- SuSFS Mount Hiding Control Related Strings -->
-    <!-- 备份和还原相关字符串 -->
-    <!-- 循环路径相关 -->
-    <!-- 循环路径功能描述 -->
+    <!-- SuSFS autostart related strings -->
+    <!-- SuSFS Kstat related strings -->
+    <!-- SuSFS mount hiding control related strings -->
+    <!-- Backup and restore related strings -->
+    <!-- Loop path function related strings -->
+    <!-- Loop path function description -->
     <!-- KPM patching related strings -->
     <!-- KPM workflow related -->
     <!-- KPM error messages -->
     <!-- KPM option radio group strings -->
     <!-- UID Scanner Settings -->
-    <!-- 确认安装相关字符串 -->
+    <!-- Confirm installation related strings -->
     <!-- SUS Map related strings -->
-    <!-- Log Viewer -->
+    <!-- Log viewer -->
 </resources>

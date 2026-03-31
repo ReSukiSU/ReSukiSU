@@ -74,23 +74,49 @@
     <!-- Restore related messages -->
     <!-- Command related -->
     <!-- Allowlist related -->
-    <!-- Kernel Flash Progress Related -->
-    <!-- Flash Status Related -->
+    <string name="settings_sucompat">Klasikong su command</string>
+    <string name="settings_sucompat_summary">Payagan ang root access gamit ang /system/bin/su, sa mga bagong proseso.</string>
+    <!-- Kernel flash progress related -->
+    <!-- Flash status related strings -->
     <!-- Slot selection related strings -->
-    <!-- Error Messages -->
-    <!-- lkm/gki install -->
-    <!--  String resources used in SuperUser -->
+    <!-- Error messages -->
+    <!-- LKM/GKI install -->
+    <!-- String resources used in superuser -->
     <!-- KPM display settings -->
-    <!-- Webui X settings -->
+    <!-- WebUI settings -->
     <!-- DPI setting related strings -->
     <!-- Language settings related strings -->
     <!-- Flash related -->
-    <!-- 分类相关 -->
-    <!-- 排序相关 -->
-    <!-- 状态相关 -->
-    <!-- 标签相关 -->
-    <!-- FAB菜单相关 -->
-    <!-- BottomSheet相关 -->
-    <string name="settings_sucompat">Klasikong su command</string>
-    <string name="settings_sucompat_summary">Payagan ang root access gamit ang /system/bin/su, sa mga bagong proseso.</string>
+    <!-- Categories related strings -->
+    <!-- Sort related strings -->
+    <!-- State related strings -->
+    <!-- Tag related strings -->
+    <!-- BottomSheet related -->
+    <!-- SuSFS configuration -->
+    <!-- SuSFS reset confirmation -->
+    <!-- SuSFS toast Messages -->
+    <!-- SuSFS settings Item -->
+    <!-- Autostart related strings -->
+    <!-- SuSFS tab titles -->
+    <!-- SuSFS path management -->
+    <!-- SuSFS reset categories -->
+    <!-- SuSFS path settings -->
+    <!-- SuSFS enabled features -->
+    <!-- Feature labels -->
+    <!-- Configurable states -->
+    <!-- Settings related strings -->
+    <!-- SuSFS autostart related strings -->
+    <!-- SuSFS Kstat related strings -->
+    <!-- SuSFS mount hiding control related strings -->
+    <!-- Backup and restore related strings -->
+    <!-- Loop path function related strings -->
+    <!-- Loop path function description -->
+    <!-- KPM patching related strings -->
+    <!-- KPM workflow related -->
+    <!-- KPM error messages -->
+    <!-- KPM option radio group strings -->
+    <!-- UID Scanner Settings -->
+    <!-- Confirm installation related strings -->
+    <!-- SUS Map related strings -->
+    <!-- Log viewer -->
 </resources>
