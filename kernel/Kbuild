@@ -343,6 +343,13 @@ $(info -- $(REPO_NAME)/compat: modern static_key_interface found)
 ccflags-y += -DKSU_HAS_MODERN_STATIC_KEY_INTERFACE
 endif
 
+# UL(4.0-), d_inode may not found
+# https://github.com/torvalds/linux/commit/155e35d4daa804582f75acaa2c74ec797a89c615
+ifeq ($(shell grep -q "static inline struct inode..d_inode" $(srctree)/include/linux/dcache.h 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: d_inode found)
+ccflags-y += -DKSU_HAS_D_INODE
+endif
+
 # The FUCKING Sulog logic require that
 # it need the whole rewrite
 # Introduce in linux kernel 4.8
