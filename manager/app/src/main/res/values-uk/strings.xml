@@ -121,23 +121,17 @@
     <string name="selected_lkm">Обраний LKM: %s</string>
     <string name="save_log">Зберегти логи</string>
     <string name="log_saved">Логи збережено</string>
-    <!-- Module related -->
     <string name="module_install_confirm">Підтвердити встановлення модуля %1$s?</string>
     <string name="unknown_module">невідомий модуль</string>
-    <!-- Restore related -->
     <string name="restore_confirm_title">Підтвердити відновлення модулів</string>
     <string name="restore_confirm_message">Ця операція перезапише всі існуючі модулі. Продовжити?</string>
     <string name="confirm">Підтвердити</string>
     <string name="cancel">Скасувати</string>
-    <!-- Backup related -->
-    <!-- Restore related messages -->
     <string name="restore_success">Модулі успішно відновлено, потрібне перезавантаження</string>
     <string name="restore_failed">Не вдалося відновити: %1$s</string>
     <string name="restart_now">Перезавантажити зараз</string>
     <string name="unknown_error">Невідома помилка</string>
-    <!-- Command related -->
     <string name="command_execution_failed">Не вдалося виконати команду: %1$s</string>
-    <!-- Allowlist related -->
     <string name="allowlist_backup_success">Резервне копіювання білого списку успішне</string>
     <string name="allowlist_backup_failed">Не вдалося створити резервну копію білого списку: %1$s</string>
     <string name="allowlist_restore_confirm_title">Підтвердити відновлення білого списку</string>
@@ -225,9 +219,7 @@
     <string name="confirm_uninstall_content">Буде видалено наступний KPM: %s</string>
     <string name="image_editor_hint">Використовуйте два пальці для масштабування зображення та один палець для перетягування, щоб налаштувати положення</string>
     <string name="reprovision">Переналаштувати</string>
-    <!-- Kernel flash progress related -->
     <string name="horizon_flash_complete">Прошивка завершена</string>
-    <!-- Flash status related strings -->
     <string name="horizon_preparing">Підготовка…</string>
     <string name="horizon_cleaning_files">Очищення файлів…</string>
     <string name="horizon_copying_files">Копіювання файлів…</string>
@@ -235,7 +227,6 @@
     <string name="horizon_patching_script">Патчинг скрипту прошивки…</string>
     <string name="horizon_flashing">Прошивка ядра…</string>
     <string name="horizon_flash_complete_status">Прошивка завершена</string>
-    <!-- Slot selection related strings -->
     <string name="select_slot_title">Вибрати слот для прошивки</string>
     <string name="select_slot_description">Будь ласка, виберіть цільовий слот для прошивки boot</string>
     <string name="slot_a">Слот A</string>
@@ -245,11 +236,9 @@
     <string name="horizon_setting_target_slot">Встановлення вказаного слоту</string>
     <string name="horizon_restoring_original_slot">Відновити слот за замовчуванням</string>
     <string name="current_slot">Поточний системний слот за замовчуванням: %1$s</string>
-    <!-- Error messages -->
     <string name="horizon_copy_failed">Не вдалося скопіювати</string>
     <string name="horizon_unknown_error">Невідома помилка</string>
     <string name="flash_failed_message">Прошивка не вдалася</string>
-    <!-- LKM/GKI install -->
     <string name="Lkm_install_methods">Відновлення/встановлення LKM</string>
     <string name="GKI_install_methods">Прошивка AnyKernel3</string>
     <string name="kernel_version_log">Версія ядра: %1$s</string>
@@ -257,7 +246,6 @@
     <string name="configuration">Налаштувати</string>
     <string name="app_settings">Налаштування додатку</string>
     <string name="tools">Інструменти</string>
-    <!-- String resources used in superuser -->
     <string name="no_apps_found">Додаток не знайдено</string>
     <string name="selinux_enabled_toast">SELinux увімкнено</string>
     <string name="selinux_disabled_toast">SELinux вимкнено</string>
@@ -270,11 +258,8 @@
     <string name="icon_switch_title">Альтернативна іконка</string>
     <string name="icon_switch_summary">Змінити іконку запуску на іконку KernelSU.</string>
     <string name="icon_switched">Іконку змінено</string>
-    <!-- KPM display settings -->
     <string name="show_kpm_info">Приховати функцію KPM</string>
     <string name="show_kpm_info_summary">Приховує інформацію та функцію KPM на головному екрані та в нижній панелі</string>
-    <!-- WebUI settings -->
-    <!-- DPI setting related strings -->
     <string name="app_dpi_title">Застосований DPI</string>
     <string name="app_dpi_summary">Налаштувати щільність відображення екрана лише для поточного додатку</string>
     <string name="dpi_size_small">Маленький</string>
@@ -285,21 +270,17 @@
     <string name="dpi_apply_settings">Застосування налаштувань DPI</string>
     <string name="dpi_confirm_title">Підтвердити зміну DPI</string>
     <string name="dpi_confirm_message">Ви впевнені, що хочете змінити DPI додатку з %1$d на %2$d?</string>
-    <!-- Language settings related strings -->
     <string name="settings_language">Мова додатку</string>
     <string name="language_system_default">Як у системі</string>
-    <!-- Flash related -->
     <string name="error_code">код помилки</string>
     <string name="check_log">Будь ласка, перевірте лог</string>
     <string name="installing_module">Встановлення модуля %1$d/%2$d</string>
     <string name="module_failed_count">Не вдалося встановити %d новий модуль</string>
     <string name="module_download_error">Не вдалося завантажити модуль</string>
     <string name="kernel_flashing">Прошивка ядра</string>
-    <!-- Categories related strings -->
     <string name="category_all_apps">Всі</string>
     <string name="category_custom_apps">Власні</string>
     <string name="category_default_apps">За замовчуванням</string>
-    <!-- Sort related strings -->
     <string name="sort_name_asc">Назва за зростанням</string>
     <string name="sort_name_desc">Назва за спаданням</string>
     <string name="sort_install_time_new">Час встановлення (нові)</string>
@@ -307,9 +288,7 @@
     <string name="sort_size_desc">Розмір за спаданням</string>
     <string name="sort_size_asc">Розмір за зростанням</string>
     <string name="sort_usage_freq">Частота використання</string>
-    <!-- State related strings -->
     <string name="no_apps_in_category">Немає додатків у цій категорії</string>
-    <!-- Tag related strings -->
     <string name="deny_authorization">Заборонити права</string>
     <string name="grant_authorization">Надати права</string>
     <string name="unmount_modules">Відмонтувати монтування модулів</string>
@@ -320,11 +299,9 @@
     <string name="scroll_to_bottom">Вниз</string>
     <string name="selected">Вибрано</string>
     <string name="select">Вибрати</string>
-    <!-- BottomSheet related -->
     <string name="menu_options">Опції меню</string>
     <string name="sort_options">Сортувати за</string>
     <string name="app_categories">Вибір типу додатку</string>
-    <!-- SuSFS configuration -->
     <string name="susfs_config_title">Налаштування SuSFS</string>
     <string name="susfs_config_description">Опис налаштувань</string>
     <string name="susfs_config_description_text">Ця функція дозволяє налаштовувати підміну значення uname та часу збірки SuSFS. Введіть потрібні значення та натисніть \"Застосувати\", щоб вони набули чинності.</string>
@@ -336,16 +313,12 @@
     <string name="susfs_current_build_time">Поточний час збірки: %s</string>
     <string name="susfs_reset_to_default">Скинути до замовчування</string>
     <string name="susfs_apply">Застосувати</string>
-    <!-- SuSFS reset confirmation -->
     <string name="susfs_reset_confirm_title">Підтвердити скидання</string>
-    <!-- SuSFS toast Messages -->
     <string name="susfs_binary_not_found">Не вдалося знайти файл ksu_susfs</string>
     <string name="susfs_command_failed">Не вдалося виконати команду SuSFS</string>
     <string name="susfs_command_error">Помилка виконання команди SuSFS: %s</string>
     <string name="susfs_uname_set_success" formatted="false">Значення uname та час збірки SuSFS успішно встановлено: %s, %s</string>
-    <!-- SuSFS settings Item -->
     <string name="susfs_config_setting_title">Налаштування SuSFS</string>
-    <!-- Autostart related strings -->
     <string name="susfs_autostart_title">Автозапуск</string>
     <string name="susfs_autostart_description">Автоматично застосовувати всі нестандартні конфігурації при перезавантаженні</string>
     <string name="susfs_autostart_requirement">Для ввімкнення потрібно додати конфігурацію</string>
@@ -353,33 +326,27 @@
     <string name="susfs_autostart_disable_failed">Не вдалося вимкнути автозапуск</string>
     <string name="susfs_autostart_error">Помилка конфігурації автозапуску: %s</string>
     <string name="susfs_no_config_to_autostart">Немає доступної конфігурації для автозапуску</string>
-    <!-- SuSFS tab titles -->
     <string name="susfs_tab_basic_settings">Основні налаштування</string>
     <string name="susfs_tab_sus_paths">Шляхи SUS</string>
     <string name="susfs_tab_path_settings">Налаштування шляхів</string>
     <string name="susfs_tab_enabled_features">Статус увімкнених функцій</string>
-    <!-- SuSFS path management -->
     <string name="susfs_add_sus_path">Додати шлях SUS</string>
     <string name="susfs_sus_path_added_success">Шлях SUS успішно додано</string>
     <string name="susfs_path_not_found_error">Помилка: шлях не знайдено</string>
     <string name="susfs_path_label">Шлях</string>
     <string name="susfs_path_placeholder">напр.: /system/addon.d</string>
     <string name="susfs_no_paths_configured">Немає налаштованих шляхів SUS</string>
-    <!-- SuSFS reset categories -->
     <string name="susfs_reset_paths_title">Скинути шляхи SUS</string>
     <string name="susfs_reset_paths_message">Це видалить усі конфігурації шляхів SUS. Ви впевнені, що хочете продовжити?</string>
     <string name="susfs_reset_path_title">Скинути налаштування шляхів</string>
-    <!-- SuSFS path settings -->
     <string name="susfs_android_data_path_label">Шлях до Android Data</string>
     <string name="susfs_sdcard_path_label">Шлях до SD-карти</string>
     <string name="susfs_set_android_data_path">Встановити шлях до Android Data</string>
     <string name="susfs_set_sdcard_path">Встановити шлях до SD-карти</string>
-    <!-- SuSFS enabled features -->
     <string name="susfs_enabled_features_description">Відображення поточного статусу увімкнених функцій SuSFS</string>
     <string name="susfs_no_features_found">Інформацію про статус функцій не знайдено</string>
     <string name="susfs_feature_enabled">Увімкнено</string>
     <string name="susfs_feature_disabled">Вимкнено</string>
-    <!-- Feature labels -->
     <string name="sus_path_feature_label">Підтримка шляхів SUS</string>
     <string name="spoof_uname_feature_label">Підтримка підміни uname</string>
     <string name="spoof_cmdline_feature_label">Підміна Cmdline/Bootconfig</string>
@@ -387,7 +354,6 @@
     <string name="enable_log_feature_label">Підтримка логування</string>
     <string name="hide_symbols_feature_label">Приховати символи KSU SUSFS</string>
     <string name="sus_kstat_feature_label">Підтримка SUS Kstat</string>
-    <!-- Configurable states -->
     <string name="susfs_feature_configurable">Настроювані функції SuSFS</string>
     <string name="susfs_enable_log_label">Увімкнути лог SuSFS</string>
     <string name="susfs_log_config_description">Увімкнути або вимкнути логування для SuSFS</string>
@@ -396,7 +362,6 @@
     <string name="susfs_log_disabled">Вимкнення логування SuSFS</string>
     <string name="module_update_json">Оновити JSON</string>
     <string name="module_update_json_copied">URL для оновлення JSON скопійовано в буфер обміну</string>
-    <!-- Settings related strings -->
     <string name="show_more_module_info">Показувати більше інформації про модуль</string>
     <string name="show_more_module_info_summary">Відображати додаткову інформацію про модуль, як-от URL-адреси для оновлення JSON</string>
     <string name="susfs_execution_location_label">Місце виконання</string>
@@ -412,10 +377,8 @@
     <string name="susfs_slot_use_uname">Використовувати Uname</string>
     <string name="susfs_slot_use_build_time">Використовувати час збірки</string>
     <string name="susfs_slot_info_unavailable">Не вдалося отримати інформацію про слот</string>
-    <!-- SuSFS autostart related strings -->
     <string name="susfs_autostart_enabled_success">Модуль автозапуску SuSFS увімкнено, шлях до модуля: %s</string>
     <string name="susfs_autostart_disabled_success">Модуль автозапуску SuSFS вимкнено</string>
-    <!-- SuSFS Kstat related strings -->
     <string name="susfs_tab_kstat_config">Налаштування Kstat</string>
     <string name="kstat_static_config_added">Статичну конфігурацію Kstat додано: %1$s</string>
     <string name="kstat_config_removed">Конфігурацію Kstat видалено: %1$s</string>
@@ -438,7 +401,6 @@
     <string name="static_kstat_config">Статична конфігурація Kstat</string>
     <string name="kstat_path_management">Керування шляхами Kstat</string>
     <string name="no_kstat_config_message">Конфігурації Kstat ще немає, натисніть кнопку вище, щоб додати</string>
-    <!-- SuSFS mount hiding control related strings -->
     <string name="susfs_hide_mounts_control_title">Керування приховуванням монтувань SUS</string>
     <string name="susfs_hide_mounts_control_description">Керуйте поведінкою приховування монтувань SUS для процесів</string>
     <string name="susfs_hide_mounts_for_all_procs_label">Приховувати монтування SUS для всіх процесів</string>
@@ -453,7 +415,6 @@
     <string name="susfs_android_data_path_set">Шлях до Android Data встановлено на: %s</string>
     <string name="susfs_sdcard_path_set">Шлях до SD-карти встановлено на: %s</string>
     <string name="susfs_path_setup_warning">Налаштування шляху може бути не повністю успішним, але шляхи SUS будуть додаватися</string>
-    <!-- Backup and restore related strings -->
     <string name="susfs_backup_title">Резервне копіювання</string>
     <string name="susfs_backup_description">Створити резервну копію всіх конфігурацій SuSFS. Файл резервної копії включатиме всі налаштування, шляхи та конфігурації.</string>
     <string name="susfs_backup_create">Створити резервну копію</string>
@@ -477,14 +438,4 @@
     <string name="hide_bl_script_description">Переопределить свойство состояния блокировки загрузчика в режиме службы late_start</string>
     <string name="cleanup_residue">Очистити залишки</string>
     <string name="cleanup_residue_description">Очищення залишкових файлів та каталогів різних модулів та інструментів (може призвести до випадкового видалення, втрати даних та неможливості завантаження, використовуйте з обережністю)</string>
-    <!-- Loop path function related strings -->
-    <!-- Loop path function description -->
-    <!-- KPM patching related strings -->
-    <!-- KPM workflow related -->
-    <!-- KPM error messages -->
-    <!-- KPM option radio group strings -->
-    <!-- UID Scanner Settings -->
-    <!-- Confirm installation related strings -->
-    <!-- SUS Map related strings -->
-    <!-- Log viewer -->
 </resources>

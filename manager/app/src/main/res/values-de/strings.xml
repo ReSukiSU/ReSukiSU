@@ -114,23 +114,17 @@
     <string name="selected_lkm">Wähle LKM: %s</string>
     <string name="save_log">Protokolle Speichern</string>
     <string name="log_saved">Protokolle gespeichert</string>
-    <!-- Module related -->
     <string name="module_install_confirm">das Installationsmodul %1$s bestätigen ?</string>
     <string name="unknown_module">unbekannter Modul</string>
-    <!-- Restore related -->
     <string name="restore_confirm_title">Modul-Wiederherstellung bestätigen</string>
     <string name="restore_confirm_message">Diese Operation wird alle vorhandenen Module überschreiben. Fortfahren?</string>
     <string name="confirm">Bestätigen</string>
     <string name="cancel">Abbrechen</string>
-    <!-- Backup related -->
-    <!-- Restore related messages -->
     <string name="restore_success">Module erfolgreich wiederhergestellt, Neustart erforderlich</string>
     <string name="restore_failed">Wiederherstellung fehlgeschlagen: %1$s</string>
     <string name="restart_now">Jetzt Neustarten</string>
     <string name="unknown_error">Ein unbekannter Fehler ist aufgetreten</string>
-    <!-- Command related -->
     <string name="command_execution_failed">Befehlsausführung fehlgeschlagen: %1$s</string>
-    <!-- Allowlist related -->
     <string name="allowlist_backup_success">Sicherung erfolgreich erlaubt</string>
     <string name="allowlist_backup_failed">Sicherung der erlaubten Liste fehlgeschlagen: %1$s</string>
     <string name="allowlist_restore_confirm_title">Allowlist-Wiederherstellung bestätigen</string>
@@ -209,9 +203,7 @@
     <string name="confirm_uninstall_content">Folgende KPM wird deinstalliert: %s</string>
     <string name="image_editor_hint">Verwende zwei Finger um das Bild zu vergrößern und einen Finger um die Position anzupassen</string>
     <string name="reprovision">Rückzahlung</string>
-    <!-- Kernel flash progress related -->
     <string name="horizon_flash_complete">Blitz abgeschlossen</string>
-    <!-- Flash status related strings -->
     <string name="horizon_preparing">Vorbereiten…</string>
     <string name="horizon_cleaning_files">Bereinigung von Dateien…</string>
     <string name="horizon_copying_files">Kopiere Datei…</string>
@@ -219,7 +211,6 @@
     <string name="horizon_patching_script">Patcht Flash-Skript…</string>
     <string name="horizon_flashing">Flashen des Kernels…</string>
     <string name="horizon_flash_complete_status">Blitz abgeschlossen</string>
-    <!-- Slot selection related strings -->
     <string name="select_slot_title">Wähle Flash Slot</string>
     <string name="select_slot_description">Bitte wählen Sie den Ziel-Slot zum Blinken des Boots aus</string>
     <string name="slot_b">Steckplatz B</string>
@@ -228,18 +219,15 @@
     <string name="horizon_setting_target_slot">Setze den angegebenen Slot</string>
     <string name="horizon_restoring_original_slot">Standard wiederherstellen</string>
     <string name="current_slot">Aktueller Standard-Slot des Systems：%1$s </string>
-    <!-- Error messages -->
     <string name="horizon_copy_failed">Kopieren fehlgeschlagen</string>
     <string name="horizon_unknown_error">Ein unbekannter Fehler ist aufgetreten</string>
     <string name="flash_failed_message">Schreiben fehlgeschlagen</string>
-    <!-- LKM/GKI install -->
     <string name="Lkm_install_methods">LKM Reparatur/Installation</string>
     <string name="GKI_install_methods">Flashen des Kernels…</string>
     <string name="kernel_version_log">Kernel</string>
     <string name="tool_version_log">Benutze das Patchwerkzeug：%1$s</string>
     <string name="configuration">Konfigurieren</string>
     <string name="app_settings">Anwendungs-Einstellungen</string>
-    <!-- String resources used in superuser -->
     <string name="no_apps_found">Anwendung nicht gefunden</string>
     <string name="selinux_enabled_toast">SELinux aktiviert</string>
     <string name="selinux_disabled_toast">SELinux deaktiviert</string>
@@ -251,11 +239,8 @@
     <string name="icon_switch_title">Alternatives Symbol</string>
     <string name="icon_switch_summary">Ändere das Launcher-Symbol auf das KernelSU Icon.</string>
     <string name="icon_switched">Icon gewechselt</string>
-    <!-- KPM display settings -->
     <string name="show_kpm_info">KPM-Funktion anzeigen</string>
     <string name="show_kpm_info_summary">Versteckt KPM-Informationen und Funktion in der Home- und Unterleiste</string>
-    <!-- WebUI settings -->
-    <!-- DPI setting related strings -->
     <string name="app_dpi_title">Angewendeter DPI</string>
     <string name="app_dpi_summary">Bildschirmanzahl nur für die aktuelle Anwendung anpassen</string>
     <string name="dpi_size_small">Klein </string>
@@ -266,49 +251,15 @@
     <string name="dpi_apply_settings">DPI-Einstellungen anwenden</string>
     <string name="dpi_confirm_title">DPI-Änderung bestätigen</string>
     <string name="dpi_confirm_message">Sind Sie sicher, dass Sie die Anwendung DPI von %1$d auf %2$d ändern möchten?</string>
-    <!-- Language settings related strings -->
     <string name="settings_language">App Sprache</string>
     <string name="language_system_default">Folge Systemeinstellung</string>
-    <!-- Flash related -->
     <string name="error_code">fehlercode</string>
     <string name="check_log">Bitte überprüfen Sie das Log</string>
     <string name="installing_module">Modul wird installiert %1$d/%2$d</string>
     <string name="module_failed_count">%d Fehler bei der Installation eines neuen Moduls</string>
     <string name="module_download_error">Modul-Download fehlgeschlagen</string>
     <string name="kernel_flashing">Kernel-Flashen</string>
-    <!-- Categories related strings -->
-    <!-- Sort related strings -->
-    <!-- State related strings -->
-    <!-- Tag related strings -->
     <string name="scroll_to_bottom">Unten</string>
     <string name="selected">Ausgewählt</string>
     <string name="select">variieren</string>
-    <!-- BottomSheet related -->
-    <!-- SuSFS configuration -->
-    <!-- SuSFS reset confirmation -->
-    <!-- SuSFS toast Messages -->
-    <!-- SuSFS settings Item -->
-    <!-- Autostart related strings -->
-    <!-- SuSFS tab titles -->
-    <!-- SuSFS path management -->
-    <!-- SuSFS reset categories -->
-    <!-- SuSFS path settings -->
-    <!-- SuSFS enabled features -->
-    <!-- Feature labels -->
-    <!-- Configurable states -->
-    <!-- Settings related strings -->
-    <!-- SuSFS autostart related strings -->
-    <!-- SuSFS Kstat related strings -->
-    <!-- SuSFS mount hiding control related strings -->
-    <!-- Backup and restore related strings -->
-    <!-- Loop path function related strings -->
-    <!-- Loop path function description -->
-    <!-- KPM patching related strings -->
-    <!-- KPM workflow related -->
-    <!-- KPM error messages -->
-    <!-- KPM option radio group strings -->
-    <!-- UID Scanner Settings -->
-    <!-- Confirm installation related strings -->
-    <!-- SUS Map related strings -->
-    <!-- Log viewer -->
 </resources>

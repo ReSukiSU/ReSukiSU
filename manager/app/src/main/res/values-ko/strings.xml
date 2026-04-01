@@ -135,22 +135,16 @@
     <string name="selected_lkm">선택된 LKM: %s</string>
     <string name="save_log">로그 저장</string>
     <string name="log_saved">로그 저장됨</string>
-    <!-- Module related -->
     <string name="module_install_confirm">confirm install module %1$s？</string>
     <string name="unknown_module">unknown module</string>
-    <!-- Restore related -->
     <string name="restore_confirm_title">모듈 복원 확인</string>
     <string name="restore_confirm_message">이 작업은 기존의 모든 모듈을 덮어씁니다. 계속할까요?</string>
     <string name="confirm">확인</string>
     <string name="cancel">취소</string>
-    <!-- Backup related -->
-    <!-- Restore related messages -->
     <string name="restore_success">모듈이 복원되었습니다. 다시 시작이 필요합니다.</string>
     <string name="restore_failed">복원 실패: %1$s</string>
     <string name="restart_now">지금 다시 시작</string>
     <string name="unknown_error">알 수 없는 오류</string>
-    <!-- Command related -->
-    <!-- Allowlist related -->
     <string name="allowlist_restore_confirm_title">허용 목록 복원 확인</string>
     <string name="allowlist_restore_confirm_message">이 작업은 현재 허용 목록을 덮어씁니다. 계속할까요?</string>
     <string name="allowlist_restore_success">허용 목록 복원됨</string>
@@ -247,9 +241,7 @@
     <string name="confirm_uninstall_content">다음 KPM이 제거됩니다: %s</string>
     <string name="image_editor_hint">두 손가락으로 이미지를 확대하고, 한 손가락으로 드래그하여 위치를 조정하세요.</string>
     <string name="reprovision">다시 프로비저닝</string>
-    <!-- Kernel flash progress related -->
     <string name="horizon_flash_complete">플래싱 완료</string>
-    <!-- Flash status related strings -->
     <string name="horizon_preparing">준비 중…</string>
     <string name="horizon_cleaning_files">파일 정리 중…</string>
     <string name="horizon_copying_files">파일 복사 중…</string>
@@ -257,7 +249,6 @@
     <string name="horizon_patching_script">플래시 스크립트 패치 중…</string>
     <string name="horizon_flashing">커널 플래싱 중…</string>
     <string name="horizon_flash_complete_status">플래싱 완료</string>
-    <!-- Slot selection related strings -->
     <string name="select_slot_title">플래싱 슬롯 선택</string>
     <string name="select_slot_description">boot를 플래싱할 대상 슬롯을 선택하세요.</string>
     <string name="slot_a">슬롯 A</string>
@@ -267,11 +258,9 @@
     <string name="horizon_setting_target_slot">지정된 슬롯 설정 중</string>
     <string name="horizon_restoring_original_slot">기본 슬롯 복원</string>
     <string name="current_slot">Current Slot：%1$s </string>
-    <!-- Error messages -->
     <string name="horizon_copy_failed">복사 실패</string>
     <string name="horizon_unknown_error">알 수 없는 오류</string>
     <string name="flash_failed_message">플래싱 실패</string>
-    <!-- LKM/GKI install -->
     <string name="Lkm_install_methods">LKM 수리/설치</string>
     <string name="GKI_install_methods">AnyKernel3 플래싱</string>
     <string name="kernel_version_log">커널 버전: %1$s</string>
@@ -279,7 +268,6 @@
     <string name="configuration">구성</string>
     <string name="app_settings">앱 설정</string>
     <string name="tools">도구</string>
-    <!-- String resources used in superuser -->
     <string name="no_apps_found">앱을 찾을 수 없음</string>
     <string name="selinux_enabled_toast">SELinux 활성화됨</string>
     <string name="selinux_disabled_toast">SELinux 비활성화됨</string>
@@ -291,14 +279,11 @@
     <string name="background_removed">사용자 지정 배경 제거됨</string>
     <string name="icon_switch_title">대체 아이콘</string>
     <string name="icon_switched">아이콘 변경됨</string>
-    <!-- KPM display settings -->
-    <!-- WebUI settings -->
     <string name="module_webui_alert">%s 모듈의 메시지</string>
     <string name="no_such_module">%s 모듈이 존재하지 않습니다.</string>
     <string name="module_unavailable">%s 모듈이 비활성화되었거나 제거 대기 중입니다.</string>
     <string name="select_default_webui_engine">기본 WebUI 엔진</string>
     <string name="select_webui_engine_description">전역 기본 WebUI 엔진을 선택하세요.</string>
-    <!-- DPI setting related strings -->
     <string name="app_dpi_title">적용된 DPI</string>
     <string name="app_dpi_summary">현재 앱의 화면 표시 밀도만 조정합니다.</string>
     <string name="dpi_size_small">작게 </string>
@@ -307,11 +292,9 @@
     <string name="dpi_confirm_title">DPI 변경 확인</string>
     <string name="dpi_confirm_message">앱 DPI를 %1$d에서 %2$d(으)로 변경할까요?</string>
     <string name="dpi_applied_success">DPI가 %1$d(으)로 설정됨</string>
-    <!-- Language settings related strings -->
     <string name="settings_language">앱 언어</string>
     <string name="language_system_default">시스템 설정</string>
     <string name="settings_background_dim">배경 밝기 조정</string>
-    <!-- Flash related -->
     <string name="error_code">오류 코드</string>
     <string name="check_log">로그를 확인하세요.</string>
     <string name="installing_module">모듈 설치 중 %1$d/%2$d</string>
@@ -320,17 +303,13 @@
     <string name="kernel_flashing">커널 플래싱</string>
     <string name="warning_of_meta_module_title">메타 모듈 필요</string>
     <string name="warning_of_meta_module_summary">이 모듈은 /system 마운트를 시도하며, 메타 모듈이 이를 처리합니다. 메타 모듈이 없으면 작동하지 않을 수 있습니다.</string>
-    <!-- Categories related strings -->
     <string name="category_all_apps">전체</string>
     <string name="category_root_apps">ROOT</string>
     <string name="category_custom_apps">사용자 지정</string>
     <string name="category_default_apps">기본값</string>
-    <!-- Sort related strings -->
     <string name="sort_name_asc">이름 오름차순</string>
     <string name="sort_name_desc">이름 내림차순</string>
-    <!-- State related strings -->
     <string name="no_apps_in_category">이 카테고리에 앱이 없습니다.</string>
-    <!-- Tag related strings -->
     <string name="persistent">영구적</string>
     <string name="temporary">일시적</string>
     <string name="deny_authorization">권한 거부</string>
@@ -343,11 +322,9 @@
     <string name="scroll_to_bottom">맨 아래로</string>
     <string name="selected">선택됨</string>
     <string name="select">option</string>
-    <!-- BottomSheet related -->
     <string name="menu_options">메뉴 옵션</string>
     <string name="sort_options">정렬 기준</string>
     <string name="app_categories">앱 유형 선택</string>
-    <!-- SuSFS configuration -->
     <string name="susfs_config_title">SuSFS 구성</string>
     <string name="susfs_config_description">구성 설명</string>
     <string name="susfs_config_description_text">이 기능을 통해 SuSFS uname 값과 빌드 날짜 스푸핑을 사용자 지정할 수 있습니다. 설정할 값을 입력하고 적용을 누르세요.</string>
@@ -359,16 +336,12 @@
     <string name="susfs_current_build_time">현재 빌드 날짜: %s</string>
     <string name="susfs_reset_to_default">기본값으로 초기화</string>
     <string name="susfs_apply">적용</string>
-    <!-- SuSFS reset confirmation -->
     <string name="susfs_reset_confirm_title">초기화 확인</string>
-    <!-- SuSFS toast Messages -->
     <string name="susfs_binary_not_found">ksu_susfs 파일을 찾을 수 없음</string>
     <string name="susfs_command_failed">SuSFS 명령 실행 실패</string>
     <string name="susfs_command_error">SuSFS 명령 실행 중 오류 발생: %s</string>
     <string name="susfs_uname_set_success" formatted="false">SuSFS uname 및 빌드 날짜 설정됨: %s, %s</string>
-    <!-- SuSFS settings Item -->
     <string name="susfs_config_setting_title">SuSFS 구성</string>
-    <!-- Autostart related strings -->
     <string name="susfs_autostart_title">자동 시작</string>
     <string name="susfs_autostart_description">다시 시작할 때 기본값이 아닌 모든 구성을 자동으로 적용합니다.</string>
     <string name="susfs_autostart_requirement">활성화하려면 구성을 추가해야 합니다.</string>
@@ -376,33 +349,27 @@
     <string name="susfs_autostart_disable_failed">자동 시작 비활성화 실패</string>
     <string name="susfs_autostart_error">자동 시작 구성 오류: %s</string>
     <string name="susfs_no_config_to_autostart">자동 시작에 사용할 수 있는 구성 없음</string>
-    <!-- SuSFS tab titles -->
     <string name="susfs_tab_basic_settings">기본 설정</string>
     <string name="susfs_tab_sus_paths">SUS 경로</string>
     <string name="susfs_tab_path_settings">경로 설정</string>
     <string name="susfs_tab_enabled_features">활성화된 기능 상태</string>
-    <!-- SuSFS path management -->
     <string name="susfs_add_sus_path">SUS 경로 추가</string>
     <string name="susfs_sus_path_added_success">SUS 경로 추가됨</string>
     <string name="susfs_path_not_found_error">경로를 찾을 수 없음 오류</string>
     <string name="susfs_path_label">경로</string>
     <string name="susfs_path_placeholder">예: /system/addon.d</string>
     <string name="susfs_no_paths_configured">구성된 SUS 경로 없음</string>
-    <!-- SuSFS reset categories -->
     <string name="susfs_reset_paths_title">SUS 경로 초기화</string>
     <string name="susfs_reset_paths_message">이렇게 하면 모든 SUS 경로 구성이 지워집니다. 계속할까요?</string>
     <string name="susfs_reset_path_title">경로 설정 초기화</string>
-    <!-- SuSFS path settings -->
     <string name="susfs_android_data_path_label">Android Data 경로</string>
     <string name="susfs_sdcard_path_label">SD 카드 경로</string>
     <string name="susfs_set_android_data_path">Android Data 경로 설정</string>
     <string name="susfs_set_sdcard_path">SD 카드 경로 설정</string>
-    <!-- SuSFS enabled features -->
     <string name="susfs_enabled_features_description">현재 SuSFS 활성화된 기능 상태를 표시합니다.</string>
     <string name="susfs_no_features_found">기능 상태 정보를 찾을 수 없음</string>
     <string name="susfs_feature_enabled">활성화됨</string>
     <string name="susfs_feature_disabled">비활성화됨</string>
-    <!-- Feature labels -->
     <string name="sus_path_feature_label">SUS 경로 지원</string>
     <string name="spoof_uname_feature_label">Uname 스푸핑 지원</string>
     <string name="spoof_cmdline_feature_label">Cmdline/Bootconfig 스푸핑</string>
@@ -411,7 +378,6 @@
     <string name="hide_symbols_feature_label">KSU SUSFS 심볼 숨기기</string>
     <string name="sus_kstat_feature_label">SUS Kstat 지원</string>
     <string name="sus_map_feature_label">SUS Map 지원</string>
-    <!-- Configurable states -->
     <string name="susfs_feature_configurable">구성 가능한 SuSFS 기능</string>
     <string name="susfs_enable_log_label">SuSFS 로그 활성화</string>
     <string name="susfs_log_config_description">SuSFS에 대한 로깅을 활성화 또는 비활성화합니다.</string>
@@ -420,7 +386,6 @@
     <string name="susfs_log_disabled">SuSFS 로깅 끄기</string>
     <string name="module_update_json">업데이트 JSON</string>
     <string name="module_update_json_copied">업데이트 JSON URL이 클립보드에 복사되었습니다.</string>
-    <!-- Settings related strings -->
     <string name="show_more_module_info">추가 모듈 정보 표시</string>
     <string name="show_more_module_info_summary">업데이트 JSON URL과 같은 추가 모듈 정보를 표시합니다.</string>
     <string name="susfs_execution_location_label">실행 위치</string>
@@ -438,10 +403,8 @@
     <string name="susfs_slot_use_uname">Uname 사용</string>
     <string name="susfs_slot_use_build_time">빌드 날짜 사용</string>
     <string name="susfs_slot_info_unavailable">슬롯 정보를 불러올 수 없음</string>
-    <!-- SuSFS autostart related strings -->
     <string name="susfs_autostart_enabled_success">SuSFS 자동 시작 모듈 활성화됨. 모듈 경로: %s</string>
     <string name="susfs_autostart_disabled_success">SuSFS 자동 시작 모듈 비활성화됨</string>
-    <!-- SuSFS Kstat related strings -->
     <string name="susfs_tab_kstat_config">Kstat 구성</string>
     <string name="kstat_static_config_added">Kstat 정적 구성 추가됨: %1$s</string>
     <string name="kstat_config_removed">Kstat 구성 제거됨: %1$s</string>
@@ -464,7 +427,6 @@
     <string name="static_kstat_config">정적 Kstat 구성</string>
     <string name="kstat_path_management">Kstat 경로 관리</string>
     <string name="no_kstat_config_message">Kstat 구성이 없습니다. 아래 버튼을 클릭하여 추가하세요.</string>
-    <!-- SuSFS mount hiding control related strings -->
     <string name="susfs_hide_mounts_control_title">SUS 마운트 숨기기 제어</string>
     <string name="susfs_hide_mounts_control_description">프로세스의 SUS 마운트 숨기기 동작을 제어합니다.</string>
     <string name="susfs_hide_mounts_for_all_procs_label">모든 프로세스에서 SUS 마운트 숨기기</string>
@@ -479,7 +441,6 @@
     <string name="susfs_android_data_path_set">Android Data 경로 설정됨: %s</string>
     <string name="susfs_sdcard_path_set">SD 카드 경로 설정됨: %s</string>
     <string name="susfs_path_setup_warning">경로 설정이 완전히 성공하지 않을 수 있지만 SUS 경로는 계속 추가됩니다.</string>
-    <!-- Backup and restore related strings -->
     <string name="susfs_backup_title">백업</string>
     <string name="susfs_backup_description">모든 SuSFS 구성의 백업을 만듭니다. 백업 파일에는 모든 설정, 경로 및 구성이 포함됩니다.</string>
     <string name="susfs_backup_create">백업 만들기</string>
@@ -546,7 +507,6 @@
     <string name="no_active_manager">활성 매니저 없음</string>
     <string name="home_zygisk_implement">Zygisk 구현</string>
     <string name="home_meta_module_implement">메타 모듈 구현</string>
-    <!-- Loop path function related strings -->
     <string name="susfs_tab_sus_loop_paths">SUS 루프 경로</string>
     <string name="susfs_add_sus_loop_path">SUS 루프 경로 추가</string>
     <string name="susfs_edit_sus_loop_path">SUS 루프 경로 편집</string>
@@ -561,7 +521,6 @@
     <string name="susfs_loop_path_invalid_location">오류: 루프 경로는 /storage/ 또는 /sdcard/ 디렉터리 내에 있을 수 없습니다.</string>
     <string name="loop_paths_section">루프 경로</string>
     <string name="add_loop_path">루프 경로 추가</string>
-    <!-- Loop path function description -->
     <string name="sus_loop_paths_description_title">루프 경로 구성</string>
     <string name="sus_loop_paths_description_text">루프 경로는 비-ROOT 사용자 앱이나 격리된 서비스가 시작될 때마다 SUS_PATH로 다시 지정됩니다. 이는 추가된 경로의 inode 상태가 초기화되거나 커널에서 inode가 다시 생성되는 문제를 해결하는 데 도움이 됩니다.</string>
     <string name="avc_log_spoofing">AVC 로그 스푸핑</string>
@@ -573,7 +532,6 @@
 - 커널에서는 기본적으로 \'0\'으로 설정되어 있습니다\n
 - 이 기능을 활성화하면 개발자가 권한이나 SELinux 문제를 디버깅할 때 원인을 파악하기 어려울 수 있으므로, 사용자는 디버깅 시 이 기능을 비활성화하는 것이 좋습니다.</string>
     <string name="home_hook_type">Hook 유형</string>
-    <!-- KPM patching related strings -->
     <string name="kpm_patch_options">KPM 패치</string>
     <string name="kpm_patch_description">추가 KPM 기능을 위한 패치입니다.</string>
     <string name="enable_kpm_patch">KPM 패치</string>
@@ -584,7 +542,6 @@
     <string name="kpm_undo_patch_enabled">KPM 패치 되돌리기 활성화됨</string>
     <string name="kpm_patch_mode">KPM 패치 모드</string>
     <string name="kpm_undo_patch_mode">KPM 패치 되돌리기 모드</string>
-    <!-- KPM workflow related -->
     <string name="kpm_preparing_tools">KPM 도구 준비 중</string>
     <string name="kpm_applying_patch">KPM 패치 적용 중</string>
     <string name="kpm_undoing_patch">KPM 패치 되돌리는 중</string>
@@ -592,16 +549,13 @@
     <string name="kpm_patch_success">KPM 패치 적용됨</string>
     <string name="kpm_undo_patch_success">KPM 패치 되돌리기 성공</string>
     <string name="kpm_file_repacked">파일이 다시 패킹됨</string>
-    <!-- KPM error messages -->
     <string name="kpm_extract_zip_failed">zip 파일 압축 해제 실패</string>
     <string name="kpm_image_file_not_found">이미지 파일을 찾을 수 없음</string>
     <string name="kpm_patch_failed">KPM 패치 실패</string>
     <string name="kpm_undo_patch_failed">KPM 패치 되돌리기 실패</string>
     <string name="kpm_patch_operation_failed">KPM 패치 작업 실패: %s</string>
-    <!-- KPM option radio group strings -->
     <string name="kpm_follow_kernel_file">커널 따르기</string>
     <string name="kpm_follow_kernel_description">어떠한 KPM 수정 없이 커널을 그대로 사용합니다.</string>
-    <!-- UID Scanner Settings -->
     <string name="uid_auto_scan_title">사용자 모드 스캔 앱 목록</string>
     <string name="uid_auto_scan_summary">이 옵션을 활성화하면 앱 목록에 사용자 모드 스캔을 사용하여 안정성이 향상됩니다. (앱 목록의 커널 스캔 중 멈춤 같은 문제가 발생 시 활성화)</string>
     <string name="uid_multi_user_scan_title">다중 사용자 앱 스캔</string>
@@ -612,7 +566,6 @@
     <string name="clean_runtime_environment_confirm">런타임 환경을 정리할까요? 스캐너 서비스가 중지되고 관련 파일이 제거됩니다.</string>
     <string name="clean_runtime_environment_success">런타임 환경 정리됨</string>
     <string name="clean_runtime_environment_failed">런타임 환경 정리 실패</string>
-    <!-- Confirm installation related strings -->
     <string name="confirm_installation">설치 확인</string>
     <string name="confirm_multiple_installation">설치 확인 (%d개 파일)</string>
     <string name="install_confirm">설치</string>
@@ -625,7 +578,6 @@
     <string name="author">제작자</string>
     <string name="description">설명</string>
     <string name="supported_devices">지원 기기</string>
-    <!-- SUS Map related strings -->
     <string name="susfs_tab_sus_maps">SUS Map</string>
     <string name="susfs_sus_map_label">라이브러리 경로</string>
     <string name="susfs_add_sus_map">SUS Map 추가</string>
@@ -641,7 +593,6 @@
     <string name="sus_maps_description_text">메모리 매핑의 실제 파일 경로를 /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap]에서 숨깁니다. 참고: 이 기능은 익명 메모리 매핑을 숨기거나 삽입된 라이브러리 자체로 인한 인라인 Hook 또는 PLT Hook을 숨길 수 없습니다.</string>
     <string name="sus_maps_warning">중요 공지: 인젝션 감지 메커니즘이 잘 구현된 앱의 경우, 이 기능이 감지를 효과적으로 우회하지 못할 수 있습니다.</string>
     <string name="sus_maps_debug_info">먼저 ps -enf를 사용하여 대상 앱의 PID 및 UID를 찾은 다음 /proc/&lt;pid&gt;/maps의 관련 경로를 확인하고, 기기 번호를 /proc/1/mountinfo와 비교하여 일치하는지 확인하세요. 기기 번호가 일치해야 맵 숨기기 기능이 제대로 작동할 수 있습니다.</string>
-    <!-- Log viewer -->
     <string name="log_viewer_title">로그 뷰어</string>
     <string name="log_viewer_back">뒤로 가기</string>
     <string name="log_viewer_search">검색</string>

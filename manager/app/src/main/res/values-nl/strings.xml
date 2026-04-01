@@ -114,57 +114,8 @@
     <string name="selected_lkm">Geselecteerde LKM: %s</string>
     <string name="save_log">Logboeken Opslaan</string>
     <string name="log_saved">Logs opgeslagen</string>
-    <!-- Module related -->
-    <!-- Restore related -->
-    <!-- Backup related -->
-    <!-- Restore related messages -->
-    <!-- Command related -->
-    <!-- Allowlist related -->
     <string name="settings_sucompat">su binary omleiden</string>
     <string name="settings_sucompat_summary">Stelt apps met Superuser-toestemming in App Profiel in staat om een superuser-shell te verkrijgen door /system/bin/su uit te voeren; alleen effectief voor nieuwe processen.</string>
     <string name="settings_kernel_umount">Kernel ontkoppelen</string>
     <string name="settings_kernel_umount_summary">Kernel-niveau ontkoppelgedrag beheerd door KernelSU</string>
-    <!-- Kernel flash progress related -->
-    <!-- Flash status related strings -->
-    <!-- Slot selection related strings -->
-    <!-- Error messages -->
-    <!-- LKM/GKI install -->
-    <!-- String resources used in superuser -->
-    <!-- KPM display settings -->
-    <!-- WebUI settings -->
-    <!-- DPI setting related strings -->
-    <!-- Language settings related strings -->
-    <!-- Flash related -->
-    <!-- Categories related strings -->
-    <!-- Sort related strings -->
-    <!-- State related strings -->
-    <!-- Tag related strings -->
-    <!-- BottomSheet related -->
-    <!-- SuSFS configuration -->
-    <!-- SuSFS reset confirmation -->
-    <!-- SuSFS toast Messages -->
-    <!-- SuSFS settings Item -->
-    <!-- Autostart related strings -->
-    <!-- SuSFS tab titles -->
-    <!-- SuSFS path management -->
-    <!-- SuSFS reset categories -->
-    <!-- SuSFS path settings -->
-    <!-- SuSFS enabled features -->
-    <!-- Feature labels -->
-    <!-- Configurable states -->
-    <!-- Settings related strings -->
-    <!-- SuSFS autostart related strings -->
-    <!-- SuSFS Kstat related strings -->
-    <!-- SuSFS mount hiding control related strings -->
-    <!-- Backup and restore related strings -->
-    <!-- Loop path function related strings -->
-    <!-- Loop path function description -->
-    <!-- KPM patching related strings -->
-    <!-- KPM workflow related -->
-    <!-- KPM error messages -->
-    <!-- KPM option radio group strings -->
-    <!-- UID Scanner Settings -->
-    <!-- Confirm installation related strings -->
-    <!-- SUS Map related strings -->
-    <!-- Log viewer -->
 </resources>

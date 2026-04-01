@@ -122,23 +122,17 @@
     <string name="selected_lkm">LKM selecionado: %s</string>
     <string name="save_log">Salvar Registros</string>
     <string name="log_saved">Registros salvos</string>
-    <!-- Module related -->
     <string name="module_install_confirm">¿confirmar la instalación del módulo %1$s?</string>
     <string name="unknown_module">módulo desconocido</string>
-    <!-- Restore related -->
     <string name="restore_confirm_title">Confirmar Restauração de Módulo</string>
     <string name="restore_confirm_message">Esta operação irá sobrescrever todos os módulos existentes. Continuar?</string>
     <string name="confirm">Confirmação</string>
     <string name="cancel">Cancelar</string>
-    <!-- Backup related -->
-    <!-- Restore related messages -->
     <string name="restore_success">Módulos restaurados com sucesso, reinicialização necessária</string>
     <string name="restore_failed">Falha na restauração: %1$s</string>
     <string name="restart_now">Reiniciar agora</string>
     <string name="unknown_error">Erro desconhecido</string>
-    <!-- Command related -->
     <string name="command_execution_failed">A execução do comando falhou: %1$s</string>
-    <!-- Allowlist related -->
     <string name="allowlist_backup_success">Backup concluído</string>
     <string name="allowlist_backup_failed">Falha no backup permitido: %1$s</string>
     <string name="allowlist_restore_confirm_title">Confirmar Restauração de Lista</string>
@@ -222,9 +216,7 @@
     <string name="confirm_uninstall_content">O seguinte KPM será desinstalado: %s</string>
     <string name="image_editor_hint">Use dois dedos para ampliar a imagem e um dedo para arrastá-la para ajustar a posição</string>
     <string name="reprovision">Restituição</string>
-    <!-- Kernel flash progress related -->
     <string name="horizon_flash_complete">Flash concluído</string>
-    <!-- Flash status related strings -->
     <string name="horizon_preparing">Preparando…</string>
     <string name="horizon_cleaning_files">limpando arquivos…</string>
     <string name="horizon_copying_files">Copiando arquivo…</string>
@@ -232,7 +224,6 @@
     <string name="horizon_patching_script">Atualizando o script flash…</string>
     <string name="horizon_flashing">Flasheando kernel…</string>
     <string name="horizon_flash_complete_status">Flash completo</string>
-    <!-- Slot selection related strings -->
     <string name="select_slot_title">Selecionar Slot em Flash</string>
     <string name="select_slot_description">Por favor, selecione o slot de destino para flashear a inicialização</string>
     <string name="slot_a">Slot B</string>
@@ -242,11 +233,9 @@
     <string name="horizon_setting_target_slot">Configurando o slot especificado</string>
     <string name="horizon_restoring_original_slot">Restaurar Slot Padrão</string>
     <string name="current_slot">Slot padrão do sistema atual：%1$s </string>
-    <!-- Error messages -->
     <string name="horizon_copy_failed">Falha ao copiar</string>
     <string name="horizon_unknown_error">Você parece estar convertendo de um formato com degradação para&#10;&#10;um sem perdas. Esteja ciente que a perda de qualidade não pode ser desfeita,&#10;&#10;então este processo não melhorará a qualidade do áudio e provavelmente&#10;&#10;aumentará o tamanho do arquivo. Continuar assim mesmo?</string>
     <string name="flash_failed_message">Flash falhou</string>
-    <!-- LKM/GKI install -->
     <string name="Lkm_install_methods">LKM reparo/instalação</string>
     <string name="GKI_install_methods">Flasheando kernel</string>
     <string name="kernel_version_log">Kernel</string>
@@ -254,7 +243,6 @@
     <string name="configuration">Configurar</string>
     <string name="app_settings">Configurações Do Aplicativo</string>
     <string name="tools">Ferramentas</string>
-    <!-- String resources used in superuser -->
     <string name="no_apps_found">Aplicativo não encontrado</string>
     <string name="selinux_enabled_toast">SELinux habilitado</string>
     <string name="selinux_disabled_toast">SELinux Desativado</string>
@@ -267,11 +255,8 @@
     <string name="icon_switch_title">Ícone alternativo</string>
     <string name="icon_switch_summary">Alterar o ícone do launcher para o ícone do KernelSU.</string>
     <string name="icon_switched">Ícone alterado</string>
-    <!-- KPM display settings -->
     <string name="show_kpm_info">Exibir função KPM</string>
     <string name="show_kpm_info_summary">Oculta as informações e funções do KPM na barra inicial e inferior</string>
-    <!-- WebUI settings -->
-    <!-- DPI setting related strings -->
     <string name="app_dpi_title">DPI aplicado</string>
     <string name="app_dpi_summary">Ajustar a densidade de exibição da tela apenas para o aplicativo atual</string>
     <string name="dpi_size_small">Pequeno </string>
@@ -282,19 +267,13 @@
     <string name="dpi_apply_settings">Aplicando configurações de DPI</string>
     <string name="dpi_confirm_title">Confirmar alteração de DPI</string>
     <string name="dpi_confirm_message">Tem certeza que deseja alterar o DPI do aplicativo do %1$d para %2$d?</string>
-    <!-- Language settings related strings -->
     <string name="settings_language">Língua do aplicativo</string>
     <string name="language_system_default">Padrão do sistema</string>
-    <!-- Flash related -->
     <string name="error_code">Código de erro</string>
     <string name="check_log">Por favor, verifique o log</string>
     <string name="installing_module">Módulo sendo instalado %1$d/%2$d</string>
     <string name="module_failed_count">%d Falha ao instalar um novo módulo</string>
     <string name="module_download_error">Falha ao baixar módulo</string>
-    <!-- Categories related strings -->
-    <!-- Sort related strings -->
-    <!-- State related strings -->
-    <!-- Tag related strings -->
     <string name="scroll_to_top">Mais votados</string>
     <string name="scroll_to_bottom">Parte Inferior</string>
     <string name="selected">Selecionado</string>
@@ -303,32 +282,4 @@
     <string name="settings_sucompat_summary">Permite que apps com permissão de Superutilizador no Perfil da App obtenham um shell de superutilizador executando /system/bin/su; eficaz apenas para novos processos.</string>
     <string name="settings_kernel_umount">Desmontar kernel</string>
     <string name="settings_kernel_umount_summary">Comportamento de desmontagem ao nível do kernel controlado pelo KernelSU</string>
-    <!-- BottomSheet related -->
-    <!-- SuSFS configuration -->
-    <!-- SuSFS reset confirmation -->
-    <!-- SuSFS toast Messages -->
-    <!-- SuSFS settings Item -->
-    <!-- Autostart related strings -->
-    <!-- SuSFS tab titles -->
-    <!-- SuSFS path management -->
-    <!-- SuSFS reset categories -->
-    <!-- SuSFS path settings -->
-    <!-- SuSFS enabled features -->
-    <!-- Feature labels -->
-    <!-- Configurable states -->
-    <!-- Settings related strings -->
-    <!-- SuSFS autostart related strings -->
-    <!-- SuSFS Kstat related strings -->
-    <!-- SuSFS mount hiding control related strings -->
-    <!-- Backup and restore related strings -->
-    <!-- Loop path function related strings -->
-    <!-- Loop path function description -->
-    <!-- KPM patching related strings -->
-    <!-- KPM workflow related -->
-    <!-- KPM error messages -->
-    <!-- KPM option radio group strings -->
-    <!-- UID Scanner Settings -->
-    <!-- Confirm installation related strings -->
-    <!-- SUS Map related strings -->
-    <!-- Log viewer -->
 </resources>

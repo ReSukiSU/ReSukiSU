@@ -121,23 +121,17 @@
     <string name="selected_lkm">LKM seleccionado: %s</string>
     <string name="save_log">Guardar registros</string>
     <string name="log_saved">Registro guardado</string>
-    <!-- Module related -->
     <string name="module_install_confirm">¿confirmar la instalación del módulo %1$s?</string>
     <string name="unknown_module">módulo desconocido</string>
-    <!-- Restore related -->
     <string name="restore_confirm_title">Confirmar restauración del módulo</string>
     <string name="restore_confirm_message">Esta operación sobrescribirá todos los módulos existentes. ¿Continuar?</string>
     <string name="confirm">Confirmar</string>
     <string name="cancel">Cancelar</string>
-    <!-- Backup related -->
-    <!-- Restore related messages -->
     <string name="restore_success">Módulos restaurados con éxito, se requiere reiniciar</string>
     <string name="restore_failed">Restauración fallida: %1$s</string>
     <string name="restart_now">Reiniciar ahora</string>
     <string name="unknown_error">Error desconocido</string>
-    <!-- Command related -->
     <string name="command_execution_failed">Ejecución del comando fallida: %1$s</string>
-    <!-- Allowlist related -->
     <string name="allowlist_backup_success">Copia de seguridad correcta</string>
     <string name="allowlist_backup_failed">Copia de seguridad de lista fallida: %1$s</string>
     <string name="allowlist_restore_confirm_title">Confirmar restauración de lista de permisos</string>
@@ -220,9 +214,7 @@
     <string name="confirm_uninstall_content">El siguiente KPM será desinstalado: %s</string>
     <string name="image_editor_hint">Usa dos dedos para acercar la imagen, y un dedo para arrastrarla para ajustar la posición</string>
     <string name="reprovision">Reaprovisionamiento</string>
-    <!-- Kernel flash progress related -->
     <string name="horizon_flash_complete">Flashear completo</string>
-    <!-- Flash status related strings -->
     <string name="horizon_preparing">Preparando…</string>
     <string name="horizon_cleaning_files">Limpiando archivos…</string>
     <string name="horizon_copying_files">Copiando archivos…</string>
@@ -230,7 +222,6 @@
     <string name="horizon_patching_script">Parcheando script flash…</string>
     <string name="horizon_flashing">Flashear kernel…</string>
     <string name="horizon_flash_complete_status">Flash completado</string>
-    <!-- Slot selection related strings -->
     <string name="select_slot_title">Seleccionar Ranura Flash</string>
     <string name="select_slot_description">Por favor, seleccione la ranura de destino para flashear el arranque</string>
     <string name="selected_slot">Slot selectionada</string>
@@ -238,11 +229,9 @@
     <string name="horizon_setting_target_slot">Establecer la ranura especificada</string>
     <string name="horizon_restoring_original_slot">Restaurar Ranura Predeterminada</string>
     <string name="current_slot">Ranura predeterminada del sistema actual：%1$s </string>
-    <!-- Error messages -->
     <string name="horizon_copy_failed">Hubo un fallo al copiar</string>
     <string name="horizon_unknown_error">Error desconocido</string>
     <string name="flash_failed_message">Flash falló</string>
-    <!-- LKM/GKI install -->
     <string name="Lkm_install_methods">Reparación/instalación de LKM</string>
     <string name="GKI_install_methods">Flashear kernel</string>
     <string name="kernel_version_log">Versión del kernel</string>
@@ -250,7 +239,6 @@
     <string name="configuration">Configurar</string>
     <string name="app_settings">Configuración de la Aplicación</string>
     <string name="tools">Herramientas</string>
-    <!-- String resources used in superuser -->
     <string name="no_apps_found">No se ha encontrado la solicitud</string>
     <string name="selinux_enabled_toast">SELinux habilitado</string>
     <string name="selinux_disabled_toast">SELinux desactivado</string>
@@ -263,11 +251,8 @@
     <string name="icon_switch_title">Icono alternativo</string>
     <string name="icon_switch_summary">Cambiar el icono del lanzador al icono de KernelSU.</string>
     <string name="icon_switched">Icono cambiado</string>
-    <!-- KPM display settings -->
     <string name="show_kpm_info">Mostrar función KPM</string>
     <string name="show_kpm_info_summary">Oculta la información y función del KPM en la barra de inicio e inferior</string>
-    <!-- WebUI settings -->
-    <!-- DPI setting related strings -->
     <string name="app_dpi_title">DPI aplicado</string>
     <string name="app_dpi_summary">Ajustar la densidad de pantalla para la aplicación actual</string>
     <string name="dpi_size_small">Pequeño </string>
@@ -278,38 +263,4 @@
     <string name="dpi_apply_settings">Aplicando ajustes de DPI</string>
     <string name="dpi_confirm_title">Confirmar cambio DPI</string>
     <string name="dpi_confirm_message">¿Estás seguro de que quieres cambiar el DPI de la aplicación de %1$d a %2$d?</string>
-    <!-- Language settings related strings -->
-    <!-- Flash related -->
-    <!-- Categories related strings -->
-    <!-- Sort related strings -->
-    <!-- State related strings -->
-    <!-- Tag related strings -->
-    <!-- BottomSheet related -->
-    <!-- SuSFS configuration -->
-    <!-- SuSFS reset confirmation -->
-    <!-- SuSFS toast Messages -->
-    <!-- SuSFS settings Item -->
-    <!-- Autostart related strings -->
-    <!-- SuSFS tab titles -->
-    <!-- SuSFS path management -->
-    <!-- SuSFS reset categories -->
-    <!-- SuSFS path settings -->
-    <!-- SuSFS enabled features -->
-    <!-- Feature labels -->
-    <!-- Configurable states -->
-    <!-- Settings related strings -->
-    <!-- SuSFS autostart related strings -->
-    <!-- SuSFS Kstat related strings -->
-    <!-- SuSFS mount hiding control related strings -->
-    <!-- Backup and restore related strings -->
-    <!-- Loop path function related strings -->
-    <!-- Loop path function description -->
-    <!-- KPM patching related strings -->
-    <!-- KPM workflow related -->
-    <!-- KPM error messages -->
-    <!-- KPM option radio group strings -->
-    <!-- UID Scanner Settings -->
-    <!-- Confirm installation related strings -->
-    <!-- SUS Map related strings -->
-    <!-- Log viewer -->
 </resources>

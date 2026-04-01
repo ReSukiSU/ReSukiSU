@@ -115,57 +115,8 @@
     <string name="selected_lkm">Kiválasztott LKM: %s</string>
     <string name="save_log">Naplók mentése</string>
     <string name="log_saved">Mentett naplók</string>
-    <!-- Module related -->
-    <!-- Restore related -->
-    <!-- Backup related -->
-    <!-- Restore related messages -->
-    <!-- Command related -->
-    <!-- Allowlist related -->
     <string name="settings_sucompat">su bináris átirányítása</string>
     <string name="settings_sucompat_summary">Lehetővé teszi az App Profile-ban Superuser engedéllyel rendelkező alkalmazások számára, hogy superuser shell-t kapjanak a /system/bin/su végrehajtásával; csak új folyamatoknál hatékony.</string>
     <string name="settings_kernel_umount">Kernel leválasztása</string>
     <string name="settings_kernel_umount_summary">KernelSU által vezérelt kernel szintű leválasztási viselkedés</string>
-    <!-- Kernel flash progress related -->
-    <!-- Flash status related strings -->
-    <!-- Slot selection related strings -->
-    <!-- Error messages -->
-    <!-- LKM/GKI install -->
-    <!-- String resources used in superuser -->
-    <!-- KPM display settings -->
-    <!-- WebUI settings -->
-    <!-- DPI setting related strings -->
-    <!-- Language settings related strings -->
-    <!-- Flash related -->
-    <!-- Categories related strings -->
-    <!-- Sort related strings -->
-    <!-- State related strings -->
-    <!-- Tag related strings -->
-    <!-- BottomSheet related -->
-    <!-- SuSFS configuration -->
-    <!-- SuSFS reset confirmation -->
-    <!-- SuSFS toast Messages -->
-    <!-- SuSFS settings Item -->
-    <!-- Autostart related strings -->
-    <!-- SuSFS tab titles -->
-    <!-- SuSFS path management -->
-    <!-- SuSFS reset categories -->
-    <!-- SuSFS path settings -->
-    <!-- SuSFS enabled features -->
-    <!-- Feature labels -->
-    <!-- Configurable states -->
-    <!-- Settings related strings -->
-    <!-- SuSFS autostart related strings -->
-    <!-- SuSFS Kstat related strings -->
-    <!-- SuSFS mount hiding control related strings -->
-    <!-- Backup and restore related strings -->
-    <!-- Loop path function related strings -->
-    <!-- Loop path function description -->
-    <!-- KPM patching related strings -->
-    <!-- KPM workflow related -->
-    <!-- KPM error messages -->
-    <!-- KPM option radio group strings -->
-    <!-- UID Scanner Settings -->
-    <!-- Confirm installation related strings -->
-    <!-- SUS Map related strings -->
-    <!-- Log viewer -->
 </resources>
