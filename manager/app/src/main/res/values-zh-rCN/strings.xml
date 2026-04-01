@@ -82,6 +82,7 @@
     <string name="jailbreak_flash_warning_countdown">继续 (%1$d)</string>
     <string name="settings_auto_jailbreak">自动越狱</string>
     <string name="settings_auto_jailbreak_summary">开机检测到 Permissive SELinux 时自动使用 Magica 提权。需要授予本应用自启动权限。</string>
+    <string name="settings_adb_root_summary">以 root 权限运行 adbd 守护进程</string>
     <string name="reboot_to_apply">重启生效</string>
     <string name="module_magisk_conflict">因与 Magisk 有冲突，所有模块不可用！</string>
     <string name="home_learn_kernelsu">了解 KernelSU</string>

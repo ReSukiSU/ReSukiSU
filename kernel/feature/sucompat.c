@@ -36,6 +36,8 @@
 #include "policy/app_profile.h"
 #ifdef KSU_TP_HOOK
 #include "hook/syscall_hook.h"
+#else
+#include "feature/adb_root.h"
 #endif
 #include "sulog/event.h"
 
@@ -225,20 +227,24 @@ extern struct static_key_true ksud_execve_key;
 extern bool ksud_execve_key;
 #endif
 
-static inline void ksu_handle_execveat_init(const char *name)
+static inline void ksu_handle_execveat_init(const char *filename, void *envp)
 {
     if (current->pid != 1 && is_init(current_cred())) {
-        if (unlikely(strcmp(name, KSUD_PATH) == 0)) {
+        if (unlikely(strcmp(filename, KSUD_PATH) == 0)) {
             pr_info("hook_manager: escape to root for init executing ksud: %d\n", current->pid);
             escape_to_root_for_init();
         }
 #ifdef CONFIG_KSU_SUSFS
-        else if (likely(strstr(name, "/app_process") == NULL && strstr(name, "/adbd") == NULL) &&
+        else if (likely(strstr(filename, "/app_process") == NULL && strstr(filename, "/adbd") == NULL) &&
                  !susfs_is_current_proc_umounted()) {
-            pr_info("susfs: mark no sucompat checks for pid: '%d', exec: '%s'\n", current->pid, name);
+            pr_info("susfs: mark no sucompat checks for pid: '%d', exec: '%s'\n", current->pid, filename);
             susfs_set_current_proc_umounted();
         }
 #endif
+        int ret = ksu_adb_root_handle_execve_manual(filename, (struct user_arg_ptr *)envp);
+        if (ret) {
+            pr_err("adb root failed: %d\n", (int)ret);
+        }
     }
 }
 
@@ -246,7 +252,7 @@ int ksu_handle_execve(int *fd, const char *filename, void *argv, void *envp, int
 {
     struct ksu_sulog_pending_event *pending_root_execve = NULL;
 
-    ksu_handle_execveat_init(filename);
+    ksu_handle_execveat_init(filename, envp);
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 3, 0) || defined(KSU_HAS_MODERN_STATIC_KEY_INTERFACE)
     if (static_branch_unlikely(&ksud_execve_key)) {

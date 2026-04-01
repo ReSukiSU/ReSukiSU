@@ -188,7 +188,7 @@ fn link_ksud_to_bin() -> Result<()> {
     Ok(())
 }
 
-pub fn install() -> Result<()> {
+pub fn install(libadbroot: Option<PathBuf>) -> Result<()> {
     ensure_dir_exists(defs::ADB_DIR)?;
     let _ = std::fs::remove_file(defs::DAEMON_PATH);
     std::fs::copy(
@@ -201,6 +201,11 @@ pub fn install() -> Result<()> {
 
     link_ksud_to_bin()?;
 
+    if let Some(libadbroot) = libadbroot {
+        ensure_dir_exists(defs::LIBRARY_DIR)?;
+        let _ = std::fs::remove_file(defs::LIBADBROOT_PATH);
+        let _ = std::fs::copy(libadbroot, defs::LIBADBROOT_PATH);
+    }
     Ok(())
 }
 

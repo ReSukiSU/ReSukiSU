@@ -81,7 +81,10 @@ enum Commands {
     SoftReboot,
 
     /// Install KernelSU userspace component to system
-    Install,
+    Install {
+        #[arg(long, default_value = None)]
+        libadbroot: Option<PathBuf>,
+    },
 
     /// Unload KernelSU kernel module (LKM Only)
     Unload,
@@ -703,7 +706,7 @@ pub fn run() -> Result<()> {
                 }
             }
         }
-        Commands::Install => utils::install(),
+        Commands::Install { libadbroot } => utils::install(libadbroot),
         Commands::Unload => crate::android::unload::unload(),
         Commands::Uninstall { package_name } => utils::uninstall(&package_name),
         Commands::Sepolicy { command } => match command {

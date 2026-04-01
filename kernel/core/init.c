@@ -25,7 +25,7 @@
 #include "ksu.h"
 #include "infra/file_wrapper.h"
 #include "selinux/selinux.h"
-
+#include "feature/adb_root.h"
 #include "feature/dynamic_manager.h"
 #include "feature/sucompat.h"
 #include "hook/setuid_hook.h"
@@ -156,6 +156,7 @@ int __init kernelsu_init(void)
 
     ksu_feature_init();
     ksu_sulog_init();
+    ksu_adb_root_init();
 
     ksu_supercalls_init();
 
@@ -231,6 +232,7 @@ void __exit kernelsu_exit(void)
 
     ksu_allowlist_exit();
 
+    ksu_adb_root_exit();
     ksu_sulog_exit();
     ksu_feature_exit();
 
