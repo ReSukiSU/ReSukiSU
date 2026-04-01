@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.automirrored.rounded.Article
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.Fence
 import androidx.compose.material.icons.filled.FolderOff
 import androidx.compose.material.icons.filled.Info
@@ -114,6 +116,7 @@ import com.resukisu.resukisu.ui.util.execKsud
 import com.resukisu.resukisu.ui.util.getBugreportFile
 import com.resukisu.resukisu.ui.util.getFeaturePersistValue
 import com.resukisu.resukisu.ui.util.getFeatureStatus
+import com.topjohnwu.superuser.ShellUtils
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import kotlinx.coroutines.Dispatchers
@@ -137,7 +140,6 @@ fun SettingsPage(bottomPadding: Dp) {
     val snackBarHost = LocalSnackbarHost.current
     val context = LocalContext.current
     val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-    var isSuLogEnabled by remember { mutableStateOf(Natives.isSuLogEnabled()) }
 
     Scaffold(
         topBar = {
@@ -340,16 +342,52 @@ fun SettingsPage(bottomPadding: Dp) {
                                 )
                             }
 
+                            item(
+                                visible = Build.VERSION.SDK_INT > Build.VERSION_CODES.Q
+                            ) {
+                                var isAdbRootEnabled by remember { mutableStateOf(false) }
 
-                            item {
-                                var savedUmountStatus by rememberSaveable { mutableStateOf("") }
-                                val umountStatus by produceState(initialValue = savedUmountStatus) {
+                                var savedAdbRootStatus by rememberSaveable { mutableStateOf("") }
+                                val adbRootStatus by produceState(initialValue = savedAdbRootStatus) {
                                     value = withContext(Dispatchers.IO) {
-                                        savedUmountStatus = getFeatureStatus("sulog")
-                                        return@withContext savedUmountStatus
+                                        savedAdbRootStatus = getFeatureStatus("adb_root")
+                                        isAdbRootEnabled = getFeaturePersistValue("adb_root") == 1L
+                                        return@withContext savedAdbRootStatus
                                     }
                                 }
-                                val umountSummary = when (umountStatus) {
+                                val adbRootSummary = when (adbRootStatus) {
+                                    "unsupported" -> stringResource(id = R.string.feature_status_unsupported_summary)
+                                    "managed" -> stringResource(id = R.string.feature_status_managed_summary)
+                                    else -> stringResource(id = R.string.settings_adb_root_summary)
+                                }
+
+                                SettingsSwitchWidget(
+                                    icon = Icons.Filled.DeveloperMode,
+                                    title = stringResource(id = R.string.settings_adb_root),
+                                    description = adbRootSummary,
+                                    checked = isAdbRootEnabled,
+                                    onCheckedChange = { checked ->
+                                        if (execKsud("feature set adb_root ${if (checked) 1 else 0}", true)) {
+                                            ShellUtils.fastCmd("setprop ctl.restart adbd")
+                                            execKsud("feature save", true)
+                                        }
+                                        isAdbRootEnabled = checked
+                                    }
+                                )
+                            }
+
+
+                            item {
+                                var isSuLogEnabled by remember { mutableStateOf(Natives.isSuLogEnabled()) }
+
+                                var savedSulogStatus by rememberSaveable { mutableStateOf("") }
+                                val sulogStatus by produceState(initialValue = savedSulogStatus) {
+                                    value = withContext(Dispatchers.IO) {
+                                        savedSulogStatus = getFeatureStatus("sulog")
+                                        return@withContext savedSulogStatus
+                                    }
+                                }
+                                val sulogSummary = when (sulogStatus) {
                                     "unsupported" -> stringResource(id = R.string.feature_status_unsupported_summary)
                                     "managed" -> stringResource(id = R.string.feature_status_managed_summary)
                                     else -> stringResource(id = R.string.settings_sulog_summary)
@@ -357,8 +395,8 @@ fun SettingsPage(bottomPadding: Dp) {
                                 SettingsSwitchWidget(
                                     icon = Icons.AutoMirrored.Rounded.Article,
                                     title = stringResource(id = R.string.settings_sulog),
-                                    description = umountSummary,
-                                    enabled = umountStatus == "supported",
+                                    description = sulogSummary,
+                                    enabled = sulogStatus == "supported",
                                     checked = isSuLogEnabled,
                                     onCheckedChange = { checked ->
                                         if (Natives.setSuLogEnabled(checked)) {

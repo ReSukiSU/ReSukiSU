@@ -5,6 +5,7 @@ kernelsu-objs += policy/feature.o
 kernelsu-objs += feature/sucompat.o
 kernelsu-objs += feature/kernel_umount.o
 kernelsu-objs += feature/sulog.o
+kernelsu-objs += feature/adb_root.o
 kernelsu-objs += hook/setuid_hook.o
 
 ifndef CONFIG_KSU_DISABLE_MANAGER
@@ -95,9 +96,23 @@ $(info -- $(REPO_NAME) version name: $(KSU_VERSION_FULL))
 ccflags-y += -DKSU_VERSION=$(KSU_VERSION)
 ccflags-y += -DKSU_VERSION_FULL=\"$(KSU_VERSION_FULL)\"
 
+ifdef KBUILD_EXTMOD
+ifeq ($(CONFIG_KSU_DISABLE_MANAGER),y)
+ccflags-y += -DCONFIG_KSU_DISABLE_MANAGER
+endif
+ifeq ($(CONFIG_KSU_DISABLE_POLICY),y)
+ccflags-y += -DCONFIG_KSU_DISABLE_POLICY
+endif
+ifeq ($(CONFIG_KSU_DEBUG),y)
+ccflags-y += -DCONFIG_KSU_DEBUG
+endif
+ifeq ($(CONFIG_KSU_MULTI_MANAGER_SUPPORT), y)
+ccflags-y += -DCONFIG_KSU_MULTI_MANAGER_SUPPORT
+endif
+endif
+
 ifeq ($(CONFIG_KSU_MULTI_MANAGER_SUPPORT), y)
 $(info -- Supported Unofficial Manager: MKSU, RKSU, KOWSU, SukiSU-Ultra, ReSukiSU )
-ccflags-y += -DCONFIG_KSU_MULTI_MANAGER_SUPPORT
 endif
 
 ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)

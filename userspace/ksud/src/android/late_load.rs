@@ -73,7 +73,7 @@ pub fn run(kmi: Option<String>, package_name: &String) -> Result<()> {
         warn!("clear temp configs failed: {e}");
     }
 
-    utils::install().context("Failed to install ksud")?;
+    utils::install(None).context("Failed to install ksud")?;
 
     // 5. Handle module updates
     if let Err(e) = handle_updated_modules() {

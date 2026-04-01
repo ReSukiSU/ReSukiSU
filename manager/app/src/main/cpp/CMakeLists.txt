@@ -21,3 +21,9 @@ target_link_libraries(
         kernelsu
         ${log-lib}
 )
+
+find_package(cxx REQUIRED CONFIG)
+link_libraries(cxx::cxx)
+
+add_library(adbroot SHARED adbroot.cc)
+target_link_libraries(adbroot ${log-lib})
