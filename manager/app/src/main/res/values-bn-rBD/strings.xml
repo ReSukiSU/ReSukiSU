@@ -44,57 +44,8 @@
     <string name="settings_check_update">আপডেটের বিজ্ঞপ্তি</string>
     <string name="settings_check_update_summary">মডিউল এবং ম্যানেজার আপডেটের জন্য স্বয়ংক্রিয়ভাবে পরীক্ষা করুন</string>
     <string name="save_log">লগ সংরক্ষণ করুন</string>
-    <!-- Module related -->
-    <!-- Restore related -->
-    <!-- Backup related -->
-    <!-- Restore related messages -->
-    <!-- Command related -->
-    <!-- Allowlist related -->
     <string name="settings_sucompat">su বাইনারি পুনর্নির্দেশ করুন</string>
     <string name="settings_sucompat_summary">অ্যাপ প্রোফাইলে সুপারইউজার অনুমতি সহ অ্যাপের জন্য /system/bin/su কে ksud-এ পুনর্নির্দেশ করুন; শুধুমাত্র নতুন প্রক্রিয়ার জন্য কার্যকর।</string>
     <string name="settings_kernel_umount">কার্নেল আনমাউন্ট</string>
     <string name="settings_kernel_umount_summary">KernelSU দ্বারা নিয়ন্ত্রিত কার্নেল-লেভেল আনমাউন্ট আচরণ</string>
-    <!-- Kernel Flash Progress Related -->
-    <!-- Flash Status Related -->
-    <!-- Slot selection related strings -->
-    <!-- Error Messages -->
-    <!-- lkm/gki install -->
-    <!--  String resources used in SuperUser -->
-    <!-- KPM display settings -->
-    <!-- Webui settings -->
-    <!-- DPI setting related strings -->
-    <!-- Language settings related strings -->
-    <!-- Flash related -->
-    <!-- 分类相关 -->
-    <!-- 排序相关 -->
-    <!-- 状态相关 -->
-    <!-- 标签相关 -->
-    <!-- BottomSheet相关 -->
-    <!-- SuSFS Configuration -->
-    <!-- SuSFS Reset Confirmation -->
-    <!-- SuSFS Toast Messages -->
-    <!-- SuSFS Settings Item -->
-    <!-- 开机自启动相关 -->
-    <!-- SuSFS Tab Titles -->
-    <!-- SuSFS Path Management -->
-    <!-- SuSFS Reset Categories -->
-    <!-- SuSFS Path Settings -->
-    <!-- SuSFS Enabled Features -->
-    <!-- Feature Labels -->
-    <!-- 可切换状态 -->
-    <!-- Settings related strings -->
-    <!-- SuSFS 自启动相关字符串 -->
-    <!-- SuSFS Kstat相关字符串 -->
-    <!-- SuSFS Mount Hiding Control Related Strings -->
-    <!-- 备份和还原相关字符串 -->
-    <!-- 循环路径相关 -->
-    <!-- 循环路径功能描述 -->
-    <!-- KPM patching related strings -->
-    <!-- KPM workflow related -->
-    <!-- KPM error messages -->
-    <!-- KPM option radio group strings -->
-    <!-- UID Scanner Settings -->
-    <!-- 确认安装相关字符串 -->
-    <!-- SUS Map related strings -->
-    <!-- Log Viewer -->
 </resources>

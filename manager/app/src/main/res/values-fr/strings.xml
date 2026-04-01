@@ -118,23 +118,17 @@
     <string name="selected_lkm">LKM sélectionné : %s</string>
     <string name="save_log">Enregistrer les journaux</string>
     <string name="log_saved">Journaux enregistrés</string>
-    <!-- Module related -->
     <string name="module_install_confirm">confirmer l\'installation du module %1$s?</string>
     <string name="unknown_module">module inconnu</string>
-    <!-- Restore related -->
     <string name="restore_confirm_title">Confirmer la restauration</string>
     <string name="restore_confirm_message">Cette opération va écraser les modules existants. Continuer ?</string>
     <string name="confirm">Confirmer</string>
     <string name="cancel">Annuler</string>
-    <!-- Backup related -->
-    <!-- Restore related messages -->
     <string name="restore_success">Succès de la sauvegarde, redémarrer</string>
     <string name="restore_failed">Échec de la restauration : %1$s</string>
     <string name="restart_now">Redémarrer</string>
     <string name="unknown_error">Erreur inconnue</string>
-    <!-- Command related -->
     <string name="command_execution_failed">L\'exécution de la commande a échoué : %1$s</string>
-    <!-- Allowlist related -->
     <string name="allowlist_backup_success">Sauvegarde de la liste blanche réussie</string>
     <string name="allowlist_backup_failed">La sauvegarde de la liste d\'autorisations a échoué : %1$s</string>
     <string name="allowlist_restore_confirm_title">Confirmer la restauration de la liste blanche</string>
@@ -217,9 +211,7 @@
     <string name="confirm_uninstall_content">Le KPM suivant sera désinstallé : %s</string>
     <string name="image_editor_hint">Utilisez deux doigts pour zoomer l\'image, et un doigt pour le faire glisser pour ajuster la position</string>
     <string name="reprovision">Remise à disposition</string>
-    <!-- Kernel Flash Progress Related -->
     <string name="horizon_flash_complete">Flash terminé</string>
-    <!-- Flash Status Related -->
     <string name="horizon_preparing">Préparation de…</string>
     <string name="horizon_cleaning_files">Nettoyage des fichiers…</string>
     <string name="horizon_copying_files">Copie des fichiers…</string>
@@ -227,19 +219,15 @@
     <string name="horizon_patching_script">Mise à jour du script…</string>
     <string name="horizon_flashing">Flash du noyau…</string>
     <string name="horizon_flash_complete_status">Flash complété</string>
-    <!-- Slot selection related strings -->
     <string name="select_slot_title">Sélectionnez l\'emplacement de Flash</string>
     <string name="select_slot_description">Veuillez sélectionner l\'emplacement cible pour le démarrage du flash</string>
     <string name="selected_slot">LKM sélectionné : %1$s</string>
     <string name="horizon_getting_original_slot">Obtention de l\'emplacement original</string>
     <string name="horizon_setting_target_slot">Définition de l\'emplacement spécifié</string>
     <string name="horizon_restoring_original_slot">Restaurer l\'emplacement par défaut</string>
-    <string name="current_slot">Emplacement actuel</string>
-    <!-- Error Messages -->
     <string name="horizon_copy_failed">Copie échouée</string>
     <string name="horizon_unknown_error">Erreur inconnue</string>
     <string name="flash_failed_message">Échec du flash</string>
-    <!-- lkm/gki install -->
     <string name="Lkm_install_methods">Réparation/installation LKM</string>
     <string name="GKI_install_methods">Flash du noyau…</string>
     <string name="kernel_version_log">Version du noyau：%1$s</string>
@@ -247,7 +235,6 @@
     <string name="configuration">Configurer</string>
     <string name="app_settings">Paramètres de l\'application</string>
     <string name="tools">Outils</string>
-    <!--  String resources used in SuperUser -->
     <string name="no_apps_found">Application introuvable</string>
     <string name="selinux_enabled_toast">SELinux activé</string>
     <string name="selinux_disabled_toast">SELinux désactivé</string>
@@ -260,11 +247,8 @@
     <string name="icon_switch_title">Icône alternative</string>
     <string name="icon_switch_summary">Changer l\'icône du lanceur en icône de KernelSU.</string>
     <string name="icon_switched">Icône changée</string>
-    <!-- KPM display settings -->
     <string name="show_kpm_info">Afficher la fonction KPM</string>
     <string name="show_kpm_info_summary">Masque les informations et fonctions KPM dans la barre d\'accueil et en bas</string>
-    <!-- Webui settings -->
-    <!-- DPI setting related strings -->
     <string name="app_dpi_title">DPI appliqué</string>
     <string name="app_dpi_summary">Ajuster la densité d\'affichage de l\'écran pour l\'application actuelle uniquement</string>
     <string name="dpi_size_small">Petit </string>
@@ -275,55 +259,16 @@
     <string name="dpi_apply_settings">Application des paramètres DPI</string>
     <string name="dpi_confirm_title">Confirmer le changement de DPI</string>
     <string name="dpi_confirm_message">Êtes-vous sûr de vouloir changer le DPI de l\'application de %1$d à %2$d?</string>
-    <!-- Language settings related strings -->
     <string name="settings_language">Langue de l\'application</string>
     <string name="language_system_default">Suivre le paramètre système</string>
-    <!-- Flash related -->
     <string name="error_code">code d\'erreur</string>
     <string name="check_log">Veuillez vérifier le journal</string>
     <string name="installing_module">Module en cours d\'installation %1$d/%2$d</string>
     <string name="module_failed_count">%d a échoué à installer un nouveau module</string>
     <string name="module_download_error">Le téléchargement du modèle a échoué</string>
     <string name="kernel_flashing">Clignotement du noyau</string>
-    <!-- 分类相关 -->
-    <!-- 排序相关 -->
-    <string name="sort_install_time_new">Installation time (new)</string>
-    <string name="sort_install_time_old">Installation time (old)</string>
-    <string name="sort_size_desc">descending order of size</string>
-    <string name="sort_size_asc">ascending order of size</string>
-    <string name="sort_usage_freq">frequency of use</string>
-    <!-- 状态相关 -->
-    <!-- 标签相关 -->
     <string name="scroll_to_top">En haut</string>
     <string name="scroll_to_bottom">En Bas</string>
     <string name="selected">Sélectionné</string>
     <string name="select">option</string>
-    <!-- BottomSheet相关 -->
-    <!-- SuSFS Configuration -->
-    <!-- SuSFS Reset Confirmation -->
-    <!-- SuSFS Toast Messages -->
-    <!-- SuSFS Settings Item -->
-    <!-- 开机自启动相关 -->
-    <!-- SuSFS Tab Titles -->
-    <!-- SuSFS Path Management -->
-    <!-- SuSFS Reset Categories -->
-    <!-- SuSFS Path Settings -->
-    <!-- SuSFS Enabled Features -->
-    <!-- Feature Labels -->
-    <!-- 可切换状态 -->
-    <!-- Settings related strings -->
-    <!-- SuSFS 自启动相关字符串 -->
-    <!-- SuSFS Kstat相关字符串 -->
-    <!-- SuSFS Mount Hiding Control Related Strings -->
-    <!-- 备份和还原相关字符串 -->
-    <!-- 循环路径相关 -->
-    <!-- 循环路径功能描述 -->
-    <!-- KPM patching related strings -->
-    <!-- KPM workflow related -->
-    <!-- KPM error messages -->
-    <!-- KPM option radio group strings -->
-    <!-- UID Scanner Settings -->
-    <!-- 确认安装相关字符串 -->
-    <!-- SUS Map related strings -->
-    <!-- Log Viewer -->
 </resources>

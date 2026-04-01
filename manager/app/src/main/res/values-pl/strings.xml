@@ -121,80 +121,8 @@
     <string name="selected_lkm">Wybrano LKM: %s</string>
     <string name="save_log">Zapisz dzienniki</string>
     <string name="log_saved">Dzienniki zapisane</string>
-    <!-- Module related -->
-    <string name="module_install_confirm">confirm install module %1$s？</string>
-    <string name="unknown_module">unknown module</string>
-    <!-- Restore related -->
-    <!-- Backup related -->
-    <!-- Restore related messages -->
-    <!-- Command related -->
-    <string name="command_execution_failed">Command execution failed: %1$s</string>
-    <!-- Allowlist related -->
-    <string name="allowlist_backup_success">Allowlist backup successful</string>
-    <string name="allowlist_backup_failed">Allowlist backup failed: %1$s</string>
     <string name="settings_sucompat">Przekieruj binarkę su</string>
     <string name="settings_sucompat_summary">Pozwala aplikacjom z uprawnieniami Superużytkownika w profilu aplikacji uzyskać shell superużytkownika przez wykonanie /system/bin/su; skuteczne tylko dla nowych procesów.</string>
     <string name="settings_kernel_umount">Odmontowanie jądra</string>
     <string name="settings_kernel_umount_summary">Zachowanie odmontowania na poziomie jądra kontrolowane przez KernelSU</string>
-    <string name="hide_other_info_summary">Hides information about the number of super users, modules and KPM modules on the home page</string>
-    <string name="kpm_empty">No installed kernel modules at this time</string>
-    <string name="kpm_install_success">Load of kpm module successful</string>
-    <string name="kpm_install_failed">Load of kpm module failed</string>
-    <string name="invalid_file_type">Incorrect file type! Please select .kpm file.</string>
-    <!-- Kernel Flash Progress Related -->
-    <!-- Flash Status Related -->
-    <!-- Slot selection related strings -->
-    <string name="current_slot">Current Slot：%1$s </string>
-    <!-- Error Messages -->
-    <!-- lkm/gki install -->
-    <!--  String resources used in SuperUser -->
-    <string name="icon_switch_summary">Change the launcher icon to KernelSU\'s icon.</string>
-    <!-- KPM display settings -->
-    <string name="show_kpm_info">Display KPM Function</string>
-    <string name="show_kpm_info_summary">Display KPM information and Function in home and bottom bar (Need to reopen the app)</string>
-    <!-- Webui settings -->
-    <!-- DPI setting related strings -->
-    <string name="dpi_size_extra_large">oversize</string>
-    <string name="dpi_size_custom">customizable</string>
-    <string name="dpi_apply_settings">Applying DPI settings</string>
-    <!-- Language settings related strings -->
-    <!-- Flash related -->
-    <!-- 分类相关 -->
-    <!-- 排序相关 -->
-    <string name="sort_install_time_new">Installation time (new)</string>
-    <string name="sort_install_time_old">Installation time (old)</string>
-    <string name="sort_size_desc">descending order of size</string>
-    <string name="sort_size_asc">ascending order of size</string>
-    <string name="sort_usage_freq">frequency of use</string>
-    <!-- 状态相关 -->
-    <!-- 标签相关 -->
-    <string name="select">option</string>
-    <!-- BottomSheet相关 -->
-    <!-- SuSFS Configuration -->
-    <!-- SuSFS Reset Confirmation -->
-    <!-- SuSFS Toast Messages -->
-    <!-- SuSFS Settings Item -->
-    <!-- 开机自启动相关 -->
-    <!-- SuSFS Tab Titles -->
-    <!-- SuSFS Path Management -->
-    <!-- SuSFS Reset Categories -->
-    <!-- SuSFS Path Settings -->
-    <!-- SuSFS Enabled Features -->
-    <!-- Feature Labels -->
-    <!-- 可切换状态 -->
-    <!-- Settings related strings -->
-    <!-- SuSFS 自启动相关字符串 -->
-    <!-- SuSFS Kstat相关字符串 -->
-    <!-- SuSFS Mount Hiding Control Related Strings -->
-    <!-- 备份和还原相关字符串 -->
-    <!-- 循环路径相关 -->
-    <!-- 循环路径功能描述 -->
-    <!-- KPM patching related strings -->
-    <!-- KPM workflow related -->
-    <!-- KPM error messages -->
-    <!-- KPM option radio group strings -->
-    <!-- UID Scanner Settings -->
-    <!-- 确认安装相关字符串 -->
-    <!-- SUS Map related strings -->
-    <!-- Log Viewer -->
 </resources>

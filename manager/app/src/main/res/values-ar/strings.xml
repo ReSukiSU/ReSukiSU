@@ -124,23 +124,17 @@
     <string name="selected_lkm">LKM المحددة: %s</string>
     <string name="save_log">حفظ السجلات</string>
     <string name="log_saved">السجلات محفوظة</string>
-    <!-- Module related -->
     <string name="module_install_confirm">تأكيد وحدة التثبيت %1$s؟</string>
     <string name="unknown_module">وحدة غير معروفة</string>
-    <!-- Restore related -->
     <string name="restore_confirm_title">تأكيد استعادة الوحدة</string>
     <string name="restore_confirm_message">هذه العملية سوف تستبدل جميع الوحدات الموجودة. هل تريد المتابعة؟</string>
     <string name="confirm">تأكيد</string>
     <string name="cancel">إلغاء</string>
-    <!-- Backup related -->
-    <!-- Restore related messages -->
     <string name="restore_success">تم استعادة الوحدات بنجاح, إعادة التشغيل مطلوبة</string>
     <string name="restore_failed">فشل الاستعادة: %1$s</string>
     <string name="restart_now">أعد تشغيل التطبيق الآن</string>
     <string name="unknown_error">خطأ غير معروف</string>
-    <!-- Command related -->
     <string name="command_execution_failed">فشل تنفيذ الأوامر: %1$s</string>
-    <!-- Allowlist related -->
     <string name="allowlist_backup_success">السماح بالنسخ الاحتياطي للقائمة بنجاح</string>
     <string name="allowlist_backup_failed">فشل النسخ الاحتياطي لقائمة السماح: %1$s</string>
     <string name="allowlist_restore_confirm_title">تأكيد استعادة القائمة المسموح بها</string>
@@ -225,9 +219,7 @@
     <string name="confirm_uninstall_content">سيتم إلغاء تثبيت KPM التالية: %s</string>
     <string name="image_editor_hint">استخدم إصبعين لتكبير الصورة، وأصبع واحد لسحبها لضبط الموضع</string>
     <string name="reprovision">إعادة</string>
-    <!-- Kernel Flash Progress Related -->
     <string name="horizon_flash_complete">الفلاش اكتمل</string>
-    <!-- Flash Status Related -->
     <string name="horizon_preparing">جار التحضير</string>
     <string name="horizon_cleaning_files">تنظيف الملفات…</string>
     <string name="horizon_copying_files">جارٍ نسخ الملف…</string>
@@ -235,7 +227,6 @@
     <string name="horizon_patching_script">تعديل البرنامج النصي الفلاش…</string>
     <string name="horizon_flashing">نواة رمادية…</string>
     <string name="horizon_flash_complete_status">الفلاش اكتمل</string>
-    <!-- Slot selection related strings -->
     <string name="select_slot_title">حدد فتحة الفلاش</string>
     <string name="select_slot_description">الرجاء تحديد الخانة المستهدفة للتشغيل المبطن</string>
     <string name="slot_a">خانة A</string>
@@ -245,11 +236,9 @@
     <string name="horizon_setting_target_slot">تعيين الفتحة المحددة</string>
     <string name="horizon_restoring_original_slot">استعادة الخانة الافتراضية</string>
     <string name="current_slot">فتحة النظام الحالية الافتراضية：%1$s </string>
-    <!-- Error Messages -->
     <string name="horizon_copy_failed">فشل النسخ</string>
     <string name="horizon_unknown_error">خطأ غير معروف</string>
     <string name="flash_failed_message">فشل التركيب</string>
-    <!-- lkm/gki install -->
     <string name="Lkm_install_methods">إصلاح/تثبيت LKM</string>
     <string name="GKI_install_methods">نواة رمادية</string>
     <string name="kernel_version_log">إصدار النواة：%1$s</string>
@@ -257,7 +246,6 @@
     <string name="configuration">تعيين</string>
     <string name="app_settings">إعدادات التطبيق </string>
     <string name="tools">ادوات</string>
-    <!--  String resources used in SuperUser -->
     <string name="no_apps_found">التطبيق غير موجود</string>
     <string name="selinux_enabled_toast">تم تمكين SELinux</string>
     <string name="selinux_disabled_toast">تم تعطيل SELinux</string>
@@ -268,11 +256,8 @@
     <string name="background_set_success">تم تعيين الخلفية بنجاح</string>
     <string name="background_removed">إزالة خلفيات مخصصة</string>
     <string name="icon_switch_summary">Change the launcher icon to KernelSU\'s icon.</string>
-    <!-- KPM display settings -->
     <string name="show_kpm_info">عرض وظيفة KPM</string>
     <string name="show_kpm_info_summary">إخفاء معلومات KPM ووظيفتها في الشريط المنزلي والأسفل</string>
-    <!-- Webui settings -->
-    <!-- DPI setting related strings -->
     <string name="app_dpi_title">تم تطبيق DPI</string>
     <string name="app_dpi_summary">ضبط كثافة عرض الشاشة للتطبيق الحالي فقط</string>
     <string name="dpi_size_small">صغير </string>
@@ -283,55 +268,16 @@
     <string name="dpi_apply_settings">تطبيق إعدادات DPI</string>
     <string name="dpi_confirm_title">تأكيد تغيير إدارة شؤون الإعلام</string>
     <string name="dpi_confirm_message">هل أنت متأكد من أنك تريد تغيير تطبيق DPI من %1$d إلى %2$d؟</string>
-    <!-- Language settings related strings -->
     <string name="settings_language">لغة التطبيق</string>
     <string name="language_system_default">اتبع النظام</string>
-    <!-- Flash related -->
     <string name="error_code">رمز الخطأ</string>
     <string name="check_log">يرجى التحقق من السجل</string>
     <string name="installing_module">تم تثبيت الوحدة %1$d/%2$d</string>
     <string name="module_failed_count">أخفق %d في تثبيت وحدة جديدة</string>
     <string name="module_download_error">فشل تحميل الوحدة</string>
     <string name="kernel_flashing">ضرب النواة</string>
-    <!-- 分类相关 -->
-    <!-- 排序相关 -->
-    <string name="sort_install_time_new">Installation time (new)</string>
-    <string name="sort_install_time_old">Installation time (old)</string>
-    <string name="sort_size_desc">descending order of size</string>
-    <string name="sort_size_asc">ascending order of size</string>
-    <string name="sort_usage_freq">frequency of use</string>
-    <!-- 状态相关 -->
-    <!-- 标签相关 -->
     <string name="scroll_to_top">في الأعلى</string>
     <string name="scroll_to_bottom">أسفل</string>
     <string name="selected">محدد</string>
     <string name="select">خيار</string>
-    <!-- BottomSheet相关 -->
-    <!-- SuSFS Configuration -->
-    <!-- SuSFS Reset Confirmation -->
-    <!-- SuSFS Toast Messages -->
-    <!-- SuSFS Settings Item -->
-    <!-- 开机自启动相关 -->
-    <!-- SuSFS Tab Titles -->
-    <!-- SuSFS Path Management -->
-    <!-- SuSFS Reset Categories -->
-    <!-- SuSFS Path Settings -->
-    <!-- SuSFS Enabled Features -->
-    <!-- Feature Labels -->
-    <!-- 可切换状态 -->
-    <!-- Settings related strings -->
-    <!-- SuSFS 自启动相关字符串 -->
-    <!-- SuSFS Kstat相关字符串 -->
-    <!-- SuSFS Mount Hiding Control Related Strings -->
-    <!-- 备份和还原相关字符串 -->
-    <!-- 循环路径相关 -->
-    <!-- 循环路径功能描述 -->
-    <!-- KPM patching related strings -->
-    <!-- KPM workflow related -->
-    <!-- KPM error messages -->
-    <!-- KPM option radio group strings -->
-    <!-- UID Scanner Settings -->
-    <!-- 确认安装相关字符串 -->
-    <!-- SUS Map related strings -->
-    <!-- Log Viewer -->
 </resources>

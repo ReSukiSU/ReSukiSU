@@ -46,7 +46,6 @@
     <string name="reboot_to_apply">Reinicie para entrar em vigor</string>
     <string name="module_magisk_conflict">Os módulos estão desativados porque estão em conflito com os do Magisk!</string>
     <string name="home_learn_kernelsu">Aprender KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">Aprenda a instalar o KernelSU e usar os módulos</string>
     <string name="home_support_title">Apoie-nos</string>
     <string name="home_support_content">O KernelSU é, e sempre será, gratuito e de código aberto. No entanto, você pode nos mostrar que se importa fazendo uma doação.</string>
@@ -123,23 +122,17 @@
     <string name="selected_lkm">LKM selecionado: %s</string>
     <string name="save_log">Salvar Registros</string>
     <string name="log_saved">Registros salvos</string>
-    <!-- Module related -->
     <string name="module_install_confirm">¿confirmar la instalación del módulo %1$s?</string>
     <string name="unknown_module">módulo desconocido</string>
-    <!-- Restore related -->
     <string name="restore_confirm_title">Confirmar Restauração de Módulo</string>
     <string name="restore_confirm_message">Esta operação irá sobrescrever todos os módulos existentes. Continuar?</string>
     <string name="confirm">Confirmação</string>
     <string name="cancel">Cancelar</string>
-    <!-- Backup related -->
-    <!-- Restore related messages -->
     <string name="restore_success">Módulos restaurados com sucesso, reinicialização necessária</string>
     <string name="restore_failed">Falha na restauração: %1$s</string>
     <string name="restart_now">Reiniciar agora</string>
     <string name="unknown_error">Erro desconhecido</string>
-    <!-- Command related -->
     <string name="command_execution_failed">A execução do comando falhou: %1$s</string>
-    <!-- Allowlist related -->
     <string name="allowlist_backup_success">Backup concluído</string>
     <string name="allowlist_backup_failed">Falha no backup permitido: %1$s</string>
     <string name="allowlist_restore_confirm_title">Confirmar Restauração de Lista</string>
@@ -150,7 +143,7 @@
     <string name="restore_allowlist">Restaurar Allowlist</string>
     <string name="settings_custom_background">Fundo personalizado do App</string>
     <string name="settings_custom_background_summary">Selecione uma imagem como plano de fundo</string>
-    <string name="home_android_version">Android Version： </string>
+    <string name="home_android_version">Android Version: </string>
     <string name="home_device_model">Modelo do aparelho</string>
     <string name="su_not_allowed">Conceder superusuário à %s não é permitido</string>
     <string name="module_install_multiple_confirm_with_names">Tem certeza que deseja instalar os seguintes módulos %1$d ? \n\n%2$s</string>
@@ -223,9 +216,7 @@
     <string name="confirm_uninstall_content">O seguinte KPM será desinstalado: %s</string>
     <string name="image_editor_hint">Use dois dedos para ampliar a imagem e um dedo para arrastá-la para ajustar a posição</string>
     <string name="reprovision">Restituição</string>
-    <!-- Kernel Flash Progress Related -->
     <string name="horizon_flash_complete">Flash concluído</string>
-    <!-- Flash Status Related -->
     <string name="horizon_preparing">Preparando…</string>
     <string name="horizon_cleaning_files">limpando arquivos…</string>
     <string name="horizon_copying_files">Copiando arquivo…</string>
@@ -233,7 +224,6 @@
     <string name="horizon_patching_script">Atualizando o script flash…</string>
     <string name="horizon_flashing">Flasheando kernel…</string>
     <string name="horizon_flash_complete_status">Flash completo</string>
-    <!-- Slot selection related strings -->
     <string name="select_slot_title">Selecionar Slot em Flash</string>
     <string name="select_slot_description">Por favor, selecione o slot de destino para flashear a inicialização</string>
     <string name="slot_a">Slot B</string>
@@ -243,11 +233,9 @@
     <string name="horizon_setting_target_slot">Configurando o slot especificado</string>
     <string name="horizon_restoring_original_slot">Restaurar Slot Padrão</string>
     <string name="current_slot">Slot padrão do sistema atual：%1$s </string>
-    <!-- Error Messages -->
     <string name="horizon_copy_failed">Falha ao copiar</string>
     <string name="horizon_unknown_error">Você parece estar convertendo de um formato com degradação para&#10;&#10;um sem perdas. Esteja ciente que a perda de qualidade não pode ser desfeita,&#10;&#10;então este processo não melhorará a qualidade do áudio e provavelmente&#10;&#10;aumentará o tamanho do arquivo. Continuar assim mesmo?</string>
     <string name="flash_failed_message">Flash falhou</string>
-    <!-- lkm/gki install -->
     <string name="Lkm_install_methods">LKM reparo/instalação</string>
     <string name="GKI_install_methods">Flasheando kernel</string>
     <string name="kernel_version_log">Kernel</string>
@@ -255,7 +243,6 @@
     <string name="configuration">Configurar</string>
     <string name="app_settings">Configurações Do Aplicativo</string>
     <string name="tools">Ferramentas</string>
-    <!--  String resources used in SuperUser -->
     <string name="no_apps_found">Aplicativo não encontrado</string>
     <string name="selinux_enabled_toast">SELinux habilitado</string>
     <string name="selinux_disabled_toast">SELinux Desativado</string>
@@ -268,11 +255,8 @@
     <string name="icon_switch_title">Ícone alternativo</string>
     <string name="icon_switch_summary">Alterar o ícone do launcher para o ícone do KernelSU.</string>
     <string name="icon_switched">Ícone alterado</string>
-    <!-- KPM display settings -->
     <string name="show_kpm_info">Exibir função KPM</string>
     <string name="show_kpm_info_summary">Oculta as informações e funções do KPM na barra inicial e inferior</string>
-    <!-- Webui X settings -->
-    <!-- DPI setting related strings -->
     <string name="app_dpi_title">DPI aplicado</string>
     <string name="app_dpi_summary">Ajustar a densidade de exibição da tela apenas para o aplicativo atual</string>
     <string name="dpi_size_small">Pequeno </string>
@@ -283,47 +267,17 @@
     <string name="dpi_apply_settings">Aplicando configurações de DPI</string>
     <string name="dpi_confirm_title">Confirmar alteração de DPI</string>
     <string name="dpi_confirm_message">Tem certeza que deseja alterar o DPI do aplicativo do %1$d para %2$d?</string>
-    <!-- Language settings related strings -->
     <string name="settings_language">Língua do aplicativo</string>
     <string name="language_system_default">Padrão do sistema</string>
-    <!-- Flash related -->
     <string name="error_code">Código de erro</string>
     <string name="check_log">Por favor, verifique o log</string>
     <string name="installing_module">Módulo sendo instalado %1$d/%2$d</string>
     <string name="module_failed_count">%d Falha ao instalar um novo módulo</string>
     <string name="module_download_error">Falha ao baixar módulo</string>
-    <string name="kernel_flashing">Kernel Flashing</string>
-    <!-- 分类相关 -->
-    <string name="category_all_apps">All</string>
-    <string name="category_root_apps">Root</string>
-    <string name="category_custom_apps">Custom</string>
-    <string name="category_default_apps">Default</string>
-    <!-- 排序相关 -->
-    <string name="sort_name_asc">Ascending order of name</string>
-    <string name="sort_name_desc">Name descending</string>
-    <string name="sort_install_time_new">Installation time (new)</string>
-    <string name="sort_install_time_old">Installation time (old)</string>
-    <string name="sort_size_desc">descending order of size</string>
-    <string name="sort_size_asc">ascending order of size</string>
-    <string name="sort_usage_freq">frequency of use</string>
-    <!-- 状态相关 -->
-    <string name="no_apps_in_category">No application in this category</string>
-    <!-- 标签相关 -->
-    <!-- FAB菜单相关 -->
-    <string name="deny_authorization">Delegation of authority</string>
-    <string name="grant_authorization">Authorizations</string>
-    <string name="unmount_modules">Unmounting Module Mounts</string>
-    <string name="disable_unmount">Disable uninstall module mounting</string>
-    <string name="expand_menu">Expand menu</string>
-    <string name="collapse_menu">Put away the menu</string>
     <string name="scroll_to_top">Mais votados</string>
     <string name="scroll_to_bottom">Parte Inferior</string>
     <string name="selected">Selecionado</string>
     <string name="select">opção</string>
-    <!-- BottomSheet相关 -->
-    <string name="menu_options">Menu Options</string>
-    <string name="sort_options">Sort by</string>
-    <string name="app_categories">Application Type Selection</string>
     <string name="settings_sucompat">Redirecionar binário su</string>
     <string name="settings_sucompat_summary">Permite que apps com permissão de Superutilizador no Perfil da App obtenham um shell de superutilizador executando /system/bin/su; eficaz apenas para novos processos.</string>
     <string name="settings_kernel_umount">Desmontar kernel</string>
