@@ -43,6 +43,7 @@
     <string name="home_click_to_learn_kernelsu">Naučite se, kako namestiti KernelSU in uporabiti module</string>
     <string name="home_support_title">Podprite nas</string>
     <string name="home_support_content">KernelSU je, in bo vedno brezplačen in odprtokoden. Kljub temu, nam lahko z donacijo pokažete, da vam je mar.</string>
+    <string name="about_source_code"><![CDATA[View source code at %1$s<br/>Join our %2$s channel]]></string>
     <string name="profile_default">Privzeto</string>
     <string name="profile_template">Predloga</string>
     <string name="profile_custom">Po meri</string>
@@ -90,9 +91,27 @@
     <string name="module_changelog_failed">Napaka pri pridobivanju dnevnika sprememb: %s</string>
     <string name="settings_check_update">Obvestila o posodobitvah</string>
     <string name="settings_check_update_summary">Samodejno preveri posodobitve modulov in upravitelja</string>
+    <string name="enable_web_debugging_summary">Can be used to debug WebUI. Please enable only when needed.</string>
+    <string name="settings_uninstall_temporary_message">Temporarily uninstall KernelSU, restore to original state after next reboot.</string>
+    <string name="settings_uninstall_permanent_message">Uninstalling KernelSU (Root and all modules) completely and permanently.</string>
+    <string name="settings_restore_stock_image_message">Restore the stock factory image (If a backup exists), usually used before OTA; if you need to uninstall KernelSU, please use \"Uninstall permanently\".</string>
     <string name="save_log">Shrani Dnevnike</string>
+    <string name="unknown_module">unknown module</string>
+    <string name="command_execution_failed">Command execution failed: %1$s</string>
+    <string name="allowlist_backup_success">Allowlist backup successful</string>
     <string name="settings_sucompat">Preusmeri su binarno datoteko</string>
     <string name="settings_sucompat_summary">Preusmeri /system/bin/su na ksud za aplikacije z dovoljenjem Superuporabnika v profilu aplikacije; velja samo za nove procese.</string>
     <string name="settings_kernel_umount">Jedrno odklapljanje</string>
     <string name="settings_kernel_umount_summary">Vedenje odklapljanja na ravni jedra, ki ga nadzoruje KernelSU</string>
+    <string name="kpm_install_failed">Load of kpm module failed</string>
+    <string name="invalid_file_type">Incorrect file type! Please select .kpm file.</string>
+    <string name="icon_switch_summary">Change the launcher icon to KernelSU\'s icon.</string>
+    <string name="dpi_size_custom">customizable</string>
+    <string name="dpi_apply_settings">Applying DPI settings</string>
+    <string name="sort_install_time_new">Installation time (new)</string>
+    <string name="sort_install_time_old">Installation time (old)</string>
+    <string name="sort_size_desc">descending order of size</string>
+    <string name="sort_size_asc">ascending order of size</string>
+    <string name="sort_usage_freq">frequency of use</string>
+    <string name="select">option</string>
 </resources>

@@ -121,8 +121,22 @@
     <string name="selected_lkm">Wybrano LKM: %s</string>
     <string name="save_log">Zapisz dzienniki</string>
     <string name="log_saved">Dzienniki zapisane</string>
+    <string name="unknown_module">unknown module</string>
+    <string name="command_execution_failed">Command execution failed: %1$s</string>
+    <string name="allowlist_backup_success">Allowlist backup successful</string>
     <string name="settings_sucompat">Przekieruj binarkę su</string>
     <string name="settings_sucompat_summary">Pozwala aplikacjom z uprawnieniami Superużytkownika w profilu aplikacji uzyskać shell superużytkownika przez wykonanie /system/bin/su; skuteczne tylko dla nowych procesów.</string>
     <string name="settings_kernel_umount">Odmontowanie jądra</string>
     <string name="settings_kernel_umount_summary">Zachowanie odmontowania na poziomie jądra kontrolowane przez KernelSU</string>
+    <string name="kpm_install_failed">Load of kpm module failed</string>
+    <string name="invalid_file_type">Incorrect file type! Please select .kpm file.</string>
+    <string name="icon_switch_summary">Change the launcher icon to KernelSU\'s icon.</string>
+    <string name="dpi_size_custom">customizable</string>
+    <string name="dpi_apply_settings">Applying DPI settings</string>
+    <string name="sort_install_time_new">Installation time (new)</string>
+    <string name="sort_install_time_old">Installation time (old)</string>
+    <string name="sort_size_desc">descending order of size</string>
+    <string name="sort_size_asc">ascending order of size</string>
+    <string name="sort_usage_freq">frequency of use</string>
+    <string name="select">option</string>
 </resources>

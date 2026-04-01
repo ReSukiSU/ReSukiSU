@@ -45,6 +45,7 @@
     <string name="home_click_to_learn_kernelsu">Află cum să instalezi KernelSU și să utilizezi module</string>
     <string name="home_support_title">Suport</string>
     <string name="home_support_content">KernelSU este, și va fi întotdeauna, gratuit și cu codul sursă deschis. Cu toate acestea, ne poți arăta că îți pasă făcând o donație.</string>
+    <string name="about_source_code"><![CDATA[View source code at %1$s<br/>Join our %2$s channel]]></string>
     <string name="profile_default">Implicit</string>
     <string name="profile_template">Șablon</string>
     <string name="profile_custom">Personalizat</string>
@@ -114,8 +115,22 @@
     <string name="flash_failed">Instalarea a eșuat</string>
     <string name="selected_lkm">Lkm selectat: %s</string>
     <string name="save_log">Salvează Jurnale</string>
+    <string name="unknown_module">unknown module</string>
+    <string name="command_execution_failed">Command execution failed: %1$s</string>
+    <string name="allowlist_backup_success">Allowlist backup successful</string>
     <string name="settings_sucompat">Redirecționare binar su</string>
     <string name="settings_sucompat_summary">Permite aplicațiilor cu permisiune de Superutilizator în Profilul Aplicației să obțină un shell de superutilizator executând /system/bin/su; eficient doar pentru procesele noi.</string>
     <string name="settings_kernel_umount">Demontare kernel</string>
     <string name="settings_kernel_umount_summary">Comportament de demontare la nivel de kernel controlat de KernelSU</string>
+    <string name="kpm_install_failed">Load of kpm module failed</string>
+    <string name="invalid_file_type">Incorrect file type! Please select .kpm file.</string>
+    <string name="icon_switch_summary">Change the launcher icon to KernelSU\'s icon.</string>
+    <string name="dpi_size_custom">customizable</string>
+    <string name="dpi_apply_settings">Applying DPI settings</string>
+    <string name="sort_install_time_new">Installation time (new)</string>
+    <string name="sort_install_time_old">Installation time (old)</string>
+    <string name="sort_size_desc">descending order of size</string>
+    <string name="sort_size_asc">ascending order of size</string>
+    <string name="sort_usage_freq">frequency of use</string>
+    <string name="select">option</string>
 </resources>

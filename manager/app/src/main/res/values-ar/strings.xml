@@ -276,6 +276,11 @@
     <string name="module_failed_count">أخفق %d في تثبيت وحدة جديدة</string>
     <string name="module_download_error">فشل تحميل الوحدة</string>
     <string name="kernel_flashing">ضرب النواة</string>
+    <string name="sort_install_time_new">Installation time (new)</string>
+    <string name="sort_install_time_old">Installation time (old)</string>
+    <string name="sort_size_desc">descending order of size</string>
+    <string name="sort_size_asc">ascending order of size</string>
+    <string name="sort_usage_freq">frequency of use</string>
     <string name="scroll_to_top">في الأعلى</string>
     <string name="scroll_to_bottom">أسفل</string>
     <string name="selected">محدد</string>

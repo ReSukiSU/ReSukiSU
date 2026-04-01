@@ -46,6 +46,7 @@
     <string name="home_click_to_learn_kernelsu">Uzzināt, kā instalēt KernelSU un izmantot moduļus</string>
     <string name="home_support_title">Atbalsti mūs</string>
     <string name="home_support_content">KernelSU ir un vienmēr būs bezmaksas un atvērtā koda. Tomēr jūs varat parādīt mums, ka jums rūp, veicot ziedojumu.</string>
+    <string name="about_source_code"><![CDATA[View source code at %1$s<br/>Join our %2$s channel]]></string>
     <string name="profile_default">Noklusējums</string>
     <string name="profile_template">Veidne</string>
     <string name="profile_custom">Pielāgots</string>
@@ -117,8 +118,22 @@
     <string name="flash_failed">Instalēšana neizdevās</string>
     <string name="selected_lkm">Izvēlētais lkm: %s</string>
     <string name="save_log">Išsaugoti Žurnalus</string>
+    <string name="unknown_module">unknown module</string>
+    <string name="command_execution_failed">Command execution failed: %1$s</string>
+    <string name="allowlist_backup_success">Allowlist backup successful</string>
     <string name="settings_sucompat">Pārvirzīt su bināro failu</string>
     <string name="settings_sucompat_summary">Pārvirzīt /system/bin/su uz ksud lietotnēm, kurām piešķirta Superuser atļauja lietotnes profilā; efektīva tikai jauniem procesiem.</string>
     <string name="settings_kernel_umount">Kodola atvienošana</string>
     <string name="settings_kernel_umount_summary">Kodola līmeņa atvienošanas uzvedība, ko kontrolē KernelSU</string>
+    <string name="kpm_install_failed">Load of kpm module failed</string>
+    <string name="invalid_file_type">Incorrect file type! Please select .kpm file.</string>
+    <string name="icon_switch_summary">Change the launcher icon to KernelSU\'s icon.</string>
+    <string name="dpi_size_custom">customizable</string>
+    <string name="dpi_apply_settings">Applying DPI settings</string>
+    <string name="sort_install_time_new">Installation time (new)</string>
+    <string name="sort_install_time_old">Installation time (old)</string>
+    <string name="sort_size_desc">descending order of size</string>
+    <string name="sort_size_asc">ascending order of size</string>
+    <string name="sort_usage_freq">frequency of use</string>
+    <string name="select">option</string>
 </resources>

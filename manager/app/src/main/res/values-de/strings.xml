@@ -6,6 +6,9 @@
     <string name="home_working">Funktioniert</string>
     <string name="home_unsupported">Nicht unterstützt</string>
     <string name="home_unsupported_reason">KernelSU unterstützt derzeit nur GKI-Kernel</string>
+    <string name="home_kernel">Kernel</string>
+    <string name="home_manager_version">Manager-Version</string>
+    <string name="home_selinux_status">SELinux Status</string>
     <string name="selinux_status_disabled">Deaktiviert</string>
     <string name="selinux_status_enforcing">Erzwingen</string>
     <string name="selinux_status_permissive">Permissiv</string>
@@ -259,6 +262,11 @@
     <string name="module_failed_count">%d Fehler bei der Installation eines neuen Moduls</string>
     <string name="module_download_error">Modul-Download fehlgeschlagen</string>
     <string name="kernel_flashing">Kernel-Flashen</string>
+    <string name="sort_install_time_new">Installation time (new)</string>
+    <string name="sort_install_time_old">Installation time (old)</string>
+    <string name="sort_size_desc">descending order of size</string>
+    <string name="sort_size_asc">ascending order of size</string>
+    <string name="sort_usage_freq">frequency of use</string>
     <string name="scroll_to_bottom">Unten</string>
     <string name="selected">Ausgewählt</string>
     <string name="select">variieren</string>

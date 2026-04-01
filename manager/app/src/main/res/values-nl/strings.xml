@@ -44,6 +44,7 @@
     <string name="home_click_to_learn_kernelsu">Leer hoe KernelSU te installeren en modules te gebruiken</string>
     <string name="home_support_title">Ondersteun ons</string>
     <string name="home_support_content">KernelSU is, en zal altijd, vrij en open source zijn. Je kan altijd je appreciatie tonen met een donatie.</string>
+    <string name="about_source_code"><![CDATA[View source code at %1$s<br/>Join our %2$s channel]]></string>
     <string name="profile_default">Standaard</string>
     <string name="profile_template">Sjabloon</string>
     <string name="profile_custom">Aangepast</string>
@@ -114,8 +115,22 @@
     <string name="selected_lkm">Geselecteerde LKM: %s</string>
     <string name="save_log">Logboeken Opslaan</string>
     <string name="log_saved">Logs opgeslagen</string>
+    <string name="unknown_module">unknown module</string>
+    <string name="command_execution_failed">Command execution failed: %1$s</string>
+    <string name="allowlist_backup_success">Allowlist backup successful</string>
     <string name="settings_sucompat">su binary omleiden</string>
     <string name="settings_sucompat_summary">Stelt apps met Superuser-toestemming in App Profiel in staat om een superuser-shell te verkrijgen door /system/bin/su uit te voeren; alleen effectief voor nieuwe processen.</string>
     <string name="settings_kernel_umount">Kernel ontkoppelen</string>
     <string name="settings_kernel_umount_summary">Kernel-niveau ontkoppelgedrag beheerd door KernelSU</string>
+    <string name="kpm_install_failed">Load of kpm module failed</string>
+    <string name="invalid_file_type">Incorrect file type! Please select .kpm file.</string>
+    <string name="icon_switch_summary">Change the launcher icon to KernelSU\'s icon.</string>
+    <string name="dpi_size_custom">customizable</string>
+    <string name="dpi_apply_settings">Applying DPI settings</string>
+    <string name="sort_install_time_new">Installation time (new)</string>
+    <string name="sort_install_time_old">Installation time (old)</string>
+    <string name="sort_size_desc">descending order of size</string>
+    <string name="sort_size_asc">ascending order of size</string>
+    <string name="sort_usage_freq">frequency of use</string>
+    <string name="select">option</string>
 </resources>
