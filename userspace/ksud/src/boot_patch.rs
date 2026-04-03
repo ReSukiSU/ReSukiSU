@@ -118,7 +118,9 @@ mod android {
         }
 
         let result = hasher.finalize();
-        Ok(format!("{result:x}"))
+        let hex: String = result.iter().map(|b| format!("{b:02x}")).collect();
+
+        Ok(hex)
     }
 
     pub(super) fn do_backup(cpio: &mut Cpio, image: &Path) -> Result<()> {
