@@ -29,7 +29,6 @@ ifeq ($(CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK), y)
   endif
 else
   $(info -- $(REPO_NAME)/manual_hook: You are using a manual setresuid hook for setuid hooks.)
-
   $(eval $(call check_ksu_hook,ksu_handle_setresuid,$(srctree)/kernel/sys.c))
 endif
 

@@ -182,7 +182,7 @@ else
   endif
 endif
 
-include $(srctree)/tools/kernel_compat.mk
+include $(KSU_SRC)/tools/kernel_compat.mk
 
 # Custom Signs
 ifdef KSU_EXPECTED_SIZE
@@ -202,7 +202,7 @@ endif
 
 ## For susfs stuff ##
 ifeq ($(CONFIG_KSU_SUSFS), y)
-include $(srctree)/tools/inline_hook_check.mk
+include $(KSU_SRC)/tools/inline_hook_check.mk
 ifeq ($(shell test -e $(srctree)/fs/susfs.c; echo $$?),0)
 $(eval SUSFS_VERSION=$(shell cat $(srctree)/include/linux/susfs.h | grep -E '^#define SUSFS_VERSION' | cut -d' ' -f3 | sed 's/"//g'))
 $(info )
@@ -216,7 +216,7 @@ endif
 
 # manual hook check
 ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
-include $(srctree)/tools/manual_hook_check.mk
+include $(KSU_SRC)/tools/manual_hook_check.mk
 endif
 
 # Keep a new line here!! Because someone may append config
