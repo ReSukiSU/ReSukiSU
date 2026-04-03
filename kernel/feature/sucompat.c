@@ -37,8 +37,6 @@
 #include "hook/syscall_hook.h"
 #endif
 
-#include "sulog.h"
-
 #define SU_PATH "/system/bin/su"
 #define SH_PATH "/system/bin/sh"
 
@@ -149,9 +147,6 @@ int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user, in
     if (likely(memcmp(path, su, sizeof(su))))
         goto do_orig_execve;
 
-    ksu_sulog_report_syscall(ksu_get_uid_t(current_uid()), NULL, "execve", su_path);
-    ksu_sulog_report_su_attempt(ksu_get_uid_t(current_uid()), NULL, su_path, true);
-
     pr_info("sys_execve su found\n");
     *filename_user = ksud_user_path();
 
@@ -191,9 +186,6 @@ int ksu_handle_execveat_sucompat(int *fd, const char *filename, void *__never_us
 
     if (likely(memcmp(filename, su_path, sizeof(su_path))))
         return 0;
-
-    ksu_sulog_report_syscall(ksu_get_uid_t(current_uid()), NULL, "execve", su_path);
-    ksu_sulog_report_su_attempt(ksu_get_uid_t(current_uid()), NULL, su_path, is_allowed);
 
     pr_info("do_execveat_common su found\n");
 
@@ -282,7 +274,6 @@ int ksu_handle_faccessat(int *dfd, const char __user **filename_user, int *mode,
     ksu_strncpy_from_user_nofault(path, *filename_user, sizeof(path));
 
     if (unlikely(!memcmp(path, su_path, sizeof(su_path)))) {
-        ksu_sulog_report_syscall(ksu_get_uid_t(current_uid()), NULL, "faccessat", path);
         pr_info("faccessat su->sh!\n");
         *filename_user = sh_user_path();
     }
@@ -308,7 +299,6 @@ int ksu_handle_stat(int *dfd, struct filename **filename, int *flags)
         return 0;
     }
 
-    ksu_sulog_report_syscall(ksu_get_uid_t(current_uid()), NULL, "newfstatat", (*filename)->name);
     pr_info("ksu_handle_stat: su->sh!\n");
     memcpy((void *)((*filename)->name), sh_path, sizeof(sh_path));
     return 0;
@@ -332,7 +322,6 @@ int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags)
     ksu_strncpy_from_user_nofault(path, *filename_user, sizeof(path));
 
     if (unlikely(!memcmp(path, su_path, sizeof(su_path)))) {
-        ksu_sulog_report_syscall(ksu_get_uid_t(current_uid()), NULL, "newfstatat", path);
         pr_info("ksu_handle_stat: su->sh!\n");
         *filename_user = sh_user_path();
     }

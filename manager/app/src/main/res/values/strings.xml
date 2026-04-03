@@ -191,8 +191,6 @@
     <string name="settings_mode_enable_by_default">Enable (Default)</string>
     <string name="settings_mode_disable_until_reboot">Disable until reboot</string>
     <string name="settings_mode_disable_always">Always disable</string>
-    <string name="settings_sulog">Record superuser access log</string>
-    <string name="settings_sulog_summary">Enable kernel-level logging of superuser access</string>
     <string name="feature_status_managed_summary">This feature is managed by a module</string>
     <string name="settings_mode_default">Default</string>
     <string name="module_install_multiple_confirm_with_names">Are you sure you want to install the following %1$d modules? \n\n%2$s</string>

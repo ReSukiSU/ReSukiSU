@@ -188,8 +188,6 @@
     <string name="settings_mode_enable_by_default">啟用（預設）</string>
     <string name="settings_mode_disable_until_reboot">禁用直到下次重新啟動</string>
     <string name="settings_mode_disable_always">始終禁用</string>
-    <string name="settings_sulog">記錄超級用戶訪問日誌</string>
-    <string name="settings_sulog_summary">喺核心記錄超級用戶請求日誌</string>
     <string name="feature_status_managed_summary">此功能由模組管理。</string>
     <string name="settings_mode_default">預設</string>
     <string name="module_install_multiple_confirm_with_names">確定要安裝以下 %1$d 個模組嗎？\n\n%2$s</string>

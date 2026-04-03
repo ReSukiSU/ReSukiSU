@@ -136,7 +136,6 @@ fun SettingsPage(bottomPadding: Dp) {
     val snackBarHost = LocalSnackbarHost.current
     val context = LocalContext.current
     val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-    var isSuLogEnabled by remember { mutableStateOf(Natives.isSuLogEnabled()) }
 
     Scaffold(
         topBar = {
@@ -345,73 +344,6 @@ fun SettingsPage(bottomPadding: Dp) {
                             }
 
                             item {
-                                var suLogMode by rememberSaveable {
-                                    mutableIntStateOf(
-                                        run {
-                                            val currentEnabled = Natives.isSuLogEnabled()
-                                            val savedPersist = prefs.getInt("sulog_mode", 0)
-                                            if (savedPersist == 2) 2 else if (!currentEnabled) 1 else 0
-                                        }
-                                    )
-                                }
-                                var savedSuLogStatus by rememberSaveable { mutableStateOf("") }
-                                val suLogStatus by produceState(initialValue = savedSuLogStatus) {
-                                    value = withContext(Dispatchers.IO) {
-                                        savedSuLogStatus = getFeatureStatus("sulog")
-                                        return@withContext savedSuLogStatus
-                                    }
-                                }
-                                val suLogSummary = when (suLogStatus) {
-                                    "unsupported" -> {
-                                        isSuLogEnabled =
-                                            true // some old kernel support sulog, we need allow show sulog in there
-                                        suLogMode = 0 // fix wrongly display
-                                        stringResource(id = R.string.feature_status_unsupported_summary)
-                                    }
-
-                                    "managed" -> stringResource(id = R.string.feature_status_managed_summary)
-                                    else -> stringResource(id = R.string.settings_sulog_summary)
-                                }
-                                SettingsDropdownWidget(
-                                    icon = Icons.Default.RemoveRedEye,
-                                    title = stringResource(id = R.string.settings_sulog),
-                                    description = suLogSummary,
-                                    items = modeItems,
-                                    enabled = suLogStatus == "supported",
-                                    selectedIndex = suLogMode,
-                                    onSelectedIndexChange = { index ->
-                                        when (index) {
-                                            // Default: enable and save to persist
-                                            0 -> if (Natives.setSuLogEnabled(true)) {
-                                                execKsud("feature save", true)
-                                                prefs.edit { putInt("sulog_mode", 0) }
-                                                suLogMode = 0
-                                                isSuLogEnabled = true
-                                            }
-
-                                            // Temporarily disable: save enabled state first, then disable
-                                            1 -> if (Natives.setSuLogEnabled(true)) {
-                                                execKsud("feature save", true)
-                                                if (Natives.setSuLogEnabled(false)) {
-                                                    prefs.edit { putInt("sulog_mode", 0) }
-                                                    suLogMode = 1
-                                                    isSuLogEnabled = false
-                                                }
-                                            }
-
-                                            // Permanently disable: disable and save
-                                            2 -> if (Natives.setSuLogEnabled(false)) {
-                                                execKsud("feature save", true)
-                                                prefs.edit { putInt("sulog_mode", 2) }
-                                                suLogMode = 2
-                                                isSuLogEnabled = false
-                                            }
-                                        }
-                                    }
-                                )
-                            }
-
-                            item {
                                 // 卸载模块开关
                                 var umountChecked by rememberSaveable { mutableStateOf(Natives.isDefaultUmountModules()) }
                                 SettingsSwitchWidget(
@@ -481,20 +413,6 @@ fun SettingsPage(bottomPadding: Dp) {
                                     showBottomsheet = true
                                 }
                             ) {}
-                        }
-
-                        if (ksuIsValid() && isSuLogEnabled) {
-                            item {
-                                // 查看使用日志
-                                SettingsJumpPageWidget(
-                                    icon = Icons.Filled.Visibility,
-                                    title = stringResource(R.string.log_viewer_view_logs),
-                                    description = stringResource(R.string.log_viewer_view_logs_summary),
-                                    onClick = {
-                                        navigator.push(Route.LogViewer)
-                                    }
-                                )
-                            }
                         }
 
                         if (ksuIsValid()) {

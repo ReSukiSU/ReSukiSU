@@ -25,7 +25,6 @@
 #include "infra/file_wrapper.h"
 #include "selinux/selinux.h"
 
-#include "feature/sulog.h"
 #include "feature/dynamic_manager.h"
 #include "feature/sucompat.h"
 #include "hook/setuid_hook.h"
@@ -184,7 +183,6 @@ int __init kernelsu_init(void)
         ksu_observer_init();
         ksu_file_wrapper_init();
 
-        ksu_sulog_init();
 #ifndef CONFIG_KSU_DISABLE_MANAGER
         ksu_dynamic_manager_init();
 #endif
@@ -227,7 +225,6 @@ void kernelsu_exit(void)
 #ifndef CONFIG_KSU_DISABLE_MANAGER
     ksu_dynamic_manager_exit();
 #endif
-    ksu_sulog_exit();
 
     // Wait for any in-flight RCU readers (e.g. handler traversing allow_list)
     synchronize_rcu();

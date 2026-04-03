@@ -188,8 +188,6 @@
     <string name="settings_mode_enable_by_default">啟用（預設）</string>
     <string name="settings_mode_disable_until_reboot">停用直到下次重新啟動</string>
     <string name="settings_mode_disable_always">總是停用</string>
-    <string name="settings_sulog">紀錄超級使用者存取的日誌</string>
-    <string name="settings_sulog_summary">於內核紀錄超級使用者請求的日誌</string>
     <string name="feature_status_managed_summary">此功能由模組管理</string>
     <string name="settings_mode_default">預設</string>
     <string name="module_install_multiple_confirm_with_names">確定要安裝以下 %1$d 個模組嗎？\n\n%2$s</string>

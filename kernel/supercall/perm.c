@@ -3,7 +3,6 @@
 #include "supercall/internal.h"
 #include "manager/manager_identity.h"
 #include "policy/allowlist.h"
-#include "feature/sulog.h"
 
 #include "compat/kernel_compat.h"
 
@@ -30,7 +29,6 @@ bool always_allow(void)
 bool allowed_for_su(void)
 {
     bool is_allowed = is_manager() || ksu_is_allow_uid_for_current(ksu_get_uid_t(current_uid()));
-    ksu_sulog_report_permission_check(ksu_get_uid_t(current_uid()), current->comm, is_allowed);
 
     return is_allowed;
 }

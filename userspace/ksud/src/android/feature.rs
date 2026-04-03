@@ -23,8 +23,6 @@ const FEATURE_VERSION: u32 = 1;
 pub enum FeatureId {
     SuCompat = 0,
     KernelUmount = 1,
-    EnhancedSecurity = 2,
-    SuLog = 3,
 }
 
 impl FeatureId {
@@ -32,8 +30,6 @@ impl FeatureId {
         match id {
             0 => Some(Self::SuCompat),
             1 => Some(Self::KernelUmount),
-            2 => Some(Self::EnhancedSecurity),
-            3 => Some(Self::SuLog),
             _ => None,
         }
     }
@@ -42,8 +38,6 @@ impl FeatureId {
         match self {
             Self::SuCompat => "su_compat",
             Self::KernelUmount => "kernel_umount",
-            Self::EnhancedSecurity => "enhanced_security",
-            Self::SuLog => "sulog",
         }
     }
 
@@ -55,12 +49,6 @@ impl FeatureId {
             Self::KernelUmount => {
                 "Kernel Umount - controls whether kernel automatically unmounts modules when not needed"
             }
-            Self::EnhancedSecurity => {
-                "Enhanced Security - disable non‑KSU root elevation and unauthorized UID downgrades"
-            }
-            Self::SuLog => {
-                "SU Log - enables logging of SU command usage to kernel log for auditing purposes"
-            }
         }
     }
 }
@@ -69,8 +57,6 @@ fn parse_feature_id(name: &str) -> Result<FeatureId> {
     match name {
         "su_compat" | "0" => Ok(FeatureId::SuCompat),
         "kernel_umount" | "1" => Ok(FeatureId::KernelUmount),
-        "enhanced_security" | "2" => Ok(FeatureId::EnhancedSecurity),
-        "sulog" | "3" => Ok(FeatureId::SuLog),
         _ => bail!("Unknown feature: {name}"),
     }
 }
@@ -294,8 +280,6 @@ pub fn list_features() {
     let all_features = [
         FeatureId::SuCompat,
         FeatureId::KernelUmount,
-        FeatureId::EnhancedSecurity,
-        FeatureId::SuLog,
     ];
 
     for feature_id in &all_features {
@@ -356,8 +340,6 @@ pub fn save_config() -> Result<()> {
     let all_features = [
         FeatureId::SuCompat,
         FeatureId::KernelUmount,
-        FeatureId::EnhancedSecurity,
-        FeatureId::SuLog,
     ];
 
     for feature_id in &all_features {

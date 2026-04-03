@@ -77,16 +77,6 @@ object Natives {
     external fun isKernelUmountEnabled(): Boolean
     external fun setKernelUmountEnabled(enabled: Boolean): Boolean
 
-
-    /**
-     * Su Log can be enabled/disabled.
-     *  0: disabled
-     *  1: enabled
-     *  negative : error
-     */
-    external fun isSuLogEnabled(): Boolean
-    external fun setSuLogEnabled(enabled: Boolean): Boolean
-
     external fun isKPMEnabled(): Boolean
     external fun getHookType(): String
 

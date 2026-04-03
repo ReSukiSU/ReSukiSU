@@ -31,7 +31,6 @@
 #ifdef KSU_TP_HOOK
 #include "hook/tp_marker.h"
 #endif
-#include "feature/sulog.h"
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 7, 0)
 static struct group_info root_groups = { .usage = REFCOUNT_INIT(2) };
@@ -218,8 +217,6 @@ int escape_with_root_profile(void)
     commit_creds(cred);
 
     disable_seccomp();
-
-    ksu_sulog_report_su_grant(ksu_get_uid_t(current_euid()), NULL, "escape_to_root");
 
 #ifdef KSU_TP_HOOK
     struct task_struct *t;

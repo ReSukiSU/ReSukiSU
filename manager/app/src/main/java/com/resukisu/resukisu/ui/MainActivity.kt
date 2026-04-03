@@ -87,7 +87,6 @@ import com.resukisu.resukisu.ui.screen.ExecuteModuleActionScreen
 import com.resukisu.resukisu.ui.screen.FlashIt
 import com.resukisu.resukisu.ui.screen.FlashScreen
 import com.resukisu.resukisu.ui.screen.InstallScreen
-import com.resukisu.resukisu.ui.screen.LogViewerScreen
 import com.resukisu.resukisu.ui.screen.TemplateEditorScreen
 import com.resukisu.resukisu.ui.screen.UmountManagerScreen
 import com.resukisu.resukisu.ui.screen.about.AboutScreen
@@ -389,7 +388,6 @@ class MainActivity : ComponentActivity() {
                                     entry<Route.Settings> { MainScreen() }
                                     entry<Route.MoreSettings> { MoreSettingsScreen() }
                                     entry<Route.SuSFSConfig> { SuSFSConfigScreen() }
-                                    entry<Route.LogViewer> { LogViewerScreen() }
                                     entry<Route.UmountManager> { UmountManagerScreen() }
                                     entry<Route.KernelFlash> { key ->
                                         KernelFlashScreen(

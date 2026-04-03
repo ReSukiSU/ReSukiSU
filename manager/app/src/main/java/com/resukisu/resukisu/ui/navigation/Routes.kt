@@ -89,10 +89,6 @@ sealed interface Route : NavKey, Parcelable {
 
     @Parcelize
     @Serializable
-    data object LogViewer : Route
-
-    @Parcelize
-    @Serializable
     data object UmountManager : Route
 
     @Parcelize

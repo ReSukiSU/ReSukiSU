@@ -19,7 +19,6 @@
 #include "feature/kernel_umount.h"
 #include "compat/kernel_compat.h"
 #include "manager/manager_identity.h"
-#include "feature/sulog.h"
 #include "selinux/selinux.h"
 #include "infra/file_wrapper.h"
 #ifdef KSU_TP_HOOK
@@ -82,7 +81,6 @@ static int do_report_event(void __user *arg)
             } else {
                 pr_info("post-fs-data triggered\n");
                 on_post_fs_data();
-                ksu_sulog_init();
 #ifndef CONFIG_KSU_DISABLE_MANAGER
                 ksu_dynamic_manager_init();
 #endif
@@ -1066,12 +1064,6 @@ static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
 };
 // clang-format on
 
-static inline void ksu_ioctl_audit(unsigned int cmd, const char *cmd_name, uid_t uid, int ret)
-{
-    const char *result = (ret == 0) ? "SUCCESS" : (ret == -EPERM) ? "DENIED" : "FAILED";
-    ksu_sulog_report_syscall(uid, NULL, cmd_name, result);
-}
-
 long ksu_supercall_handle_ioctl(unsigned int cmd, void __user *argp)
 {
     int i;
@@ -1085,12 +1077,10 @@ long ksu_supercall_handle_ioctl(unsigned int cmd, void __user *argp)
             // Check permission first
             if (ksu_ioctl_handlers[i].perm_check && !ksu_ioctl_handlers[i].perm_check()) {
                 pr_warn("ksu ioctl: permission denied for cmd=0x%x uid=%d\n", cmd, ksu_get_uid_t(current_uid()));
-                ksu_ioctl_audit(cmd, ksu_ioctl_handlers[i].name, ksu_get_uid_t(current_uid()), -EPERM);
                 return -EPERM;
             }
             // Execute handler
             int ret = ksu_ioctl_handlers[i].handler(argp);
-            ksu_ioctl_audit(cmd, ksu_ioctl_handlers[i].name, ksu_get_uid_t(current_uid()), ret);
             return ret;
         }
     }

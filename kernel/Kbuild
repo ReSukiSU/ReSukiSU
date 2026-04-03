@@ -4,7 +4,6 @@ kernelsu-objs += policy/app_profile.o
 kernelsu-objs += policy/feature.o
 kernelsu-objs += feature/sucompat.o
 kernelsu-objs += feature/kernel_umount.o
-kernelsu-objs += feature/sulog.o
 kernelsu-objs += hook/setuid_hook.o
 
 ifndef CONFIG_KSU_DISABLE_MANAGER

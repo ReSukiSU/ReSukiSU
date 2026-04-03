@@ -31,8 +31,6 @@
 #include "runtime/ksud_boot.h"
 #include "ksu.h"
 
-#include "sulog.h"
-
 static bool ksu_kernel_umount_enabled = true;
 
 static int kernel_umount_feature_get(u64 *value)

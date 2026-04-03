@@ -188,8 +188,6 @@
     <string name="settings_mode_enable_by_default">启用（默认）</string>
     <string name="settings_mode_disable_until_reboot">禁用直到下次重启</string>
     <string name="settings_mode_disable_always">始终禁用</string>
-    <string name="settings_sulog">记录超级用户访问日志</string>
-    <string name="settings_sulog_summary">在内核记录超级用户请求日志</string>
     <string name="feature_status_managed_summary">此功能由模块管理。</string>
     <string name="settings_mode_default">默认</string>
     <string name="module_install_multiple_confirm_with_names">确定要安装以下 %1$d 个模块吗？\n\n%2$s</string>

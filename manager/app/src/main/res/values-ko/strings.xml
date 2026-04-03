@@ -164,8 +164,6 @@
     <string name="settings_mode_enable_by_default">활성화 (기본값)</string>
     <string name="settings_mode_disable_until_reboot">다시 시작할 때까지 비활성화</string>
     <string name="settings_mode_disable_always">항상 비활성화</string>
-    <string name="settings_sulog">슈퍼유저 액세스 로그 기록</string>
-    <string name="settings_sulog_summary">슈퍼유저 액세스에 대한 커널 수준 로깅을 활성화합니다.</string>
     <string name="feature_status_managed_summary">이 기능은 모듈에서 관리합니다.</string>
     <string name="settings_mode_default">기본값</string>
     <string name="module_install_multiple_confirm_with_names">다음 %1$d개의 모듈을 설치할까요? \n\n%2$s</string>
