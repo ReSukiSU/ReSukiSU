@@ -5,14 +5,12 @@ use std::path::PathBuf;
 
 use log::{LevelFilter, error, info};
 
-#[cfg(all(target_arch = "aarch64", target_os = "android"))]
-use crate::android::susfs;
 use crate::{
     android::{
         debug, dynamic_manager, feature, init_event, ksucalls,
         module::{self, module_config},
         profile, sepolicy, su,
-        susfs::cli::{SuSFSSubCommands, susfs_cli},
+        susfs::{self},
         umount_config, utils,
     },
     apk_sign, assets,
@@ -129,7 +127,6 @@ enum Commands {
     /// Resetprop - Magisk-compatible system property tool
     Resetprop(crate::android::resetprop::Args),
 
-    #[cfg(all(target_arch = "aarch64", target_os = "android"))]
     /// Manage susfs component
     Susfs(susfs::cli::SusfsArgs),
 }
