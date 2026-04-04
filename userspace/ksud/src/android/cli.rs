@@ -543,12 +543,9 @@ pub fn run() -> Result<()> {
         return crate::android::resetprop::run_from_args(&all_args);
     }
 
-    #[cfg(all(target_arch = "aarch64", target_os = "android"))]
-    {
-        if arg0.ends_with("ksu_susfs") {
-            let all_args: Vec<String> = std::env::args().collect();
-            return crate::android::susfs::cli::run_from_args(&all_args);
-        }
+    if arg0.ends_with("ksu_susfs") {
+        let all_args: Vec<String> = std::env::args().collect();
+        return crate::android::susfs::cli::run_from_args(&all_args);
     }
 
     let cli = Args::parse();
@@ -556,7 +553,6 @@ pub fn run() -> Result<()> {
     log::info!("command: {:?}", cli.command);
 
     let result = match cli.command {
-        #[cfg(all(target_arch = "aarch64", target_os = "android"))]
         Commands::Susfs(args) => crate::android::susfs::cli::run_main(args.command),
         Commands::PostFsData => init_event::on_post_data_fs(),
         Commands::BootCompleted => {
