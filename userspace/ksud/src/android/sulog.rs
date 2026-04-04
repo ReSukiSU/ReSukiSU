@@ -12,7 +12,10 @@ use std::process::{Command, Stdio};
 use std::thread;
 use std::time::Duration;
 
-use crate::{defs, android::{ksucalls, module::module_config, utils}};
+use crate::{
+    android::{ksucalls, module::module_config, utils},
+    defs,
+};
 
 const KSU_EVENT_QUEUE_TYPE_DROPPED: u16 = u16::MAX;
 const KSU_EVENT_RECORD_FLAG_INTERNAL: u16 = 1;
