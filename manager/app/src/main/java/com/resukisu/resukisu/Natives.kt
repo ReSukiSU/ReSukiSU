@@ -68,6 +68,9 @@ object Natives {
     external fun isSuEnabled(): Boolean
     external fun setSuEnabled(enabled: Boolean): Boolean
 
+    external fun isSuLogEnabled(): Boolean
+    external fun setSuLogEnabled(enabled: Boolean): Boolean
+
     /**
      * Kernel module umount can be disabled temporarily.
      *  0: disabled

@@ -136,17 +136,23 @@
     <string name="selected_lkm">Đã chọn LKM: %s</string>
     <string name="save_log">Lưu nhật ký</string>
     <string name="log_saved">Nhật ký đã được lưu</string>
+    <!-- Module related -->
     <string name="module_install_confirm">Xác nhận cài đặt module %1$s？</string>
     <string name="unknown_module">Module không xác định</string>
+    <!-- Restore related -->
     <string name="restore_confirm_title">Xác nhận khôi phục module</string>
     <string name="restore_confirm_message">Hành động này sẽ ghi đè lên tất cả các module hiện có. Tiếp tục?</string>
     <string name="confirm">Xác nhận</string>
     <string name="cancel">Thoát</string>
+    <!-- Backup related -->
+    <!-- Restore related messages -->
     <string name="restore_success">Các module đã được khôi phục thành công, cần khởi động lại</string>
     <string name="restore_failed">Khôi phục thất bại: %1$s</string>
     <string name="restart_now">Khởi động lại ngay</string>
     <string name="unknown_error">Lỗi không xác định</string>
+    <!-- Command related -->
     <string name="command_execution_failed">Thực thi lệnh thất bại: %1$s</string>
+    <!-- Allowlist related -->
     <string name="allowlist_backup_success">Sao lưu danh sách cho phép thành công</string>
     <string name="allowlist_backup_failed">Sao lưu danh sách cho phép thất bại: %1$s</string>
     <string name="allowlist_restore_confirm_title">Xác nhận khôi phục danh sách cho phép</string>
@@ -241,7 +247,9 @@
     <string name="confirm_uninstall_content">KPM sau đây sẽ được gỡ cài đặt: %s</string>
     <string name="image_editor_hint">Sử dụng hai ngón tay để phóng to hình ảnh và một ngón tay kéo thả để điều chỉnh vị trí</string>
     <string name="reprovision">Chọn lại</string>
+    <!-- Kernel Flash Progress Related -->
     <string name="horizon_flash_complete">Flash hoàn tất</string>
+    <!-- Flash Status Related -->
     <string name="horizon_preparing">Chuẩn bị…</string>
     <string name="horizon_cleaning_files">Đang dọn dẹp các file…</string>
     <string name="horizon_copying_files">Đang sao chép các file…</string>
@@ -249,6 +257,7 @@
     <string name="horizon_patching_script">Đang vá tập lệnh Flash…</string>
     <string name="horizon_flashing">Flashing Kernel…</string>
     <string name="horizon_flash_complete_status">Flash hoàn tất</string>
+    <!-- Slot selection related strings -->
     <string name="select_slot_title">Chọn Slot Flash</string>
     <string name="select_slot_description">Vui lòng chọn Slot để Flash Boot</string>
     <string name="selected_slot">Slot đã chọn: %1$s</string>
@@ -256,15 +265,18 @@
     <string name="horizon_setting_target_slot">Cài đặt Slot được chỉ định</string>
     <string name="horizon_restoring_original_slot">Khôi phục Slot mặc định</string>
     <string name="current_slot">Slot hiện tại: %1$s </string>
+    <!-- Error Messages -->
     <string name="horizon_copy_failed">Sao chép thất bại</string>
     <string name="horizon_unknown_error">Lỗi không xác định</string>
     <string name="flash_failed_message">Flash thất bại</string>
+    <!-- lkm/gki install -->
     <string name="Lkm_install_methods">LKM cài đặt</string>
     <string name="kernel_version_log">Phiên bản Kernel: %1$s</string>
     <string name="tool_version_log">Sử dụng công cụ vá lỗi: %1$s</string>
     <string name="configuration">Cấu hình</string>
     <string name="app_settings">Cài đặt ứng dụng</string>
     <string name="tools">Công cụ</string>
+    <!--  String resources used in SuperUser -->
     <string name="no_apps_found">Không tìm thấy ứng dụng</string>
     <string name="selinux_enabled_toast">SELinux đã bật</string>
     <string name="selinux_disabled_toast">SELinux đã tắt</string>
@@ -277,8 +289,11 @@
     <string name="icon_switch_title">Thay thế icon</string>
     <string name="icon_switch_summary">Thay đổi icon SukiSU thành icon của KernelSU</string>
     <string name="icon_switched">Đã thay đổi icon</string>
+    <!-- KPM display settings -->
     <string name="show_kpm_info">Ẩn chức năng KPM</string>
     <string name="show_kpm_info_summary">Ẩn thông tin và chức năng của KPM ở trang chủ và thanh điều hướng</string>
+    <!-- Webui settings -->
+    <!-- DPI setting related strings -->
     <string name="app_dpi_title">Tuỳ chỉnh DPI</string>
     <string name="app_dpi_summary">Điều chỉnh DPI hiển thị</string>
     <string name="dpi_size_small">Nhỏ</string>
@@ -289,8 +304,10 @@
     <string name="dpi_apply_settings">Áp dụng</string>
     <string name="dpi_confirm_title">Xác nhận thay đổi DPI</string>
     <string name="dpi_confirm_message">Bạn có chắc chắn muốn thay đổi DPI của ứng dụng từ %1$d thành %2$d?</string>
+    <!-- Language settings related strings -->
     <string name="settings_language">Ngôn ngữ ứng dụng</string>
     <string name="language_system_default">Mặc định theo hệ thống</string>
+    <!-- Flash related -->
     <string name="error_code">Error code</string>
     <string name="check_log">Vui lòng kiểm tra nhật ký</string>
     <string name="installing_module">Đang cài đặt module %1$d/%2$d</string>
@@ -298,9 +315,11 @@
     <string name="module_download_error">Tải xuống module thất bại</string>
     <string name="warning_of_meta_module_title">Yêu cầu Siêu Module</string>
     <string name="warning_of_meta_module_summary">Module này muốn mount /system, Siêu Module sẽ xử lý việc đó. Nếu không, nó có thể không hoạt động</string>
+    <!-- 分类相关 -->
     <string name="category_all_apps">Tất cả</string>
     <string name="category_custom_apps">Tuỳ chỉnh</string>
     <string name="category_default_apps">Mặc định</string>
+    <!-- 排序相关 -->
     <string name="sort_name_asc">Tên (Tăng dần)</string>
     <string name="sort_name_desc">Tên (Giảm dần)</string>
     <string name="sort_install_time_new">Thời gian cài đặt (Mới)</string>
@@ -308,7 +327,9 @@
     <string name="sort_size_desc">Kích thước (Giảm dần)</string>
     <string name="sort_size_asc">Kích thước (Tăng dần)</string>
     <string name="sort_usage_freq">Tần suất sử dụng</string>
+    <!-- 状态相关 -->
     <string name="no_apps_in_category">Không có ứng dụng nào trong danh mục này</string>
+    <!-- 标签相关 -->
     <string name="deny_authorization">Huỷ bỏ uỷ quyền</string>
     <string name="grant_authorization">Uỷ quyền</string>
     <string name="unmount_modules">Umount modules</string>
@@ -319,9 +340,11 @@
     <string name="scroll_to_bottom">Xuống dưới</string>
     <string name="selected">Đã chọn</string>
     <string name="select">Chọn</string>
+    <!-- BottomSheet相关 -->
     <string name="menu_options">Tuỳ chọn Menu</string>
     <string name="sort_options">Sắp xếp theo</string>
     <string name="app_categories">Lựa chọn loại ứng dụng</string>
+    <!-- SuSFS Configuration -->
     <string name="susfs_config_title">Cấu hình SuSFS</string>
     <string name="susfs_config_description">Mô tả cấu hình</string>
     <string name="susfs_config_description_text">Tính năng này cho phép bạn tùy chỉnh giá trị SuSFS Uname và Giả mạo thời gian xây dựng. Nhập các giá trị bạn muốn đặt và nhấp vào \"Áp dụng\" để có hiệu lực</string>
@@ -333,12 +356,16 @@
     <string name="susfs_current_build_time">Thời gian xây dựng hiện tại: %s</string>
     <string name="susfs_reset_to_default">Reset về Default</string>
     <string name="susfs_apply">Áp dụng</string>
+    <!-- SuSFS Reset Confirmation -->
     <string name="susfs_reset_confirm_title">Xác nhận Đặt lại</string>
+    <!-- SuSFS Toast Messages -->
     <string name="susfs_binary_not_found">Không tìm thấy file ksu_susfs</string>
     <string name="susfs_command_failed">Thực thi lệnh SuSFS thất bại</string>
     <string name="susfs_command_error">Lỗi khi thực hiện lệnh SuSFS: %s</string>
     <string name="susfs_uname_set_success" formatted="false">SuSFS Uname và Thời gian xây dựng được thiết lập thành công: %s, %s</string>
+    <!-- SuSFS Settings Item -->
     <string name="susfs_config_setting_title">Cấu hình SuSFS</string>
+    <!-- 开机自启动相关 -->
     <string name="susfs_autostart_title">Tự động khởi động</string>
     <string name="susfs_autostart_description">Tự động áp dụng tất cả các cấu hình không phải mặc định khi khởi động lại</string>
     <string name="susfs_autostart_requirement">Cấu hình cần được thêm vào để kích hoạt</string>
@@ -346,27 +373,33 @@
     <string name="susfs_autostart_disable_failed">Vô hiệu hoá tính năng tự động khởi động thất bại!</string>
     <string name="susfs_autostart_error">Lỗi cấu hình tự động khởi động: %s</string>
     <string name="susfs_no_config_to_autostart">Không có cấu hình nào có sẵn để tự động khởi động</string>
+    <!-- SuSFS Tab Titles -->
     <string name="susfs_tab_basic_settings">Cài đặt cơ bản</string>
     <string name="susfs_tab_sus_paths">Đường dẫn SuS</string>
     <string name="susfs_tab_path_settings">Cài đặt Đường dẫn</string>
     <string name="susfs_tab_enabled_features">Trạng thái tính năng</string>
+    <!-- SuSFS Path Management -->
     <string name="susfs_add_sus_path">Thêm Đường dẫn SuS</string>
     <string name="susfs_sus_path_added_success">Đường dẫn SuS đã được thêm thành công</string>
     <string name="susfs_path_not_found_error">Lỗi không tìm thấy đường dẫn</string>
     <string name="susfs_path_label">Đường dẫn</string>
     <string name="susfs_path_placeholder">Ví dụ: /system/addon.d</string>
     <string name="susfs_no_paths_configured">Không có Đường dẫn SuS nào được cấu hình</string>
+    <!-- SuSFS Reset Categories -->
     <string name="susfs_reset_paths_title">Đặt lại Đường dẫn SuS</string>
     <string name="susfs_reset_paths_message">Thao tác này sẽ xóa tất cả các cấu hình Đường dẫn SuS. Bạn có chắc chắn muốn tiếp tục không?</string>
     <string name="susfs_reset_path_title">Reset Cài đặt Đường dẫn</string>
+    <!-- SuSFS Path Settings -->
     <string name="susfs_android_data_path_label">Đường dẫn Android Data</string>
     <string name="susfs_sdcard_path_label">Đường dẫn SD Card</string>
     <string name="susfs_set_android_data_path">Đặt Đường dẫn Android Data</string>
     <string name="susfs_set_sdcard_path">Đặt Đường dẫn SD Card</string>
+    <!-- SuSFS Enabled Features -->
     <string name="susfs_enabled_features_description">Hiển thị trạng thái tính năng hiện tại của SuSFS</string>
     <string name="susfs_no_features_found">Không tìm thấy thông tin trạng thái tính năng</string>
     <string name="susfs_feature_enabled">Đã bật</string>
     <string name="susfs_feature_disabled">Đã tắt</string>
+    <!-- Feature Labels -->
     <string name="sus_path_feature_label">Hỗ trợ Đường dẫn SuS</string>
     <string name="spoof_uname_feature_label">Hỗ trợ giả mạo Uname</string>
     <string name="spoof_cmdline_feature_label">Giả mạo Cmdline/Bootconfig</string>
@@ -375,6 +408,7 @@
     <string name="hide_symbols_feature_label">Ẩn biểu tượng KSU SuSFS</string>
     <string name="sus_kstat_feature_label">Hỗ trợ SuS Kstat</string>
     <string name="sus_map_feature_label">Hỗ trợ SuS Map</string>
+    <!-- 可切换状态 -->
     <string name="susfs_feature_configurable">Nhấn để bật/tắt ghi nhật ký</string>
     <string name="susfs_enable_log_label">Kích hoạt nhật ký SuSFS</string>
     <string name="susfs_log_config_description">Bật hoặc tắt ghi nhật ký cho SuSFS</string>
@@ -383,6 +417,7 @@
     <string name="susfs_log_disabled">Tắt ghi nhật ký SuSFS</string>
     <string name="module_update_json">JSON cập nhật</string>
     <string name="module_update_json_copied">JSON URL cập nhật đã được sao chép vào clipboard</string>
+    <!-- Settings related strings -->
     <string name="show_more_module_info">Hiển thị \"JSON URLs\"</string>
     <string name="show_more_module_info_summary">Hiển thị thông tin đường dẫn cập nhật \"JSON URLs\" của module</string>
     <string name="susfs_execution_location_label">Vị trí thực thi</string>
@@ -397,8 +432,10 @@
     <string name="susfs_slot_use_uname">Sử dụng Uname</string>
     <string name="susfs_slot_use_build_time">Sử dụng Thời gian xây dựng</string>
     <string name="susfs_slot_info_unavailable">Không thể lấy thông tin Slot</string>
+    <!-- SuSFS 自启动相关字符串 -->
     <string name="susfs_autostart_enabled_success">Module tự động khởi động SuSFS đã bật, đường dẫn module: %s</string>
     <string name="susfs_autostart_disabled_success">Module tự động khởi động SuSFS đã bị vô hiệu hoá</string>
+    <!-- SuSFS Kstat相关字符串 -->
     <string name="susfs_tab_kstat_config">Cấu hình Kstat</string>
     <string name="kstat_static_config_added">Đã thêm cấu hình Kstat tĩnh: %1$s</string>
     <string name="kstat_config_removed">Đã xoá cấu hình Kstat: %1$s</string>
@@ -421,6 +458,7 @@
     <string name="static_kstat_config">Cấu hình Kstat tĩnh</string>
     <string name="kstat_path_management">Quản lý Đường dẫn Kstat</string>
     <string name="no_kstat_config_message">Chưa có cấu hình Kstat, hãy nhấp vào nút bên dưới để thêm</string>
+    <!-- SuSFS Mount Hiding Control Related Strings -->
     <string name="susfs_hide_mounts_control_title">Điều khiển ẩn SuS Mount</string>
     <string name="susfs_hide_mounts_control_description">Kiểm soát hành vi ẩn của SuS Mount với các tiến trình</string>
     <string name="susfs_hide_mounts_for_all_procs_label">Ẩn SuS Mount khỏi tất cả các tiến trình</string>
@@ -432,9 +470,12 @@
     <string name="susfs_hide_mounts_current_setting">Cài đặt hiện tại: %s</string>
     <string name="susfs_hide_mounts_setting_all">Ẩn khỏi tất cả các tiến trình</string>
     <string name="susfs_hide_mounts_setting_non_ksu">Chỉ ẩn đối với các tiến trình không phải KSU</string>
+    <string name="kernel_simple_kernel">Hiển thị tóm tắt \"Phiên bản Kernel\"</string>
+    <string name="kernel_simple_kernel_summary">Tóm tắt hiển thị phiên bản Kernel cho ngắn gọn</string>
     <string name="susfs_android_data_path_set">Đường dẫn Android Data đã được đặt thành: %s</string>
     <string name="susfs_sdcard_path_set">Đường dẫn SD Card đã được đặt thành: %s</string>
     <string name="susfs_path_setup_warning">Thiết lập đường dẫn có thể không thành công hoàn toàn, nhưng đường dẫn SuS sẽ tiếp tục được thêm vào</string>
+    <!-- 备份和还原相关字符串 -->
     <string name="susfs_backup_title">Sao lưu</string>
     <string name="susfs_backup_description">Tạo bản sao lưu cho tất cả các cấu hình SuSFS. File sao lưu sẽ bao gồm tất cả các thiết lập, đường dẫn và thông tin cấu hình</string>
     <string name="susfs_backup_create">Tạo bản sao lưu</string>
@@ -498,6 +539,7 @@
     <string name="no_active_manager">Trình quản lý đang không hoạt động</string>
     <string name="home_zygisk_implement">Triển khai Zygisk</string>
     <string name="home_meta_module_implement">Triển khai Siêu Module</string>
+    <!-- 循环路径相关 -->
     <string name="susfs_tab_sus_loop_paths">Đường dẫn Vòng lặp SuS</string>
     <string name="susfs_add_sus_loop_path">Thêm Đường dẫn Vòng lặp SuS</string>
     <string name="susfs_edit_sus_loop_path">Chỉnh sửa Đường dẫn Vòng lặp SuS</string>
@@ -512,6 +554,7 @@
     <string name="susfs_loop_path_invalid_location">Lỗi: Đường dẫn Vòng lặp không thể nằm trong thư mục /storage/ hoặc /sdcard/</string>
     <string name="loop_paths_section">Đường dẫn Vòng lặp</string>
     <string name="add_loop_path">Thêm Đường dẫn Vòng lặp</string>
+    <!-- 循环路径功能描述 -->
     <string name="sus_loop_paths_description_title">Cấu hình Đường dẫn Vòng lặp</string>
     <string name="sus_loop_paths_description_text">Đường dẫn Vòng lặp được đổi tên thành SUS_PATH mỗi khi một ứng dụng không phải root hoặc dịch vụ cô lập được khởi động. Điều này giúp giải quyết vấn đề đường dẫn đã thêm có thể trở nên không hợp lệ do trạng thái inode được đặt lại hoặc inode được tạo lại trong Kernel</string>
     <string name="avc_log_spoofing">Giả mạo nhật ký AVC</string>
@@ -523,6 +566,7 @@ Bật: Kích hoạt tính năng giả mạo sus tcontext của \'su\' thành \'u
 - Giá trị này được đặt thành \'0\' theo mặc định trong kernel\n
 - Việc bật tính năng này đôi khi có thể khiến các nhà phát triển khó xác định nguyên nhân của các vấn đề về quyền hoặc SELinux khi gỡ lỗi, vì vậy người dùng nên tắt tính năng này khi gỡ lỗi</string>
     <string name="home_hook_type">Chế độ Hook</string>
+    <!-- KPM patching related strings -->
     <string name="kpm_patch_options">Vá KPM</string>
     <string name="kpm_patch_description">Thêm tính năng KPM</string>
     <string name="enable_kpm_patch">Vá KPM</string>
@@ -533,6 +577,7 @@ Bật: Kích hoạt tính năng giả mạo sus tcontext của \'su\' thành \'u
     <string name="kpm_undo_patch_enabled">Hoàn tác Vá KPM đã bật</string>
     <string name="kpm_patch_mode">Chế độ Vá KPM</string>
     <string name="kpm_undo_patch_mode">Chế độ hoàn tác Vá KPM</string>
+    <!-- KPM workflow related -->
     <string name="kpm_preparing_tools">Chuẩn bị công cụ Vá KPM</string>
     <string name="kpm_applying_patch">Áp dụng Vá KPM</string>
     <string name="kpm_undoing_patch">Hoàn tác Vá KPM</string>
@@ -540,13 +585,16 @@ Bật: Kích hoạt tính năng giả mạo sus tcontext của \'su\' thành \'u
     <string name="kpm_patch_success">Đã vá KPM thành công</string>
     <string name="kpm_undo_patch_success">Hoàn tác vá KPM thành công</string>
     <string name="kpm_file_repacked">Nén lại file thành công</string>
+    <!-- KPM error messages -->
     <string name="kpm_extract_zip_failed">Giải nén file thất bại</string>
     <string name="kpm_image_file_not_found">Không tìm thấy file image</string>
     <string name="kpm_patch_failed">Vá KPM thất bại</string>
     <string name="kpm_undo_patch_failed">Hoàn tác Vá KPM thất bại</string>
     <string name="kpm_patch_operation_failed">Quá trình Vá KPM thất bại: %s</string>
+    <!-- KPM option radio group strings -->
     <string name="kpm_follow_kernel_file">Mặc định theo file Kernel</string>
     <string name="kpm_follow_kernel_description">Sử dụng file kernel mặc định mà không có bất kỳ sửa đổi nào về KPM</string>
+    <!-- UID Scanner Settings -->
     <string name="uid_auto_scan_title">Chế độ quét danh sách ứng dụng người dùng</string>
     <string name="uid_auto_scan_summary">Bật tuỳ chọn này thì chế độ người dùng sẽ được sử dụng để quét danh sách ứng dụng nhằm cải thiện tính ổn định (nếu danh sách ứng dụng quét kernel bị kẹt và xảy ra các sự cố khác, bạn có thể thử bật tùy chọn này)</string>
     <string name="uid_multi_user_scan_title">Quét ứng dụng nhiều người dùng</string>
@@ -557,6 +605,7 @@ Bật: Kích hoạt tính năng giả mạo sus tcontext của \'su\' thành \'u
     <string name="clean_runtime_environment_confirm">Bạn có chắc chắn muốn dọn dẹp môi trường hoạt động không? Thao tác này sẽ dừng dịch vụ quét và xóa các file liên quan</string>
     <string name="clean_runtime_environment_success">Dọn dẹp môi trường hoạt động thành công</string>
     <string name="clean_runtime_environment_failed">Dọn dẹp môi trường hoạt động thất bại</string>
+    <!-- 确认安装相关字符串 -->
     <string name="confirm_installation">Xác nhận cài đặt</string>
     <string name="confirm_multiple_installation">Xác nhận cài đặt (%d files)</string>
     <string name="install_confirm">Cài đặt</string>
@@ -567,6 +616,7 @@ Bật: Kích hoạt tính năng giả mạo sus tcontext của \'su\' thành \'u
     <string name="author">Tác giả</string>
     <string name="description">Mô tả</string>
     <string name="supported_devices">Thiết bị được hỗ trợ</string>
+    <!-- SUS Map related strings -->
     <string name="susfs_tab_sus_maps">SuS Maps</string>
     <string name="susfs_sus_map_label">Đường dẫn thư viện</string>
     <string name="susfs_add_sus_map">Thêm SuS Map</string>
@@ -582,28 +632,7 @@ Bật: Kích hoạt tính năng giả mạo sus tcontext của \'su\' thành \'u
     <string name="sus_maps_description_text">Ẩn đường dẫn tệp của bộ nhớ map khỏi /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap]. Lưu ý: Tính năng này không hỗ trợ ẩn bộ nhớ map ẩn danh, cũng như không thể ẩn các hook nội tuyến hoặc hook PLT do chính thư viện được đưa vào gây ra</string>
     <string name="sus_maps_warning">Quan trọng: Đối với các ứng dụng có cơ chế phát hiện tấn công mạnh mẽ, tính năng này có thể không hiệu quả trong việc bỏ qua khả năng phát hiện</string>
     <string name="sus_maps_debug_info">Trước tiên, hãy tìm PID và UID của ứng dụng đích bằng lệnh ps -enf. Sau đó kiểm tra các đường dẫn liên quan trong /proc/&lt;pid&gt;/maps và so sánh chúng với số thiết bị trong /proc/1/mountinfo để đảm bảo tính nhất quán. Chỉ khi số thiết bị khớp nhau thì chức năng ẩn map mới hoạt động bình thường</string>
-    <string name="log_viewer_title">Trình xem nhật ký</string>
-    <string name="log_viewer_back">Trở lại</string>
-    <string name="log_viewer_search">Tìm kiếm</string>
-    <string name="log_viewer_clear_logs">Xoá nhật ký</string>
-    <string name="log_viewer_clear_logs_confirm">Bạn có chắc chắn muốn xóa tệp nhật ký đã chọn không? Thao tác này không thể hoàn tác</string>
-    <string name="log_viewer_logs_cleared">Đã xoá nhật ký thành công</string>
-    <string name="log_viewer_filter_type">Lọc theo loại</string>
-    <string name="log_viewer_all_types">Tất cả các loại</string>
-    <string name="log_viewer_showing_entries">Hiển thị %1$d trong tổng %2$d nhật ký</string>
-    <string name="log_viewer_no_logs">Không tìm thấy nhật ký nào</string>
-    <string name="log_viewer_no_matching_logs">Không tìm thấy nhật ký nào phù hợp</string>
-    <string name="log_viewer_refresh">Làm mới</string>
-    <string name="log_viewer_search_placeholder">Tìm kiếm theo UID, lệnh hoặc chi tiết…</string>
-    <string name="log_viewer_clear_search">Xoá tìm kiếm</string>
-    <string name="log_viewer_view_logs">Xem nhật ký sử dụng</string>
-    <string name="log_viewer_view_logs_summary">Xem nhật ký truy cập Superuser</string>
-    <string name="log_viewer_exclude_subtypes">Loại trừ các phân loại</string>
-    <string name="log_viewer_exclude_current_app">Ứng dụng hiện tại</string>
-    <string name="log_viewer_page_info">Trang: %1$d/%2$d | Tổng nhật ký: %3$d</string>
-    <string name="log_viewer_too_many_logs">Quá nhiều nhật ký, chỉ hiển thị %1$d nhật ký mới nhất</string>
-    <string name="log_viewer_load_more">Đang load thêm nhật ký</string>
-    <string name="log_viewer_all_logs_loaded">Tất cả nhật ký đã được hiển thị</string>
+    <!-- Log Viewer -->
     <string name="incompatible_kernel_msg">Trình quản lý hiện tại không tương thích với Kernel này! Vui lòng nâng cấp Kernel lên phiên bản %2$d hoặc cao hơn (hiện tại là %1$d)</string>
     <string name="umount_path_manager">Quản lý Đường dẫn Umount</string>
     <string name="umount_path_manager_summary">Quản lý Đường dẫn Kernel Umount</string>

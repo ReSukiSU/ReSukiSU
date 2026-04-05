@@ -210,6 +210,7 @@
     <string name="yes">예</string>
     <string name="no">아니오</string>
     <string name="failed_reboot">다시 시작 실패</string>
+    <string name="kpm_title">KPM</string>
     <string name="kpm_version">버전</string>
     <string name="kpm_author">제작자</string>
     <string name="kpm_uninstall">제거</string>
@@ -588,29 +589,6 @@
     <string name="sus_maps_description_text">메모리 매핑의 실제 파일 경로를 /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap]에서 숨깁니다. 참고: 이 기능은 익명 메모리 매핑을 숨기거나 삽입된 라이브러리 자체로 인한 인라인 Hook 또는 PLT Hook을 숨길 수 없습니다.</string>
     <string name="sus_maps_warning">중요 공지: 인젝션 감지 메커니즘이 잘 구현된 앱의 경우, 이 기능이 감지를 효과적으로 우회하지 못할 수 있습니다.</string>
     <string name="sus_maps_debug_info">먼저 ps -enf를 사용하여 대상 앱의 PID 및 UID를 찾은 다음 /proc/&lt;pid&gt;/maps의 관련 경로를 확인하고, 기기 번호를 /proc/1/mountinfo와 비교하여 일치하는지 확인하세요. 기기 번호가 일치해야 맵 숨기기 기능이 제대로 작동할 수 있습니다.</string>
-    <string name="log_viewer_title">로그 뷰어</string>
-    <string name="log_viewer_back">뒤로 가기</string>
-    <string name="log_viewer_search">검색</string>
-    <string name="log_viewer_clear_logs">로그 지우기</string>
-    <string name="log_viewer_clear_logs_confirm">선택한 로그 파일을 지울까요? 이 작업은 실행 취소할 수 없습니다.</string>
-    <string name="log_viewer_logs_cleared">로그 지우기 성공</string>
-    <string name="log_viewer_filter_type">유형별 필터</string>
-    <string name="log_viewer_all_types">모든 유형</string>
-    <string name="log_viewer_showing_entries">%1$d / %2$d개 항목 표시 중</string>
-    <string name="log_viewer_no_logs">로그를 찾을 수 없음</string>
-    <string name="log_viewer_no_matching_logs">일치하는 로그를 찾을 수 없음</string>
-    <string name="log_viewer_refresh">새로고침</string>
-    <string name="log_viewer_raw_log">원본 로그</string>
-    <string name="log_viewer_search_placeholder">UID, 명령, 세부 정보로 검색…</string>
-    <string name="log_viewer_clear_search">검색 지우기</string>
-    <string name="log_viewer_view_logs">사용 로그 보기</string>
-    <string name="log_viewer_view_logs_summary">KernelSU 슈퍼유저 액세스 로그를 봅니다.</string>
-    <string name="log_viewer_exclude_subtypes">하위 유형 제외</string>
-    <string name="log_viewer_exclude_current_app">현재 앱</string>
-    <string name="log_viewer_page_info">페이지: %1$d/%2$d | 총 로그 수: %3$d</string>
-    <string name="log_viewer_too_many_logs">로그가 너무 많아 최신 %1$d개 항목만 표시합니다.</string>
-    <string name="log_viewer_load_more">로그 더 불러오기</string>
-    <string name="log_viewer_all_logs_loaded">로그가 모두 표시됨</string>
     <string name="incompatible_kernel_msg">    현재 매니저는 이 커널과 호환되지 않습니다! 커널을 버전 %2$d 이상으로 업그레이드하세요. (현재 %1$d)
     </string>
     <string name="umount_path_manager">마운트 해제 경로 관리</string>

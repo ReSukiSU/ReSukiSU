@@ -47,6 +47,7 @@
     <string name="reboot_to_apply">Перезагрузите, чтобы изменения вступили в силу</string>
     <string name="module_magisk_conflict">Модули недоступны из-за конфликта с Magisk!</string>
     <string name="home_learn_kernelsu">Узнайте о KernelSU</string>
+    <string name="home_learn_kernelsu_url">https://kernelsu.org/ru_RU/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">Узнайте, как установить KernelSU и использовать модули</string>
     <string name="home_support_title">Поддержите нас</string>
     <string name="home_support_content">KernelSU был и всегда будет бесплатным и открытым проектом. Однако Вы всегда можете поддержать нас, отправив небольшое пожертвование.</string>
@@ -128,17 +129,23 @@
     <string name="selected_lkm">Выбран LKM: %s</string>
     <string name="save_log">Сохранить логи</string>
     <string name="log_saved">Логи сохранены</string>
+    <!-- Module related -->
     <string name="module_install_confirm">подтвердите установку модуля %1$s?</string>
     <string name="unknown_module">неизвестный модуль</string>
+    <!-- Restore related -->
     <string name="restore_confirm_title">Подтвердите восстановление модуля</string>
     <string name="restore_confirm_message">Эта операция перезапишет все существующие модули. Продолжить?</string>
     <string name="confirm">Подтвердить</string>
     <string name="cancel">Отмена</string>
+    <!-- Backup related -->
+    <!-- Restore related messages -->
     <string name="restore_success">Модули восстановлены, требуется перезагрузка</string>
     <string name="restore_failed">Ошибка восстановления: %1$s</string>
     <string name="restart_now">Перезапустить сейчас</string>
     <string name="unknown_error">Неизвестная ошибка</string>
+    <!-- Command related -->
     <string name="command_execution_failed">Выполнение команды не удалось: %1$s</string>
+    <!-- Allowlist related -->
     <string name="allowlist_backup_success">Резервная копия создана успешно</string>
     <string name="allowlist_backup_failed">Ошибка резервного копирования списка: %1$s</string>
     <string name="allowlist_restore_confirm_title">Подтвердите восстановление списка</string>
@@ -229,7 +236,9 @@
     <string name="confirm_uninstall_content">Следующие KPM будут удалены: %s</string>
     <string name="image_editor_hint">Используйте два пальца для увеличения изображения, и один палец для изменения положения</string>
     <string name="reprovision">Реализация</string>
+    <!-- Kernel Flash Progress Related -->
     <string name="horizon_flash_complete">Прошивка завершена</string>
+    <!-- Flash Status Related -->
     <string name="horizon_preparing">Подготовка…</string>
     <string name="horizon_cleaning_files">Очистка файлов…</string>
     <string name="horizon_copying_files">Копирование файлов…</string>
@@ -237,6 +246,7 @@
     <string name="horizon_patching_script">Изменение флэш-скрипта…</string>
     <string name="horizon_flashing">Прошивка ядра…</string>
     <string name="horizon_flash_complete_status">Прошивка завершена</string>
+    <!-- Slot selection related strings -->
     <string name="select_slot_title">Выберите слот для прошивки</string>
     <string name="select_slot_description">Пожалуйста, выберите целевой слот для прошивки загрузки</string>
     <string name="slot_a">Слот A</string>
@@ -246,9 +256,11 @@
     <string name="horizon_setting_target_slot">Установка указанного слота</string>
     <string name="horizon_restoring_original_slot">Восстановить</string>
     <string name="current_slot">Текущий слот по умолчанию：%1$s </string>
+    <!-- Error Messages -->
     <string name="horizon_copy_failed">Копирование не удалось</string>
     <string name="horizon_unknown_error">Неизвестная ошибка</string>
     <string name="flash_failed_message">Установка не выполнена</string>
+    <!-- lkm/gki install -->
     <string name="Lkm_install_methods">Починить/установить LKM</string>
     <string name="GKI_install_methods">Прошить AnyKernel3</string>
     <string name="kernel_version_log">Ядро</string>
@@ -256,6 +268,7 @@
     <string name="configuration">Настройка</string>
     <string name="app_settings">Настройки приложения</string>
     <string name="tools">Инструменты</string>
+    <!--  String resources used in SuperUser -->
     <string name="no_apps_found">Приложение не найдено</string>
     <string name="selinux_enabled_toast">SELinux включен</string>
     <string name="selinux_disabled_toast">SELinux отключен</string>
@@ -268,8 +281,11 @@
     <string name="icon_switch_title">Альт. иконка</string>
     <string name="icon_switch_summary">Поменять иконку приложения на иконку KernelSU</string>
     <string name="icon_switched">Иконка поменяна</string>
+    <!-- KPM display settings -->
     <string name="show_kpm_info">Скрыть статус KPM</string>
     <string name="show_kpm_info_summary">Скрывать информацию и функции KPM на домашней странице и панели навигации</string>
+    <!-- Webui settings -->
+    <!-- DPI setting related strings -->
     <string name="app_dpi_title">Изменить DPI</string>
     <string name="app_dpi_summary">Регулировка плотности экрана только для текущего приложения</string>
     <string name="dpi_size_small">маленький</string>
@@ -280,18 +296,22 @@
     <string name="dpi_apply_settings">Применить настройки DPI</string>
     <string name="dpi_confirm_title">Подтвердите изменение DPI</string>
     <string name="dpi_confirm_message">Вы уверены, что хотите изменить DPI приложения с %1$d на %2$d?</string>
+    <!-- Language settings related strings -->
     <string name="settings_language">Язык приложения</string>
     <string name="language_system_default">Как в системе</string>
+    <!-- Flash related -->
     <string name="error_code">код ошибки</string>
     <string name="check_log">Пожалуйста, проверьте журнал</string>
     <string name="installing_module">Модуль устанавливается %1$d/%2$d</string>
     <string name="module_failed_count">%d не удалось установить новый модуль</string>
     <string name="module_download_error">Ошибка загрузки модуля</string>
     <string name="kernel_flashing">Прошить ядро</string>
+    <!-- 分类相关 -->
     <string name="category_all_apps">Все</string>
     <string name="category_root_apps">Рут-доступ</string>
     <string name="category_custom_apps">Пользовательские</string>
     <string name="category_default_apps">Стандартные</string>
+    <!-- 排序相关 -->
     <string name="sort_name_asc">Название (по возрастанию)</string>
     <string name="sort_name_desc">Название (по убыванию)</string>
     <string name="sort_install_time_new">Время установки (новые)</string>
@@ -299,7 +319,9 @@
     <string name="sort_size_desc">Размер (по убыванию)</string>
     <string name="sort_size_asc">Размер (по возрастанию)</string>
     <string name="sort_usage_freq">Частота использования</string>
+    <!-- 状态相关 -->
     <string name="no_apps_in_category">В этой категории нет приложений</string>
+    <!-- 标签相关 -->
     <string name="deny_authorization">Доступ отклонён</string>
     <string name="grant_authorization">Доступ выдан</string>
     <string name="unmount_modules">Размонтирование модулей</string>
@@ -310,9 +332,11 @@
     <string name="scroll_to_bottom">Вниз</string>
     <string name="selected">Выбранные</string>
     <string name="select">опция</string>
+    <!-- BottomSheet相关 -->
     <string name="menu_options">Настройки списка</string>
     <string name="sort_options">Сортировка</string>
     <string name="app_categories">Выбор типа приложения</string>
+    <!-- SuSFS Configuration -->
     <string name="susfs_config_title">Конфигурация SuSFS</string>
     <string name="susfs_config_description">Описание конфигурации</string>
     <string name="susfs_config_description_text">Эта функция позволяет вам настраивать переменную uname для SuSFS. Впишите значение и нажмите \"Применить\" для изменения.</string>
@@ -324,12 +348,16 @@
     <string name="susfs_current_build_time">Текущее время сборки: %s</string>
     <string name="susfs_reset_to_default">Значение по умолчанию</string>
     <string name="susfs_apply">Применить</string>
+    <!-- SuSFS Reset Confirmation -->
     <string name="susfs_reset_confirm_title">Подтвердить сброс</string>
+    <!-- SuSFS Toast Messages -->
     <string name="susfs_binary_not_found">Не удалось найти файл ksu_susfs</string>
     <string name="susfs_command_failed">Выполнение команды SuSFS не удалось</string>
     <string name="susfs_command_error">Ошибка выполнения команды SuSFS: %s</string>
     <string name="susfs_uname_set_success" formatted="false">Значение uname для SuSFS установлено успешно: %s</string>
+    <!-- SuSFS Settings Item -->
     <string name="susfs_config_setting_title">Конфигурация SuSFS</string>
+    <!-- 开机自启动相关 -->
     <string name="susfs_autostart_title">Автозапуск</string>
     <string name="susfs_autostart_description">Автоматически применять все конфигурации не по умолчанию при перезагрузке</string>
     <string name="susfs_autostart_requirement">Для включения необходимо добавить конфигурацию</string>
@@ -337,27 +365,33 @@
     <string name="susfs_autostart_disable_failed">Не удалось отключить автозапуск</string>
     <string name="susfs_autostart_error">Ошибка автозапуска конфигурации: %s</string>
     <string name="susfs_no_config_to_autostart">Нет доступных конфигураций для автозапуска</string>
+    <!-- SuSFS Tab Titles -->
     <string name="susfs_tab_basic_settings">Базовые настройки</string>
     <string name="susfs_tab_sus_paths">SUS пути</string>
     <string name="susfs_tab_path_settings">Настройки пути</string>
     <string name="susfs_tab_enabled_features">Статус включённых функций</string>
+    <!-- SuSFS Path Management -->
     <string name="susfs_add_sus_path">Добавить SUS путь</string>
     <string name="susfs_sus_path_added_success">Путь SUS успешно добавлен</string>
     <string name="susfs_path_not_found_error">Ошибка пути</string>
     <string name="susfs_path_label">Путь</string>
     <string name="susfs_path_placeholder">например: /system/addon.d</string>
     <string name="susfs_no_paths_configured">SUS пути не настроены</string>
+    <!-- SuSFS Reset Categories -->
     <string name="susfs_reset_paths_title">Сбросить SUS пути</string>
     <string name="susfs_reset_paths_message">Это очистит все конфигурации пути SUS. Вы уверены, что хотите продолжить?</string>
     <string name="susfs_reset_path_title">Сбросить настройки пути</string>
+    <!-- SuSFS Path Settings -->
     <string name="susfs_android_data_path_label">Путь к данным Android</string>
     <string name="susfs_sdcard_path_label">Путь к SD-карте</string>
     <string name="susfs_set_android_data_path">Задать путь к данным Android</string>
     <string name="susfs_set_sdcard_path">Задать путь к SD-карте</string>
+    <!-- SuSFS Enabled Features -->
     <string name="susfs_enabled_features_description">Показывать текущее состояние функций SuSFS</string>
     <string name="susfs_no_features_found">Информация о состоянии объектов не найдена</string>
     <string name="susfs_feature_enabled">Включено</string>
     <string name="susfs_feature_disabled">Выключено</string>
+    <!-- Feature Labels -->
     <string name="sus_path_feature_label">Поддержка SUS пути</string>
     <string name="spoof_uname_feature_label">Поддержка подмены uname</string>
     <string name="spoof_cmdline_feature_label">Подмена Cmdline/Bootconfig</string>
@@ -365,6 +399,7 @@
     <string name="enable_log_feature_label">Поддержка логов</string>
     <string name="hide_symbols_feature_label">Скрытие KSU SUSFS Symbols</string>
     <string name="sus_kstat_feature_label">Поддержка SUS Kstat</string>
+    <!-- 可切换状态 -->
     <string name="susfs_feature_configurable">Настраиваемые функции SuSFS</string>
     <string name="susfs_enable_log_label">SuSFS включить лог</string>
     <string name="susfs_log_config_description">Включить или отключить логирование для SuSFS</string>
@@ -373,6 +408,7 @@
     <string name="susfs_log_disabled">Выключить логирование SuSFS</string>
     <string name="module_update_json">JSON обновления</string>
     <string name="module_update_json_copied">JSON ссылка обновления скопирована в буфер обмена</string>
+    <!-- Settings related strings -->
     <string name="show_more_module_info">Показать больше информации о модуле</string>
     <string name="show_more_module_info_summary">Показывать доп. информацию о модулях, такую как JSON ссылку для обновления</string>
     <string name="susfs_execution_location_label">Место выполнения</string>
@@ -388,8 +424,10 @@
     <string name="susfs_slot_use_uname">Использовать Uname</string>
     <string name="susfs_slot_use_build_time">Использовать время сборки</string>
     <string name="susfs_slot_info_unavailable">Не удается получить информацию о слоте</string>
+    <!-- SuSFS 自启动相关字符串 -->
     <string name="susfs_autostart_enabled_success">SuSFS автозапуск модуля включен, путь к модулям: %s</string>
     <string name="susfs_autostart_disabled_success">SuSFS модуль автозапуска отключен</string>
+    <!-- SuSFS Kstat相关字符串 -->
     <string name="susfs_tab_kstat_config">Конфигурация Kstat</string>
     <string name="kstat_static_config_added">Добавлена статическая конфигурация Kstat: %1$s</string>
     <string name="kstat_config_removed">Конфигурация Kstat удалена: %1$s</string>
@@ -412,6 +450,7 @@
     <string name="static_kstat_config">Статическая конфигурация Kstat</string>
     <string name="kstat_path_management">Управление путями Kstat</string>
     <string name="no_kstat_config_message">Пока нет конфигурации Kstat, нажмите кнопку выше, чтобы добавить</string>
+    <!-- SuSFS Mount Hiding Control Related Strings -->
     <string name="susfs_hide_mounts_control_title">Контроль скрытия SUS монтирования</string>
     <string name="susfs_hide_mounts_control_description">Управление режимом скрытия SUS монтирования для процессов</string>
     <string name="susfs_hide_mounts_for_all_procs_label">Скрыть монтирования SUS для всех процессов</string>
@@ -423,9 +462,12 @@
     <string name="susfs_hide_mounts_current_setting">Текущие настройки: %s</string>
     <string name="susfs_hide_mounts_setting_all">Скрыть для всех процессов</string>
     <string name="susfs_hide_mounts_setting_non_ksu">Скрыть только для процессов, не связанных с KSU</string>
+    <string name="kernel_simple_kernel">Скрыть доп. информацию о ядре</string>
+    <string name="kernel_simple_kernel_summary">Включить или отключить чистый режим, отображаемой версии ядра SukiSU</string>
     <string name="susfs_android_data_path_set">Путь к данным Android был установлен на: %s</string>
     <string name="susfs_sdcard_path_set">Путь к SD-карте был установлен на: %s</string>
     <string name="susfs_path_setup_warning">Установка пути может быть не вполне успешной, но SUS пути будут добавлены</string>
+    <!-- 备份和还原相关字符串 -->
     <string name="susfs_backup_title">Резервное копирование</string>
     <string name="susfs_backup_description">Создайте резервную копию всех конфигураций SuSFS. Файл резервной копии будет содержать все настройки, пути и конфигурации.</string>
     <string name="susfs_backup_create">Создать резервную копию</string>
@@ -488,6 +530,7 @@
     <string name="multi_manager_list">Активный менеджер</string>
     <string name="no_active_manager">Нет активного менеджера</string>
     <string name="home_zygisk_implement">Реализация Zygisk</string>
+    <!-- 循环路径相关 -->
     <string name="susfs_tab_sus_loop_paths">Пути цикла SUS</string>
     <string name="susfs_add_sus_loop_path">Добавить путь SUS </string>
     <string name="susfs_edit_sus_loop_path">Редактировать путь SUS</string>
@@ -502,6 +545,7 @@
     <string name="susfs_loop_path_invalid_location">Ошибка: пути не могут быть внутри /storage/ или /sdcard/ каталогов</string>
     <string name="loop_paths_section">Циклические пути</string>
     <string name="add_loop_path">Добавить циклический путь</string>
+    <!-- 循环路径功能描述 -->
     <string name="sus_loop_paths_description_title">Конфигурация пути цикла</string>
     <string name="sus_loop_paths_description_text">Пути цикла повторно отмечены как SUS_PATH в каждом пользовательском приложении, не являющемся root, или изолированном запуске службы. Это помогает решить проблемы, в которых добавленные пути могут иметь сброс статуса inode или повторно созданные inode в ядре.</string>
     <string name="avc_log_spoofing">Спуф AVC лога</string>
@@ -512,6 +556,7 @@
 - Значение по умолчанию в ядре установлено как \'0\'\n
 - Включение этой опции иногда затрудняет разработчикам определение причины при отладке проблем, связанных с разрешениями или SELinux, поэтому пользователям рекомендуется отключать её во время отладки</string>
     <string name="home_hook_type">Типы хуков</string>
+    <!-- KPM patching related strings -->
     <string name="kpm_patch_options">Патч KPM</string>
     <string name="kpm_patch_description">Добавление дополнительных функций KPM</string>
     <string name="enable_kpm_patch">Патч KPM</string>
@@ -522,6 +567,7 @@
     <string name="kpm_undo_patch_enabled">Патч для отмены KPM включен</string>
     <string name="kpm_patch_mode">Режим патча KPM</string>
     <string name="kpm_undo_patch_mode">Режим отмены патча KPM</string>
+    <!-- KPM workflow related -->
     <string name="kpm_preparing_tools">Подготовка инструментов KPM</string>
     <string name="kpm_applying_patch">Применение патча KPM</string>
     <string name="kpm_undoing_patch">Отмена патча KPM</string>
@@ -529,13 +575,16 @@
     <string name="kpm_patch_success">Патч KPM успешно применен</string>
     <string name="kpm_undo_patch_success">Патч KPM успешно отменён</string>
     <string name="kpm_file_repacked">Файл успешно переупакован</string>
+    <!-- KPM error messages -->
     <string name="kpm_extract_zip_failed">Не удалось извлечь zip-файл</string>
     <string name="kpm_image_file_not_found">Файл образа не найден</string>
     <string name="kpm_patch_failed">Ошибка патча KPM</string>
     <string name="kpm_undo_patch_failed">Ошибка патча отмены KPM</string>
     <string name="kpm_patch_operation_failed">Ошибка патча KPM: %s</string>
+    <!-- KPM option radio group strings -->
     <string name="kpm_follow_kernel_file">Следовать за ядром</string>
     <string name="kpm_follow_kernel_description">Использовать ядро без каких-либо изменений KPM</string>
+    <!-- UID Scanner Settings -->
     <string name="uid_auto_scan_title">Пользовательский режим сканирования списка приложений</string>
     <string name="uid_auto_scan_summary">Включение этой опции позволит использовать сканирование пользовательского режима для списка приложений, улучшая стабильность. (Если вы столкнетесь с такими проблемами, как замораживание во время сканирования ядра списка приложений, вы можете включить эту опцию.)</string>
     <string name="uid_multi_user_scan_title">Поиск многопользовательских приложений</string>
@@ -546,6 +595,7 @@
     <string name="clean_runtime_environment_confirm">Вы уверены, что хотите очистить среду Runtime? Это остановит службу сканирования и удалит связанные с ней файлы.</string>
     <string name="clean_runtime_environment_success">Runtime окружение успешно очищено</string>
     <string name="clean_runtime_environment_failed">Не удалось очистить среду runtime</string>
+    <!-- 确认安装相关字符串 -->
     <string name="confirm_installation">Подтвердите установку</string>
     <string name="confirm_multiple_installation">Подтвердите установку (%d файлов)</string>
     <string name="install_confirm">Установить</string>
@@ -558,6 +608,7 @@
     <string name="author">Автор</string>
     <string name="description">Описание</string>
     <string name="supported_devices">Поддерживаемые устройства</string>
+    <!-- SUS Map related strings -->
     <string name="susfs_sus_map_label">Путь к библиотеке</string>
     <string name="susfs_add_sus_map">Добавить SUS Map</string>
     <string name="susfs_edit_sus_map">Изменить SUS Map</string>
@@ -572,29 +623,7 @@
     <string name="sus_maps_description_text">Скрыть реальные пути к папкам памяти из /proc/self/[maps|smaps_rollup|map_files|mem|pagemap]. Обратите внимание: эта функция не поддерживает скрытие анонимных карт и может скрыть встроенные хуки или PLT хуки вызванные инъекцией самой библиотеки.</string>
     <string name="sus_maps_warning">Важное уведомление: для приложений с хорошо реализованными механизмами обнаружений эта функция может работать не эффективно .</string>
     <string name="sus_maps_debug_info">Сначала найдите PID и UID целевого приложения, используя ps -enf, затем проверьте соответствующие пути в /proc/&lt;pid&gt;/maps и сравните номера устройства с номерами в /proc/1/mountinfo. Функция скрытия  будет работать должным образом только если номера устройств совпадают.</string>
-    <string name="log_viewer_title">Просмотр логов</string>
-    <string name="log_viewer_back">Назад</string>
-    <string name="log_viewer_search">Поиск</string>
-    <string name="log_viewer_clear_logs">Очистить логи</string>
-    <string name="log_viewer_clear_logs_confirm">Вы уверены, что хотите удалить выбранный файл журнала? Это действие нельзя отменить.</string>
-    <string name="log_viewer_logs_cleared">Логи успешно очищены</string>
-    <string name="log_viewer_filter_type">Фильтрация по типу</string>
-    <string name="log_viewer_all_types">Все типы</string>
-    <string name="log_viewer_showing_entries">Показаны записи %1$d из %2$d</string>
-    <string name="log_viewer_no_logs">Логи не найдены</string>
-    <string name="log_viewer_no_matching_logs">Совпадающих журналов не найдено</string>
-    <string name="log_viewer_refresh">Обновить</string>
-    <string name="log_viewer_raw_log">Необработанный лог</string>
-    <string name="log_viewer_search_placeholder">Поиск по UID, команде или деталям…</string>
-    <string name="log_viewer_clear_search">Очистить поиск</string>
-    <string name="log_viewer_view_logs">Просмотр логов использования</string>
-    <string name="log_viewer_view_logs_summary">Просмотр журналов доступа к KernelSU</string>
-    <string name="log_viewer_exclude_subtypes">Исключить подтипы</string>
-    <string name="log_viewer_exclude_current_app">Текущее приложение</string>
-    <string name="log_viewer_page_info">Страница: %1$d/%2$d | Всего журналов: %3$d</string>
-    <string name="log_viewer_too_many_logs">Слишком много журналов, отображаются только последние записи %1$d</string>
-    <string name="log_viewer_load_more">Загрузить больше логов</string>
-    <string name="log_viewer_all_logs_loaded">Все логи отображаются</string>
+    <!-- Log Viewer -->
     <string name="incompatible_kernel_msg">    Текущий менеджер несовместим с этим ядром! Пожалуйста, обновите ядро до версии %2$d или выше (сейчас %1$d)
     </string>
     <string name="umount_path_manager">Управление путями размонтирования</string>

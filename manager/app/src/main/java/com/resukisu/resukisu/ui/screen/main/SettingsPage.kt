@@ -31,6 +31,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.automirrored.rounded.Article
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
@@ -39,12 +40,10 @@ import androidx.compose.material.icons.filled.FolderOff
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
-import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Update
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.rounded.ElectricalServices
 import androidx.compose.material.icons.rounded.FolderDelete
 import androidx.compose.material.icons.rounded.RemoveCircle
@@ -65,6 +64,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -112,6 +112,7 @@ import com.resukisu.resukisu.ui.theme.hazeSource
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.execKsud
 import com.resukisu.resukisu.ui.util.getBugreportFile
+import com.resukisu.resukisu.ui.util.getFeaturePersistValue
 import com.resukisu.resukisu.ui.util.getFeatureStatus
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
@@ -136,6 +137,7 @@ fun SettingsPage(bottomPadding: Dp) {
     val snackBarHost = LocalSnackbarHost.current
     val context = LocalContext.current
     val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+    var isSuLogEnabled by remember { mutableStateOf(Natives.isSuLogEnabled()) }
 
     Scaffold(
         topBar = {
@@ -215,28 +217,23 @@ fun SettingsPage(bottomPadding: Dp) {
                             }
 
                             item {
-                                var suCompatMode by rememberSaveable {
-                                    mutableIntStateOf(
-                                        run {
-                                            val currentEnabled = Natives.isSuEnabled()
-                                            val savedPersist = prefs.getInt("su_compat_mode", 0)
-                                            if (savedPersist == 2) 2 else if (!currentEnabled) 1 else 0
-                                        }
-                                    )
+                                val currentSuEnabled = Natives.isSuEnabled()
+                                var suCompatMode by rememberSaveable { mutableIntStateOf(if (!currentSuEnabled) 1 else 0) }
+                                val suPersistValue by produceState(initialValue = null as Long?) {
+                                    value = getFeaturePersistValue("su_compat")
                                 }
-                                var savedSuStatus by rememberSaveable { mutableStateOf("") }
-                                val suStatus by produceState(initialValue = savedSuStatus) {
-                                    value = withContext(Dispatchers.IO) {
-                                        savedSuStatus = getFeatureStatus("su_compat")
-                                        return@withContext savedSuStatus
+                                LaunchedEffect(suPersistValue) {
+                                    suPersistValue?.let { v ->
+                                        suCompatMode =
+                                            if (v == 0L) 2 else if (!currentSuEnabled) 1 else 0
                                     }
+                                }
+
+                                val suStatus by produceState(initialValue = "") {
+                                    value = getFeatureStatus("su_compat")
                                 }
                                 val suSummary = when (suStatus) {
-                                    "unsupported" -> {
-                                        suCompatMode = 0 // fix wrongly display
-                                        stringResource(id = R.string.feature_status_unsupported_summary)
-                                    }
-
+                                    "unsupported" -> stringResource(id = R.string.feature_status_unsupported_summary)
                                     "managed" -> stringResource(id = R.string.feature_status_managed_summary)
                                     else -> stringResource(id = R.string.settings_sucompat_summary)
                                 }
@@ -339,6 +336,35 @@ fun SettingsPage(bottomPadding: Dp) {
                                             putBoolean("auto_jailbreak", value)
                                         }
                                         savedAutoJailbreakStatus = value
+                                    }
+                                )
+                            }
+
+
+                            item {
+                                var savedUmountStatus by rememberSaveable { mutableStateOf("") }
+                                val umountStatus by produceState(initialValue = savedUmountStatus) {
+                                    value = withContext(Dispatchers.IO) {
+                                        savedUmountStatus = getFeatureStatus("sulog")
+                                        return@withContext savedUmountStatus
+                                    }
+                                }
+                                val umountSummary = when (umountStatus) {
+                                    "unsupported" -> stringResource(id = R.string.feature_status_unsupported_summary)
+                                    "managed" -> stringResource(id = R.string.feature_status_managed_summary)
+                                    else -> stringResource(id = R.string.settings_sulog_summary)
+                                }
+                                SettingsSwitchWidget(
+                                    icon = Icons.AutoMirrored.Rounded.Article,
+                                    title = stringResource(id = R.string.settings_sulog),
+                                    description = umountSummary,
+                                    enabled = umountStatus == "supported",
+                                    checked = isSuLogEnabled,
+                                    onCheckedChange = { checked ->
+                                        if (Natives.setSuLogEnabled(checked)) {
+                                            execKsud("feature save", true)
+                                            isSuLogEnabled = checked
+                                        }
                                     }
                                 )
                             }

@@ -63,6 +63,7 @@ import androidx.compose.material.icons.rounded.Photo
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -643,6 +644,7 @@ private fun MetaModuleWarningCard(
         exit = fadeOut() + shrinkVertically()
     ) {
         WarningCard(
+            shape = CardDefaults.elevatedShape,
             message = text,
             onClose = {
                 showMetamoduleWarning = false

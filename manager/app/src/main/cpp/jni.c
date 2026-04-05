@@ -299,6 +299,14 @@ NativeBridge(setSuEnabled, jboolean, jboolean enabled) {
 	return set_su_enabled(enabled);
 }
 
+NativeBridgeNP(isSuLogEnabled, jboolean) {
+    return is_sulog_enabled();
+}
+
+NativeBridge(setSuLogEnabled, jboolean, jboolean enabled) {
+    return set_sulog_enabled(enabled);
+}
+
 NativeBridgeNP(isKernelUmountEnabled, jboolean) {
     return is_kernel_umount_enabled();
 }

@@ -45,6 +45,11 @@ bool clear_dynamic_manager();
 bool set_su_enabled(bool enabled);
 bool is_su_enabled();
 
+// sulog
+bool is_sulog_enabled();
+
+bool set_sulog_enabled(bool enabled);
+
 // Kernel umount
 bool set_kernel_umount_enabled(bool enabled);
 bool is_kernel_umount_enabled();

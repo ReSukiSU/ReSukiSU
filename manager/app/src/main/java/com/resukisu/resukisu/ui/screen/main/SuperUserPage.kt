@@ -41,6 +41,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Article
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
@@ -149,6 +150,8 @@ fun SuperUserPage(bottomPadding: Dp) {
     val backupLauncher = ModuleModify.rememberAllowlistBackupLauncher(context, snackBarHostState)
     val restoreLauncher = ModuleModify.rememberAllowlistRestoreLauncher(context, snackBarHostState)
 
+    val navigator = LocalNavigator.current
+
     LaunchedEffect(Unit) {
         viewModel.search = ""
     }
@@ -229,6 +232,16 @@ fun SuperUserPage(bottomPadding: Dp) {
                         Icon(
                             imageVector = Icons.Filled.MoreVert,
                             contentDescription = stringResource(id = R.string.settings),
+                        )
+                    }
+                },
+                navigationContent = {
+                    IconButton(onClick = {
+                        navigator.push(Route.Sulog)
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.Article,
+                            contentDescription = stringResource(R.string.sulog)
                         )
                     }
                 },

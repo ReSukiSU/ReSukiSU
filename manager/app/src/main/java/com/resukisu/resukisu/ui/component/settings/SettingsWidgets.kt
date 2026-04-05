@@ -779,17 +779,19 @@ fun SettingsDropdownWidget(
         rowHeader = rowHeader,
         foreContent = foreContent,
         descriptionColumnContent = {
-            val color = if (isError) MaterialTheme.colorScheme.error
-            else descriptionColor
-            Text(
-                text = items[selectedIndex],
-                color = color.copy(alpha = alpha),
-                style = MaterialTheme.typography.bodyMediumEmphasized,
-                fontSize = MaterialTheme.typography.bodyMediumEmphasized.fontSize,
-                fontFamily = MaterialTheme.typography.bodySmallEmphasized.fontFamily,
-                lineHeight = MaterialTheme.typography.bodyMediumEmphasized.lineHeight,
-                fontWeight = MaterialTheme.typography.bodyMediumEmphasized.fontWeight,
-            )
+            if (itemsNotEmpty) {
+                val color = if (isError) MaterialTheme.colorScheme.error
+                else descriptionColor
+                Text(
+                    text = items[selectedIndex],
+                    color = color.copy(alpha = alpha),
+                    style = MaterialTheme.typography.bodyMediumEmphasized,
+                    fontSize = MaterialTheme.typography.bodyMediumEmphasized.fontSize,
+                    fontFamily = MaterialTheme.typography.bodySmallEmphasized.fontFamily,
+                    lineHeight = MaterialTheme.typography.bodyMediumEmphasized.lineHeight,
+                    fontWeight = MaterialTheme.typography.bodyMediumEmphasized.fontWeight,
+                )
+            }
         }
     ) {}
 

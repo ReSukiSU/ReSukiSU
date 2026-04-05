@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Error
@@ -37,8 +38,9 @@ import com.resukisu.resukisu.ui.theme.getCardElevation
 @Composable
 fun WarningCard(
     modifier: Modifier = Modifier,
-    shape: Shape = CardDefaults.elevatedShape,
+    shape: Shape = RoundedCornerShape(16.dp),
     message: String,
+    content: (@Composable () -> Unit) = {},
     color: Color? = null,
     onClick: (() -> Unit)? = null,
     onClose: (() -> Unit)? = null,
@@ -56,6 +58,7 @@ fun WarningCard(
             )
         },
         color = color,
+        end = content,
         onClick = onClick,
         onClose = onClose,
         icon = icon
@@ -66,8 +69,9 @@ fun WarningCard(
 @Composable
 fun WarningCard(
     modifier: Modifier = Modifier,
-    shape: Shape = CardDefaults.elevatedShape,
+    shape: Shape = RoundedCornerShape(16.dp),
     message: AnnotatedString,
+    content: (@Composable () -> Unit) = {},
     color: Color? = null,
     onClick: (() -> Unit)? = null,
     onClose: (() -> Unit)? = null,
@@ -85,6 +89,7 @@ fun WarningCard(
             )
         },
         color = color,
+        end = content,
         onClick = onClick,
         onClose = onClose,
         icon = icon
@@ -97,6 +102,7 @@ private fun WarningCardInner(
     modifier: Modifier = Modifier,
     shape: Shape = CardDefaults.elevatedShape,
     content: (@Composable () -> Unit),
+    end: (@Composable () -> Unit),
     color: Color? = null,
     onClick: (() -> Unit)? = null,
     onClose: (() -> Unit)? = null,
@@ -172,6 +178,12 @@ private fun WarningCardInner(
                         .size(18.dp)
                         .align(Alignment.TopEnd)
                 )
+            }
+
+            Box(
+                modifier = Modifier.align(Alignment.TopEnd)
+            ) {
+                end()
             }
         }
     }
