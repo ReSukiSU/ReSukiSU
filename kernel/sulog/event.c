@@ -17,6 +17,11 @@
 #include <linux/string.h>
 #include <linux/uaccess.h>
 
+#include <linux/version.h>
+#if defined(__x86_64__) && LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 0)
+#include <linux/mm.h>
+#endif
+
 // https://github.com/torvalds/linux/commit/f0907827a8a9152aedac2833ed1b674a7b2a44f2
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 18, 0) || defined(KSU_COMPAT_HAS_OVERFLOW_H)
 #include <linux/overflow.h>
