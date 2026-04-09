@@ -36,12 +36,16 @@
 
 static int do_grant_root(void __user *arg)
 {
+    int ret;
     // we already checked the uid above in allowed_for_su().
+    __u32 audit_uid = ksu_get_uid_t(current_uid());
+    __u32 audit_euid = ksu_get_uid_t(current_euid());
 
-    pr_info("allow root for: %d\n", ksu_get_uid_t(current_uid()));
-    escape_with_root_profile();
+    pr_info("allow root for: %d\n", audit_uid);
+    ret = escape_with_root_profile();
+    ksu_sulog_emit_grant_root(ret, audit_uid, audit_euid, GFP_KERNEL);
 
-    return 0;
+    return ret;
 }
 
 static int do_get_info(void __user *arg)
