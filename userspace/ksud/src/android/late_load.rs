@@ -35,7 +35,7 @@ fn dump_process_info(label: &str) {
     );
 }
 
-pub fn run(kmi: Option<String>) -> Result<()> {
+pub fn run(kmi: Option<String>, package_name: &String) -> Result<()> {
     utils::daemonize(false)?;
     info!("late-load command triggered!");
     dump_process_info("late-load start");
@@ -129,11 +129,12 @@ pub fn run(kmi: Option<String>) -> Result<()> {
     init_event::run_stage("boot-completed", false);
 
     // 15. Restart Manager so it gets a fresh ksu fd from the newly loaded kernel module
-    info!("Restarting KernelSU Manager...");
-    let pkg = "com.resukisu.resukisu";
-    let _ = Command::new("am").args(["force-stop", pkg]).status();
+    info!("Restarting KernelSU Manager {package_name}...");
     let _ = Command::new("am")
-        .args(["start", "-n", &format!("{pkg}/.ui.MainActivity")])
+        .args(["force-stop", package_name])
+        .status();
+    let _ = Command::new("am")
+        .args(["start", "-n", &format!("{package_name}/.MainActivity")])
         .status();
 
     Ok(())

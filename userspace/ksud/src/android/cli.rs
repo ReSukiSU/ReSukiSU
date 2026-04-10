@@ -59,6 +59,10 @@ enum Commands {
         /// Restore adb properties after magica late-load
         #[arg(long)]
         post_magica: bool,
+
+        /// manager package name
+        #[arg(long, default_value_t = String::from("com.resukisu.resukisu"))]
+        package_name: String,
     },
 
     /// Manage susfs component
@@ -79,11 +83,14 @@ enum Commands {
     /// Install KernelSU userspace component to system
     Install,
 
-    /// Uninstall KernelSU modules and itself(LKM Only)
-    Uninstall,
-
     /// Unload KernelSU kernel module (LKM Only)
     Unload,
+
+    /// Uninstall KernelSU modules and itself(LKM Only)
+    Uninstall {
+        #[arg(long, default_value_t = String::from("com.resukisu.resukisu"))]
+        package_name: String,
+    },
 
     /// SELinux policy Patch tool
     Sepolicy {
@@ -697,8 +704,8 @@ pub fn run() -> Result<()> {
             }
         }
         Commands::Install => utils::install(),
-        Commands::Uninstall => utils::uninstall(),
         Commands::Unload => crate::android::unload::unload(),
+        Commands::Uninstall { package_name } => utils::uninstall(&package_name),
         Commands::Sepolicy { command } => match command {
             Sepolicy::Patch { sepolicy } => sepolicy::live_patch(&sepolicy),
             Sepolicy::Apply { file } => sepolicy::apply_file(file),
@@ -708,15 +715,16 @@ pub fn run() -> Result<()> {
             magica,
             post_magica,
             kmi,
+            package_name,
         } => {
             if let Some(port) = magica {
-                return crate::android::magica::run(port).map_err(|e| {
+                return crate::android::magica::run(port, &package_name).map_err(|e| {
                     error!("Error running magica: {e}");
                     e
                 });
             }
 
-            let result = crate::android::late_load::run(kmi);
+            let result = crate::android::late_load::run(kmi, &package_name);
             if post_magica {
                 info!("Restoring adb properties (post-magica cleanup)...");
                 if let Err(e) = crate::android::magica::disable_adb_root() {

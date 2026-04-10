@@ -21,7 +21,6 @@ import org.json.JSONArray
 import java.io.File
 import java.util.Properties
 
-
 /**
  * @author weishu
  * @date 2023/1/1.
@@ -270,9 +269,8 @@ fun restoreBoot(
 fun uninstallPermanently(
     onFinish: (Boolean, Int) -> Unit, onStdout: (String) -> Unit, onStderr: (String) -> Unit
 ): Boolean {
-    val magiskboot = File(ksuApp.applicationInfo.nativeLibraryDir, "libmagiskboot.so")
     val result =
-        flashWithIO("${getKsuDaemonPath()} uninstall --magiskboot $magiskboot", onStdout, onStderr)
+        flashWithIO("${getKsuDaemonPath()} uninstall --package-name ${BuildConfig.APPLICATION_ID}", onStdout, onStderr)
     onFinish(result.isSuccess, result.code)
     return result.isSuccess
 }
