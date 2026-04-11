@@ -117,8 +117,6 @@ import com.resukisu.resukisu.ui.util.getBugreportFile
 import com.resukisu.resukisu.ui.util.getFeaturePersistValue
 import com.resukisu.resukisu.ui.util.getFeatureStatus
 import com.topjohnwu.superuser.ShellUtils
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -831,13 +829,6 @@ fun rememberUninstallDialog(onSelected: (UninstallType) -> Unit): DialogHandle {
 private fun TopBar(
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
-    if (ThemeConfig.backgroundImageLoaded) HazeStyle(
-        backgroundColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(
-            alpha = 0.8f
-        ),
-        tint = HazeTint(Color.Transparent)
-    ) else null
-
     LargeFlexibleTopAppBar(
         modifier = Modifier.haze(
             scrollBehavior?.state?.collapsedFraction ?: 1f
