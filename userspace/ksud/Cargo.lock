@@ -1015,6 +1015,7 @@ dependencies = [
  "android_logger",
  "anyhow",
  "bindgen",
+ "bitflags 2.11.0",
  "chrono",
  "clap",
  "const_format",
