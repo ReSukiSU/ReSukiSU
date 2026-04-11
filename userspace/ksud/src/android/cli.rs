@@ -52,13 +52,17 @@ enum Commands {
         #[arg(long, default_missing_value = "5555", num_args = 0..=1)]
         magica: Option<u16>,
 
-        /// Specify kernel KMI version instead of auto-detection
+        /// Pass allow_shell=1 when loading kernelsu.ko
         #[arg(long)]
-        kmi: Option<String>,
+        allow_shell: bool,
 
         /// Restore adb properties after magica late-load
         #[arg(long)]
         post_magica: bool,
+
+        /// Specify kernel KMI version instead of auto-detection
+        #[arg(long)]
+        kmi: Option<String>,
 
         /// manager package name
         #[arg(long, default_value_t = String::from("com.resukisu.resukisu"))]
@@ -79,6 +83,15 @@ enum Commands {
 
     /// Emulate system reboot
     SoftReboot,
+
+    /// Load a kernel module with kallsyms access
+    Insmod {
+        /// kernel module path
+        module: PathBuf,
+        /// module load parameters (e.g. key=val key2=val2)
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true, num_args = 0..)]
+        params: Vec<String>,
+    },
 
     /// Install KernelSU userspace component to system
     Install {
@@ -227,12 +240,6 @@ enum Debug {
         name: String,
         /// destination file path
         path: PathBuf,
-    },
-
-    /// Load a kernel module from disk
-    Insmod {
-        /// kernel module path
-        module: PathBuf,
     },
 
     /// Process mark management
@@ -604,6 +611,7 @@ pub fn run() -> Result<()> {
             UmountConfigOp::List => umount_config::list_umount(),
         },
         Commands::SoftReboot => init_event::soft_reboot(),
+        Commands::Insmod { module, params } => debug::insmod(&module, &params),
         Commands::Module { command } => {
             utils::switch_mnt_ns(1)?;
             match command {
@@ -716,18 +724,20 @@ pub fn run() -> Result<()> {
         },
         Commands::LateLoad {
             magica,
+            allow_shell,
             post_magica,
             kmi,
             package_name,
         } => {
             if let Some(port) = magica {
-                return crate::android::magica::run(port, &package_name).map_err(|e| {
-                    error!("Error running magica: {e}");
-                    e
-                });
+                return crate::android::magica::run(port, &package_name, allow_shell).map_err(
+                    |e| {
+                        error!("Error running magica: {e}");
+                        e
+                    },
+                );
             }
-
-            let result = crate::android::late_load::run(kmi, &package_name);
+            let result = crate::android::late_load::run(&package_name, kmi, allow_shell);
             if post_magica {
                 info!("Restoring adb properties (post-magica cleanup)...");
                 if let Err(e) = crate::android::magica::disable_adb_root() {
@@ -789,7 +799,6 @@ pub fn run() -> Result<()> {
                 let data = assets::get_asset(&name)?;
                 utils::ensure_binary(&path, data.as_ref().as_ref(), false)
             }
-            Debug::Insmod { module } => debug::insmod(&module),
             Debug::Mark { command } => match command {
                 MarkCommand::Get { pid } => debug::mark_get(pid),
                 MarkCommand::Mark { pid } => debug::mark_set(pid),

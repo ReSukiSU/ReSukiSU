@@ -1,5 +1,6 @@
 use anyhow::{Context, Result};
 use log::{info, warn};
+use rustix::cstr;
 use std::process::Command;
 
 use crate::android::module::{handle_updated_modules, metamodule, prune_modules};
@@ -35,7 +36,7 @@ fn dump_process_info(label: &str) {
     );
 }
 
-pub fn run(kmi: Option<String>, package_name: &String) -> Result<()> {
+pub fn run(package_name: &String, kmi: Option<String>, allow_shell: bool) -> Result<()> {
     utils::daemonize(false)?;
     info!("late-load command triggered!");
     dump_process_info("late-load start");
@@ -58,7 +59,12 @@ pub fn run(kmi: Option<String>, package_name: &String) -> Result<()> {
 
         // 4. Load kernelsu.ko from memory with manual relocation
         info!("Loading kernelsu.ko for KMI {kmi}...");
-        ksuinit::load_module(ko_data.as_ref().as_ref()).context("Failed to load kernelsu.ko")?;
+        let params = if allow_shell {
+            cstr!("allow_shell=1")
+        } else {
+            cstr!("")
+        };
+        ksuinit::load_module(&ko_data, params).context("Failed to load kernelsu.ko")?;
         info!("kernelsu.ko loaded successfully!");
         dump_process_info("after load_module");
     }
