@@ -134,7 +134,7 @@ pub fn run(kmi: Option<String>, package_name: &String) -> Result<()> {
         .args(["force-stop", package_name])
         .status();
     let _ = Command::new("am")
-        .args(["start", "-n", &format!("{package_name}/.MainActivity")])
+        .args(["start", "-n", &format!("{package_name}/.ui.MainActivity")])
         .status();
 
     Ok(())
