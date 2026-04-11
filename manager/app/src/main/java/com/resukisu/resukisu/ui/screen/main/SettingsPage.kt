@@ -366,6 +366,7 @@ fun SettingsPage(bottomPadding: Dp) {
                                     title = stringResource(id = R.string.settings_adb_root),
                                     description = adbRootSummary,
                                     checked = isAdbRootEnabled,
+                                    enabled = adbRootStatus == "supported",
                                     onCheckedChange = { checked ->
                                         if (execKsud("feature set adb_root ${if (checked) 1 else 0}", true)) {
                                             ShellUtils.fastCmd("setprop ctl.restart adbd")
