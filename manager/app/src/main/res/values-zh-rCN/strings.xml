@@ -180,23 +180,17 @@
     <string name="selected_lkm">已选择的 LKM：%s</string>
     <string name="save_log">保存日志</string>
     <string name="log_saved">日志已保存</string>
-    <!-- Module related -->
     <string name="module_install_confirm">确认安装模块 %1$s？</string>
     <string name="unknown_module">未知模块</string>
-    <!-- Restore related -->
     <string name="restore_confirm_title">确认还原模块</string>
     <string name="restore_confirm_message">此操作将覆盖所有现有模块，是否继续？</string>
     <string name="confirm">确定</string>
     <string name="cancel">取消</string>
-    <!-- Backup related -->
-    <!-- Restore related messages -->
     <string name="restore_success">模块已成功还原，需重启生效</string>
     <string name="restore_failed">还原失败：%1$s</string>
     <string name="restart_now">立即重启</string>
     <string name="unknown_error">未知错误</string>
-    <!-- Command related -->
     <string name="command_execution_failed">命令执行失败：%1$s</string>
-    <!-- Allowlist related -->
     <string name="allowlist_backup_success">应用列表备份成功</string>
     <string name="allowlist_backup_failed">应用列表备份失败：%1$s</string>
     <string name="allowlist_restore_confirm_title">确认还原应用列表</string>
@@ -297,9 +291,7 @@
     <string name="confirm_uninstall_content">将卸载以下 KPM 模块：\n%s</string>
     <string name="image_editor_hint">使用双指缩放图片，单指拖动调整位置</string>
     <string name="reprovision">重置</string>
-    <!-- Kernel Flash Progress Related -->
     <string name="horizon_flash_complete">刷写完成</string>
-    <!-- Flash Status Related -->
     <string name="horizon_preparing">准备中…</string>
     <string name="horizon_cleaning_files">清理文件…</string>
     <string name="horizon_copying_files">复制文件…</string>
@@ -307,7 +299,6 @@
     <string name="horizon_patching_script">修补刷写脚本…</string>
     <string name="horizon_flashing">刷写内核中…</string>
     <string name="horizon_flash_complete_status">刷写完成</string>
-    <!-- Slot selection related strings -->
     <string name="select_slot_title">选择刷写槽位</string>
     <string name="select_slot_description">请选择要刷写 boot 的目标槽位</string>
     <string name="slot_a">A 槽位</string>
@@ -317,11 +308,9 @@
     <string name="horizon_setting_target_slot">设置指定槽位</string>
     <string name="horizon_restoring_original_slot">恢复默认槽位</string>
     <string name="current_slot">当前系统默认槽位：%1$s </string>
-    <!-- Error Messages -->
     <string name="horizon_copy_failed">复制失败</string>
     <string name="horizon_unknown_error">未知错误</string>
     <string name="flash_failed_message">刷写失败</string>
-    <!-- lkm/gki install -->
     <string name="Lkm_install_methods">LKM 修补/安装</string>
     <string name="GKI_install_methods">刷写 AnyKernel3</string>
     <string name="kernel_version_log">内核版本：%1$s</string>
@@ -329,7 +318,6 @@
     <string name="configuration">配置</string>
     <string name="app_settings">应用设置</string>
     <string name="tools">工具</string>
-    <!--  String resources used in SuperUser -->
     <string name="no_apps_found">未找到应用</string>
     <string name="selinux_enabled_toast">SELinux 已设置为启用状态</string>
     <string name="selinux_disabled_toast">SELinux 已设置为禁用状态</string>
@@ -342,15 +330,12 @@
     <string name="icon_switch_title">备选图标</string>
     <string name="icon_switch_summary">更换为 KernelSU 图标</string>
     <string name="icon_switched">已切换图标</string>
-    <!-- KPM display settings -->
     <string name="show_kpm_info">隐藏 KPM 功能</string>
     <string name="show_kpm_info_summary">在主页和底栏隐藏 KPM 相关功能和信息</string>
-    <!-- Webui settings -->
     <string name="module_webui_alert">来自模块 %s 的消息</string>
     <string name="no_such_module">模块 %s 不存在</string>
     <string name="module_unavailable">模块 %s 被禁用或待卸载</string>
     <string name="select_default_webui_engine">默认 WebUI 引擎</string>
-    <!-- DPI setting related strings -->
     <string name="app_dpi_title">应用 DPI</string>
     <string name="app_dpi_summary">仅调整当前应用的屏幕显示密度</string>
     <string name="dpi_size_small">小</string>
@@ -362,11 +347,9 @@
     <string name="dpi_confirm_title">确认更改 DPI</string>
     <string name="dpi_confirm_message">你确定要将应用 DPI 从 %1$d 更改为 %2$d 吗？</string>
     <string name="dpi_applied_success">DPI 已设置为 %1$d</string>
-    <!-- Language settings related strings -->
     <string name="settings_language">应用语言</string>
     <string name="language_system_default">跟随系统</string>
     <string name="settings_background_dim">背景暗度调节</string>
-    <!-- Flash related -->
     <string name="error_code">错误代码</string>
     <string name="check_log">请查看日志</string>
     <string name="installing_module">正在安装模块 %1$d/%2$d</string>
@@ -375,11 +358,9 @@
     <string name="kernel_flashing">内核刷写</string>
     <string name="warning_of_meta_module_title">需要元模块</string>
     <string name="warning_of_meta_module_summary">这个模块需要挂载一些文件。需要安装元模块，使它正常工作</string>
-    <!-- 分类相关 -->
     <string name="category_all_apps">全部</string>
     <string name="category_custom_apps">自定义</string>
     <string name="category_default_apps">默认</string>
-    <!-- 排序相关 -->
     <string name="sort_name_asc">名称升序</string>
     <string name="sort_name_desc">名称降序</string>
     <string name="sort_install_time_new">安装时间（新）</string>
@@ -387,9 +368,7 @@
     <string name="sort_size_desc">大小降序</string>
     <string name="sort_size_asc">大小升序</string>
     <string name="sort_usage_freq">使用频率</string>
-    <!-- 状态相关 -->
     <string name="no_apps_in_category">此分类中没有应用</string>
-    <!-- 标签相关 -->
     <string name="persistent">持久</string>
     <string name="temporary">临时</string>
     <string name="deny_authorization">取消授权</string>
@@ -402,11 +381,9 @@
     <string name="scroll_to_bottom">底部</string>
     <string name="selected">已选择</string>
     <string name="select">选择</string>
-    <!-- BottomSheet相关 -->
     <string name="menu_options">菜单选项</string>
     <string name="sort_options">排序方式</string>
     <string name="app_categories">应用类型选择</string>
-    <!-- SuSFS Configuration -->
     <string name="susfs_config_title">SuSFS 配置</string>
     <string name="susfs_config_description">配置说明</string>
     <string name="susfs_config_description_text">此功能允许您自定义 SuSFS 的 uname 值和构建时间伪装。输入您想要设置的值，点击应用即可生效</string>
@@ -418,16 +395,12 @@
     <string name="susfs_current_build_time">当前构建时间: %s</string>
     <string name="susfs_reset_to_default">重置为默认值</string>
     <string name="susfs_apply">应用</string>
-    <!-- SuSFS Reset Confirmation -->
     <string name="susfs_reset_confirm_title">确认重置</string>
-    <!-- SuSFS Toast Messages -->
     <string name="susfs_binary_not_found">无法找到 ksu_susfs 文件</string>
     <string name="susfs_command_failed">SuSFS 命令执行失败</string>
     <string name="susfs_command_error">执行 SuSFS 命令时出错: %s</string>
     <string name="susfs_uname_set_success" formatted="false">SuSFS 内核名称和构建时间设置成功: %s, %s</string>
-    <!-- SuSFS Settings Item -->
     <string name="susfs_config_setting_title">SuSFS 配置</string>
-    <!-- 开机自启动相关 -->
     <string name="susfs_autostart_title">开机自启动</string>
     <string name="susfs_autostart_description">重启时自动应用所有非默认配置</string>
     <string name="susfs_autostart_requirement">需要添加配置后才能启用</string>
@@ -435,33 +408,27 @@
     <string name="susfs_autostart_disable_failed">禁用开机自启动失败</string>
     <string name="susfs_autostart_error">开机自启动配置错误: %s</string>
     <string name="susfs_no_config_to_autostart">没有可用的配置进行开机自启动</string>
-    <!-- SuSFS Tab Titles -->
     <string name="susfs_tab_basic_settings">基本设置</string>
     <string name="susfs_tab_sus_paths">SuS 路径</string>
     <string name="susfs_tab_path_settings">路径设置</string>
     <string name="susfs_tab_enabled_features">启用功能状态</string>
-    <!-- SuSFS Path Management -->
     <string name="susfs_add_sus_path">添加 SuS 路径</string>
     <string name="susfs_sus_path_added_success">SuS 路径添加成功</string>
     <string name="susfs_path_not_found_error">路径未找到错误</string>
     <string name="susfs_path_label">路径</string>
     <string name="susfs_path_placeholder">例如: /system/addon.d</string>
     <string name="susfs_no_paths_configured">暂无 SuS 路径配置</string>
-    <!-- SuSFS Reset Categories -->
     <string name="susfs_reset_paths_title">重置 SuS 路径</string>
     <string name="susfs_reset_paths_message">这将清除所有 SuS 路径配置，确定要继续吗？</string>
     <string name="susfs_reset_path_title">重置路径设置</string>
-    <!-- SuSFS Path Settings -->
     <string name="susfs_android_data_path_label">Android Data 路径</string>
     <string name="susfs_sdcard_path_label">SDCard 路径</string>
     <string name="susfs_set_android_data_path">设置 Android Data 路径</string>
     <string name="susfs_set_sdcard_path">设置 SDCard 路径</string>
-    <!-- SuSFS Enabled Features -->
     <string name="susfs_enabled_features_description">显示当前 SuSFS 启用的功能状态</string>
     <string name="susfs_no_features_found">未找到功能状态信息</string>
     <string name="susfs_feature_enabled">已启用</string>
     <string name="susfs_feature_disabled">已禁用</string>
-    <!-- Feature Labels -->
     <string name="sus_path_feature_label">SuS 路径支持</string>
     <string name="spoof_uname_feature_label">欺骗 uname 支持</string>
     <string name="spoof_cmdline_feature_label">欺骗 Cmdline/Bootconfig</string>
@@ -470,7 +437,6 @@
     <string name="hide_symbols_feature_label">隐藏 KSU SuSFS 符号</string>
     <string name="sus_kstat_feature_label">SuS Kstat 支持</string>
     <string name="sus_map_feature_label">SUS Map 支持</string>
-    <!-- 可切换状态 -->
     <string name="susfs_feature_configurable">可配置的 SuSFS 功能</string>
     <string name="susfs_enable_log_label">SuSFS 启用日志</string>
     <string name="susfs_log_config_description">启用或者关闭 SuSFS 的日志</string>
@@ -479,7 +445,6 @@
     <string name="susfs_log_disabled">关闭 SuSFS 日志</string>
     <string name="module_update_json">更新配置</string>
     <string name="module_update_json_copied">更新配置地址已复制到剪贴板</string>
-    <!-- Settings related strings -->
     <string name="show_more_module_info">显示更多模块信息</string>
     <string name="show_more_module_info_summary">显示额外的模块信息，如更新配置 URL 等</string>
     <string name="susfs_execution_location_label">执行位置</string>
@@ -495,10 +460,8 @@
     <string name="susfs_slot_use_uname">使用 Uname</string>
     <string name="susfs_slot_use_build_time">使用构建时间</string>
     <string name="susfs_slot_info_unavailable">无法获取槽位信息</string>
-    <!-- SuSFS 自启动相关字符串 -->
     <string name="susfs_autostart_enabled_success">SuSFS 自启动模块已启用，模块路径：%s</string>
     <string name="susfs_autostart_disabled_success">SuSFS 自启动模块已禁用</string>
-    <!-- SuSFS Kstat相关字符串 -->
     <string name="susfs_tab_kstat_config">Kstat 配置</string>
     <string name="kstat_static_config_added">Kstat 静态配置已添加：%1$s</string>
     <string name="kstat_config_removed">已移除 Kstat 配置：%1$s</string>
@@ -521,7 +484,6 @@
     <string name="static_kstat_config">静态 Kstat 配置</string>
     <string name="kstat_path_management">Kstat 路径管理</string>
     <string name="no_kstat_config_message">暂无 Kstat 配置，点击下方按钮添加配置</string>
-    <!-- SuSFS Mount Hiding Control Related Strings -->
     <string name="susfs_hide_mounts_control_title">SuS 挂载隐藏控制</string>
     <string name="susfs_hide_mounts_control_description">控制 SuS 挂载对进程的隐藏行为</string>
     <string name="susfs_hide_mounts_for_all_procs_label">对所有进程隐藏 SuS 挂载</string>
@@ -538,7 +500,6 @@
     <string name="susfs_android_data_path_set">Android Data 路径已设置为: %s</string>
     <string name="susfs_sdcard_path_set">SDCard 路径已设置为: %s</string>
     <string name="susfs_path_setup_warning">路径设置可能未完全成功，但将继续添加 SuS 路径</string>
-    <!-- 备份和还原相关字符串 -->
     <string name="susfs_backup_title">备份</string>
     <string name="susfs_backup_description">创建所有 SuSFS 配置的备份。备份文件将包含所有设置、路径和配置信息。</string>
     <string name="susfs_backup_create">创建备份</string>
@@ -605,7 +566,6 @@
     <string name="no_active_manager">无活跃管理器</string>
     <string name="home_zygisk_implement">Zygisk 实现</string>
     <string name="home_meta_module_implement">元模块实现</string>
-    <!-- 循环路径相关 -->
     <string name="susfs_tab_sus_loop_paths">SuS 循环路径</string>
     <string name="susfs_add_sus_loop_path">添加 SuS 循环路径</string>
     <string name="susfs_edit_sus_loop_path">编辑 SuS 循环路径</string>
@@ -620,7 +580,6 @@
     <string name="susfs_loop_path_invalid_location">错误：循环路径不能位于 /storage/ 或 /sdcard/ 目录内</string>
     <string name="loop_paths_section">循环路径</string>
     <string name="add_loop_path">添加循环路径</string>
-    <!-- 循环路径功能描述 -->
     <string name="sus_loop_paths_description_title">循环路径配置</string>
     <string name="sus_loop_paths_description_text">循环路径会在每次非 root 用户应用或隔离服务启动时重新标记为 SUS_PATH。这有助于解决添加的路径可能因 inode 状态重置或内核中 inode 重新创建而失效的问题</string>
     <string name="avc_log_spoofing">AVC 日志欺骗</string>
@@ -632,7 +591,6 @@
 - 内核中默认设置为 \'0\'\n
 - 启用此功能有时会使开发人员在调试权限或 SELinux 问题时难以识别原因，因此建议用户在调试时禁用此功能。</string>
     <string name="home_hook_type">钩子类型</string>
-    <!-- KPM patching related strings -->
     <string name="kpm_patch_options">KPM 修补</string>
     <string name="kpm_patch_description">用于添加附加的 KPM 功能</string>
     <string name="enable_kpm_patch">KPM 修补</string>
@@ -643,7 +601,6 @@
     <string name="kpm_undo_patch_enabled">KPM 撤销修补已启用</string>
     <string name="kpm_patch_mode">KPM 修补模式</string>
     <string name="kpm_undo_patch_mode">KPM 撤销修补模式</string>
-    <!-- KPM workflow related -->
     <string name="kpm_preparing_tools">准备 KPM 修补工具</string>
     <string name="kpm_applying_patch">正在应用 KPM 修补</string>
     <string name="kpm_undoing_patch">正在撤销 KPM 修补</string>
@@ -651,16 +608,13 @@
     <string name="kpm_patch_success">KPM 修补成功</string>
     <string name="kpm_undo_patch_success">KPM 撤销修补成功</string>
     <string name="kpm_file_repacked">文件重新打包完成</string>
-    <!-- KPM error messages -->
     <string name="kpm_extract_zip_failed">解压压缩包失败</string>
     <string name="kpm_image_file_not_found">未找到 Image 文件</string>
     <string name="kpm_patch_failed">KPM 修补失败</string>
     <string name="kpm_undo_patch_failed">KPM 撤销修补失败</string>
     <string name="kpm_patch_operation_failed">KPM 修补操作失败: %s</string>
-    <!-- KPM option radio group strings -->
     <string name="kpm_follow_kernel_file">跟随内核</string>
     <string name="kpm_follow_kernel_description">原样使用内核，不进行任何 KPM 修改</string>
-    <!-- UID Scanner Settings -->
     <string name="uid_auto_scan_title">用户态扫描应用列表</string>
     <string name="uid_auto_scan_summary">开启后将使用用户态扫描应用列表，提高稳定性 (因内核扫描应用列表出现卡死等问题可以尝试打开此选项) </string>
     <string name="uid_multi_user_scan_title">多用户应用扫描</string>
@@ -671,7 +625,6 @@
     <string name="clean_runtime_environment_confirm">您确定要清理运行环境吗？这将停止扫描服务并删除相关文件</string>
     <string name="clean_runtime_environment_success">运行环境清理成功</string>
     <string name="clean_runtime_environment_failed">运行环境清理失败</string>
-    <!-- 确认安装相关字符串 -->
     <string name="confirm_installation">确认安装</string>
     <string name="confirm_multiple_installation">确认安装（%d 个文件）</string>
     <string name="install_confirm">确认安装</string>
@@ -684,7 +637,6 @@
     <string name="author">作者</string>
     <string name="description">描述</string>
     <string name="supported_devices">支持设备</string>
-    <!-- SUS Map related strings -->
     <string name="susfs_tab_sus_maps">SUS映射</string>
     <string name="susfs_sus_map_label">库文件路径</string>
     <string name="susfs_add_sus_map">添加SUS映射</string>
@@ -700,7 +652,6 @@
     <string name="sus_maps_description_text">从 /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap] 中隐藏内存映射的真实文件路径。请注意：此功能不支持隐藏匿名内存映射，也无法隐藏由注入库本身产生的内联钩子或 PLT 钩子。</string>
     <string name="sus_maps_warning">重要提示：对于具备完善注入检测机制的应用，此功能可能无法有效绕过检测。</string>
     <string name="sus_maps_debug_info">首先通过 ps -enf 查找目标应用的 PID 和 UID，然后检查 /proc/&lt;pid&gt;/maps 中的相关路径，并与 /proc/1/mountinfo 中的设备号进行比对以确保一致性。只有当设备号一致时，隐藏映射才能正常工作。</string>
-    <!-- Log Viewer -->
     <string name="incompatible_kernel_msg">当前管理器与此内核不兼容！请将内核升级至版本 %2$d 或以上（当前 %1$d）</string>
     <string name="umount_path_manager">Umount 路径管理</string>
     <string name="umount_path_manager_summary">管理内核卸载路径</string>

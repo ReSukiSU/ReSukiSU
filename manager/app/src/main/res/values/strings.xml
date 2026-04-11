@@ -183,23 +183,17 @@
     <string name="selected_lkm">Selected LKM: %s</string>
     <string name="save_log">Save logs</string>
     <string name="log_saved">Logs saved</string>
-    <!-- Module related -->
     <string name="module_install_confirm">Confirm install module %1$s？</string>
     <string name="unknown_module">Unknown module</string>
-    <!-- Restore related -->
     <string name="restore_confirm_title">Confirm Module Restoration</string>
     <string name="restore_confirm_message">This operation will overwrite all existing modules. Continue?</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
-    <!-- Backup related -->
-    <!-- Restore related messages -->
     <string name="restore_success">Modules restored successfully, restart required</string>
     <string name="restore_failed">Restore failed: %1$s</string>
     <string name="restart_now">Restart Now</string>
     <string name="unknown_error">Unknown error</string>
-    <!-- Command related -->
     <string name="command_execution_failed">Failed to execute command: %1$s</string>
-    <!-- Allowlist related -->
     <string name="allowlist_backup_success">Allowlist backed up successfully</string>
     <string name="allowlist_backup_failed">Failed to backup allowlist: %1$s</string>
     <string name="allowlist_restore_confirm_title">Confirm Allowlist Restoration</string>
@@ -303,9 +297,7 @@
     <string name="confirm_uninstall_content">The following KPM will be uninstalled: %s</string>
     <string name="image_editor_hint">Use two fingers to zoom the image, and one finger to drag it to adjust the position</string>
     <string name="reprovision">Reprovision</string>
-    <!-- Kernel Flash Progress Related -->
     <string name="horizon_flash_complete">Flash Complete</string>
-    <!-- Flash Status Related -->
     <string name="horizon_preparing">Preparing…</string>
     <string name="horizon_cleaning_files">Cleaning files…</string>
     <string name="horizon_copying_files">Copying files…</string>
@@ -313,7 +305,6 @@
     <string name="horizon_patching_script">Patching flash script…</string>
     <string name="horizon_flashing">Flashing kernel…</string>
     <string name="horizon_flash_complete_status">Flash completed</string>
-    <!-- Slot selection related strings -->
     <string name="select_slot_title">Select Flash Slot</string>
     <string name="select_slot_description">Please select the target slot for flashing boot</string>
     <string name="slot_a">Slot A</string>
@@ -323,11 +314,9 @@
     <string name="horizon_setting_target_slot">Setting the specified slot</string>
     <string name="horizon_restoring_original_slot">Restore Default Slot</string>
     <string name="current_slot">Current system default slot：%1$s </string>
-    <!-- Error Messages -->
     <string name="horizon_copy_failed">Copy failed</string>
     <string name="horizon_unknown_error">Unknown error</string>
     <string name="flash_failed_message">Flash failed</string>
-    <!-- lkm/gki install -->
     <string name="Lkm_install_methods">LKM repair/installation</string>
     <string name="GKI_install_methods">Flashing AnyKernel3</string>
     <string name="kernel_version_log">Kernel version：%1$s</string>
@@ -335,7 +324,6 @@
     <string name="configuration">Configure</string>
     <string name="app_settings">Application Settings</string>
     <string name="tools">Tools</string>
-    <!--  String resources used in SuperUser -->
     <string name="no_apps_found">Application not found</string>
     <string name="selinux_enabled_toast">SELinux Enabled</string>
     <string name="selinux_disabled_toast">SELinux Disabled</string>
@@ -348,16 +336,13 @@
     <string name="icon_switch_title">Alternate icon</string>
     <string name="icon_switch_summary">Change the launcher icon to KernelSU\'s icon</string>
     <string name="icon_switched">Icon switched</string>
-    <!-- KPM display settings -->
     <string name="show_kpm_info">Hide KPM Function</string>
     <string name="show_kpm_info_summary">Hide KPM information and Function in home and bottom bar</string>
-    <!-- Webui settings -->
     <string name="module_webui_alert">Message from Module %s</string>
     <string name="no_such_module">Module %s does not exist</string>
     <string name="module_unavailable">Module %s is disabled, or pending removal</string>
     <string name="select_default_webui_engine">Default WebUI engine</string>
     <string name="select_webui_engine_description">Select global default webui engine</string>
-    <!-- DPI setting related strings -->
     <string name="app_dpi_title">Applied DPI</string>
     <string name="app_dpi_summary">Adjust the screen display density for the current application only</string>
     <string name="dpi_size_small">Small </string>
@@ -369,11 +354,9 @@
     <string name="dpi_confirm_title">Confirm DPI change</string>
     <string name="dpi_confirm_message">Are you sure you want to change the application DPI from %1$d to %2$d?</string>
     <string name="dpi_applied_success">DPI has been set to %1$d</string>
-    <!-- Language settings related strings -->
     <string name="settings_language">App Language</string>
     <string name="language_system_default">Follow System</string>
     <string name="settings_background_dim">Background Darkness Adjustment</string>
-    <!-- Flash related -->
     <string name="error_code">error code</string>
     <string name="check_log">Please check the log</string>
     <string name="installing_module">Module being installed %1$d/%2$d</string>
@@ -382,12 +365,10 @@
     <string name="kernel_flashing">Kernel Flashing</string>
     <string name="warning_of_meta_module_title">Require Meta module</string>
     <string name="warning_of_meta_module_summary">This module want to mount /system, meta module will handle that. Otherwise, it might not work</string>
-    <!-- 分类相关 -->
     <string name="category_all_apps">All</string>
     <string name="category_root_apps">Root</string>
     <string name="category_custom_apps">Custom</string>
     <string name="category_default_apps">Default</string>
-    <!-- 排序相关 -->
     <string name="sort_name_asc">Ascending order of name</string>
     <string name="sort_name_desc">Name descending</string>
     <string name="sort_install_time_new">Installation time (New)</string>
@@ -395,9 +376,7 @@
     <string name="sort_size_desc">Descending order of size</string>
     <string name="sort_size_asc">Ascending order of size</string>
     <string name="sort_usage_freq">Frequency of use</string>
-    <!-- 状态相关 -->
     <string name="no_apps_in_category">No application in this category</string>
-    <!-- 标签相关 -->
     <string name="persistent">Persistent</string>
     <string name="temporary">Temporary</string>
     <string name="deny_authorization">Delegation of authority</string>
@@ -410,11 +389,9 @@
     <string name="scroll_to_bottom">Bottom</string>
     <string name="selected">Selected</string>
     <string name="select">Select</string>
-    <!-- BottomSheet相关 -->
     <string name="menu_options">Menu Options</string>
     <string name="sort_options">Sort by</string>
     <string name="app_categories">Application Type Selection</string>
-    <!-- SuSFS Configuration -->
     <string name="susfs_config_title">SuSFS Configuration</string>
     <string name="susfs_config_description">Configuration Description</string>
     <string name="susfs_config_description_text">This feature allows you to customize the SuSFS uname value and build time spoofing. Enter the values you want to set and click Apply to take effect</string>
@@ -426,16 +403,12 @@
     <string name="susfs_current_build_time">Current build time: %s</string>
     <string name="susfs_reset_to_default">Reset to Default</string>
     <string name="susfs_apply">Apply</string>
-    <!-- SuSFS Reset Confirmation -->
     <string name="susfs_reset_confirm_title">Confirm Reset</string>
-    <!-- SuSFS Toast Messages -->
     <string name="susfs_binary_not_found">Cannot find ksu_susfs file</string>
     <string name="susfs_command_failed">SuSFS command execution failed</string>
     <string name="susfs_command_error">Error executing SuSFS command: %s</string>
     <string name="susfs_uname_set_success" formatted="false">SuSFS uname and build time set successfully: %s, %s</string>
-    <!-- SuSFS Settings Item -->
     <string name="susfs_config_setting_title">SuSFS Configuration</string>
-    <!-- 开机自启动相关 -->
     <string name="susfs_autostart_title">Auto Start</string>
     <string name="susfs_autostart_description">Automatically apply all non-default configurations on reboot</string>
     <string name="susfs_autostart_requirement">Configuration needs to be added to enable</string>
@@ -443,33 +416,27 @@
     <string name="susfs_autostart_disable_failed">Failed to disable auto start</string>
     <string name="susfs_autostart_error">Auto start configuration error: %s</string>
     <string name="susfs_no_config_to_autostart">No available configuration for auto start</string>
-    <!-- SuSFS Tab Titles -->
     <string name="susfs_tab_basic_settings">Basic Settings</string>
     <string name="susfs_tab_sus_paths">SUS Paths</string>
     <string name="susfs_tab_path_settings">Path Settings</string>
     <string name="susfs_tab_enabled_features">Enabled Features Status</string>
-    <!-- SuSFS Path Management -->
     <string name="susfs_add_sus_path">Add SUS Path</string>
     <string name="susfs_sus_path_added_success">SUS path added successfully</string>
     <string name="susfs_path_not_found_error">Path not found error</string>
     <string name="susfs_path_label">Path</string>
     <string name="susfs_path_placeholder">e.g.: /system/addon.d</string>
     <string name="susfs_no_paths_configured">No SUS paths configured</string>
-    <!-- SuSFS Reset Categories -->
     <string name="susfs_reset_paths_title">Reset SUS Paths</string>
     <string name="susfs_reset_paths_message">This will clear all SUS path configurations. Are you sure you want to continue?</string>
     <string name="susfs_reset_path_title">Reset Path Settings</string>
-    <!-- SuSFS Path Settings -->
     <string name="susfs_android_data_path_label">Android Data Path</string>
     <string name="susfs_sdcard_path_label">SD Card Path</string>
     <string name="susfs_set_android_data_path">Set Android Data Path</string>
     <string name="susfs_set_sdcard_path">Set SD Card Path</string>
-    <!-- SuSFS Enabled Features -->
     <string name="susfs_enabled_features_description">Display current SuSFS enabled features status</string>
     <string name="susfs_no_features_found">No feature status information found</string>
     <string name="susfs_feature_enabled">Enabled</string>
     <string name="susfs_feature_disabled">Disabled</string>
-    <!-- Feature Labels -->
     <string name="sus_path_feature_label">SUS Path Support</string>
     <string name="spoof_uname_feature_label">Spoof uname Support</string>
     <string name="spoof_cmdline_feature_label">Spoof Cmdline/Bootconfig</string>
@@ -478,7 +445,6 @@
     <string name="hide_symbols_feature_label">Hide KSU SUSFS Symbols</string>
     <string name="sus_kstat_feature_label">SUS Kstat Support</string>
     <string name="sus_map_feature_label">SUS Map Support</string>
-    <!-- 可切换状态 -->
     <string name="susfs_feature_configurable">Configurable SuSFS Features</string>
     <string name="susfs_enable_log_label">SuSFS Enable Log</string>
     <string name="susfs_log_config_description">Enable or disable logging for SuSFS</string>
@@ -487,7 +453,6 @@
     <string name="susfs_log_disabled">Turn off SuSFS logging</string>
     <string name="module_update_json">Update JSON</string>
     <string name="module_update_json_copied">Update JSON URL copied to clipboard</string>
-    <!-- Settings related strings -->
     <string name="show_more_module_info">Show More Module Info</string>
     <string name="show_more_module_info_summary">Display additional module information like update JSON URLs</string>
     <string name="susfs_execution_location_label">Execution Location</string>
@@ -505,10 +470,8 @@
     <string name="susfs_slot_use_uname">Use Uname</string>
     <string name="susfs_slot_use_build_time">Use Build Time</string>
     <string name="susfs_slot_info_unavailable">Unable to retrieve slot information</string>
-    <!-- SuSFS 自启动相关字符串 -->
     <string name="susfs_autostart_enabled_success">SuSFS auto-start module enabled, module path: %s</string>
     <string name="susfs_autostart_disabled_success">SuSFS auto-start module disabled</string>
-    <!-- SuSFS Kstat相关字符串 -->
     <string name="susfs_tab_kstat_config">Kstat Configuration</string>
     <string name="kstat_static_config_added">Kstat static configuration added: %1$s</string>
     <string name="kstat_config_removed">Kstat configuration removed: %1$s</string>
@@ -531,7 +494,6 @@
     <string name="static_kstat_config">Static Kstat Configuration</string>
     <string name="kstat_path_management">Kstat Path Management</string>
     <string name="no_kstat_config_message">No Kstat configuration yet, click the button below to add</string>
-    <!-- SuSFS Mount Hiding Control Related Strings -->
     <string name="susfs_hide_mounts_control_title">SUS Mount Hiding Control</string>
     <string name="susfs_hide_mounts_control_description">Control the hiding behavior of SUS mounts for processes</string>
     <string name="susfs_hide_mounts_for_all_procs_label">Hide SUS mounts for all processes</string>
@@ -548,7 +510,6 @@
     <string name="susfs_android_data_path_set">Android Data path has been set to: %s</string>
     <string name="susfs_sdcard_path_set">SD card path has been set to: %s</string>
     <string name="susfs_path_setup_warning">Path setup may not be fully successful, but SUS paths will continue to be added</string>
-    <!-- 备份和还原相关字符串 -->
     <string name="susfs_backup_title">Backup</string>
     <string name="susfs_backup_description">Create a backup of all SuSFS configurations. The backup file will include all settings, paths, and configurations</string>
     <string name="susfs_backup_create">Create Backup</string>
@@ -615,7 +576,6 @@
     <string name="no_active_manager">No active manager</string>
     <string name="home_zygisk_implement">Zygisk implement</string>
     <string name="home_meta_module_implement">Meta Module implement</string>
-    <!-- 循环路径相关 -->
     <string name="susfs_tab_sus_loop_paths">SUS Loop Paths</string>
     <string name="susfs_add_sus_loop_path">Add SUS Loop Path</string>
     <string name="susfs_edit_sus_loop_path">Edit SUS Loop Path</string>
@@ -631,7 +591,6 @@
     <string name="susfs_loop_path_invalid_location">Error: Loop paths cannot be inside /storage/ or /sdcard/ directories</string>
     <string name="loop_paths_section">Loop Paths</string>
     <string name="add_loop_path">Add Loop Path</string>
-    <!-- 循环路径功能描述 -->
     <string name="sus_loop_paths_description_title">Loop Path Configuration</string>
     <string name="sus_loop_paths_description_text">Loop paths are re-flagged as SUS_PATH on each non-root user app or isolated service startup. This helps address issues where added paths may have their inode status reset or inode re-created in the kernel</string>
     <string name="avc_log_spoofing">AVC Log Spoofing</string>
@@ -647,7 +606,6 @@ Important Note:\n
 - Enabling this will sometimes make developers hard to identify the cause when they are debugging with some permission or SELinux issue, so users are advised to disable this when doing
 </string>
     <string name="home_hook_type">Hook type</string>
-    <!-- KPM patching related strings -->
     <string name="kpm_patch_options">KPM Patch</string>
     <string name="kpm_patch_description">For adding additional KPM features</string>
     <string name="enable_kpm_patch">KPM Patch</string>
@@ -658,7 +616,6 @@ Important Note:\n
     <string name="kpm_undo_patch_enabled">KPM undo patch enabled</string>
     <string name="kpm_patch_mode">KPM Patch Mode</string>
     <string name="kpm_undo_patch_mode">KPM Undo Patch Mode</string>
-    <!-- KPM workflow related -->
     <string name="kpm_preparing_tools">Preparing KPM tools</string>
     <string name="kpm_applying_patch">Applying KPM patch</string>
     <string name="kpm_undoing_patch">Undoing KPM patch</string>
@@ -666,16 +623,13 @@ Important Note:\n
     <string name="kpm_patch_success">KPM patch applied successfully</string>
     <string name="kpm_undo_patch_success">KPM patch undone successfully</string>
     <string name="kpm_file_repacked">File repacked successfully</string>
-    <!-- KPM error messages -->
     <string name="kpm_extract_zip_failed">Failed to extract zip file</string>
     <string name="kpm_image_file_not_found">Image file not found</string>
     <string name="kpm_patch_failed">KPM patch failed</string>
     <string name="kpm_undo_patch_failed">KPM undo patch failed</string>
     <string name="kpm_patch_operation_failed">KPM patch operation failed: %s</string>
-    <!-- KPM option radio group strings -->
     <string name="kpm_follow_kernel_file">Follow Kernel</string>
     <string name="kpm_follow_kernel_description">Use kernel as-is without any KPM modifications</string>
-    <!-- UID Scanner Settings -->
     <string name="uid_auto_scan_title">User-mode scanning application list</string>
     <string name="uid_auto_scan_summary">Enabling this option will use user-mode scanning for the application list, improving stability. (if you encounter issues such as freezing during kernel scanning of the application list, you may try enabling this option)</string>
     <string name="uid_multi_user_scan_title">Multi-User Application Scanning</string>
@@ -686,7 +640,6 @@ Important Note:\n
     <string name="clean_runtime_environment_confirm">Are you sure you want to clean the runtime environment? This will stop the scanner service and remove related files</string>
     <string name="clean_runtime_environment_success">Runtime environment cleaned successfully</string>
     <string name="clean_runtime_environment_failed">Failed to clean runtime environment</string>
-    <!-- 确认安装相关字符串 -->
     <string name="confirm_installation">Confirm Installation</string>
     <string name="confirm_multiple_installation">Confirm Installation (%d files)</string>
     <string name="install_confirm">Install</string>
@@ -699,7 +652,6 @@ Important Note:\n
     <string name="author">Author</string>
     <string name="description">Description</string>
     <string name="supported_devices">Supported Devices</string>
-    <!-- SUS Map related strings -->
     <string name="susfs_tab_sus_maps">SUS Maps</string>
     <string name="susfs_sus_map_label">Library Path</string>
     <string name="susfs_sus_map_placeholder">/data/adb/modules/my_module/zygisk/arm64-v8a.so</string>
@@ -716,7 +668,6 @@ Important Note:\n
     <string name="sus_maps_description_text">Hide the real file paths of memory mappings from /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap]. Please note: This feature does not support hiding anonymous memory mappings, nor can it hide inline hooks or PLT hooks caused by the injected library itself</string>
     <string name="sus_maps_warning">Important Notice: For applications with well-implemented injection detection mechanisms, this feature may not effectively bypass detection</string>
     <string name="sus_maps_debug_info">First, find the target application\'s PID and UID using ps -enf, then check the relevant paths in /proc/&lt;pid&gt;/maps and compare the device numbers with those in /proc/1/mountinfo to ensure consistency. Only when the device numbers match can the map hiding function work properly</string>
-    <!-- Log Viewer -->
     <string name="incompatible_kernel_msg">
     The current manager is incompatible with this kernel! Please upgrade the kernel to version %2$d or higher (currently %1$d)
     </string>

@@ -127,23 +127,17 @@
     <string name="selected_lkm">LKM dipilih: %s</string>
     <string name="save_log">Simpan Log</string>
     <string name="log_saved">Log disimpan</string>
-    <!-- Module related -->
     <string name="module_install_confirm">konfirmasi pemasangan modul %1$s?</string>
     <string name="unknown_module">module tidak dikenal</string>
-    <!-- Restore related -->
     <string name="restore_confirm_title">Konfirmasi pemulihan module</string>
     <string name="restore_confirm_message">Operasi ini akan menimpa semua modul yang ada. Lanjutkan?</string>
     <string name="confirm">Konfirmasi</string>
     <string name="cancel">Batal</string>
-    <!-- Backup related -->
-    <!-- Restore related messages -->
     <string name="restore_success">Modul berhasil dipulihkan, restart diperlukan</string>
     <string name="restore_failed">Pemulihan gagal: %1$s</string>
     <string name="restart_now">Mulai Ulang Sekarang</string>
     <string name="unknown_error">Kesalahan tidak diketahui</string>
-    <!-- Command related -->
     <string name="command_execution_failed">Eksekusi perintah gagal: %1$s</string>
-    <!-- Allowlist related -->
     <string name="allowlist_backup_success">Cadangan daftar izin berhasil</string>
     <string name="allowlist_backup_failed">Gagal mencadangkan daftar izin: %1$s</string>
     <string name="allowlist_restore_confirm_title">Konfirmasi Pemulihan Daftar Izin</string>
@@ -232,9 +226,7 @@
     <string name="confirm_uninstall_content">KPM berikut akan diuninstall: %s</string>
     <string name="image_editor_hint">Gunakan dua jari untuk memperbesar gambar, dan satu jari untuk menggeser mengatur posisi</string>
     <string name="reprovision">Reprovisi</string>
-    <!-- Kernel Flash Progress Related -->
     <string name="horizon_flash_complete">Flash Selesai</string>
-    <!-- Flash Status Related -->
     <string name="horizon_preparing">Mempersiapkan…</string>
     <string name="horizon_cleaning_files">Membersihkan Berkas...</string>
     <string name="horizon_copying_files">Menyalin file...</string>
@@ -242,7 +234,6 @@
     <string name="horizon_patching_script">Memperbaiki skrip flash…</string>
     <string name="horizon_flashing">Mem-flash kernel…</string>
     <string name="horizon_flash_complete_status">Flash selesai</string>
-    <!-- Slot selection related strings -->
     <string name="select_slot_title">Pilih Slot Flash</string>
     <string name="select_slot_description">Silakan pilih slot target untuk flash boot</string>
     <string name="slot_a">Slot A</string>
@@ -252,11 +243,9 @@
     <string name="horizon_setting_target_slot">Mengatur slot yang ditentukan</string>
     <string name="horizon_restoring_original_slot">Pulihkan Slot Default</string>
     <string name="current_slot">Slot default sistem saat ini：%1$s </string>
-    <!-- Error Messages -->
     <string name="horizon_copy_failed">Menyalin gagal</string>
     <string name="horizon_unknown_error">Kesalahan yang tidak diketahui</string>
     <string name="flash_failed_message">Flash gagal</string>
-    <!-- lkm/gki install -->
     <string name="Lkm_install_methods">Perbaikan/pemasangan LKM</string>
     <string name="GKI_install_methods">Mem-flash AnyKernel3</string>
     <string name="kernel_version_log">Versi kernel: %1$s</string>
@@ -264,7 +253,6 @@
     <string name="configuration">Konfigurasi</string>
     <string name="app_settings">Pengaturan Aplikasi</string>
     <string name="tools">Alat-Alat</string>
-    <!--  String resources used in SuperUser -->
     <string name="no_apps_found">Aplikasi tidak ditemukan</string>
     <string name="selinux_enabled_toast">SELinux Dinyalakan</string>
     <string name="selinux_disabled_toast">SELinux Dimatikan</string>
@@ -277,11 +265,8 @@
     <string name="icon_switch_title">Ubah ikon</string>
     <string name="icon_switch_summary">Ubah ikon peluncur aplikasi ke ikon KernelSU</string>
     <string name="icon_switched">Ikon dirubah</string>
-    <!-- KPM display settings -->
     <string name="show_kpm_info">Tampilkan fungsi KPM</string>
     <string name="show_kpm_info_summary">Tampilkan fungsi informasi KPM dan menu KPM di bilah navigasi</string>
-    <!-- Webui X settings -->
-    <!-- DPI setting related strings -->
     <string name="app_dpi_title">Ubah DPI</string>
     <string name="app_dpi_summary">Pengaturan DPI hanya untuk aplikasi ini saja</string>
     <string name="dpi_size_small">Kecil</string>
@@ -292,22 +277,18 @@
     <string name="dpi_apply_settings">Terapkan setelan DPI</string>
     <string name="dpi_confirm_title">Konfirmasi perubahan DPI</string>
     <string name="dpi_confirm_message">Apa kamu yakin ingin merubah DPI aplikasi dari %1$d ke %2$d?</string>
-    <!-- Language settings related strings -->
     <string name="settings_language">Bahasa Aplikasi</string>
     <string name="language_system_default">Mengikuti sistem</string>
-    <!-- Flash related -->
     <string name="error_code">Kode error</string>
     <string name="check_log">Silahkan periksa log</string>
     <string name="installing_module">Modul yang dipasang %1$d/%2$d</string>
     <string name="module_failed_count">%d Gagal memasang modul baru</string>
     <string name="module_download_error">Download modul gagal</string>
     <string name="kernel_flashing">Memasang Kernel</string>
-    <!-- 分类相关 -->
     <string name="category_all_apps">Semua</string>
     <string name="category_root_apps">Akar</string>
     <string name="category_custom_apps">Kostum</string>
     <string name="category_default_apps">Bawaan</string>
-    <!-- 排序相关 -->
     <string name="sort_name_asc">Urutan naik nama</string>
     <string name="sort_name_desc">Urutan turun nama</string>
     <string name="sort_install_time_new">Waktu pemasangan (baru)</string>
@@ -315,9 +296,7 @@
     <string name="sort_size_desc">Urutan turun ukuran</string>
     <string name="sort_size_asc">Urutan naik ukuran</string>
     <string name="sort_usage_freq">Frekuensi penggunaan</string>
-    <!-- 状态相关 -->
     <string name="no_apps_in_category">Tidak ada aplikasi dalam kategori ini</string>
-    <!-- 标签相关 -->
     <string name="deny_authorization">Penolakan otorisasi</string>
     <string name="grant_authorization">Otorisasi</string>
     <string name="unmount_modules">Melepas Pemasangan Modul</string>
@@ -328,11 +307,9 @@
     <string name="scroll_to_bottom">Bawah</string>
     <string name="selected">Dipilih</string>
     <string name="select">pilihan</string>
-    <!-- BottomSheet相关 -->
     <string name="menu_options">Opsi Menu</string>
     <string name="sort_options">Urut berdasarkan</string>
     <string name="app_categories">Pilihan Jenis Aplikasi</string>
-    <!-- SuSFS Configuration -->
     <string name="susfs_config_title">Konfigurasi SuSFS</string>
     <string name="susfs_config_description">Deskripsi Konfigurasi</string>
     <string name="susfs_config_description_text">Fitur ini memungkinkan Anda menyesuaikan nilai uname SuSFS dan spoofing waktu build. Masukkan nilai yang ingin Anda atur lalu klik Terapkan untuk memproses perubahan.</string>
@@ -344,16 +321,12 @@
     <string name="susfs_current_build_time">Waktu membangun saat ini: %s</string>
     <string name="susfs_reset_to_default">Setel Ulang ke Default</string>
     <string name="susfs_apply">Terapkan</string>
-    <!-- SuSFS Reset Confirmation -->
     <string name="susfs_reset_confirm_title">Konfirmasi Setel Ulang</string>
-    <!-- SuSFS Toast Messages -->
     <string name="susfs_binary_not_found">File ksu_susfs tidak ditemukan</string>
     <string name="susfs_command_failed">Eksekusi perintah SUSFS gagal</string>
     <string name="susfs_command_error">Gagal menjalankan perintah SUSFS: %s</string>
     <string name="susfs_uname_set_success" formatted="false">Berhasil atur uname dan waktu build SUSFS: %s, %s</string>
-    <!-- SuSFS Settings Item -->
     <string name="susfs_config_setting_title">Konfigurasi SUSFS</string>
-    <!-- 开机自启动相关 -->
     <string name="susfs_autostart_title">Mulai Otomatis</string>
     <string name="susfs_autostart_description">Terapkan semua konfigurasi non-default secara otomatis saat mulai ulang</string>
     <string name="susfs_autostart_requirement">Perlu tambahan konfigurasi untuk mengaktifkan</string>
@@ -361,35 +334,27 @@
     <string name="susfs_autostart_disable_failed">Gagal menonaktifkan mulai otomatis</string>
     <string name="susfs_autostart_error">Kesalahan konfigurasi mulai otomatis: %s</string>
     <string name="susfs_no_config_to_autostart">Tidak ada konfigurasi yang tersedia untuk mulai otomatis</string>
-    <!-- SuSFS Tab Titles -->
     <string name="susfs_tab_basic_settings">Pengaturan Dasar</string>
     <string name="susfs_tab_sus_paths">Jalur SUS</string>
     <string name="susfs_tab_path_settings">Pengaturan Path</string>
     <string name="susfs_tab_enabled_features">Status Fitur yang Diaktifkan</string>
-    <!-- SuSFS Path Management -->
     <string name="susfs_add_sus_path">Tambahkan Jalur SUS</string>
     <string name="susfs_sus_path_added_success">Jalur SUS berhasil ditambahkan</string>
     <string name="susfs_path_not_found_error">Kesalahan jalur tidak ditemukan</string>
     <string name="susfs_path_label">Jalur</string>
     <string name="susfs_path_placeholder">contoh: /system/addon.d</string>
     <string name="susfs_no_paths_configured">Tidak ada jalur SUS yang dikonfigurasi</string>
-    <!-- SuSFS Umount Mode -->
-    <!-- SuSFS Run Umount -->
-    <!-- SuSFS Reset Categories -->
     <string name="susfs_reset_paths_title">Setel Ulang Jalur SUS</string>
     <string name="susfs_reset_paths_message">Ini akan menghapus semua konfigurasi jalur SUS. Apakah Anda yakin ingin melanjutkan?</string>
     <string name="susfs_reset_path_title">Setel Ulang Pengaturan Jalur</string>
-    <!-- SuSFS Path Settings -->
     <string name="susfs_android_data_path_label">Jalur Data Android</string>
     <string name="susfs_sdcard_path_label">Jalur SD Card</string>
     <string name="susfs_set_android_data_path">Atur Jalur Data Android</string>
     <string name="susfs_set_sdcard_path">Atur Jalur SD Card</string>
-    <!-- SuSFS Enabled Features -->
     <string name="susfs_enabled_features_description">Tampilkan status fitur SuSFS yang saat ini diaktifkan</string>
     <string name="susfs_no_features_found">Tidak ditemukan informasi status fitur</string>
     <string name="susfs_feature_enabled">Diaktifkan</string>
     <string name="susfs_feature_disabled">Dinonaktifkan</string>
-    <!-- Feature Labels -->
     <string name="sus_path_feature_label">Dukungan Jalur SUS</string>
     <string name="spoof_uname_feature_label">Dukungan Spoof uname</string>
     <string name="spoof_cmdline_feature_label">Spoof Cmdline/Bootconfig</string>
@@ -397,7 +362,6 @@
     <string name="enable_log_feature_label">Dukungan Logging</string>
     <string name="hide_symbols_feature_label">Sembunyikan Simbol KSU SUSFS</string>
     <string name="sus_kstat_feature_label">Dukungan SUS Kstat</string>
-    <!-- 可切换状态 -->
     <string name="susfs_feature_configurable">Fitur SuSFS yang Dapat Dikonfigurasi</string>
     <string name="susfs_enable_log_label">Aktifkan Log SuSFS</string>
     <string name="susfs_log_config_description">Aktifkan atau nonaktifkan logging untuk SuSFS</string>
@@ -406,7 +370,6 @@
     <string name="susfs_log_disabled">Menonaktifkan logging SuSFS</string>
     <string name="module_update_json">Perbarui JSON</string>
     <string name="module_update_json_copied">URL Pembaruan JSON disalin ke papan klip</string>
-    <!-- Settings related strings -->
     <string name="show_more_module_info">Tampilkan info modul lainnya</string>
     <string name="show_more_module_info_summary">Pajang info modul tambahan seperti URL pembaruan JSON</string>
     <string name="susfs_execution_location_label">Lokasi Eksekusi</string>
@@ -424,10 +387,8 @@
     <string name="susfs_slot_use_uname">Gunakan Uname</string>
     <string name="susfs_slot_use_build_time">Gunakan Waktu Build</string>
     <string name="susfs_slot_info_unavailable">Tidak dapat mengambil informasi slot</string>
-    <!-- SuSFS 自启动相关字符串 -->
     <string name="susfs_autostart_enabled_success">Modul autostart SuSFS diaktifkan, jalur modul: %s</string>
     <string name="susfs_autostart_disabled_success">Modul autostart SuSFS dinonaktifkan</string>
-    <!-- SuSFS Kstat相关字符串 -->
     <string name="susfs_tab_kstat_config">Konfigurasi Kstat</string>
     <string name="kstat_static_config_added">Konfigurasi statis Kstat ditambahkan: %1$s</string>
     <string name="kstat_config_removed">Konfigurasi Kstat dihapus: %1$s</string>
@@ -450,7 +411,6 @@
     <string name="static_kstat_config">Konfigurasi Statis Kstat</string>
     <string name="kstat_path_management">Manajemen Jalur Kstat</string>
     <string name="no_kstat_config_message">Belum ada konfigurasi Kstat, klik tombol di atas untuk menambahkan</string>
-    <!-- SuSFS Mount Hiding Control Related Strings -->
     <string name="susfs_hide_mounts_control_title">Kontrol Penyembunyian Pemasangan SUS</string>
     <string name="susfs_hide_mounts_control_description">Kontrol perilaku penyembunyian pemasangan SUS untuk proses</string>
     <string name="susfs_hide_mounts_for_all_procs_label">Sembunyikan pemasangan SUS untuk semua proses</string>
@@ -467,7 +427,6 @@
     <string name="susfs_android_data_path_set">Jalur Data Android telah diatur ke: %s</string>
     <string name="susfs_sdcard_path_set">Jalur SD card telah diatur ke: %s</string>
     <string name="susfs_path_setup_warning">Penyiapan jalur mungkin tidak sepenuhnya berhasil, tetapi jalur SUS akan terus ditambahkan</string>
-    <!-- 备份和还原相关字符串 -->
     <string name="susfs_backup_title">Backup</string>
     <string name="susfs_backup_description">Buat backup dari semua konfigurasi SuSFS. File backup akan mencakup semua pengaturan, jalur, dan konfigurasi.</string>
     <string name="susfs_backup_create">Buat Backup</string>
@@ -530,7 +489,6 @@
     <string name="multi_manager_list">Manajer Aktif</string>
     <string name="no_active_manager">Tidak ada manajer aktif</string>
     <string name="home_zygisk_implement">Implementasi Zygisk</string>
-    <!-- 循环路径相关 -->
     <string name="susfs_tab_sus_loop_paths">Jalur Loop SUS</string>
     <string name="susfs_add_sus_loop_path">Tambahkan Jalur Loop SUS</string>
     <string name="susfs_edit_sus_loop_path">Edit Jalur Loop SUS</string>
@@ -546,7 +504,6 @@
     <string name="susfs_loop_path_invalid_location">Kesalahan: Jalur loop tidak dapat berada di dalam direktori /storage/ atau /sdcard/</string>
     <string name="loop_paths_section">Jalur Loop</string>
     <string name="add_loop_path">Tambahkan Jalur Loop</string>
-    <!-- 循环路径功能描述 -->
     <string name="sus_loop_paths_description_title">Konfigurasi Jalur Loop</string>
     <string name="sus_loop_paths_description_text">Jalur loop ditandai ulang sebagai SUS_PATH pada setiap startup aplikasi pengguna non-root atau layanan terisolasi. Ini membantu mengatasi masalah di mana jalur yang ditambahkan mungkin memiliki status inode direset atau inode dibuat ulang di kernel.</string>
     <string name="avc_log_spoofing">Palsukan log AVC</string>
@@ -557,10 +514,8 @@ Diaktifkan: Aktifkan pemalsuan sus tcontext dari \'su\' dengan \'u:r:priv_app:s0
     <string name="avc_log_spoofing_warning">Catatan Penting:\n
 - Secara default pada kernel nilai ini disetel ke \'0\'\n
 - Mengaktifkan ini terkadang membuat pengembang lebih sulit mengidentifikasi penyebab saat melakukan debugging terkait izin atau masalah SELinux, sehingga disarankan agar pengguna menonaktifkannya saat sedang melakukan debugging</string>
-    <!-- 模块签名功能描述 -->
     <string name="module_verified">Tervalidasi</string>
     <string name="home_hook_type">Jenis hook</string>
-    <!-- KPM patching related strings -->
     <string name="kpm_patch_options">Patch KPM</string>
     <string name="kpm_patch_description">Untuk menambahkan fitur KPM tambahan</string>
     <string name="enable_kpm_patch">Patch KPM</string>
@@ -571,7 +526,6 @@ Diaktifkan: Aktifkan pemalsuan sus tcontext dari \'su\' dengan \'u:r:priv_app:s0
     <string name="kpm_undo_patch_enabled">Pembatalan patch KPM diaktifkan</string>
     <string name="kpm_patch_mode">Mode Patch KPM</string>
     <string name="kpm_undo_patch_mode">Mode Pembatalan Patch KPM</string>
-    <!-- KPM workflow related -->
     <string name="kpm_preparing_tools">Sedang menyiapkan Alat KPM</string>
     <string name="kpm_applying_patch">Menerapkan patch KPM</string>
     <string name="kpm_undoing_patch">Membatalkan patch KPM</string>
@@ -579,16 +533,13 @@ Diaktifkan: Aktifkan pemalsuan sus tcontext dari \'su\' dengan \'u:r:priv_app:s0
     <string name="kpm_patch_success">KPM berhasil diterapkan</string>
     <string name="kpm_undo_patch_success">Patch KPM berhasil dibatalkan</string>
     <string name="kpm_file_repacked">File berhasil direpack</string>
-    <!-- KPM error messages -->
     <string name="kpm_extract_zip_failed">Gagal mengekstrak berkas zip</string>
     <string name="kpm_image_file_not_found">Berkas Image tidak ditemukan</string>
     <string name="kpm_patch_failed">Patch KPM gagal</string>
     <string name="kpm_undo_patch_failed">Pembatalan patch KPM gagal</string>
     <string name="kpm_patch_operation_failed">Operasi patch KPM gagal: %s</string>
-    <!-- KPM option radio group strings -->
     <string name="kpm_follow_kernel_file">Ikuti kernel</string>
     <string name="kpm_follow_kernel_description">Gunakan kernel apa adanya tanpa perubahan dari KPM</string>
-    <!-- UID Scanner Settings -->
     <string name="uid_auto_scan_title">Daftar aplikasi pemindaian pada mode pengguna</string>
     <string name="uid_auto_scan_summary">Mengaktifkan opsi ini akan menggunakan pemindaian mode pengguna untuk daftar aplikasi, sehingga meningkatkan kestabilan. (Jika Anda mengalami masalah seperti hang saat kernel memindai daftar aplikasi, Anda dapat mencoba mengaktifkan opsi ini.)</string>
     <string name="uid_multi_user_scan_title">Pemindaian Aplikasi Multi-Pengguna</string>
@@ -599,7 +550,6 @@ Diaktifkan: Aktifkan pemalsuan sus tcontext dari \'su\' dengan \'u:r:priv_app:s0
     <string name="clean_runtime_environment_confirm">Apakah Anda yakin ingin membersihkan lingkungan runtime? Tindakan ini akan menghentikan layanan pemindai dan menghapus berkas yang terkait.</string>
     <string name="clean_runtime_environment_success">Lingkungan runtime berhasil dibersihkan</string>
     <string name="clean_runtime_environment_failed">Gagal membersihkan lingkungan runtime</string>
-    <!-- 确认安装相关字符串 -->
     <string name="confirm_installation">Konfirmasi Instalasi</string>
     <string name="confirm_multiple_installation">Konfirmasi Instalasi (Berkas %d)</string>
     <string name="install_confirm">Instal</string>
@@ -612,7 +562,6 @@ Diaktifkan: Aktifkan pemalsuan sus tcontext dari \'su\' dengan \'u:r:priv_app:s0
     <string name="author">Pembuat</string>
     <string name="description">Deskripsi</string>
     <string name="supported_devices">Perangkat yang didukung</string>
-    <!-- SUS Map related strings -->
     <string name="susfs_tab_sus_maps">Peta SUS</string>
     <string name="susfs_sus_map_label">Jalur Pustaka</string>
     <string name="susfs_sus_map_placeholder">/data/adb/modules/my_module/zygisk/arm64-v8a.so</string>
@@ -626,7 +575,6 @@ Diaktifkan: Aktifkan pemalsuan sus tcontext dari \'su\' dengan \'u:r:priv_app:s0
     <string name="susfs_reset_sus_maps_message">Tindakan ini akan menghapus semua peta SUS yang telah dikonfigurasi. Tindakan ini tidak dapat dibatalkan.</string>
     <string name="sus_maps_section">Penyembunyian Peta Memori</string>
     <string name="sus_maps_description_title">Sembunyikan berkas nyata yang di-mmapped dari berbagai peta di /proc/self/</string>
-    <!-- Log Viewer -->
     <string name="settings_sucompat">Rutekan ulang biner su</string>
     <string name="settings_sucompat_summary">Memungkinkan aplikasi yang diberi izin Superuser di Profil Aplikasi mendapatkan shell superuser dengan menjalankan /system/bin/su; efektif hanya untuk proses baru.</string>
     <string name="settings_kernel_umount">Umount kernel</string>

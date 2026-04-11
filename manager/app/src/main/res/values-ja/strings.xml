@@ -129,23 +129,17 @@
     <string name="selected_lkm">選択された LKM: %s</string>
     <string name="save_log">ログを保存</string>
     <string name="log_saved">保存されたログ</string>
-    <!-- Module related -->
     <string name="module_install_confirm">%1$s モジュールをインストールしますか？</string>
     <string name="unknown_module">不明なモジュール</string>
-    <!-- Restore related -->
     <string name="restore_confirm_title">モジュールの復元を確認</string>
     <string name="restore_confirm_message">この操作によりモジュールが上書きされます。続行しますか？</string>
     <string name="confirm">確認</string>
     <string name="cancel">キャンセル</string>
-    <!-- Backup related -->
-    <!-- Restore related messages -->
     <string name="restore_success">モジュールは正常に復元されました、再起動が必要です</string>
     <string name="restore_failed">復元に失敗: %1$s</string>
     <string name="restart_now">今すぐ再起動</string>
     <string name="unknown_error">不明なエラー</string>
-    <!-- Command related -->
     <string name="command_execution_failed">コマンドの実行に失敗しました: %1$s</string>
-    <!-- Allowlist related -->
     <string name="allowlist_backup_success">許可リストのバックアップが成功しました</string>
     <string name="allowlist_backup_failed">許可リストのバックアップに失敗: %1$s</string>
     <string name="allowlist_restore_confirm_title">許可リストの復元を確認</string>
@@ -243,9 +237,7 @@
     <string name="confirm_uninstall_content">次の KPM がアンインストールされます: %s</string>
     <string name="image_editor_hint">2 本の指で画像を拡大、1 本の指でドラッグで位置を調整します。</string>
     <string name="reprovision">再プロビジョニング</string>
-    <!-- Kernel Flash Progress Related -->
     <string name="horizon_flash_complete">フラッシュが完了しました</string>
-    <!-- Flash Status Related -->
     <string name="horizon_preparing">準備中…</string>
     <string name="horizon_cleaning_files">ファイルを削除中…</string>
     <string name="horizon_copying_files">ファイルをコピー中…</string>
@@ -253,7 +245,6 @@
     <string name="horizon_patching_script">フラッシュスクリプトをパッチ中…</string>
     <string name="horizon_flashing">カーネルをフラッシュ中…</string>
     <string name="horizon_flash_complete_status">フラッシュが完了しました</string>
-    <!-- Slot selection related strings -->
     <string name="select_slot_title">フラッシュ先のスロットを選択</string>
     <string name="select_slot_description">フラッシュする boot のターゲットスロットを選択</string>
     <string name="slot_a">スロット A</string>
@@ -263,11 +254,9 @@
     <string name="horizon_setting_target_slot">指定するスロットを設定</string>
     <string name="horizon_restoring_original_slot">デフォルトのスロットに復元</string>
     <string name="current_slot">現在のシステムデフォルトスロット: %1$s </string>
-    <!-- Error Messages -->
     <string name="horizon_copy_failed">コピーに失敗しました</string>
     <string name="horizon_unknown_error">不明なエラー</string>
     <string name="flash_failed_message">フラッシュに失敗しました</string>
-    <!-- lkm/gki install -->
     <string name="Lkm_install_methods">LKM の修復またはインストール</string>
     <string name="GKI_install_methods">AnyKernel3 をフラッシュ</string>
     <string name="kernel_version_log">カーネル バージョン: %1$s</string>
@@ -275,7 +264,6 @@
     <string name="configuration">設定</string>
     <string name="app_settings">アプリの設定</string>
     <string name="tools">ツール</string>
-    <!--  String resources used in SuperUser -->
     <string name="no_apps_found">アプリがありません</string>
     <string name="selinux_enabled_toast">SELinux 有効</string>
     <string name="selinux_disabled_toast">SELinux 無効</string>
@@ -288,11 +276,8 @@
     <string name="icon_switch_title">代替アイコン</string>
     <string name="icon_switch_summary">ランチャーアイコンを KernelSU のアイコンに変更します。</string>
     <string name="icon_switched">アイコンを変更しました</string>
-    <!-- KPM display settings -->
     <string name="show_kpm_info">KPM 機能を非表示</string>
     <string name="show_kpm_info_summary">ホームとボトムバーから KPM の情報と機能を非表示にします。</string>
-    <!-- Webui settings -->
-    <!-- DPI setting related strings -->
     <string name="app_dpi_title">DPI の変更を適用</string>
     <string name="app_dpi_summary">このアプリのみで画面表示密度を調整します。</string>
     <string name="dpi_size_small">小</string>
@@ -303,10 +288,8 @@
     <string name="dpi_apply_settings">DPI の設定を適用する</string>
     <string name="dpi_confirm_title">DPI の変更を確認</string>
     <string name="dpi_confirm_message">アプリの DPI を %1$d から %2$d に変更してもよろしいですか？</string>
-    <!-- Language settings related strings -->
     <string name="settings_language">アプリの言語</string>
     <string name="language_system_default">システムに従う</string>
-    <!-- Flash related -->
     <string name="error_code">エラーコード</string>
     <string name="check_log">ログを確認してください</string>
     <string name="installing_module">モジュールをインストール中: %1$d/%2$d</string>
@@ -315,12 +298,10 @@
     <string name="kernel_flashing">カーネルをフラッシュ中</string>
     <string name="warning_of_meta_module_title">メタモジュールが必要です</string>
     <string name="warning_of_meta_module_summary">このモジュールは /system をマウントしようとしますが、メタモジュールがそれを処理します。そうでなければ動作しない可能性があります</string>
-    <!-- 分类相关 -->
     <string name="category_all_apps">すべて</string>
     <string name="category_root_apps">Root</string>
     <string name="category_custom_apps">カスタム</string>
     <string name="category_default_apps">デフォルト</string>
-    <!-- 排序相关 -->
     <string name="sort_name_asc">名前の昇順</string>
     <string name="sort_name_desc">名前の降順</string>
     <string name="sort_install_time_new">インストール日時 (新しい)</string>
@@ -328,9 +309,7 @@
     <string name="sort_size_desc">サイズの降順</string>
     <string name="sort_size_asc">サイズの昇順</string>
     <string name="sort_usage_freq">使用頻度</string>
-    <!-- 状态相关 -->
     <string name="no_apps_in_category">このカテゴリーにアプリはありません</string>
-    <!-- 标签相关 -->
     <string name="deny_authorization">権限の認証</string>
     <string name="grant_authorization">認証</string>
     <string name="unmount_modules">モジュールのマウントを解除</string>
@@ -341,11 +320,9 @@
     <string name="scroll_to_bottom">画面下</string>
     <string name="selected">選択中</string>
     <string name="select">オプション</string>
-    <!-- BottomSheet相关 -->
     <string name="menu_options">メニューのオプション</string>
     <string name="sort_options">並べ替え</string>
     <string name="app_categories">アプリタイプを選択</string>
-    <!-- SuSFS Configuration -->
     <string name="susfs_config_title">SuSFS の構成</string>
     <string name="susfs_config_description">構成の説明</string>
     <string name="susfs_config_description_text">この機能を使用すると SuSFS の uname の値とビルド日時の偽装をカスタマイズできます。設定する値を入力後に「適用」をタップで有効になります。</string>
@@ -357,16 +334,12 @@
     <string name="susfs_current_build_time">現在のビルド日時: %s</string>
     <string name="susfs_reset_to_default">デフォルトにリセット</string>
     <string name="susfs_apply">適用</string>
-    <!-- SuSFS Reset Confirmation -->
     <string name="susfs_reset_confirm_title">リセットを確認</string>
-    <!-- SuSFS Toast Messages -->
     <string name="susfs_binary_not_found">ksu_susfs ファイルが見つかりません</string>
     <string name="susfs_command_failed">SuSFS コマンドの実行に失敗しました</string>
     <string name="susfs_command_error">SuSFS コマンドの実行エラー: %s</string>
     <string name="susfs_uname_set_success" formatted="false">SuSFS uname とビルド日時が正常に設定されました: %s - %s</string>
-    <!-- SuSFS Settings Item -->
     <string name="susfs_config_setting_title">SuSFS の構成</string>
-    <!-- 开机自启动相关 -->
     <string name="susfs_autostart_title">自動起動</string>
     <string name="susfs_autostart_description">システムの起動時に自動で uname の構成を適用する</string>
     <string name="susfs_autostart_requirement">有効化するには uname を構成するかパスを追加する必要があります</string>
@@ -374,33 +347,27 @@
     <string name="susfs_autostart_disable_failed">自動起動の無効化に失敗しました</string>
     <string name="susfs_autostart_error">自動起動の構成エラー: %s</string>
     <string name="susfs_no_config_to_autostart">自動起動に利用可能な構成がありません</string>
-    <!-- SuSFS Tab Titles -->
     <string name="susfs_tab_basic_settings">基本設定</string>
     <string name="susfs_tab_sus_paths">SUS のパス</string>
     <string name="susfs_tab_path_settings">パスの設定</string>
     <string name="susfs_tab_enabled_features">有効な機能のステータス</string>
-    <!-- SuSFS Path Management -->
     <string name="susfs_add_sus_path">SUS パスを追加</string>
     <string name="susfs_sus_path_added_success">SUS パスが正常に追加されました</string>
     <string name="susfs_path_not_found_error">パスが見つかりません</string>
     <string name="susfs_path_label">パス</string>
     <string name="susfs_path_placeholder">例: /system/addon.d</string>
     <string name="susfs_no_paths_configured">SUS パスが未構成です</string>
-    <!-- SuSFS Reset Categories -->
     <string name="susfs_reset_paths_title">SUS パスをリセット</string>
     <string name="susfs_reset_paths_message">すべての SUS パスの構成が消去されます。続行してもよろしいですか？</string>
     <string name="susfs_reset_path_title">パスの設定をリセット</string>
-    <!-- SuSFS Path Settings -->
     <string name="susfs_android_data_path_label">Android データパス</string>
     <string name="susfs_sdcard_path_label">SD カードのパス</string>
     <string name="susfs_set_android_data_path">Android データパスを設定</string>
     <string name="susfs_set_sdcard_path">SD カードのパスを設定</string>
-    <!-- SuSFS Enabled Features -->
     <string name="susfs_enabled_features_description">SuSFS で有効な機能のステータスを表示します。</string>
     <string name="susfs_no_features_found">機能のステータス情報が見つかりません</string>
     <string name="susfs_feature_enabled">有効</string>
     <string name="susfs_feature_disabled">無効</string>
-    <!-- Feature Labels -->
     <string name="sus_path_feature_label">SUS パスの対応</string>
     <string name="spoof_uname_feature_label">uname 偽装の対応</string>
     <string name="spoof_cmdline_feature_label">Cmdline/Bootconfig を偽装</string>
@@ -409,7 +376,6 @@
     <string name="hide_symbols_feature_label">KSU SUSFS シンボルを非表示</string>
     <string name="sus_kstat_feature_label">SUS Kstat の対応</string>
     <string name="sus_map_feature_label">SUS マップの対応</string>
-    <!-- 可切换状态 -->
     <string name="susfs_feature_configurable">構成可能な SuSFS の機能</string>
     <string name="susfs_enable_log_label">SuSFS のログ取得を有効化</string>
     <string name="susfs_log_config_description">SuSFS のログ取得を有効化または無効化します。</string>
@@ -418,7 +384,6 @@
     <string name="susfs_log_disabled">SuSFS のログ取得を無効化</string>
     <string name="module_update_json">更新用の JSON</string>
     <string name="module_update_json_copied">更新用 JSON の URL をクリップボードにコピーしました</string>
-    <!-- Settings related strings -->
     <string name="show_more_module_info">モジュール情報の詳細を表示</string>
     <string name="show_more_module_info_summary">更新用 JSON の URL など追加の情報を表示します。</string>
     <string name="susfs_execution_location_label">実行先</string>
@@ -436,10 +401,8 @@
     <string name="susfs_slot_use_uname">Uname を使用する</string>
     <string name="susfs_slot_use_build_time">ビルド日時を使用する</string>
     <string name="susfs_slot_info_unavailable">スロット情報を取得できません</string>
-    <!-- SuSFS 自启动相关字符串 -->
     <string name="susfs_autostart_enabled_success">SuSFS 自動起動モジュールが有効、モジュールのパス: %s</string>
     <string name="susfs_autostart_disabled_success">SuSFS 自動起動モジュールが無効</string>
-    <!-- SuSFS Kstat相关字符串 -->
     <string name="susfs_tab_kstat_config">Kstat の構成</string>
     <string name="kstat_static_config_added">Kstat の静的構成を追加しました: %1$s</string>
     <string name="kstat_config_removed">Kstat の構成を削除しました: %1$s</string>
@@ -462,7 +425,6 @@
     <string name="static_kstat_config">Kstat の静的構成</string>
     <string name="kstat_path_management">Kstat パスの管理</string>
     <string name="no_kstat_config_message">Kstat の構成が未設定です。上のボタンをタップで追加します。</string>
-    <!-- SuSFS Mount Hiding Control Related Strings -->
     <string name="susfs_hide_mounts_control_title">SUS マウントの非表示制御</string>
     <string name="susfs_hide_mounts_control_description">プロセスの SUS マウントを非表示する動作を制御します。</string>
     <string name="susfs_hide_mounts_for_all_procs_label">すべてのプロセスで SUS マウントを非表示</string>
@@ -479,7 +441,6 @@
     <string name="susfs_android_data_path_set">Android データパスが設定されました: %s</string>
     <string name="susfs_sdcard_path_set">SD カードのパスは次のように設定済みです: %s</string>
     <string name="susfs_path_setup_warning">パスの設定は完全に成功しない可能性がありますが、SUS パスは引き続き追加されます。</string>
-    <!-- 备份和还原相关字符串 -->
     <string name="susfs_backup_title">バックアップ</string>
     <string name="susfs_backup_description">SuSFS のすべての設定のバックアップを作成します。バックアップファイルは「すべての設定、パス、構成」が含まれます。</string>
     <string name="susfs_backup_create">バックアップを作成</string>
@@ -542,7 +503,6 @@
     <string name="no_active_manager">有効なマネージャーがありません</string>
     <string name="home_zygisk_implement">Zygisk を実装</string>
     <string name="home_meta_module_implement">メタモジュールの実装</string>
-    <!-- 循环路径相关 -->
     <string name="susfs_tab_sus_loop_paths">SUS ループパス</string>
     <string name="susfs_add_sus_loop_path">SUS ループパスを追加</string>
     <string name="susfs_edit_sus_loop_path">SUS ループパスを編集</string>
@@ -558,7 +518,6 @@
     <string name="susfs_loop_path_invalid_location">エラー: ループパスは「/storage/」または「/sdcard/」のディレクトリ内に配置できません。</string>
     <string name="loop_paths_section">ループパス</string>
     <string name="add_loop_path">ループパスを追加</string>
-    <!-- 循环路径功能描述 -->
     <string name="sus_loop_paths_description_title">ループパスの構成</string>
     <string name="sus_loop_paths_description_text">ループパスは、非 root ユーザーアプリまたは独立したサービスの起動ごとに SUS_PATH として再設定されます。これにより、追加されたパスの inode ステータスがリセットされたり、カーネル内で inode が再生成される問題に対処できます。</string>
     <string name="avc_log_spoofing">AVC ログの偽装</string>
@@ -570,7 +529,6 @@
 - カーネルはデフォルトで「0」に設定されています。\n
 - これを有効化すると、開発者が何らかの権限や SELinux の問題をデバッグするときに原因を特定するのが難しくなる場合があるため、デバッグ時はこれを無効化することをお勧めします。</string>
     <string name="home_hook_type">フックタイプ</string>
-    <!-- KPM patching related strings -->
     <string name="kpm_patch_options">KPM パッチ</string>
     <string name="kpm_patch_description">KPM に追加機能を加える</string>
     <string name="enable_kpm_patch">KPM パッチ</string>
@@ -581,7 +539,6 @@
     <string name="kpm_undo_patch_enabled">KPM パッチを元に戻すが有効</string>
     <string name="kpm_patch_mode">KPM パッチモード</string>
     <string name="kpm_undo_patch_mode">KPM パッチモードを元に戻す</string>
-    <!-- KPM workflow related -->
     <string name="kpm_preparing_tools">KPM ツールの準備</string>
     <string name="kpm_applying_patch">KPM パッチを適用中</string>
     <string name="kpm_undoing_patch">KPM パッチを元に戻す</string>
@@ -589,16 +546,13 @@
     <string name="kpm_patch_success">KPM パッチの適用に成功しました</string>
     <string name="kpm_undo_patch_success">KPM パッチが正常に元に戻されました</string>
     <string name="kpm_file_repacked">ファイルの再パックが成功しました</string>
-    <!-- KPM error messages -->
     <string name="kpm_extract_zip_failed">zip ファイルの展開に失敗しました</string>
     <string name="kpm_image_file_not_found">イメージファイルがありません</string>
     <string name="kpm_patch_failed">KPM パッチに失敗</string>
     <string name="kpm_undo_patch_failed">KPM パッチを戻せませんでした</string>
     <string name="kpm_patch_operation_failed">KPM パッチの操作に失敗しました: %s</string>
-    <!-- KPM option radio group strings -->
     <string name="kpm_follow_kernel_file">カーネルに従う</string>
     <string name="kpm_follow_kernel_description">KPM を変更せずにカーネルをそのまま使用します</string>
-    <!-- UID Scanner Settings -->
     <string name="uid_auto_scan_title">アプリリストをユーザーモードでスキャン</string>
     <string name="uid_multi_user_scan_title">マルチユーザーのアプリをスキャン</string>
     <string name="uid_multi_user_scan_summary">有効化すると仕事用プロファイルを含むすべてのユーザーのアプリをスキャンします</string>
@@ -608,7 +562,6 @@
     <string name="clean_runtime_environment_confirm">ランタイム環境をクリーンアップしてもよろしいですか？これによりスキャナサービスが停止し、関連ファイルが削除されます</string>
     <string name="clean_runtime_environment_success">ランタイム環境の消去に成功しました</string>
     <string name="clean_runtime_environment_failed">ランタイム環境の消去に失敗しました</string>
-    <!-- 确认安装相关字符串 -->
     <string name="confirm_installation">インストールを確認</string>
     <string name="confirm_multiple_installation">インストールを確認 (%d 個のファイル)</string>
     <string name="install_confirm">インストール</string>
@@ -621,7 +574,6 @@
     <string name="author">作者</string>
     <string name="description">説明</string>
     <string name="supported_devices">対応しているデバイス</string>
-    <!-- SUS Map related strings -->
     <string name="susfs_tab_sus_maps">SUS マップ</string>
     <string name="susfs_sus_map_label">ライブラリのパス</string>
     <string name="susfs_sus_map_placeholder">/data/adb/modules/my_module/zygisk/arm64-v8a.so</string>
@@ -634,7 +586,6 @@
     <string name="susfs_reset_sus_maps_title">SUS マップをリセット</string>
     <string name="susfs_reset_sus_maps_message">構成されている SUS マップをすべて削除します。この操作は元に戻せません。</string>
     <string name="sus_maps_section">メモリマップの非表示</string>
-    <!-- Log Viewer -->
     <string name="umount_path_manager">アンマウントパスの管理</string>
     <string name="umount_path_manager_summary">カーネルアンマウントパスの管理</string>
     <string name="add_umount_path">アンマウントパスを追加</string>
