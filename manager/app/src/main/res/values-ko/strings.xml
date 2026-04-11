@@ -86,7 +86,6 @@
     <string name="settings_profile_template_summary">앱 프로필의 로컬 및 온라인 템플레이트 관리</string>
     <string name="app_profile_template_create">템플레이트 생성</string>
     <string name="app_profile_template_edit">템플레이트 편집</string>
-    <string name="app_profile_template_id">ID</string>
     <string name="app_profile_template_id_invalid">올바르지 않은 템플레이트 id</string>
     <string name="app_profile_template_name">이름</string>
     <string name="app_profile_template_description">설명</string>
@@ -213,7 +212,6 @@
     <string name="yes">예</string>
     <string name="no">아니오</string>
     <string name="failed_reboot">다시 시작 실패</string>
-    <string name="kpm_title">KPM</string>
     <string name="kpm_version">버전</string>
     <string name="kpm_author">제작자</string>
     <string name="kpm_uninstall">제거</string>
@@ -397,7 +395,6 @@
     <string name="susfs_slot_info_title">슬롯 정보</string>
     <string name="susfs_slot_info_description">현재 부팅 슬롯 정보를 보고 값을 복사합니다.</string>
     <string name="susfs_current_active_slot">현재 활성 슬롯: %s</string>
-    <string name="susfs_slot_uname">Uname: %s</string>
     <string name="susfs_slot_build_time">빌드 날짜: %s</string>
     <string name="susfs_slot_current_badge">현재</string>
     <string name="susfs_slot_use_uname">Uname 사용</string>

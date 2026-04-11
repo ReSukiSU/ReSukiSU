@@ -505,7 +505,6 @@
     <string name="susfs_reset_loop_paths_title">Döngü Yollarını Sıfırla</string>
     <string name="susfs_reset_loop_paths_message">Tüm SUS döngü yollarını temizlemek istediğinizden emin misiniz? Bu işlem geri alınamaz.</string>
     <string name="susfs_loop_path_label">Döngü Yolu</string>
-    <string name="susfs_loop_path_placeholder">/data/ornek/yol</string>
     <string name="susfs_loop_path_restriction_warning">Not: Döngü yolları aracılığıyla yalnızca /storage/ ve /sdcard/ içinde OLMAYAN yollar eklenebilir.</string>
     <string name="susfs_loop_path_invalid_location">Hata: Döngü yolları /storage/ veya /sdcard/ dizinleri içinde olamaz</string>
     <string name="loop_paths_section">Döngü Yolları</string>

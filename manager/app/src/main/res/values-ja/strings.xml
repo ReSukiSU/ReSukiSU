@@ -21,7 +21,6 @@
     <string name="module_failed_to_disable">%s モジュールを OFF にできませんでした</string>
     <string name="module_empty">モジュールがインストールされていません</string>
     <string name="module">モジュール</string>
-    <string name="module_repo"></string>
     <string name="module_sort_action_first">並べ替え (アクションを優先)</string>
     <string name="module_sort_enabled_first">並べ替え (最初に有効)</string>
     <string name="uninstall">アンインストール</string>

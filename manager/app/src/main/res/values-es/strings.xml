@@ -263,4 +263,13 @@
     <string name="dpi_apply_settings">Aplicando ajustes de DPI</string>
     <string name="dpi_confirm_title">Confirmar cambio DPI</string>
     <string name="dpi_confirm_message">¿Estás seguro de que quieres cambiar el DPI de la aplicación de %1$d a %2$d?</string>
+    <string name="error_code">código de error</string>
+    <string name="check_log">Por favor, compruebe el registro</string>
+    <string name="installing_module">Módulo instalado %1$d/%2$d</string>
+    <string name="module_failed_count">%d falló al instalar un nuevo módulo</string>
+    <string name="module_download_error">La descarga del modelo falló</string>
+    <string name="scroll_to_top">Arriba</string>
+    <string name="scroll_to_bottom">Abajo</string>
+    <string name="selected">Seleccionados</string>
+    <string name="select">opción</string>
 </resources>

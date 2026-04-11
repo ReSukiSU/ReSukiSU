@@ -16,7 +16,6 @@
     <string name="selinux_status_enforcing">Ditegakkan</string>
     <string name="selinux_status_permissive">Permisi</string>
     <string name="unknown">Tidak Diketahui</string>
-    <string name="superuser">Superuser</string>
     <string name="module_failed_to_enable">Gagal mengaktifkan modul: %s</string>
     <string name="module_failed_to_disable">Gagal menonaktifkan modul: %s</string>
     <string name="module_empty">Tidak ada modul terpasang</string>
@@ -59,7 +58,6 @@
     <string name="send_log">Kirim Log</string>
     <string name="safe_mode">Mode Aman</string>
     <string name="jailbreak_mode">Mode jailbreak</string>
-    <string name="home_jailbreak">Jailbreak</string>
     <string name="jailbreak_timeout">Jailbreak munkin gagal, periksa log</string>
     <string name="jailbreak_flash_warning">Anda dalam **Mode Jailbreak**. Flash partisi pada perangkat dengan **bootloader terkunci** dapat merusak AVB (Boot Verifikasi Android) dan dapat menyebabkan **kegagalan boot** pada perangkat.\n\nPastikan bootloader Anda sudah tidak terkunci sebelum melanjutkan!</string>
     <string name="jailbreak_flash_warning_countdown">Lanjutkan (%1$d)</string>
@@ -76,9 +74,7 @@
     <string name="profile_template">Templat</string>
     <string name="profile_custom">Khusus</string>
     <string name="profile_name">Nama Profil</string>
-    <string name="profile_namespace">Mount namespace</string>
     <string name="profile_namespace_inherited">Diwariskan</string>
-    <string name="profile_namespace_global">Global</string>
     <string name="profile_groups">Grup</string>
     <string name="profile_capabilities">Kemampuan</string>
     <string name="profile_selinux_context">Konteks SELinux</string>
