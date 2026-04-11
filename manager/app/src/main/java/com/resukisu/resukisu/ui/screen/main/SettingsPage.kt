@@ -33,10 +33,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.automirrored.rounded.Article
+import androidx.compose.material.icons.filled.Adb
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.Fence
 import androidx.compose.material.icons.filled.FolderOff
 import androidx.compose.material.icons.filled.Info
@@ -360,7 +360,7 @@ fun SettingsPage(bottomPadding: Dp) {
                                 }
 
                                 SettingsSwitchWidget(
-                                    icon = Icons.Filled.DeveloperMode,
+                                    icon = Icons.Filled.Adb,
                                     title = stringResource(id = R.string.settings_adb_root),
                                     description = adbRootSummary,
                                     checked = isAdbRootEnabled,
