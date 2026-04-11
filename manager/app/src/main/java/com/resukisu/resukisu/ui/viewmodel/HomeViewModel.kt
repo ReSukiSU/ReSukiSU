@@ -68,7 +68,8 @@ class HomeViewModel : ViewModel() {
         val managersList: Natives.ManagersList? = null,
         val isDynamicSignEnabled: Boolean = false,
         val zygiskImplement: String = "",
-        val metaModuleImplement: String = ""
+        val metaModuleImplement: String = "",
+        val seccompStatus: Int = -1,
     )
 
     // 状态变量
@@ -185,7 +186,7 @@ class HomeViewModel : ViewModel() {
                     isKpmConfigured = isKpmConfigured,
                     requireNewKernel = requireNewKernel,
                     isSELinuxPermissive = isSELinuxPermissive,
-                    isOfficialSignature = isOfficialSignature
+                    isOfficialSignature = isOfficialSignature,
                 )
 
                 isCoreDataLoaded = true
@@ -200,13 +201,16 @@ class HomeViewModel : ViewModel() {
 
         val job = viewModelScope.launch(Dispatchers.IO) {
             try {
-                val basicInfo = loadBasicSystemInfo(context)
+                val (kernelRelease, androidVersion, deviceModel, managerVersion, selinuxStatus, seccompStatus) = loadBasicSystemInfo(
+                    context
+                )
                 systemInfo = systemInfo.copy(
-                    kernelRelease = basicInfo.first,
-                    androidVersion = basicInfo.second,
-                    deviceModel = basicInfo.third,
-                    managerVersion = basicInfo.fourth,
-                    selinuxStatus = basicInfo.fifth
+                    kernelRelease = kernelRelease,
+                    androidVersion = androidVersion,
+                    deviceModel = deviceModel,
+                    managerVersion = managerVersion,
+                    selinuxStatus = selinuxStatus,
+                    seccompStatus = seccompStatus
                 )
 
                 if (!isSimpleMode) {
@@ -293,7 +297,7 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    private suspend fun loadBasicSystemInfo(context: Context): Tuple5<String, String, String, Pair<String, Long>, String> {
+    private suspend fun loadBasicSystemInfo(context: Context): Tuple6<String, String, String, Pair<String, Long>, String, Int> {
         return withContext(Dispatchers.IO) {
             val uname = try {
                 Os.uname()
@@ -313,18 +317,23 @@ class HomeViewModel : ViewModel() {
                 Pair("Unknown", 0L)
             }
 
-            val seLinuxStatus = try {
+            val selinuxStatus = try {
                 getSELinuxStatus(ksuApp.applicationContext)
             } catch (_: Exception) {
                 "Unknown"
             }
 
-            Tuple5(
+            val seccompStatus = runCatching {
+                Os.prctl(21 /* PR_GET_SECCOMP */, 0, 0, 0, 0)
+            }.getOrDefault(-1)
+
+            Tuple6(
                 uname?.release ?: "Unknown",
                 Build.VERSION.RELEASE ?: "Unknown",
                 deviceModel,
                 managerVersion,
-                seLinuxStatus
+                selinuxStatus,
+                seccompStatus
             )
         }
     }
@@ -504,13 +513,6 @@ class HomeViewModel : ViewModel() {
         val third: T3,
         val fourth: T4,
         val fifth: T5
-    )
-
-    data class Tuple4<T1, T2, T3, T4>(
-        val first: T1,
-        val second: T2,
-        val third: T3,
-        val fourth: T4
     )
 
     override fun onCleared() {

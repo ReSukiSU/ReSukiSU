@@ -41,6 +41,7 @@ import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.LocalPolice
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.PowerSettingsNew
@@ -840,6 +841,20 @@ private fun InfoCard(
                 stringResource(R.string.home_selinux_status),
                 systemInfo.selinuxStatus,
                 icon = Icons.Default.Security,
+            )
+
+            val seccompDisplay = when (systemInfo.seccompStatus) {
+                -1 -> stringResource(R.string.seccomp_status_not_supported)
+                0 -> stringResource(R.string.seccomp_status_disabled)
+                1 -> stringResource(R.string.seccomp_status_strict)
+                2 -> stringResource(R.string.seccomp_status_filter)
+                else -> stringResource(R.string.seccomp_status_unknown)
+            }
+
+            InfoCardItem(
+                stringResource(R.string.home_seccomp_status),
+                seccompDisplay,
+                icon = Icons.Default.LocalPolice,
             )
 
             if (!isHideZygiskImplement && !isSimpleMode && systemInfo.zygiskImplement.isNotEmpty() && systemInfo.zygiskImplement != "None") {
