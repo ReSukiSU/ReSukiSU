@@ -54,7 +54,7 @@ pub fn run(package_name: &String, kmi: Option<String>, allow_shell: bool) -> Res
 
         // 3. Get kernelsu.ko from embedded assets
         let ko_name = format!("{kmi}_kernelsu.ko");
-        let ko_data = assets::get_asset(&ko_name)
+        let ko_data = assets::get_asset_data(&ko_name)
             .with_context(|| format!("Failed to get {ko_name} from assets"))?;
 
         // 4. Load kernelsu.ko from memory with manual relocation
