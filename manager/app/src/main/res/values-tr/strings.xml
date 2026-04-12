@@ -183,7 +183,6 @@
     <string name="theme_light">Açık</string>
     <string name="theme_dark">Koyu</string>
     <string name="manual_hook">Manuel Kanca</string>
-    <string name="inline_hook">Satır İçi Kanca</string>
     <string name="dynamic_color_title">Dinamik renkler</string>
     <string name="dynamic_color_summary">Sistem temaları kullanarak dinamik renkler</string>
     <string name="choose_theme_color">Bir tema rengi seçin</string>
@@ -429,8 +428,6 @@
     <string name="susfs_hide_mounts_current_setting">Mevcut ayar: %s</string>
     <string name="susfs_hide_mounts_setting_all">Tüm işlemler için gizle</string>
     <string name="susfs_hide_mounts_setting_non_ksu">Sadece KSU dışı işlemler için gizle</string>
-    <string name="kernel_simple_kernel">Çekirdek Sürümü Özet Modu</string>
-    <string name="kernel_simple_kernel_summary">SukiSU çekirdek sürümünün gösterdiği sade modu etkinleştirin veya devre dışı bırakın</string>
     <string name="susfs_android_data_path_set">Android Veri yolu şuna ayarlandı: %s</string>
     <string name="susfs_sdcard_path_set">SD kart yolu şuna ayarlandı: %s</string>
     <string name="susfs_path_setup_warning">Yol kurulumu tam olarak başarılı olmayabilir, ancak SUS yolları eklenmeye devam edecektir</string>
@@ -545,16 +542,6 @@
     <string name="kpm_patch_operation_failed">KPM yama işlemi başarısız oldu: %s</string>
     <string name="kpm_follow_kernel_file">Çekirdeği Takip Et</string>
     <string name="kpm_follow_kernel_description">Çekirdeği herhangi bir KPM değişikliği olmadan olduğu gibi kullan</string>
-    <string name="uid_auto_scan_title">Kullanıcı modu uygulama listesi taraması</string>
-    <string name="uid_auto_scan_summary">Bu seçeneği etkinleştirmek, uygulama listesi için kullanıcı modu taramasını kullanır ve kararlılığı artırır. (Uygulama listesinin çekirdek tarafından taranması sırasında donma gibi sorunlarla karşılaşırsanız, bu seçeneği etkinleştirmeyi deneyebilirsiniz)</string>
-    <string name="uid_multi_user_scan_title">Çok Kullanıcılı Uygulama Taraması</string>
-    <string name="uid_multi_user_scan_summary">Etkinleştirildiğinde, iş profilleri de dahil olmak üzere tüm kullanıcıların uygulamalarını tarar.</string>
-    <string name="uid_scanner_setting_failed">Ayar başarısız oldu, lütfen izinleri kontrol edin</string>
-    <string name="clean_runtime_environment">Çalışma Zamanı Ortamını Temizle</string>
-    <string name="clean_runtime_environment_summary">Çalışma zamanı dosyalarını temizleyin ve tarayıcı hizmetini durdurun</string>
-    <string name="clean_runtime_environment_confirm">Çalışma zamanı ortamını temizlemek istediğinizden emin misiniz? Bu işlem, tarayıcı hizmetini durduracak ve ilgili dosyaları kaldıracaktır</string>
-    <string name="clean_runtime_environment_success">Çalışma zamanı ortamı başarıyla temizlendi</string>
-    <string name="clean_runtime_environment_failed">Çalışma zamanı ortamı temizlenemedi</string>
     <string name="confirm_installation">Kurulumu Onayla</string>
     <string name="confirm_multiple_installation">Kurulumu Onayla (%d dosya)</string>
     <string name="install_confirm">Yükle</string>
@@ -592,9 +579,5 @@
     <string name="umount_path_added">Yol eklendi</string>
     <string name="umount_path_removed">Yol kaldırıldı</string>
     <string name="operation_failed">İşlem başarısız oldu</string>
-    <string name="confirm_action">Eylemi Onayla</string>
-    <string name="confirm_clear_custom_paths">Tüm özel yolları temizlemek istediğinizden emin misiniz? (varsayılan yollar korunacaktır)</string>
-    <string name="custom_paths_cleared">Özel yollar temizlendi</string>
-    <string name="config_applied">Yapılandırma çekirdeğe uygulandı</string>
     <string name="group_contains_apps">%d uygulama içeriyor</string>
 </resources>

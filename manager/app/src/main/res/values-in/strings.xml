@@ -422,8 +422,6 @@
     <string name="susfs_hide_mounts_current_setting">Pengaturan saat ini: %s</string>
     <string name="susfs_hide_mounts_setting_all">Sembunyikan untuk semua proses</string>
     <string name="susfs_hide_mounts_setting_non_ksu">Sembunyikan hanya untuk proses non-KSU</string>
-    <string name="kernel_simple_kernel">Mode Ringkas Versi Kernel</string>
-    <string name="kernel_simple_kernel_summary">Aktifkan atau nonaktifkan mode bersih yang ditampilkan oleh versi kernel SukiSU</string>
     <string name="susfs_android_data_path_set">Jalur Data Android telah diatur ke: %s</string>
     <string name="susfs_sdcard_path_set">Jalur SD card telah diatur ke: %s</string>
     <string name="susfs_path_setup_warning">Penyiapan jalur mungkin tidak sepenuhnya berhasil, tetapi jalur SUS akan terus ditambahkan</string>
@@ -514,7 +512,6 @@ Diaktifkan: Aktifkan pemalsuan sus tcontext dari \'su\' dengan \'u:r:priv_app:s0
     <string name="avc_log_spoofing_warning">Catatan Penting:\n
 - Secara default pada kernel nilai ini disetel ke \'0\'\n
 - Mengaktifkan ini terkadang membuat pengembang lebih sulit mengidentifikasi penyebab saat melakukan debugging terkait izin atau masalah SELinux, sehingga disarankan agar pengguna menonaktifkannya saat sedang melakukan debugging</string>
-    <string name="module_verified">Tervalidasi</string>
     <string name="home_hook_type">Jenis hook</string>
     <string name="kpm_patch_options">Patch KPM</string>
     <string name="kpm_patch_description">Untuk menambahkan fitur KPM tambahan</string>
@@ -540,16 +537,6 @@ Diaktifkan: Aktifkan pemalsuan sus tcontext dari \'su\' dengan \'u:r:priv_app:s0
     <string name="kpm_patch_operation_failed">Operasi patch KPM gagal: %s</string>
     <string name="kpm_follow_kernel_file">Ikuti kernel</string>
     <string name="kpm_follow_kernel_description">Gunakan kernel apa adanya tanpa perubahan dari KPM</string>
-    <string name="uid_auto_scan_title">Daftar aplikasi pemindaian pada mode pengguna</string>
-    <string name="uid_auto_scan_summary">Mengaktifkan opsi ini akan menggunakan pemindaian mode pengguna untuk daftar aplikasi, sehingga meningkatkan kestabilan. (Jika Anda mengalami masalah seperti hang saat kernel memindai daftar aplikasi, Anda dapat mencoba mengaktifkan opsi ini.)</string>
-    <string name="uid_multi_user_scan_title">Pemindaian Aplikasi Multi-Pengguna</string>
-    <string name="uid_multi_user_scan_summary">Ketika diaktifkan, fitur ini akan memindai aplikasi untuk semua pengguna, termasuk profil kerja</string>
-    <string name="uid_scanner_setting_failed">Gagal mengatur, silakan periksa perizinan</string>
-    <string name="clean_runtime_environment">Bersihkan Lingkungan Runtime</string>
-    <string name="clean_runtime_environment_summary">Bersihkan berkas runtime dan hentikan layanan pemindai</string>
-    <string name="clean_runtime_environment_confirm">Apakah Anda yakin ingin membersihkan lingkungan runtime? Tindakan ini akan menghentikan layanan pemindai dan menghapus berkas yang terkait.</string>
-    <string name="clean_runtime_environment_success">Lingkungan runtime berhasil dibersihkan</string>
-    <string name="clean_runtime_environment_failed">Gagal membersihkan lingkungan runtime</string>
     <string name="confirm_installation">Konfirmasi Instalasi</string>
     <string name="confirm_multiple_installation">Konfirmasi Instalasi (Berkas %d)</string>
     <string name="install_confirm">Instal</string>

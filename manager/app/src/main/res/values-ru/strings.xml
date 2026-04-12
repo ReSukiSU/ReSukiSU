@@ -424,8 +424,6 @@
     <string name="susfs_hide_mounts_current_setting">Текущие настройки: %s</string>
     <string name="susfs_hide_mounts_setting_all">Скрыть для всех процессов</string>
     <string name="susfs_hide_mounts_setting_non_ksu">Скрыть только для процессов, не связанных с KSU</string>
-    <string name="kernel_simple_kernel">Скрыть доп. информацию о ядре</string>
-    <string name="kernel_simple_kernel_summary">Включить или отключить чистый режим, отображаемой версии ядра SukiSU</string>
     <string name="susfs_android_data_path_set">Путь к данным Android был установлен на: %s</string>
     <string name="susfs_sdcard_path_set">Путь к SD-карте был установлен на: %s</string>
     <string name="susfs_path_setup_warning">Установка пути может быть не вполне успешной, но SUS пути будут добавлены</string>
@@ -539,16 +537,6 @@
     <string name="kpm_patch_operation_failed">Ошибка патча KPM: %s</string>
     <string name="kpm_follow_kernel_file">Следовать за ядром</string>
     <string name="kpm_follow_kernel_description">Использовать ядро без каких-либо изменений KPM</string>
-    <string name="uid_auto_scan_title">Пользовательский режим сканирования списка приложений</string>
-    <string name="uid_auto_scan_summary">Включение этой опции позволит использовать сканирование пользовательского режима для списка приложений, улучшая стабильность. (Если вы столкнетесь с такими проблемами, как замораживание во время сканирования ядра списка приложений, вы можете включить эту опцию.)</string>
-    <string name="uid_multi_user_scan_title">Поиск многопользовательских приложений</string>
-    <string name="uid_multi_user_scan_summary">Когда включено, сканирует приложения для всех пользователей, включая рабочие профили</string>
-    <string name="uid_scanner_setting_failed">Не удалось установить, проверьте права доступа</string>
-    <string name="clean_runtime_environment">Очистить среду Runtime</string>
-    <string name="clean_runtime_environment_summary">Очистить среду Runtime и остановить службу сканирования</string>
-    <string name="clean_runtime_environment_confirm">Вы уверены, что хотите очистить среду Runtime? Это остановит службу сканирования и удалит связанные с ней файлы.</string>
-    <string name="clean_runtime_environment_success">Runtime окружение успешно очищено</string>
-    <string name="clean_runtime_environment_failed">Не удалось очистить среду runtime</string>
     <string name="confirm_installation">Подтвердите установку</string>
     <string name="confirm_multiple_installation">Подтвердите установку (%d файлов)</string>
     <string name="install_confirm">Установить</string>
@@ -588,8 +576,4 @@
     <string name="umount_path_added">Путь добавлен</string>
     <string name="umount_path_removed">Путь удален</string>
     <string name="operation_failed">Неудача</string>
-    <string name="confirm_action">Подтвердите действие</string>
-    <string name="confirm_clear_custom_paths">Вы уверены, что хотите удалить все кастомные пути? (Стандартные пути не будут удалены)</string>
-    <string name="custom_paths_cleared">Кастомные пути удалены</string>
-    <string name="config_applied">Конфигурация применена к ядру</string>
 </resources>

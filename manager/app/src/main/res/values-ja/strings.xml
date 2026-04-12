@@ -186,7 +186,6 @@
     <string name="theme_light">ライト</string>
     <string name="theme_dark">ダーク</string>
     <string name="manual_hook">手動でフック</string>
-    <string name="inline_hook">インラインフック</string>
     <string name="dynamic_color_title">ダイナミックカラー</string>
     <string name="dynamic_color_summary">システムテーマのダイナミックカラーを使用します。</string>
     <string name="choose_theme_color">テーマカラーを選択</string>
@@ -436,8 +435,6 @@
     <string name="susfs_hide_mounts_current_setting">現在の設定: %s</string>
     <string name="susfs_hide_mounts_setting_all">すべてのプロセスを非表示</string>
     <string name="susfs_hide_mounts_setting_non_ksu">非 KSU プロセスのみ非表示</string>
-    <string name="kernel_simple_kernel">簡潔モードなカーネル バージョン</string>
-    <string name="kernel_simple_kernel_summary">SukiSU のカーネル バージョンによって表示されるクリーンモードを有効または無効します。</string>
     <string name="susfs_android_data_path_set">Android データパスが設定されました: %s</string>
     <string name="susfs_sdcard_path_set">SD カードのパスは次のように設定済みです: %s</string>
     <string name="susfs_path_setup_warning">パスの設定は完全に成功しない可能性がありますが、SUS パスは引き続き追加されます。</string>
@@ -553,15 +550,6 @@
     <string name="kpm_patch_operation_failed">KPM パッチの操作に失敗しました: %s</string>
     <string name="kpm_follow_kernel_file">カーネルに従う</string>
     <string name="kpm_follow_kernel_description">KPM を変更せずにカーネルをそのまま使用します</string>
-    <string name="uid_auto_scan_title">アプリリストをユーザーモードでスキャン</string>
-    <string name="uid_multi_user_scan_title">マルチユーザーのアプリをスキャン</string>
-    <string name="uid_multi_user_scan_summary">有効化すると仕事用プロファイルを含むすべてのユーザーのアプリをスキャンします</string>
-    <string name="uid_scanner_setting_failed">設定に失敗、権限を確認してください</string>
-    <string name="clean_runtime_environment">ランタイム環境を消去</string>
-    <string name="clean_runtime_environment_summary">ランタイムファイルを消去し、スキャナーサービスを停止します</string>
-    <string name="clean_runtime_environment_confirm">ランタイム環境をクリーンアップしてもよろしいですか？これによりスキャナサービスが停止し、関連ファイルが削除されます</string>
-    <string name="clean_runtime_environment_success">ランタイム環境の消去に成功しました</string>
-    <string name="clean_runtime_environment_failed">ランタイム環境の消去に失敗しました</string>
     <string name="confirm_installation">インストールを確認</string>
     <string name="confirm_multiple_installation">インストールを確認 (%d 個のファイル)</string>
     <string name="install_confirm">インストール</string>
@@ -594,9 +582,5 @@
     <string name="umount_flags_hint">0=通常のアンマウント、2=MNT_DETACH</string>
     <string name="confirm_delete">構成を削除</string>
     <string name="operation_failed">操作が失敗しました</string>
-    <string name="confirm_action">アクションを確認</string>
-    <string name="confirm_clear_custom_paths">すべてのカスタムパスを消去してもよろしいですか？ (デフォルトのパスは保持されます)</string>
-    <string name="custom_paths_cleared">カスタムパスを消去しました</string>
-    <string name="config_applied">カーネルに適用された構成</string>
     <string name="group_contains_apps">%d 個のアプリが含まれています</string>
 </resources>

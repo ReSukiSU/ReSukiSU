@@ -210,7 +210,6 @@
     <string name="settings_kernel_umount">内核处理卸载模块</string>
     <string name="settings_kernel_umount_summary">在内核给需要的应用卸载模块</string>
     <string name="feature_status_unsupported_summary">内核不支持此功能。</string>
-    <string name="settings_mode_enable_by_default">启用（默认）</string>
     <string name="settings_mode_disable_until_reboot">禁用直到下次重启</string>
     <string name="settings_mode_disable_always">始终禁用</string>
     <string name="settings_sulog">超级用户访问日志</string>
@@ -335,7 +334,6 @@
     <string name="module_webui_alert">来自模块 %s 的消息</string>
     <string name="no_such_module">模块 %s 不存在</string>
     <string name="module_unavailable">模块 %s 被禁用或待卸载</string>
-    <string name="select_default_webui_engine">默认 WebUI 引擎</string>
     <string name="app_dpi_title">应用 DPI</string>
     <string name="app_dpi_summary">仅调整当前应用的屏幕显示密度</string>
     <string name="dpi_size_small">小</string>
@@ -495,8 +493,6 @@
     <string name="susfs_hide_mounts_current_setting">当前设置: %s</string>
     <string name="susfs_hide_mounts_setting_all">对所有进程隐藏</string>
     <string name="susfs_hide_mounts_setting_non_ksu">仅对非 KSU 进程隐藏</string>
-    <string name="kernel_simple_kernel">内核版本简洁模式</string>
-    <string name="kernel_simple_kernel_summary">启用或禁用 SukiSU 内核版本显示的简洁模式</string>
     <string name="susfs_android_data_path_set">Android Data 路径已设置为: %s</string>
     <string name="susfs_sdcard_path_set">SDCard 路径已设置为: %s</string>
     <string name="susfs_path_setup_warning">路径设置可能未完全成功，但将继续添加 SuS 路径</string>
@@ -521,7 +517,6 @@
     <string name="susfs_backup_info_version">版本：%s</string>
     <string name="hide_bl_script">上锁状态</string>
     <string name="hide_bl_script_description">覆盖引导锁状态属性于 late_start 服务模式</string>
-    <string name="clear">清空</string>
     <string name="cleanup_residue">清理工具残留</string>
     <string name="cleanup_residue_description">清理各种模块以及工具的残留文件和目录（可能会误删导致丢失以及无法启动，谨慎使用）</string>
     <string name="susfs_edit_sus_path">编辑 SuS 路径</string>
@@ -541,7 +536,6 @@
     <string name="susfs_add_app_path">添加应用路径</string>
     <string name="susfs_version_mismatch">SuSFS 库版本不匹配，内核：%1$s vs 管理器：%2$s，建议更新内核或管理器</string>
     <string name="warning">警告</string>
-    <string name="search">搜索</string>
     <string name="search_apps">搜索应用</string>
     <string name="search_modules">搜索模块</string>
     <string name="selected_apps_count">%1$d 个已选应用</string>
@@ -615,16 +609,6 @@
     <string name="kpm_patch_operation_failed">KPM 修补操作失败: %s</string>
     <string name="kpm_follow_kernel_file">跟随内核</string>
     <string name="kpm_follow_kernel_description">原样使用内核，不进行任何 KPM 修改</string>
-    <string name="uid_auto_scan_title">用户态扫描应用列表</string>
-    <string name="uid_auto_scan_summary">开启后将使用用户态扫描应用列表，提高稳定性 (因内核扫描应用列表出现卡死等问题可以尝试打开此选项) </string>
-    <string name="uid_multi_user_scan_title">多用户应用扫描</string>
-    <string name="uid_multi_user_scan_summary">开启后将扫描所有用户的应用，包括工作资料等</string>
-    <string name="uid_scanner_setting_failed">设置失败，请检查权限</string>
-    <string name="clean_runtime_environment">清理运行环境</string>
-    <string name="clean_runtime_environment_summary">清理运行时文件并停止扫描服务</string>
-    <string name="clean_runtime_environment_confirm">您确定要清理运行环境吗？这将停止扫描服务并删除相关文件</string>
-    <string name="clean_runtime_environment_success">运行环境清理成功</string>
-    <string name="clean_runtime_environment_failed">运行环境清理失败</string>
     <string name="confirm_installation">确认安装</string>
     <string name="confirm_multiple_installation">确认安装（%d 个文件）</string>
     <string name="install_confirm">确认安装</string>
@@ -665,11 +649,7 @@
     <string name="umount_path_added">卸载路径已添加</string>
     <string name="umount_path_removed">卸载路径已删除</string>
     <string name="operation_failed">操作失败</string>
-    <string name="confirm_action">确认操作</string>
-    <string name="confirm_clear_custom_paths">确定要清除所有自定义路径吗？（默认路径将保留）</string>
-    <string name="custom_paths_cleared">自定义路径已清除</string>
     <string name="changes_take_effect_immediately">所有修改将即时生效</string>
-    <string name="config_applied">配置已应用到内核</string>
     <string name="group_contains_apps">包含 %1$d 个应用</string>
     <string name="meta_module_disabled">模块未挂载，因为元模块已禁用</string>
     <string name="meta_module_removed">模块未挂载，因为元模块即将删除</string>
@@ -695,13 +675,11 @@
     <string name="module_shortcut_title">创建快捷方式</string>
     <string name="module_shortcut_name_label">快捷方式名称</string>
     <string name="module_shortcut_icon_pick">选择自定义图标</string>
-    <string name="module_shortcut_add">添加快捷方式</string>
     <string name="module_shortcut_not_supported">启动器不支持桌面快捷方式。</string>
     <string name="module_shortcut_should_not_empty">"桌面快捷方式名称不得为空"</string>
     <string name="module_shortcut_created">已在桌面创建快捷方式。</string>
     <string name="module_shortcut_updated">快捷方式已更新。</string>
     <string name="module_shortcut_delete">删除快捷方式</string>
-    <string name="module_shortcut_type_title">选择类型</string>
     <string name="module_shortcut_permission_tip_xiaomi">请在 Xiaomi 设置中为本应用启用“创建桌面快捷方式”权限。</string>
     <string name="module_shortcut_permission_tip_oppo">请在 OPPO 设置中为本应用启用“桌面快捷方式”权限。</string>
     <string name="module_shortcut_permission_tip_default">若创建快捷方式失败，请在系统设置中为本应用启用桌面快捷方式权限。</string>

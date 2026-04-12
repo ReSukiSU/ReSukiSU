@@ -432,8 +432,6 @@
     <string name="susfs_hide_mounts_current_setting">Cài đặt hiện tại: %s</string>
     <string name="susfs_hide_mounts_setting_all">Ẩn khỏi tất cả các tiến trình</string>
     <string name="susfs_hide_mounts_setting_non_ksu">Chỉ ẩn đối với các tiến trình không phải KSU</string>
-    <string name="kernel_simple_kernel">Hiển thị tóm tắt \"Phiên bản Kernel\"</string>
-    <string name="kernel_simple_kernel_summary">Tóm tắt hiển thị phiên bản Kernel cho ngắn gọn</string>
     <string name="susfs_android_data_path_set">Đường dẫn Android Data đã được đặt thành: %s</string>
     <string name="susfs_sdcard_path_set">Đường dẫn SD Card đã được đặt thành: %s</string>
     <string name="susfs_path_setup_warning">Thiết lập đường dẫn có thể không thành công hoàn toàn, nhưng đường dẫn SuS sẽ tiếp tục được thêm vào</string>
@@ -549,16 +547,6 @@ Bật: Kích hoạt tính năng giả mạo sus tcontext của \'su\' thành \'u
     <string name="kpm_patch_operation_failed">Quá trình Vá KPM thất bại: %s</string>
     <string name="kpm_follow_kernel_file">Mặc định theo file Kernel</string>
     <string name="kpm_follow_kernel_description">Sử dụng file kernel mặc định mà không có bất kỳ sửa đổi nào về KPM</string>
-    <string name="uid_auto_scan_title">Chế độ quét danh sách ứng dụng người dùng</string>
-    <string name="uid_auto_scan_summary">Bật tuỳ chọn này thì chế độ người dùng sẽ được sử dụng để quét danh sách ứng dụng nhằm cải thiện tính ổn định (nếu danh sách ứng dụng quét kernel bị kẹt và xảy ra các sự cố khác, bạn có thể thử bật tùy chọn này)</string>
-    <string name="uid_multi_user_scan_title">Quét ứng dụng nhiều người dùng</string>
-    <string name="uid_multi_user_scan_summary">Khi được bật, tất cả ứng dụng của người dùng sẽ được quét, bao gồm cả dữ liệu công việc, v.v</string>
-    <string name="uid_scanner_setting_failed">Thiết lập thất bại, vui lòng kiểm tra quyền</string>
-    <string name="clean_runtime_environment">Dọn dẹp môi trường hoạt động</string>
-    <string name="clean_runtime_environment_summary">Dọn dẹp các file hoạt động và dừng quét các dịch vụ</string>
-    <string name="clean_runtime_environment_confirm">Bạn có chắc chắn muốn dọn dẹp môi trường hoạt động không? Thao tác này sẽ dừng dịch vụ quét và xóa các file liên quan</string>
-    <string name="clean_runtime_environment_success">Dọn dẹp môi trường hoạt động thành công</string>
-    <string name="clean_runtime_environment_failed">Dọn dẹp môi trường hoạt động thất bại</string>
     <string name="confirm_installation">Xác nhận cài đặt</string>
     <string name="confirm_multiple_installation">Xác nhận cài đặt (%d files)</string>
     <string name="install_confirm">Cài đặt</string>
@@ -595,9 +583,5 @@ Bật: Kích hoạt tính năng giả mạo sus tcontext của \'su\' thành \'u
     <string name="umount_path_added">Đã thêm đường dẫn</string>
     <string name="umount_path_removed">Đường dẫn đã bị xóa</string>
     <string name="operation_failed">Thao tác thất bại</string>
-    <string name="confirm_action">Xác nhận Khởi chạy?</string>
-    <string name="confirm_clear_custom_paths">Bạn có chắc chắn muốn xóa tất cả các đường dẫn tùy chỉnh không? (các đường dẫn mặc định sẽ được giữ nguyên)</string>
-    <string name="custom_paths_cleared">Đường dẫn tùy chỉnh đã được xóa</string>
-    <string name="config_applied">Cấu hình đã được áp dụng cho Kernel</string>
     <string name="group_contains_apps">Chứa %d ứng dụng</string>
 </resources>

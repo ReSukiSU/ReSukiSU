@@ -186,7 +186,6 @@
     <string name="settings_kernel_umount">核心處理卸載模組</string>
     <string name="settings_kernel_umount_summary">喺核心比需要嘅應用程式卸載模組</string>
     <string name="feature_status_unsupported_summary">核心唔支援此功能。</string>
-    <string name="settings_mode_enable_by_default">啟用（預設）</string>
     <string name="settings_mode_disable_until_reboot">禁用直到下次重新啟動</string>
     <string name="settings_mode_disable_always">始終禁用</string>
     <string name="settings_sulog">超級用戶訪問日誌</string>
@@ -310,7 +309,6 @@
     <string name="module_webui_alert">來自模組 %s 嘅消息</string>
     <string name="no_such_module">模組 %s 唔存在</string>
     <string name="module_unavailable">模組 %s 被禁用或待解除安裝</string>
-    <string name="select_default_webui_engine">預設 WebUI 引擎</string>
     <string name="app_dpi_title">應用程式 DPI</string>
     <string name="app_dpi_summary">僅調整當前應用程式嘅螢幕顯示密度</string>
     <string name="dpi_size_small">小</string>
@@ -470,8 +468,6 @@
     <string name="susfs_hide_mounts_current_setting">當前設定: %s</string>
     <string name="susfs_hide_mounts_setting_all">對所有程序隱藏</string>
     <string name="susfs_hide_mounts_setting_non_ksu">僅對非 KSU 程序隱藏</string>
-    <string name="kernel_simple_kernel">核心版本簡潔模式</string>
-    <string name="kernel_simple_kernel_summary">啟用或禁用 SukiSU 核心版本顯示嘅簡潔模式</string>
     <string name="susfs_android_data_path_set">Android Data 路徑已設定為: %s</string>
     <string name="susfs_sdcard_path_set">SDCard 路徑已設定為: %s</string>
     <string name="susfs_path_setup_warning">路徑設定可能未完全成功，但將繼續添加 SuS 路徑</string>
@@ -496,7 +492,6 @@
     <string name="susfs_backup_info_version">版本：%s</string>
     <string name="hide_bl_script">上鎖狀態</string>
     <string name="hide_bl_script_description">覆蓋引導鎖狀態屬性於 late_start 服務模式</string>
-    <string name="clear">清空</string>
     <string name="cleanup_residue">清理工具殘留</string>
     <string name="cleanup_residue_description">清理各種模組以及工具嘅殘留檔案和目錄（可能會誤刪導致遺失以及無法啟動，謹慎使用）</string>
     <string name="susfs_edit_sus_path">編輯 SuS 路徑</string>
@@ -516,7 +511,6 @@
     <string name="susfs_add_app_path">添加應用程式路徑</string>
     <string name="susfs_version_mismatch">SuSFS 庫版本唔匹配，核心：%1$s vs 管理器：%2$s，建議更新核心或管理器</string>
     <string name="warning">警告</string>
-    <string name="search">搜尋</string>
     <string name="search_apps">搜尋應用程式</string>
     <string name="search_modules">搜尋模組</string>
     <string name="selected_apps_count">%1$d 個已選應用程式</string>
@@ -590,16 +584,6 @@
     <string name="kpm_patch_operation_failed">KPM 修補操作失敗: %s</string>
     <string name="kpm_follow_kernel_file">跟隨核心</string>
     <string name="kpm_follow_kernel_description">原樣使用核心，唔進行任何 KPM 修改</string>
-    <string name="uid_auto_scan_title">用戶態掃描應用程式列表</string>
-    <string name="uid_auto_scan_summary">開啟後將以用戶態掃描應用程式列表，提高穩定性 (因核心掃描應用程式列表出現卡死等問題可以嘗試打開此選項) </string>
-    <string name="uid_multi_user_scan_title">多用戶應用程式掃描</string>
-    <string name="uid_multi_user_scan_summary">開啟後將掃描所有用戶嘅應用程式，包括工作資料等</string>
-    <string name="uid_scanner_setting_failed">設定失敗，請檢查權限</string>
-    <string name="clean_runtime_environment">清理運行環境</string>
-    <string name="clean_runtime_environment_summary">清理運行時檔案並停止掃描服務</string>
-    <string name="clean_runtime_environment_confirm">您確定要清理運行環境嗎？這將停止掃描服務並刪除相關檔案</string>
-    <string name="clean_runtime_environment_success">運行環境清理成功</string>
-    <string name="clean_runtime_environment_failed">運行環境清理失敗</string>
     <string name="confirm_installation">確認安裝</string>
     <string name="confirm_multiple_installation">確認安裝（%d 個檔案）</string>
     <string name="install_confirm">確認安裝</string>
@@ -640,11 +624,7 @@
     <string name="umount_path_added">卸載路徑已添加</string>
     <string name="umount_path_removed">卸載路徑已刪除</string>
     <string name="operation_failed">操作失敗</string>
-    <string name="confirm_action">確認操作</string>
-    <string name="confirm_clear_custom_paths">確定要清除所有自訂路徑嗎？（預設路徑將保留）</string>
-    <string name="custom_paths_cleared">自訂路徑已清除</string>
     <string name="changes_take_effect_immediately">所有修改將即時生效</string>
-    <string name="config_applied">設定已套用到核心</string>
     <string name="group_contains_apps">包含 %1$d 個應用程式</string>
     <string name="meta_module_disabled">模組未掛載，因為元模組已禁用</string>
     <string name="meta_module_removed">模組未掛載，因為元模組即將刪除</string>
@@ -670,13 +650,11 @@
     <string name="module_shortcut_title">建立捷徑</string>
     <string name="module_shortcut_name_label">捷徑名稱</string>
     <string name="module_shortcut_icon_pick">選擇自訂圖標</string>
-    <string name="module_shortcut_add">添加捷徑</string>
     <string name="module_shortcut_not_supported">啟動器唔支援桌面捷徑。</string>
     <string name="module_shortcut_should_not_empty">"桌面捷徑名稱唔可以為空"</string>
     <string name="module_shortcut_created">已喺桌面建立捷徑。</string>
     <string name="module_shortcut_updated">捷徑已更新。</string>
     <string name="module_shortcut_delete">刪除捷徑</string>
-    <string name="module_shortcut_type_title">選擇類型</string>
     <string name="module_shortcut_permission_tip_xiaomi">請喺 Xiaomi 設定中為本應用程式啟用「建立桌面捷徑」權限。</string>
     <string name="module_shortcut_permission_tip_oppo">請喺 OPPO 設定中為本應用程式啟用「桌面捷徑」權限。</string>
     <string name="module_shortcut_permission_tip_default">若建立捷徑失敗，請喺系統設定中為本應用程式啟用桌面捷徑權限。</string>
