@@ -3,7 +3,7 @@ name: Build Manager
 on:
   workflow_dispatch:
   push:
-    branches: [ "main", "dev", "ci", "miuix", "new-manager" ]
+    branches: [ "main", "dev", "ci" ]
     paths:
       - '.github/workflows/build-manager.yml'
       - '.github/workflows/build-lkm.yml'
@@ -14,7 +14,7 @@ on:
       - 'userspace/**'
       - 'scripts/ksubot.py'
   pull_request:
-    branches: [ "main", "dev", "miuix" , "new-manager" ]
+    branches: [ "main", "dev" ]
     paths:
       - '.github/workflows/build-manager.yml'
       - '.github/workflows/build-lkm.yml'
@@ -80,23 +80,14 @@ jobs:
       - name: Determine manager variant
         id: determine
         run: |
-          if [ "${{ github.ref_name }}" == "miuix" ] && [ "${{ matrix.spoofed }}" == "true" ]; then
-            echo "SKIP=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          if [ "${{ github.ref_name }}" == "miuix" ]; then
-            echo "title=Manager" >> $GITHUB_OUTPUT
-            echo "topicid=${{ vars.MESSAGE_MIUIX_THREAD_ID }}" >> $GITHUB_OUTPUT
-          elif [ "${{ matrix.spoofed }}" == "true" ]; then
+          if [ "${{ matrix.spoofed }}" == "true" ]; then
             echo "title=Spoofed-Manager" >> $GITHUB_OUTPUT
-            echo "topicid=${{ vars.MESSAGE_SPOOFED_THREAD_ID }}" >> $GITHUB_OUTPUT
           else
             echo "title=Manager" >> $GITHUB_OUTPUT
-            echo "topicid=${{ vars.MESSAGE_THREAD_ID }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Run randomizer
-        if: ${{ matrix.spoofed == 'true' && steps.determine.outputs.SKIP != 'true' }}
+        if: ${{ matrix.spoofed == 'true' }}
         run: |
           chmod +x randomizer
           ./randomizer
@@ -188,14 +179,7 @@ jobs:
       - name: Determine manager variant
         id: determine
         run: |
-          if [ "${{ github.ref_name }}" == "miuix" ] && [ "${{ matrix.spoofed }}" == "true" ]; then
-            echo "SKIP=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          if [ "${{ github.ref_name }}" == "miuix" ]; then
-            echo "title=Manager" >> $GITHUB_OUTPUT
-            echo "topicid=${{ vars.MESSAGE_MIUIX_THREAD_ID }}" >> $GITHUB_OUTPUT
-          elif [ "${{ matrix.spoofed }}" == "true" ]; then
+          if [ "${{ matrix.spoofed }}" == "true" ]; then
             echo "title=Spoofed-Manager" >> $GITHUB_OUTPUT
             echo "topicid=${{ vars.MESSAGE_SPOOFED_THREAD_ID }}" >> $GITHUB_OUTPUT
           else
