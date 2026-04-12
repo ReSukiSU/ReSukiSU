@@ -23,7 +23,6 @@
     <string name="module_sort_action_first">Сортувати (Спочатку дії)</string>
     <string name="module_sort_enabled_first">Сортувати (Спочатку ввімкнені)</string>
     <string name="uninstall">Видалити</string>
-    <string name="module_install">Встановити</string>
     <string name="install">Встановити</string>
     <string name="reboot">Перезавантажити</string>
     <string name="settings">Налаштування</string>
@@ -49,11 +48,9 @@
     <string name="home_click_to_learn_kernelsu">Дізнайтеся, як встановити KernelSU та використовувати модулі</string>
     <string name="home_support_title">Підтримати нас</string>
     <string name="home_support_content">KernelSU є, і завжди буде, безкоштовним та з відкритим вихідним кодом. Однак ви можете показати нам свою підтримку, зробивши пожертву.</string>
-    <string name="about_source_code"><![CDATA[Переглянути вихідний код на %1$s<br/>Приєднуйтесь до нашого каналу %2$s]]></string>
     <string name="profile_default">За замовчуванням</string>
     <string name="profile_template">Шаблон</string>
     <string name="profile_custom">Власний</string>
-    <string name="profile_name">Назва профілю</string>
     <string name="profile_groups">Групи</string>
     <string name="profile_capabilities">Можливості</string>
     <string name="profile_selinux_context">Контекст SELinux</string>
@@ -99,8 +96,6 @@
     <string name="grant_root_failed">Не вдалося надати root-права!</string>
     <string name="action">Дія</string>
     <string name="close">Закрити</string>
-    <string name="enable_web_debugging">Увімкнути налагодження WebView</string>
-    <string name="enable_web_debugging_summary">Можна використовувати для налагодження WebUI. Будь ласка, вмикайте лише за потреби.</string>
     <string name="direct_install">Пряме встановлення (рекомендовано)</string>
     <string name="select_file">Виберіть образ для патчу</string>
     <string name="install_inactive_slot">Встановити в неактивний слот (після OTA)</string>
@@ -121,16 +116,9 @@
     <string name="selected_lkm">Обраний LKM: %s</string>
     <string name="save_log">Зберегти логи</string>
     <string name="log_saved">Логи збережено</string>
-    <string name="module_install_confirm">Підтвердити встановлення модуля %1$s?</string>
     <string name="unknown_module">невідомий модуль</string>
-    <string name="restore_confirm_title">Підтвердити відновлення модулів</string>
-    <string name="restore_confirm_message">Ця операція перезапише всі існуючі модулі. Продовжити?</string>
     <string name="confirm">Підтвердити</string>
     <string name="cancel">Скасувати</string>
-    <string name="restore_success">Модулі успішно відновлено, потрібне перезавантаження</string>
-    <string name="restore_failed">Не вдалося відновити: %1$s</string>
-    <string name="restart_now">Перезавантажити зараз</string>
-    <string name="unknown_error">Невідома помилка</string>
     <string name="command_execution_failed">Не вдалося виконати команду: %1$s</string>
     <string name="allowlist_backup_success">Резервне копіювання білого списку успішне</string>
     <string name="allowlist_backup_failed">Не вдалося створити резервну копію білого списку: %1$s</string>
@@ -149,7 +137,6 @@
     <string name="settings_sucompat_summary">Дозволяє програмам з правами Суперкористувача в профілі програми отримати оболонку суперкористувача шляхом виконання /system/bin/su; діє тільки для нових процесів.</string>
     <string name="settings_kernel_umount">Розмонтування ядра</string>
     <string name="settings_kernel_umount_summary">Поведінка розмонтування на рівні ядра, контрольована KernelSU</string>
-    <string name="module_install_multiple_confirm_with_names">Ви впевнені, що хочете встановити наступні %1$d модулі? \n\n%2$s</string>
     <string name="more_settings">Більше налаштувань</string>
     <string name="selinux_enabled">Увімкнено</string>
     <string name="selinux_disabled">Вимкнено</string>
@@ -169,7 +156,6 @@
     <string name="theme_follow_system">Як у системі</string>
     <string name="theme_light">Світла</string>
     <string name="theme_dark">Темна</string>
-    <string name="manual_hook">Ручний хук</string>
     <string name="dynamic_color_title">Динамічні кольори</string>
     <string name="dynamic_color_summary">Динамічні кольори з використанням системних тем</string>
     <string name="choose_theme_color">Вибрати колір теми</string>
@@ -217,8 +203,6 @@
     <string name="invalid_file_type">Неправильний тип файлу! Будь ласка, виберіть файл .kpm.</string>
     <string name="confirm_uninstall_title_with_filename">Видалити</string>
     <string name="confirm_uninstall_content">Буде видалено наступний KPM: %s</string>
-    <string name="image_editor_hint">Використовуйте два пальці для масштабування зображення та один палець для перетягування, щоб налаштувати положення</string>
-    <string name="reprovision">Переналаштувати</string>
     <string name="horizon_flash_complete">Прошивка завершена</string>
     <string name="horizon_preparing">Підготовка…</string>
     <string name="horizon_cleaning_files">Очищення файлів…</string>

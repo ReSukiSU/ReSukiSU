@@ -19,7 +19,6 @@
     <string name="module_sort_action_first">Sorteren (actie eerst)</string>
     <string name="module_sort_enabled_first">Sorteren (eerst ingeschakeld)</string>
     <string name="uninstall">Verwijderen</string>
-    <string name="module_install">Installeren</string>
     <string name="install">Installeren</string>
     <string name="reboot">Herstart</string>
     <string name="settings">Instellingen</string>
@@ -47,7 +46,6 @@
     <string name="profile_default">Standaard</string>
     <string name="profile_template">Sjabloon</string>
     <string name="profile_custom">Aangepast</string>
-    <string name="profile_name">Profiel naam</string>
     <string name="profile_groups">Groepen</string>
     <string name="profile_capabilities">Mogelijkheden</string>
     <string name="profile_umount_modules">Ontkoppel modules</string>
@@ -90,8 +88,6 @@
     <string name="settings_check_update_summary">Automatisch controleren op module- en manager-updates</string>
     <string name="grant_root_failed">Kan geen root verlenen!</string>
     <string name="action">Actie</string>
-    <string name="enable_web_debugging">Schakel WebView-foutopsporing</string>
-    <string name="enable_web_debugging_summary">Kan worden gebruikt om WebUI te debuggen. Schakel dit alleen in als dat nodig is.</string>
     <string name="direct_install">Directe installatie (aanbevolen)</string>
     <string name="select_file">Selecteer een bestand</string>
     <string name="install_inactive_slot">Installeren in inactief slot (na OTA)</string>

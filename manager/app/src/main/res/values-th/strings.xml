@@ -23,7 +23,6 @@
     <string name="module_sort_action_first">เรียงลำดับ (แบบรันคำสั่งก่อน)</string>
     <string name="module_sort_enabled_first">เรียงลำดับ (แบบเปิดใช้งานก่อน)</string>
     <string name="uninstall">ถอนการติดตั้ง</string>
-    <string name="module_install">ติดตั้ง</string>
     <string name="install">ติดตั้ง</string>
     <string name="reboot">รีบูต</string>
     <string name="settings">ตั้งค่า</string>
@@ -52,7 +51,6 @@
     <string name="profile_default">ค่าเริ่มต้น</string>
     <string name="profile_template">เทมเพลต</string>
     <string name="profile_custom">กำหนดเอง</string>
-    <string name="profile_name">ชื่อโปรไฟล์</string>
     <string name="profile_groups">หมวดหมู่</string>
     <string name="profile_capabilities">ความสามารถของแอป</string>
     <string name="profile_selinux_context">บริบท SELinux</string>
@@ -99,8 +97,6 @@
     <string name="grant_root_failed">ไม่สามารถให้สิทธิ์รูทได้!</string>
     <string name="action">คำสั่ง</string>
     <string name="close">Close</string>
-    <string name="enable_web_debugging">เปิดใช้งานการแก้ไขข้อบกพร่อง WebView</string>
-    <string name="enable_web_debugging_summary">ใช้เพื่อดีบัก WebUI เท่านั้น โปรดเปิดใช้งานเมื่อจำเป็น</string>
     <string name="direct_install">ติดตั้งโดยตรง (แนะนำ)</string>
     <string name="select_file">เลือกไฟล์</string>
     <string name="install_inactive_slot">ติดตั้งลงในสล็อตที่ไม่ใช้งาน (หลังจาก OTA)</string>

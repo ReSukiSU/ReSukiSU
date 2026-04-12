@@ -22,7 +22,6 @@
     <string name="module_sort_action_first">Sort (Action first)</string>
     <string name="module_sort_enabled_first">Sort (Enabled first)</string>
     <string name="uninstall">Eemalda</string>
-    <string name="module_install">Paigalda</string>
     <string name="install">Paigalda</string>
     <string name="reboot">Taaskäivita</string>
     <string name="settings">Seaded</string>
@@ -48,11 +47,9 @@
     <string name="home_click_to_learn_kernelsu">Õpi KernelSUd paigaldama ja mooduleid kasutama</string>
     <string name="home_support_title">Toeta meid</string>
     <string name="home_support_content">KernelSU on, ja alati jääb, tasuta ning avatud lähtekoodiga kättesaadavaks. Sellegipoolest võid sa näidata, et hoolid, ning teha annetuse.</string>
-    <string name="about_source_code"><![CDATA[View source code at %1$s<br/>Join our %2$s channel]]></string>
     <string name="profile_default">Vaikimisi</string>
     <string name="profile_template">Mall</string>
     <string name="profile_custom">Kohandatud</string>
-    <string name="profile_name">Profiili nimi</string>
     <string name="profile_groups">Grupid</string>
     <string name="profile_capabilities">Võimekused</string>
     <string name="profile_selinux_context">SELinux kontekst</string>
@@ -97,8 +94,6 @@
     <string name="app_profile_template_import_empty">Lõikelaud on tühi!</string>
     <string name="module_changelog_failed">Muudatuste logi hankimine ebaõnnestus: %s</string>
     <string name="grant_root_failed">Juurkasutaja andmine ebaõnnestus!</string>
-    <string name="enable_web_debugging">Luba WebView silumine</string>
-    <string name="enable_web_debugging_summary">Saab kasutada WebUI silumiseks, palun luba ainult vajadusel.</string>
     <string name="direct_install">Otsene paigaldus (soovitatud)</string>
     <string name="select_file">Vali fail</string>
     <string name="install_inactive_slot">Paigalda ebaaktiivsesse lahtrisse (pärast üle-õhu uuendust)</string>

@@ -20,7 +20,6 @@
     <string name="module_empty">কোন মডিউল ইনস্টল করা নেই</string>
     <string name="module">মডিউল</string>
     <string name="uninstall">আনইন্সটল</string>
-    <string name="module_install">মডিউল ইনস্টল</string>
     <string name="install">ইনস্টল</string>
     <string name="reboot">রিবুট</string>
     <string name="settings">সেটিংস</string>
@@ -47,7 +46,6 @@
     <string name="home_click_to_learn_kernelsu">কিভাবে কার্নেলএসইউ ইনস্টল করতে হয় এবং মডিউল ব্যবহার করতে হয় তা শিখুন</string>
     <string name="home_support_title">সাপোর্ট টাইটেল</string>
     <string name="home_support_content">কার্নেলএসইউ বিনামূল্যে এবং ওপেন সোর্স, এবং সবসময় থাকবে। আপনি সবসময় একটি অনুদান দিয়ে আপনার কৃতজ্ঞতা প্রদর্শন করতে পারেন.</string>
-    <string name="profile_name">প্রফাইলের নাম</string>
     <string name="profile_groups">গ্রুপস</string>
     <string name="profile_capabilities">যোগ্যতা</string>
     <string name="profile_selinux_context">এসই লিনাক্স কনটেক্সট</string>

@@ -21,7 +21,6 @@
     <string name="module_sort_action_first">Sort (Action first)</string>
     <string name="module_sort_enabled_first">Sort (Enabled first)</string>
     <string name="uninstall">Deinstalirajte</string>
-    <string name="module_install">Instalirajte</string>
     <string name="install">Instalirajte</string>
     <string name="reboot">Ponovo pokrenite</string>
     <string name="settings">Podešavanja</string>
@@ -48,11 +47,9 @@
     <string name="home_click_to_learn_kernelsu">Naučite kako da instalirate KernelSU i da koristite module</string>
     <string name="home_support_title">Podržite Nas</string>
     <string name="home_support_content">KernelSU je, i uvijek če biti, besplatan, i otvorenog izvora. Možete nam međutim pokazati da vas je briga s time da napravite donaciju.</string>
-    <string name="about_source_code"><![CDATA[View source code at %1$s<br/>Join our %2$s channel]]></string>
     <string name="profile_default">Zadano</string>
     <string name="profile_template">Šablon</string>
     <string name="profile_custom">Prilagođeno</string>
-    <string name="profile_name">Naziv profila</string>
     <string name="profile_groups">Grupe</string>
     <string name="profile_capabilities">Sposobnosti</string>
     <string name="profile_selinux_context">SELinux kontekst</string>

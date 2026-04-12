@@ -22,7 +22,6 @@
     <string name="module_sort_action_first">Ordenar (Ação primeiro)</string>
     <string name="module_sort_enabled_first">Ordenar (Ativado primeiro)</string>
     <string name="uninstall">Desinstalar</string>
-    <string name="module_install">Instalar</string>
     <string name="install">Instalar</string>
     <string name="reboot">Reiniciar</string>
     <string name="settings">Configurações</string>
@@ -51,7 +50,6 @@
     <string name="profile_default">Padrão</string>
     <string name="profile_template">Modelo</string>
     <string name="profile_custom">Personalizado</string>
-    <string name="profile_name">Nome do perfil</string>
     <string name="profile_groups">Grupos</string>
     <string name="profile_capabilities">Capacidades</string>
     <string name="profile_selinux_context">Contexto do SELinux</string>
@@ -96,8 +94,6 @@
     <string name="settings_check_update_summary">Verificar automaticamente se há atualizações do módulo e do gerenciador</string>
     <string name="grant_root_failed">Falha ao conceder acesso root!</string>
     <string name="action">Ação</string>
-    <string name="enable_web_debugging">Ativar depuração do WebView</string>
-    <string name="enable_web_debugging_summary">Pode ser usado para depurar o WebUI. Por favor, ative somente quando necessário.</string>
     <string name="direct_install">Instalação direta (recomendada)</string>
     <string name="select_file">Selecione um arquivo</string>
     <string name="install_inactive_slot">Instalar no slot inativo (após o OTA)</string>

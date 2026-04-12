@@ -49,7 +49,6 @@
     <string name="module_sort_star_first">排序 (星标数优先)</string>
     <string name="module_sort_enabled_first">排序（已启用优先）</string>
     <string name="uninstall">卸载</string>
-    <string name="module_install">安装</string>
     <string name="install">安装</string>
     <string name="reboot">重启</string>
     <string name="settings">设置</string>
@@ -96,11 +95,9 @@
     <string name="home_click_to_learn_kernelsu">了解如何安装 KernelSU 以及如何开发模块</string>
     <string name="home_support_title">支持开发</string>
     <string name="home_support_content">KernelSU 将保持免费开源，向开发者捐赠以表示支持。</string>
-    <string name="about_source_code"><![CDATA[在 %1$s 查看源码<br/>加入我们的 %2$s 频道<br/><br/>有动漫人物图片表情包的图像版权为%3$s所有，图像中的知识产权由%4$s 所有。在使用这些文件之前，除了必须遵守 %5$s 以外，还需要遵守向前两者索要使用这些艺术内容的授权。]]></string>
     <string name="profile_default">默认</string>
     <string name="profile_template">模版</string>
     <string name="profile_custom">自定义</string>
-    <string name="profile_name">名称</string>
     <string name="profile_namespace">挂载命名空间</string>
     <string name="profile_namespace_inherited">继承</string>
     <string name="profile_namespace_global">全局</string>
@@ -155,8 +152,6 @@
     <string name="grant_root_failed">获取 root 失败！</string>
     <string name="action">执行</string>
     <string name="close">关闭</string>
-    <string name="enable_web_debugging">启用 WebView 调试</string>
-    <string name="enable_web_debugging_summary">可用于调试 WebUI 。请仅在需要时启用。</string>
     <string name="direct_install">直接安装（推荐）</string>
     <string name="select_file">选择一个需要修补的镜像</string>
     <string name="install_inactive_slot">安装到未使用的槽位（OTA 后）</string>
@@ -180,16 +175,9 @@
     <string name="selected_lkm">已选择的 LKM：%s</string>
     <string name="save_log">保存日志</string>
     <string name="log_saved">日志已保存</string>
-    <string name="module_install_confirm">确认安装模块 %1$s？</string>
     <string name="unknown_module">未知模块</string>
-    <string name="restore_confirm_title">确认还原模块</string>
-    <string name="restore_confirm_message">此操作将覆盖所有现有模块，是否继续？</string>
     <string name="confirm">确定</string>
     <string name="cancel">取消</string>
-    <string name="restore_success">模块已成功还原，需重启生效</string>
-    <string name="restore_failed">还原失败：%1$s</string>
-    <string name="restart_now">立即重启</string>
-    <string name="unknown_error">未知错误</string>
     <string name="command_execution_failed">命令执行失败：%1$s</string>
     <string name="allowlist_backup_success">应用列表备份成功</string>
     <string name="allowlist_backup_failed">应用列表备份失败：%1$s</string>
@@ -216,7 +204,6 @@
     <string name="settings_sulog_summary">记录与 Root 有关的事件到 KernelSU 超级用户访问日志文件</string>
     <string name="feature_status_managed_summary">此功能由模块管理。</string>
     <string name="settings_mode_default">默认</string>
-    <string name="module_install_multiple_confirm_with_names">确定要安装以下 %1$d 个模块吗？\n\n%2$s</string>
     <string name="more_settings">更多设置</string>
     <string name="selinux_enabled">强制执行</string>
     <string name="selinux_disabled">宽容模式</string>
@@ -288,8 +275,6 @@
     <string name="invalid_file_type">文件类型不正确，请选择 .kpm 文件</string>
     <string name="confirm_uninstall_title_with_filename">卸载</string>
     <string name="confirm_uninstall_content">将卸载以下 KPM 模块：\n%s</string>
-    <string name="image_editor_hint">使用双指缩放图片，单指拖动调整位置</string>
-    <string name="reprovision">重置</string>
     <string name="horizon_flash_complete">刷写完成</string>
     <string name="horizon_preparing">准备中…</string>
     <string name="horizon_cleaning_files">清理文件…</string>

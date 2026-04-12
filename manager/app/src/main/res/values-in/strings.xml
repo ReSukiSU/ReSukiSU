@@ -23,7 +23,6 @@
     <string name="module_sort_action_first">Urut (Tindakan pertama)</string>
     <string name="module_sort_enabled_first">Urut (Diaktifkan terlebih dahulu)</string>
     <string name="uninstall">Hapus</string>
-    <string name="module_install">Instal</string>
     <string name="install">Instal</string>
     <string name="reboot">Reboot</string>
     <string name="settings">Pengaturan</string>
@@ -50,11 +49,9 @@
     <string name="home_click_to_learn_kernelsu">Pelajari cara instal KernelSU dan menggunakan modul</string>
     <string name="home_support_title">Dukung Kami</string>
     <string name="home_support_content">KernelSU akan selalu menjadi aplikasi gratis dan terbuka. Anda dapat memberikan donasi sebagai bentuk dukungan.</string>
-    <string name="about_source_code"><![CDATA[Lihat kode sumber di %1$s<br/>Gabung dengan kami di saluran %2$s]]></string>
     <string name="profile_default">Bawaan</string>
     <string name="profile_template">Templat</string>
     <string name="profile_custom">Khusus</string>
-    <string name="profile_name">Nama profil</string>
     <string name="profile_groups">Kelompok</string>
     <string name="profile_capabilities">Kemampuan</string>
     <string name="profile_selinux_context">Konteks SELinux</string>
@@ -101,8 +98,6 @@
     <string name="grant_root_failed">Gagal memberikan akses root!</string>
     <string name="action">Tindakan</string>
     <string name="close">Tutup</string>
-    <string name="enable_web_debugging">Pengawakutuan WebView</string>
-    <string name="enable_web_debugging_summary">Dapat digunakan untuk men-debug WebUI. Harap aktifkan hanya bila diperlukan.</string>
     <string name="direct_install">Instal langsung (rekomendasi)</string>
     <string name="select_file">Pilih berkas</string>
     <string name="install_inactive_slot">Instal ke slot nonaktif (setelah OTA)</string>
@@ -127,16 +122,9 @@
     <string name="selected_lkm">LKM dipilih: %s</string>
     <string name="save_log">Simpan Log</string>
     <string name="log_saved">Log disimpan</string>
-    <string name="module_install_confirm">konfirmasi pemasangan modul %1$s?</string>
     <string name="unknown_module">module tidak dikenal</string>
-    <string name="restore_confirm_title">Konfirmasi pemulihan module</string>
-    <string name="restore_confirm_message">Operasi ini akan menimpa semua modul yang ada. Lanjutkan?</string>
     <string name="confirm">Konfirmasi</string>
     <string name="cancel">Batal</string>
-    <string name="restore_success">Modul berhasil dipulihkan, restart diperlukan</string>
-    <string name="restore_failed">Pemulihan gagal: %1$s</string>
-    <string name="restart_now">Mulai Ulang Sekarang</string>
-    <string name="unknown_error">Kesalahan tidak diketahui</string>
     <string name="command_execution_failed">Eksekusi perintah gagal: %1$s</string>
     <string name="allowlist_backup_success">Cadangan daftar izin berhasil</string>
     <string name="allowlist_backup_failed">Gagal mencadangkan daftar izin: %1$s</string>
@@ -152,7 +140,6 @@
     <string name="home_device_model">Model Perangkat</string>
     <string name="su_not_allowed">Memberikan hak superuser kepada %s tidak diizinkan</string>
     <string name="settings_mode_default">Bawaan</string>
-    <string name="module_install_multiple_confirm_with_names">Apakah Anda yakin ingin menginstal %1$d modul berikut?\n\n%2$s</string>
     <string name="more_settings">Setelan lainnya</string>
     <string name="selinux">Selinux</string>
     <string name="selinux_enabled">Aktifkan</string>
@@ -175,7 +162,6 @@
     <string name="theme_follow_system">Mengikuti sistem</string>
     <string name="theme_light">Terang</string>
     <string name="theme_dark">Hitam</string>
-    <string name="manual_hook">Hook manual</string>
     <string name="dynamic_color_title">Warna dinamik</string>
     <string name="dynamic_color_summary">Warna dinamik, menggunakan sistem tema</string>
     <string name="choose_theme_color">Pilih warna tema</string>
@@ -224,8 +210,6 @@
     <string name="invalid_file_type">Format file tidak sesuai. Silakan pilih file dengan format .kpm.</string>
     <string name="confirm_uninstall_title_with_filename">Menghapus instalan</string>
     <string name="confirm_uninstall_content">KPM berikut akan diuninstall: %s</string>
-    <string name="image_editor_hint">Gunakan dua jari untuk memperbesar gambar, dan satu jari untuk menggeser mengatur posisi</string>
-    <string name="reprovision">Reprovisi</string>
     <string name="horizon_flash_complete">Flash Selesai</string>
     <string name="horizon_preparing">Mempersiapkan…</string>
     <string name="horizon_cleaning_files">Membersihkan Berkas...</string>

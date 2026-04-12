@@ -23,7 +23,6 @@
     <string name="module_sort_action_first">Сортировать (Сначала с действием)</string>
     <string name="module_sort_enabled_first">Сортировать (Сначала включённые)</string>
     <string name="uninstall">Удалить</string>
-    <string name="module_install">Установить</string>
     <string name="install">Установка</string>
     <string name="reboot">Перезагрузить</string>
     <string name="settings">Настройки</string>
@@ -51,11 +50,9 @@
     <string name="home_click_to_learn_kernelsu">Узнайте, как установить KernelSU и использовать модули</string>
     <string name="home_support_title">Поддержите нас</string>
     <string name="home_support_content">KernelSU был и всегда будет бесплатным и открытым проектом. Однако Вы всегда можете поддержать нас, отправив небольшое пожертвование.</string>
-    <string name="about_source_code"><![CDATA[Просмотреть исходный код на %1$s<br/>Присоединяйтесь к нашему %2$s каналу]]></string>
     <string name="profile_default">По умолчанию</string>
     <string name="profile_template">Шаблон</string>
     <string name="profile_custom">Пользовательский</string>
-    <string name="profile_name">Название профиля</string>
     <string name="profile_groups">Группы</string>
     <string name="profile_capabilities">Возможности</string>
     <string name="profile_selinux_context">Контекст SELinux</string>
@@ -102,8 +99,6 @@
     <string name="grant_root_failed">Не удалось выдать root!</string>
     <string name="action">Действие</string>
     <string name="close">Закрыть</string>
-    <string name="enable_web_debugging">Включить отладку WebView</string>
-    <string name="enable_web_debugging_summary">Используется для отладки WebUI. Пожалуйста, включайте только при необходимости.</string>
     <string name="direct_install">Прямая установка (Рекомендуется)</string>
     <string name="select_file">Выбрать файл</string>
     <string name="install_inactive_slot">Установка в неактивный слот (После OTA)</string>
@@ -129,16 +124,9 @@
     <string name="selected_lkm">Выбран LKM: %s</string>
     <string name="save_log">Сохранить логи</string>
     <string name="log_saved">Логи сохранены</string>
-    <string name="module_install_confirm">подтвердите установку модуля %1$s?</string>
     <string name="unknown_module">неизвестный модуль</string>
-    <string name="restore_confirm_title">Подтвердите восстановление модуля</string>
-    <string name="restore_confirm_message">Эта операция перезапишет все существующие модули. Продолжить?</string>
     <string name="confirm">Подтвердить</string>
     <string name="cancel">Отмена</string>
-    <string name="restore_success">Модули восстановлены, требуется перезагрузка</string>
-    <string name="restore_failed">Ошибка восстановления: %1$s</string>
-    <string name="restart_now">Перезапустить сейчас</string>
-    <string name="unknown_error">Неизвестная ошибка</string>
     <string name="command_execution_failed">Выполнение команды не удалось: %1$s</string>
     <string name="allowlist_backup_success">Резервная копия создана успешно</string>
     <string name="allowlist_backup_failed">Ошибка резервного копирования списка: %1$s</string>
@@ -158,7 +146,6 @@
     <string name="settings_kernel_umount">Размонтирование модулей</string>
     <string name="settings_kernel_umount_summary">Размонтировать модули в ядре для профиля приложения</string>
     <string name="settings_mode_default">По умолчанию</string>
-    <string name="module_install_multiple_confirm_with_names">Уверены, что хотите установить следующие %1$d модули? \n\n%2$s</string>
     <string name="more_settings">Доп. настройки</string>
     <string name="selinux_enabled">Включено</string>
     <string name="selinux_disabled">Выключен</string>
@@ -180,7 +167,6 @@
     <string name="theme_follow_system">Как в системе</string>
     <string name="theme_light">Светлая</string>
     <string name="theme_dark">Тёмная</string>
-    <string name="manual_hook">Самопис. хуки</string>
     <string name="dynamic_color_title">Динамические цвета</string>
     <string name="dynamic_color_summary">Использовать акцентные цвета системы</string>
     <string name="choose_theme_color">Выберите цвет темы</string>
@@ -228,8 +214,6 @@
     <string name="invalid_file_type">Неверный тип файла! Пожалуйста, выберите .kpm файл.</string>
     <string name="confirm_uninstall_title_with_filename">Удалить</string>
     <string name="confirm_uninstall_content">Следующие KPM будут удалены: %s</string>
-    <string name="image_editor_hint">Используйте два пальца для увеличения изображения, и один палец для изменения положения</string>
-    <string name="reprovision">Реализация</string>
     <string name="horizon_flash_complete">Прошивка завершена</string>
     <string name="horizon_preparing">Подготовка…</string>
     <string name="horizon_cleaning_files">Очистка файлов…</string>

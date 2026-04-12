@@ -17,7 +17,6 @@
     <string name="module_empty">Nessun modulo installato</string>
     <string name="module">Modulo</string>
     <string name="uninstall">Disinstalla</string>
-    <string name="module_install">Installa</string>
     <string name="install">Installa</string>
     <string name="reboot">Riavvia</string>
     <string name="settings">Impostazioni</string>
@@ -43,11 +42,9 @@
     <string name="home_click_to_learn_kernelsu">Scopri come installare KernelSU e utilizzare i moduli</string>
     <string name="home_support_title">Supportaci</string>
     <string name="home_support_content">KernelSU è, e sempre sarà, gratuito e open source. Puoi comunque mostrarci il tuo apprezzamento facendo una donazione.</string>
-    <string name="about_source_code"><![CDATA[View source code at %1$s<br/>Join our %2$s channel]]></string>
     <string name="profile_default">Predefinito</string>
     <string name="profile_template">Modello</string>
     <string name="profile_custom">Personalizzato</string>
-    <string name="profile_name">Nome profilo</string>
     <string name="profile_groups">Gruppi</string>
     <string name="profile_capabilities">Capacità</string>
     <string name="profile_selinux_context">Contesto SELinux</string>
@@ -92,8 +89,6 @@
     <string name="settings_check_update">Notifiche di aggiornamento</string>
     <string name="settings_check_update_summary">Controlla automaticamente gli aggiornamenti del modulo e del gestore</string>
     <string name="grant_root_failed">Impossibile ottenere l\'accesso root!</string>
-    <string name="enable_web_debugging">Abilita il debug di WebView</string>
-    <string name="enable_web_debugging_summary">Può essere usato per svolgere il debug di WebUI, è consigliato attivarlo solo quando necessario.</string>
     <string name="direct_install">Installazione diretta (Raccomandata)</string>
     <string name="select_file">Scegli un file</string>
     <string name="install_inactive_slot">Installa nello slot inattivo (dopo OTA)</string>

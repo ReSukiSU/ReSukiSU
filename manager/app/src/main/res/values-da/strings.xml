@@ -41,7 +41,6 @@
     <string name="home_support_content">KernelSU er, og vil altid være gratis og open source. Du kan stadig vise os din støtte ved at donere.</string>
     <string name="profile_template">Skabelon</string>
     <string name="profile_custom">Brugerdefineret</string>
-    <string name="profile_name">Profilnavn</string>
     <string name="profile_groups">Grupper</string>
     <string name="profile_capabilities">Evner</string>
     <string name="profile_selinux_context">SELinux-kontext</string>

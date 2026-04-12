@@ -50,7 +50,6 @@
     <string name="module_sort_star_first">Sort (Stars first)</string>
     <string name="module_sort_enabled_first">Sort (Enabled first)</string>
     <string name="uninstall">Uninstall</string>
-    <string name="module_install">Install</string>
     <string name="install">Install</string>
     <string name="reboot">Reboot</string>
     <string name="settings">Settings</string>
@@ -98,12 +97,10 @@
     <string name="home_click_to_learn_kernelsu">Learn how to install KernelSU and use modules</string>
     <string name="home_support_title">Support Us</string>
     <string name="home_support_content">KernelSU is, and always will be, free, and open source. You can however show us that you care by making a donation</string>
-    <string name="about_source_code"><![CDATA[View source code at %1$s<br/>Join our %2$s channel<br/><br/>The images of the files with anime character sticker are copyrighted by %3$s, the Brand Intellectual Property in the images is owned by %4$s. Before using these files, in addition to complying with %5$s, you also need to comply with the authorization of the two authors to use these artistic contents]]></string>
     <string name="profile" translatable="false">App Profile</string>
     <string name="profile_default">Default</string>
     <string name="profile_template">Template</string>
     <string name="profile_custom">Custom</string>
-    <string name="profile_name">Profile name</string>
     <string name="profile_namespace">Mount namespace</string>
     <string name="profile_namespace_inherited">Inherited</string>
     <string name="profile_namespace_global">Global</string>
@@ -158,8 +155,6 @@
     <string name="grant_root_failed">Failed to grant root!</string>
     <string name="action">Action</string>
     <string name="close">Close</string>
-    <string name="enable_web_debugging">Enable WebView debugging</string>
-    <string name="enable_web_debugging_summary">Can be used to debug WebUI. Please enable only when needed</string>
     <string name="direct_install">Direct install (Recommended)</string>
     <string name="select_file">Select a image that needs to be patched</string>
     <string name="install_inactive_slot">Install to inactive slot (After OTA)</string>
@@ -183,16 +178,9 @@
     <string name="selected_lkm">Selected LKM: %s</string>
     <string name="save_log">Save logs</string>
     <string name="log_saved">Logs saved</string>
-    <string name="module_install_confirm">Confirm install module %1$s？</string>
     <string name="unknown_module">Unknown module</string>
-    <string name="restore_confirm_title">Confirm Module Restoration</string>
-    <string name="restore_confirm_message">This operation will overwrite all existing modules. Continue?</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
-    <string name="restore_success">Modules restored successfully, restart required</string>
-    <string name="restore_failed">Restore failed: %1$s</string>
-    <string name="restart_now">Restart Now</string>
-    <string name="unknown_error">Unknown error</string>
     <string name="command_execution_failed">Failed to execute command: %1$s</string>
     <string name="allowlist_backup_success">Allowlist backed up successfully</string>
     <string name="allowlist_backup_failed">Failed to backup allowlist: %1$s</string>
@@ -219,7 +207,6 @@
     <string name="settings_sulog_summary">Record root-related events into KernelSU sulog files.</string>
     <string name="feature_status_managed_summary">This feature is managed by a module</string>
     <string name="settings_mode_default">Default</string>
-    <string name="module_install_multiple_confirm_with_names">Sure you want to install the following %1$d modules? \n\n%2$s</string>
     <string name="more_settings">More settings</string>
     <string name="selinux">SELinux</string>
     <string name="selinux_enabled">Enabled</string>
@@ -244,7 +231,6 @@
     <string name="theme_follow_system">Follow system</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
-    <string name="manual_hook">Manual Hook</string>
     <string name="dynamic_color_title">Dynamic colours</string>
     <string name="dynamic_color_summary">Dynamic colours using system themes</string>
     <string name="choose_theme_color">Choose a theme colour</string>
@@ -293,8 +279,6 @@
     <string name="invalid_file_type">Incorrect file type! Please select .kpm file</string>
     <string name="confirm_uninstall_title_with_filename">Uninstall</string>
     <string name="confirm_uninstall_content">The following KPM will be uninstalled: %s</string>
-    <string name="image_editor_hint">Use two fingers to zoom the image, and one finger to drag it to adjust the position</string>
-    <string name="reprovision">Reprovision</string>
     <string name="horizon_flash_complete">Flash Complete</string>
     <string name="horizon_preparing">Preparing…</string>
     <string name="horizon_cleaning_files">Cleaning files…</string>

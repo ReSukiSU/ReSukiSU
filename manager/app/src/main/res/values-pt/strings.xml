@@ -23,7 +23,6 @@
     <string name="module_sort_action_first">Ordenar (exceto primeiro)</string>
     <string name="module_sort_enabled_first">Ordenar (Habilitado primeiro)</string>
     <string name="uninstall">Desinstalar</string>
-    <string name="module_install">Instalar</string>
     <string name="install">Instalar</string>
     <string name="reboot">Reiniciar</string>
     <string name="settings">Configurações</string>
@@ -49,11 +48,9 @@
     <string name="home_click_to_learn_kernelsu">Aprenda a instalar o KernelSU e usar os módulos</string>
     <string name="home_support_title">Apoie-nos</string>
     <string name="home_support_content">O KernelSU é, e sempre será, gratuito e de código aberto. No entanto, você pode nos mostrar que se importa fazendo uma doação.</string>
-    <string name="about_source_code"><![CDATA[Veja o código fonte no %1$s<br/>Entre em nosso canal no %2$s]]></string>
     <string name="profile_default">Padrão</string>
     <string name="profile_template">Modelo</string>
     <string name="profile_custom">Personalizado</string>
-    <string name="profile_name">Nome do perfil</string>
     <string name="profile_groups">Grupos</string>
     <string name="profile_capabilities">Capacidades</string>
     <string name="profile_selinux_context">contexto SELinux</string>
@@ -100,8 +97,6 @@
     <string name="grant_root_failed">Falha ao conceder acesso root!</string>
     <string name="action">Ações</string>
     <string name="close">Fechar</string>
-    <string name="enable_web_debugging">Ativar depuração do WebView</string>
-    <string name="enable_web_debugging_summary">Pode ser usado para depurar o WebUI. Por favor, ative somente quando necessário.</string>
     <string name="direct_install">Instalação direta (recomendada)</string>
     <string name="select_file">Selecione uma imagem que precisa ser corrigida</string>
     <string name="install_inactive_slot">Instalar no slot inativo (após o OTA)</string>
@@ -122,16 +117,9 @@
     <string name="selected_lkm">LKM selecionado: %s</string>
     <string name="save_log">Salvar Registros</string>
     <string name="log_saved">Registros salvos</string>
-    <string name="module_install_confirm">¿confirmar la instalación del módulo %1$s?</string>
     <string name="unknown_module">módulo desconocido</string>
-    <string name="restore_confirm_title">Confirmar Restauração de Módulo</string>
-    <string name="restore_confirm_message">Esta operação irá sobrescrever todos os módulos existentes. Continuar?</string>
     <string name="confirm">Confirmação</string>
     <string name="cancel">Cancelar</string>
-    <string name="restore_success">Módulos restaurados com sucesso, reinicialização necessária</string>
-    <string name="restore_failed">Falha na restauração: %1$s</string>
-    <string name="restart_now">Reiniciar agora</string>
-    <string name="unknown_error">Erro desconhecido</string>
     <string name="command_execution_failed">A execução do comando falhou: %1$s</string>
     <string name="allowlist_backup_success">Backup concluído</string>
     <string name="allowlist_backup_failed">Falha no backup permitido: %1$s</string>
@@ -146,7 +134,6 @@
     <string name="home_android_version">Android Version: </string>
     <string name="home_device_model">Modelo do aparelho</string>
     <string name="su_not_allowed">Conceder superusuário à %s não é permitido</string>
-    <string name="module_install_multiple_confirm_with_names">Tem certeza que deseja instalar os seguintes módulos %1$d ? \n\n%2$s</string>
     <string name="more_settings">More settings</string>
     <string name="selinux">SELinux</string>
     <string name="selinux_enabled">Ativado</string>
@@ -165,7 +152,6 @@
     <string name="theme_follow_system">Seguir o sistema</string>
     <string name="theme_light">Claro</string>
     <string name="theme_dark">Escuro</string>
-    <string name="manual_hook">Hook manual</string>
     <string name="dynamic_color_title">Cor dinâmica</string>
     <string name="dynamic_color_summary">Cores dinâmicas usando temas de sistema</string>
     <string name="choose_theme_color">Escolha uma cor temática</string>
@@ -214,8 +200,6 @@
     <string name="invalid_file_type">Tipo de arquivo incorreto! Selecione o arquivo .kpm.</string>
     <string name="confirm_uninstall_title_with_filename">Desinstalar</string>
     <string name="confirm_uninstall_content">O seguinte KPM será desinstalado: %s</string>
-    <string name="image_editor_hint">Use dois dedos para ampliar a imagem e um dedo para arrastá-la para ajustar a posição</string>
-    <string name="reprovision">Restituição</string>
     <string name="horizon_flash_complete">Flash concluído</string>
     <string name="horizon_preparing">Preparando…</string>
     <string name="horizon_cleaning_files">limpando arquivos…</string>

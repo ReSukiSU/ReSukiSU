@@ -20,7 +20,6 @@
     <string name="module_empty">Heç bir modul quraşdırılmayıb</string>
     <string name="module">Modul</string>
     <string name="uninstall">Sil</string>
-    <string name="module_install">Yüklə</string>
     <string name="install">Yüklə</string>
     <string name="reboot">Yenidən başlat</string>
     <string name="settings">Parametrlər</string>
@@ -49,7 +48,6 @@
     <string name="profile_default">Defolt</string>
     <string name="profile_template">Şablon</string>
     <string name="profile_custom">Özəl</string>
-    <string name="profile_name">Profil adı</string>
     <string name="profile_groups">Qruplar</string>
     <string name="profile_capabilities">Bacarıqlar</string>
     <string name="profile_selinux_context">SELinux konteksi</string>

@@ -17,7 +17,6 @@
     <string name="module_sort_action_first">Sortiere zuerst (Aktion)</string>
     <string name="module_sort_enabled_first">Sortieren (zuerst aktiviert)</string>
     <string name="uninstall">Deinstallieren</string>
-    <string name="module_install">Installieren</string>
     <string name="install">Installieren</string>
     <string name="reboot">Neustarten</string>
     <string name="settings">Einstellungen</string>
@@ -42,11 +41,9 @@
     <string name="home_click_to_learn_kernelsu">Erfahre, wie KernelSU installiert wird und wie Module verwendet werden</string>
     <string name="home_support_title">Unterstütze uns</string>
     <string name="home_support_content">KernelSU ist und wird immer frei und quelloffen sein. Du kannst uns jedoch deine Unterstützung zeigen, indem du eine Spende tätigst.</string>
-    <string name="about_source_code"><![CDATA[Den Quellcode finden Sie unter %1$s<br/>Begleiten Sie uns %2$s-Kanal]]></string>
     <string name="profile_default">Standard</string>
     <string name="profile_template">Vorlage</string>
     <string name="profile_custom">Benutzerdefiniert</string>
-    <string name="profile_name">Profilname</string>
     <string name="profile_groups">Gruppen</string>
     <string name="profile_capabilities">Fähigkeiten</string>
     <string name="profile_selinux_context">SELinux-Kontext</string>
@@ -90,8 +87,6 @@
     <string name="grant_root_failed">Root-Zugriff konnte nicht gewährt werden!</string>
     <string name="action">Aktion</string>
     <string name="close">Schließen</string>
-    <string name="enable_web_debugging">WebView-Debugging aktivieren</string>
-    <string name="enable_web_debugging_summary">Kann zum Fehlerbeheben der WebUI verwendet werden, bitte nur im Notfall aktivieren.</string>
     <string name="direct_install">Direkte Installation (empfohlen)</string>
     <string name="select_file">Datei auswählen</string>
     <string name="install_inactive_slot">In inaktiven Slot installieren (nach OTA)</string>
@@ -114,16 +109,9 @@
     <string name="selected_lkm">Wähle LKM: %s</string>
     <string name="save_log">Protokolle Speichern</string>
     <string name="log_saved">Protokolle gespeichert</string>
-    <string name="module_install_confirm">das Installationsmodul %1$s bestätigen ?</string>
     <string name="unknown_module">unbekannter Modul</string>
-    <string name="restore_confirm_title">Modul-Wiederherstellung bestätigen</string>
-    <string name="restore_confirm_message">Diese Operation wird alle vorhandenen Module überschreiben. Fortfahren?</string>
     <string name="confirm">Bestätigen</string>
     <string name="cancel">Abbrechen</string>
-    <string name="restore_success">Module erfolgreich wiederhergestellt, Neustart erforderlich</string>
-    <string name="restore_failed">Wiederherstellung fehlgeschlagen: %1$s</string>
-    <string name="restart_now">Jetzt Neustarten</string>
-    <string name="unknown_error">Ein unbekannter Fehler ist aufgetreten</string>
     <string name="command_execution_failed">Befehlsausführung fehlgeschlagen: %1$s</string>
     <string name="allowlist_backup_success">Sicherung erfolgreich erlaubt</string>
     <string name="allowlist_backup_failed">Sicherung der erlaubten Liste fehlgeschlagen: %1$s</string>
@@ -140,7 +128,6 @@
     <string name="su_not_allowed">Superuser %s zu erlauben ist nicht erlaubt</string>
     <string name="settings_sucompat">Su-Binärdatei umleiten</string>
     <string name="settings_sucompat_summary">Ermöglicht Anwendungen mit Superuser-Berechtigung im App-Profil, eine Superuser-Shell durch Ausführung von /system/bin/su zu erhalten; wirksam nur für neue Prozesse.</string>
-    <string name="module_install_multiple_confirm_with_names">Möchten Sie die folgenden %1$d Module installieren? \n\n\n%2$s</string>
     <string name="more_settings">Weitere Einstellungen</string>
     <string name="selinux_enabled">Aktiviert</string>
     <string name="selinux_disabled">Deaktiviert</string>
@@ -158,7 +145,6 @@
     <string name="theme_follow_system">Systemkonform</string>
     <string name="theme_light">Licht</string>
     <string name="theme_dark">Dunkel</string>
-    <string name="manual_hook">Manueller Hook</string>
     <string name="dynamic_color_title">Dynamische Farbe</string>
     <string name="dynamic_color_summary">Dynamische Farben mit System-Themes</string>
     <string name="choose_theme_color">Wähle eine Theme-Farbe</string>
@@ -201,8 +187,6 @@
     <string name="invalid_file_type">Falscher Dateityp! Bitte wählen Sie eine .kpm Datei.</string>
     <string name="confirm_uninstall_title_with_filename">Deinstallieren</string>
     <string name="confirm_uninstall_content">Folgende KPM wird deinstalliert: %s</string>
-    <string name="image_editor_hint">Verwende zwei Finger um das Bild zu vergrößern und einen Finger um die Position anzupassen</string>
-    <string name="reprovision">Rückzahlung</string>
     <string name="horizon_flash_complete">Blitz abgeschlossen</string>
     <string name="horizon_preparing">Vorbereiten…</string>
     <string name="horizon_cleaning_files">Bereinigung von Dateien…</string>
