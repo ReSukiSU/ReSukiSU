@@ -19,7 +19,6 @@
     <string name="module_failed_to_disable">Dezactivarea modulului %s a eșuat</string>
     <string name="module_empty">Niciun modul instalat</string>
     <string name="uninstall">Dezinstalează</string>
-    <string name="module_install">Instalează</string>
     <string name="install">Instalează</string>
     <string name="reboot">Repornește</string>
     <string name="settings">Setări</string>
@@ -48,7 +47,6 @@
     <string name="profile_default">Implicit</string>
     <string name="profile_template">Șablon</string>
     <string name="profile_custom">Personalizat</string>
-    <string name="profile_name">Nume profil</string>
     <string name="profile_groups">Grupuri</string>
     <string name="profile_capabilities">Capabilități</string>
     <string name="profile_selinux_context">Context SELinux</string>
@@ -91,8 +89,6 @@
     <string name="settings_check_update">Notificări de actualizare</string>
     <string name="settings_check_update_summary">Verifică automat actualizările pentru modul și manager</string>
     <string name="grant_root_failed">Nu s-a acordat acces root!</string>
-    <string name="enable_web_debugging">Activează depanarea WebView</string>
-    <string name="enable_web_debugging_summary">Poate fi folosit pentru a depana WebUI, activează numai când este necesar.</string>
     <string name="direct_install">Instalare directă (recomandat)</string>
     <string name="select_file">Selectează un fișier</string>
     <string name="install_inactive_slot">Instalează într-un slot inactiv (după OTA)</string>

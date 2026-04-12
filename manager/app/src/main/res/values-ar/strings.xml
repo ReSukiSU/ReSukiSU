@@ -23,7 +23,6 @@
     <string name="module_sort_action_first">فرز (الإجراء أولاً)</string>
     <string name="module_sort_enabled_first">فرز (الممكن أولاً)</string>
     <string name="uninstall">إلغاء التثبيت</string>
-    <string name="module_install">تثبيت الوحدة</string>
     <string name="install">تثبيت</string>
     <string name="reboot">إعادة تشغيل</string>
     <string name="settings">الإعدادات</string>
@@ -49,11 +48,9 @@
     <string name="home_click_to_learn_kernelsu">تعرف على كيفية تثبيت KernelSU واستخدام الإضافات</string>
     <string name="home_support_title">إدعمنا</string>
     <string name="home_support_content">KernelSU سيظل دائماً مجانياً ومفتوح المصدر. مع ذلك، يمكنك أن تظهر لنا أنك تهتم بالتبرع.</string>
-    <string name="about_source_code"><![CDATA[أنظر إلى مصدر البرمجة في %1$s<br/>إنضم إلى قناتنا في %2$s ]]></string>
     <string name="profile_default">الإفتراضي</string>
     <string name="profile_template">نموذج</string>
     <string name="profile_custom">مُخصّص</string>
-    <string name="profile_name">اسم الملف الشخصي</string>
     <string name="profile_groups">مجموعات</string>
     <string name="profile_capabilities">القدرات</string>
     <string name="profile_selinux_context">سياق SELinux</string>
@@ -100,8 +97,6 @@
     <string name="grant_root_failed">فشل في منح صلاحية الجذر!</string>
     <string name="action">إجراء</string>
     <string name="close">إغلاق</string>
-    <string name="enable_web_debugging">تمكين تصحيح أخطاء WebView</string>
-    <string name="enable_web_debugging_summary">يمكن استخدامه لتصحيح أخطاء WebUI، يرجى تمكينه فقط عند الحاجة.</string>
     <string name="direct_install">تثبيت مباشر (موصى به)</string>
     <string name="select_file">اختيار ملف</string>
     <string name="install_inactive_slot">التثبيت على فتحة غير نشطة (بعد OTA)</string>
@@ -124,16 +119,9 @@
     <string name="selected_lkm">LKM المحددة: %s</string>
     <string name="save_log">حفظ السجلات</string>
     <string name="log_saved">السجلات محفوظة</string>
-    <string name="module_install_confirm">تأكيد وحدة التثبيت %1$s؟</string>
     <string name="unknown_module">وحدة غير معروفة</string>
-    <string name="restore_confirm_title">تأكيد استعادة الوحدة</string>
-    <string name="restore_confirm_message">هذه العملية سوف تستبدل جميع الوحدات الموجودة. هل تريد المتابعة؟</string>
     <string name="confirm">تأكيد</string>
     <string name="cancel">إلغاء</string>
-    <string name="restore_success">تم استعادة الوحدات بنجاح, إعادة التشغيل مطلوبة</string>
-    <string name="restore_failed">فشل الاستعادة: %1$s</string>
-    <string name="restart_now">أعد تشغيل التطبيق الآن</string>
-    <string name="unknown_error">خطأ غير معروف</string>
     <string name="command_execution_failed">فشل تنفيذ الأوامر: %1$s</string>
     <string name="allowlist_backup_success">السماح بالنسخ الاحتياطي للقائمة بنجاح</string>
     <string name="allowlist_backup_failed">فشل النسخ الاحتياطي لقائمة السماح: %1$s</string>
@@ -152,7 +140,6 @@
     <string name="settings_sucompat_summary">يسمح للتطبيقات التي تم منحها صلاحيات Superuser في ملف تعريف التطبيق بالحصول على shell superuser من خلال تنفيذ /system/bin/su؛ فعال فقط للعمليات الجديدة.</string>
     <string name="settings_kernel_umount">إلغاء تحميل النواة</string>
     <string name="settings_kernel_umount_summary">سلوك إلغاء تحميل مستوى النواة الذي يسيطر عليه KernelSU</string>
-    <string name="module_install_multiple_confirm_with_names">هل أنت متأكد من أنك تريد تثبيت وحدات %1$d التالية؟ \n\n%2$s</string>
     <string name="more_settings">المزيد من الإعدادات</string>
     <string name="selinux_enabled">مفعّل</string>
     <string name="selinux_disabled">رفض</string>
@@ -170,7 +157,6 @@
     <string name="theme_follow_system">اتبّاع النظام</string>
     <string name="theme_light">فاتح</string>
     <string name="theme_dark">مظلم</string>
-    <string name="manual_hook">ربط يدوي</string>
     <string name="dynamic_color_title">لون ديناميكية</string>
     <string name="dynamic_color_summary">الألوان الديناميكية باستخدام سمات النظام</string>
     <string name="choose_theme_color">اختر لون السمة</string>
@@ -217,8 +203,6 @@
     <string name="invalid_file_type">نوع الملف غير صحيح! الرجاء تحديد ملف .kpm.</string>
     <string name="confirm_uninstall_title_with_filename">إلغاء التثبيت</string>
     <string name="confirm_uninstall_content">سيتم إلغاء تثبيت KPM التالية: %s</string>
-    <string name="image_editor_hint">استخدم إصبعين لتكبير الصورة، وأصبع واحد لسحبها لضبط الموضع</string>
-    <string name="reprovision">إعادة</string>
     <string name="horizon_flash_complete">الفلاش اكتمل</string>
     <string name="horizon_preparing">جار التحضير</string>
     <string name="horizon_cleaning_files">تنظيف الملفات…</string>

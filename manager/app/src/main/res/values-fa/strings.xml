@@ -22,7 +22,6 @@
     <string name="module_sort_action_first">Sort (Action first)</string>
     <string name="module_sort_enabled_first">Sort (Enabled first)</string>
     <string name="uninstall">لغو نصب</string>
-    <string name="module_install">نصب</string>
     <string name="install">نصب</string>
     <string name="reboot">راه اندازی دوباره</string>
     <string name="settings">تنظیمات</string>
@@ -51,7 +50,6 @@
     <string name="profile_default">پیش‌فرض</string>
     <string name="profile_template">قالب</string>
     <string name="profile_custom">شخصی سازی شده</string>
-    <string name="profile_name">اسم پروفایل</string>
     <string name="profile_umount_modules">جداکردن ماژول ها</string>
      <string name="settings_check_update">نوتیفیکیشن‌های به‌روزرسانی</string>
     <string name="settings_check_update_summary">بررسی خودکار برای به‌روزرسانی‌های ماژول و مدیر</string>

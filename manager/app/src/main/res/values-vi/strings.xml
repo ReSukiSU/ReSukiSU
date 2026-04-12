@@ -26,7 +26,6 @@
     <string name="module_sort_star_first">Sắp xếp (Số sao trước)</string>
     <string name="module_sort_enabled_first">Sắp xếp (Theo trạng thái)</string>
     <string name="uninstall">Gỡ cài đặt</string>
-    <string name="module_install">Cài đặt</string>
     <string name="install">Cài đặt</string>
     <string name="reboot">Khởi động lại</string>
     <string name="settings">Cài đặt</string>
@@ -63,11 +62,9 @@
     <string name="home_click_to_learn_kernelsu">Tìm hiểu cách cài đặt KernelSU và sử dụng các module!</string>
     <string name="home_support_title">Ủng hộ chúng tôi</string>
     <string name="home_support_content">KernelSU sẽ luôn là miễn phí và mã nguồn mở. Tuy nhiên, bạn có thể cho chúng tôi thấy rằng bạn quan tâm bằng cách quyên góp!</string>
-    <string name="about_source_code"><![CDATA[Xem mã nguồn tại %1$s<br/>Tham gia kênh %2$s của chúng tôi<br/><br/>Hình ảnh của các tệp có nhãn dán nhân vật anime thuộc bản quyền của %3$s, Quyền sở hữu trí tuệ thương hiệu trong hình ảnh thuộc về %4$s. Trước khi sử dụng các tệp này, ngoài việc tuân thủ %5$s, bạn cũng cần tuân thủ sự cho phép của hai tác giả để sử dụng các nội dung nghệ thuật này]]></string>
     <string name="profile_default">Mặc định</string>
     <string name="profile_template">Bản mẫu</string>
     <string name="profile_custom">Tuỳ chỉnh</string>
-    <string name="profile_name">Tên hồ sơ</string>
     <string name="profile_groups">Nhóm</string>
     <string name="profile_capabilities">Tính tương thích</string>
     <string name="profile_selinux_context">Bối cảnh SELinux</string>
@@ -111,8 +108,6 @@
     <string name="grant_root_failed">Cấp quyền root thất bại!</string>
     <string name="action">Khởi chạy</string>
     <string name="close">Đóng</string>
-    <string name="enable_web_debugging">Gỡ lỗi WebView</string>
-    <string name="enable_web_debugging_summary">Có thể sử dụng để gỡ lỗi WebUI. Vui lòng chỉ bật khi cần thiết</string>
     <string name="direct_install">Cài đặt trực tiếp (Khuyến nghị)</string>
     <string name="select_file">Chọn file .img cần vá</string>
     <string name="install_inactive_slot">Cài đặt vào phân vùng chưa được sử dụng (Sau OTA)</string>
@@ -136,16 +131,9 @@
     <string name="selected_lkm">Đã chọn LKM: %s</string>
     <string name="save_log">Lưu nhật ký</string>
     <string name="log_saved">Nhật ký đã được lưu</string>
-    <string name="module_install_confirm">Xác nhận cài đặt module %1$s？</string>
     <string name="unknown_module">Module không xác định</string>
-    <string name="restore_confirm_title">Xác nhận khôi phục module</string>
-    <string name="restore_confirm_message">Hành động này sẽ ghi đè lên tất cả các module hiện có. Tiếp tục?</string>
     <string name="confirm">Xác nhận</string>
     <string name="cancel">Thoát</string>
-    <string name="restore_success">Các module đã được khôi phục thành công, cần khởi động lại</string>
-    <string name="restore_failed">Khôi phục thất bại: %1$s</string>
-    <string name="restart_now">Khởi động lại ngay</string>
-    <string name="unknown_error">Lỗi không xác định</string>
     <string name="command_execution_failed">Thực thi lệnh thất bại: %1$s</string>
     <string name="allowlist_backup_success">Sao lưu danh sách cho phép thành công</string>
     <string name="allowlist_backup_failed">Sao lưu danh sách cho phép thất bại: %1$s</string>
@@ -167,7 +155,6 @@
     <string name="feature_status_unsupported_summary">Kernel không hỗ trợ tính năng này</string>
     <string name="feature_status_managed_summary">Tính năng này được quản lý bởi một module</string>
     <string name="settings_mode_default">Mặc định</string>
-    <string name="module_install_multiple_confirm_with_names">Bạn có chắc muốn cài đặt các module %1$d không? \n\n%2$s</string>
     <string name="more_settings">Nhiều cài đặt hơn</string>
     <string name="selinux_enabled">Đang bật</string>
     <string name="selinux_disabled">Đang tắt</string>
@@ -191,7 +178,6 @@
     <string name="theme_follow_system">Theo hệ thống</string>
     <string name="theme_light">Sáng</string>
     <string name="theme_dark">Tối</string>
-    <string name="manual_hook">Hook thủ công</string>
     <string name="dynamic_color_title">Màu sắc động</string>
     <string name="dynamic_color_summary">Sử dụng màu sắc động làm chủ đề hệ thống</string>
     <string name="choose_theme_color">Chọn màu chủ đề</string>
@@ -239,8 +225,6 @@
     <string name="invalid_file_type">Loại file không đúng! Vui lòng chọn file .kpm</string>
     <string name="confirm_uninstall_title_with_filename">Gỡ cài đặt</string>
     <string name="confirm_uninstall_content">KPM sau đây sẽ được gỡ cài đặt: %s</string>
-    <string name="image_editor_hint">Sử dụng hai ngón tay để phóng to hình ảnh và một ngón tay kéo thả để điều chỉnh vị trí</string>
-    <string name="reprovision">Chọn lại</string>
     <string name="horizon_flash_complete">Flash hoàn tất</string>
     <string name="horizon_preparing">Chuẩn bị…</string>
     <string name="horizon_cleaning_files">Đang dọn dẹp các file…</string>
@@ -432,8 +416,6 @@
     <string name="susfs_hide_mounts_current_setting">Cài đặt hiện tại: %s</string>
     <string name="susfs_hide_mounts_setting_all">Ẩn khỏi tất cả các tiến trình</string>
     <string name="susfs_hide_mounts_setting_non_ksu">Chỉ ẩn đối với các tiến trình không phải KSU</string>
-    <string name="kernel_simple_kernel">Hiển thị tóm tắt \"Phiên bản Kernel\"</string>
-    <string name="kernel_simple_kernel_summary">Tóm tắt hiển thị phiên bản Kernel cho ngắn gọn</string>
     <string name="susfs_android_data_path_set">Đường dẫn Android Data đã được đặt thành: %s</string>
     <string name="susfs_sdcard_path_set">Đường dẫn SD Card đã được đặt thành: %s</string>
     <string name="susfs_path_setup_warning">Thiết lập đường dẫn có thể không thành công hoàn toàn, nhưng đường dẫn SuS sẽ tiếp tục được thêm vào</string>
@@ -549,16 +531,6 @@ Bật: Kích hoạt tính năng giả mạo sus tcontext của \'su\' thành \'u
     <string name="kpm_patch_operation_failed">Quá trình Vá KPM thất bại: %s</string>
     <string name="kpm_follow_kernel_file">Mặc định theo file Kernel</string>
     <string name="kpm_follow_kernel_description">Sử dụng file kernel mặc định mà không có bất kỳ sửa đổi nào về KPM</string>
-    <string name="uid_auto_scan_title">Chế độ quét danh sách ứng dụng người dùng</string>
-    <string name="uid_auto_scan_summary">Bật tuỳ chọn này thì chế độ người dùng sẽ được sử dụng để quét danh sách ứng dụng nhằm cải thiện tính ổn định (nếu danh sách ứng dụng quét kernel bị kẹt và xảy ra các sự cố khác, bạn có thể thử bật tùy chọn này)</string>
-    <string name="uid_multi_user_scan_title">Quét ứng dụng nhiều người dùng</string>
-    <string name="uid_multi_user_scan_summary">Khi được bật, tất cả ứng dụng của người dùng sẽ được quét, bao gồm cả dữ liệu công việc, v.v</string>
-    <string name="uid_scanner_setting_failed">Thiết lập thất bại, vui lòng kiểm tra quyền</string>
-    <string name="clean_runtime_environment">Dọn dẹp môi trường hoạt động</string>
-    <string name="clean_runtime_environment_summary">Dọn dẹp các file hoạt động và dừng quét các dịch vụ</string>
-    <string name="clean_runtime_environment_confirm">Bạn có chắc chắn muốn dọn dẹp môi trường hoạt động không? Thao tác này sẽ dừng dịch vụ quét và xóa các file liên quan</string>
-    <string name="clean_runtime_environment_success">Dọn dẹp môi trường hoạt động thành công</string>
-    <string name="clean_runtime_environment_failed">Dọn dẹp môi trường hoạt động thất bại</string>
     <string name="confirm_installation">Xác nhận cài đặt</string>
     <string name="confirm_multiple_installation">Xác nhận cài đặt (%d files)</string>
     <string name="install_confirm">Cài đặt</string>
@@ -595,9 +567,5 @@ Bật: Kích hoạt tính năng giả mạo sus tcontext của \'su\' thành \'u
     <string name="umount_path_added">Đã thêm đường dẫn</string>
     <string name="umount_path_removed">Đường dẫn đã bị xóa</string>
     <string name="operation_failed">Thao tác thất bại</string>
-    <string name="confirm_action">Xác nhận Khởi chạy?</string>
-    <string name="confirm_clear_custom_paths">Bạn có chắc chắn muốn xóa tất cả các đường dẫn tùy chỉnh không? (các đường dẫn mặc định sẽ được giữ nguyên)</string>
-    <string name="custom_paths_cleared">Đường dẫn tùy chỉnh đã được xóa</string>
-    <string name="config_applied">Cấu hình đã được áp dụng cho Kernel</string>
     <string name="group_contains_apps">Chứa %d ứng dụng</string>
 </resources>

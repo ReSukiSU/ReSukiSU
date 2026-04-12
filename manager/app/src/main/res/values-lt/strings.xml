@@ -23,7 +23,6 @@
     <string name="module_sort_action_first">Sort (Action first)</string>
     <string name="module_sort_enabled_first">Sort (Enabled first)</string>
     <string name="uninstall">Išdiegti</string>
-    <string name="module_install">Įdiegti</string>
     <string name="install">Įdiegti</string>
     <string name="reboot">Paleisti iš naujo</string>
     <string name="settings">Parametrai</string>
@@ -50,11 +49,9 @@
     <string name="home_click_to_learn_kernelsu">Sužinokite, kaip įdiegti KernelSU ir naudoti modulius</string>
     <string name="home_support_title">Paremkite mus</string>
     <string name="home_support_content">KernelSU yra ir visada bus nemokamas ir atvirojo kodo. Tačiau galite parodyti, kad jums rūpi, paaukodami mums.</string>
-    <string name="about_source_code"><![CDATA[View source code at %1$s<br/>Join our %2$s channel]]></string>
     <string name="profile_default">Numatytas</string>
     <string name="profile_template">Šablonas</string>
     <string name="profile_custom">Pasirinktinis</string>
-    <string name="profile_name">Profilio pavadinimas</string>
     <string name="profile_groups">Grupės</string>
     <string name="profile_capabilities">Galimybės</string>
     <string name="profile_selinux_context">SELinux kontekstas</string>

@@ -20,7 +20,6 @@
     <string name="module_empty">कोई मॉड्यूल इंस्टाल नहीं हुआ</string>
     <string name="module">मॉड्यूल</string>
     <string name="uninstall">अनइंस्टॉल करें</string>
-    <string name="module_install">इंस्टाल करें</string>
     <string name="install">इंस्टाल करें</string>
     <string name="reboot">रीबूट करें</string>
     <string name="settings">सेटिंग</string>
@@ -46,11 +45,9 @@
     <string name="home_click_to_learn_kernelsu">जानें कि KernelSU कैसे स्थापित करें और मॉड्यूल का उपयोग कैसे करें</string>
     <string name="home_support_title">हमें प्रोत्साहन दें</string>
     <string name="home_support_content">KernelSU मुफ़्त और ओपन सोर्स और हमेशा रहेगा। हालाँकि आप दान देकर हमें दिखा सकते हैं कि आप संरक्षण करते हैं।</string>
-    <string name="about_source_code"><![CDATA[View source code at %1$s<br/>Join our %2$s channel]]></string>
     <string name="profile_default">डिफॉल्ट</string>
     <string name="profile_template">टेम्पलेट</string>
     <string name="profile_custom">कस्टम</string>
-    <string name="profile_name">प्रोफाइल का नाम</string>
     <string name="profile_groups">समूह</string>
     <string name="profile_capabilities">क्षमताएं</string>
     <string name="profile_umount_modules">मॉड्यूल्स अनमाउंट करें</string>

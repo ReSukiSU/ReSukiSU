@@ -20,7 +20,6 @@
     <string name="module_empty">কোনো মোডিউল ইন্সটল করা নেই</string>
     <string name="module">মোডিউল</string>
     <string name="uninstall">আনইন্সটল</string>
-    <string name="module_install">ইন্সটল</string>
     <string name="install">ইন্সটল</string>
     <string name="reboot">রিবুট</string>
     <string name="settings">সেটিংস</string>

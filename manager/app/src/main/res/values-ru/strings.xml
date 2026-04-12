@@ -23,7 +23,6 @@
     <string name="module_sort_action_first">Сортировать (Сначала с действием)</string>
     <string name="module_sort_enabled_first">Сортировать (Сначала включённые)</string>
     <string name="uninstall">Удалить</string>
-    <string name="module_install">Установить</string>
     <string name="install">Установка</string>
     <string name="reboot">Перезагрузить</string>
     <string name="settings">Настройки</string>
@@ -51,11 +50,9 @@
     <string name="home_click_to_learn_kernelsu">Узнайте, как установить KernelSU и использовать модули</string>
     <string name="home_support_title">Поддержите нас</string>
     <string name="home_support_content">KernelSU был и всегда будет бесплатным и открытым проектом. Однако Вы всегда можете поддержать нас, отправив небольшое пожертвование.</string>
-    <string name="about_source_code"><![CDATA[Просмотреть исходный код на %1$s<br/>Присоединяйтесь к нашему %2$s каналу]]></string>
     <string name="profile_default">По умолчанию</string>
     <string name="profile_template">Шаблон</string>
     <string name="profile_custom">Пользовательский</string>
-    <string name="profile_name">Название профиля</string>
     <string name="profile_groups">Группы</string>
     <string name="profile_capabilities">Возможности</string>
     <string name="profile_selinux_context">Контекст SELinux</string>
@@ -102,8 +99,6 @@
     <string name="grant_root_failed">Не удалось выдать root!</string>
     <string name="action">Действие</string>
     <string name="close">Закрыть</string>
-    <string name="enable_web_debugging">Включить отладку WebView</string>
-    <string name="enable_web_debugging_summary">Используется для отладки WebUI. Пожалуйста, включайте только при необходимости.</string>
     <string name="direct_install">Прямая установка (Рекомендуется)</string>
     <string name="select_file">Выбрать файл</string>
     <string name="install_inactive_slot">Установка в неактивный слот (После OTA)</string>
@@ -129,16 +124,9 @@
     <string name="selected_lkm">Выбран LKM: %s</string>
     <string name="save_log">Сохранить логи</string>
     <string name="log_saved">Логи сохранены</string>
-    <string name="module_install_confirm">подтвердите установку модуля %1$s?</string>
     <string name="unknown_module">неизвестный модуль</string>
-    <string name="restore_confirm_title">Подтвердите восстановление модуля</string>
-    <string name="restore_confirm_message">Эта операция перезапишет все существующие модули. Продолжить?</string>
     <string name="confirm">Подтвердить</string>
     <string name="cancel">Отмена</string>
-    <string name="restore_success">Модули восстановлены, требуется перезагрузка</string>
-    <string name="restore_failed">Ошибка восстановления: %1$s</string>
-    <string name="restart_now">Перезапустить сейчас</string>
-    <string name="unknown_error">Неизвестная ошибка</string>
     <string name="command_execution_failed">Выполнение команды не удалось: %1$s</string>
     <string name="allowlist_backup_success">Резервная копия создана успешно</string>
     <string name="allowlist_backup_failed">Ошибка резервного копирования списка: %1$s</string>
@@ -158,7 +146,6 @@
     <string name="settings_kernel_umount">Размонтирование модулей</string>
     <string name="settings_kernel_umount_summary">Размонтировать модули в ядре для профиля приложения</string>
     <string name="settings_mode_default">По умолчанию</string>
-    <string name="module_install_multiple_confirm_with_names">Уверены, что хотите установить следующие %1$d модули? \n\n%2$s</string>
     <string name="more_settings">Доп. настройки</string>
     <string name="selinux_enabled">Включено</string>
     <string name="selinux_disabled">Выключен</string>
@@ -180,7 +167,6 @@
     <string name="theme_follow_system">Как в системе</string>
     <string name="theme_light">Светлая</string>
     <string name="theme_dark">Тёмная</string>
-    <string name="manual_hook">Самопис. хуки</string>
     <string name="dynamic_color_title">Динамические цвета</string>
     <string name="dynamic_color_summary">Использовать акцентные цвета системы</string>
     <string name="choose_theme_color">Выберите цвет темы</string>
@@ -228,8 +214,6 @@
     <string name="invalid_file_type">Неверный тип файла! Пожалуйста, выберите .kpm файл.</string>
     <string name="confirm_uninstall_title_with_filename">Удалить</string>
     <string name="confirm_uninstall_content">Следующие KPM будут удалены: %s</string>
-    <string name="image_editor_hint">Используйте два пальца для увеличения изображения, и один палец для изменения положения</string>
-    <string name="reprovision">Реализация</string>
     <string name="horizon_flash_complete">Прошивка завершена</string>
     <string name="horizon_preparing">Подготовка…</string>
     <string name="horizon_cleaning_files">Очистка файлов…</string>
@@ -424,8 +408,6 @@
     <string name="susfs_hide_mounts_current_setting">Текущие настройки: %s</string>
     <string name="susfs_hide_mounts_setting_all">Скрыть для всех процессов</string>
     <string name="susfs_hide_mounts_setting_non_ksu">Скрыть только для процессов, не связанных с KSU</string>
-    <string name="kernel_simple_kernel">Скрыть доп. информацию о ядре</string>
-    <string name="kernel_simple_kernel_summary">Включить или отключить чистый режим, отображаемой версии ядра SukiSU</string>
     <string name="susfs_android_data_path_set">Путь к данным Android был установлен на: %s</string>
     <string name="susfs_sdcard_path_set">Путь к SD-карте был установлен на: %s</string>
     <string name="susfs_path_setup_warning">Установка пути может быть не вполне успешной, но SUS пути будут добавлены</string>
@@ -539,16 +521,6 @@
     <string name="kpm_patch_operation_failed">Ошибка патча KPM: %s</string>
     <string name="kpm_follow_kernel_file">Следовать за ядром</string>
     <string name="kpm_follow_kernel_description">Использовать ядро без каких-либо изменений KPM</string>
-    <string name="uid_auto_scan_title">Пользовательский режим сканирования списка приложений</string>
-    <string name="uid_auto_scan_summary">Включение этой опции позволит использовать сканирование пользовательского режима для списка приложений, улучшая стабильность. (Если вы столкнетесь с такими проблемами, как замораживание во время сканирования ядра списка приложений, вы можете включить эту опцию.)</string>
-    <string name="uid_multi_user_scan_title">Поиск многопользовательских приложений</string>
-    <string name="uid_multi_user_scan_summary">Когда включено, сканирует приложения для всех пользователей, включая рабочие профили</string>
-    <string name="uid_scanner_setting_failed">Не удалось установить, проверьте права доступа</string>
-    <string name="clean_runtime_environment">Очистить среду Runtime</string>
-    <string name="clean_runtime_environment_summary">Очистить среду Runtime и остановить службу сканирования</string>
-    <string name="clean_runtime_environment_confirm">Вы уверены, что хотите очистить среду Runtime? Это остановит службу сканирования и удалит связанные с ней файлы.</string>
-    <string name="clean_runtime_environment_success">Runtime окружение успешно очищено</string>
-    <string name="clean_runtime_environment_failed">Не удалось очистить среду runtime</string>
     <string name="confirm_installation">Подтвердите установку</string>
     <string name="confirm_multiple_installation">Подтвердите установку (%d файлов)</string>
     <string name="install_confirm">Установить</string>
@@ -588,8 +560,4 @@
     <string name="umount_path_added">Путь добавлен</string>
     <string name="umount_path_removed">Путь удален</string>
     <string name="operation_failed">Неудача</string>
-    <string name="confirm_action">Подтвердите действие</string>
-    <string name="confirm_clear_custom_paths">Вы уверены, что хотите удалить все кастомные пути? (Стандартные пути не будут удалены)</string>
-    <string name="custom_paths_cleared">Кастомные пути удалены</string>
-    <string name="config_applied">Конфигурация применена к ядру</string>
 </resources>

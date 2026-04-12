@@ -38,7 +38,6 @@
     <string name="profile_default">ಡೀಫಾಲ್ಟ್</string>
     <string name="profile_template">ಟೆಂಪ್ಲೇಟ್</string>
     <string name="profile_custom">ಕಸ್ಟಮ್</string>
-    <string name="profile_name">ಪ್ರೊಫೈಲ್ ಹೆಸರು</string>
     <string name="profile_groups">ಗುಂಪುಗಳು</string>
     <string name="profile_capabilities">ಸಾಮರ್ಥ್ಯಗಳು</string>
     <string name="profile_selinux_context">SELinux ಸಂದರ್ಭ</string>

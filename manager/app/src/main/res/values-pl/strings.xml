@@ -21,7 +21,6 @@
     <string name="module_sort_action_first">Sortuj (najpierw działania)</string>
     <string name="module_sort_enabled_first">Sortuj (najpierw włączone)</string>
     <string name="uninstall">Odinstaluj</string>
-    <string name="module_install">Instaluj</string>
     <string name="install">Instaluj</string>
     <string name="reboot">Uruchom ponownie</string>
     <string name="settings">Ustawienia</string>
@@ -47,11 +46,9 @@
     <string name="home_click_to_learn_kernelsu">Dowiedz się jak zainstalować KernelSU i jak korzystać z modułów</string>
     <string name="home_support_title">Wesprzyj nas</string>
     <string name="home_support_content">KernelSU jest i zawsze będzie darmowy oraz otwarty. Niemniej jednak możesz nam pokazać, że Ci zależy, wysyłając darowiznę.</string>
-    <string name="about_source_code"><![CDATA[View source code at %1$s<br/>Join our %2$s channel]]></string>
     <string name="profile_default">Domyślny</string>
     <string name="profile_template">Szablon</string>
     <string name="profile_custom">Własny</string>
-    <string name="profile_name">Nazwa profilu</string>
     <string name="profile_groups">Grupy</string>
     <string name="profile_capabilities">Uprawnienia</string>
     <string name="profile_selinux_context">Kontekst SELinux</string>
@@ -97,8 +94,6 @@
     <string name="settings_check_update_summary">Automatycznie sprawdzaj aktualizacje modułów i menedžera</string>
     <string name="grant_root_failed">Nie udało się przyznać roota!</string>
     <string name="action">Akcja</string>
-    <string name="enable_web_debugging">Włącz debugowanie WebView</string>
-    <string name="enable_web_debugging_summary">Może być użyte do debugowania WebUI. Włącz tylko w razie potrzeby.</string>
     <string name="direct_install">Instalacja bezpośrednia (zalecane)</string>
     <string name="select_file">Wybierz plik</string>
     <string name="install_inactive_slot">Zainstaluj do nieaktywnego slotu (po aktualizcji OTA)</string>

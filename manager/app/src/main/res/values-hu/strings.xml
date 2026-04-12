@@ -19,7 +19,6 @@
     <string name="module_empty">Nincs telepített modul</string>
     <string name="module">Modulok</string>
     <string name="uninstall">Eltávolítás</string>
-    <string name="module_install">Telepítés</string>
     <string name="install">Telepítés</string>
     <string name="reboot">Újraindítás</string>
     <string name="settings">Beállítások</string>
@@ -45,11 +44,9 @@
     <string name="home_click_to_learn_kernelsu">Ismerje meg a KernelSU telepítését és a modulok használatát</string>
     <string name="home_support_title">Támogasson minket</string>
     <string name="home_support_content">A KernelSU ingyenes, nyílt forráskódú és mindig is az lesz. Ön azonban adományozással megmutathatja, hogy törődik a projekttel.</string>
-    <string name="about_source_code"><![CDATA[View source code at %1$s<br/>Join our %2$s channel]]></string>
     <string name="profile_default">Alapértelmezett</string>
     <string name="profile_template">Sablon</string>
     <string name="profile_custom">Egyedi</string>
-    <string name="profile_name">Profil neve</string>
     <string name="profile_groups">Csoportok</string>
     <string name="profile_capabilities">Jogosultságok</string>
     <string name="profile_selinux_context">SELinux kontextus</string>
@@ -93,8 +90,6 @@
     <string name="settings_check_update_summary">Modul- és kezelőfrissítések automatikus keresése</string>
     <string name="grant_root_failed">A root jog megadása sikertelen!</string>
     <string name="action">Művelet</string>
-    <string name="enable_web_debugging">WebView hibakeresés engedélyezése</string>
-    <string name="enable_web_debugging_summary">A WebUI hibakeresésére használható, csak szükség esetén engedélyezze.</string>
     <string name="direct_install">Közvetlen telepítés (Ajánlott)</string>
     <string name="select_file">Fájl kiválasztása</string>
     <string name="install_inactive_slot">Telepítés inaktív helyre (OTA után)</string>

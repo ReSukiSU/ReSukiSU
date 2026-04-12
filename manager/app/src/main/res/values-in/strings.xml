@@ -23,7 +23,6 @@
     <string name="module_sort_action_first">Urut (Tindakan pertama)</string>
     <string name="module_sort_enabled_first">Urut (Diaktifkan terlebih dahulu)</string>
     <string name="uninstall">Hapus</string>
-    <string name="module_install">Instal</string>
     <string name="install">Instal</string>
     <string name="reboot">Reboot</string>
     <string name="settings">Pengaturan</string>
@@ -50,11 +49,9 @@
     <string name="home_click_to_learn_kernelsu">Pelajari cara instal KernelSU dan menggunakan modul</string>
     <string name="home_support_title">Dukung Kami</string>
     <string name="home_support_content">KernelSU akan selalu menjadi aplikasi gratis dan terbuka. Anda dapat memberikan donasi sebagai bentuk dukungan.</string>
-    <string name="about_source_code"><![CDATA[Lihat kode sumber di %1$s<br/>Gabung dengan kami di saluran %2$s]]></string>
     <string name="profile_default">Bawaan</string>
     <string name="profile_template">Templat</string>
     <string name="profile_custom">Khusus</string>
-    <string name="profile_name">Nama profil</string>
     <string name="profile_groups">Kelompok</string>
     <string name="profile_capabilities">Kemampuan</string>
     <string name="profile_selinux_context">Konteks SELinux</string>
@@ -101,8 +98,6 @@
     <string name="grant_root_failed">Gagal memberikan akses root!</string>
     <string name="action">Tindakan</string>
     <string name="close">Tutup</string>
-    <string name="enable_web_debugging">Pengawakutuan WebView</string>
-    <string name="enable_web_debugging_summary">Dapat digunakan untuk men-debug WebUI. Harap aktifkan hanya bila diperlukan.</string>
     <string name="direct_install">Instal langsung (rekomendasi)</string>
     <string name="select_file">Pilih berkas</string>
     <string name="install_inactive_slot">Instal ke slot nonaktif (setelah OTA)</string>
@@ -127,16 +122,9 @@
     <string name="selected_lkm">LKM dipilih: %s</string>
     <string name="save_log">Simpan Log</string>
     <string name="log_saved">Log disimpan</string>
-    <string name="module_install_confirm">konfirmasi pemasangan modul %1$s?</string>
     <string name="unknown_module">module tidak dikenal</string>
-    <string name="restore_confirm_title">Konfirmasi pemulihan module</string>
-    <string name="restore_confirm_message">Operasi ini akan menimpa semua modul yang ada. Lanjutkan?</string>
     <string name="confirm">Konfirmasi</string>
     <string name="cancel">Batal</string>
-    <string name="restore_success">Modul berhasil dipulihkan, restart diperlukan</string>
-    <string name="restore_failed">Pemulihan gagal: %1$s</string>
-    <string name="restart_now">Mulai Ulang Sekarang</string>
-    <string name="unknown_error">Kesalahan tidak diketahui</string>
     <string name="command_execution_failed">Eksekusi perintah gagal: %1$s</string>
     <string name="allowlist_backup_success">Cadangan daftar izin berhasil</string>
     <string name="allowlist_backup_failed">Gagal mencadangkan daftar izin: %1$s</string>
@@ -152,7 +140,6 @@
     <string name="home_device_model">Model Perangkat</string>
     <string name="su_not_allowed">Memberikan hak superuser kepada %s tidak diizinkan</string>
     <string name="settings_mode_default">Bawaan</string>
-    <string name="module_install_multiple_confirm_with_names">Apakah Anda yakin ingin menginstal %1$d modul berikut?\n\n%2$s</string>
     <string name="more_settings">Setelan lainnya</string>
     <string name="selinux">Selinux</string>
     <string name="selinux_enabled">Aktifkan</string>
@@ -175,7 +162,6 @@
     <string name="theme_follow_system">Mengikuti sistem</string>
     <string name="theme_light">Terang</string>
     <string name="theme_dark">Hitam</string>
-    <string name="manual_hook">Hook manual</string>
     <string name="dynamic_color_title">Warna dinamik</string>
     <string name="dynamic_color_summary">Warna dinamik, menggunakan sistem tema</string>
     <string name="choose_theme_color">Pilih warna tema</string>
@@ -224,8 +210,6 @@
     <string name="invalid_file_type">Format file tidak sesuai. Silakan pilih file dengan format .kpm.</string>
     <string name="confirm_uninstall_title_with_filename">Menghapus instalan</string>
     <string name="confirm_uninstall_content">KPM berikut akan diuninstall: %s</string>
-    <string name="image_editor_hint">Gunakan dua jari untuk memperbesar gambar, dan satu jari untuk menggeser mengatur posisi</string>
-    <string name="reprovision">Reprovisi</string>
     <string name="horizon_flash_complete">Flash Selesai</string>
     <string name="horizon_preparing">Mempersiapkan…</string>
     <string name="horizon_cleaning_files">Membersihkan Berkas...</string>
@@ -422,8 +406,6 @@
     <string name="susfs_hide_mounts_current_setting">Pengaturan saat ini: %s</string>
     <string name="susfs_hide_mounts_setting_all">Sembunyikan untuk semua proses</string>
     <string name="susfs_hide_mounts_setting_non_ksu">Sembunyikan hanya untuk proses non-KSU</string>
-    <string name="kernel_simple_kernel">Mode Ringkas Versi Kernel</string>
-    <string name="kernel_simple_kernel_summary">Aktifkan atau nonaktifkan mode bersih yang ditampilkan oleh versi kernel SukiSU</string>
     <string name="susfs_android_data_path_set">Jalur Data Android telah diatur ke: %s</string>
     <string name="susfs_sdcard_path_set">Jalur SD card telah diatur ke: %s</string>
     <string name="susfs_path_setup_warning">Penyiapan jalur mungkin tidak sepenuhnya berhasil, tetapi jalur SUS akan terus ditambahkan</string>
@@ -514,7 +496,6 @@ Diaktifkan: Aktifkan pemalsuan sus tcontext dari \'su\' dengan \'u:r:priv_app:s0
     <string name="avc_log_spoofing_warning">Catatan Penting:\n
 - Secara default pada kernel nilai ini disetel ke \'0\'\n
 - Mengaktifkan ini terkadang membuat pengembang lebih sulit mengidentifikasi penyebab saat melakukan debugging terkait izin atau masalah SELinux, sehingga disarankan agar pengguna menonaktifkannya saat sedang melakukan debugging</string>
-    <string name="module_verified">Tervalidasi</string>
     <string name="home_hook_type">Jenis hook</string>
     <string name="kpm_patch_options">Patch KPM</string>
     <string name="kpm_patch_description">Untuk menambahkan fitur KPM tambahan</string>
@@ -540,16 +521,6 @@ Diaktifkan: Aktifkan pemalsuan sus tcontext dari \'su\' dengan \'u:r:priv_app:s0
     <string name="kpm_patch_operation_failed">Operasi patch KPM gagal: %s</string>
     <string name="kpm_follow_kernel_file">Ikuti kernel</string>
     <string name="kpm_follow_kernel_description">Gunakan kernel apa adanya tanpa perubahan dari KPM</string>
-    <string name="uid_auto_scan_title">Daftar aplikasi pemindaian pada mode pengguna</string>
-    <string name="uid_auto_scan_summary">Mengaktifkan opsi ini akan menggunakan pemindaian mode pengguna untuk daftar aplikasi, sehingga meningkatkan kestabilan. (Jika Anda mengalami masalah seperti hang saat kernel memindai daftar aplikasi, Anda dapat mencoba mengaktifkan opsi ini.)</string>
-    <string name="uid_multi_user_scan_title">Pemindaian Aplikasi Multi-Pengguna</string>
-    <string name="uid_multi_user_scan_summary">Ketika diaktifkan, fitur ini akan memindai aplikasi untuk semua pengguna, termasuk profil kerja</string>
-    <string name="uid_scanner_setting_failed">Gagal mengatur, silakan periksa perizinan</string>
-    <string name="clean_runtime_environment">Bersihkan Lingkungan Runtime</string>
-    <string name="clean_runtime_environment_summary">Bersihkan berkas runtime dan hentikan layanan pemindai</string>
-    <string name="clean_runtime_environment_confirm">Apakah Anda yakin ingin membersihkan lingkungan runtime? Tindakan ini akan menghentikan layanan pemindai dan menghapus berkas yang terkait.</string>
-    <string name="clean_runtime_environment_success">Lingkungan runtime berhasil dibersihkan</string>
-    <string name="clean_runtime_environment_failed">Gagal membersihkan lingkungan runtime</string>
     <string name="confirm_installation">Konfirmasi Instalasi</string>
     <string name="confirm_multiple_installation">Konfirmasi Instalasi (Berkas %d)</string>
     <string name="install_confirm">Instal</string>

@@ -23,7 +23,6 @@
     <string name="module_sort_action_first">Sort (Action first)</string>
     <string name="module_sort_enabled_first">Sort (Enabled first)</string>
     <string name="uninstall">विस्थापित करा</string>
-    <string name="module_install">स्थापित करा</string>
     <string name="install">स्थापित करा</string>
     <string name="reboot">रीबूट करा</string>
     <string name="settings">सेटिंग्ज</string>
@@ -53,7 +52,6 @@
     <string name="profile_default">डीफॉल्ट</string>
     <string name="profile_template">साचा</string>
     <string name="profile_custom">कस्टम</string>
-    <string name="profile_name">प्रोफाइल नाव</string>
     <string name="profile_groups">गट</string>
     <string name="profile_capabilities">क्षमता</string>
     <string name="profile_selinux_context">SELinux संदर्भ</string>

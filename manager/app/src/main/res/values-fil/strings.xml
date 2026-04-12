@@ -21,7 +21,6 @@
     <string name="module_sort_action_first">Sort (Action first)</string>
     <string name="module_sort_enabled_first">Sort (Enabled first)</string>
     <string name="uninstall">I-uninstall</string>
-    <string name="module_install">I-install</string>
     <string name="install">I-install</string>
     <string name="reboot">I-reboot</string>
     <string name="settings">Mga setting</string>
@@ -47,7 +46,6 @@
     <string name="home_click_to_learn_kernelsu">Matutunan kung paano mag-install ng KernelSU at gumamit ng mga modyul</string>
     <string name="home_support_title">Suportahan Kami</string>
     <string name="home_support_content">Ang KernelSU ay, at palaging magiging, libre, at open source. Gayunpaman, maaari mong ipakita sa amin na nagmamalasakit ka sa pamamagitan ng pagbibigay ng donasyon.</string>
-    <string name="profile_name">Pangalan ng profile</string>
     <string name="profile_groups">Mga Grupo</string>
     <string name="profile_capabilities">Mga Kakayanan</string>
     <string name="profile_selinux_context">Konteksto ng SELinux</string>

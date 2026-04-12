@@ -24,7 +24,6 @@
     <string name="module_sort_action_first">Sırala (Action önce)</string>
     <string name="module_sort_enabled_first">Sırala (Etkin önce)</string>
     <string name="uninstall">Kaldır</string>
-    <string name="module_install">Yükle</string>
     <string name="install">Yükle</string>
     <string name="reboot">Yeniden başlat</string>
     <string name="settings">Ayarlar</string>
@@ -51,11 +50,9 @@
     <string name="home_click_to_learn_kernelsu">KernelSU\'yu nasıl yükleyeceğinizi ve modülleri nasıl kullanacağınızı öğrenin</string>
     <string name="home_support_title">Bizi destekleyin</string>
     <string name="home_support_content">KernelSU, her zaman olduğu gibi ücretsiz ve açık kaynaklıdır. Ancak bir bağış yaparak bizi destekleyebilirsiniz.</string>
-    <string name="about_source_code"><![CDATA[Kaynak kodunu %1$s adresinde görüntüleyin<br/>%2$s kanalımıza katılın]]></string>
     <string name="profile_default">Varsayılan</string>
     <string name="profile_template">Şablon</string>
     <string name="profile_custom">Özel</string>
-    <string name="profile_name">Profil adı</string>
     <string name="profile_groups">Gruplar</string>
     <string name="profile_capabilities">Yetenekler</string>
     <string name="profile_selinux_context">SELinux bağlamı</string>
@@ -102,8 +99,6 @@
     <string name="grant_root_failed">Root yetkisi verilemedi!</string>
     <string name="action">Eylem</string>
     <string name="close">Kapat</string>
-    <string name="enable_web_debugging">WebView hata ayıklama etkinleştir</string>
-    <string name="enable_web_debugging_summary">WebUI\'yi hata ayıklamak için kullanılabilir. Sadece ihtiyaç duyulduğunda etkinleştirin.</string>
     <string name="direct_install">Doğrudan yükleme (Önerilen)</string>
     <string name="select_file">Yamalanacak bir görüntü seçin</string>
     <string name="install_inactive_slot">Etkin olmayan yuvaya yükle (OTA sonrası)</string>
@@ -127,16 +122,9 @@
     <string name="selected_lkm">Seçilen LKM: %s</string>
     <string name="save_log">Günlükleri kaydet</string>
     <string name="log_saved">Günlükler kaydedildi</string>
-    <string name="module_install_confirm">%1$s modülünü yüklemek istediğinizden emin misiniz?</string>
     <string name="unknown_module">Bilinmeyen modül</string>
-    <string name="restore_confirm_title">Modül Geri Yüklemeyi Onayla</string>
-    <string name="restore_confirm_message">Bu işlem, mevcut tüm modülleri üzerine yazacaktır. Devam etmek istiyor musunuz?</string>
     <string name="confirm">Onayla</string>
     <string name="cancel">İptal</string>
-    <string name="restore_success">Modüller başarıyla geri yüklendi, yeniden başlatma gerekiyor</string>
-    <string name="restore_failed">Geri yükleme başarısız: %1$s</string>
-    <string name="restart_now">Şimdi yeniden başlat</string>
-    <string name="unknown_error">Bilinmeyen hata</string>
     <string name="command_execution_failed">Komut yürütme başarısız: %1$s</string>
     <string name="allowlist_backup_success">İzin verilenler listesi yedekleme başarılı</string>
     <string name="allowlist_backup_failed">İzin verilenler listesi yedekleme başarısız: %1$s</string>
@@ -158,7 +146,6 @@
     <string name="feature_status_unsupported_summary">Çekirdek bu özelliği desteklemiyor</string>
     <string name="feature_status_managed_summary">Bu özellik bir modül tarafından yönetiliyor</string>
     <string name="settings_mode_default">Varsayılan</string>
-    <string name="module_install_multiple_confirm_with_names">Aşağıdaki %1$d modülü yüklemek istediğinizden emin misiniz? \n\n%2$s</string>
     <string name="more_settings">Daha fazla ayar</string>
     <string name="selinux_enabled">Etkin</string>
     <string name="selinux_disabled">Devre dışı</string>
@@ -182,8 +169,6 @@
     <string name="theme_follow_system">Sistemi takip et</string>
     <string name="theme_light">Açık</string>
     <string name="theme_dark">Koyu</string>
-    <string name="manual_hook">Manuel Kanca</string>
-    <string name="inline_hook">Satır İçi Kanca</string>
     <string name="dynamic_color_title">Dinamik renkler</string>
     <string name="dynamic_color_summary">Sistem temaları kullanarak dinamik renkler</string>
     <string name="choose_theme_color">Bir tema rengi seçin</string>
@@ -231,8 +216,6 @@
     <string name="invalid_file_type">Yanlış dosya türü! Lütfen .kpm dosyasını seçin.</string>
     <string name="confirm_uninstall_title_with_filename">Kaldır</string>
     <string name="confirm_uninstall_content">Aşağıdaki KPM kaldırılacak: %s</string>
-    <string name="image_editor_hint">Görüntüyü yaklaştırmak için iki parmağınızı kullanın ve bir parmağınızla sürükleyerek konumu ayarlayın</string>
-    <string name="reprovision">Yeniden sağla</string>
     <string name="horizon_flash_complete">Flash\'lama Tamamlandı</string>
     <string name="horizon_preparing">Hazırlanıyor…</string>
     <string name="horizon_cleaning_files">Dosyalar temizleniyor…</string>
@@ -429,8 +412,6 @@
     <string name="susfs_hide_mounts_current_setting">Mevcut ayar: %s</string>
     <string name="susfs_hide_mounts_setting_all">Tüm işlemler için gizle</string>
     <string name="susfs_hide_mounts_setting_non_ksu">Sadece KSU dışı işlemler için gizle</string>
-    <string name="kernel_simple_kernel">Çekirdek Sürümü Özet Modu</string>
-    <string name="kernel_simple_kernel_summary">SukiSU çekirdek sürümünün gösterdiği sade modu etkinleştirin veya devre dışı bırakın</string>
     <string name="susfs_android_data_path_set">Android Veri yolu şuna ayarlandı: %s</string>
     <string name="susfs_sdcard_path_set">SD kart yolu şuna ayarlandı: %s</string>
     <string name="susfs_path_setup_warning">Yol kurulumu tam olarak başarılı olmayabilir, ancak SUS yolları eklenmeye devam edecektir</string>
@@ -545,16 +526,6 @@
     <string name="kpm_patch_operation_failed">KPM yama işlemi başarısız oldu: %s</string>
     <string name="kpm_follow_kernel_file">Çekirdeği Takip Et</string>
     <string name="kpm_follow_kernel_description">Çekirdeği herhangi bir KPM değişikliği olmadan olduğu gibi kullan</string>
-    <string name="uid_auto_scan_title">Kullanıcı modu uygulama listesi taraması</string>
-    <string name="uid_auto_scan_summary">Bu seçeneği etkinleştirmek, uygulama listesi için kullanıcı modu taramasını kullanır ve kararlılığı artırır. (Uygulama listesinin çekirdek tarafından taranması sırasında donma gibi sorunlarla karşılaşırsanız, bu seçeneği etkinleştirmeyi deneyebilirsiniz)</string>
-    <string name="uid_multi_user_scan_title">Çok Kullanıcılı Uygulama Taraması</string>
-    <string name="uid_multi_user_scan_summary">Etkinleştirildiğinde, iş profilleri de dahil olmak üzere tüm kullanıcıların uygulamalarını tarar.</string>
-    <string name="uid_scanner_setting_failed">Ayar başarısız oldu, lütfen izinleri kontrol edin</string>
-    <string name="clean_runtime_environment">Çalışma Zamanı Ortamını Temizle</string>
-    <string name="clean_runtime_environment_summary">Çalışma zamanı dosyalarını temizleyin ve tarayıcı hizmetini durdurun</string>
-    <string name="clean_runtime_environment_confirm">Çalışma zamanı ortamını temizlemek istediğinizden emin misiniz? Bu işlem, tarayıcı hizmetini durduracak ve ilgili dosyaları kaldıracaktır</string>
-    <string name="clean_runtime_environment_success">Çalışma zamanı ortamı başarıyla temizlendi</string>
-    <string name="clean_runtime_environment_failed">Çalışma zamanı ortamı temizlenemedi</string>
     <string name="confirm_installation">Kurulumu Onayla</string>
     <string name="confirm_multiple_installation">Kurulumu Onayla (%d dosya)</string>
     <string name="install_confirm">Yükle</string>
@@ -592,9 +563,5 @@
     <string name="umount_path_added">Yol eklendi</string>
     <string name="umount_path_removed">Yol kaldırıldı</string>
     <string name="operation_failed">İşlem başarısız oldu</string>
-    <string name="confirm_action">Eylemi Onayla</string>
-    <string name="confirm_clear_custom_paths">Tüm özel yolları temizlemek istediğinizden emin misiniz? (varsayılan yollar korunacaktır)</string>
-    <string name="custom_paths_cleared">Özel yollar temizlendi</string>
-    <string name="config_applied">Yapılandırma çekirdeğe uygulandı</string>
     <string name="group_contains_apps">%d uygulama içeriyor</string>
 </resources>

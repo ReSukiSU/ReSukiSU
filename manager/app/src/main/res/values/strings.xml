@@ -50,7 +50,6 @@
     <string name="module_sort_star_first">Sort (Stars first)</string>
     <string name="module_sort_enabled_first">Sort (Enabled first)</string>
     <string name="uninstall">Uninstall</string>
-    <string name="module_install">Install</string>
     <string name="install">Install</string>
     <string name="reboot">Reboot</string>
     <string name="settings">Settings</string>
@@ -98,12 +97,10 @@
     <string name="home_click_to_learn_kernelsu">Learn how to install KernelSU and use modules</string>
     <string name="home_support_title">Support Us</string>
     <string name="home_support_content">KernelSU is, and always will be, free, and open source. You can however show us that you care by making a donation</string>
-    <string name="about_source_code"><![CDATA[View source code at %1$s<br/>Join our %2$s channel<br/><br/>The images of the files with anime character sticker are copyrighted by %3$s, the Brand Intellectual Property in the images is owned by %4$s. Before using these files, in addition to complying with %5$s, you also need to comply with the authorization of the two authors to use these artistic contents]]></string>
     <string name="profile" translatable="false">App Profile</string>
     <string name="profile_default">Default</string>
     <string name="profile_template">Template</string>
     <string name="profile_custom">Custom</string>
-    <string name="profile_name">Profile name</string>
     <string name="profile_namespace">Mount namespace</string>
     <string name="profile_namespace_inherited">Inherited</string>
     <string name="profile_namespace_global">Global</string>
@@ -158,8 +155,6 @@
     <string name="grant_root_failed">Failed to grant root!</string>
     <string name="action">Action</string>
     <string name="close">Close</string>
-    <string name="enable_web_debugging">Enable WebView debugging</string>
-    <string name="enable_web_debugging_summary">Can be used to debug WebUI. Please enable only when needed</string>
     <string name="direct_install">Direct install (Recommended)</string>
     <string name="select_file">Select a image that needs to be patched</string>
     <string name="install_inactive_slot">Install to inactive slot (After OTA)</string>
@@ -183,16 +178,9 @@
     <string name="selected_lkm">Selected LKM: %s</string>
     <string name="save_log">Save logs</string>
     <string name="log_saved">Logs saved</string>
-    <string name="module_install_confirm">Confirm install module %1$s？</string>
     <string name="unknown_module">Unknown module</string>
-    <string name="restore_confirm_title">Confirm Module Restoration</string>
-    <string name="restore_confirm_message">This operation will overwrite all existing modules. Continue?</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
-    <string name="restore_success">Modules restored successfully, restart required</string>
-    <string name="restore_failed">Restore failed: %1$s</string>
-    <string name="restart_now">Restart Now</string>
-    <string name="unknown_error">Unknown error</string>
     <string name="command_execution_failed">Failed to execute command: %1$s</string>
     <string name="allowlist_backup_success">Allowlist backed up successfully</string>
     <string name="allowlist_backup_failed">Failed to backup allowlist: %1$s</string>
@@ -213,14 +201,12 @@
     <string name="settings_kernel_umount">Module unmounting</string>
     <string name="settings_kernel_umount_summary">Unmount modules from kernel in App Profile</string>
     <string name="feature_status_unsupported_summary">Kernel does not support this feature</string>
-    <string name="settings_mode_enable_by_default">Enable (Default)</string>
     <string name="settings_mode_disable_until_reboot">Disable until Reboot</string>
     <string name="settings_mode_disable_always">Always disable</string>
     <string name="settings_sulog">SU Log</string>
     <string name="settings_sulog_summary">Record root-related events into KernelSU sulog files.</string>
     <string name="feature_status_managed_summary">This feature is managed by a module</string>
     <string name="settings_mode_default">Default</string>
-    <string name="module_install_multiple_confirm_with_names">Sure you want to install the following %1$d modules? \n\n%2$s</string>
     <string name="more_settings">More settings</string>
     <string name="selinux">SELinux</string>
     <string name="selinux_enabled">Enabled</string>
@@ -245,8 +231,6 @@
     <string name="theme_follow_system">Follow system</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
-    <string name="manual_hook">Manual Hook</string>
-    <string name="inline_hook">Inline Hook</string>
     <string name="dynamic_color_title">Dynamic colours</string>
     <string name="dynamic_color_summary">Dynamic colours using system themes</string>
     <string name="choose_theme_color">Choose a theme colour</string>
@@ -295,8 +279,6 @@
     <string name="invalid_file_type">Incorrect file type! Please select .kpm file</string>
     <string name="confirm_uninstall_title_with_filename">Uninstall</string>
     <string name="confirm_uninstall_content">The following KPM will be uninstalled: %s</string>
-    <string name="image_editor_hint">Use two fingers to zoom the image, and one finger to drag it to adjust the position</string>
-    <string name="reprovision">Reprovision</string>
     <string name="horizon_flash_complete">Flash Complete</string>
     <string name="horizon_preparing">Preparing…</string>
     <string name="horizon_cleaning_files">Cleaning files…</string>
@@ -341,8 +323,6 @@
     <string name="module_webui_alert">Message from Module %s</string>
     <string name="no_such_module">Module %s does not exist</string>
     <string name="module_unavailable">Module %s is disabled, or pending removal</string>
-    <string name="select_default_webui_engine">Default WebUI engine</string>
-    <string name="select_webui_engine_description">Select global default webui engine</string>
     <string name="app_dpi_title">Applied DPI</string>
     <string name="app_dpi_summary">Adjust the screen display density for the current application only</string>
     <string name="dpi_size_small">Small </string>
@@ -505,8 +485,6 @@
     <string name="susfs_hide_mounts_current_setting">Current setting: %s</string>
     <string name="susfs_hide_mounts_setting_all">Hide for all processes</string>
     <string name="susfs_hide_mounts_setting_non_ksu">Hide only for non-KSU processes</string>
-    <string name="kernel_simple_kernel">Kernel Version Concise Mode</string>
-    <string name="kernel_simple_kernel_summary">Enable or disable the clean mode displayed by the SukiSU kernel version</string>
     <string name="susfs_android_data_path_set">Android Data path has been set to: %s</string>
     <string name="susfs_sdcard_path_set">SD card path has been set to: %s</string>
     <string name="susfs_path_setup_warning">Path setup may not be fully successful, but SUS paths will continue to be added</string>
@@ -531,7 +509,6 @@
     <string name="susfs_backup_info_version">Version: %s</string>
     <string name="hide_bl_script">Lock state</string>
     <string name="hide_bl_script_description">Overwrite bootloader locking status attribute in late_start service mode</string>
-    <string name="clear">Clear</string>
     <string name="cleanup_residue">Cleanup Residue</string>
     <string name="cleanup_residue_description">Clean up the residual files and directories of various modules and tools (may be deleted by mistake, resulting in loss and failure to start, use with caution)</string>
     <string name="susfs_edit_sus_path">Edit SUS Path</string>
@@ -551,7 +528,6 @@
     <string name="susfs_add_app_path">Add App Path</string>
     <string name="susfs_version_mismatch">SuSFS library version mismatch, kernel: %1$s vs manager: %2$s, It is recommended to update the kernel or manager</string>
     <string name="warning">Warning</string>
-    <string name="search">Search</string>
     <string name="search_apps">Search Apps</string>
     <string name="search_modules">Search modules</string>
     <string name="selected_apps_count">%1$d apps selected</string>
@@ -630,16 +606,6 @@ Important Note:\n
     <string name="kpm_patch_operation_failed">KPM patch operation failed: %s</string>
     <string name="kpm_follow_kernel_file">Follow Kernel</string>
     <string name="kpm_follow_kernel_description">Use kernel as-is without any KPM modifications</string>
-    <string name="uid_auto_scan_title">User-mode scanning application list</string>
-    <string name="uid_auto_scan_summary">Enabling this option will use user-mode scanning for the application list, improving stability. (if you encounter issues such as freezing during kernel scanning of the application list, you may try enabling this option)</string>
-    <string name="uid_multi_user_scan_title">Multi-User Application Scanning</string>
-    <string name="uid_multi_user_scan_summary">When enabled, scans applications for all users, including work profiles</string>
-    <string name="uid_scanner_setting_failed">Setting failed, please check permissions</string>
-    <string name="clean_runtime_environment">Clean Runtime Environment</string>
-    <string name="clean_runtime_environment_summary">Clean up runtime files and stop the scanner service</string>
-    <string name="clean_runtime_environment_confirm">Are you sure you want to clean the runtime environment? This will stop the scanner service and remove related files</string>
-    <string name="clean_runtime_environment_success">Runtime environment cleaned successfully</string>
-    <string name="clean_runtime_environment_failed">Failed to clean runtime environment</string>
     <string name="confirm_installation">Confirm Installation</string>
     <string name="confirm_multiple_installation">Confirm Installation (%d files)</string>
     <string name="install_confirm">Install</string>
@@ -683,11 +649,7 @@ Important Note:\n
     <string name="umount_path_added">Umount path added</string>
     <string name="umount_path_removed">Umount path removed</string>
     <string name="operation_failed">Operation failed</string>
-    <string name="confirm_action">Confirm Action</string>
-    <string name="confirm_clear_custom_paths">Are you sure you want to clear all custom paths? (default paths will be preserved)</string>
-    <string name="custom_paths_cleared">Custom paths cleared</string>
     <string name="changes_take_effect_immediately">All changes will take effect immediately.</string>
-    <string name="config_applied">Configuration applied to kernel</string>
     <string name="group_contains_apps">Contains %d apps</string>
     <string name="meta_module_disabled">module not mounted, because metamodule disabled</string>
     <string name="meta_module_removed">module not mounted, because metamodule being delete</string>
@@ -713,13 +675,11 @@ Important Note:\n
     <string name="module_shortcut_title">Create shortcut</string>
     <string name="module_shortcut_name_label">Shortcut name</string>
     <string name="module_shortcut_icon_pick">Choose custom icon</string>
-    <string name="module_shortcut_add">Add shortcut</string>
     <string name="module_shortcut_not_supported">Launcher does not support desktop shortcuts.</string>
     <string name="module_shortcut_should_not_empty">"Desktop shortcuts shouldn't is empty"</string>
     <string name="module_shortcut_created">Shortcut created on desktop.</string>
     <string name="module_shortcut_updated">Shortcut updated.</string>
     <string name="module_shortcut_delete">Delete shortcut</string>
-    <string name="module_shortcut_type_title">Select type</string>
     <string name="module_shortcut_permission_tip_xiaomi">Please enable \"Create desktop shortcuts\" permission for this app in Xiaomi settings.</string>
     <string name="module_shortcut_permission_tip_oppo">Please enable \"Desktop shortcut\" permission for this app in OPPO settings.</string>
     <string name="module_shortcut_permission_tip_default">If shortcut creation fails, please enable desktop shortcut permission for this app in system settings.</string>

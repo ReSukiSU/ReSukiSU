@@ -17,7 +17,6 @@
     <string name="module_empty">Ni nameščenih modulov</string>
     <string name="module">Modul</string>
     <string name="uninstall">Odmesti</string>
-    <string name="module_install">Namesti</string>
     <string name="install">Namesti</string>
     <string name="reboot">Znova zaženi</string>
     <string name="settings">Nastavitve</string>
@@ -46,7 +45,6 @@
     <string name="profile_default">Privzeto</string>
     <string name="profile_template">Predloga</string>
     <string name="profile_custom">Po meri</string>
-    <string name="profile_name">Ime profila</string>
     <string name="profile_groups">Skupine</string>
     <string name="profile_capabilities">Zmožnosti</string>
     <string name="profile_selinux_context">SELinux kontekst</string>
