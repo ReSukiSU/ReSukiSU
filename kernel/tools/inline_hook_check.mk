@@ -17,9 +17,9 @@ define check_ksu_hook_incompatible
 endef
 
 define check_ksu_manual_guard
-    ifeq ($$(shell grep -wq "CONFIG_KSU_MANUAL_HOOK" $(1); echo $$$$?),0)
-        $$(warning Detected KSU_MANUAL_HOOK guard in $(1) file, your build maybe broken. If $(2) happen, please check your hook and feedback to your SuSFS Patches Author.)
-    endif
+ifeq ($$(shell grep -wq "CONFIG_KSU_MANUAL_HOOK" $(1); echo $$$$?),0)
+$$(warning Detected KSU_MANUAL_HOOK guard in $(1) file, your build maybe broken. If $(2) happen, please check your hook and feedback to your SuSFS Patches Author.)
+endif
 endef
 
 $(eval $(call check_ksu_hook_incompatible,ksu_vfs_read_hook,$(srctree)/fs/read_write.c))
