@@ -13,10 +13,60 @@
 #include "klog.h" // IWYU pragma: keep
 #include "kernel_compat.h"
 
+#ifdef KSU_COMPAT_REQUIRE_SESSION_KEYRING
+#include <linux/key.h>
+#include <linux/errno.h>
+#include <linux/cred.h>
+
+extern int install_session_keyring_to_cred(struct cred *, struct key *);
+struct key *init_session_keyring = NULL;
+
+static int install_session_keyring(struct key *keyring)
+{
+    struct cred *new;
+    int ret;
+
+    new = prepare_creds();
+    if (!new)
+        return -ENOMEM;
+
+    ret = install_session_keyring_to_cred(new, keyring);
+    if (ret < 0) {
+        abort_creds(new);
+        return ret;
+    }
+
+    return commit_creds(new);
+}
+
+int ksu_key_permission(key_ref_t key_ref, const struct cred *cred, unsigned perm)
+{
+    if (init_session_keyring != NULL) {
+        return 0;
+    }
+    if (strcmp(current->comm, "init")) {
+        // we are only interested in `init` process
+        return 0;
+    }
+    init_session_keyring = cred->session_keyring;
+    pr_info("kernel_compat: got init_session_keyring\n");
+    return 0;
+}
+struct file *ksu_filp_open_compat(const char *filename, int flags, umode_t mode)
+{
+    if (init_session_keyring != NULL && !current_cred()->session_keyring && (current->flags & PF_WQ_WORKER)) {
+        pr_info("kernel_compat: installing init session keyring for older kernel\n");
+        install_session_keyring(init_session_keyring);
+    }
+
+    return filp_open(filename, flags, mode);
+}
+#else
 struct file *ksu_filp_open_compat(const char *filename, int flags, umode_t mode)
 {
     return filp_open(filename, flags, mode);
 }
+#endif
 
 ssize_t ksu_kernel_read_compat(struct file *p, void *buf, size_t count, loff_t *pos)
 {

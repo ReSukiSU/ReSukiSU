@@ -56,6 +56,10 @@ static struct security_hook_list ksu_hooks[] = {
 #ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK
     LSM_HOOK_INIT(file_permission, ksu_file_permission),
 #endif
+
+#ifdef KSU_COMPAT_REQUIRE_SESSION_KEYRING
+    LSM_HOOK_INIT(key_permission, ksu_key_permission),
+#endif
 };
 
 void __init ksu_lsm_hook_init(void)
