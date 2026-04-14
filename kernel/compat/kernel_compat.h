@@ -286,6 +286,6 @@ static inline u64 ksu_ktime_get_ns(void)
 #define in_compat_syscall() is_compat_task()
 #endif
 
-extern void ksu_run_in_init_if_possible(void (*callback)(void*), void* data);
+extern void ksu_run_in_init_if_possible(void (*callback)(void *), void *data);
 
 #endif

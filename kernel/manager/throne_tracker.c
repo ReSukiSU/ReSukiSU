@@ -259,7 +259,7 @@ struct track_throne_struct {
 
 void do_track_throne(void *data)
 {
-    struct track_throne_struct* tts = (struct track_throne_struct *)data;
+    struct track_throne_struct *tts = (struct track_throne_struct *)data;
     bool prune_only = tts->prune_only;
     bool force_search_manager = tts->force_search_manager;
     bool from_renameat = tts->from_renameat;

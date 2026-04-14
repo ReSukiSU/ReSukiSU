@@ -431,7 +431,7 @@ bool ksu_get_allow_list(int *array, u16 length, u16 *out_length, u16 *out_total,
     return true;
 }
 
-void do_persistent_allow_list(void* unused)
+void do_persistent_allow_list(void *unused)
 {
     u32 magic = FILE_MAGIC;
     u32 version = FILE_FORMAT_VERSION;
@@ -471,7 +471,7 @@ out:
     filp_close(fp, 0);
 }
 
-void do_ksu_load_allow_list(void* unused)
+void do_ksu_load_allow_list(void *unused)
 {
     loff_t off = 0;
     ssize_t ret = 0;

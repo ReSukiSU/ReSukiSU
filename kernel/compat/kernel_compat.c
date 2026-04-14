@@ -149,8 +149,8 @@ void *ksu_compat_kvrealloc(const void *p, size_t oldsize, size_t newsize, gfp_t 
 #include <linux/task_work.h>
 struct ksu_task_work_struct {
     struct callback_head cb;
-    void (*callback)(void*);
-    void* data;
+    void (*callback)(void *);
+    void *data;
 };
 
 static void ksu_task_work_dispatcher(struct callback_head *cb)
@@ -161,7 +161,7 @@ static void ksu_task_work_dispatcher(struct callback_head *cb)
 }
 #endif
 
-void ksu_run_in_init_if_possible(void (*callback)(void*), void* data)
+void ksu_run_in_init_if_possible(void (*callback)(void *), void *data)
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 5, 0)
     struct task_struct *tsk;
