@@ -431,7 +431,7 @@ bool ksu_get_allow_list(int *array, u16 length, u16 *out_length, u16 *out_total,
     return true;
 }
 
-void ksu_persistent_allow_list(void)
+void do_persistent_allow_list(void* unused)
 {
     u32 magic = FILE_MAGIC;
     u32 version = FILE_FORMAT_VERSION;
@@ -440,7 +440,7 @@ void ksu_persistent_allow_list(void)
     loff_t off = 0;
 
     const struct cred *saved = override_creds(ksu_cred);
-    fp = ksu_filp_open_compat(KERNEL_SU_ALLOWLIST, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    fp = filp_open(KERNEL_SU_ALLOWLIST, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (IS_ERR(fp)) {
         pr_err("save_allow_list create file failed: %ld\n", PTR_ERR(fp));
         return;
@@ -471,13 +471,8 @@ out:
     filp_close(fp, 0);
 }
 
-void ksu_load_allow_list(void)
+void do_ksu_load_allow_list(void* unused)
 {
-#ifdef CONFIG_KSU_DISABLE_POLICY
-    pr_info("allowlist load skipped because policy is disabled\n");
-    return;
-#endif
-
     loff_t off = 0;
     ssize_t ret = 0;
     struct file *fp = NULL;
@@ -490,7 +485,7 @@ void ksu_load_allow_list(void)
 #endif
 
     // load allowlist now!
-    fp = ksu_filp_open_compat(KERNEL_SU_ALLOWLIST, O_RDONLY, 0);
+    fp = filp_open(KERNEL_SU_ALLOWLIST, O_RDONLY, 0);
     if (IS_ERR(fp)) {
         pr_err("load_allow_list open file failed: %ld\n", PTR_ERR(fp));
         return;
@@ -526,6 +521,20 @@ void ksu_load_allow_list(void)
 exit:
     ksu_show_allow_list();
     filp_close(fp, 0);
+}
+
+void ksu_persistent_allow_list(void)
+{
+    ksu_run_in_init_if_possible(do_persistent_allow_list, NULL);
+}
+
+void ksu_load_allow_list(void)
+{
+#ifdef CONFIG_KSU_DISABLE_POLICY
+    pr_info("allowlist load skipped because policy is disabled\n");
+    return;
+#endif
+    ksu_run_in_init_if_possible(do_ksu_load_allow_list, NULL);
 }
 
 void ksu_prune_allowlist(bool (*is_uid_valid)(uid_t, char *, void *), void *data)

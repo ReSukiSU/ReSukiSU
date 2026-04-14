@@ -217,7 +217,7 @@ static __always_inline bool check_v2_signature(char *path, u8 *signature_index)
     bool v3_1_signing_exist = false;
     u8 matched_index = -1;
     int i;
-    struct file *fp = ksu_filp_open_compat(path, O_RDONLY, 0);
+    struct file *fp = filp_open(path, O_RDONLY, 0);
     if (IS_ERR(fp)) {
         pr_err("open %s error.\n", path);
         return false;

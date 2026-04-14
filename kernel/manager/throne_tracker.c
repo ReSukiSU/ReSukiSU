@@ -186,7 +186,7 @@ void search_manager(const char *path, int depth, struct list_head *uid_data)
             // make sure to clean buffer on every iteration
             memset(candidate_path, 0, DATA_PATH_LEN);
 
-            file = ksu_filp_open_compat(pos->dirpath, O_RDONLY | O_NOFOLLOW, 0);
+            file = filp_open(pos->dirpath, O_RDONLY | O_NOFOLLOW, 0);
             if (IS_ERR(file)) {
                 pr_err("Failed to open directory: %s, err: %ld\n", pos->dirpath, PTR_ERR(file));
                 goto skip_iterate;
@@ -251,8 +251,20 @@ static bool is_uid_exist(uid_t uid, char *package, void *data)
     return exist;
 }
 
-void track_throne(bool prune_only, bool force_search_manager, bool from_renameat)
+struct track_throne_struct {
+    bool prune_only;
+    bool force_search_manager;
+    bool from_renameat;
+};
+
+void do_track_throne(void *data)
 {
+    struct track_throne_struct* tts = (struct track_throne_struct *)data;
+    bool prune_only = tts->prune_only;
+    bool force_search_manager = tts->force_search_manager;
+    bool from_renameat = tts->from_renameat;
+    kfree(tts);
+
     struct list_head uid_list;
     struct uid_data *np, *n;
     struct file *fp;
@@ -287,13 +299,13 @@ void track_throne(bool prune_only, bool force_search_manager, bool from_renameat
     INIT_LIST_HEAD(&uid_list);
 
     if (from_renameat) {
-        fp = ksu_filp_open_compat(SYSTEM_PACKAGES_LIST_TMP_PATH, O_RDONLY, 0);
+        fp = filp_open(SYSTEM_PACKAGES_LIST_TMP_PATH, O_RDONLY, 0);
         if (IS_ERR(fp)) {
             pr_err("%s: open " SYSTEM_PACKAGES_LIST_TMP_PATH " failed: %ld\n", __func__, PTR_ERR(fp));
             goto out;
         }
     } else {
-        fp = ksu_filp_open_compat(SYSTEM_PACKAGES_LIST_PATH, O_RDONLY, 0);
+        fp = filp_open(SYSTEM_PACKAGES_LIST_PATH, O_RDONLY, 0);
         if (IS_ERR(fp)) {
             pr_err("%s: open " SYSTEM_PACKAGES_LIST_PATH " failed: %ld\n", __func__, PTR_ERR(fp));
             goto out;
@@ -406,6 +418,19 @@ out:
         bitmap_free(curr_app_id_map);
     if (diff_map)
         bitmap_free(diff_map);
+}
+
+void track_throne(bool prune_only, bool force_search_manager, bool from_renameat)
+{
+    struct track_throne_struct *tts = kzalloc(sizeof(struct track_throne_struct), GFP_KERNEL);
+    tts->prune_only = prune_only;
+    tts->force_search_manager = force_search_manager;
+    tts->from_renameat = from_renameat;
+
+    // yep, we no need run in init task_work from there
+    // because we triggered from system_server
+    // but we use task_work submit to init can make there async
+    ksu_run_in_init_if_possible(do_track_throne, tts);
 }
 
 // for 6.8- kernel, we can use LSM hook in manual hook
