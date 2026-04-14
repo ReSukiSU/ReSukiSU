@@ -93,7 +93,4 @@ else
   $(eval $(call check_ksu_hook_incompatible,ksu_handle_rename,$(srctree)/security/security.c))
 endif
 
-ifeq ($(shell test \( $(VERSION) -lt 4 -o \( $(VERSION) -eq 4 -a $(PATCHLEVEL) -le 2 \) \) && echo y),y)
-  # 4.2-, check ksu_key_permission manual hook
-  $(eval $(call check_ksu_hook,ksu_key_permission,$(srctree)/security/security.c))
-endif
+# opt ksu_key_permission, i think it are no need for UL

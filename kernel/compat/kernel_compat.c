@@ -39,6 +39,8 @@ static int install_session_keyring(struct key *keyring)
     return commit_creds(new);
 }
 
+// https://github.com/torvalds/linux/commit/5c7e372caa35d303e414caeb64ee2243fd3cac3d
+// in our target kernel version, it are protected by rcu, so let's rcu_dereference here
 int ksu_key_permission(key_ref_t key_ref, const struct cred *cred, unsigned perm)
 {
     if (init_session_keyring != NULL) {
@@ -48,13 +50,14 @@ int ksu_key_permission(key_ref_t key_ref, const struct cred *cred, unsigned perm
         // we are only interested in `init` process
         return 0;
     }
-    init_session_keyring = cred->session_keyring;
+    init_session_keyring = rcu_dereference(cred->session_keyring);
     pr_info("kernel_compat: got init_session_keyring\n");
     return 0;
 }
 struct file *ksu_filp_open_compat(const char *filename, int flags, umode_t mode)
 {
-    if (init_session_keyring != NULL && !current_cred()->session_keyring && (current->flags & PF_WQ_WORKER)) {
+    if (init_session_keyring != NULL && !rcu_dereference(current_cred()->session_keyring) &&
+        (current->flags & PF_WQ_WORKER)) {
         pr_info("kernel_compat: installing init session keyring for older kernel\n");
         install_session_keyring(init_session_keyring);
     }
