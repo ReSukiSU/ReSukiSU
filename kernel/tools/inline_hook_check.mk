@@ -18,7 +18,7 @@ endef
 
 define check_ksu_manual_guard
 ifeq ($$(shell grep -wq "CONFIG_KSU_MANUAL_HOOK" $(1); echo $$$$?),0)
-$$(warning Detected KSU_MANUAL_HOOK guard in $(1) file, your build maybe broken. If $(2) happen, please check your hook and feedback to your SuSFS Patches Author.)
+$$(warning WARNING: Detected KSU_MANUAL_HOOK guard in $(1) file, your build maybe broken. If $(2) happen, please check your hook and feedback to your SuSFS Patches Author.)
 endif
 endef
 
