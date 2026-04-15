@@ -28,6 +28,10 @@ void on_post_fs_data(void)
     ksu_observer_init();
     // sanity check, this may influence the performance
     ksu_stop_input_hook_runtime();
+
+    // scan manager
+    pr_info("post-fs-data triggered, scanning manager...");
+    track_throne(false, false, false);
 }
 
 #if defined(CONFIG_EXT4_FS) && (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) || defined(KSU_HAS_MODERN_EXT4))

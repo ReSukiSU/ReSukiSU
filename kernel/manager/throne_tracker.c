@@ -427,10 +427,18 @@ void track_throne(bool prune_only, bool force_search_manager, bool from_renameat
     tts->force_search_manager = force_search_manager;
     tts->from_renameat = from_renameat;
 
-    // yep, we no need run in init task_work from there
-    // because we triggered from system_server
-    // but we use task_work submit to init can make there async
-    ksu_run_in_init_if_possible(do_track_throne, tts);
+    if (from_renameat) {
+        // after renameat hook, packages.list.tmp -> packages.list
+        // don't async for it, or it will always have an race
+        // for example,
+        // we put track_throne task to init
+        // and user install an new app before task_work executed
+        // ^ race here
+
+        do_track_throne(tts);
+    } else {
+        ksu_run_in_init_if_possible(do_track_throne, tts);
+    }
 }
 
 // for 6.8- kernel, we can use LSM hook in manual hook
