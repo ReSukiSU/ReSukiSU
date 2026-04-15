@@ -194,3 +194,43 @@ put_task:
     callback(data);
 #endif
 }
+
+#ifdef KSU_COMPAT_REQUIRE_SESSION_KEYRING
+#include <linux/key.h>
+#include <linux/errno.h>
+#include <linux/cred.h>
+#include "ksu.h"
+
+static inline struct key *ksu_get_session_keyring(const struct cred *cred)
+{
+// https://github.com/torvalds/linux/commit/3a50597de8635cd05133bd12c95681c82fe7b878
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0)
+    return rcu_dereference(cred->session_keyring);
+#else
+    return rcu_dereference(current->cred->tgcred->session_keyring);
+#endif
+}
+
+extern int install_session_keyring_to_cred(struct cred *, struct key *);
+
+// https://github.com/torvalds/linux/commit/5c7e372caa35d303e414caeb64ee2243fd3cac3d
+// in our target kernel version, it are protected by rcu, so let's rcu_dereference here
+int ksu_key_permission(key_ref_t key_ref, const struct cred *cred, unsigned perm)
+{
+    if (ksu_get_session_keyring(ksu_cred)) {
+        // if we have session_keyring, skip
+        return 0;
+    }
+
+    if (strcmp(current->comm, "init")) {
+        // we are only interested in `init` process
+        return 0;
+    }
+
+    install_session_keyring_to_cred(ksu_cred, ksu_get_session_keyring(current_cred()));
+
+    pr_info("kernel_compat: install init_session_keyring to ksu_cred\n");
+    return 0;
+}
+
+#endif

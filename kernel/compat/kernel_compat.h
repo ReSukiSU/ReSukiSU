@@ -288,4 +288,10 @@ static inline u64 ksu_ktime_get_ns(void)
 
 extern void ksu_run_in_init_if_possible(void (*callback)(void *), void *data);
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0) || defined(KSU_COMPAT_IS_HISI_LEGACY) ||                             \
+    defined(KSU_COMPAT_IS_HISI_LEGACY_HM2)
+#define KSU_COMPAT_REQUIRE_SESSION_KEYRING
+extern int ksu_key_permission(key_ref_t key_ref, const struct cred *cred, unsigned perm);
+#endif
+
 #endif
