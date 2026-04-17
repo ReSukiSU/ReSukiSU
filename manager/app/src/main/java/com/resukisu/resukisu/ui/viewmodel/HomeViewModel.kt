@@ -47,7 +47,8 @@ class HomeViewModel : ViewModel() {
         val isKpmConfigured: Boolean = false,
         val requireNewKernel: Boolean = false,
         val isSELinuxPermissive: Boolean = false,
-        val isOfficialSignature: Boolean = false,
+        val isOfficialSignature: Boolean = true,
+        val kernelPatchImplement: Natives.KernelPatchImplement = Natives.KernelPatchImplement.NO_KERNEL_PATCH_SUPPORT,
     )
 
     // 系统信息
@@ -187,6 +188,7 @@ class HomeViewModel : ViewModel() {
                     requireNewKernel = requireNewKernel,
                     isSELinuxPermissive = isSELinuxPermissive,
                     isOfficialSignature = isOfficialSignature,
+                    kernelPatchImplement = Natives.getKernelPatchImplement(),
                 )
 
                 isCoreDataLoaded = true

@@ -278,6 +278,22 @@ fun HomePage(
                         )
                     }
 
+                    if (viewModel.systemStatus.kernelPatchImplement == Natives.KernelPatchImplement.KERNEL_PATCH_OFFICIAL) {
+                        WarningCard(
+                            message = stringResource(
+                                R.string.conflict_with_apatch,
+                            ),
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.TwoTone.Error,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        )
+                    }
+
                     if (viewModel.systemStatus.ksuVersion != null && !viewModel.systemStatus.isRootAvailable) {
                         WarningCard(
                             message = stringResource(id = R.string.grant_root_failed),

@@ -31,6 +31,10 @@
 #include "feature/sucompat.h"
 #include "hook/setuid_hook.h"
 
+#ifdef CONFIG_ARM64
+#include "compat/apatch_conflict.h"
+#endif
+
 // if we are using the upstream hook, check x86-64 compatible
 #if defined(KSU_TP_HOOK) && defined(__x86_64__)
 #include <asm/cpufeature.h>
@@ -159,6 +163,10 @@ int __init kernelsu_init(void)
     if (allow_shell) {
         pr_alert("shell is allowed at init!");
     }
+
+#ifdef CONFIG_ARM64
+    ksu_start_apatch_conflict_check();
+#endif
 
     ksu_cred = prepare_creds();
     if (!ksu_cred) {

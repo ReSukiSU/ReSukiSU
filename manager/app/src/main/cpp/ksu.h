@@ -35,6 +35,8 @@ bool is_KPM_enable();
 
 void get_hook_type(char* hook_type);
 
+int get_kernel_patch_implement();
+
 bool set_dynamic_manager(unsigned int size, const char* hash);
 
 bool get_dynamic_manager(struct ksu_dynamic_manager_cmd* config);
