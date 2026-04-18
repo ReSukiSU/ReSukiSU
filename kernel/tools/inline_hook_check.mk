@@ -48,5 +48,5 @@ $(eval $(call check_ksu_hook,ksu_handle_input_handle_event,$(srctree)/drivers/in
 
 ifeq ($(MANUAL_GUARD_FOUND),1)
     $(info -- $(REPO_NAME)/susfs_inline: WARNING: Your build maybe broken.)
-    $(info -- $(REPO_NAME)/susfs_inline: If you have any issue, please check your hook before submit an issue to $(REPO_NAME).)
+    $(info -- $(REPO_NAME)/susfs_inline: - If you have any issue, please check your hook before submit an issue to $(REPO_NAME).)
 endif
