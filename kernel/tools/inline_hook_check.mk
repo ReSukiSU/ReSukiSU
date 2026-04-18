@@ -34,6 +34,9 @@ $(eval $(call check_ksu_hook,ksu_handle_execveat,$(srctree)/fs/exec.c))
 $(eval $(call check_ksu_manual_guard,$(srctree)/fs/open.c))
 $(eval $(call check_ksu_hook,ksu_handle_faccessat,$(srctree)/fs/open.c))
 
+$(eval $(call check_ksu_manual_guard,$(srctree)/fs/read_write.c))
+$(eval $(call check_ksu_hook,ksu_handle_sys_read,$(srctree)/fs/read_write.c))
+
 $(eval $(call check_ksu_manual_guard,$(srctree)/fs/stat.c))
 $(eval $(call check_ksu_hook,ksu_handle_stat,$(srctree)/fs/stat.c))
 
