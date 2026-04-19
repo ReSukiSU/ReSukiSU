@@ -5,12 +5,13 @@ use std::path::PathBuf;
 
 use log::{LevelFilter, error, info};
 
-use crate::android::susfs;
 use crate::{
     android::{
         debug, dynamic_manager, feature, init_event, ksucalls,
         module::{self, module_config},
-        profile, sepolicy, su, sulog, umount_config, utils,
+        profile, sepolicy, su, sulog,
+        susfs::{self},
+        umount_config, utils,
     },
     apk_sign, assets,
     boot_patch::{BootPatchArgs, BootRestoreArgs},
@@ -67,12 +68,6 @@ enum Commands {
         /// manager package name
         #[arg(long, default_value_t = String::from("com.resukisu.resukisu"))]
         package_name: String,
-    },
-
-    /// Manage susfs component
-    Susfs {
-        #[command(subcommand)]
-        command: Susfs,
     },
 
     /// Manage auto apply user custom umount configs
@@ -158,6 +153,9 @@ enum Commands {
 
     /// Resetprop - Magisk-compatible system property tool
     Resetprop(crate::android::resetprop::Args),
+
+    /// Manage susfs component
+    Susfs(susfs::cli::SusfsArgs),
 }
 
 #[derive(clap::Subcommand, Debug)]
@@ -556,16 +554,7 @@ mod kpm_cmd {
     }
 }
 
-#[derive(clap::Subcommand, Debug)]
-enum Susfs {
-    /// Get SUSFS Status
-    Status,
-    /// Get SUSFS Version
-    Version,
-    /// Get SUSFS enable Features
-    Features,
-}
-
+#[allow(clippy::similar_names)]
 pub fn run() -> Result<()> {
     android_logger::init_once(
         Config::default()
@@ -584,24 +573,20 @@ pub fn run() -> Result<()> {
         return crate::android::resetprop::run_from_args(&all_args);
     }
 
+    if arg0.ends_with("ksu_susfs") {
+        let all_args: Vec<String> = std::env::args().collect();
+        return crate::android::susfs::cli::run_from_args(&all_args);
+    }
+
     let cli = Args::parse();
 
     log::info!("command: {:?}", cli.command);
 
     let result = match cli.command {
+        Commands::Susfs(args) => crate::android::susfs::cli::run_main(args.command),
         Commands::PostFsData => init_event::on_post_data_fs(),
         Commands::BootCompleted => {
             init_event::on_boot_completed();
-            Ok(())
-        }
-        Commands::Susfs { command } => {
-            match command {
-                Susfs::Version => println!("{}", susfs::get_susfs_version()),
-
-                Susfs::Status => println!("{}", susfs::get_susfs_status()),
-
-                Susfs::Features => println!("{}", susfs::get_susfs_features()),
-            }
             Ok(())
         }
         Commands::UmountConfig { command } => match command {
