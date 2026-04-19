@@ -84,7 +84,7 @@
     <string name="profile_umount_modules">卸載模組</string>
     <string name="failed_to_update_app_profile">為 %s 更新 App Profile 失敗</string>
     <string name="debug_version_notice">"您正在使用 DEBUG 組建的管理器，如果你不知道什麼是 DEBUG 組建，請立即切換至 RELEASE 組建"</string>
-    <string name="unofficial_version_notice">您使用的管理器不是 %s 官方管理器，您可能無法取得權限。</string>
+    <string name="unofficial_version_notice">"您使用的管理器不是 %s 官方管理器，您可能無法取得權限。"</string>
     <string name="settings_umount_modules_default">預設卸載模組</string>
     <string name="settings_umount_modules_default_summary">App Profile 裡面「卸載模組」的全域預設值。如果啟用，將會為沒有配置 Profile 的應用程式移除所有針對系統修改的模組</string>
     <string name="profile_umount_modules_summary">啟用此選項後，將允許 KernelSU 為本應用程式還原被模組修改的檔案</string>
