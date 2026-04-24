@@ -10,7 +10,10 @@ mv .ddk-version .ddk-version.bak || true
 for kmi in $KMIS; do
     echo "========== Building $kmi =========="
     export DDK_TARGET=$kmi
-    if ddk build -e CONFIG_KSU=m; then
+
+    # We have an problem in downstream
+    # We don't have real .git folder, so compile will always failed due to our lost git submodule check.
+    if ddk build -e CONFIG_KSU=m -e CONFIG_KSU_TRACEPOINT_HOOK=y -e CONFIG_KSU_MULTI_MANAGER_SUPPORT=y; then
         if [ -f kernelsu.ko ]; then
             cp kernelsu.ko "kernelsu-${kmi}.ko"
             llvm-objcopy --strip-unneeded --discard-locals "kernelsu-${kmi}.ko"
