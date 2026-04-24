@@ -13,7 +13,7 @@
 #include "arch.h"
 #include "policy/feature.h"
 #include "selinux/selinux.h"
-#ifndef KSU_TP_HOOK
+#ifndef CONFIG_KSU_TRACEPOINT_HOOK
 #include "runtime/ksud.h" // for user_arg_ptr
 #endif
 #include "compat/kernel_compat.h"
@@ -40,7 +40,7 @@ static inline long is_exec_adbd(const char *filename)
     return 1;
 }
 
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
 static long is_exec_adbd_tracepoint(struct pt_regs *regs)
 {
     char __user *filename_user = (char __user *)PT_REGS_PARM1(regs);
@@ -189,7 +189,7 @@ out_release_env_p:
     return ret;
 }
 
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
 static long setup_ld_preload_tracepoint(struct pt_regs *regs)
 {
     return setup_ld_preload((void ***)&PT_REGS_PARM3(regs));

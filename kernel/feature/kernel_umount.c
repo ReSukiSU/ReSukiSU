@@ -1,8 +1,5 @@
 #include <linux/sched.h>
 #include <linux/slab.h>
-#ifdef KSU_TP_HOOK
-#include <linux/task_work.h>
-#endif
 #include <linux/version.h>
 #include <linux/cred.h>
 #include <linux/fs.h>

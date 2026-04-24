@@ -3,7 +3,7 @@
 #include <asm/ptrace.h>
 #include "runtime/ksud.h"
 
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
 long ksu_adb_root_handle_execve_tracepoint(struct pt_regs *regs);
 #else
 long ksu_adb_root_handle_execve_manual(const char *filename, struct user_arg_ptr *envp_p);

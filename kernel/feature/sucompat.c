@@ -34,7 +34,7 @@
 #include "runtime/ksud.h"
 #include "feature/sucompat.h"
 #include "policy/app_profile.h"
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
 #include "hook/syscall_hook.h"
 #else
 #include "feature/adb_root.h"
@@ -119,7 +119,7 @@ static const char ksud_path[] = KSUD_PATH;
 
 extern bool ksu_kernel_umount_enabled;
 
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
 
 // WARNING! THERE HAVE TRYING TO CALL SYSCALL INTERNALLY
 // ENSURE CALL IT ONLY IN TRACEPOINT SYSCALL REDIRECT

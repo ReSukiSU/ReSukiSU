@@ -38,7 +38,7 @@
 #include "compat/kernel_compat.h"
 #include "selinux/selinux.h"
 #include "manager/throne_tracker.h"
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
 #include "hook/syscall_hook.h"
 #endif
 
@@ -78,7 +78,7 @@ static void stop_execve_hook(void);
 #define KSU_INPUT_USE_STATIC_KEY
 #endif
 
-#if defined(KSU_TP_HOOK)
+#if defined(CONFIG_KSU_TRACEPOINT_HOOK)
 static struct work_struct stop_input_hook_work;
 #elif defined(CONFIG_KSU_SUSFS)
 DEFINE_STATIC_KEY_TRUE(ksu_is_init_rc_hook_enabled);
@@ -491,10 +491,10 @@ void ksu_handle_initrc(struct file *file)
         return;
     }
 
-#if defined(KSU_INIT_RC_USE_STATIC_KEY) && !defined(KSU_TP_HOOK)
+#if defined(KSU_INIT_RC_USE_STATIC_KEY) && !defined(CONFIG_KSU_TRACEPOINT_HOOK)
     if (static_branch_unlikely(&ksu_init_rc_hook))
         goto logic;
-#elif !defined(KSU_TP_HOOK)
+#elif !defined(CONFIG_KSU_TRACEPOINT_HOOK)
     if (unlikely(ksu_init_rc_hook))
         goto logic;
 #else
@@ -598,11 +598,11 @@ int ksu_handle_input_handle_event(unsigned int *type, unsigned int *code, int *v
     return 0; // dummy manual hook
 #else
 
-#if defined(KSU_INPUT_USE_STATIC_KEY) && !defined(KSU_TP_HOOK)
+#if defined(KSU_INPUT_USE_STATIC_KEY) && !defined(CONFIG_KSU_TRACEPOINT_HOOK)
     if (static_branch_unlikely(&ksu_input_hook))
         goto logic;
 
-#elif !defined(KSU_TP_HOOK)
+#elif !defined(CONFIG_KSU_TRACEPOINT_HOOK)
     if (unlikely(!ksu_input_hook))
         goto logic;
 #else
@@ -755,7 +755,7 @@ bool ksu_is_safe_mode()
     return false;
 }
 
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
 void ksu_execve_hook_ksud(const struct pt_regs *regs)
 {
     const char __user **filename_user = (const char **)&PT_REGS_PARM1(regs);
@@ -852,7 +852,7 @@ static void do_stop_input_hook(struct work_struct *work)
 
 static void stop_init_rc_hook(void)
 {
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
     ksu_syscall_table_unhook(__NR_read);
     ksu_syscall_table_unhook(__NR_fstat);
     pr_info("unregister init_rc syscall hook\n");
@@ -875,7 +875,7 @@ void ksu_stop_input_hook_runtime(void)
         return;
     }
     input_hook_stopped = true;
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
     bool ret = schedule_work(&stop_input_hook_work);
     pr_info("unregister input kprobe: %d!\n", ret);
 #else
@@ -896,7 +896,7 @@ void ksu_stop_input_hook_runtime(void)
 // ksud: module support
 void __init ksu_ksud_init(void)
 {
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
     int ret;
 
     ksu_syscall_table_hook(__NR_read, ksu_sys_read, &orig_sys_read);
@@ -914,7 +914,7 @@ void __init ksu_ksud_init(void)
 
 void __exit ksu_ksud_exit(void)
 {
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
     // TODO:
     // this should be done before unregister vfs_read_kp
     // stop_init_rc_hook();

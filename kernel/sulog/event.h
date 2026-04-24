@@ -15,7 +15,7 @@ struct ksu_sulog_pending_event;
 int ksu_sulog_events_init(void);
 void ksu_sulog_events_exit(void);
 
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
 struct ksu_sulog_pending_event *ksu_sulog_capture_root_execve_tracepoint(const char __user *filename_user,
                                                                          const char __user *const __user *argv_user,
                                                                          gfp_t gfp);

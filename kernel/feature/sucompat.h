@@ -16,7 +16,7 @@ int ksu_handle_stat(int *dfd, struct filename **filename, int *flags);
 int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
 #endif // #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0) && defined(CONFIG_KSU_SUSFS)
 
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
 // WARNING! THERE HAVE TRYING TO CALL SYSCALL INTERNALLY
 // ENSURE CALL IT ONLY IN TRACEPOINT SYSCALL REDIRECT
 int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user, int orig_nr, const struct pt_regs *regs);

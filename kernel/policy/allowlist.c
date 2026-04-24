@@ -1,7 +1,4 @@
 #include <linux/mutex.h>
-#ifdef KSU_TP_HOOK
-#include <linux/task_work.h>
-#endif
 #include <linux/capability.h>
 #include <linux/compiler.h>
 #include <linux/fs.h>

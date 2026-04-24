@@ -66,7 +66,7 @@
 #endif
 
 #else
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
 #error "Unsupported arch"
 #endif
 #endif

@@ -31,25 +31,18 @@ config KSU_TOOLKIT_SUPPORT
         If you don't know what is that, DON'T enable this!
 
 config KSU_FULL_NAME_FORMAT
-          string "KernelSU full name format"
-          depends on KSU
-          default "%TAG_NAME%-%COMMIT_SHA%@%REPO_NAME%"
-          help
-            Change the build time full name format.
-            It is displayed in KernelSU manager under "Version".
-            There are some placeholders:
-            %TAG_NAME%    = latest tag name of this branch
-            %COMMIT_SHA%  = short SHA of Git HEAD
-            %REPO_NAME%   = project name
-            %BRANCH_NAME% = current Git branch name
-            %KSU_VERSION% = KSU version code
-
-config KSU_MULTI_MANAGER_SUPPORT
-	bool "Multi KernelSU manager support"
-	depends on KSU
-	default y
-	help
-		Enable multi KernelSU manager support
+      string "KernelSU full name format"
+      depends on KSU
+      default "%TAG_NAME%-%COMMIT_SHA%@%REPO_NAME%"
+      help
+        Change the build time full name format.
+        It is displayed in KernelSU manager under "Version".
+        There are some placeholders:
+        %TAG_NAME%    = latest tag name of this branch
+        %COMMIT_SHA%  = short SHA of Git HEAD
+        %REPO_NAME%   = project name
+        %BRANCH_NAME% = current Git branch name
+        %KSU_VERSION% = KSU version code
 
 config KSU_DISABLE_MANAGER
 	bool "Disable KernelSU manager integration"
@@ -68,22 +61,68 @@ config KSU_DISABLE_POLICY
 	  Escalation will always use the default full root profile, and
 	  non-root handling will follow the global umount policy only.
 
+config KSU_MULTI_MANAGER_SUPPORT
+	bool "Multi KernelSU manager support"
+	depends on KSU && !KSU_DISABLE_MANAGER
+	default y
+	help
+		Enable multi KernelSU manager support
+
 config KPM
-	  bool "Enable SukiSU KPM"
-	  depends on KSU && 64BIT
-	  select KALLSYMS
-	  select KALLSYMS_ALL
-	  default n
-	  help
-		Enabling this option will activate the KPM feature of SukiSU.
-		This option is suitable for scenarios where you need to force KPM to be enabled.
-		but it may affect system stability.
+    bool "Enable SukiSU KPM"
+    depends on KSU && 64BIT
+    select KALLSYMS
+    select KALLSYMS_ALL
+    default n
+    help
+	  Enabling this option will activate the KPM feature of SukiSU.
+	  This option is suitable for scenarios where you need to force KPM to be enabled.
+	  but it may affect system stability.
+
+choice
+	prompt "KernelSU Hooking Method"
+	depends on KSU
+	default KSU_TRACEPOINT_HOOK
+	help
+	  Select the hooking method for KernelSU.
+	  Note: Tracepoint Syscall Redirect hook is only supported for GKI2(5.10+)
+
+config KSU_TRACEPOINT_HOOK
+	bool "Tracepoint Syscall Redirect"
+	help
+	  The standard, upstream method for modern kernels. 
+	  Utilizes GKI tracepoints for syscall redirection. 
+	  The implementation is only for devices with GKI2 support.
+	  Support for kernel 5.10+
 
 config KSU_MANUAL_HOOK
-	bool "Hook KernelSU manually"
-	depends on KSU != m && !KSU_SUSFS
+	bool "Manually hook KernelSU"
+	depends on KSU != m
 	help
-	  If enabled, Hook required KernelSU syscalls with manually-patched function.
+	  If enabled, it hooks the required KernelSU syscalls 
+	  with a manually-patched function.
+	  Support for kernel 3.4+
+
+config KSU_SUSFS
+	bool "SUSFS Inline Hook"
+	depends on THREAD_INFO_IN_TASK
+	help
+	  Patch and Enable SUSFS to kernel with KernelSU.
+	  SuSFS Officially support kernel 5.10+
+	  This KSU driver support it for 4.3+ in KSU side, 
+	  But the kernel side susfs compatibility MUST completed by yourself.
+
+endchoice
+
+menu "KernelSU - Manual Hook Auto hook"
+    depends on KSU_MANUAL_HOOK
+
+comment "------------------------WARNING-------------------------------"
+comment "ReSukiSU will check EVERY hooks in kernel compile process"
+comment "If anything mismatch with document, Kernel compile maybe FAILED!"
+comment "See document if you face any compile failed due to hook check"
+comment "Document: https://resukisu.github.io/guide/manual-integrate.html"
+comment "--------------------------------------------------------------"
 
 config KSU_MANUAL_HOOK_AUTO_SETUID_HOOK
 	bool "Automatically hook setuid by lsm"
@@ -118,15 +157,17 @@ config KSU_MANUAL_HOOK_AUTO_INPUT_HOOK
          in void input_event(struct input_dev *dev, unsigned int type, unsigned int code, int value)
          add a call to ksu_handle_input_handle_event there.
 
-menu "KernelSU - SUSFS"
-config KSU_SUSFS
-    bool "KernelSU addon - SUSFS"
-    depends on KSU
-    depends on THREAD_INFO_IN_TASK
-    default n
-    help
-        Patch and Enable SUSFS to kernel with KernelSU.
+endmenu
 
+menu "KernelSU - SUSFS"
+    depends on KSU_SUSFS
+
+comment "------------------------WARNING-------------------------------"
+comment "ReSukiSU will check EVERY hooks in kernel compile process"
+comment "If anything mismatch with simonpunk's patch, Kernel compile maybe FAILED!"
+comment "See simonpunk's original patch if you face any compile failed due to hook check"
+comment "Repo: https://gitlab.com/simonpunk/susfs4ksu"
+comment "--------------------------------------------------------------"
 config KSU_SUSFS_SUS_PATH
     bool "Enable to hide suspicious path"
     depends on KSU_SUSFS

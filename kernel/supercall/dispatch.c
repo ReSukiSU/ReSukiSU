@@ -21,7 +21,7 @@
 #include "manager/manager_identity.h"
 #include "selinux/selinux.h"
 #include "infra/file_wrapper.h"
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
 #include "hook/tp_marker.h"
 #endif
 #include "feature/dynamic_manager.h"
@@ -380,7 +380,7 @@ static int do_set_app_profile(void __user *arg)
     ret = ksu_set_app_profile(&cmd.profile);
     if (!ret) {
         ksu_persistent_allow_list();
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
         ksu_mark_running_process();
 #endif
     }
@@ -471,7 +471,7 @@ static int do_manage_mark(void __user *arg)
 
     switch (cmd.operation) {
     case KSU_MARK_GET: {
-#if defined(KSU_TP_HOOK)
+#if defined(CONFIG_KSU_TRACEPOINT_HOOK)
         // Get task mark status
         ret = ksu_get_task_mark(cmd.pid);
         if (ret < 0) {
@@ -493,7 +493,7 @@ static int do_manage_mark(void __user *arg)
         break;
     }
     case KSU_MARK_MARK: {
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
         if (cmd.pid == 0) {
             ksu_mark_all_process();
         } else {
@@ -511,7 +511,7 @@ static int do_manage_mark(void __user *arg)
         break;
     }
     case KSU_MARK_UNMARK: {
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
         if (cmd.pid == 0) {
             ksu_unmark_all_process();
         } else {
@@ -529,7 +529,7 @@ static int do_manage_mark(void __user *arg)
         break;
     }
     case KSU_MARK_REFRESH: {
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
         ksu_mark_running_process();
         pr_info("manage_mark: refreshed running processes\n");
 #else
@@ -844,7 +844,7 @@ static int do_get_full_version(void __user *arg)
 static int do_get_hook_type(void __user *arg)
 {
     struct ksu_hook_type_cmd cmd = { 0 };
-#if defined(KSU_TP_HOOK)
+#if defined(CONFIG_KSU_TRACEPOINT_HOOK)
     const char *type = "Tracepoint Syscall Redirect";
 #elif defined(CONFIG_KSU_MANUAL_HOOK)
     const char *type = "Manual";

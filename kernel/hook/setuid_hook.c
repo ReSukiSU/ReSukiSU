@@ -1,9 +1,6 @@
 #include <linux/compiler.h>
 #include <linux/version.h>
 #include <linux/slab.h>
-#ifdef KSU_TP_HOOK
-#include <linux/task_work.h>
-#endif
 #include <linux/thread_info.h>
 #include <linux/seccomp.h>
 #include <linux/printk.h>
@@ -24,7 +21,7 @@
 #include "manager/manager_identity.h"
 #include "infra/seccomp_cache.h"
 #include "supercall/supercall.h"
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
 #include "hook/tp_marker.h"
 #endif
 #include "compat/kernel_compat.h"
@@ -97,7 +94,7 @@ int ksu_handle_setuid(uid_t new_uid, uid_t old_uid)
         ksu_install_fd();
         spin_lock_irq(&current->sighand->siglock);
         ksu_seccomp_allow_cache(current->seccomp.filter, __NR_reboot);
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
         ksu_set_task_tracepoint_flag(current);
 #endif
         spin_unlock_irq(&current->sighand->siglock);
@@ -110,11 +107,11 @@ int ksu_handle_setuid(uid_t new_uid, uid_t old_uid)
             ksu_seccomp_allow_cache(current->seccomp.filter, __NR_reboot);
             spin_unlock_irq(&current->sighand->siglock);
         }
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
         ksu_set_task_tracepoint_flag(current);
 #endif
     }
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
     else {
         ksu_clear_task_tracepoint_flag_if_needed(current);
     }

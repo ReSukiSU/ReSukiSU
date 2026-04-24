@@ -200,7 +200,7 @@ int ksu_handle_sys_reboot(int magic1, int magic2, unsigned int cmd, void __user 
     return 0;
 }
 
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
 // Reboot hook for installing fd
 static int reboot_handler_pre(struct kprobe *p, struct pt_regs *regs)
 {
@@ -226,7 +226,7 @@ void __init ksu_supercalls_init(void)
 
     ksu_supercall_dump_commands();
 
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
     rc = register_kprobe(&reboot_kp);
     if (rc) {
         pr_err("reboot kprobe failed: %d\n", rc);
@@ -238,7 +238,7 @@ void __init ksu_supercalls_init(void)
 
 void __exit ksu_supercalls_exit(void)
 {
-#ifdef KSU_TP_HOOK
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
     unregister_kprobe(&reboot_kp);
 #endif
     ksu_supercall_cleanup_state();

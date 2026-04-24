@@ -34,13 +34,13 @@ kernelsu-objs += supercall/dispatch.o
 kernelsu-objs += supercall/perm.o
 kernelsu-objs += supercall/supercall.o
 
-ifeq ($(CONFIG_KPM), y)
+ifdef CONFIG_KPM
 kernelsu-objs += kpm/kpm.o
 kernelsu-objs += kpm/compact.o
 kernelsu-objs += kpm/super_access.o
 endif
 
-ifeq ($(CONFIG_ARM64),y)
+ifdef CONFIG_ARM64
 kernelsu-objs += compat/apatch_conflict.o
 endif
 
@@ -73,6 +73,10 @@ $(info -- Please go to Kbuild and change KSU_SRC to the absolute path of the KSU
 $(error You should use $(REPO_NAME) as a git submodule instead of copying code directly)
 endif
 
+ifdef KBUILD_EXTMOD
+include $(KSU_SRC)/tools/ddk_compatible.mk
+endif
+
 $(shell cd $(KSU_SRC); [ -f ../.git/shallow ] && $(GIT_BIN) fetch --unshallow)
 KSU_LOCAL_VERSION := $(shell cd $(KSU_SRC); $(GIT_BIN) rev-list --count HEAD)
 KSU_VERSION := $(shell expr 30000 + $(KSU_LOCAL_VERSION) + 700)
@@ -80,11 +84,6 @@ KSU_VERSION := $(shell expr 30000 + $(KSU_LOCAL_VERSION) + 700)
 KSU_TAG_NAME    := $(shell cd $(KSU_SRC); $(GIT_BIN) describe --abbrev=0 --tags 2>/dev/null || echo "v4.1.0")
 KSU_COMMIT_SHA  := $(shell cd $(KSU_SRC); $(GIT_BIN) rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
 KSU_BRANCH_NAME := $(shell cd $(KSU_SRC); $(GIT_BIN) branch --show-current 2>/dev/null || echo "unknown")
-
-# make ddk happy
-ifneq ($(KDIR),)
-CONFIG_KSU_FULL_NAME_FORMAT := "%TAG_NAME%-%COMMIT_SHA%@%REPO_NAME%"
-endif
 
 # call subst to process placeholders
 KSU_VERSION_FULL := $(subst ",,$(CONFIG_KSU_FULL_NAME_FORMAT))
@@ -100,33 +99,8 @@ $(info -- $(REPO_NAME) version name: $(KSU_VERSION_FULL))
 ccflags-y += -DKSU_VERSION=$(KSU_VERSION)
 ccflags-y += -DKSU_VERSION_FULL=\"$(KSU_VERSION_FULL)\"
 
-ifdef KBUILD_EXTMOD
-ifeq ($(CONFIG_KSU_DISABLE_MANAGER),y)
-ccflags-y += -DCONFIG_KSU_DISABLE_MANAGER
-endif
-ifeq ($(CONFIG_KSU_DISABLE_POLICY),y)
-ccflags-y += -DCONFIG_KSU_DISABLE_POLICY
-endif
-ifeq ($(CONFIG_KSU_DEBUG),y)
-ccflags-y += -DCONFIG_KSU_DEBUG
-endif
-ifeq ($(CONFIG_KSU_MULTI_MANAGER_SUPPORT), y)
-ccflags-y += -DCONFIG_KSU_MULTI_MANAGER_SUPPORT
-endif
-endif
-
-ifeq ($(CONFIG_KSU_MULTI_MANAGER_SUPPORT), y)
+ifdef CONFIG_KSU_MULTI_MANAGER_SUPPORT
 $(info -- Supported Unofficial Manager: MKSU, RKSU, KOWSU, SukiSU-Ultra, ReSukiSU )
-endif
-
-ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
-$(info -- $(REPO_NAME): using KSU_MANUAL_HOOK)
-else ifeq ($(CONFIG_KSU_SUSFS), y)
-$(info -- $(REPO_NAME): using SUSFS_INLINE_HOOK)
-else
-ccflags-y += -DKSU_TP_HOOK
-KSU_TP_HOOK := y
-$(info -- $(REPO_NAME): using KSU_TRACEPOINT_HOOK)
 endif
 
 KERNEL_VERSION := $(VERSION).$(PATCHLEVEL)
@@ -143,28 +117,9 @@ endif
 $(info -- KERNEL_VERSION: $(KERNEL_VERSION))
 $(info -- KERNEL_TYPE: $(KERNEL_TYPE))
 
-ifeq ($(CONFIG_KSU),y)
-  ifneq ($(KERNEL_TYPE), GKI 2.0)
-      ifeq ($(KSU_TP_HOOK), y)
-          $(info -- $(REPO_NAME) TP Hooks are only supported on GKI 2.0 kernels.)
-          $(info -- Current Kernel Type: $(KERNEL_TYPE))
-          $(info -- If you really want to continue, go to Kbuild and comment out this warning.)
-          $(info -- Usually, this error occurs because you forgot to enable some kernel configurations.)
-          $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
-          $(error TP hooks are incompatible with Non-GKI/GKI 1.0 kernels in this configuration.)
-      endif
-  endif
-endif
+ifdef CONFIG_KSU_TRACEPOINT_HOOK
+  $(info -- $(REPO_NAME): using Tracepoint Syscall Redirect Hook)
 
-# Check if KPM is enabled
-ifeq ($(CONFIG_KPM), y)
-$(info -- KPM is enabled)
-$(info -- WARNING, This feature is unstable!!! You are WARNED!!!)
-else
-$(info -- KPM is disabled)
-endif
-
-ifeq ($(KSU_TP_HOOK), y)
   ifndef CONFIG_KSU_DISABLE_MANAGER
     kernelsu-objs += manager/pkg_observer.o
   endif
@@ -187,7 +142,45 @@ ifeq ($(KSU_TP_HOOK), y)
       $(error Unsupported arch for tracepoint hook)
     endif
   endif
+  ifeq ($(CONFIG_KSU),y)
+    ifneq ($(KERNEL_TYPE), GKI 2.0)
+      $(info -- $(REPO_NAME) TP Hooks are only supported on GKI 2.0 kernels.)
+      $(info -- Current Kernel Type: $(KERNEL_TYPE))
+      $(info -- If you really want to continue, go to Kbuild and comment out this warning.)
+      $(info -- Usually, this error occurs because you forgot to enable some kernel configurations.)
+      $(info -- Read: https://resukisu.github.io/guide/manual-integrate.html)
+      $(error TP hooks are incompatible with Non-GKI/GKI 1.0 kernels.)
+    endif
+  endif
+
+else ifdef CONFIG_KSU_MANUAL_HOOK
+  $(info -- $(REPO_NAME): using Manual Hook)
+  include $(KSU_SRC)/tools/manual_hook_check.mk
+else ifdef CONFIG_KSU_SUSFS
+  $(info -- $(REPO_NAME): using SuSFS Inline hook)
+  include $(KSU_SRC)/tools/inline_hook_check.mk
+  ifeq ($(shell test -e $(srctree)/fs/susfs.c; echo $$?),0)
+    $(eval SUSFS_VERSION=$(shell cat $(srctree)/include/linux/susfs.h | grep -E '^#define SUSFS_VERSION' | cut -d' ' -f3 | sed 's/"//g'))
+    $(info )
+    $(info -- SUSFS_VERSION: $(SUSFS_VERSION))
+  else
+    $(info -- You have not integrated susfs in your kernel yet.)
+    $(info -- Read: https://gitlab.com/simonpunk/susfs4ksu)
+    $(error You should integrate susfs in your kernel.)
+  endif
 else
+  $(error Unsupported hook method)
+endif
+
+# Check if KPM is enabled
+ifdef CONFIG_KPM
+  $(info -- KPM is enabled)
+  $(info -- WARNING, This feature is unstable!!! You are WARNED!!!)
+else
+  $(info -- KPM is disabled)
+endif
+
+ifndef CONFIG_KSU_TRACEPOINT_HOOK
   # For old kernel, pkg observer maybe let system freeze
   # https://github.com/ReSukiSU/ReSukiSU/issues/82#issuecomment-4015396974
   #
@@ -221,25 +214,6 @@ endif
 ifdef KSU_MANAGER_PACKAGE
 ccflags-y += -DKSU_MANAGER_PACKAGE=\"$(KSU_MANAGER_PACKAGE)\"
 $(info -- KernelSU Manager package name: $(KSU_MANAGER_PACKAGE))
-endif
-
-## For susfs stuff ##
-ifeq ($(CONFIG_KSU_SUSFS), y)
-include $(KSU_SRC)/tools/inline_hook_check.mk
-ifeq ($(shell test -e $(srctree)/fs/susfs.c; echo $$?),0)
-$(eval SUSFS_VERSION=$(shell cat $(srctree)/include/linux/susfs.h | grep -E '^#define SUSFS_VERSION' | cut -d' ' -f3 | sed 's/"//g'))
-$(info )
-$(info -- SUSFS_VERSION: $(SUSFS_VERSION))
-else
-$(info -- You have not integrated susfs in your kernel yet.)
-$(info -- Read: https://gitlab.com/simonpunk/susfs4ksu)
-$(error You should integrate susfs in your kernel.)
-endif
-endif
-
-# manual hook check
-ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
-include $(KSU_SRC)/tools/manual_hook_check.mk
 endif
 
 # Keep a new line here!! Because someone may append config
