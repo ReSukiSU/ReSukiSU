@@ -195,7 +195,6 @@
     <string name="yes">예</string>
     <string name="no">아니오</string>
     <string name="failed_reboot">다시 시작 실패</string>
-    <string name="kpm_title">KPM</string>
     <string name="kpm_version">버전</string>
     <string name="kpm_author">제작자</string>
     <string name="kpm_uninstall">제거</string>
