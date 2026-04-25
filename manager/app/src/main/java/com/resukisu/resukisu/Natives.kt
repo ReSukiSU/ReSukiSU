@@ -47,7 +47,11 @@ object Natives {
 
     val isLateLoadMode: Boolean
         external get
+
     val isManager: Boolean
+        external get
+
+    val isPrBuild: Boolean
         external get
 
     enum class KernelPatchImplement {

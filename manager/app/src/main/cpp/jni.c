@@ -48,6 +48,10 @@ NativeBridgeNP(isManager, jboolean) {
 	return is_manager();
 }
 
+NativeBridgeNP(isPrBuild, jboolean) {
+	return is_pr_build();
+}
+
 NativeBridgeNP(isLateLoadMode, jboolean) {
 	return is_late_load_mode();
 }

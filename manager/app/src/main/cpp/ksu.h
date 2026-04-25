@@ -24,6 +24,7 @@ bool is_lkm_mode();
 
 bool is_manager();
 bool is_late_load_mode();
+bool is_pr_build();
 
 void get_full_version(char* buff);
 

@@ -278,6 +278,22 @@ fun HomePage(
                         )
                     }
 
+                    if (BuildConfig.IS_PR_BUILD || Natives.isPrBuild) {
+                        WarningCard(
+                            message = stringResource(
+                                id = R.string.home_pr_build_warning
+                            ),
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.TwoTone.Error,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        )
+                    }
+
                     if (viewModel.systemStatus.kernelPatchImplement == Natives.KernelPatchImplement.KERNEL_PATCH_OFFICIAL) {
                         WarningCard(
                             message = stringResource(
