@@ -26,8 +26,10 @@ import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -102,6 +104,15 @@ private enum class AddPathTarget(
     )
 }
 
+private enum class SuSFSTab(val titleRes: Int) {
+    Basic(R.string.susfs_tab_basic_settings),
+    SusPaths(R.string.susfs_tab_sus_paths),
+    SusLoopPaths(R.string.susfs_tab_sus_loop_paths),
+    SusMaps(R.string.susfs_tab_sus_maps),
+    Kstat(R.string.susfs_tab_kstat_config),
+    Features(R.string.susfs_tab_enabled_features),
+}
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SuSFSConfigScreen() {
@@ -113,6 +124,7 @@ fun SuSFSConfigScreen() {
 
     var addPathTarget by remember { mutableStateOf<AddPathTarget?>(null) }
     var showUnameDialog by remember { mutableStateOf(false) }
+    var selectedTab by remember { mutableStateOf(SuSFSTab.Basic) }
 
     LaunchedEffect(viewModel.toastMessage) {
         val message = viewModel.toastMessage ?: return@LaunchedEffect
@@ -233,155 +245,196 @@ fun SuSFSConfigScreen() {
                             SettingsBaseWidget(
                                 icon = Icons.Filled.VisibilityOff,
                                 title = stringResource(R.string.susfs_hide_mounts_for_all_procs_label),
-                                description = stringResource(R.string.feature_status_unsupported_summary),
-                                enabled = false,
-                            ) {}
-                        }
-                    }
-                }
-
-                item {
-                    SplicedColumnGroup(
-                        title = stringResource(R.string.susfs_tab_basic_settings)
-                    ) {
-                        item {
-                            SettingsBaseWidget(
-                                icon = Icons.Filled.Edit,
-                                title = stringResource(R.string.susfs_uname_label),
-                                description = uiState.unameValue,
-                            ) {
-                                IconButton(
-                                    enabled = !uiState.commandRunning,
-                                    onClick = { showUnameDialog = true }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Edit,
-                                        contentDescription = null
-                                    )
-                                }
-                            }
-                        }
-                        item {
-                            SettingsBaseWidget(
-                                icon = Icons.Filled.Edit,
-                                title = stringResource(R.string.susfs_build_time_label),
-                                description = uiState.buildTimeValue,
-                            ) {}
-                        }
-                        item {
-                            SettingsBaseWidget(
-                                icon = Icons.Filled.Settings,
-                                title = stringResource(R.string.avc_log_spoofing),
-                                description = stringResource(R.string.avc_log_spoofing_description),
-                                enabled = !uiState.commandRunning,
+                                description = when {
+                                    !uiState.hideMountsControlSupported -> {
+                                        stringResource(R.string.feature_status_unsupported_summary)
+                                    }
+                                    uiState.hideSusMountsForAllProcs -> {
+                                        stringResource(R.string.susfs_hide_mounts_for_all_procs_enabled_description)
+                                    }
+                                    else -> {
+                                        stringResource(R.string.susfs_hide_mounts_for_all_procs_disabled_description)
+                                    }
+                                },
+                                enabled = !uiState.commandRunning && uiState.hideMountsControlSupported,
                             ) {
                                 Switch(
-                                    checked = uiState.avcLogSpoofing,
-                                    enabled = !uiState.commandRunning,
-                                    onCheckedChange = viewModel::setAvcLogSpoofing
+                                    checked = uiState.hideSusMountsForAllProcs,
+                                    enabled = !uiState.commandRunning && uiState.hideMountsControlSupported,
+                                    onCheckedChange = viewModel::setHideSusMountsForAllProcs,
                                 )
                             }
                         }
-                        item {
-                            SettingsBaseWidget(
-                                icon = Icons.Filled.Delete,
-                                title = stringResource(R.string.susfs_reset_to_default),
-                                description = null,
-                                enabled = !uiState.commandRunning,
-                                onClick = {
-                                    viewModel.setUnameAndBuildTime("", "")
-                                }
-                            ) {}
-                        }
                     }
                 }
 
                 item {
-                    PathGroup(
-                        title = stringResource(R.string.susfs_tab_sus_paths),
-                        addTitle = stringResource(R.string.susfs_add_sus_path),
-                        emptyText = stringResource(R.string.susfs_no_paths_configured),
-                        paths = uiState.susPaths,
-                        enabled = !uiState.commandRunning,
-                        onAddClick = { addPathTarget = AddPathTarget.SusPath },
-                        onDelete = viewModel::removeSusPath,
-                    )
+                    PrimaryScrollableTabRow(
+                        selectedTabIndex = selectedTab.ordinal
+                    ) {
+                        SuSFSTab.entries.forEach { tab ->
+                            Tab(
+                                selected = selectedTab == tab,
+                                onClick = { selectedTab = tab },
+                                text = { Text(stringResource(tab.titleRes)) },
+                            )
+                        }
+                    }
                 }
 
-                item {
-                    PathGroup(
-                        title = stringResource(R.string.susfs_tab_sus_loop_paths),
-                        addTitle = stringResource(R.string.susfs_add_sus_loop_path),
-                        emptyText = stringResource(R.string.susfs_no_loop_paths_configured),
-                        paths = uiState.susLoopPaths,
-                        enabled = !uiState.commandRunning,
-                        onAddClick = { addPathTarget = AddPathTarget.SusLoopPath },
-                        onDelete = viewModel::removeSusLoopPath,
-                    )
-                }
+                when (selectedTab) {
+                    SuSFSTab.Basic -> {
+                        item {
+                            SplicedColumnGroup(
+                                title = stringResource(R.string.susfs_tab_basic_settings)
+                            ) {
+                                item {
+                                    SettingsBaseWidget(
+                                        icon = Icons.Filled.Edit,
+                                        title = stringResource(R.string.susfs_uname_label),
+                                        description = uiState.unameValue,
+                                    ) {
+                                        IconButton(
+                                            enabled = !uiState.commandRunning,
+                                            onClick = { showUnameDialog = true }
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Edit,
+                                                contentDescription = null
+                                            )
+                                        }
+                                    }
+                                }
+                                item {
+                                    SettingsBaseWidget(
+                                        icon = Icons.Filled.Edit,
+                                        title = stringResource(R.string.susfs_build_time_label),
+                                        description = uiState.buildTimeValue,
+                                    ) {}
+                                }
+                                item {
+                                    SettingsBaseWidget(
+                                        icon = Icons.Filled.Settings,
+                                        title = stringResource(R.string.avc_log_spoofing),
+                                        description = stringResource(R.string.avc_log_spoofing_description),
+                                        enabled = !uiState.commandRunning,
+                                    ) {
+                                        Switch(
+                                            checked = uiState.avcLogSpoofing,
+                                            enabled = !uiState.commandRunning,
+                                            onCheckedChange = viewModel::setAvcLogSpoofing
+                                        )
+                                    }
+                                }
+                                item {
+                                    SettingsBaseWidget(
+                                        icon = Icons.Filled.Delete,
+                                        title = stringResource(R.string.susfs_reset_to_default),
+                                        description = null,
+                                        enabled = !uiState.commandRunning,
+                                        onClick = {
+                                            viewModel.setUnameAndBuildTime("", "")
+                                        }
+                                    ) {}
+                                }
+                            }
+                        }
+                    }
 
-                item {
-                    PathGroup(
-                        title = stringResource(R.string.susfs_tab_sus_maps),
-                        addTitle = stringResource(R.string.susfs_add_sus_map),
-                        emptyText = stringResource(R.string.susfs_no_sus_maps_configured),
-                        paths = uiState.susMaps,
-                        enabled = !uiState.commandRunning,
-                        onAddClick = { addPathTarget = AddPathTarget.SusMap },
-                        onDelete = viewModel::removeSusMap,
-                    )
-                }
+                    SuSFSTab.SusPaths -> {
+                        item {
+                            PathGroup(
+                                title = stringResource(R.string.susfs_tab_sus_paths),
+                                addTitle = stringResource(R.string.susfs_add_sus_path),
+                                emptyText = stringResource(R.string.susfs_no_paths_configured),
+                                paths = uiState.susPaths,
+                                enabled = !uiState.commandRunning,
+                                onAddClick = { addPathTarget = AddPathTarget.SusPath },
+                                onDelete = viewModel::removeSusPath,
+                            )
+                        }
+                    }
 
-                item {
-                    PathGroup(
-                        title = stringResource(R.string.kstat_path_management),
-                        addTitle = stringResource(R.string.add_kstat_path_title),
-                        emptyText = stringResource(R.string.no_kstat_config_message),
-                        paths = uiState.kstatPaths,
-                        enabled = !uiState.commandRunning,
-                        onAddClick = { addPathTarget = AddPathTarget.KstatPath },
-                        onDelete = viewModel::removeKstatPath,
-                    )
-                }
+                    SuSFSTab.SusLoopPaths -> {
+                        item {
+                            PathGroup(
+                                title = stringResource(R.string.susfs_tab_sus_loop_paths),
+                                addTitle = stringResource(R.string.susfs_add_sus_loop_path),
+                                emptyText = stringResource(R.string.susfs_no_loop_paths_configured),
+                                paths = uiState.susLoopPaths,
+                                enabled = !uiState.commandRunning,
+                                onAddClick = { addPathTarget = AddPathTarget.SusLoopPath },
+                                onDelete = viewModel::removeSusLoopPath,
+                            )
+                        }
+                    }
 
-                item {
-                    PathGroup(
-                        title = stringResource(R.string.update),
-                        addTitle = stringResource(R.string.update),
-                        emptyText = stringResource(R.string.no_kstat_config_message),
-                        paths = uiState.kstatUpdatedPaths,
-                        enabled = !uiState.commandRunning,
-                        onAddClick = { addPathTarget = AddPathTarget.KstatUpdate },
-                        onDelete = viewModel::removeKstatUpdatePath,
-                    )
-                }
+                    SuSFSTab.SusMaps -> {
+                        item {
+                            PathGroup(
+                                title = stringResource(R.string.susfs_tab_sus_maps),
+                                addTitle = stringResource(R.string.susfs_add_sus_map),
+                                emptyText = stringResource(R.string.susfs_no_sus_maps_configured),
+                                paths = uiState.susMaps,
+                                enabled = !uiState.commandRunning,
+                                onAddClick = { addPathTarget = AddPathTarget.SusMap },
+                                onDelete = viewModel::removeSusMap,
+                            )
+                        }
+                    }
 
-                item {
-                    PathGroup(
-                        title = stringResource(R.string.susfs_update_full_clone),
-                        addTitle = stringResource(R.string.susfs_update_full_clone),
-                        emptyText = stringResource(R.string.no_kstat_config_message),
-                        paths = uiState.kstatFullClonePaths,
-                        enabled = !uiState.commandRunning,
-                        onAddClick = { addPathTarget = AddPathTarget.KstatFullClone },
-                        onDelete = viewModel::removeKstatFullClonePath,
-                    )
-                }
+                    SuSFSTab.Kstat -> {
+                        item {
+                            PathGroup(
+                                title = stringResource(R.string.kstat_path_management),
+                                addTitle = stringResource(R.string.add_kstat_path_title),
+                                emptyText = stringResource(R.string.no_kstat_config_message),
+                                paths = uiState.kstatPaths,
+                                enabled = !uiState.commandRunning,
+                                onAddClick = { addPathTarget = AddPathTarget.KstatPath },
+                                onDelete = viewModel::removeKstatPath,
+                            )
+                        }
+                        item {
+                            PathGroup(
+                                title = stringResource(R.string.update),
+                                addTitle = stringResource(R.string.update),
+                                emptyText = stringResource(R.string.no_kstat_config_message),
+                                paths = uiState.kstatUpdatedPaths,
+                                enabled = !uiState.commandRunning,
+                                onAddClick = { addPathTarget = AddPathTarget.KstatUpdate },
+                                onDelete = viewModel::removeKstatUpdatePath,
+                            )
+                        }
+                        item {
+                            PathGroup(
+                                title = stringResource(R.string.susfs_update_full_clone),
+                                addTitle = stringResource(R.string.susfs_update_full_clone),
+                                emptyText = stringResource(R.string.no_kstat_config_message),
+                                paths = uiState.kstatFullClonePaths,
+                                enabled = !uiState.commandRunning,
+                                onAddClick = { addPathTarget = AddPathTarget.KstatFullClone },
+                                onDelete = viewModel::removeKstatFullClonePath,
+                            )
+                        }
+                        item {
+                            StaticKstatGroup(
+                                title = stringResource(R.string.static_kstat_config),
+                                entries = uiState.staticKstatEntries,
+                                enabled = !uiState.commandRunning,
+                                onAddClick = { addPathTarget = AddPathTarget.KstatStatic },
+                                onDelete = viewModel::removeStaticKstat,
+                            )
+                        }
+                    }
 
-                item {
-                    StaticKstatGroup(
-                        title = stringResource(R.string.static_kstat_config),
-                        entries = uiState.staticKstatEntries,
-                        enabled = !uiState.commandRunning,
-                        onAddClick = { addPathTarget = AddPathTarget.KstatStatic },
-                        onDelete = viewModel::removeStaticKstat,
-                    )
-                }
-
-                item {
-                    FeatureGroup(
-                        features = uiState.featureStatus
-                    )
+                    SuSFSTab.Features -> {
+                        item {
+                            FeatureGroup(
+                                features = uiState.featureStatus
+                            )
+                        }
+                    }
                 }
             }
         }
