@@ -8,8 +8,10 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
@@ -156,6 +158,7 @@ fun ExecuteModuleActionScreen(moduleId: String) {
             if (!isActionRunning) {
                 val navigator = LocalNavigator.current
                 ExtendedFloatingActionButton(
+                    modifier = Modifier.padding(WindowInsets.navigationBars.asPaddingValues()),
                     text = { Text(text = stringResource(R.string.close)) },
                     icon = { Icon(Icons.Filled.Close, contentDescription = null) },
                     onClick = {
