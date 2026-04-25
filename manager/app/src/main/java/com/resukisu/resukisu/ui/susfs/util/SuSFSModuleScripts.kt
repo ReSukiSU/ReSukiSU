@@ -443,7 +443,7 @@ object ScriptGenerator {
                 // SUS挂载隐藏控制
                 val hideValue = if (config.hideSusMountsForAllProcs) 1 else 0
                 appendLine("# 设置SUS挂载隐藏控制")
-                appendLine($$"\"$SUSFS_BIN\" hide_sus_mnts_for_all_procs $$hideValue")
+                appendLine($$"\"$SUSFS_BIN\" hide_sus_mnts_for_non_su_procs $$hideValue")
                 appendLine($$"echo \"$(get_current_time): SUS挂载隐藏控制设置为: $${if (config.hideSusMountsForAllProcs) "对所有进程隐藏" else "仅对非KSU进程隐藏"}\" >> \"$LOG_FILE\"")
                 appendLine()
 
@@ -486,16 +486,10 @@ object ScriptGenerator {
     @SuppressLint("SdCardPath")
     private fun StringBuilder.generatePathSettingSection(androidDataPath: String, sdcardPath: String) {
         appendLine("# 路径配置")
-        appendLine("# 设置Android Data路径")
+        appendLine("# set_android_data_root_path / set_sdcard_root_path 已在上游 susfs 废弃")
+        appendLine($$"echo \"$(get_current_time): 使用已保存路径配置: android_data=$$androidDataPath, sdcard=$$sdcardPath\" >> \"$LOG_FILE\"")
         appendLine("until [ -d \"/sdcard/Android\" ]; do sleep 1; done")
         appendLine("sleep 60")
-        appendLine()
-        appendLine($$"\"$SUSFS_BIN\" set_android_data_root_path '$$androidDataPath'")
-        appendLine($$"echo \"$(get_current_time): Android Data路径设置为: $$androidDataPath\" >> \"$LOG_FILE\"")
-        appendLine()
-        appendLine("# 设置SD卡路径")
-        appendLine($$"\"$SUSFS_BIN\" set_sdcard_root_path '$$sdcardPath'")
-        appendLine($$"echo \"$(get_current_time): SD卡路径设置为: $$sdcardPath\" >> \"$LOG_FILE\"")
         appendLine()
     }
 

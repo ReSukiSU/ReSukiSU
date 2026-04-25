@@ -589,8 +589,21 @@ fun getSuSFSVersion(): String {
 
 fun getSuSFSFeatures(): String {
     val shell = getRootShell()
-    val cmd = "${getKsuDaemonPath()} susfs show features"
-    return runCmd(shell, cmd)
+    val daemon = getKsuDaemonPath()
+    val candidates = listOf(
+        "$daemon susfs show enabled_features",
+        "$daemon susfs show enabled-features",
+        "$daemon susfs show features"
+    )
+
+    for (cmd in candidates) {
+        val output = runCmd(shell, cmd).trim()
+        if (output.isNotEmpty() && !output.contains("error:", ignoreCase = true)) {
+            return output
+        }
+    }
+
+    return ""
 }
 
 fun getMetaModuleImplement(): String {

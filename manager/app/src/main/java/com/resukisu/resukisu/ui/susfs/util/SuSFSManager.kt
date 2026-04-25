@@ -69,6 +69,7 @@ object SuSFSManager {
     private const val MIN_VERSION_FOR_LOOP_PATH = "1.5.9"
     private const val MIN_VERSION_SUS_MAPS = "1.5.12"
     const val MAX_SUSFS_VERSION = "2.0.0"
+    private const val CMD_HIDE_SUS_MOUNTS_FOR_NON_SU_PROCS = "hide_sus_mnts_for_non_su_procs"
     private const val BACKUP_FILE_EXTENSION = ".susfs_backup"
     private const val MEDIA_DATA_PATH = "/data/media/0/Android/data"
     private const val CGROUP_BASE_PATH = "/sys/fs/cgroup"
@@ -948,7 +949,7 @@ object SuSFSManager {
             return false
         }
 
-        val success = executeSusfsCommand(context, "hide_sus_mnts_for_all_procs ${if (hideForAll) 1 else 0}")
+        val success = executeSusfsCommand(context, "$CMD_HIDE_SUS_MOUNTS_FOR_NON_SU_PROCS ${if (hideForAll) 1 else 0}")
         if (success) {
             saveHideSusMountsForAllProcs(context, hideForAll)
             if (isAutoStartEnabled(context)) updateMagiskModule(context)
@@ -977,30 +978,6 @@ object SuSFSManager {
     // 添加SUS路径
     @SuppressLint("StringFormatInvalid")
     suspend fun addSusPath(context: Context, path: String): Boolean {
-        // 如果是1.5.8版本，先设置路径配置
-        if (isSusVersion158()) {
-            // 获取当前配置的路径，如果没有配置则使用默认值
-            val androidDataPath = getAndroidDataPath(context)
-            val sdcardPath = getSdcardPath(context)
-
-            // 先设置Android Data路径
-            val androidDataSuccess = executeSusfsCommand(context, "set_android_data_root_path '$androidDataPath'")
-            if (androidDataSuccess) {
-                showToast(context, context.getString(R.string.susfs_android_data_path_set, androidDataPath))
-            }
-
-            // 再设置SD卡路径
-            val sdcardSuccess = executeSusfsCommand(context, "set_sdcard_root_path '$sdcardPath'")
-            if (sdcardSuccess) {
-                showToast(context, context.getString(R.string.susfs_sdcard_path_set, sdcardPath))
-            }
-
-            // 如果路径设置失败，记录但不阻止继续执行
-            if (!androidDataSuccess || !sdcardSuccess) {
-                showToast(context, context.getString(R.string.susfs_path_setup_warning))
-            }
-        }
-
         // 执行添加SUS路径命令
         val result = executeSusfsCommandWithOutput(context, "add_sus_path '$path'")
         val isActuallySuccessful = result.isSuccess && !result.output.contains("not found, skip adding")
@@ -1061,7 +1038,7 @@ object SuSFSManager {
     // 循环路径相关方法
     @SuppressLint("SdCardPath")
     private fun isValidLoopPath(path: String): Boolean {
-        return !path.startsWith("/storage/") && !path.startsWith("/sdcard/")
+        return path.isNotBlank()
     }
 
     @SuppressLint("StringFormatInvalid")
@@ -1307,30 +1284,24 @@ object SuSFSManager {
 
     // 设置Android数据路径
     suspend fun setAndroidDataPath(context: Context, path: String): Boolean {
-        val success = executeSusfsCommand(context, "set_android_data_root_path '$path'")
-        if (success) {
-            saveAndroidDataPath(context, path)
-            if (isAutoStartEnabled(context)) {
-                CoroutineScope(Dispatchers.Default).launch {
-                    updateMagiskModule(context)
-                }
+        saveAndroidDataPath(context, path)
+        if (isAutoStartEnabled(context)) {
+            CoroutineScope(Dispatchers.Default).launch {
+                updateMagiskModule(context)
             }
         }
-        return success
+        return true
     }
 
     // 设置SD卡路径
     suspend fun setSdcardPath(context: Context, path: String): Boolean {
-        val success = executeSusfsCommand(context, "set_sdcard_root_path '$path'")
-        if (success) {
-            saveSdcardPath(context, path)
-            if (isAutoStartEnabled(context)) {
-                CoroutineScope(Dispatchers.Default).launch {
-                    updateMagiskModule(context)
-                }
+        saveSdcardPath(context, path)
+        if (isAutoStartEnabled(context)) {
+            CoroutineScope(Dispatchers.Default).launch {
+                updateMagiskModule(context)
             }
         }
-        return success
+        return true
     }
 
     /**
