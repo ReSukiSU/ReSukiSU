@@ -107,6 +107,7 @@ import com.resukisu.resukisu.ui.screen.ExecuteModuleActionScreen
 import com.resukisu.resukisu.ui.screen.FlashIt
 import com.resukisu.resukisu.ui.screen.FlashScreen
 import com.resukisu.resukisu.ui.screen.InstallScreen
+import com.resukisu.resukisu.ui.screen.SuSFSConfigScreen
 import com.resukisu.resukisu.ui.screen.SulogScreen
 import com.resukisu.resukisu.ui.screen.TemplateEditorScreen
 import com.resukisu.resukisu.ui.screen.UmountManagerScreen
@@ -114,7 +115,6 @@ import com.resukisu.resukisu.ui.screen.about.AboutScreen
 import com.resukisu.resukisu.ui.screen.about.OpenSourceLicenseScreen
 import com.resukisu.resukisu.ui.screen.moduleRepo.ModuleRepoScreen
 import com.resukisu.resukisu.ui.screen.moduleRepo.OnlineModuleDetailScreen
-import com.resukisu.resukisu.ui.susfs.SuSFSConfigScreen
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.KernelSUTheme
 import com.resukisu.resukisu.ui.theme.ThemeConfig

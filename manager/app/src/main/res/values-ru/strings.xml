@@ -398,9 +398,6 @@
     <string name="no_kstat_config_message">Пока нет конфигурации Kstat, нажмите кнопку выше, чтобы добавить</string>
     <string name="susfs_hide_mounts_control_title">Контроль скрытия SUS монтирования</string>
     <string name="susfs_hide_mounts_control_description">Управление режимом скрытия SUS монтирования для процессов</string>
-    <string name="susfs_hide_mounts_for_all_procs_label">Скрыть монтирования SUS для всех процессов</string>
-    <string name="susfs_hide_mounts_for_all_procs_enabled_description">Когда включено, монтирования SUS будут скрыты от всех процессов, включая процессы KSU</string>
-    <string name="susfs_hide_mounts_for_all_procs_disabled_description">Если отключено, монтирования SUS будут скрываться только из процессов, не связанных с KSU, процессы KSU могут видеть монтирования</string>
     <string name="susfs_hide_mounts_all_enabled">Включено скрытие монтирования SUS для всех процессов</string>
     <string name="susfs_hide_mounts_all_disabled">Отключено скрытие монтирования SUS для всех процессов</string>
     <string name="susfs_hide_mounts_recommendation">Рекомендуется отключить после разблокировки экрана или во время service.sh или boot-completed.sh, так как это должно исправить проблему на некоторых root-приложениях, которые опираются на монтирование, смонтированное процессом KSU</string>

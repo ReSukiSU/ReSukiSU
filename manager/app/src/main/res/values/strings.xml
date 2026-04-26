@@ -474,11 +474,11 @@
     <string name="static_kstat_config">Static Kstat Configuration</string>
     <string name="kstat_path_management">Kstat Path Management</string>
     <string name="no_kstat_config_message">No Kstat configuration yet, click the button below to add</string>
+    <string name="susfs_basic_information">Basic Information</string>
     <string name="susfs_hide_mounts_control_title">SUS Mount Hiding Control</string>
     <string name="susfs_hide_mounts_control_description">Control the hiding behavior of SUS mounts for processes</string>
-    <string name="susfs_hide_mounts_for_all_procs_label">Hide SUS mounts for all processes</string>
-    <string name="susfs_hide_mounts_for_all_procs_enabled_description">When enabled, SUS mounts will be hidden from all processes, including KSU processes</string>
-    <string name="susfs_hide_mounts_for_all_procs_disabled_description">When disabled, SUS mounts will only be hidden from non-KSU processes, KSU processes can see the mounts</string>
+    <string name="susfs_hide_mounts_for_nonsu_procs">Hide SUS mounts for Non Root processes</string>
+    <string name="susfs_hide_mounts_for_nonsu_procs_description">Decide hide all sus mounts for non-su processes or not</string>
     <string name="susfs_hide_mounts_all_enabled">Enabled hiding SUS mounts for all processes</string>
     <string name="susfs_hide_mounts_all_disabled">Disabled hiding SUS mounts for all processes</string>
     <string name="susfs_hide_mounts_recommendation">It is recommended to set to disabled after screen is unlocked, or during service.sh or boot-completed.sh stage, as this should fix the issue on some rooted apps that rely on mounts mounted by KSU process</string>

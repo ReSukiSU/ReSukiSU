@@ -386,9 +386,6 @@
     <string name="no_kstat_config_message">Конфігурації Kstat ще немає, натисніть кнопку вище, щоб додати</string>
     <string name="susfs_hide_mounts_control_title">Керування приховуванням монтувань SUS</string>
     <string name="susfs_hide_mounts_control_description">Керуйте поведінкою приховування монтувань SUS для процесів</string>
-    <string name="susfs_hide_mounts_for_all_procs_label">Приховувати монтування SUS для всіх процесів</string>
-    <string name="susfs_hide_mounts_for_all_procs_enabled_description">Якщо увімкнено, монтування SUS будуть приховані від усіх процесів, включно з процесами KSU</string>
-    <string name="susfs_hide_mounts_for_all_procs_disabled_description">Якщо вимкнено, монтування SUS будуть приховані лише від процесів, що не належать KSU; процеси KSU зможуть бачити монтування</string>
     <string name="susfs_hide_mounts_all_enabled">Увімкнено приховування монтувань SUS для всіх процесів</string>
     <string name="susfs_hide_mounts_all_disabled">Вимкнено приховування монтувань SUS для всіх процесів</string>
     <string name="susfs_hide_mounts_recommendation">Рекомендується встановлювати у вимкнений стан після розблокування екрана, або на етапі service.sh чи boot-completed.sh, оскільки це повинно виправити проблему з деякими рутованими додатками, які залежать від монтувань, створених процесом KSU</string>

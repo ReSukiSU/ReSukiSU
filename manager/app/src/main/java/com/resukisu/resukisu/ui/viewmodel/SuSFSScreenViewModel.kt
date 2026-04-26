@@ -1,6 +1,5 @@
 package com.resukisu.resukisu.ui.viewmodel
 
-import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -21,12 +20,8 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
-private inline val susfsConfigPath: String
-    get() = "/data/adb/ksu/.susfs.json"
 private inline val defaultSusfsValue: String
     get() = "default"
-private const val settingsPrefsName = "settings"
-private const val hideSusMountsForAllProcsKey = "susfs_hide_mounts_for_all_procs"
 
 data class SuSFSFeatureStatus(
     val key: String,
@@ -56,12 +51,11 @@ data class SuSFSStaticKstatEntry(
 data class SuSFSUiState(
     val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
-    val commandRunning: Boolean = false,
     val enabled: Boolean = false,
     val versionText: String = "",
     val unameValue: String = defaultSusfsValue,
     val buildTimeValue: String = defaultSusfsValue,
-    val hideSusMountsForAllProcs: Boolean = false,
+    val hideSuSMntsForNonSUProcs: Boolean = false,
     val hideMountsControlSupported: Boolean = true,
     val avcLogSpoofing: Boolean = false,
     val susPaths: List<String> = emptyList(),
@@ -104,7 +98,6 @@ class SuSFSScreenViewModel : ViewModel() {
                 uiState = newState.copy(
                     isLoading = false,
                     isRefreshing = false,
-                    commandRunning = uiState.commandRunning,
                 )
             }.onFailure {
                 uiState = uiState.copy(
@@ -117,44 +110,34 @@ class SuSFSScreenViewModel : ViewModel() {
     }
 
     fun setUnameAndBuildTime(unameValue: String, buildTimeValue: String) {
-        val uname = unameValue.trim().ifEmpty { defaultSusfsValue }
-        val buildTime = buildTimeValue.trim().ifEmpty { defaultSusfsValue }
-        if (uname == defaultSusfsValue && buildTime == defaultSusfsValue) {
-            runCommand("del_uname")
-            return
+        viewModelScope.launch(Dispatchers.IO) {
+            val uname = unameValue.trim().ifEmpty { defaultSusfsValue }
+            val buildTime = buildTimeValue.trim().ifEmpty { defaultSusfsValue }
+            if (uname == defaultSusfsValue && buildTime == defaultSusfsValue) {
+                runCommand("del_uname")
+                return@launch
+            }
+            runCommand("set_uname ${shellQuote(uname)} ${shellQuote(buildTime)}")
         }
-        runCommand("set_uname ${shellQuote(uname)} ${shellQuote(buildTime)}")
     }
 
     fun setAvcLogSpoofing(enabled: Boolean) {
-        runCommand("enable_avc_log_spoofing ${if (enabled) 1 else 0}")
+        viewModelScope.launch(Dispatchers.IO) {
+            runCommand("enable_avc_log_spoofing ${if (enabled) 1 else 0}")
+        }
     }
 
-    fun setHideSusMountsForAllProcs(enabled: Boolean) {
+    fun setHideSusMountsForNonSUProcs(enabled: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
-            if (uiState.commandRunning) return@launch
-            uiState = uiState.copy(commandRunning = true)
-
-            val success = runCommandCandidates(
-                listOf(
-                    "hide_sus_mnts_for_non_su_procs ${if (enabled) 1 else 0}",
-                    "hide_sus_mnts_for_all_procs ${if (enabled) 1 else 0}",
-                )
-            )
+            val success = runCommand("hide_sus_mnts_for_non_su_procs ${if (enabled) 1 else 0}")
 
             if (success) {
-                ksuApp.getSharedPreferences(settingsPrefsName, Context.MODE_PRIVATE)
-                    .edit()
-                    .putBoolean(hideSusMountsForAllProcsKey, enabled)
-                    .apply()
-
                 toastMessage = ksuApp.getString(
                     if (enabled) R.string.susfs_hide_mounts_all_enabled
                     else R.string.susfs_hide_mounts_all_disabled
                 )
                 uiState = uiState.copy(
-                    commandRunning = false,
-                    hideSusMountsForAllProcs = enabled,
+                    hideSuSMntsForNonSUProcs = enabled,
                     hideMountsControlSupported = true,
                 )
                 return@launch
@@ -162,7 +145,6 @@ class SuSFSScreenViewModel : ViewModel() {
 
             toastMessage = ksuApp.getString(R.string.feature_status_unsupported_summary)
             uiState = uiState.copy(
-                commandRunning = false,
                 hideMountsControlSupported = false,
             )
         }
@@ -187,31 +169,35 @@ class SuSFSScreenViewModel : ViewModel() {
     fun removeKstatFullClonePath(path: String) = removePath(path, showSuccessToast = true) { "del_sus_kstat_full_clone $it" }
 
     fun addStaticKstatPath(path: String) {
-        val value = path.trim()
-        if (value.isBlank()) return
-        runCommand("add_sus_kstat_statically ${shellQuote(value)}", showSuccessToast = true)
+        viewModelScope.launch(Dispatchers.IO) {
+            val value = path.trim()
+            if (value.isBlank()) return@launch
+            runCommand("add_sus_kstat_statically ${shellQuote(value)}", showSuccessToast = true)
+        }
     }
 
     fun removeStaticKstat(entry: SuSFSStaticKstatEntry) {
-        runCommand(
-            listOf(
-                "del_sus_kstat_statically",
-                shellQuote(entry.path),
-                shellQuote(entry.ino),
-                shellQuote(entry.dev),
-                shellQuote(entry.nlink),
-                shellQuote(entry.size),
-                shellQuote(entry.atime),
-                shellQuote(entry.atimeNsec),
-                shellQuote(entry.mtime),
-                shellQuote(entry.mtimeNsec),
-                shellQuote(entry.ctime),
-                shellQuote(entry.ctimeNsec),
-                shellQuote(entry.blocks),
-                shellQuote(entry.blksize),
-            ).joinToString(" "),
-            showSuccessToast = true,
-        )
+        viewModelScope.launch(Dispatchers.IO) {
+            runCommand(
+                listOf(
+                    "del_sus_kstat_statically",
+                    shellQuote(entry.path),
+                    shellQuote(entry.ino),
+                    shellQuote(entry.dev),
+                    shellQuote(entry.nlink),
+                    shellQuote(entry.size),
+                    shellQuote(entry.atime),
+                    shellQuote(entry.atimeNsec),
+                    shellQuote(entry.mtime),
+                    shellQuote(entry.mtimeNsec),
+                    shellQuote(entry.ctime),
+                    shellQuote(entry.ctimeNsec),
+                    shellQuote(entry.blocks),
+                    shellQuote(entry.blksize),
+                ).joinToString(" "),
+                showSuccessToast = true,
+            )
+        }
     }
 
     private fun addPath(
@@ -219,9 +205,11 @@ class SuSFSScreenViewModel : ViewModel() {
         showSuccessToast: Boolean = false,
         commandBuilder: (String) -> String,
     ) {
-        val value = rawPath.trim()
-        if (value.isBlank()) return
-        runCommand(commandBuilder(shellQuote(value)), showSuccessToast)
+        viewModelScope.launch(Dispatchers.IO) {
+            val value = rawPath.trim()
+            if (value.isBlank()) return@launch
+            runCommand(commandBuilder(shellQuote(value)), showSuccessToast)
+        }
     }
 
     private fun removePath(
@@ -229,22 +217,20 @@ class SuSFSScreenViewModel : ViewModel() {
         showSuccessToast: Boolean = false,
         commandBuilder: (String) -> String,
     ) {
-        val value = rawPath.trim()
-        if (value.isBlank()) return
-        runCommand(commandBuilder(shellQuote(value)), showSuccessToast)
+        viewModelScope.launch(Dispatchers.IO) {
+            val value = rawPath.trim()
+            if (value.isBlank()) return@launch
+            runCommand(commandBuilder(shellQuote(value)), showSuccessToast)
+        }
     }
 
-    private fun runCommand(command: String, showSuccessToast: Boolean = false) {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (uiState.commandRunning) return@launch
-            uiState = uiState.copy(commandRunning = true)
-
-            val success = runCommandCandidates(listOf(command))
+    private suspend fun runCommand(command: String, showSuccessToast: Boolean = false): Boolean =
+        withContext(Dispatchers.IO) {
+            val success = execKsud("susfs $command")
             if (!success) {
                 toastMessage = ksuApp.getString(R.string.operation_failed)
             }
 
-            uiState = uiState.copy(commandRunning = false)
             if (success) {
                 if (showSuccessToast) {
                     toastMessage = ksuApp.getString(R.string.kpm_control_success)
@@ -254,29 +240,16 @@ class SuSFSScreenViewModel : ViewModel() {
                     uiState = newState.copy(
                         isLoading = false,
                         isRefreshing = false,
-                        commandRunning = false,
                     )
                 } else {
                     refresh()
                 }
             }
-        }
-    }
-
-    private fun runCommandCandidates(commands: List<String>): Boolean {
-        for (command in commands) {
-            if (execKsud("susfs $command", true)) {
-                return true
-            }
-        }
-        return false
+            return@withContext success
     }
 
     private suspend fun loadState(): SuSFSUiState {
         val statusEnabled = runCatching { getSuSFSStatus() }.getOrDefault(false)
-        val hideSusMountsForAllProcs = ksuApp
-            .getSharedPreferences(settingsPrefsName, Context.MODE_PRIVATE)
-            .getBoolean(hideSusMountsForAllProcsKey, false)
 
         val version = runCatching {
             getSuSFSVersion().trim()
@@ -295,12 +268,11 @@ class SuSFSScreenViewModel : ViewModel() {
         return SuSFSUiState(
             isLoading = false,
             isRefreshing = false,
-            commandRunning = false,
             enabled = statusEnabled,
             versionText = version,
             unameValue = commonObject?.optString("release", defaultSusfsValue) ?: defaultSusfsValue,
             buildTimeValue = commonObject?.optString("version", defaultSusfsValue) ?: defaultSusfsValue,
-            hideSusMountsForAllProcs = hideSusMountsForAllProcs,
+            hideSuSMntsForNonSUProcs = false, // TODO native
             hideMountsControlSupported = uiState.hideMountsControlSupported,
             avcLogSpoofing = commonObject?.optBoolean("avc_spoofing", false) ?: false,
             susPaths = jsonArrayToSortedList(susPathObject?.optJSONArray("sus_path")),
@@ -316,8 +288,8 @@ class SuSFSScreenViewModel : ViewModel() {
     }
 
     private suspend fun readSusfsConfigJson(): JSONObject? = withContext(Dispatchers.IO) {
-        val suFile = SuFile(susfsConfigPath).apply {
-            setShell(getRootShell())
+        val suFile = SuFile("/data/adb/ksu/.susfs.json").apply {
+            shell = getRootShell()
         }
         if (!suFile.isFile) {
             return@withContext null

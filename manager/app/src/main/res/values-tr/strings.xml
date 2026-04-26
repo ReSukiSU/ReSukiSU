@@ -466,9 +466,6 @@
     <string name="no_kstat_config_message">Henüz Kstat yapılandırması yok, eklemek için yukarıdaki düğmeye tıklayın</string>
     <string name="susfs_hide_mounts_control_title">SUS Bağlama Noktası Gizleme Kontrolü</string>
     <string name="susfs_hide_mounts_control_description">İşlemler için SUS bağlama noktalarının gizleme davranışını kontrol et</string>
-    <string name="susfs_hide_mounts_for_all_procs_label">Tüm işlemler için SUS bağlama noktalarını gizle</string>
-    <string name="susfs_hide_mounts_for_all_procs_enabled_description">Etkinleştirildiğinde, SUS bağlama noktaları KSU işlemleri dahil tüm işlemlerden gizlenir</string>
-    <string name="susfs_hide_mounts_for_all_procs_disabled_description">Devre dışı bırakıldığında, SUS bağlama noktaları sadece KSU dışı işlemlerden gizlenir, KSU işlemleri bağlama noktalarını görebilir</string>
     <string name="susfs_hide_mounts_all_enabled">Tüm işlemler için SUS bağlama noktalarını gizleme etkinleştirildi</string>
     <string name="susfs_hide_mounts_all_disabled">Tüm işlemler için SUS bağlama noktalarını gizleme devre dışı bırakıldı</string>
     <string name="susfs_hide_mounts_recommendation">Ekran kilidi açıldıktan sonra veya service.sh ya da boot-completed.sh aşamasında devre dışı bırakılması önerilir, çünkü bu, KSU işlemi tarafından bağlanan bağlama noktalarına dayanan bazı rootlu uygulamalardaki sorunu çözmelidir</string>

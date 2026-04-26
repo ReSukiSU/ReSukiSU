@@ -409,9 +409,6 @@
     <string name="no_kstat_config_message">Kstat の構成が未設定です。上のボタンをタップで追加します。</string>
     <string name="susfs_hide_mounts_control_title">SUS マウントの非表示制御</string>
     <string name="susfs_hide_mounts_control_description">プロセスの SUS マウントを非表示する動作を制御します。</string>
-    <string name="susfs_hide_mounts_for_all_procs_label">すべてのプロセスで SUS マウントを非表示</string>
-    <string name="susfs_hide_mounts_for_all_procs_enabled_description">有効化すると SUS マウントは KSU プロセスを含むすべてのプロセスから非表示になります。</string>
-    <string name="susfs_hide_mounts_for_all_procs_disabled_description">無効化すると SUS マウントは非 KSU プロセスからのみ非表示になり、KSU プロセスはマウントを見ることができます。</string>
     <string name="susfs_hide_mounts_all_enabled">すべてのプロセスで SUS マウントの非表示を有効化しました</string>
     <string name="susfs_hide_mounts_all_disabled">すべてのプロセスで SUS マウントの非表示を無効化しました</string>
     <string name="susfs_hide_mounts_recommendation">画面のロック解除後または service.sh または boot-completed.sh の段階で無効に設定することを推奨します。これにより、KSU プロセスによってマウントされたマウントに依存する一部の root 化されたアプリの問題が解決されるはずです。</string>

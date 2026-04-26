@@ -406,9 +406,6 @@
     <string name="no_kstat_config_message">Chưa có cấu hình Kstat, hãy nhấp vào nút bên dưới để thêm</string>
     <string name="susfs_hide_mounts_control_title">Điều khiển ẩn SuS Mount</string>
     <string name="susfs_hide_mounts_control_description">Kiểm soát hành vi ẩn của SuS Mount với các tiến trình</string>
-    <string name="susfs_hide_mounts_for_all_procs_label">Ẩn SuS Mount khỏi tất cả các tiến trình</string>
-    <string name="susfs_hide_mounts_for_all_procs_enabled_description">Khi kích hoạt, SuS Mount sẽ bị ẩn khỏi tất cả các tiến trình, bao gồm cả các tiến trình KSU</string>
-    <string name="susfs_hide_mounts_for_all_procs_disabled_description">Khi bị vô hiệu hoá, SuS Mount sẽ chỉ bị ẩn khỏi các tiến trình không phải KSU, không bị ẩn ở tiến trình KSU</string>
     <string name="susfs_hide_mounts_all_enabled">Đã kích hoạt ẩn SuS Mount khỏi tất cả các tiến trình</string>
     <string name="susfs_hide_mounts_all_disabled">Đã vô hiệu hoá việc ẩn SuS Mount cho tất cả các tiến trình</string>
     <string name="susfs_hide_mounts_recommendation">Nên vô hiệu hoá sau khi màn hình được mở khoá hoặc trong giai đoạn service.sh hoặc boot-completed.sh, vì điều này sẽ khắc phục sự cố trên một số ứng dụng đã root dựa vào mount bởi tiến trình KSU</string>

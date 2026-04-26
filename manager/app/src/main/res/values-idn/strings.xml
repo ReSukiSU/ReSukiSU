@@ -404,9 +404,6 @@ Tanamkan: Secara permanen memasang ke sistem</string>
     <string name="no_kstat_config_message">Belum ada konfigurasi Kstat, klik tombol di atas untuk menambahkan</string>
     <string name="susfs_hide_mounts_control_title">Kontrol Penyembunyian Kaitan SUS</string>
     <string name="susfs_hide_mounts_control_description">Kontrol perilaku penyembunyian kaitan SUS untuk proses</string>
-    <string name="susfs_hide_mounts_for_all_procs_label">Sembunyikan Kaitan SUS untuk Semua Proses</string>
-    <string name="susfs_hide_mounts_for_all_procs_enabled_description">Jika diaktifkan, kaitan SUS akan disembunyikan dari semua proses, termasuk proses KSU</string>
-    <string name="susfs_hide_mounts_for_all_procs_disabled_description">Jika dinonaktifkan, kaitan SUS akan disembunyikan hanya dari proses non-KSU; proses KSU akan dapat melihat kaitan</string>
     <string name="susfs_hide_mounts_all_enabled">Mengaktifkan penyembunyian kaitan SUS untuk semua proses</string>
     <string name="susfs_hide_mounts_all_disabled">Menonaktifkan penyembunyian kaitan SUS untuk semua proses</string>
     <string name="susfs_hide_mounts_recommendation">Disarankan untuk mengatur ke nonaktif setelah layar terbuka atau pada tahap service.sh atau boot-completed.sh, karena ini seharusnya memperbaiki masalah dengan beberapa aplikasi root yang bergantung pada kaitan yang dibuat oleh proses KSU</string>

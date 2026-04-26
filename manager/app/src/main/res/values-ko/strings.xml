@@ -404,9 +404,6 @@
     <string name="no_kstat_config_message">Kstat 구성이 없습니다. 아래 버튼을 클릭하여 추가하세요.</string>
     <string name="susfs_hide_mounts_control_title">SUS 마운트 숨기기 제어</string>
     <string name="susfs_hide_mounts_control_description">프로세스의 SUS 마운트 숨기기 동작을 제어합니다.</string>
-    <string name="susfs_hide_mounts_for_all_procs_label">모든 프로세스에서 SUS 마운트 숨기기</string>
-    <string name="susfs_hide_mounts_for_all_procs_enabled_description">활성화하면 KSU 프로세스를 포함한 모든 프로세스에서 SUS 마운트가 숨겨집니다.</string>
-    <string name="susfs_hide_mounts_for_all_procs_disabled_description">비활성화하면 비-KSU 프로세스에서만 SUS 마운트가 숨겨지며 KSU 프로세스는 마운트를 볼 수 있습니다.</string>
     <string name="susfs_hide_mounts_all_enabled">모든 프로세스에서 SUS 마운트 숨기기 활성화됨</string>
     <string name="susfs_hide_mounts_all_disabled">모든 프로세스에서 SUS 마운트 숨기기 비활성화됨</string>
     <string name="susfs_hide_mounts_recommendation">화면 잠금이 해제된 후나 service.sh 또는 boot-completed.sh 단계 동안 비활성화로 설정하는 것이 좋습니다. 이렇게 하면 KSU 프로세스에 의한 마운트를 사용하는 일부 ROOT 앱의 문제를 해결할 수 있습니다.</string>

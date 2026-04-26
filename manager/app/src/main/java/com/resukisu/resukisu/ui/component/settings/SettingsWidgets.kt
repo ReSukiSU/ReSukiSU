@@ -159,7 +159,7 @@ fun SettingsBaseWidget(
                                 }
                             },
                             onLongPress = {
-                                haptic.performHapticFeedback(hapticFeedbackType)
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 onLongClickState.value(it)
                             },
                             onTap = {
@@ -534,6 +534,7 @@ fun SettingsSwitchWidget(
     onCheckedChange: (Boolean) -> Unit,
     isError: Boolean = false
 ) {
+    val haptic = LocalHapticFeedback.current
     val toggleAction = {
         if (enabled) {
             onCheckedChange(!checked)
@@ -546,7 +547,7 @@ fun SettingsSwitchWidget(
         enabled = enabled,
         isError = isError,
         onClick = { toggleAction() },
-        hapticFeedbackType = HapticFeedbackType.ToggleOn,
+        hapticFeedbackType = if (!checked) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff,
         description = description,
     ) {
         Switch(
@@ -569,7 +570,13 @@ fun SettingsSwitchWidget(
                     )
                 }
             },
-            onCheckedChange = null
+            onCheckedChange = { newValue ->
+                if (newValue)
+                    haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
+                else
+                    haptic.performHapticFeedback(HapticFeedbackType.ToggleOff)
+                onCheckedChange(newValue)
+            }
         )
     }
 }

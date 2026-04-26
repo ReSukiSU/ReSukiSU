@@ -59,7 +59,6 @@ class HomeViewModel : ViewModel() {
         val selinuxStatus: String = "",
         val kpmVersion: String = "",
         val susfsEnabled: Boolean = false,
-        val susfsVersionSupported: Boolean = false,
         val susfsVersion: String = "",
         val susfsFeatures: String = "",
         val superuserCount: Int = 0,
@@ -215,24 +214,23 @@ class HomeViewModel : ViewModel() {
                 )
 
                 if (!isSimpleMode) {
-                    val moduleInfo = loadModuleInfo()
+                    val (kpmVersion, superUserCount, moduleCount, kpmCount, zygiskImplement, metamoduleImplement) = loadModuleInfo()
                     systemInfo = systemInfo.copy(
-                        kpmVersion = moduleInfo.first,
-                        superuserCount = moduleInfo.second,
-                        moduleCount = moduleInfo.third,
-                        kpmModuleCount = moduleInfo.fourth,
-                        zygiskImplement = moduleInfo.fifth,
-                        metaModuleImplement = moduleInfo.sixth
+                        kpmVersion = kpmVersion,
+                        superuserCount = superUserCount,
+                        moduleCount = moduleCount,
+                        kpmModuleCount = kpmCount,
+                        zygiskImplement = zygiskImplement,
+                        metaModuleImplement = metamoduleImplement
                     )
                 }
 
                 if (!isHideSusfsStatus) {
-                    val susfsInfo = loadSuSFSInfo()
+                    val (enabled, version, features) = loadSuSFSInfo()
                     systemInfo = systemInfo.copy(
-                        susfsEnabled = susfsInfo.first,
-                        susfsVersionSupported = susfsInfo.first,
-                        susfsVersion = susfsInfo.second,
-                        susfsFeatures = susfsInfo.third,
+                        susfsEnabled = enabled,
+                        susfsVersion = version,
+                        susfsFeatures = features,
                     )
                 }
 
