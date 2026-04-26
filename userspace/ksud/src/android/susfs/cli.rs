@@ -227,20 +227,20 @@ pub fn run_from_args(args: &[String]) -> Result<()> {
 pub fn run_main(command: SuSFSSubCommands) -> Result<()> {
     match command {
         SuSFSSubCommands::AddSusPath { path } => {
-            config::operation::add_sus_path(&path);
             api::add_sus_path(&api::SusPathType::Normal, &path)?;
+            config::operation::add_sus_path(&path);
         }
         SuSFSSubCommands::AddSusPathLoop { path } => {
-            config::operation::add_sus_path_loop(&path);
             api::add_sus_path(&api::SusPathType::Loop, &path)?;
+            config::operation::add_sus_path_loop(&path);
         }
         SuSFSSubCommands::AddSusKstat { path } => {
-            config::operation::add_sus_kstat(&path);
             api::add_sus_kstat(path)?;
+            config::operation::add_sus_kstat(&path);
         }
         SuSFSSubCommands::UpdateSusKstat { path } => {
-            config::operation::add_sus_kstat_update(&path);
             api::update_sus_kstat(path)?;
+            config::operation::add_sus_kstat_update(&path);
         }
         SuSFSSubCommands::UpdateSusKstatFullClone { path } => {
             config::operation::add_sus_kstat_full_clone(&path);
@@ -264,12 +264,12 @@ pub fn run_main(command: SuSFSSubCommands) -> Result<()> {
             api::add_open_redirect(target_path, redirected_path, uid_scheme)?;
         }
         SuSFSSubCommands::AddSusMap { path } => {
-            config::operation::add_sus_map(&path);
             api::add_sus_map(path)?;
+            config::operation::add_sus_map(&path);
         }
         SuSFSSubCommands::EnableAvcLogSpoofing { enabled } => {
-            config::operation::enable_avc_spoofing(enabled);
             api::enable_avc_log_spoofing(enabled)?;
+            config::operation::enable_avc_spoofing(enabled);
         }
         SuSFSSubCommands::Show { info_type } => match info_type {
             ShowType::Version => {
@@ -297,21 +297,6 @@ pub fn run_main(command: SuSFSSubCommands) -> Result<()> {
             blocks,
             blksize,
         } => {
-            config::operation::add_sus_kstat_statically(
-                &path,
-                &ino,
-                &dev,
-                &nlink,
-                &size,
-                &atime,
-                &atime_nsec,
-                &mtime,
-                &mtime_nsec,
-                &ctime,
-                &ctime_nsec,
-                &blocks,
-                &blksize,
-            );
             api::add_sus_kstat_statically(
                 &path,
                 &ino,
@@ -327,6 +312,21 @@ pub fn run_main(command: SuSFSSubCommands) -> Result<()> {
                 &blocks,
                 &blksize,
             )?;
+            config::operation::add_sus_kstat_statically(
+                &path,
+                &ino,
+                &dev,
+                &nlink,
+                &size,
+                &atime,
+                &atime_nsec,
+                &mtime,
+                &mtime_nsec,
+                &ctime,
+                &ctime_nsec,
+                &blocks,
+                &blksize,
+            );
         }
         // Del
         SuSFSSubCommands::DelSusPath { path } => {
