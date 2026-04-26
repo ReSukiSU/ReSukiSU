@@ -396,9 +396,6 @@
     <string name="no_kstat_config_message">Belum ada konfigurasi Kstat, klik tombol di atas untuk menambahkan</string>
     <string name="susfs_hide_mounts_control_title">Kontrol Penyembunyian Pemasangan SUS</string>
     <string name="susfs_hide_mounts_control_description">Kontrol perilaku penyembunyian pemasangan SUS untuk proses</string>
-    <string name="susfs_hide_mounts_for_all_procs_label">Sembunyikan pemasangan SUS untuk semua proses</string>
-    <string name="susfs_hide_mounts_for_all_procs_enabled_description">Saat diaktifkan, pemasangan SUS akan disembunyikan dari semua proses, termasuk proses KSU</string>
-    <string name="susfs_hide_mounts_for_all_procs_disabled_description">Saat dinonaktifkan, pemasangan SUS hanya akan disembunyikan dari proses non-KSU, proses KSU dapat melihat pemasangan</string>
     <string name="susfs_hide_mounts_all_enabled">Mengaktifkan penyembunyian pemasangan SUS untuk semua proses</string>
     <string name="susfs_hide_mounts_all_disabled">Menonaktifkan penyembunyian pemasangan SUS untuk semua proses</string>
     <string name="susfs_hide_mounts_recommendation">Disarankan untuk menonaktifkan setelah layar tidak terkunci, atau selama tahap service.sh atau boot-completed.sh, karena ini seharusnya memperbaiki masalah pada beberapa aplikasi root yang bergantung pada pemasangan yang dipasang oleh proses KSU</string>

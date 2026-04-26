@@ -468,9 +468,6 @@
     <string name="no_kstat_config_message">暫無 Kstat 設定，點擊下方按鈕添加設定</string>
     <string name="susfs_hide_mounts_control_title">SuS 掛載隱藏控制</string>
     <string name="susfs_hide_mounts_control_description">控制 SuS 掛載對程序嘅隱藏行為</string>
-    <string name="susfs_hide_mounts_for_all_procs_label">對所有程序隱藏 SuS 掛載</string>
-    <string name="susfs_hide_mounts_for_all_procs_enabled_description">啟用後，SuS 掛載將對所有程序隱藏，包括 KSU 程序</string>
-    <string name="susfs_hide_mounts_for_all_procs_disabled_description">禁用後，SuS 掛載僅對非 KSU 程序隱藏，KSU 程序可以看到掛載</string>
     <string name="susfs_hide_mounts_all_enabled">已啟用對所有程序隱藏 SuS 掛載</string>
     <string name="susfs_hide_mounts_all_disabled">已禁用對所有程序隱藏 SuS 掛載</string>
     <string name="susfs_hide_mounts_recommendation">建議喺螢幕解鎖後或喺 service.sh 或 boot-completed.sh 階段設定為禁用，這可以修復一些依賴 KSU 程序掛載嘅 root 應用程式嘅問題</string>

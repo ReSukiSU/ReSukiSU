@@ -576,21 +576,38 @@ fun restartApp(packageName: String) {
     launchApp(packageName)
 }
 
-fun getSuSFSStatus(): String {
+fun getSuSFSStatus(): Boolean {
     val shell = getRootShell()
-    return ShellUtils.fastCmd(shell, "${getKsuDaemonPath()} susfs show status").trim()
+    val cmd = "${getKsuDaemonPath()} susfs show version"
+    return shell.newJob().add(cmd).exec().isSuccess
 }
 
 fun getSuSFSVersion(): String {
     val shell = getRootShell()
-    val result = ShellUtils.fastCmd(shell, "${getKsuDaemonPath()} susfs show version")
-    return result
+    val cmd = "${getKsuDaemonPath()} susfs show version"
+    val result = shell.newJob().add(cmd).to(ArrayList<String>(), null).exec()
+    if (!result.isSuccess) return ""
+    return result.out.joinToString("\n").trim()
 }
 
 fun getSuSFSFeatures(): String {
     val shell = getRootShell()
-    val cmd = "${getKsuDaemonPath()} susfs show features"
-    return runCmd(shell, cmd)
+    val daemon = getKsuDaemonPath()
+    val candidates = listOf(
+        "$daemon susfs show enabled_features",
+        "$daemon susfs show enabled-features"
+    )
+
+    for (cmd in candidates) {
+        val result = shell.newJob().add(cmd).to(ArrayList<String>(), null).exec()
+        if (!result.isSuccess) continue
+        val output = result.out.joinToString("\n").trim()
+        if (output.isNotEmpty()) {
+            return output
+        }
+    }
+
+    return ""
 }
 
 fun getMetaModuleImplement(): String {

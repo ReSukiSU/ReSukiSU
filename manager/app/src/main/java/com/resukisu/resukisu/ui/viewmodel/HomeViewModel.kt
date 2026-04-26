@@ -13,7 +13,6 @@ import com.resukisu.resukisu.KernelVersion
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.getKernelVersion
 import com.resukisu.resukisu.ksuApp
-import com.resukisu.resukisu.ui.susfs.util.SuSFSManager
 import com.resukisu.resukisu.ui.util.downloader.checkNewVersion
 import com.resukisu.resukisu.ui.util.getKpmModuleCount
 import com.resukisu.resukisu.ui.util.getKpmVersion
@@ -60,7 +59,6 @@ class HomeViewModel : ViewModel() {
         val selinuxStatus: String = "",
         val kpmVersion: String = "",
         val susfsEnabled: Boolean = false,
-        val susfsVersionSupported: Boolean = false,
         val susfsVersion: String = "",
         val susfsFeatures: String = "",
         val superuserCount: Int = 0,
@@ -216,26 +214,23 @@ class HomeViewModel : ViewModel() {
                 )
 
                 if (!isSimpleMode) {
-                    val moduleInfo = loadModuleInfo()
+                    val (kpmVersion, superUserCount, moduleCount, kpmCount, zygiskImplement, metamoduleImplement) = loadModuleInfo()
                     systemInfo = systemInfo.copy(
-                        kpmVersion = moduleInfo.first,
-                        superuserCount = moduleInfo.second,
-                        moduleCount = moduleInfo.third,
-                        kpmModuleCount = moduleInfo.fourth,
-                        zygiskImplement = moduleInfo.fifth,
-                        metaModuleImplement = moduleInfo.sixth
+                        kpmVersion = kpmVersion,
+                        superuserCount = superUserCount,
+                        moduleCount = moduleCount,
+                        kpmModuleCount = kpmCount,
+                        zygiskImplement = zygiskImplement,
+                        metaModuleImplement = metamoduleImplement
                     )
                 }
 
                 if (!isHideSusfsStatus) {
-                    val susfsInfo = loadSuSFSInfo()
+                    val (enabled, version, features) = loadSuSFSInfo()
                     systemInfo = systemInfo.copy(
-                        susfsEnabled = susfsInfo.first,
-                        susfsVersionSupported = susfsInfo.first && SuSFSManager.isBinaryAvailable(
-                            context
-                        ), // enabled & have binary
-                        susfsVersion = susfsInfo.second,
-                        susfsFeatures = susfsInfo.third,
+                        susfsEnabled = enabled,
+                        susfsVersion = version,
+                        susfsFeatures = features,
                     )
                 }
 
@@ -385,7 +380,7 @@ class HomeViewModel : ViewModel() {
     private suspend fun loadSuSFSInfo(): Triple<Boolean, String, String> {
         return withContext(Dispatchers.IO) {
             val susfsEnabled = try {
-                getSuSFSStatus().equals("true", ignoreCase = true)
+                getSuSFSStatus()
             } catch (_: Exception) {
                 false
             }
