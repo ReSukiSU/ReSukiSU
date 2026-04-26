@@ -24,7 +24,7 @@ compose-material3 = "1.5.0-alpha18"
 compose-ui = "1.11.0"
 documentfile = "1.1.0"
 ndk = "29.0.14206865"
-foundation = "1.10.6"
+foundation = "1.11.0"
 aboutLibraries = "14.0.0-b02"
 
 [plugins]
