@@ -50,6 +50,7 @@ mod android {
     pub const UMOUNT_CONFIG_PATH: &str = concatcp!(WORKING_DIR, ".umount");
 
     pub const DYNAMIC_MANAGER: &str = concatcp!(WORKING_DIR, ".dynamic_manager");
+    pub const SUSFS_CONFUG: &str = concatcp!(WORKING_DIR, ".susfs.json");
 
     #[derive(Serialize)]
     pub struct MountInfo {

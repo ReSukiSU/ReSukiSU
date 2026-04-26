@@ -22,6 +22,7 @@ chrono = "0.4"
 regex-lite = "0.1"
 android-bootimg = { git = "https://github.com/5ec1cff/android_bootimg" }
 memmap2 = "0.9.10"
+bitflags = "2.11.0"
 
 [target.'cfg(target_os = "android")'.dependencies]
 rustix = { version = "=1.1.4", default-features = false, features = ["process", "thread", "fs", "system", "stdio"] }
@@ -57,6 +58,7 @@ prop-rs-android = { git = "https://github.com/Kernel-SU/ksu_props" }
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
 env_logger = { version = "0.11.10", default-features = false }
+bitflags = "2.11.0"
 
 [profile.release]
 strip = true

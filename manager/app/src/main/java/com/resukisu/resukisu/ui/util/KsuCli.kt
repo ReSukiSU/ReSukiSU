@@ -578,18 +578,18 @@ fun restartApp(packageName: String) {
 
 fun getSuSFSStatus(): String {
     val shell = getRootShell()
-    return ShellUtils.fastCmd(shell, "${getKsuDaemonPath()} susfs status").trim()
+    return ShellUtils.fastCmd(shell, "${getKsuDaemonPath()} susfs show status").trim()
 }
 
 fun getSuSFSVersion(): String {
     val shell = getRootShell()
-    val result = ShellUtils.fastCmd(shell, "${getKsuDaemonPath()} susfs version")
+    val result = ShellUtils.fastCmd(shell, "${getKsuDaemonPath()} susfs show version")
     return result
 }
 
 fun getSuSFSFeatures(): String {
     val shell = getRootShell()
-    val cmd = "${getKsuDaemonPath()} susfs features"
+    val cmd = "${getKsuDaemonPath()} susfs show features"
     return runCmd(shell, cmd)
 }
 
