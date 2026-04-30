@@ -109,6 +109,7 @@
     <string name="failed_to_update_app_profile">為 %s 更新 App Profile 失敗</string>
     <string name="debug_version_notice">"您正在使用 DEBUG 組建的管理器，如果你不知道什麼是 DEBUG 組建，請立即切換至 RELEASE 組建"</string>
     <string name="unofficial_version_notice">"您使用的管理器不是 %s 官方管理器，您可能無法取得權限。"</string>
+    <string name="conflict_with_apatch">檢測到APatch，所有功能均可能停止運作。</string>
     <string name="settings_umount_modules_default">預設卸載模組</string>
     <string name="settings_umount_modules_default_summary">App Profile 裡面「卸載模組」的全域預設值。如果啟用，將會為沒有配置 Profile 的應用程式移除所有針對系統修改的模組</string>
     <string name="profile_umount_modules_summary">啟用此選項後，將允許 KernelSU 為本應用程式還原被模組修改的檔案</string>
@@ -673,4 +674,17 @@
     <string name="module_shortcut_permission_tip_xiaomi">請在小米設定中為本應用程式啟用「建立桌面捷徑」權限。</string>
     <string name="module_shortcut_permission_tip_oppo">請在 OPPO 設定中為本應用程式啟用「桌面捷徑」權限。</string>
     <string name="module_shortcut_permission_tip_default">若建立捷徑失敗，請在系統設定中為本應用程式啟用桌面捷徑權限。</string>
+    <string name="download_channel_name">模組下載</string>
+    <string name="download_progress_title">正在下載 %s</string>
+    <string name="download_complete_title">下載完成</string>
+    <string name="download_complete_content">%s已成功下載</string>
+    <string name="download_failed_title">下載失敗</string>
+    <string name="download_failed_content">%s 下載失敗</string>
+    <string name="download">下載</string>
+    <string name="download_cancel">取消</string>
+    <string name="download_install">安裝</string>
+    <string name="notification_permission_description">需要通知權限用於在通知列表展示下載進度。</string>
+    <string name="notification_permission_denied">下載失敗: 未授權通知權限</string>
+    <string name="storage_permission_description">需要存取外部儲存空間以寫入檔案內容。</string>
+    <string name="storage_permission_denied">下載失敗: 未授權存取外部儲存空間</string>
 </resources>

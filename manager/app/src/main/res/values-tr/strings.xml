@@ -59,6 +59,7 @@
     <string name="reboot_download">Download moduna yeniden başlat</string>
     <string name="reboot_edl">EDL moduna yeniden başlat</string>
     <string name="about">Hakkında</string>
+    <string name="about_anime_character_sticker"><![CDATA[Anime karakterinin çıkartmasının bulunduğu görüntülerin dosyalarının telif hakları %1$s mülkiyetindedir. Görüntülerdeki fikrî mülkiyet hakları ise %2$s mülkiyetindedir. Bu dosyaları kullanmadan önce hem %3$s \'a uymalı hem de bu iki eser sahibinden bu sanat eserlerini kullanmak için izin almanız gerekmektedir.]]></string>
     <string name="get_source_code">Kaynak kodunu görüntüle</string>
     <string name="get_source_code_detail">GitHub üzerinden kaynak kodunu görüntüle</string>
     <string name="join_telegram_group">Topluluğa katıl</string>
