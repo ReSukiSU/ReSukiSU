@@ -14,7 +14,6 @@ on:
       - 'userspace/**'
       - 'scripts/ksubot.py'
   pull_request:
-    branches: [ "main", "dev" ]
     paths:
       - '.github/workflows/build-manager.yml'
       - '.github/workflows/build-lkm.yml'
