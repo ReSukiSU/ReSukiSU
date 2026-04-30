@@ -15,6 +15,7 @@ jobs:
         rustup target add aarch64-unknown-linux-musl
 
     - uses: Swatinem/rust-cache@v2
+      if: github.event_name != 'pull_request'
       with:
         workspaces: userspace/ksuinit
         cache-targets: true
