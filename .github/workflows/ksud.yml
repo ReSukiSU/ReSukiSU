@@ -56,6 +56,7 @@ jobs:
       with:
         prefix-key: ksud-${{ inputs.target }}
         workspaces: userspace/ksud
+        cache-targets: true
         
     - name: Setup cargo-ndk
       run: cargo install cargo-ndk --locked
