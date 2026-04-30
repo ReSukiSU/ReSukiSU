@@ -1,14 +1,9 @@
 name: Build ksuinit
 on:
   workflow_call:
-    inputs:
-      os:
-        required: false
-        type: string
-        default: ubuntu-latest
 jobs:
   build:
-    runs-on: ${{ inputs.os }}
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
       with:
@@ -23,6 +18,7 @@ jobs:
       with:
         workspaces: userspace/ksuinit
         cache-targets: false
+        prefix-key: "ksuinit"
 
     - name: Build ksuinit
       run: |
