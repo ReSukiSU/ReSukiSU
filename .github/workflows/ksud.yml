@@ -54,8 +54,9 @@ jobs:
     - uses: Swatinem/rust-cache@v2
       if: github.event_name != 'pull_request'
       with:
-        prefix-key: ksud-${{ inputs.target }}-rust
+        prefix-key: ksud-${{ inputs.target }}
         workspaces: userspace/ksud
+        cache-targets: true
         
     - name: Setup cargo-ndk
       run: cargo install cargo-ndk --locked

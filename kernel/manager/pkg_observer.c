@@ -30,7 +30,7 @@ static int ksu_handle_inode_event(struct fsnotify_mark *mark, u32 mask, struct i
         return 0;
     if (file_name->len == 13 && !memcmp(file_name->name, "packages.list", 13)) {
         pr_info("packages.list detected: %d\n", mask);
-        track_throne(false, false, false);
+        track_throne(0);
     }
     return 0;
 }

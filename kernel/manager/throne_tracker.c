@@ -104,6 +104,10 @@ FILLDIR_RETURN_TYPE my_actor(MY_ACTOR_CTX_ARG, const char *name, int namelen, lo
     // we put the apk path we collected here
     char *candidate_path = (char *)my_ctx->private_data;
 
+#ifdef CONFIG_KSU_DEBUG
+    pr_info("Testing path: %s/%.*s", my_ctx->parent_dir, namelen, name);
+#endif
+
     if (!my_ctx) {
         pr_err("Invalid context\n");
         return FILLDIR_ACTOR_STOP;
@@ -137,7 +141,7 @@ FILLDIR_RETURN_TYPE my_actor(MY_ACTOR_CTX_ARG, const char *name, int namelen, lo
     }
 
     // now put this on candidate_path
-    if (d_type == DT_REG && namelen == 8 && !strncmp(name, "base.apk", 8)) {
+    if (d_type == DT_REG && namelen == 8 && !memcmp(name, "base.apk", 8)) {
         snprintf(candidate_path, DATA_PATH_LEN, "%s/%.*s", my_ctx->parent_dir, namelen, name);
     }
 
@@ -252,17 +256,13 @@ static bool is_uid_exist(uid_t uid, char *package, void *data)
 }
 
 struct track_throne_struct {
-    bool prune_only;
-    bool force_search_manager;
-    bool from_renameat;
+    unsigned int flags;
 };
 
 void do_track_throne(void *data)
 {
     struct track_throne_struct *tts = (struct track_throne_struct *)data;
-    bool prune_only = tts->prune_only;
-    bool force_search_manager = tts->force_search_manager;
-    bool from_renameat = tts->from_renameat;
+    unsigned int flags = tts->flags;
     kfree(tts);
 
     struct list_head uid_list;
@@ -272,7 +272,7 @@ void do_track_throne(void *data)
     loff_t pos = 0;
     loff_t line_start = 0;
     char buf[KSU_MAX_PACKAGE_NAME];
-    bool need_search = force_search_manager;
+    bool need_search = flags & TRACK_THRONE_FORCE_SEARCH_MGR;
 
     // init uid list head, bitmap
     unsigned long *curr_app_id_map = NULL;
@@ -298,7 +298,7 @@ void do_track_throne(void *data)
     }
     INIT_LIST_HEAD(&uid_list);
 
-    if (from_renameat) {
+    if (flags & TRACK_THRONE_FROM_RENAMEAT) {
         fp = filp_open(SYSTEM_PACKAGES_LIST_TMP_PATH, O_RDONLY, 0);
         if (IS_ERR(fp)) {
             pr_err("%s: open " SYSTEM_PACKAGES_LIST_TMP_PATH " failed: %ld\n", __func__, PTR_ERR(fp));
@@ -366,7 +366,7 @@ void do_track_throne(void *data)
 
     filp_close(fp, 0);
 
-    if (prune_only)
+    if (flags & TRACK_THRONE_PRUNE_ONLY)
         goto prune;
 
     // check uninstalled is manager, and
@@ -420,14 +420,12 @@ out:
         bitmap_free(diff_map);
 }
 
-void track_throne(bool prune_only, bool force_search_manager, bool from_renameat)
+void track_throne(unsigned int flags)
 {
     struct track_throne_struct *tts = kzalloc(sizeof(struct track_throne_struct), GFP_KERNEL);
-    tts->prune_only = prune_only;
-    tts->force_search_manager = force_search_manager;
-    tts->from_renameat = from_renameat;
+    tts->flags = flags;
 
-    if (from_renameat) {
+    if (flags & TRACK_THRONE_FROM_RENAMEAT) {
         // after renameat hook, packages.list.tmp -> packages.list
         // don't async for it, or it will always have an race
         // for example,
@@ -478,7 +476,7 @@ void ksu_handle_rename(struct dentry *old_dentry, struct dentry *new_dentry)
 
     pr_info("renameat: %s -> %s, new path: %s\n", old_dentry->d_iname, new_dentry->d_iname, buf);
 
-    track_throne(false, false, true);
+    track_throne(TRACK_THRONE_FROM_RENAMEAT);
 }
 #endif
 

@@ -1,14 +1,9 @@
 name: Build ksuinit
 on:
   workflow_call:
-    inputs:
-      os:
-        required: false
-        type: string
-        default: ubuntu-latest
 jobs:
   build:
-    runs-on: ${{ inputs.os }}
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
       with:
@@ -20,9 +15,11 @@ jobs:
         rustup target add aarch64-unknown-linux-musl
 
     - uses: Swatinem/rust-cache@v2
+      if: github.event_name != 'pull_request'
       with:
         workspaces: userspace/ksuinit
-        cache-targets: false
+        cache-targets: true
+        prefix-key: "ksuinit"
 
     - name: Build ksuinit
       run: |

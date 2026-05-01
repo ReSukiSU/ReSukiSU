@@ -83,8 +83,8 @@ int ksu_handle_dynamic_manager(struct ksu_dynamic_manager_cmd *cmd)
 
         dynamic_manager.is_set = 1;
 
-        track_throne(false, true, false);
-        pr_info("dynamic manager updated: size=0x%x, hash=%.16s... (multi-manager enabled)\n", cmd->size, cmd->hash);
+        track_throne(TRACK_THRONE_FORCE_SEARCH_MGR);
+        pr_info("dynamic manager updated: size=0x%x, hash=%.16s\n", cmd->size, cmd->hash);
         break;
 
     case DYNAMIC_MANAGER_OP_GET:

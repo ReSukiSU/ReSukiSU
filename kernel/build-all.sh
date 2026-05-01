@@ -26,6 +26,7 @@ for kmi in $KMIS; do
         cd kernel/
         if [ -f kernelsu.ko ]; then
             cp kernelsu.ko "kernelsu-${kmi}.ko"
+            llvm-objcopy --strip-unneeded "kernelsu-${kmi}.ko"
             echo "✓ Built kernelsu-${kmi}.ko"
         fi
         cd ..
