@@ -5,10 +5,12 @@ on:
     branches: [ "main" ]
     paths:
       - 'manager/**'
+      - '.github/workflows/codeql.yml'
   pull_request:
     branches: [ "main" ]
     paths:
       - 'manager/**'
+      - '.github/workflows/codeql.yml'
   schedule:
     - cron: '30 1 * * 0'
 
