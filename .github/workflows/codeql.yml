@@ -40,6 +40,9 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'java-kotlin' ]
+    defaults:
+      run:
+        working-directory: ./manager
 
     steps:
       - name: Checkout repository
