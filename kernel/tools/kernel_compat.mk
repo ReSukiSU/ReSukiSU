@@ -109,6 +109,15 @@ endif
 
 # policy rwlock
 # kernel 4.14-
+ifeq ($(shell grep -q "^static DEFINE_RWLOCK(policy_rwlock);" $(srctree)/security/selinux/ss/services.c; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: policy_rwlock found,but not exported.)
+$(info -- $(REPO_NAME)/compat: We recommend you export it to get better memory management security.)
+$(info -- $(REPO_NAME)/compat: See: https://resukisu.github.io/guide/manual-integrate.html#policy-rwlock-export)
+$(info -- $(REPO_NAME)/compat: This is only an warning, but if you see kernel panic during system boot/modules stop working,DON'T FEEDBACK TO OUR.)
+ccflags-y += -DKSU_COMPAT_NON_EXPORTED_POLICY_RWLOCK
+endif
+
+
 ifeq ($(shell grep -q "^DEFINE_RWLOCK(policy_rwlock);" $(srctree)/security/selinux/ss/services.c; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: exported policy_rwlock found!)
 ccflags-y += -DKSU_COMPAT_HAS_EXPORTED_POLICY_RWLOCK
@@ -116,6 +125,14 @@ endif
 
 # sel_mutex
 # kernel 4.14-
+ifeq ($(shell grep -q "^static DEFINE_MUTEX(sel_mutex);" $(srctree)/security/selinux/selinuxfs.c; echo $??),0)
+$(info -- $(REPO_NAME)/compat: sel_mutex found,but not exported.)
+$(info -- $(REPO_NAME)/compat: We recommend you export it to avoid some probably race problem.)
+$(info -- $(REPO_NAME)/compat: See: https://resukisu.github.io/guide/manual-integrate.html#sel-mutex-export)
+$(info -- $(REPO_NAME)/compat: This is only an warning, but if you see kernel panic during system boot/modules stop working.DON'T FEEDBACK TO OUR.)
+ccflags-y += -DKSU_COMPAT_NON_EXPORTED_SEL_MUTEX
+endif
+
 ifeq ($(shell grep -q "^DEFINE_MUTEX(sel_mutex);" $(srctree)/security/selinux/selinuxfs.c; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: exported sel_mutex found!)
 ccflags-y += -DKSU_COMPAT_HAS_EXPORTED_SEL_MUTEX
