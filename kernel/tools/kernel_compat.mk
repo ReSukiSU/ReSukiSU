@@ -111,7 +111,7 @@ endif
 # kernel 4.14-
 ifeq ($(shell grep -q "^static DEFINE_RWLOCK(policy_rwlock);" $(srctree)/security/selinux/ss/services.c; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: policy_rwlock found,but not exported.)
-$(info -- $(REPO_NAME)/compat: We recommend you export it to get better memory management security.)
+$(info -- $(REPO_NAME)/compat: We recommend you export it to avoid some probably race problem.)
 $(info -- $(REPO_NAME)/compat: See: https://resukisu.github.io/guide/manual-integrate.html#policy-rwlock-export)
 $(info -- $(REPO_NAME)/compat: WARNING: You maybe see kernel panic during system boot or modules stop working.)
 ccflags-y += -DKSU_COMPAT_NON_EXPORTED_POLICY_RWLOCK
