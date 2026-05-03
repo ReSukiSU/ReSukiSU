@@ -9,7 +9,7 @@ For languages other than English and Chinese Simplified, please don't create pul
 Before reporting a bug, please first read the [document](https://resukisu.github.io)
 
 If the issue still exists, please ensure you have tried the **latest CI build**, as the bug may have already been resolved. 
-**You can export log from 'Settings' page**
+**You can export log from `Settings` page**
 
 When you [Open an issue](https://github.com/ReSukiSU/ReSukiSU/issues), you **must**:
 
@@ -36,6 +36,7 @@ Please note:
 - Make sure the project builds successfully before submitting the pull request.
 - If your code related manager, format your code using Android Studio and optimize imports before committing.
 - Signed off your changes
+- make sure your commit's title is look like `part: change`
 
 ## If it are an commit cherry-pick from upstream, you should:
 
