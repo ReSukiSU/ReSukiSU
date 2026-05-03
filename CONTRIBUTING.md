@@ -27,7 +27,7 @@ When you [Open an issue](https://github.com/ReSukiSU/ReSukiSU/issues), you **mus
 
 ## Code
 
-Fork the this repository, make your changes, and open a pull request.
+Fork this repository, make your changes, and open a pull request.
 
 Please note:
 
