@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -153,26 +155,27 @@ private enum class SuSFSTab(
     val content: @Composable (
         viewModel: SuSFSScreenViewModel,
         contentPadding: PaddingValues,
-        nestedScrollConnection: NestedScrollConnection
+        nestedScrollConnection: NestedScrollConnection,
+        listState: LazyListState,
     ) -> Unit
 ) {
-    Basic(R.string.susfs_tab_basic_settings, { viewModel, padding, scroll ->
-        BasicTab(viewModel, padding, scroll)
+    Basic(R.string.susfs_tab_basic_settings, { viewModel, padding, scroll, listState ->
+        BasicTab(viewModel, padding, scroll, listState)
     }),
-    SusPaths(R.string.susfs_tab_sus_paths, { viewModel, padding, scroll ->
-        SuSPathTab(viewModel, padding, scroll)
+    SusPaths(R.string.susfs_tab_sus_paths, { viewModel, padding, scroll, listState ->
+        SuSPathTab(viewModel, padding, scroll, listState)
     }),
-    SusLoopPaths(R.string.susfs_tab_sus_loop_paths, { viewModel, padding, scroll ->
-        SuSLoopPathTab(viewModel, padding, scroll)
+    SusLoopPaths(R.string.susfs_tab_sus_loop_paths, { viewModel, padding, scroll, listState ->
+        SuSLoopPathTab(viewModel, padding, scroll, listState)
     }),
-    SusMaps(R.string.susfs_tab_sus_maps, { viewModel, padding, scroll ->
-        SuSMapTab(viewModel, padding, scroll)
+    SusMaps(R.string.susfs_tab_sus_maps, { viewModel, padding, scroll, listState ->
+        SuSMapTab(viewModel, padding, scroll, listState)
     }),
-    Kstat(R.string.susfs_tab_kstat_config, { viewModel, padding, scroll ->
-        SuSKstatTab(viewModel, padding, scroll)
+    Kstat(R.string.susfs_tab_kstat_config, { viewModel, padding, scroll, listState ->
+        SuSKstatTab(viewModel, padding, scroll, listState)
     }),
-    Features(R.string.susfs_tab_enabled_features, { viewModel, padding, scroll ->
-        SuSFeaturesTab(viewModel, padding, scroll)
+    Features(R.string.susfs_tab_enabled_features, { viewModel, padding, scroll, listState ->
+        SuSFeaturesTab(viewModel, padding, scroll, listState)
     }),
 }
 
@@ -206,7 +209,8 @@ private fun rememberPathEditDialog(
 private fun SuSFeaturesTab(
     viewModel: SuSFSScreenViewModel,
     contentPadding: PaddingValues,
-    nestedScrollConnection: NestedScrollConnection
+    nestedScrollConnection: NestedScrollConnection,
+    listState: LazyListState,
 ) {
     val uiState = viewModel.uiState
 
@@ -215,7 +219,10 @@ private fun SuSFeaturesTab(
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection),
     ) {
-        LazyColumn(modifier = Modifier.weight(1f)) {
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            state = listState,
+        ) {
             item {
                 Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
             }
@@ -237,13 +244,12 @@ private fun SuSFeaturesTab(
                 FeatureGroup(viewModel = viewModel, features = uiState.featureStatus)
             }
         }
-        SettingsBaseWidget(
+        BottomCenterOutlinedAction(
             modifier = Modifier.padding(bottom = contentPadding.calculateBottomPadding()),
             icon = Icons.Filled.Refresh,
-            title = stringResource(R.string.refresh),
-            description = null,
-            onClick = { viewModel.refresh() }
-        ) {}
+            text = stringResource(R.string.refresh),
+            onClick = { viewModel.refresh() },
+        )
     }
 }
 
@@ -251,7 +257,8 @@ private fun SuSFeaturesTab(
 private fun SuSKstatTab(
     viewModel: SuSFSScreenViewModel,
     contentPadding: PaddingValues,
-    nestedScrollConnection: NestedScrollConnection
+    nestedScrollConnection: NestedScrollConnection,
+    listState: LazyListState,
 ) {
     val uiState = viewModel.uiState
     val kstatPathEditDialog = rememberPathEditDialog(AddPathTarget.KstatPath, viewModel)
@@ -285,6 +292,7 @@ private fun SuSKstatTab(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection),
+        state = listState,
     ) {
         item {
             Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
@@ -356,7 +364,8 @@ private fun SuSKstatTab(
 private fun SuSMapTab(
     viewModel: SuSFSScreenViewModel,
     contentPadding: PaddingValues,
-    nestedScrollConnection: NestedScrollConnection
+    nestedScrollConnection: NestedScrollConnection,
+    listState: LazyListState,
 ) {
     val uiState = viewModel.uiState
     val pathEditDialog = rememberPathEditDialog(AddPathTarget.SusMap, viewModel)
@@ -365,6 +374,7 @@ private fun SuSMapTab(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection),
+        state = listState,
     ) {
         item {
             Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
@@ -403,7 +413,8 @@ private fun SuSMapTab(
 private fun SuSLoopPathTab(
     viewModel: SuSFSScreenViewModel,
     contentPadding: PaddingValues,
-    nestedScrollConnection: NestedScrollConnection
+    nestedScrollConnection: NestedScrollConnection,
+    listState: LazyListState,
 ) {
     val uiState = viewModel.uiState
     val pathEditDialog = rememberPathEditDialog(AddPathTarget.SusLoopPath, viewModel)
@@ -412,6 +423,7 @@ private fun SuSLoopPathTab(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection),
+        state = listState,
     ) {
         item {
             Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
@@ -450,7 +462,8 @@ private fun SuSLoopPathTab(
 private fun SuSPathTab(
     viewModel: SuSFSScreenViewModel,
     contentPadding: PaddingValues,
-    nestedScrollConnection: NestedScrollConnection
+    nestedScrollConnection: NestedScrollConnection,
+    listState: LazyListState,
 ) {
     val uiState = viewModel.uiState
     val pathEditDialog = rememberPathEditDialog(AddPathTarget.SusPath, viewModel)
@@ -524,7 +537,10 @@ private fun SuSPathTab(
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection),
     ) {
-        LazyColumn(modifier = Modifier.weight(1f)) {
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            state = listState,
+        ) {
             item {
                 Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
             }
@@ -584,13 +600,12 @@ private fun SuSPathTab(
                 )
             }
         }
-        SettingsBaseWidget(
+        BottomCenterOutlinedAction(
             modifier = Modifier.padding(bottom = contentPadding.calculateBottomPadding()),
             icon = Icons.Filled.Delete,
-            title = stringResource(R.string.susfs_reset_paths_title),
-            description = null,
-            onClick = { viewModel.resetAllSusPaths() }
-        ) {}
+            text = stringResource(R.string.susfs_reset_paths_title),
+            onClick = { viewModel.resetAllSusPaths() },
+        )
     }
 }
 
@@ -598,7 +613,8 @@ private fun SuSPathTab(
 private fun BasicTab(
     viewModel: SuSFSScreenViewModel,
     contentPadding: PaddingValues,
-    nestedScrollConnection: NestedScrollConnection
+    nestedScrollConnection: NestedScrollConnection,
+    listState: LazyListState,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -772,7 +788,10 @@ private fun BasicTab(
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection),
     ) {
-        LazyColumn(modifier = Modifier.weight(1f)) {
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            state = listState,
+        ) {
             item { Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding())) }
             item {
                 SplicedColumnGroup(
@@ -938,6 +957,14 @@ private fun BasicTab(
                     }
                 }
             }
+            item {
+                SettingsBaseWidget(
+                    icon = Icons.Filled.Delete,
+                    title = stringResource(R.string.susfs_reset_to_default),
+                    description = null,
+                    onClick = { viewModel.setUnameAndBuildTime("", "") }
+                ) {}
+            }
             item { Spacer(modifier = Modifier.height(8.dp)) }
         }
 
@@ -971,13 +998,6 @@ private fun BasicTab(
                 )
             }
         }
-        SettingsBaseWidget(
-            modifier = Modifier.padding(top = 6.dp, bottom = contentPadding.calculateBottomPadding()),
-            icon = Icons.Filled.Delete,
-            title = stringResource(R.string.susfs_reset_to_default),
-            description = null,
-            onClick = { viewModel.setUnameAndBuildTime("", "") }
-        ) {}
     }
 }
 
@@ -997,11 +1017,27 @@ fun SuSFSConfigScreen() {
 
     val pagerState = rememberPagerState(pageCount = { SuSFSTab.entries.size })
     val animationScope = rememberCoroutineScope()
+    val tabListStates = remember { List(SuSFSTab.entries.size) { LazyListState() } }
 
     LaunchedEffect(viewModel.toastMessage) {
         val message = viewModel.toastMessage ?: return@LaunchedEffect
         snackBarHost.showSnackbar(message)
         viewModel.consumeToastMessage()
+    }
+
+    val currentListState = tabListStates[pagerState.currentPage]
+    LaunchedEffect(
+        pagerState.currentPage,
+        currentListState.firstVisibleItemIndex,
+        currentListState.firstVisibleItemScrollOffset,
+    ) {
+        val targetOffset = if (currentListState.firstVisibleItemIndex > 0) {
+            scrollBehavior.state.heightOffsetLimit
+        } else {
+            (-currentListState.firstVisibleItemScrollOffset.toFloat())
+                .coerceIn(scrollBehavior.state.heightOffsetLimit, 0f)
+        }
+        scrollBehavior.state.heightOffset = targetOffset
     }
 
     Scaffold(
@@ -1132,10 +1168,37 @@ fun SuSFSConfigScreen() {
                     SuSFSTab.entries[page].content(
                         viewModel,
                         tabPadding,
-                        scrollBehavior.nestedScrollConnection
+                        scrollBehavior.nestedScrollConnection,
+                        tabListStates[page],
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun BottomCenterOutlinedAction(
+    modifier: Modifier = Modifier,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    text: String,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        OutlinedButton(
+            shape = RoundedCornerShape(999.dp),
+            onClick = onClick,
+        ) {
+            Icon(imageVector = icon, contentDescription = null)
+            Text(
+                modifier = Modifier.padding(start = 6.dp),
+                text = text,
+            )
         }
     }
 }
