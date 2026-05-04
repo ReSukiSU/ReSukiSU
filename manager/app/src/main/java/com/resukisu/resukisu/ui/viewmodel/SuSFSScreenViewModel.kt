@@ -1,8 +1,13 @@
 package com.resukisu.resukisu.ui.viewmodel
 
+import android.content.Context
+import android.content.SharedPreferences
+import android.content.pm.ApplicationInfo
+import android.os.Build
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.resukisu.resukisu.R
@@ -12,6 +17,7 @@ import com.resukisu.resukisu.ui.util.getRootShell
 import com.resukisu.resukisu.ui.util.getSuSFSFeatures
 import com.resukisu.resukisu.ui.util.getSuSFSStatus
 import com.resukisu.resukisu.ui.util.getSuSFSVersion
+import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.io.SuFile
 import com.topjohnwu.superuser.io.SuFileInputStream
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +28,14 @@ import org.json.JSONObject
 
 private inline val defaultSusfsValue: String
     get() = "default"
+
+private const val SUSFS_PREFS = "susfs_config"
+private const val KEY_EXECUTE_IN_POST_FS_DATA = "execute_in_post_fs_data"
+private const val KEY_ENABLE_HIDE_BL = "enable_hide_bl"
+
+private const val SUSFS_CONFIG_PATH = "/data/adb/ksu/.susfs.json"
+private const val CGROUP_BASE_PATH = "/sys/fs/cgroup"
+private const val MEDIA_DATA_PATH = "/data/media/0/Android/data"
 
 data class SuSFSFeatureStatus(
     val key: String,
@@ -49,6 +63,17 @@ data class SuSFSStaticKstatEntry(
         get() = "ino=$ino, dev=$dev, size=$size"
 }
 
+data class SuSFSAppEntry(
+    val packageName: String,
+    val label: String,
+)
+
+data class SuSFSSlotInfo(
+    val slotName: String,
+    val uname: String,
+    val buildTime: String,
+)
+
 data class SuSFSUiState(
     val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
@@ -56,6 +81,8 @@ data class SuSFSUiState(
     val versionText: String = "",
     val unameValue: String = defaultSusfsValue,
     val buildTimeValue: String = defaultSusfsValue,
+    val executeInPostFsData: Boolean = false,
+    val hideBlEnabled: Boolean = true,
     val hideSuSMntsForNonSUProcs: Boolean = false,
     val hideMountsControlSupported: Boolean = true,
     val susfsLogEnabled: Boolean = false,
@@ -78,12 +105,29 @@ class SuSFSScreenViewModel : ViewModel() {
     var toastMessage by mutableStateOf<String?>(null)
         private set
 
+    var slotInfoList by mutableStateOf<List<SuSFSSlotInfo>>(emptyList())
+        private set
+
+    var currentActiveSlot by mutableStateOf("")
+        private set
+
+    var slotInfoLoading by mutableStateOf(false)
+        private set
+
     init {
         refresh()
     }
 
+    private fun prefs(): SharedPreferences {
+        return ksuApp.getSharedPreferences(SUSFS_PREFS, Context.MODE_PRIVATE)
+    }
+
     fun consumeToastMessage() {
         toastMessage = null
+    }
+
+    fun postToast(message: String) {
+        toastMessage = message
     }
 
     fun refresh() {
@@ -121,6 +165,24 @@ class SuSFSScreenViewModel : ViewModel() {
             }
             runCommand("set_uname ${shellQuote(uname)} ${shellQuote(buildTime)}")
         }
+    }
+
+    fun setExecuteInPostFsData(enabled: Boolean) {
+        prefs().edit { putBoolean(KEY_EXECUTE_IN_POST_FS_DATA, enabled) }
+        uiState = uiState.copy(executeInPostFsData = enabled)
+    }
+
+    fun setHideBlEnabled(enabled: Boolean) {
+        prefs().edit { putBoolean(KEY_ENABLE_HIDE_BL, enabled) }
+        uiState = uiState.copy(hideBlEnabled = enabled)
+    }
+
+    fun useSlotUname(uname: String) {
+        setUnameAndBuildTime(uname, uiState.buildTimeValue)
+    }
+
+    fun useSlotBuildTime(buildTime: String) {
+        setUnameAndBuildTime(uiState.unameValue, buildTime)
     }
 
     fun setAvcLogSpoofing(enabled: Boolean) {
@@ -162,6 +224,150 @@ class SuSFSScreenViewModel : ViewModel() {
                 uiState = uiState.copy(susfsLogEnabled = enabled)
             }
         }
+    }
+
+    fun resetAllSusPaths() {
+        viewModelScope.launch(Dispatchers.IO) {
+            var anySuccess = false
+            uiState.susPaths.forEach { path ->
+                if (runCommand("del_sus_path ${shellQuote(path)}", showSuccessToast = false)) {
+                    anySuccess = true
+                }
+            }
+            if (anySuccess) {
+                toastMessage = ksuApp.getString(R.string.kpm_control_success)
+                refresh()
+            }
+        }
+    }
+
+    fun addAppPaths(packageNames: Collection<String>) {
+        if (packageNames.isEmpty()) return
+        viewModelScope.launch(Dispatchers.IO) {
+            var anySuccess = false
+            packageNames.forEach { packageName ->
+                val uid = resolveUid(packageName) ?: return@forEach
+                val candidates = linkedSetOf<String>()
+                candidates += "/sdcard/Android/data/$packageName"
+                candidates += "$MEDIA_DATA_PATH/$packageName"
+                candidates += buildUidPath(uid)
+
+                candidates.forEach { path ->
+                    val success = runCommand("add_sus_path ${shellQuote(path)}", showSuccessToast = false)
+                    if (success) anySuccess = true
+                }
+            }
+            if (anySuccess) {
+                toastMessage = ksuApp.getString(R.string.kpm_control_success)
+                refresh()
+            }
+        }
+    }
+
+    fun backupCurrentConfig(outputPath: String, onFinish: (Boolean, String?) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val config = readSusfsConfigJson()
+            if (config == null) {
+                onFinish(false, ksuApp.getString(R.string.susfs_backup_file_not_found))
+                return@launch
+            }
+
+            val payload = JSONObject().apply {
+                put("version", runCatching { getSuSFSVersion() }.getOrDefault(""))
+                put("timestamp", System.currentTimeMillis())
+                put("deviceInfo", "${Build.MANUFACTURER} ${Build.MODEL} (${Build.VERSION.RELEASE})")
+                put("configurations", config)
+                put("executeInPostFsData", prefs().getBoolean(KEY_EXECUTE_IN_POST_FS_DATA, false))
+                put("hideBlEnabled", prefs().getBoolean(KEY_ENABLE_HIDE_BL, true))
+            }
+
+            val writeResult = runCatching {
+                java.io.File(outputPath).parentFile?.mkdirs()
+                java.io.File(outputPath).writeText(payload.toString(2))
+            }
+            if (writeResult.isSuccess) {
+                onFinish(true, null)
+            } else {
+                onFinish(false, writeResult.exceptionOrNull()?.message)
+            }
+        }
+    }
+
+    fun restoreFromBackupFile(filePath: String, onFinish: (Boolean, String?) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = runCatching {
+                val content = java.io.File(filePath).readText()
+                JSONObject(content)
+            }.getOrNull()
+            if (result == null) {
+                onFinish(false, ksuApp.getString(R.string.susfs_backup_invalid_format))
+                return@launch
+            }
+
+            val config = result.optJSONObject("configurations")
+            if (config == null) {
+                onFinish(false, ksuApp.getString(R.string.susfs_backup_invalid_format))
+                return@launch
+            }
+
+            val writeSuccess = writeRawConfig(config.toString())
+            if (!writeSuccess) {
+                onFinish(false, ksuApp.getString(R.string.operation_failed))
+                return@launch
+            }
+
+            prefs().edit {
+                if (result.has("executeInPostFsData")) {
+                    putBoolean(KEY_EXECUTE_IN_POST_FS_DATA, result.optBoolean("executeInPostFsData", false))
+                }
+                if (result.has("hideBlEnabled")) {
+                    putBoolean(KEY_ENABLE_HIDE_BL, result.optBoolean("hideBlEnabled", true))
+                }
+            }
+
+            refresh()
+            onFinish(true, null)
+        }
+    }
+
+    fun validateBackup(filePath: String, onFinish: (Boolean, String?) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val ok = runCatching {
+                val content = java.io.File(filePath).readText()
+                val parsed = JSONObject(content)
+                parsed.has("configurations")
+            }.getOrDefault(false)
+            onFinish(ok, if (ok) null else ksuApp.getString(R.string.susfs_backup_invalid_format))
+        }
+    }
+
+    fun refreshSlotInfo() {
+        viewModelScope.launch(Dispatchers.IO) {
+            slotInfoLoading = true
+            val loaded = runCatching { loadSlotInfo() }.getOrElse { emptyList() }
+            slotInfoList = loaded
+            currentActiveSlot = getActiveBootSlot()
+            slotInfoLoading = false
+        }
+    }
+
+    suspend fun loadSelectableApps(): List<SuSFSAppEntry> = withContext(Dispatchers.IO) {
+        val entries = SuperUserViewModel.apps
+            .asSequence()
+            .filter { appInfo ->
+                val info = appInfo.packageInfo.applicationInfo ?: return@filter false
+                (info.flags and ApplicationInfo.FLAG_SYSTEM) == 0
+            }
+            .map { appInfo ->
+                SuSFSAppEntry(
+                    packageName = appInfo.packageName,
+                    label = appInfo.label.ifBlank { appInfo.packageName },
+                )
+            }
+            .distinctBy { it.packageName }
+            .sortedBy { it.label.lowercase() }
+            .toList()
+        return@withContext entries
     }
 
     fun addSusPath(path: String) = addPath(path, showSuccessToast = true) { "add_sus_path $it" }
@@ -344,6 +550,8 @@ class SuSFSScreenViewModel : ViewModel() {
             versionText = version,
             unameValue = commonObject?.optString("release", defaultSusfsValue) ?: defaultSusfsValue,
             buildTimeValue = commonObject?.optString("version", defaultSusfsValue) ?: defaultSusfsValue,
+            executeInPostFsData = prefs().getBoolean(KEY_EXECUTE_IN_POST_FS_DATA, false),
+            hideBlEnabled = prefs().getBoolean(KEY_ENABLE_HIDE_BL, true),
             hideSuSMntsForNonSUProcs = false, // TODO native
             hideMountsControlSupported = uiState.hideMountsControlSupported,
             susfsLogEnabled = uiState.susfsLogEnabled,
@@ -361,7 +569,7 @@ class SuSFSScreenViewModel : ViewModel() {
     }
 
     private suspend fun readSusfsConfigJson(): JSONObject? = withContext(Dispatchers.IO) {
-        val suFile = SuFile("/data/adb/ksu/.susfs.json").apply {
+        val suFile = SuFile(SUSFS_CONFIG_PATH).apply {
             shell = getRootShell()
         }
         if (!suFile.isFile) {
@@ -373,6 +581,74 @@ class SuSFSScreenViewModel : ViewModel() {
             return@withContext null
         }
         return@withContext runCatching { JSONObject(content) }.getOrNull()
+    }
+
+    private suspend fun writeRawConfig(content: String): Boolean = withContext(Dispatchers.IO) {
+        val cmd = "cat <<'EOF' > $SUSFS_CONFIG_PATH\n$content\nEOF"
+        return@withContext getRootShell().newJob().add(cmd).exec().isSuccess
+    }
+
+    private suspend fun getActiveBootSlot(): String = withContext(Dispatchers.IO) {
+        val shell = getRootShell()
+        val suffix = runShellCmd(shell, "getprop ro.boot.slot_suffix").trim()
+        return@withContext when (suffix) {
+            "_a" -> "boot_a"
+            "_b" -> "boot_b"
+            else -> "unknown"
+        }
+    }
+
+    private suspend fun loadSlotInfo(): List<SuSFSSlotInfo> = withContext(Dispatchers.IO) {
+        val shell = getRootShell()
+        val result = mutableListOf<SuSFSSlotInfo>()
+        listOf("boot_a", "boot_b").forEach { slot ->
+            val unameCmd = "strings -n 20 /dev/block/by-name/$slot | awk '/Linux version/ && ++c==2 {print \$3; exit}'"
+            val buildTimeCmd = "strings -n 20 /dev/block/by-name/$slot | sed -n '/Linux version.*#/{s/.*#/#/p;q}'"
+            val uname = runShellCmd(shell, unameCmd).trim()
+            val buildTime = runShellCmd(shell, buildTimeCmd).trim()
+            if (uname.isNotEmpty() && buildTime.isNotEmpty()) {
+                result += SuSFSSlotInfo(
+                    slotName = slot,
+                    uname = uname,
+                    buildTime = buildTime
+                )
+            }
+        }
+        return@withContext result
+    }
+
+    private fun runShellCmd(shell: Shell, cmd: String): String {
+        val out = mutableListOf<String>()
+        shell.newJob().add(cmd).to(out, null).exec()
+        return out.joinToString("\n")
+    }
+
+    private suspend fun resolveUid(packageName: String): Int? = withContext(Dispatchers.IO) {
+        SuperUserViewModel.apps.firstOrNull { it.packageName == packageName }?.packageInfo?.applicationInfo?.uid?.let {
+            return@withContext it
+        }
+        return@withContext runCatching {
+            val pkg = ksuApp.packageManager.getPackageInfo(packageName, 0)
+            pkg.applicationInfo?.uid
+        }.getOrNull()
+    }
+
+    private suspend fun buildUidPath(uid: Int): String = withContext(Dispatchers.IO) {
+        val candidates = listOf(
+            "$CGROUP_BASE_PATH/uid_$uid",
+            "$CGROUP_BASE_PATH/apps/uid_$uid",
+            "$CGROUP_BASE_PATH/system/uid_$uid",
+            "$CGROUP_BASE_PATH/freezer/uid_$uid",
+            "$CGROUP_BASE_PATH/memory/uid_$uid",
+            "$CGROUP_BASE_PATH/cpuset/uid_$uid",
+            "$CGROUP_BASE_PATH/cpu/uid_$uid",
+        )
+        val shell = getRootShell()
+        for (path in candidates) {
+            val ok = shell.newJob().add("[ -d ${shellQuote(path)} ]").exec().isSuccess
+            if (ok) return@withContext path
+        }
+        return@withContext candidates.first()
     }
 
     private fun parseFeatureStatus(rawOutput: String): List<SuSFSFeatureStatus> {
