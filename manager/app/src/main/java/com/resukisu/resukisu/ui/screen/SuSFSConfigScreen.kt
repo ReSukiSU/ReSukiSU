@@ -1,6 +1,5 @@
 package com.resukisu.resukisu.ui.screen
 
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -1025,12 +1024,8 @@ fun SuSFSConfigScreen() {
         viewModel.consumeToastMessage()
     }
 
-    val currentListState = tabListStates[pagerState.currentPage]
-    LaunchedEffect(
-        pagerState.currentPage,
-        currentListState.firstVisibleItemIndex,
-        currentListState.firstVisibleItemScrollOffset,
-    ) {
+    LaunchedEffect(pagerState.currentPage) {
+        val currentListState = tabListStates[pagerState.currentPage]
         val targetOffset = if (currentListState.firstVisibleItemIndex > 0) {
             scrollBehavior.state.heightOffsetLimit
         } else {
@@ -1117,14 +1112,6 @@ fun SuSFSConfigScreen() {
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
     ) { innerPadding ->
-        BackHandler(
-            pagerState.currentPage != 0
-        ) {
-            animationScope.launch {
-                pagerState.animateScrollToPage(0)
-            }
-        }
-
         if (uiState.isLoading) {
             Box(
                 modifier = Modifier
