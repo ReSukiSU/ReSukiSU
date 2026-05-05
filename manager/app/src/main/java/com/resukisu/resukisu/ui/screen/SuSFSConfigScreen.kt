@@ -15,12 +15,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Apps
@@ -41,12 +40,12 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.PrimaryScrollableTabRow
@@ -92,11 +91,11 @@ import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.haze
 import com.resukisu.resukisu.ui.theme.hazeSource
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
-import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
 import com.resukisu.resukisu.ui.viewmodel.SuSFSAppEntry
 import com.resukisu.resukisu.ui.viewmodel.SuSFSFeatureStatus
 import com.resukisu.resukisu.ui.viewmodel.SuSFSScreenViewModel
 import com.resukisu.resukisu.ui.viewmodel.SuSFSStaticKstatEntry
+import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
@@ -155,26 +154,25 @@ private enum class SuSFSTab(
         viewModel: SuSFSScreenViewModel,
         contentPadding: PaddingValues,
         nestedScrollConnection: NestedScrollConnection,
-        listState: LazyListState,
     ) -> Unit
 ) {
-    Basic(R.string.susfs_tab_basic_settings, { viewModel, padding, scroll, listState ->
-        BasicTab(viewModel, padding, scroll, listState)
+    Basic(R.string.susfs_tab_basic_settings, { viewModel, padding, scroll ->
+        BasicTab(viewModel, padding, scroll)
     }),
-    SusPaths(R.string.susfs_tab_sus_paths, { viewModel, padding, scroll, listState ->
-        SuSPathTab(viewModel, padding, scroll, listState)
+    SusPaths(R.string.susfs_tab_sus_paths, { viewModel, padding, scroll ->
+        SuSPathTab(viewModel, padding, scroll)
     }),
-    SusLoopPaths(R.string.susfs_tab_sus_loop_paths, { viewModel, padding, scroll, listState ->
-        SuSLoopPathTab(viewModel, padding, scroll, listState)
+    SusLoopPaths(R.string.susfs_tab_sus_loop_paths, { viewModel, padding, scroll ->
+        SuSLoopPathTab(viewModel, padding, scroll)
     }),
-    SusMaps(R.string.susfs_tab_sus_maps, { viewModel, padding, scroll, listState ->
-        SuSMapTab(viewModel, padding, scroll, listState)
+    SusMaps(R.string.susfs_tab_sus_maps, { viewModel, padding, scroll ->
+        SuSMapTab(viewModel, padding, scroll)
     }),
-    Kstat(R.string.susfs_tab_kstat_config, { viewModel, padding, scroll, listState ->
-        SuSKstatTab(viewModel, padding, scroll, listState)
+    Kstat(R.string.susfs_tab_kstat_config, { viewModel, padding, scroll ->
+        SuSKstatTab(viewModel, padding, scroll)
     }),
-    Features(R.string.susfs_tab_enabled_features, { viewModel, padding, scroll, listState ->
-        SuSFeaturesTab(viewModel, padding, scroll, listState)
+    Features(R.string.susfs_tab_enabled_features, { viewModel, padding, scroll ->
+        SuSFeaturesTab(viewModel, padding, scroll)
     }),
 }
 
@@ -209,7 +207,6 @@ private fun SuSFeaturesTab(
     viewModel: SuSFSScreenViewModel,
     contentPadding: PaddingValues,
     nestedScrollConnection: NestedScrollConnection,
-    listState: LazyListState,
 ) {
     val uiState = viewModel.uiState
 
@@ -220,7 +217,6 @@ private fun SuSFeaturesTab(
     ) {
         LazyColumn(
             modifier = Modifier.weight(1f),
-            state = listState,
         ) {
             item {
                 Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
@@ -257,7 +253,6 @@ private fun SuSKstatTab(
     viewModel: SuSFSScreenViewModel,
     contentPadding: PaddingValues,
     nestedScrollConnection: NestedScrollConnection,
-    listState: LazyListState,
 ) {
     val uiState = viewModel.uiState
     val kstatPathEditDialog = rememberPathEditDialog(AddPathTarget.KstatPath, viewModel)
@@ -291,7 +286,6 @@ private fun SuSKstatTab(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection),
-        state = listState,
     ) {
         item {
             Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
@@ -364,7 +358,6 @@ private fun SuSMapTab(
     viewModel: SuSFSScreenViewModel,
     contentPadding: PaddingValues,
     nestedScrollConnection: NestedScrollConnection,
-    listState: LazyListState,
 ) {
     val uiState = viewModel.uiState
     val pathEditDialog = rememberPathEditDialog(AddPathTarget.SusMap, viewModel)
@@ -373,7 +366,6 @@ private fun SuSMapTab(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection),
-        state = listState,
     ) {
         item {
             Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
@@ -413,7 +405,6 @@ private fun SuSLoopPathTab(
     viewModel: SuSFSScreenViewModel,
     contentPadding: PaddingValues,
     nestedScrollConnection: NestedScrollConnection,
-    listState: LazyListState,
 ) {
     val uiState = viewModel.uiState
     val pathEditDialog = rememberPathEditDialog(AddPathTarget.SusLoopPath, viewModel)
@@ -422,7 +413,6 @@ private fun SuSLoopPathTab(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection),
-        state = listState,
     ) {
         item {
             Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
@@ -462,7 +452,6 @@ private fun SuSPathTab(
     viewModel: SuSFSScreenViewModel,
     contentPadding: PaddingValues,
     nestedScrollConnection: NestedScrollConnection,
-    listState: LazyListState,
 ) {
     val uiState = viewModel.uiState
     val pathEditDialog = rememberPathEditDialog(AddPathTarget.SusPath, viewModel)
@@ -538,7 +527,6 @@ private fun SuSPathTab(
     ) {
         LazyColumn(
             modifier = Modifier.weight(1f),
-            state = listState,
         ) {
             item {
                 Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
@@ -613,7 +601,6 @@ private fun BasicTab(
     viewModel: SuSFSScreenViewModel,
     contentPadding: PaddingValues,
     nestedScrollConnection: NestedScrollConnection,
-    listState: LazyListState,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -789,7 +776,6 @@ private fun BasicTab(
     ) {
         LazyColumn(
             modifier = Modifier.weight(1f),
-            state = listState,
         ) {
             item { Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding())) }
             item {
@@ -1016,23 +1002,11 @@ fun SuSFSConfigScreen() {
 
     val pagerState = rememberPagerState(pageCount = { SuSFSTab.entries.size })
     val animationScope = rememberCoroutineScope()
-    val tabListStates = remember { List(SuSFSTab.entries.size) { LazyListState() } }
 
     LaunchedEffect(viewModel.toastMessage) {
         val message = viewModel.toastMessage ?: return@LaunchedEffect
         snackBarHost.showSnackbar(message)
         viewModel.consumeToastMessage()
-    }
-
-    LaunchedEffect(pagerState.currentPage) {
-        val currentListState = tabListStates[pagerState.currentPage]
-        val targetOffset = if (currentListState.firstVisibleItemIndex > 0) {
-            scrollBehavior.state.heightOffsetLimit
-        } else {
-            (-currentListState.firstVisibleItemScrollOffset.toFloat())
-                .coerceIn(scrollBehavior.state.heightOffsetLimit, 0f)
-        }
-        scrollBehavior.state.heightOffset = targetOffset
     }
 
     Scaffold(
@@ -1156,7 +1130,6 @@ fun SuSFSConfigScreen() {
                         viewModel,
                         tabPadding,
                         scrollBehavior.nestedScrollConnection,
-                        tabListStates[page],
                     )
                 }
             }
