@@ -105,9 +105,9 @@ void try_umount(const char *mnt, int flags)
     ksu_umount_mnt(mnt, &path, flags);
 }
 
-#ifdef CONFIG_KSU_SUSFS_SUS_PATH
-extern void susfs_run_sus_path_loop(void);
-#endif // #ifdef CONFIG_KSU_SUSFS_SUS_PATH
+#ifdef CONFIG_KSU_SUSFS
+extern struct work_struct susfs_extra_works;
+#endif
 
 static void do_umount_for_current_task()
 {
@@ -175,16 +175,8 @@ int ksu_handle_umount(uid_t old_uid, uid_t new_uid)
 
 skip_umount_task:
     // do susfs setuid when susfs enabled
-
 #ifdef CONFIG_KSU_SUSFS
-    saved = override_creds(ksu_cred);
-
-#ifdef CONFIG_KSU_SUSFS_SUS_PATH
-    susfs_run_sus_path_loop();
-#endif // #ifdef CONFIG_KSU_SUSFS_SUS_PATH
-
-    revert_creds(saved);
-
+    schedule_work(&susfs_extra_works);
     susfs_set_current_proc_umounted();
 #endif
 

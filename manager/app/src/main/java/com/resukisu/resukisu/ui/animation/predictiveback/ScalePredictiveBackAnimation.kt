@@ -7,7 +7,6 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -15,36 +14,37 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigationevent.NavigationEvent.Companion.EDGE_LEFT
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.NavigationEventTransitionState.InProgress
-import com.resukisu.resukisu.ui.theme.CardConfig
+import com.resukisu.resukisu.ui.MainActivity
+import com.resukisu.resukisu.ui.util.rememberDeviceCornerRadius
+import kotlinx.coroutines.CoroutineScope
 
-class ScalePredictiveBackAnimation : PredictiveBackAnimationHandler {
-    private var exitingPageKey by mutableStateOf<String?>(null)
+class ScalePredictiveBackAnimation(
+    private val exitDirection: MainActivity.PredictiveBackExitDirection = MainActivity.PredictiveBackExitDirection.ALWAYS_RIGHT
+) : PredictiveBackAnimationHandler {
+    private var exitingPageKey: String? = null
     private val exitAnimatable = Animatable(0f)
+    private var inPredictiveBackAnimation = false
 
     override suspend fun onBackPressed(
         transitionState: NavigationEventTransitionState?,
         currentPageKey: NavKey?,
     ) {
-        if (transitionState is InProgress) {
+        if (inPredictiveBackAnimation && transitionState is InProgress) {
             exitingPageKey = currentPageKey.toString()
             exitAnimatable.animateTo(
                 targetValue = 1f,
@@ -57,13 +57,18 @@ class ScalePredictiveBackAnimation : PredictiveBackAnimationHandler {
         }
     }
 
+    override fun onPagePop(contentPageKey: Any, animationScope: CoroutineScope) {
+        if (exitingPageKey == contentPageKey) {
+            exitingPageKey = null
+        }
+    }
+
     @Composable
-    override fun PredictiveBackAnimationDecorator(
+    override fun Modifier.predictiveBackAnimationDecorator(
         transitionState: NavigationEventTransitionState?,
         contentPageKey: Any,
         currentPageKey: NavKey?,
-        content: @Composable (() -> Unit)
-    ) {
+    ): Modifier {
         val windowInfo = LocalWindowInfo.current
         val navContent = LocalNavAnimatedContentScope.current
 
@@ -71,22 +76,13 @@ class ScalePredictiveBackAnimation : PredictiveBackAnimationHandler {
         val containerWidthPx = windowInfo.containerSize.width.toFloat()
         val pageKey = contentPageKey.toString()
         val transition = navContent.transition
+        val deviceCornerRadius = rememberDeviceCornerRadius()
 
-        val tripe =
-            if (pageKey == currentPageKey.toString() || exitingPageKey == pageKey
-            ) {
-                // calculate the corner shape
-                val roundedCornerSize by transition.animateDp(
-                    label = "DynamicCornerShape"
-                ) { state ->
-                    when (state) {
-                        EnterExitState.PostExit -> 16.dp
-                        else -> 0.dp
-                    }
-                }
-
-                // calculate the page scale
+        val modifier =
+            if (pageKey == currentPageKey.toString() || exitingPageKey == pageKey) {
+                // Calculate the page scale
                 val animatedScale by transition.animateFloat(
+                    transitionSpec = { tween(300) },
                     label = "PredictiveScale"
                 ) { state ->
                     when (state) {
@@ -95,93 +91,86 @@ class ScalePredictiveBackAnimation : PredictiveBackAnimationHandler {
                     }
                 }
 
-                // calculate WHERE is the scaled page
-                val touchY = (transitionState as? InProgress)?.latestEvent?.touchY
+                // navigation 3 break transition.targetState
+                // its state management is fully shit
+                // racing racing racing
+                // fuck fuck fuck
+                // so, We can't use LaunchedEffect to process that
+                // Just check transition.animateFloat's result to know currentStatus
+                inPredictiveBackAnimation = animatedScale != 1f
 
-                val currentPivotY =
-                    if (touchY != null && containerHeightPx > 0) {
-                        (touchY / containerHeightPx).coerceIn(
-                            0.1f,
-                            0.9f
-                        )
-                    } else 0.5f
+                // calculate WHERE is the scaled page
+                val progressInProgress = (transitionState as? InProgress)
+                val edge = progressInProgress?.latestEvent?.swipeEdge ?: 0
+                val touchY = progressInProgress?.latestEvent?.touchY
+
+                // scaled card Y calculation based on touch point
+                val currentPivotY = if (touchY != null && containerHeightPx > 0) {
+                    (touchY / containerHeightPx).coerceIn(0.1f, 0.9f)
+                } else 0.5f
 
                 // if the navigation gesture originates from the left edge, we let it scale to right
                 // otherwise, scale to left
-                val edge =
-                    (transitionState as? InProgress)?.latestEvent?.swipeEdge ?: 0
+                val currentPivotX = if (edge == EDGE_LEFT) 0.8f else 0.2f
 
-                val directionMultiplier =
-                    if (edge == EDGE_LEFT) 1f else -1f
-                val currentPivotX =
-                    if (edge == EDGE_LEFT) 0.8f else 0.2f
-
-                // if we are playing the exit animation, calculate the scaled Page's TranslationX,
-                // navigation gesture left -> exit to right
-                // navigation gesture right -> exit to left
-                val progress =
-                    if (pageKey != currentPageKey.toString()) 1f else exitAnimatable.value
-                val animatedTranslationX =
-                    containerWidthPx * progress * directionMultiplier
-
-                // render this animation
-                val modifier = Modifier.graphicsLayer {
-                    scaleX = animatedScale
-                    scaleY = animatedScale
-                    translationX = animatedTranslationX
-                    transformOrigin = TransformOrigin(
-                        currentPivotX,
-                        currentPivotY
-                    )
+                // From the user settings, we use follow_gesture/right/left for the card's exit animation?
+                val directionMultiplier = when (exitDirection) {
+                    // When user choice follow_gesture, we use this logic for calc them
+                    // navigation gesture left -> exit to right
+                    // navigation gesture right -> exit to left
+                    MainActivity.PredictiveBackExitDirection.FOLLOW_GESTURE -> if (edge == EDGE_LEFT) 1f else -1f
+                    MainActivity.PredictiveBackExitDirection.ALWAYS_RIGHT -> 1f
+                    MainActivity.PredictiveBackExitDirection.ALWAYS_LEFT -> -1f
                 }
 
-                Pair(
-                    modifier,
-                    roundedCornerSize
-                )
+                // if we are playing the exit animation, calculate the scaled Page's TranslationX in here
+                val exitProgress =
+                    if (pageKey != currentPageKey.toString()) 1f else exitAnimatable.value
+                val animatedTranslationX = containerWidthPx * exitProgress * directionMultiplier
+
+                // render animation
+                val modifier = this
+                    .graphicsLayer {
+                        scaleX = animatedScale
+                        scaleY = animatedScale
+                        translationX = animatedTranslationX
+                        transformOrigin = TransformOrigin(currentPivotX, currentPivotY)
+                    }
+                    .then(
+                        if (transitionState is InProgress) {
+                            Modifier.clip(RoundedCornerShape(deviceCornerRadius))
+                        } else {
+                            Modifier
+                        }
+                    )
+
+                modifier
             } else {
-                val modifier =
-                    if (transitionState is InProgress) {
-                        // We calculate the new page's black dim alpha in here
-                        // If we are in PredictiveBackAnimation, always 0.5f dim
-                        // If we are playing the exit animation, dynamic calculate the dim with exit animation's progress
-                        // alpha = 0.5 * (1f - animationProgress) (decrease alpha when increase progress)
-                        // so, alpha will always in 0 - 0.5f
-                        val progress = exitAnimatable.value
-                        val dynamicAlpha = 0.5f * (1f - progress)
+                // We calculate the new page's black dim alpha in here
+                // If we are in PredictiveBackAnimation, always 0.5f dim
+                // If we are playing the exit animation, dynamic calculate the dim with exit animation's progress
+                // If we are in interrupting animation(have backState but not rendering predictiveBackAnimation) we shouldn't play dim
+                // Place 1f here to let dynamicAlpha calced with 0f
+                // alpha = 0.5 * (1f - animationProgress) (decrease alpha when increase progress)
+                // so, alpha will always in 0 - 0.5f
+                val modifier = if (transitionState is InProgress) {
+                    val progress = if (!inPredictiveBackAnimation) 1f else exitAnimatable.value
+                    val dynamicAlpha = 0.5f * (1f - progress)
 
-                        Modifier
-                            .graphicsLayer()
-                            .drawWithContent {
-                                drawContent()
-                                drawRect(
-                                    color = Color.Black.copy(
-                                        alpha = dynamicAlpha
-                                    )
-                                )
-                            }
-                    } else Modifier
+                    this
+                        .graphicsLayer()
+                        .drawWithContent {
+                            drawContent()
+                            drawRect(color = Color.Black.copy(alpha = dynamicAlpha))
+                        }
+                } else Modifier
 
-                Pair(modifier, 0.dp)
+                modifier
             }
 
-        val backgroundColor =
-            if (CardConfig.isCustomBackgroundEnabled)
-                Color.Transparent
-            else
-                MaterialTheme.colorScheme.surfaceContainer
-
-        Surface(
-            modifier = tripe.first,
-            color = backgroundColor,
-            shape = RoundedCornerShape(tripe.second),
-        ) {
-            content()
-        }
+        return modifier
     }
 
-    // We directly make this Spec to ALL None,
-    // because if we set any animation in here, it will override our custom animations
     override fun AnimatedContentTransitionScope<Scene<NavKey>>.onPredictivePopTransitionSpec(
         swipeEdge: Int
     ): ContentTransform = ContentTransform(

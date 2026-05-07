@@ -33,32 +33,42 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
+import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ColorLens
+import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Draw
+import androidx.compose.material.icons.filled.FormatColorFill
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Opacity
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Wallpaper
+import androidx.compose.material.icons.rounded.Animation
+import androidx.compose.material.icons.rounded.SwapHoriz
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -76,11 +86,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import androidx.core.content.edit
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.MainActivity
 import com.resukisu.resukisu.ui.component.ConfirmResult
-import com.resukisu.resukisu.ui.component.ksuIsValid
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
+import com.resukisu.resukisu.ui.component.rememberCustomDialog
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
@@ -89,11 +102,12 @@ import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
 import com.resukisu.resukisu.ui.component.settings.SplicedColumnGroup
 import com.resukisu.resukisu.ui.component.settings.SplicedGroupScope
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
+import com.resukisu.resukisu.ui.theme.BackgroundManager
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeColors
 import com.resukisu.resukisu.ui.theme.ThemeConfig
-import com.resukisu.resukisu.ui.theme.haze
-import com.resukisu.resukisu.ui.theme.hazeSource
+import com.resukisu.resukisu.ui.theme.blurEffect
+import com.resukisu.resukisu.ui.theme.blurSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -106,7 +120,10 @@ import java.io.File
 import kotlin.math.roundToInt
 
 // TODO Rename this screen to ThemeSettingsScreen, and drop SELinux config, rewrite dynamic manager
-@SuppressLint("LocalContextConfigurationRead", "LocalContextResourcesRead", "ObsoleteSdkInt")
+@SuppressLint(
+    "LocalContextConfigurationRead", "LocalContextResourcesRead", "ObsoleteSdkInt",
+    "RestrictedApi"
+)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MoreSettingsScreen() {
@@ -211,9 +228,7 @@ fun MoreSettingsScreen() {
         topBar = {
             LargeFlexibleTopAppBar(
                 modifier = Modifier
-                    .haze(
-                        alpha = scrollBehavior.state.collapsedFraction
-                    ),
+                    .blurEffect(),
                 title = {
                     Text(
                         text = stringResource(R.string.more_settings)
@@ -228,11 +243,15 @@ fun MoreSettingsScreen() {
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor =
-                        if (ThemeConfig.backgroundImageLoaded) Color.Transparent
-                        else MaterialTheme.colorScheme.surfaceContainer,
+                        if (ThemeConfig.isEnableBlur)
+                            Color.Transparent
+                        else
+                            MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha),
                     scrolledContainerColor =
-                        if (ThemeConfig.backgroundImageLoaded) Color.Transparent
-                        else MaterialTheme.colorScheme.surfaceContainer,
+                        if (ThemeConfig.isEnableBlur)
+                            Color.Transparent
+                        else
+                            MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha),
                 ),
                 windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 scrollBehavior = scrollBehavior
@@ -245,7 +264,7 @@ fun MoreSettingsScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .hazeSource()
+                .blurSource()
         ) {
             item {
                 Spacer(modifier = Modifier.height(paddingValues.calculateTopPadding()))
@@ -262,21 +281,77 @@ fun MoreSettingsScreen() {
             }
 
             item {
+                // Predictive Back Settings
+                val transition = LocalNavAnimatedContentScope.current.transition
+                val uiState by activity.settingsStateFlow.collectAsStateWithLifecycle()
+
+                val predictiveBackAnimationDialog = rememberCustomDialog { dismiss ->
+                    PredictiveBackAnimationDialog(
+                        currentAnimation = uiState.predictiveBackAnimation,
+                        onDismiss = dismiss,
+                        onSelect = { animation ->
+                            // Hey Google
+                            // Why you keep playing the animation even we are already play completed?
+
+                            // This is very dirty, We are using RestrictedApi, but we don't have other choice
+                            transition.setPlaytimeAfterInitialAndTargetStateEstablished(
+                                transition.targetState,
+                                transition.targetState,
+                                transition.playTimeNanos
+                            )
+
+                            activity.settingsStateFlow.value =
+                                activity.settingsStateFlow.value.copy(
+                                    predictiveBackAnimation = animation
+                                )
+
+                            prefs.edit(commit = true) {
+                                putString("predictive_back_animation", animation.value)
+                            }
+
+                            dismiss()
+                        }
+                    )
+                }
+
+                val predictiveBackExitDirectionDialog = rememberCustomDialog { dismiss ->
+                    PredictiveBackExitDirectionDialog(
+                        currentDirection = uiState.predictiveBackExitDirection,
+                        onDismiss = dismiss,
+                        onSelect = { direction ->
+                            activity.settingsStateFlow.value =
+                                activity.settingsStateFlow.value.copy(
+                                    predictiveBackExitDirection = direction
+                                )
+
+                            prefs.edit(commit = true) {
+                                putString("predictive_back_exit_direction", direction.value)
+                            }
+
+                            dismiss()
+                        }
+                    )
+                }
+
+                SplicedColumnGroup(
+                    title = stringResource(R.string.predictive_back_settings)
+                ) {
+                    item { PredictiveBackAnimationWidget(uiState) { predictiveBackAnimationDialog.show() } }
+                    item(
+                        visible = uiState.predictiveBackAnimation == MainActivity.PredictiveBackAnimation.Scale ||
+                                uiState.predictiveBackAnimation == MainActivity.PredictiveBackAnimation.AOSP
+                    ) {
+                        PredictiveBackAnimationDirectionWidget(uiState) { predictiveBackExitDirectionDialog.show() }
+                    }
+                }
+            }
+
+            item {
                 // 自定义设置
                 CustomizationSettings(
                     state = settingsState,
                     handlers = settingsHandlers
                 )
-            }
-
-            if (ksuIsValid()) {
-                // 高级设置
-                item {
-                    AdvancedSettings(
-                        state = settingsState,
-                        handlers = settingsHandlers
-                    )
-                }
             }
 
             item {
@@ -285,6 +360,132 @@ fun MoreSettingsScreen() {
             }
         }
     }
+}
+
+@Composable
+fun PredictiveBackAnimationWidget(
+    uiState: MainActivity.SettingsState,
+    onClick: () -> Unit
+) {
+    SettingsBaseWidget(
+        icon = Icons.Rounded.Animation,
+        title = stringResource(R.string.predictive_back_animation),
+        description = when (uiState.predictiveBackAnimation) {
+            MainActivity.PredictiveBackAnimation.None -> stringResource(R.string.predictive_back_animation_none)
+            MainActivity.PredictiveBackAnimation.AOSP -> stringResource(R.string.predictive_back_animation_aosp)
+            MainActivity.PredictiveBackAnimation.MIUIX -> stringResource(R.string.predictive_back_animation_miuix)
+            MainActivity.PredictiveBackAnimation.Scale -> stringResource(R.string.predictive_back_animation_scale)
+            MainActivity.PredictiveBackAnimation.KernelSUClassic -> stringResource(R.string.predictive_back_animation_ksu_classic)
+        },
+        onClick = {
+            onClick()
+        }
+    ) {}
+}
+
+@Composable
+fun PredictiveBackAnimationDirectionWidget(
+    uiState: MainActivity.SettingsState,
+    onClick: () -> Unit
+) {
+    SettingsBaseWidget(
+        icon = Icons.Rounded.SwapHoriz,
+        title = stringResource(R.string.predictive_back_exit_direction),
+        description = when (uiState.predictiveBackExitDirection) {
+            MainActivity.PredictiveBackExitDirection.FOLLOW_GESTURE -> stringResource(R.string.predictive_back_exit_direction_follow_gesture)
+            MainActivity.PredictiveBackExitDirection.ALWAYS_RIGHT -> stringResource(R.string.predictive_back_exit_direction_always_right)
+            MainActivity.PredictiveBackExitDirection.ALWAYS_LEFT -> stringResource(R.string.predictive_back_exit_direction_always_left)
+        },
+        onClick = {
+            onClick()
+        }
+    ) {}
+}
+
+@Composable
+fun PredictiveBackAnimationDialog(
+    currentAnimation: MainActivity.PredictiveBackAnimation,
+    onDismiss: () -> Unit,
+    onSelect: (MainActivity.PredictiveBackAnimation) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.predictive_back_animation_desc)) },
+        text = {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                MainActivity.PredictiveBackAnimation.entries.forEach { animation ->
+                    val animationText = when (animation) {
+                        MainActivity.PredictiveBackAnimation.None -> stringResource(R.string.predictive_back_animation_none)
+                        MainActivity.PredictiveBackAnimation.AOSP -> stringResource(R.string.predictive_back_animation_aosp)
+                        MainActivity.PredictiveBackAnimation.MIUIX -> stringResource(R.string.predictive_back_animation_miuix)
+                        MainActivity.PredictiveBackAnimation.Scale -> stringResource(R.string.predictive_back_animation_scale)
+                        MainActivity.PredictiveBackAnimation.KernelSUClassic -> stringResource(R.string.predictive_back_animation_ksu_classic)
+                    }
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelect(animation) }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (animation == currentAnimation),
+                            onClick = { onSelect(animation) }
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(animationText)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.close))
+            }
+        }
+    )
+}
+
+@Composable
+fun PredictiveBackExitDirectionDialog(
+    currentDirection: MainActivity.PredictiveBackExitDirection,
+    onDismiss: () -> Unit,
+    onSelect: (MainActivity.PredictiveBackExitDirection) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.predictive_back_exit_direction_desc)) },
+        text = {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                MainActivity.PredictiveBackExitDirection.entries.forEach { direction ->
+                    val directionText = when (direction) {
+                        MainActivity.PredictiveBackExitDirection.FOLLOW_GESTURE -> stringResource(R.string.predictive_back_exit_direction_follow_gesture)
+                        MainActivity.PredictiveBackExitDirection.ALWAYS_RIGHT -> stringResource(R.string.predictive_back_exit_direction_always_right)
+                        MainActivity.PredictiveBackExitDirection.ALWAYS_LEFT -> stringResource(R.string.predictive_back_exit_direction_always_left)
+                    }
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelect(direction) }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (direction == currentDirection),
+                            onClick = { onSelect(direction) }
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(directionText)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.close))
+            }
+        }
+    )
 }
 
 @Composable
@@ -491,45 +692,6 @@ private fun SplicedGroupScope.hideOptionsSettings(
 }
 
 @Composable
-private fun AdvancedSettings(
-    state: MoreSettingsState,
-    handlers: MoreSettingsHandlers
-) {
-
-    SplicedColumnGroup(title = stringResource(R.string.advanced_settings)) {
-        item {
-            // SELinux 开关
-            SettingsSwitchWidget(
-                icon = Icons.Filled.Security,
-                title = stringResource(R.string.selinux),
-                description = if (state.selinuxEnabled)
-                    stringResource(R.string.selinux_enabled) else
-                    stringResource(R.string.selinux_disabled),
-                checked = state.selinuxEnabled,
-                onCheckedChange = handlers::handleSelinuxChange
-            )
-        }
-
-        item {
-            // 动态管理器设置
-            SettingsJumpPageWidget(
-                icon = Icons.Filled.Security,
-                title = stringResource(R.string.dynamic_manager_title),
-                description = if (state.isDynamicSignEnabled) {
-                    stringResource(
-                        R.string.dynamic_manager_enabled_summary,
-                        state.dynamicSignSize
-                    )
-                } else {
-                    stringResource(R.string.dynamic_manager_disabled)
-                },
-                onClick = { state.showDynamicSignDialog = true }
-            )
-        }
-    }
-}
-
-@Composable
 private fun ThemeColorSelection(state: MoreSettingsState) {
     SettingsBaseWidget(
         icon = Icons.Default.Palette,
@@ -620,7 +782,6 @@ private fun DpiSliderControls(
                 state.isDpiCustom = !state.dpiPresets.containsValue(state.tempDpi)
             },
             valueRange = 160f..600f,
-            steps = 11,
             colors = SliderDefaults.colors(
                 thumbColor = MaterialTheme.colorScheme.primary,
                 activeTrackColor = MaterialTheme.colorScheme.primary,
@@ -751,13 +912,67 @@ private fun BackgroundAdjustmentControls(
     handlers: MoreSettingsHandlers,
     coroutineScope: CoroutineScope
 ) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-        // 透明度滑动条
-        AlphaSlider(state = state, handlers = handlers, coroutineScope = coroutineScope)
+    val context = LocalContext.current
 
-        // TODO Set an default Dim for background
-        // 亮度调节滑动条
-        DimSlider(state = state, handlers = handlers, coroutineScope = coroutineScope)
+    Column {
+        Column(modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .padding(top = 8.dp)) {
+            AlphaSlider(state = state, handlers = handlers, coroutineScope = coroutineScope)
+            DimSlider(state = state, handlers = handlers, coroutineScope = coroutineScope)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            SettingsSwitchWidget(
+                icon = Icons.Filled.BlurOn,
+                title = stringResource(id = R.string.settings_config_enable_blur),
+                description = stringResource(id = R.string.settings_config_enable_blur_summary),
+                checked = ThemeConfig.isEnableBlur,
+                onCheckedChange = { isChecked ->
+                    BackgroundManager.saveEnableBlur(context, isChecked)
+                }
+            )
+            AnimatedVisibility(
+                visible = ThemeConfig.isEnableBlur,
+                enter = fadeIn() + slideInVertically(),
+                exit = fadeOut() + slideOutVertically()
+            ) {
+                SettingsSwitchWidget(
+                    icon = Icons.Filled.Draw,
+                    title = stringResource(id = R.string.settings_exp_draw_background_to_blur),
+                    description = stringResource(id = R.string.settings_exp_draw_background_to_blur_description),
+                    isError = true,
+                    checked = ThemeConfig.isEnableBlurExp,
+                    onCheckedChange = { isChecked ->
+                        BackgroundManager.saveEnableBlurExp(context, isChecked)
+                    }
+                )
+            }
+
+            AnimatedVisibility(
+                visible = state.useDynamicColor,
+                enter = fadeIn() + slideInVertically(),
+                exit = fadeOut() + slideOutVertically()
+            ) {
+                SettingsSwitchWidget(
+                    icon = Icons.Filled.FormatColorFill,
+                    title = stringResource(id = R.string.settings_config_use_custom_background_seed_color),
+                    description = stringResource(id = R.string.settings_config_use_custom_background_seed_color_summary),
+                    checked = ThemeConfig.isUseBackgroundSeedColor,
+                    onCheckedChange = { isChecked ->
+                        BackgroundManager.saveUseBackgroundSeedColor(context, isChecked)
+                    }
+                )
+            }
+        }
+        SettingsSwitchWidget(
+            icon = Icons.Filled.Contrast,
+            title = stringResource(id = R.string.settings_custom_enable_high_contrast),
+            description = stringResource(id = R.string.settings_custom_enable_high_contrast_summary),
+            checked = ThemeConfig.isHighContrastMode,
+            onCheckedChange = { isChecked ->
+                BackgroundManager.saveEnableHighContrastMode(context, isChecked)
+            }
+        )
     }
 }
 
@@ -805,7 +1020,6 @@ private fun AlphaSlider(
             }
         },
         valueRange = 0f..1f,
-        steps = 20,
         colors = SliderDefaults.colors(
             thumbColor = MaterialTheme.colorScheme.primary,
             activeTrackColor = MaterialTheme.colorScheme.primary,
@@ -858,7 +1072,6 @@ private fun DimSlider(
             }
         },
         valueRange = 0f..1f,
-        steps = 20,
         colors = SliderDefaults.colors(
             thumbColor = MaterialTheme.colorScheme.primary,
             activeTrackColor = MaterialTheme.colorScheme.primary,

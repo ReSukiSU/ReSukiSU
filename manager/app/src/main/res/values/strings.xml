@@ -195,6 +195,14 @@
     <string name="restore_allowlist">Restore Allowlist</string>
     <string name="settings_custom_background">Custom App Background</string>
     <string name="settings_custom_background_summary">Select an image as background</string>
+    <string name="settings_config_enable_blur">Enable Blur</string>
+    <string name="settings_config_enable_blur_summary">Enable blur process for this app</string>
+    <string name="settings_exp_draw_background_to_blur">Draw Custom background to blur</string>
+    <string name="settings_exp_draw_background_to_blur_description">Experiment feature, process with your own risk</string>
+    <string name="settings_config_use_custom_background_seed_color">Pick color from custom background</string>
+    <string name="settings_config_use_custom_background_seed_color_summary">Extract dynamic color seed color from custom background</string>
+    <string name="settings_custom_enable_high_contrast">High Contrast Mode</string>
+    <string name="settings_custom_enable_high_contrast_summary">Render shadow around with text</string>
     <string name="settings_card_alpha">Card transparency</string>
     <string name="home_android_version">Android version</string>
     <string name="home_device_model">Device model</string>
@@ -315,6 +323,19 @@
     <string name="selinux_change_failed">SELinux Status change failed</string>
     <string name="advanced_settings">Advanced Settings</string>
     <string name="appearance_settings">Customize the toolbar</string>
+    <string name="predictive_back_settings">Predictive Back</string>
+    <string name="predictive_back_animation">Predictive Back Animation</string>
+    <string name="predictive_back_animation_desc">Select the animation effect for predictive back</string>
+    <string name="predictive_back_exit_direction">Exit Direction</string>
+    <string name="predictive_back_exit_direction_desc">Select the exit direction for predictive back</string>
+    <string name="predictive_back_animation_none">None</string>
+    <string name="predictive_back_animation_aosp">AOSP</string>
+    <string name="predictive_back_animation_scale">Scale</string>
+    <string name="predictive_back_animation_ksu_classic">KernelSU Classic</string>
+    <string name="predictive_back_animation_miuix" translatable="false">Miuix</string>
+    <string name="predictive_back_exit_direction_follow_gesture">Follow Gesture</string>
+    <string name="predictive_back_exit_direction_always_right">Always Right</string>
+    <string name="predictive_back_exit_direction_always_left">Always Left</string>
     <string name="back">Comeback</string>
     <string name="background_set_success">Background set successfully</string>
     <string name="background_removed">Removed custom backgrounds</string>

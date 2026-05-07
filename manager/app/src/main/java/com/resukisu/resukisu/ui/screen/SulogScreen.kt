@@ -82,8 +82,8 @@ import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
 import com.resukisu.resukisu.ui.component.settings.splicedLazyColumnGroup
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.theme.CardConfig
-import com.resukisu.resukisu.ui.theme.hazeSource
-import com.resukisu.resukisu.ui.util.LocalHazeState
+import com.resukisu.resukisu.ui.theme.blurSource
+import com.resukisu.resukisu.ui.util.LocalBlurState
 import com.resukisu.resukisu.ui.util.SulogEntry
 import com.resukisu.resukisu.ui.util.SulogEventFilter
 import com.resukisu.resukisu.ui.util.SulogEventType
@@ -224,7 +224,7 @@ private fun SulogScreenContent(
             state = pullToRefreshState,
             modifier = Modifier
                 .fillMaxSize()
-                .hazeSource(),
+                .blurSource(),
             isRefreshing = state.isRefreshing,
             onRefresh = {
                 actions.onRefresh()
@@ -321,7 +321,7 @@ private fun SulogScreenContent(
 @Composable
 fun SulogScreenTranslationPreview() {
     CompositionLocalProvider(
-        LocalHazeState provides null
+        LocalBlurState provides null
     ) {
         Surface(
             color = MaterialTheme.colorScheme.surfaceContainer
@@ -411,7 +411,7 @@ fun SulogScreenTranslationPreview() {
 @Composable
 fun SulogScreenPreview() {
     CompositionLocalProvider(
-        LocalHazeState provides null
+        LocalBlurState provides null
     ) {
         Surface(
             color = MaterialTheme.colorScheme.surfaceContainer

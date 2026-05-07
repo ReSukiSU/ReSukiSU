@@ -17,8 +17,19 @@ import androidx.compose.ui.unit.dp
 @Stable
 object CardConfig {
     // 卡片透明度
-    var cardAlpha by mutableFloatStateOf(1f)
-        internal set
+    private var _cardAlpha by mutableFloatStateOf(1f)
+
+    var cardAlpha: Float
+        get() = run {
+            if (isCustomBackgroundEnabled)
+                _cardAlpha
+            else
+                1f
+        }
+        set(value) {
+            _cardAlpha = value.coerceIn(0f, 1f)
+        }
+
     // 卡片阴影
     var cardElevation by mutableStateOf(0.dp)
         internal set

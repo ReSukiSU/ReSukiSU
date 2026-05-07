@@ -4,7 +4,6 @@ agp = "9.2.0"
 gson = "2.14.0"
 kotlin = "2.3.21"
 m3color = "2026.1"
-haze = "1.7.2"
 capsule = "2.1.3"
 compose-bom = "2026.04.01"
 lifecycle = "2.10.0"
@@ -25,7 +24,8 @@ compose-ui = "1.11.0"
 documentfile = "1.1.0"
 ndk = "29.0.14206865"
 foundation = "1.11.0"
-aboutLibraries = "14.0.0-b02"
+aboutLibraries = "14.1.0"
+miuix = "0.9.0"
 
 [plugins]
 agp-app = { id = "com.android.application", version.ref = "agp" }
@@ -43,9 +43,7 @@ androidx-compose-runtime-tracing = { module = "androidx.compose.runtime:runtime-
 androidx-foundation = { module = "androidx.compose.foundation:foundation" }
 
 m3color = { module = "com.github.Kyant0:m3color", version.ref = "m3color" }
-haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 capsule = { module = "io.github.kyant0:capsule", version.ref = "capsule" }
-haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "compose-material3" }
@@ -75,7 +73,8 @@ kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 me-zhanghai-android-appiconloader-coil = { group = "me.zhanghai.android.appiconloader", name = "appiconloader-coil", version.ref = "appiconloader-coil" }
 
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
-androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
+miuix-navigation = { group = "top.yukonga.miuix.kmp", name = "miuix-navigation3-ui-android", version.ref = "miuix" }
+miuix-blur = { group = "top.yukonga.miuix.kmp", name = "miuix-blur-android", version.ref = "miuix" }
 androidx-navigationevent = { module = "androidx.navigationevent:navigationevent", version.ref = "navigationevent" }
 
 sheet-compose-dialogs-core = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "core", version.ref = "sheets-compose-dialogs" }

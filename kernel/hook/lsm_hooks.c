@@ -11,6 +11,7 @@
 #include "manager/throne_tracker.h"
 #include "compat/kernel_compat.h"
 #include "ksu.h"
+#include "klog.h"
 
 #ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK
 #include "setuid_hook.h"

@@ -79,9 +79,9 @@ import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.rememberCustomDialog
 import com.resukisu.resukisu.ui.component.rememberFabVisibilityState
+import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.theme.getCardColors
 import com.resukisu.resukisu.ui.theme.getCardElevation
-import com.resukisu.resukisu.ui.theme.hazeSource
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.getRootShell
 import com.resukisu.resukisu.ui.util.loadKpmModule
@@ -375,7 +375,7 @@ fun KpmPage(bottomPadding: Dp) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .hazeSource(),
+                .blurSource(),
         ) {
             Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
             if (!isNoticeClosed) {

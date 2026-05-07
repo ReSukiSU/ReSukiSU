@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
@@ -42,13 +41,6 @@ class MoreSettingsState(
     // 对话框显示状态
     var showThemeColorDialog by mutableStateOf(false)
 
-    // 动态管理器配置状态
-    var dynamicSignConfig by mutableStateOf<Natives.DynamicManagerConfig?>(null)
-    var isDynamicSignEnabled by mutableStateOf(false)
-    var dynamicSignSize by mutableStateOf("")
-    var dynamicSignHash by mutableStateOf("")
-    var showDynamicSignDialog by mutableStateOf(false)
-
 
     // 各种设置开关状态
     var isSimpleMode by mutableStateOf(prefs.getBoolean("is_simple_mode", false))
@@ -62,9 +54,6 @@ class MoreSettingsState(
     var isHideTagRow by mutableStateOf(prefs.getBoolean("is_hide_tag_row", false))
     var showMoreModuleInfo by mutableStateOf(prefs.getBoolean("show_more_module_info", false))
     var useAltIcon by mutableStateOf(prefs.getBoolean("use_alt_icon", false))
-
-    // SELinux状态
-    var selinuxEnabled by mutableStateOf(false)
 
     // 卡片配置状态
     var cardAlpha by mutableFloatStateOf(CardConfig.cardAlpha)

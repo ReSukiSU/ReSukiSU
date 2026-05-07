@@ -519,7 +519,7 @@ static struct vfsmount *anon_inode_mnt __read_mostly;
 static struct inode *ksu_anon_inode_make_secure_inode(const char *name, const struct inode *context_inode)
 {
     struct inode *inode;
-#ifdef KSU_OPTIONAL_HAS_INIT_SEC_ANON
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 12, 0) || defined(KSU_OPTIONAL_HAS_INIT_SEC_ANON)
     int error;
     const struct qstr qname = QSTR_INIT(name, strlen(name));
 #endif
@@ -532,7 +532,7 @@ static struct inode *ksu_anon_inode_make_secure_inode(const char *name, const st
     if (IS_ERR(inode))
         return inode;
     inode->i_flags &= ~S_PRIVATE;
-#ifdef KSU_OPTIONAL_HAS_INIT_SEC_ANON
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 12, 0) || defined(KSU_OPTIONAL_HAS_INIT_SEC_ANON)
     error = security_inode_init_security_anon(inode, &qname, context_inode);
     if (error) {
         iput(inode);

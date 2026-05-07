@@ -201,7 +201,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 
     implementation(libs.androidx.navigation3.runtime)
-    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.miuix.blur)
+    implementation(libs.miuix.navigation)
     implementation(libs.androidx.navigationevent) {
         exclude(group = "androidx.navigation", module = "navigationevent-compose")
     }
@@ -214,8 +215,6 @@ dependencies {
     implementation(libs.com.github.topjohnwu.libsu.io)
 
     implementation(libs.m3color)
-    implementation(libs.haze)
-    implementation(libs.haze.materials)
     implementation(libs.capsule)
 
     implementation(libs.dev.rikka.rikkax.parcelablelist)

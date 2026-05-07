@@ -5,8 +5,8 @@ plugins {
 }
 
 val androidMinSdkVersion by extra(26)
-val androidTargetSdkVersion by extra(36)
-val androidCompileSdkVersion by extra(36)
+val androidTargetSdkVersion by extra(37)
+val androidCompileSdkVersion by extra(37)
 val androidBuildToolsVersion by extra("36.1.0")
 val androidCompileNdkVersion by extra(libs.versions.ndk.get())
 val androidSourceCompatibility by extra(JavaVersion.VERSION_21)

@@ -8,12 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
@@ -21,21 +16,16 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
 import com.maxkeppeker.sheets.core.models.base.Header
@@ -57,24 +47,13 @@ fun MoreSettingsDialogs(
 ) {
     // 主题色选择对话框
     if (state.showThemeColorDialog) {
+        // FIXME Dynamic calculate
         ThemeColorDialog(
             onColorSelected = { theme ->
                 handlers.handleThemeColorChange(theme)
                 state.showThemeColorDialog = false
             },
             onDismiss = { state.showThemeColorDialog = false }
-        )
-    }
-
-    // 动态管理器配置对话框
-    if (state.showDynamicSignDialog) {
-        DynamicManagerDialog(
-            state = state,
-            onConfirm = { enabled, size, hash ->
-                handlers.handleDynamicManagerConfig(enabled, size, hash)
-                state.showDynamicSignDialog = false
-            },
-            onDismiss = { state.showDynamicSignDialog = false }
         )
     }
 }
@@ -103,6 +82,7 @@ fun LanguageSelectionDialog(
             locales.add(java.util.Locale.ROOT) // This will represent "System Default"
 
             // Dynamically detect available locales by checking resource directories
+            // FIXME From manifest
             val resourceDirs = listOf(
                 "ar", "bg", "de", "fa", "fr", "hu", "in", "it",
                 "ja", "ko", "pl", "pt-rBR", "ru", "th", "tr",
@@ -275,115 +255,6 @@ fun ThemeColorDialog(
             Button(
                 onClick = onDismiss
             ) {
-                Text(stringResource(R.string.cancel))
-            }
-        }
-    )
-}
-
-@Composable
-fun DynamicManagerDialog(
-    state: MoreSettingsState,
-    onConfirm: (Boolean, String, String) -> Unit,
-    onDismiss: () -> Unit
-) {
-    var localEnabled by remember { mutableStateOf(state.isDynamicSignEnabled) }
-    var localSize by remember { mutableStateOf(state.dynamicSignSize) }
-    var localHash by remember { mutableStateOf(state.dynamicSignHash) }
-
-    fun parseDynamicSignSize(input: String): Int? {
-        return try {
-            when {
-                input.startsWith("0x", true) -> input.substring(2).toInt(16)
-                else -> input.toInt()
-            }
-        } catch (_: NumberFormatException) {
-            null
-        }
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.dynamic_manager_title)) },
-        text = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState())
-            ) {
-                // 启用开关
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { localEnabled = !localEnabled }
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Switch(
-                        checked = localEnabled,
-                        onCheckedChange = { localEnabled = it }
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(stringResource(R.string.enable_dynamic_manager))
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 签名大小输入
-                OutlinedTextField(
-                    value = localSize,
-                    onValueChange = { input ->
-                        val isValid = when {
-                            input.isEmpty() -> true
-                            input.matches(Regex("^\\d+$")) -> true
-                            input.matches(Regex("^0[xX][0-9a-fA-F]*$")) -> true
-                            else -> false
-                        }
-                        if (isValid) {
-                            localSize = input
-                        }
-                    },
-                    label = { Text(stringResource(R.string.signature_size)) },
-                    enabled = localEnabled,
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // 签名哈希输入
-                OutlinedTextField(
-                    value = localHash,
-                    onValueChange = { hash ->
-                        if (hash.all { it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' }) {
-                            localHash = hash
-                        }
-                    },
-                    label = { Text(stringResource(R.string.signature_hash)) },
-                    enabled = localEnabled,
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    supportingText = {
-                        Text(stringResource(R.string.hash_must_be_64_chars))
-                    },
-                    isError = localEnabled && localHash.isNotEmpty() && localHash.length != 64
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { onConfirm(localEnabled, localSize, localHash) },
-                enabled = if (localEnabled) {
-                    parseDynamicSignSize(localSize)?.let { it > 0 } == true &&
-                            localHash.length == 64
-                } else true
-            ) {
-                Text(stringResource(R.string.confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.cancel))
             }
         }

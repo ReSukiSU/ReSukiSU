@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
-import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.MainActivity
 import com.resukisu.resukisu.ui.theme.BackgroundManager
@@ -21,7 +20,6 @@ import com.resukisu.resukisu.ui.theme.saveCustomBackground
 import com.resukisu.resukisu.ui.theme.saveDynamicColorState
 import com.resukisu.resukisu.ui.theme.saveThemeColors
 import com.resukisu.resukisu.ui.theme.saveThemeMode
-import com.topjohnwu.superuser.Shell
 import zako.zako.zako.zakoui.screen.moreSettings.state.MoreSettingsState
 import zako.zako.zako.zakoui.screen.moreSettings.util.toggleLauncherIcon
 
@@ -76,19 +74,6 @@ class MoreSettingsHandlers(
         state.tempDpi = state.currentDpi
 
         CardConfig.save(activity)
-
-        // 初始化 SELinux 状态
-        state.selinuxEnabled = Shell.cmd("getenforce").exec().out.firstOrNull() == "Enforcing"
-
-        // 初始化动态管理器配置
-        state.dynamicSignConfig = Natives.getDynamicManager()
-        state.dynamicSignConfig?.let { config ->
-            if (config.isValid()) {
-                state.isDynamicSignEnabled = true
-                state.dynamicSignSize = config.size.toString()
-                state.dynamicSignHash = config.hash
-            }
-        }
     }
 
     /**
@@ -196,7 +181,10 @@ class MoreSettingsHandlers(
         activity.saveAndApplyCustomBackground(transformedUri)
         state.isCustomBackgroundEnabled = true
         CardConfig.cardAlpha = 0.55f
-        ThemeConfig.backgroundDim = 0f
+        BackgroundManager.saveBackgroundDim(activity, 0.3f)
+        BackgroundManager.saveEnableBlur(activity, false)
+        BackgroundManager.saveUseBackgroundSeedColor(activity, true)
+        BackgroundManager.saveEnableHighContrastMode(activity, false)
         CardConfig.cardElevation = 0.dp
         CardConfig.isCustomBackgroundEnabled = true
         CardConfig.save(activity)
@@ -227,6 +215,9 @@ class MoreSettingsHandlers(
         state.backgroundDim = ThemeConfig.backgroundDim
 
         BackgroundManager.saveBackgroundDim(activity, 0f)
+        BackgroundManager.saveEnableBlur(activity, false)
+        BackgroundManager.saveUseBackgroundSeedColor(activity, false)
+        BackgroundManager.saveEnableHighContrastMode(activity, false)
 
         activity.getSharedPreferences("theme_prefs", Context.MODE_PRIVATE).edit {
             putBoolean("prevent_background_refresh", false)
@@ -354,97 +345,5 @@ class MoreSettingsHandlers(
     fun handleShowMoreModuleInfoChange(newValue: Boolean) {
         prefs.edit { putBoolean("show_more_module_info", newValue) }
         state.showMoreModuleInfo = newValue
-    }
-
-    /**
-     * 处理SELinux变更
-     */
-    fun handleSelinuxChange(enabled: Boolean) {
-        val command = if (enabled) "setenforce 1" else "setenforce 0"
-        Shell.getShell().newJob().add(command).exec().let { result ->
-            if (result.isSuccess) {
-                state.selinuxEnabled = enabled
-                val message = if (enabled)
-                    activity.getString(R.string.selinux_enabled_toast)
-                else
-                    activity.getString(R.string.selinux_disabled_toast)
-
-                Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(
-                    activity,
-                    activity.getString(R.string.selinux_change_failed),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-    }
-
-    /**
-     * 处理动态管理器配置
-     */
-    fun handleDynamicManagerConfig(enabled: Boolean, size: String, hash: String) {
-        if (enabled) {
-            val parsedSize = parseDynamicSignSize(size)
-            if (parsedSize != null && parsedSize > 0 && hash.length == 64) {
-                val success = Natives.setDynamicManager(parsedSize, hash)
-                if (success) {
-                    state.dynamicSignConfig = Natives.DynamicManagerConfig(parsedSize, hash)
-                    state.isDynamicSignEnabled = true
-                    state.dynamicSignSize = size
-                    state.dynamicSignHash = hash
-                    Toast.makeText(
-                        activity,
-                        activity.getString(R.string.dynamic_manager_set_success),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    Toast.makeText(
-                        activity,
-                        activity.getString(R.string.dynamic_manager_set_failed),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            } else {
-                Toast.makeText(
-                    activity,
-                    activity.getString(R.string.invalid_sign_config),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        } else {
-            val success = Natives.clearDynamicManager()
-            if (success) {
-                state.dynamicSignConfig = null
-                state.isDynamicSignEnabled = false
-                state.dynamicSignSize = ""
-                state.dynamicSignHash = ""
-                Toast.makeText(
-                    activity,
-                    activity.getString(R.string.dynamic_manager_disabled_success),
-                    Toast.LENGTH_SHORT
-                ).show()
-            } else {
-                Toast.makeText(
-                    activity,
-                    activity.getString(R.string.dynamic_manager_clear_failed),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-    }
-
-    /**
-     * 解析动态签名大小
-     */
-    private fun parseDynamicSignSize(input: String): Int? {
-        return try {
-            when {
-                input.startsWith("0x", true) -> input.substring(2).toInt(16)
-                else -> input.toInt()
-            }
-        } catch (_: NumberFormatException) {
-            null
-        }
     }
 }

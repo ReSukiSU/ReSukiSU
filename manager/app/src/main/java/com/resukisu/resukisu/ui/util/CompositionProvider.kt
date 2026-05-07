@@ -4,14 +4,14 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.compositionLocalOf
 import com.resukisu.resukisu.ui.activity.PermissionRequestInterface
-import dev.chrisbanes.haze.HazeState
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
 
 val LocalSnackbarHost = compositionLocalOf<SnackbarHostState> {
     error("CompositionLocal LocalSnackbarController not present")
 }
 
-val LocalHazeState = compositionLocalOf<HazeState?> {
-    error("CompositionLocal HazeState not present")
+val LocalBlurState = compositionLocalOf<LayerBackdrop?> {
+    error("CompositionLocal LocalBlurState not present")
 }
 
 val LocalPagerState = compositionLocalOf<PagerState> { error("No pager state") }

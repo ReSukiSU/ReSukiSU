@@ -3,10 +3,12 @@ package com.resukisu.resukisu.ui.animation.predictiveback
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.Scene
 import androidx.navigationevent.NavigationEvent
 import androidx.navigationevent.NavigationEventTransitionState
+import kotlinx.coroutines.CoroutineScope
 
 interface PredictiveBackAnimationHandler {
     /**
@@ -28,23 +30,35 @@ interface PredictiveBackAnimationHandler {
     )
 
     /**
+     * Callback when page actually pop
+     *
+     * **NOTE:** the page will pop from view tree IMMEDIATELY
+     * after this callback completed
+     *
+     * @param contentPageKey The [NavKey] of the page being pop.
+     * @param animationScope An [CoroutineScope] for reset animation status ONLY
+     */
+    fun onPagePop(
+        contentPageKey: Any,
+        animationScope: CoroutineScope
+    ) {
+    }
+
+    /**
      * A UI decorator applied to every page during the rendering process.
      * * Allows for custom modifications to the page layout or graphics layer.
-     * **Note:** You MUST invoke `content()` within this function (typically inside a Surface or Box),
-     * otherwise the page content will fail to render.
      *
      * @param transitionState The current state of the predictive back transition.
      * @param contentPageKey The [NavKey] of the page being decorated.
      * @param currentPageKey The [NavKey]'s toString of the page currently at the top of the stack.
-     * @param content The composable lambda representing the page's actual UI.
+     * @return the Modifier will apply to the Box of the content
      */
     @Composable
-    fun PredictiveBackAnimationDecorator(
+    fun Modifier.predictiveBackAnimationDecorator(
         transitionState: NavigationEventTransitionState?,
         contentPageKey: Any,
         currentPageKey: NavKey?,
-        content: @Composable () -> Unit
-    )
+    ): Modifier
 
     /**
      * Defines the transition specs specifically for a predictive back (swipe) gesture.

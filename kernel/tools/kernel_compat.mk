@@ -51,19 +51,25 @@ $(info -- $(REPO_NAME)/compat: put_seccomp_filter found)
 ccflags-y += -DKSU_OPTIONAL_SECCOMP_FILTER_RELEASE
 endif
 
+# https://github.com/torvalds/linux/commit/215b674b84dd052098fe6389e32a5afaff8b4d56
+# 5.12-
 ifeq ($(shell grep -q "security_inode_init_security_anon" $(srctree)/include/linux/security.h; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: security_inode_init_security_anon found)
 ccflags-y += -DKSU_OPTIONAL_HAS_INIT_SEC_ANON
 endif
 
+# https://github.com/torvalds/linux/commit/e7e832ce6fa769f800cd7eaebdb0459ad31e0416
+# 5.12-
 ifeq ($(shell grep -q "anon_inode_getfd_secure" $(srctree)/fs/anon_inodes.c; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: anon_inode_getfd_secure found)
 ccflags-y += -DKSU_HAS_GETFD_SECURE
 endif
 
-ifeq ($(shell grep -A1 "^int vfs_getattr" $(srctree)/fs/stat.c | grep -q "query_flags"; echo $$?),0)
-$(info -- $(REPO_NAME)/compat: vfs_getattr() found)
-ccflags-y += -DKSU_HAS_NEW_VFS_GETATTR
+# https://github.com/torvalds/linux/commit/4f0b9194bc119a9850a99e5e824808e2f468c348
+# 6.8-
+ifeq ($(shell grep -q "anon_inode_create_getfd" $(srctree)/fs/anon_inodes.c; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: anon_inode_create_getfd found)
+ccflags-y += -DKSU_HAS_ANON_INODE_CREATE_FD
 endif
 
 ifeq ($(shell grep -q "static inline struct inode \*file_inode" $(srctree)/include/linux/fs.h; echo $$?),0)
@@ -90,14 +96,8 @@ endif
 ## For Huawei EMUI10+ check  
 # Scan Kernel Tree to find CONFIG_HKIP_SELINUX_PROT in ebitmap.h
 ifeq ($(shell grep -q "CONFIG_HKIP_SELINUX_PROT" $(srctree)/security/selinux/ss/ebitmap.h 2>/dev/null; echo $$?),0)
-  $(info -- $(REPO_NAME): CONFIG_HKIP_SELINUX_PROT found!)
-  ccflags-y += -DKSU_COMPAT_IS_HISI_HM2
-endif
-
-# Function proc_ops check
-ifeq ($(shell grep -q "struct proc_ops " $(srctree)/include/linux/proc_fs.h; echo $$?),0)
-$(info -- $(REPO_NAME)/compat: proc_ops found)
-ccflags-y += -DKSU_COMPAT_HAS_PROC_OPS
+$(info -- $(REPO_NAME): CONFIG_HKIP_SELINUX_PROT found!)
+ccflags-y += -DKSU_COMPAT_IS_HISI_HM2
 endif
 
 # policy mutex
@@ -109,13 +109,38 @@ endif
 
 # policy rwlock
 # kernel 4.14-
+ifeq ($(shell grep -q "^static DEFINE_RWLOCK(policy_rwlock);" $(srctree)/security/selinux/ss/services.c; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: policy_rwlock found,but not exported.)
+$(info -- $(REPO_NAME)/compat: We recommend you export it to avoid some probably race problem.)
+$(info -- $(REPO_NAME)/compat: See: https://resukisu.github.io/guide/manual-integrate.html#policy-rwlock-export)
+$(info -- $(REPO_NAME)/compat: WARNING: You maybe see kernel panic during system boot or modules stop working.)
+ccflags-y += -DKSU_COMPAT_NON_EXPORTED_POLICY_RWLOCK
+endif
+
+
 ifeq ($(shell grep -q "^DEFINE_RWLOCK(policy_rwlock);" $(srctree)/security/selinux/ss/services.c; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: exported policy_rwlock found!)
 ccflags-y += -DKSU_COMPAT_HAS_EXPORTED_POLICY_RWLOCK
 endif
 
+# sel_mutex
+# kernel 4.14-
+ifeq ($(shell grep -q "^static DEFINE_MUTEX(sel_mutex);" $(srctree)/security/selinux/selinuxfs.c; echo $??),0)
+$(info -- $(REPO_NAME)/compat: sel_mutex found,but not exported.)
+$(info -- $(REPO_NAME)/compat: We recommend you export it to avoid some probably race problem.)
+$(info -- $(REPO_NAME)/compat: See: https://resukisu.github.io/guide/manual-integrate.html#sel-mutex-export)
+$(info -- $(REPO_NAME)/compat: WARNING: You maybe see kernel panic during system boot or modules stop working.)
+ccflags-y += -DKSU_COMPAT_NON_EXPORTED_SEL_MUTEX
+endif
+
+ifeq ($(shell grep -q "^DEFINE_MUTEX(sel_mutex);" $(srctree)/security/selinux/selinuxfs.c; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: exported sel_mutex found!)
+ccflags-y += -DKSU_COMPAT_HAS_EXPORTED_SEL_MUTEX
+endif
+
 # Function ns_get_path check
 # for kernel 3.19-
+# https://github.com/torvalds/linux/commit/e149ed2b805fefdccf7ccdfc19eca22fdd4514ac
 ifeq ($(shell grep -q "ns_get_path" $(srctree)/fs/nsfs.c; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: ns_get_path found)
 ccflags-y += -DKSU_COMPAT_HAS_NS_GET_PATH
@@ -167,19 +192,6 @@ $(info -- $(REPO_NAME)/compat: d_inode found)
 ccflags-y += -DKSU_HAS_D_INODE
 endif
 
-# The FUCKING Sulog logic require that
-# it need the whole rewrite
-# Introduce in linux kernel 4.8
-ifeq ($(shell grep -q "time64_to_tm" $(srctree)/include/linux/time.h 2>/dev/null; echo $$?),0)
-$(info -- $(REPO_NAME)/compat: time64_to_tm found)
-ccflags-y += -DKSU_HAS_TIME64
-endif
-
-ifeq ($(shell grep -q "ktime_get_ns" $(srctree)/include/linux/timekeeping.h 2>/dev/null; echo $$?),0)
-$(info -- $(REPO_NAME)/compat: ktime_get_ns found)
-ccflags-y += -DKSU_HAS_TIME_HELPER
-endif
-
 # https://github.com/torvalds/linux/commit/5955102c9984fa081b2d570cfac75c97eecf8f3b
 # for setuid_hooks only
 # it will remove when we impl dynamic-manager feature init out of replaceable ksud
@@ -222,5 +234,17 @@ endif
 # have that can avoid scan selinux_ops
 ifeq ($(shell grep -q "^struct security_operations selinux_ops" $(srctree)/security/selinux/hooks.c; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: exported selinux_ops found!)
-CFLAGS_ksu.o += -DKSU_HAS_EXPORTED_SELINUX_OPS
+ccflags-y += -DKSU_HAS_EXPORTED_SELINUX_OPS
+endif
+
+# Android SPEC Changes
+# https://android-review.googlesource.com/c/kernel/common/+/3009995
+ifeq ($(shell grep -q "POLICYDB_CONFIG_ANDROID_NETLINK_ROUTE" $(srctree)/security/selinux/ss/policydb.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: android spec POLICYDB_CONFIG_ANDROID_NETLINK_ROUTE found!!)
+ccflags-y += -DKSU_COMPAT_HAS_POLICYDB_CONFIG_ANDROID_NETLINK_ROUTE
+endif
+
+ifeq ($(shell grep -q "POLICYDB_CONFIG_ANDROID_NETLINK_GETNEIGH" $(srctree)/security/selinux/ss/policydb.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: android spec POLICYDB_CONFIG_ANDROID_NETLINK_GETNEIGH found!!)
+ccflags-y += -DKSU_COMPAT_HAS_POLICYDB_CONFIG_ANDROID_NETLINK_GETNEIGH
 endif

@@ -35,13 +35,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.content.edit
 import androidx.core.graphics.drawable.toBitmap
@@ -56,17 +59,17 @@ import com.kyant.m3color.scheme.SchemeTonalSpot
 import com.kyant.m3color.score.Score
 import com.resukisu.resukisu.ui.theme.util.BackgroundTransformation
 import com.resukisu.resukisu.ui.theme.util.saveTransformedBackground
-import com.resukisu.resukisu.ui.util.LocalHazeState
+import com.resukisu.resukisu.ui.util.LocalBlurState
 import com.resukisu.resukisu.ui.webui.MonetColorsProvider
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import top.yukonga.miuix.kmp.blur.BlendColorEntry
+import top.yukonga.miuix.kmp.blur.BlurColors
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.textureBlur
 import java.io.File
 import java.io.FileOutputStream
 
@@ -83,6 +86,10 @@ object ThemeConfig {
     var backgroundImageLoaded by mutableStateOf(false)
     var isThemeChanging by mutableStateOf(false)
     var preventBackgroundRefresh by mutableStateOf(false)
+    var isHighContrastMode by mutableStateOf(false)
+    var isEnableBlur by mutableStateOf(false)
+    var isEnableBlurExp by mutableStateOf(false)
+    var isUseBackgroundSeedColor by mutableStateOf(false)
 
     // 主题变化检测
     private var lastDarkModeState: Boolean? = null
@@ -187,6 +194,34 @@ object BackgroundManager {
         }
     }
 
+    fun saveEnableBlur(context: Context, enable: Boolean) {
+        ThemeConfig.isEnableBlur = enable
+        context.getSharedPreferences("theme_prefs", Context.MODE_PRIVATE).edit {
+            putBoolean("enable_blur", enable)
+        }
+    }
+
+    fun saveEnableBlurExp(context: Context, enable: Boolean) {
+        ThemeConfig.isEnableBlurExp = enable
+        context.getSharedPreferences("theme_prefs", Context.MODE_PRIVATE).edit {
+            putBoolean("enable_blur_exp", enable)
+        }
+    }
+
+    fun saveUseBackgroundSeedColor(context: Context, enable: Boolean) {
+        ThemeConfig.isUseBackgroundSeedColor = enable
+        context.getSharedPreferences("theme_prefs", Context.MODE_PRIVATE).edit {
+            putBoolean("use_background_seed_color", enable)
+        }
+    }
+
+    fun saveEnableHighContrastMode(context: Context, enable: Boolean) {
+        ThemeConfig.isHighContrastMode = enable
+        context.getSharedPreferences("theme_prefs", Context.MODE_PRIVATE).edit {
+            putBoolean("high_contrast_mode", enable)
+        }
+    }
+
     fun saveAndApplyCustomBackground(
         context: Context,
         uri: Uri,
@@ -233,6 +268,10 @@ object BackgroundManager {
         }
 
         ThemeConfig.backgroundDim = prefs.getFloat("background_dim", 0f).coerceIn(0f, 1f)
+        ThemeConfig.isEnableBlur = prefs.getBoolean("enable_blur", false)
+        ThemeConfig.isEnableBlurExp = prefs.getBoolean("enable_blur_exp", false)
+        ThemeConfig.isUseBackgroundSeedColor = prefs.getBoolean("use_background_seed_color", false)
+        ThemeConfig.isHighContrastMode = prefs.getBoolean("high_contrast_mode", false)
     }
 
     private fun saveBackgroundUri(context: Context, uri: Uri?) {
@@ -311,7 +350,7 @@ fun KernelSUTheme(
         MaterialExpressiveTheme(
             colorScheme = colorScheme,
             motionScheme = MotionScheme.expressive(),
-            typography = Typography
+            typography = generateTypography()
         ) {
             MonetColorsProvider.UpdateCss()
             Box(modifier = Modifier.fillMaxSize()) {
@@ -398,40 +437,43 @@ var backgroundImagePainter: AsyncImagePainter? by mutableStateOf(null)
 var backgroundSeedColor by mutableIntStateOf(0)
 
 /**
- * Captures background content for hazeEffect child nodes,
- * It will only work when hazeState available
+ * Captures background content for blurEffect child nodes,
+ * It will only work when blurState available
  * @return modified modifier
  */
 @Composable
-fun Modifier.hazeSource(): Modifier {
-    return LocalHazeState.current?.let {
-        hazeSource(it)
+fun Modifier.blurSource(): Modifier {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return this
+
+    return LocalBlurState.current?.let {
+        this.then(Modifier.layerBackdrop(it))
     } ?: this
 }
 
 /**
- * Render haze when hazeState available
- * @param alpha the alpha of hazeEffect
+ * Render blur when backdrop available
  * @return modified modifier
  */
 @Composable
-fun Modifier.haze(
-    alpha: Float = 1f
-): Modifier {
-    return LocalHazeState.current?.let {
-        val dark = isInDarkTheme(ThemeConfig.forceDarkMode)
+fun Modifier.blurEffect(): Modifier {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return this
 
-        val hazeStyle = HazeStyle(
-            backgroundColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            tint = HazeTint(Color.Transparent)
+    return LocalBlurState.current?.let { backdrop ->
+        val blendColor =
+            MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.8f)
+
+        this.then(
+            Modifier.textureBlur(
+                backdrop = backdrop,
+                shape = RectangleShape,
+                blurRadius = 25f,
+                colors = BlurColors(
+                    blendColors = listOf(
+                        BlendColorEntry(color = blendColor)
+                    )
+                )
+            )
         )
-
-        hazeEffect(it) {
-            style = hazeStyle
-            blurRadius = 30.dp
-            noiseFactor = if (dark) 0f else 0.2f
-            this.alpha = alpha
-        }
     } ?: this
 }
 
@@ -500,6 +542,58 @@ private fun BackgroundInitializer(uri: Uri) {
     )
 }
 
+@Composable
+private fun generateTypography(): androidx.compose.material3.Typography {
+    val darkMode = isInDarkTheme(ThemeConfig.forceDarkMode)
+
+    fun generateShadow(originalShadow: Shadow?): Shadow? {
+        if (!ThemeConfig.isHighContrastMode) return originalShadow
+        val shadow = originalShadow ?: Shadow(
+            offset = Offset(1.5f, 1.5f),
+            blurRadius = 0f
+        )
+        return shadow.copy(
+            color = if (darkMode) Color.Black.copy(alpha = 0.7f) else Color.White.copy(alpha = 0.7f)
+        )
+    }
+
+    fun TextStyle.applyShadow() = this.copy(shadow = generateShadow(shadow))
+    val typography = MaterialTheme.typography
+
+    return typography.copy(
+        displayLarge = typography.displayLarge.applyShadow(),
+        displayMedium = typography.displayMedium.applyShadow(),
+        displaySmall = typography.displaySmall.applyShadow(),
+        headlineLarge = typography.headlineLarge.applyShadow(),
+        headlineMedium = typography.headlineMedium.applyShadow(),
+        headlineSmall = typography.headlineSmall.applyShadow(),
+        titleLarge = typography.titleLarge.applyShadow(),
+        titleMedium = typography.titleMedium.applyShadow(),
+        titleSmall = typography.titleSmall.applyShadow(),
+        bodyLarge = typography.bodyLarge.applyShadow(),
+        bodyMedium = typography.bodyMedium.applyShadow(),
+        bodySmall = typography.bodySmall.applyShadow(),
+        labelLarge = typography.labelLarge.applyShadow(),
+        labelMedium = typography.labelMedium.applyShadow(),
+        labelSmall = typography.labelSmall.applyShadow(),
+        displayLargeEmphasized = typography.displayLargeEmphasized.applyShadow(),
+        displayMediumEmphasized = typography.displayMediumEmphasized.applyShadow(),
+        displaySmallEmphasized = typography.displaySmallEmphasized.applyShadow(),
+        headlineLargeEmphasized = typography.headlineLargeEmphasized.applyShadow(),
+        headlineMediumEmphasized = typography.headlineMediumEmphasized.applyShadow(),
+        headlineSmallEmphasized = typography.headlineSmallEmphasized.applyShadow(),
+        titleLargeEmphasized = typography.titleLargeEmphasized.applyShadow(),
+        titleMediumEmphasized = typography.titleMediumEmphasized.applyShadow(),
+        titleSmallEmphasized = typography.titleSmallEmphasized.applyShadow(),
+        bodyLargeEmphasized = typography.bodyLargeEmphasized.applyShadow(),
+        bodyMediumEmphasized = typography.bodyMediumEmphasized.applyShadow(),
+        bodySmallEmphasized = typography.bodySmallEmphasized.applyShadow(),
+        labelLargeEmphasized = typography.labelLargeEmphasized.applyShadow(),
+        labelMediumEmphasized = typography.labelMediumEmphasized.applyShadow(),
+        labelSmallEmphasized = typography.labelSmallEmphasized.applyShadow(),
+    )
+}
+
 // TODO migrate to MaterialKolor, provide scheme settings/dynamic seed color/spec 2025 to user settings
 @Composable
 private fun createColorScheme(
@@ -509,9 +603,11 @@ private fun createColorScheme(
     return when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val seedColor =
-                if (ThemeConfig.backgroundImageLoaded) backgroundSeedColor else colorResource(id = R.color.system_accent1_500).toArgb()
+                if (ThemeConfig.isUseBackgroundSeedColor) backgroundSeedColor else colorResource(id = R.color.system_accent1_500).toArgb()
             val hct = Hct.fromInt(seedColor)
             val scheme = SchemeTonalSpot(hct, darkTheme, 0.0)
+
+            fun Int.toColor(): Color = Color(this)
             MaterialTheme.colorScheme.copy(
                 primary = scheme.primary.toColor(),
                 onPrimary = scheme.onPrimary.toColor(),
@@ -556,9 +652,6 @@ private fun createColorScheme(
         else -> createLightColorScheme()
     }
 }
-
-@Suppress("NOTHING_TO_INLINE")
-private inline fun Int.toColor(): Color = Color(this)
 
 @Composable
 private fun SystemBarController(darkMode: Boolean) {

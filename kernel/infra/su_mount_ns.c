@@ -111,7 +111,7 @@ static void ksu_mnt_ns_global(void)
     }
 
 try_setns:
-#ifdef KSU_COMPAT_HAS_NS_GET_PATH
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0) || defined(KSU_COMPAT_HAS_NS_GET_PATH)
     rcu_read_lock();
     // &init_task is not init, but swapper/idle, which forks the init process
     // so we need to find the init process
