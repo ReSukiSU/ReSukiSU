@@ -87,8 +87,8 @@ import com.resukisu.resukisu.ui.component.settings.SplicedColumnGroup
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
-import com.resukisu.resukisu.ui.theme.haze
-import com.resukisu.resukisu.ui.theme.hazeSource
+import com.resukisu.resukisu.ui.theme.blurEffect
+import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.viewmodel.SuSFSAppEntry
 import com.resukisu.resukisu.ui.viewmodel.SuSFSFeatureStatus
@@ -969,7 +969,7 @@ fun SuSFSConfigScreen() {
     Scaffold(
         topBar = {
             Column(
-                modifier = Modifier.haze(scrollBehavior.state.collapsedFraction),
+                modifier = Modifier.blurEffect(),
             ) {
                 LargeFlexibleTopAppBar(
                     title = {
@@ -1056,7 +1056,7 @@ fun SuSFSConfigScreen() {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .hazeSource(),
+                    .blurSource(),
             ) {
                 if (uiState.loadError != null) {
                     WarningCard(
