@@ -460,7 +460,6 @@ class SuSFSScreenViewModel : ViewModel() {
             val addedNew = runCommand("add_sus_kstat_statically $newAddCommand", showSuccessToast = false)
             if (addedNew) {
                 toastMessage = ksuApp.getString(R.string.kpm_control_success)
-                postRebootToast()
             }
         }
     }
