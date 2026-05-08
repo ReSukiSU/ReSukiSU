@@ -2,6 +2,7 @@ package com.resukisu.resukisu.ui.viewmodel
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.os.Build
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +61,7 @@ data class SuSFSStaticKstatEntry(
 data class SuSFSAppEntry(
     val packageName: String,
     val label: String,
+    val packageInfo: PackageInfo? = null,
 )
 
 data class SuSFSSlotInfo(
@@ -333,6 +335,7 @@ class SuSFSScreenViewModel : ViewModel() {
                 SuSFSAppEntry(
                     packageName = appInfo.packageName,
                     label = appInfo.label.ifBlank { appInfo.packageName },
+                    packageInfo = appInfo.packageInfo,
                 )
             }
             .distinctBy { it.packageName }

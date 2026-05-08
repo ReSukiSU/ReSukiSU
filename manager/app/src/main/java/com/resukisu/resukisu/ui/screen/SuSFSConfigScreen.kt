@@ -1456,14 +1456,16 @@ private fun SingleValueDialog(
 @Composable
 private fun AppEntryIcon(
     packageName: String,
+    packageInfo: android.content.pm.PackageInfo? = null,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    var iconDrawable by remember(packageName) { mutableStateOf<android.graphics.drawable.Drawable?>(null) }
+    var iconDrawable by remember(packageName, packageInfo) { mutableStateOf<android.graphics.drawable.Drawable?>(null) }
 
-    LaunchedEffect(packageName) {
+    LaunchedEffect(packageName, packageInfo) {
         iconDrawable = runCatching {
-            context.packageManager.getApplicationIcon(packageName)
+            packageInfo?.applicationInfo?.loadIcon(context.packageManager)
+                ?: context.packageManager.getApplicationIcon(packageName)
         }.getOrNull()
     }
 
@@ -1668,6 +1670,7 @@ private fun AddAppPathDialog(
                             rowHeader = {
                                 AppEntryIcon(
                                     packageName = app.packageName,
+                                    packageInfo = app.packageInfo,
                                     modifier = Modifier.size(24.dp)
                                 )
                             },
