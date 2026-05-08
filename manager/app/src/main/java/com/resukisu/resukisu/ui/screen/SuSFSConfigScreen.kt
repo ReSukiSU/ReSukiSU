@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -861,7 +862,7 @@ private fun BasicTab(
                             icon = Icons.Filled.Edit,
                             title = stringResource(R.string.susfs_uname_label),
                             description = uiState.unameValue,
-                            onClick = unameDialog::show,
+                            onClick = { unameDialog.show() },
                         ) {
                             IconButton(onClick = unameDialog::show) {
                                 Icon(imageVector = Icons.Filled.Edit, contentDescription = null)
@@ -873,7 +874,7 @@ private fun BasicTab(
                             icon = Icons.Filled.Edit,
                             title = stringResource(R.string.susfs_build_time_label),
                             description = uiState.buildTimeValue,
-                            onClick = buildTimeDialog::show,
+                            onClick = { buildTimeDialog.show() },
                         ) {
                             IconButton(onClick = buildTimeDialog::show) {
                                 Icon(imageVector = Icons.Filled.Edit, contentDescription = null)
