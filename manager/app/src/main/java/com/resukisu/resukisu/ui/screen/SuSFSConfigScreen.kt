@@ -649,7 +649,9 @@ private fun BasicTab(
         if (uri == null) return@rememberLauncherForActivityResult
         val tempFile = File(
             context.cacheDir,
-            "susfs_backup_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}.json"
+            "susfs_${
+                SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            }.json"
         )
         viewModel.backupCurrentConfig(tempFile.absolutePath) { ok, err ->
             if (!ok) {
@@ -725,6 +727,7 @@ private fun BasicTab(
                                     viewModel.postToast(err ?: context.getString(R.string.susfs_restore_failed, ""))
                                 } else {
                                     viewModel.postToast(context.getString(R.string.susfs_restore_success, "", ""))
+                                    viewModel.postToast(context.getString(R.string.reboot_to_apply))
                                 }
                             }
                         }
@@ -946,7 +949,7 @@ private fun BasicTab(
                 modifier = Modifier.weight(1f),
                 onClick = {
                     val date = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-                    backupLauncher.launch("SuSFS_Config_$date.susfs_backup")
+                    backupLauncher.launch("susfs_${date}.json")
                 }
             ) {
                 Icon(imageVector = Icons.Filled.Backup, contentDescription = null)

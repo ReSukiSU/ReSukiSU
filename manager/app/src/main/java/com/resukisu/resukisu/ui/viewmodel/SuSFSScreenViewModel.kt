@@ -3,7 +3,6 @@ package com.resukisu.resukisu.ui.viewmodel
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
-import android.os.Build
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -250,22 +249,15 @@ class SuSFSScreenViewModel : ViewModel() {
 
     fun backupCurrentConfig(outputPath: String, onFinish: (Boolean, String?) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            val config = readSusfsConfigJson()
-            if (config == null) {
+            val rawConfig = readSusfsConfigRaw()
+            if (rawConfig.isNullOrBlank()) {
                 onFinish(false, ksuApp.getString(R.string.susfs_backup_file_not_found))
                 return@launch
             }
 
-            val payload = JSONObject().apply {
-                put("version", runCatching { getSuSFSVersion() }.getOrDefault(""))
-                put("timestamp", System.currentTimeMillis())
-                put("deviceInfo", "${Build.MANUFACTURER} ${Build.MODEL} (${Build.VERSION.RELEASE})")
-                put("configurations", config)
-            }
-
             val writeResult = runCatching {
                 java.io.File(outputPath).parentFile?.mkdirs()
-                java.io.File(outputPath).writeText(payload.toString(2))
+                java.io.File(outputPath).writeText(rawConfig)
             }
             if (writeResult.isSuccess) {
                 onFinish(true, null)
@@ -277,22 +269,19 @@ class SuSFSScreenViewModel : ViewModel() {
 
     fun restoreFromBackupFile(filePath: String, onFinish: (Boolean, String?) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            val result = runCatching {
-                val content = java.io.File(filePath).readText()
-                JSONObject(content)
-            }.getOrNull()
-            if (result == null) {
+            val content = runCatching { java.io.File(filePath).readText() }.getOrNull()
+            if (content.isNullOrBlank()) {
                 onFinish(false, ksuApp.getString(R.string.susfs_backup_invalid_format))
                 return@launch
             }
 
-            val config = result.optJSONObject("configurations")
-            if (config == null) {
+            val validJson = runCatching { JSONObject(content) }.isSuccess
+            if (!validJson) {
                 onFinish(false, ksuApp.getString(R.string.susfs_backup_invalid_format))
                 return@launch
             }
 
-            val writeSuccess = writeRawConfig(config.toString())
+            val writeSuccess = writeRawConfig(content)
             if (!writeSuccess) {
                 onFinish(false, ksuApp.getString(R.string.operation_failed))
                 return@launch
@@ -307,8 +296,8 @@ class SuSFSScreenViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             val ok = runCatching {
                 val content = java.io.File(filePath).readText()
-                val parsed = JSONObject(content)
-                parsed.has("configurations")
+                JSONObject(content)
+                true
             }.getOrDefault(false)
             onFinish(ok, if (ok) null else ksuApp.getString(R.string.susfs_backup_invalid_format))
         }
@@ -618,6 +607,18 @@ class SuSFSScreenViewModel : ViewModel() {
             return@withContext null
         }
         return@withContext runCatching { JSONObject(content) }.getOrNull()
+    }
+
+    private suspend fun readSusfsConfigRaw(): String? = withContext(Dispatchers.IO) {
+        val suFile = SuFile(SUSFS_CONFIG_PATH).apply {
+            shell = getRootShell()
+        }
+        if (!suFile.isFile) {
+            return@withContext null
+        }
+        return@withContext runCatching {
+            SuFileInputStream.open(suFile).bufferedReader().use { it.readText() }
+        }.getOrNull()
     }
 
     private suspend fun writeRawConfig(content: String): Boolean = withContext(Dispatchers.IO) {
