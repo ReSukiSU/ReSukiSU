@@ -250,6 +250,9 @@ private fun SuSFeaturesTab(
             item {
                 FeatureGroup(viewModel = viewModel, features = uiState.featureStatus)
             }
+            item {
+                Spacer(modifier = Modifier.height(contentPadding.calculateBottomPadding()))
+            }
         }
     }
 }
@@ -621,6 +624,10 @@ private fun SuSPathTab(
                     onDelete = viewModel::removeSusPath,
                 )
             }
+
+            item {
+                Spacer(modifier = Modifier.height(contentPadding.calculateBottomPadding()))
+            }
         }
     }
 }
@@ -830,6 +837,10 @@ private fun BasicTab(
                         ) {}
                     }
                 }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(contentPadding.calculateBottomPadding()))
             }
         }
     }
