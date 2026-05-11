@@ -253,3 +253,8 @@ ifneq ($(shell grep -q "flex_array" $(srctree)/security/selinux/ss/policydb.h; e
 $(info -- $(REPO_NAME)/compat: found modern selinux policydb)
 ccflags-y += -DKSU_COMPAT_HAS_MODERN_POLICYDB
 endif
+
+ifeq ($(shell grep -q "struct sidtab .sidtab" $(srctree)/security/selinux/ss/services.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: found sidtab as reference)
+ccflags-y += -DKSU_COMPAT_SIDTAB_AS_REFERENCE
+endif

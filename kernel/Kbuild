@@ -6,6 +6,7 @@ kernelsu-objs += feature/sucompat.o
 kernelsu-objs += feature/kernel_umount.o
 kernelsu-objs += feature/sulog.o
 kernelsu-objs += feature/adb_root.o
+kernelsu-objs += feature/selinux_hide.o
 kernelsu-objs += hook/setuid_hook.o
 
 ifndef CONFIG_KSU_DISABLE_MANAGER
@@ -119,6 +120,24 @@ endif
 $(info -- KERNEL_VERSION: $(KERNEL_VERSION))
 $(info -- KERNEL_TYPE: $(KERNEL_TYPE))
 
+ifeq ($(CONFIG_ARM64),y)
+  kernelsu-objs += hook/arm64/patch_memory.o
+else ifeq ($(CONFIG_X86_64),y)
+  kernelsu-objs += hook/x86_64/patch_memory.o
+else ifeq ($(CONFIG_ARM),y)
+  kernelsu-objs += hook/arm32/patch_memory.o
+else
+  ifeq ($(CONFIG_KSU),y)
+    $(info -- Unsupported arch)
+    $(error $(REPO_NAME) only support arm64-v8a, armeabi-v7a, x86-64)
+  endif
+endif
+
+ifeq ($(KERNEL_TYPE), GKI 2.0)
+  kernelsu-objs += infra/symbol_resolver.o
+  kernelsu-objs += hook/lsm_hook_magic.o
+endif
+
 ifdef CONFIG_KSU_TRACEPOINT_HOOK
   $(info -- $(REPO_NAME): using Tracepoint Syscall Redirect Hook)
 
@@ -126,16 +145,12 @@ ifdef CONFIG_KSU_TRACEPOINT_HOOK
     kernelsu-objs += manager/pkg_observer.o
   endif
 
-  kernelsu-objs += infra/symbol_resolver.o
-  kernelsu-objs += hook/lsm_hook_magic.o
   kernelsu-objs += hook/syscall_hook_manager.o
   kernelsu-objs += hook/syscall_event_bridge.o
   kernelsu-objs += hook/tp_marker.o
   ifeq ($(CONFIG_ARM64),y)
-    kernelsu-objs += hook/arm64/patch_memory.o
     kernelsu-objs += hook/arm64/syscall_hook.o
   else ifeq ($(CONFIG_X86_64),y)
-    kernelsu-objs += hook/x86_64/patch_memory.o
     kernelsu-objs += hook/x86_64/syscall_hook.o
   else
     ifeq ($(CONFIG_KSU), y)
@@ -161,6 +176,7 @@ else ifdef CONFIG_KSU_MANUAL_HOOK
 else ifdef CONFIG_KSU_SUSFS
   $(info -- $(REPO_NAME): using SuSFS Inline hook)
   include $(KSU_SRC)/tools/inline_hook_check.mk
+  include $(KSU_SRC)/tools/susfs_compat.mk
   ifeq ($(shell test -e $(srctree)/fs/susfs.c; echo $$?),0)
     $(eval SUSFS_VERSION=$(shell cat $(srctree)/include/linux/susfs.h | grep -E '^#define SUSFS_VERSION' | cut -d' ' -f3 | sed 's/"//g'))
     $(info )

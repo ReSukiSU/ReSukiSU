@@ -312,4 +312,8 @@ __weak long copy_from_kernel_nofault(void *dst, const void *src, size_t size)
 }
 #endif
 
+#ifndef __nocfi
+#define __nocfi
+#endif
+
 #endif

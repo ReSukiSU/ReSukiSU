@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.system.OsConstants
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -40,6 +41,7 @@ import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Fence
 import androidx.compose.material.icons.filled.FolderOff
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Save
@@ -402,6 +404,57 @@ fun SettingsPage(bottomPadding: Dp) {
                                         if (Natives.setSuLogEnabled(checked)) {
                                             execKsud("feature save", true)
                                             isSuLogEnabled = checked
+                                        }
+                                    }
+                                )
+                            }
+
+
+                            item {
+                                var isSelinuxHideEnabled by remember { mutableStateOf(Natives.isSelinuxHideEnabled()) }
+
+                                var savedSelinuxHideStatus by rememberSaveable { mutableStateOf("") }
+                                val selinuxHideStatus by produceState(initialValue = savedSelinuxHideStatus) {
+                                    value = withContext(Dispatchers.IO) {
+                                        savedSelinuxHideStatus = getFeatureStatus("selinux_hide")
+                                        return@withContext savedSelinuxHideStatus
+                                    }
+                                }
+                                val selinuxHideSummary = when (selinuxHideStatus) {
+                                    "unsupported" -> stringResource(id = R.string.feature_status_unsupported_summary)
+                                    "managed" -> stringResource(id = R.string.feature_status_managed_summary)
+                                    else -> stringResource(id = R.string.settings_selinux_hide_summary)
+                                }
+                                SettingsSwitchWidget(
+                                    icon = Icons.Filled.Policy,
+                                    title = stringResource(id = R.string.settings_selinux_hide),
+                                    description = selinuxHideSummary,
+                                    enabled = selinuxHideStatus == "supported",
+                                    checked = isSelinuxHideEnabled,
+                                    onCheckedChange = { checked ->
+                                        val status = Natives.setSelinuxHideEnabled(checked)
+                                        execKsud("feature save", true)
+                                        isSelinuxHideEnabled = checked
+
+                                        when (status) {
+                                            0 -> {}
+                                            -OsConstants.EAGAIN -> {
+                                                Toast.makeText(
+                                                    context,
+                                                    R.string.settings_selinux_hide_reboot_required,
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            }
+                                            else -> {
+                                                Toast.makeText(
+                                                    context,
+                                                    ksuApp.getString(
+                                                        R.string.settings_selinux_hide_failed,
+                                                        status
+                                                    ),
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            }
                                         }
                                     }
                                 )

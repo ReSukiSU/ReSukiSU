@@ -15,14 +15,25 @@
 #include <linux/uaccess.h>
 #include <linux/stop_machine.h>
 #include <asm/cacheflush.h>
-#include <asm-generic/fixmap.h>
 
 #include <asm/pgtable.h>
 #include <asm/page.h>
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0)
+#include <asm-generic/fixmap.h>
 #include <asm/fixmap.h>
+#else
+#include <asm/fixmap.h>
+#endif
+
+#include <linux/sched.h>
+
+/* --------------------------------- */
 
 // --- Architecture-specific Page Table to Physical Address translation ---
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
 #define KSU_P4D_TO_PHYS(p4d) ((unsigned long)p4d_pfn(p4d) << PAGE_SHIFT)
+#endif
 #define KSU_PUD_TO_PHYS(pud) ((unsigned long)pud_pfn(pud) << PAGE_SHIFT)
 #define KSU_PMD_TO_PHYS(pmd) ((unsigned long)pmd_pfn(pmd) << PAGE_SHIFT)
 #define KSU_PTE_TO_PHYS(pte) ((unsigned long)pte_pfn(pte) << PAGE_SHIFT)
@@ -33,7 +44,9 @@ unsigned long phys_from_virt(unsigned long addr, int *err)
 {
     struct mm_struct *mm = &init_mm;
     pgd_t *pgd;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
     p4d_t *p4d;
+#endif
     pud_t *pud;
     pmd_t *pmd;
     pte_t *pte;
@@ -43,15 +56,16 @@ unsigned long phys_from_virt(unsigned long addr, int *err)
     pgd = pgd_offset(mm, addr);
     if (pgd_none(*pgd) || pgd_bad(*pgd))
         goto fail;
-    pr_debug("pgd of 0x%lx p=0x%lx v=0x%lx", addr, (uintptr_t)pgd, (uintptr_t)pgd_val(*pgd));
+    pr_info("pgd of 0x%lx p=0x%lx v=0x%lx", addr, (uintptr_t)pgd, (uintptr_t)pgd_val(*pgd));
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
     p4d = p4d_offset(pgd, addr);
     if (p4d_none(*p4d) || p4d_bad(*p4d))
         goto fail;
-    pr_debug("p4d of 0x%lx p=0x%lx v=0x%lx", addr, (uintptr_t)p4d, (uintptr_t)p4d_val(*p4d));
+    pr_info("p4d of 0x%lx p=0x%lx v=0x%lx", addr, (uintptr_t)p4d, (uintptr_t)p4d_val(*p4d));
 #if defined(p4d_leaf)
     if (p4d_leaf(*p4d)) {
-        pr_debug("Address 0x%lx maps to a P4D-level huge page\n", addr);
+        pr_info("Address 0x%lx maps to a P4D-level huge page\n", addr);
         return KSU_P4D_TO_PHYS(*p4d) + ((addr & ~P4D_MASK));
     }
 #elif defined(p4d_large)
@@ -61,12 +75,15 @@ unsigned long phys_from_virt(unsigned long addr, int *err)
 #endif
 
     pud = pud_offset(p4d, addr);
+#else
+    pud = pud_offset(pgd, addr);
+#endif
     if (pud_none(*pud) || pud_bad(*pud))
         goto fail;
-    pr_debug("pud of 0x%lx p=0x%lx v=0x%lx", addr, (uintptr_t)pud, (uintptr_t)pud_val(*pud));
+    pr_info("pud of 0x%lx p=0x%lx v=0x%lx", addr, (uintptr_t)pud, (uintptr_t)pud_val(*pud));
 #if defined(pud_leaf)
     if (pud_leaf(*pud)) {
-        pr_debug("Address 0x%lx maps to a PUD-level huge page\n", addr);
+        pr_info("Address 0x%lx maps to a PUD-level huge page\n", addr);
         return KSU_PUD_TO_PHYS(*pud) + ((addr & ~PUD_MASK));
     }
 #elif defined(pud_large)
@@ -76,10 +93,10 @@ unsigned long phys_from_virt(unsigned long addr, int *err)
 #endif
 
     pmd = pmd_offset(pud, addr);
-    pr_debug("pmd of 0x%lx p=0x%lx v=0x%lx", addr, (uintptr_t)pmd, (uintptr_t)pmd_val(*pmd));
+    pr_info("pmd of 0x%lx p=0x%lx v=0x%lx", addr, (uintptr_t)pmd, (uintptr_t)pmd_val(*pmd));
 #if defined(pmd_leaf)
     if (pmd_leaf(*pmd)) {
-        pr_debug("Address 0x%lx maps to a PMD-level huge page\n", addr);
+        pr_info("Address 0x%lx maps to a PMD-level huge page\n", addr);
         return KSU_PMD_TO_PHYS(*pmd) + ((addr & ~PMD_MASK));
     }
 #elif defined(pmd_large)
@@ -123,10 +140,10 @@ struct patch_text_info {
 
 static int ksu_patch_text_nosync(void *dst, void *src, size_t len, int flags)
 {
-    pr_debug("patch dst=0x%lx src=0x%lx len=%ld\n", (unsigned long)dst, (unsigned long)src, len);
+    pr_info("patch dst=0x%lx src=0x%lx len=%ld\n", (unsigned long)dst, (unsigned long)src, len);
 
     unsigned long p = (unsigned long)dst;
-    int ret;
+    int ret = 0;
 
     int phy_err;
     unsigned long phy = phys_from_virt(p, &phy_err);
@@ -135,27 +152,31 @@ static int ksu_patch_text_nosync(void *dst, void *src, size_t len, int flags)
         pr_err("failed to find phy addr for patch dst addr 0x%lx\n", p);
         goto err;
     }
-    pr_debug("phy addr for patch 0x%lx: 0x%lx\n", p, phy);
+    pr_info("phy addr for patch 0x%lx: 0x%lx\n", p, phy);
 
     // Modern x86 removes FIX_TEXT_POKE0. FIX_BTMAP_BEGIN is universal and safe here.
     set_fixmap(FIX_BTMAP_BEGIN, phy & PAGE_MASK);
     void *map = (void *)(fix_to_virt(FIX_BTMAP_BEGIN) + (phy & ~PAGE_MASK));
 
-    pr_debug("fixmap addr for patch 0x%lx: 0x%lx\n", p, (unsigned long)map);
+    pr_info("fixmap addr for patch 0x%lx: 0x%lx\n", p, (unsigned long)map);
 
-    ret = (int)copy_to_kernel_nofault(map, src, len);
+    memcpy(map, src, len);
+
+    if (memcmp(map, src, len) == 0) {
+        ret = 0;
+    } else {
+        ret = -EFAULT;
+    }
 
     clear_fixmap(FIX_BTMAP_BEGIN);
 
-    if (!ret) {
-        if (flags & KSU_PATCH_TEXT_FLUSH_ICACHE)
-            ksu_flush_icache((uintptr_t)dst, (uintptr_t)dst + len);
-        if (flags & KSU_PATCH_TEXT_FLUSH_DCACHE)
-            ksu_flush_dcache(dst, len);
-    }
+    if (flags & KSU_PATCH_TEXT_FLUSH_ICACHE)
+        ksu_flush_icache((uintptr_t)dst, (uintptr_t)dst + len);
+    if (flags & KSU_PATCH_TEXT_FLUSH_DCACHE)
+        ksu_flush_dcache(dst, len);
 
 err:
-    pr_debug("patch result=%d\n", ret);
+    pr_info("patch result=%d\n", ret);
     return ret;
 }
 

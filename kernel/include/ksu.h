@@ -11,6 +11,12 @@
 extern struct cred *ksu_cred;
 extern bool ksu_late_loaded;
 extern bool allow_shell;
+extern struct policydb *backup_policydb;
+extern struct sidtab *backup_sidtab;
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
+extern struct selinux_policy *backup_sepolicy;
+#endif
 
 // kernel su version full strings
 #ifndef KSU_VERSION_FULL
