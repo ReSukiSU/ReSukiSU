@@ -17,6 +17,8 @@ pub struct Common {
     pub avc_spoofing: bool,
     #[serde(default)]
     pub enable_susfs_log: bool,
+    #[serde(default)]
+    pub hide_sus_mnts_for_non_su_procs: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -59,6 +61,7 @@ impl Default for Data {
                 release: "default".to_string(),
                 avc_spoofing: false,
                 enable_susfs_log: false,
+                hide_sus_mnts_for_non_su_procs: false,
             },
             sus_path: SusPath {
                 sus_path_loop: HashSet::new(),

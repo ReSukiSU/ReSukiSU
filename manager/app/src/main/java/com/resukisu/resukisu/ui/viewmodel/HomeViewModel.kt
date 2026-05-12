@@ -26,12 +26,14 @@ import com.resukisu.resukisu.ui.util.getSuperuserCount
 import com.resukisu.resukisu.ui.util.getZygiskImplement
 import com.resukisu.resukisu.ui.util.isOfficialSignature
 import com.resukisu.resukisu.ui.util.isSELinuxPermissive
+import com.resukisu.resukisu.ui.util.listModules
 import com.resukisu.resukisu.ui.util.module.LatestVersionInfo
 import com.resukisu.resukisu.ui.util.rootAvailable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 
 class HomeViewModel : ViewModel() {
 
@@ -103,6 +105,9 @@ class HomeViewModel : ViewModel() {
     var isExtendedDataLoaded by mutableStateOf(false)
         private set
     var isRefreshing by mutableStateOf(false)
+        private set
+
+    var hasEnabledThirdPartySusfsModule by mutableStateOf(false)
         private set
 
     private var loadingJobs = mutableListOf<Job>()
@@ -224,6 +229,8 @@ class HomeViewModel : ViewModel() {
                         metaModuleImplement = metamoduleImplement
                     )
                 }
+
+                hasEnabledThirdPartySusfsModule = detectEnabledThirdPartySusfsModule()
 
                 if (!isHideSusfsStatus) {
                     val (enabled, version, features) = loadSuSFSInfo()
@@ -406,6 +413,26 @@ class HomeViewModel : ViewModel() {
             }
 
             Triple(true, susfsVersion, susfsFeatures)
+        }
+    }
+
+    private suspend fun detectEnabledThirdPartySusfsModule(): Boolean {
+        return withContext(Dispatchers.IO) {
+            runCatching {
+                val modulesJson = listModules()
+                val array = JSONArray(modulesJson)
+                for (i in 0 until array.length()) {
+                    val module = array.optJSONObject(i) ?: continue
+                    val enabled = module.optBoolean("enabled", false)
+                    if (!enabled) continue
+
+                    val id = module.optString("id", "")
+                    if (id.contains("susfs", ignoreCase = true)) {
+                        return@withContext true
+                    }
+                }
+                false
+            }.getOrDefault(false)
         }
     }
 

@@ -1,7 +1,7 @@
 use anyhow::Result;
 use clap::{Args, Parser, Subcommand, error::ErrorKind};
 
-use crate::android::susfs::{api, config};
+use crate::android::susfs::{api, config, slot_info};
 
 #[derive(Debug, Args)]
 pub struct SusfsArgs {
@@ -197,6 +197,12 @@ pub enum SuSFSSubCommands {
         #[arg(default_value = "default")]
         blksize: String,
     },
+    /// Read boot slot kernel uname/build-time (auto-decompress kernel payload)
+    #[command(name = "slot_info")]
+    SlotInfo {
+        #[command(subcommand)]
+        info_type: SlotInfoType,
+    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -204,6 +210,11 @@ pub enum ShowType {
     Version,
     EnabledFeatures,
     Variant,
+}
+
+#[derive(Subcommand, Debug)]
+pub enum SlotInfoType {
+    Json,
 }
 
 #[derive(Debug, Parser)]
@@ -259,6 +270,7 @@ pub fn run_main(command: SuSFSSubCommands) -> Result<()> {
         }
         SuSFSSubCommands::HideSusMntsForNonSuProcs { enabled } => {
             api::hide_sus_mnts_for_non_su_procs(enabled)?;
+            config::operation::set_hide_sus_mnts_for_non_su_procs(enabled);
         }
         SuSFSSubCommands::EnableLog { enabled } => {
             api::enable_log(enabled)?;
@@ -392,6 +404,9 @@ pub fn run_main(command: SuSFSSubCommands) -> Result<()> {
                 &blksize,
             );
         }
+        SuSFSSubCommands::SlotInfo { info_type } => match info_type {
+            SlotInfoType::Json => slot_info::show_slot_info_json()?,
+        },
     }
 
     Ok(())

@@ -611,6 +611,14 @@ fun getSuSFSFeatures(): String {
     return ""
 }
 
+fun getSuSFSSlotInfoJson(): String {
+    val shell = getRootShell()
+    val cmd = "${getKsuDaemonPath()} susfs slot_info json"
+    val result = shell.newJob().add(cmd).to(ArrayList<String>(), null).exec()
+    if (!result.isSuccess) return "[]"
+    return result.out.joinToString("\n").trim().ifBlank { "[]" }
+}
+
 fun getMetaModuleImplement(): String {
     try {
         val metaModuleProp = SuFile.open("/data/adb/metamodule/module.prop")

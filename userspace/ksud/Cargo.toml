@@ -52,6 +52,10 @@ nom = "8"
 derive-new = "0.7"
 getopts = "0.2"
 serde = { version = "1.0", features = ["derive"] }
+bzip2 = "0.6"
+flate2 = "1"
+lz4 = "1"
+lzma-rust2 = { version = "0.15", features = ["std", "xz"] }
 ksuinit = { path = "../ksuinit" }
 adb_client = { git = "https://github.com/Kernel-SU/adb_client" }
 prop-rs-android = { git = "https://github.com/Kernel-SU/ksu_props" }

@@ -13,9 +13,9 @@ import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.ui.util.execKsud
 import com.resukisu.resukisu.ui.util.getRootShell
 import com.resukisu.resukisu.ui.util.getSuSFSFeatures
+import com.resukisu.resukisu.ui.util.getSuSFSSlotInfoJson
 import com.resukisu.resukisu.ui.util.getSuSFSStatus
 import com.resukisu.resukisu.ui.util.getSuSFSVersion
-import com.resukisu.resukisu.ui.util.runCmd
 import com.topjohnwu.superuser.io.SuFile
 import com.topjohnwu.superuser.io.SuFileInputStream
 import com.topjohnwu.superuser.io.SuFileOutputStream
@@ -530,7 +530,10 @@ class SuSFSScreenViewModel : ViewModel() {
             versionText = version,
             unameValue = commonObject?.optString("release", defaultSusfsValue) ?: defaultSusfsValue,
             buildTimeValue = commonObject?.optString("version", defaultSusfsValue) ?: defaultSusfsValue,
-            hideSuSMntsForNonSUProcs = false, // TODO native
+            hideSuSMntsForNonSUProcs = commonObject?.optBoolean(
+                "hide_sus_mnts_for_non_su_procs",
+                false
+            ) ?: false,
             hideMountsControlSupported = uiState.hideMountsControlSupported,
             susfsLogEnabled = commonObject?.optBoolean("enable_susfs_log", false) ?: false,
             avcLogSpoofing = commonObject?.optBoolean("avc_spoofing", false) ?: false,
@@ -579,23 +582,23 @@ class SuSFSScreenViewModel : ViewModel() {
     }
 
     private suspend fun loadSlotInfo(): List<SuSFSSlotInfo> = withContext(Dispatchers.IO) {
-        val shell = getRootShell()
+        val raw = runCatching { getSuSFSSlotInfoJson() }.getOrDefault("[]")
+        val json = runCatching { JSONArray(raw) }.getOrElse { JSONArray() }
         val result = mutableListOf<SuSFSSlotInfo>()
-        listOf("boot_a", "boot_b").forEach { slot ->
-            val unameCmd =
-                $$"strings -n 20 /dev/block/by-name/$$slot | awk '/Linux version/ && ++c==2 {print $3; exit}'"
-            val buildTimeCmd = "strings -n 20 /dev/block/by-name/$slot | sed -n '/Linux version.*#/{s/.*#/#/p;q}'"
-            val uname = runCmd(shell, unameCmd).trim()
-            val buildTime = runCmd(shell, buildTimeCmd).trim()
-            if (uname.isNotEmpty() && buildTime.isNotEmpty()) {
+        for (i in 0 until json.length()) {
+            val item = json.optJSONObject(i) ?: continue
+            val slotName = item.optString("slot_name", "").trim()
+            val uname = item.optString("uname", "").trim()
+            val buildTime = item.optString("build_time", "").trim()
+            if (slotName.isNotEmpty() && uname.isNotEmpty() && buildTime.isNotEmpty()) {
                 result += SuSFSSlotInfo(
-                    slotName = slot,
+                    slotName = slotName,
                     uname = uname,
-                    buildTime = buildTime
+                    buildTime = buildTime,
                 )
             }
         }
-        return@withContext result
+        result
     }
 
     private fun parseFeatureStatus(rawOutput: String): List<SuSFSFeatureStatus> {
