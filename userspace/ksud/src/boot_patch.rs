@@ -804,7 +804,7 @@ pub fn restore(args: BootRestoreArgs) -> Result<()> {
 
         let (mut cpio, vendor_ramdisk_idx) =
             if let Some(ramdisk_image) = boot_image.get_blocks().get_ramdisk() {
-                extract_ramdisk(&ramdisk_image)?
+                extract_ramdisk(ramdisk_image)?
             } else {
                 bail!("No compatible ramdisk found.")
             };
