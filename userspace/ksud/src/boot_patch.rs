@@ -804,27 +804,7 @@ pub fn restore(args: BootRestoreArgs) -> Result<()> {
 
         let (mut cpio, vendor_ramdisk_idx) =
             if let Some(ramdisk_image) = boot_image.get_blocks().get_ramdisk() {
-                if ramdisk_image.is_vendor_ramdisk() {
-                    let (pos, target) = ramdisk_image
-                        .iter_vendor_ramdisk()
-                        .enumerate()
-                        .find(|entry| entry.1.get_name_raw() == b"")
-                        .or_else(|| {
-                            ramdisk_image
-                                .iter_vendor_ramdisk()
-                                .enumerate()
-                                .find(|entry| entry.1.get_name_raw() == b"init_boot")
-                        })
-                        .ok_or_else(|| anyhow!("No suitable vendor ramdisk entry found"))?;
-
-                    let mut ramdisk = Vec::<u8>::new();
-                    target.dump(&mut ramdisk, false)?;
-                    (Cpio::load_from_data(ramdisk.as_slice())?, Some(pos))
-                } else {
-                    let mut ramdisk = Vec::<u8>::new();
-                    ramdisk_image.dump(&mut ramdisk, false)?;
-                    (Cpio::load_from_data(ramdisk.as_slice())?, None)
-                }
+                extract_ramdisk(&ramdisk_image)?
             } else {
                 bail!("No compatible ramdisk found.")
             };
