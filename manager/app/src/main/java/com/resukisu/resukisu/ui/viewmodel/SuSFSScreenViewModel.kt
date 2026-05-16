@@ -41,7 +41,7 @@ private inline val defaultSusfsValue: String
     get() = "default"
 
 private const val CONFIG_PATH = "/data/adb/ksu/.susfs.json"
-private const val TAG = "SuSFSScreenViewModel"
+private const val SUSFS_VM_TAG = "SuSFSScreenViewModel"
 private const val DEFAULT_SUSFS_CONFIG_TEMPLATE = """{
   "common": {
     "version": "default",
@@ -399,7 +399,7 @@ class SuSFSScreenViewModel : ViewModel() {
             }
             result
         } catch (t: Throwable) {
-            Log.e(TAG, "fetchInstalledPackagesViaRootService failed", t)
+            Log.e(SUSFS_VM_TAG, "fetchInstalledPackagesViaRootService failed", t)
             emptyList()
         } finally {
             stopKsuService()
@@ -429,7 +429,7 @@ class SuSFSScreenViewModel : ViewModel() {
             )
             task?.let { Shell.getShell().execTask(it) } ?: continuation.resume(null)
         } catch (t: Throwable) {
-            Log.e(TAG, "connectKsuService failed", t)
+            Log.e(SUSFS_VM_TAG, "connectKsuService failed", t)
             if (continuation.isActive) {
                 continuation.resume(null)
             }
@@ -442,7 +442,7 @@ class SuSFSScreenViewModel : ViewModel() {
             val intent = Intent(ksuApp, KsuService::class.java)
             com.topjohnwu.superuser.ipc.RootService.stop(intent)
         } catch (t: Throwable) {
-            Log.e(TAG, "stopKsuService failed", t)
+            Log.e(SUSFS_VM_TAG, "stopKsuService failed", t)
         } finally {
             serviceConnection = null
         }
