@@ -350,23 +350,47 @@ class SuSFSScreenViewModel : ViewModel() {
 
     suspend fun loadSelectableApps(): List<SuSFSAppEntry> = withContext(Dispatchers.IO) {
         val packageManager = ksuApp.packageManager
-        val packageInfos = fetchInstalledPackagesViaRootService()
-            .ifEmpty { getInstalledPackagesFallback() }
+        val launcherIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+        val launchableApps = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            packageManager.queryIntentActivities(
+                launcherIntent,
+                android.content.pm.PackageManager.ResolveInfoFlags.of(0)
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            packageManager.queryIntentActivities(launcherIntent, 0)
+        }
 
-        val entries = packageInfos
+        val entries = launchableApps
             .asSequence()
-            .filter { packageInfo -> packageInfo.applicationInfo != null }
-            .filter { packageInfo -> packageInfo.packageName != ksuApp.packageName }
-            .map { packageInfo ->
-                val appInfo = packageInfo.applicationInfo
+            .mapNotNull { it.activityInfo?.packageName }
+            .filter { packageName -> packageName != ksuApp.packageName }
+            .distinct()
+            .mapNotNull { packageName ->
+                val packageInfo = runCatching {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        packageManager.getPackageInfo(
+                            packageName,
+                            android.content.pm.PackageManager.PackageInfoFlags.of(0)
+                        )
+                    } else {
+                        @Suppress("DEPRECATION")
+                        packageManager.getPackageInfo(packageName, 0)
+                    }
+                }.getOrNull() ?: return@mapNotNull null
+
+                val appInfo = packageInfo.applicationInfo ?: return@mapNotNull null
+                if ((appInfo.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0) {
+                    return@mapNotNull null
+                }
+
                 SuSFSAppEntry(
-                    packageName = packageInfo.packageName,
-                    label = appInfo?.loadLabel(packageManager)?.toString()?.ifBlank { packageInfo.packageName }
-                        ?: packageInfo.packageName,
+                    packageName = packageName,
+                    label = appInfo.loadLabel(packageManager)?.toString()?.ifBlank { packageName }
+                        ?: packageName,
                     packageInfo = packageInfo,
                 )
             }
-            .distinctBy { it.packageName }
             .sortedBy { it.label.lowercase() }
             .toList()
         return@withContext entries
