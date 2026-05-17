@@ -76,7 +76,7 @@ setup_submodule() {
         if [ "$(git config --get submodule.KernelSU.url)" != "https://github.com/ReSukiSU/ReSukiSU" ]; then
             echo '[!] KernelSU is already a submodule but with a different URL. Set to correct URL.'
 			git submodule set-url KernelSU https://github.com/ReSukiSU/ReSukiSU
-			cd $GKI_ROOT/KernelSU
+			cd "$GKI_ROOT/KernelSU"
 			git fetch origin
 			if [ -z "${1-}" ]; then
 				git checkout main
