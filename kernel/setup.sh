@@ -83,8 +83,10 @@ setup_submodule() {
 			else
 				git checkout "$1"
 			fi
+			echo '[+] Done.'
 		fi
-		echo '[+] Done.'
+		else
+			echo '[!] KernelSU has been setup as a submodule. Skipping setup.'
         return 0
     fi
 
