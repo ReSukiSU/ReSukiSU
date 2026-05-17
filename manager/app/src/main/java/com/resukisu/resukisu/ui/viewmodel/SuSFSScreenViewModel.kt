@@ -350,45 +350,40 @@ class SuSFSScreenViewModel : ViewModel() {
 
     suspend fun loadSelectableApps(): List<SuSFSAppEntry> = withContext(Dispatchers.IO) {
         val packageManager = ksuApp.packageManager
-        val launcherIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
-        val launchableApps = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            packageManager.queryIntentActivities(
-                launcherIntent,
-                android.content.pm.PackageManager.ResolveInfoFlags.of(0)
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            packageManager.queryIntentActivities(launcherIntent, 0)
-        }
+        val packageInfos = fetchInstalledPackagesViaRootService()
+            .ifEmpty { getInstalledPackagesFallback() }
 
-        val entries = launchableApps
+        val entries = packageInfos
             .asSequence()
-            .mapNotNull { it.activityInfo?.packageName }
-            .filter { packageName -> packageName != ksuApp.packageName }
-            .distinct()
-            .mapNotNull { packageName ->
-                val packageInfo = runCatching {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        packageManager.getPackageInfo(
-                            packageName,
-                            android.content.pm.PackageManager.PackageInfoFlags.of(0)
-                        )
+            .filter { it.packageName.isNotBlank() }
+            .distinctBy { it.packageName }
+            .map { packageInfo ->
+                val packageInfoWithAppInfo = runCatching {
+                    if (packageInfo.applicationInfo == null) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            packageManager.getPackageInfo(
+                                packageInfo.packageName,
+                                android.content.pm.PackageManager.PackageInfoFlags.of(0)
+                            )
+                        } else {
+                            @Suppress("DEPRECATION")
+                            packageManager.getPackageInfo(packageInfo.packageName, 0)
+                        }
                     } else {
-                        @Suppress("DEPRECATION")
-                        packageManager.getPackageInfo(packageName, 0)
+                        packageInfo
                     }
-                }.getOrNull() ?: return@mapNotNull null
+                }.getOrNull() ?: packageInfo
 
-                val appInfo = packageInfo.applicationInfo ?: return@mapNotNull null
-                if ((appInfo.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0) {
-                    return@mapNotNull null
-                }
+                val label = runCatching {
+                    packageInfoWithAppInfo.applicationInfo
+                        ?.loadLabel(packageManager)
+                        ?.toString()
+                }.getOrNull()
 
                 SuSFSAppEntry(
-                    packageName = packageName,
-                    label = appInfo.loadLabel(packageManager)?.toString()?.ifBlank { packageName }
-                        ?: packageName,
-                    packageInfo = packageInfo,
+                    packageName = packageInfo.packageName,
+                    label = label?.ifBlank { packageInfo.packageName } ?: packageInfo.packageName,
+                    packageInfo = packageInfoWithAppInfo,
                 )
             }
             .sortedBy { it.label.lowercase() }
