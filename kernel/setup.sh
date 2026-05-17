@@ -72,7 +72,7 @@ setup_submodule() {
         return 0
     fi
 
-    if [ -d "KernelSU" ] && git submodule status KernelSU 2>/dev/null | grep -q "^ "; then
+    if [ -d "KernelSU" ] && git submodule status -q KernelSU; then
         echo '[+] KernelSU submodule already exists. Skipping.'
         return 0
     fi
