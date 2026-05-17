@@ -64,10 +64,23 @@ setup_kernelsu() {
 	echo '[+] Done.'
 }
 
+# Setup KernelSU as submodule
+setup_submodule() {
+	# check if GKI_ROOT is a git repository
+	if [ -d "$GKI_ROOT/.git" ]; then]
+		echo "[+] Setting up KernelSU as submodule..."
+		git submodule add https://github.com/ReSukiSU/ReSukiSU KernelSU
+		echo "[+] Submodule added."
+	else
+		echo '[!] GKI_ROOT is not a git repository. So skipping submodule setup.'
+	fi
+}
+
 # Process command-line arguments
 if [ "$#" -eq 0 ]; then
 	initialize_variables
 	setup_kernelsu
+	setup_submodule
 elif [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 	display_usage
 elif [ "$1" = "--cleanup" ]; then
@@ -76,4 +89,5 @@ elif [ "$1" = "--cleanup" ]; then
 else
 	initialize_variables
 	setup_kernelsu "$@"
+	setup_submodule
 fi
