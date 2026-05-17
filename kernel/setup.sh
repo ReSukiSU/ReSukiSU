@@ -66,15 +66,20 @@ setup_kernelsu() {
 
 # Setup KernelSU as submodule
 setup_submodule() {
-	# check if GKI_ROOT is a git repository
 	cd "$GKI_ROOT"
-	if [ -d "$GKI_ROOT/.git" ]; then
-		echo "[+] Setting up KernelSU as submodule..."
-		git submodule add https://github.com/ReSukiSU/ReSukiSU KernelSU
-		echo "[+] Submodule added."
-	else
-		echo '[!] GKI_ROOT is not a git repository. So skipping submodule setup.'
-	fi
+    if [ ! -d "$GKI_ROOT/.git" ]; then
+        echo '[!] GKI_ROOT is not a git repository. Skipping submodule setup.'
+        return 0
+    fi
+
+    if [ -d "KernelSU" ] && git submodule status KernelSU 2>/dev/null | grep -q "^ "; then
+        echo '[+] KernelSU submodule already exists. Skipping.'
+        return 0
+    fi
+
+    echo '[+] Setting up KernelSU as submodule...'
+    git submodule add https://github.com/ReSukiSU/ReSukiSU KernelSU
+    echo '[+] Submodule added.'
 }
 
 # Process command-line arguments
