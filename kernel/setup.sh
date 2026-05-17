@@ -67,6 +67,7 @@ setup_kernelsu() {
 # Setup KernelSU as submodule
 setup_submodule() {
 	# check if GKI_ROOT is a git repository
+	cd "$GKI_ROOT"
 	if [ -d "$GKI_ROOT/.git" ]; then
 		echo "[+] Setting up KernelSU as submodule..."
 		git submodule add https://github.com/ReSukiSU/ReSukiSU KernelSU
