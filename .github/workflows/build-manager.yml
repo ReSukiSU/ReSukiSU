@@ -211,7 +211,6 @@ jobs:
           path: "manager/app/build/outputs/mapping/release/"
           if-no-files-found: ignore
 
-
   repack-manager:
     if: always() && needs.build-manager.result == 'success' && needs.build-ksud.result == 'success'
     needs: [build-manager, build-ksud, generate-key]
