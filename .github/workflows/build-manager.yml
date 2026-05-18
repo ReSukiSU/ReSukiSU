@@ -202,8 +202,14 @@ jobs:
           name: ${{ steps.determine.outputs.title }}-gradle-${{ matrix.build_type }}
           path: |
             manager/app/build/outputs/apk/release/*.apk
-            manager/app/build/outputs/mapping/release/
             manager/app/build/outputs/apk/debug/*.apk
+
+      - name: Upload mappings
+        uses: actions/upload-artifact@v7
+        with:
+          name: "${{ steps.determine.outputs.title }}-mappings"
+          path: "manager/app/build/outputs/mapping/release/"
+
 
   repack-manager:
     if: always() && needs.build-manager.result == 'success' && needs.build-ksud.result == 'success'
