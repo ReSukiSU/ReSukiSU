@@ -12,13 +12,18 @@ extern struct cred *ksu_cred;
 extern bool ksu_late_loaded;
 extern bool allow_shell;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
+extern struct selinux_policy *backup_sepolicy;
+#else
+extern struct policydb *backup_policydb;
+extern struct sidtab *backup_sidtab;
+#endif
+
 // kernel su version full strings
 #ifndef KSU_VERSION_FULL
 #define KSU_VERSION_FULL "v3.x-00000000@unknown"
 #endif
 #define KSU_FULL_VERSION_STRING 255
-
-void ksu_lsm_hook_init(void);
 
 void setup_ksu_cred(void);
 

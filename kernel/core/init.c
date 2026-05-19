@@ -21,16 +21,19 @@
 #include "manager/throne_tracker.h"
 #include "runtime/ksud.h"
 #include "runtime/ksud_boot.h"
-#include "feature/sulog.h"
 #include "supercall/supercall.h"
 #include "ksu.h"
 #include "infra/file_wrapper.h"
 #include "selinux/selinux.h"
+#include "hook/setuid_hook.h"
+#include "compat/kernel_compat.h"
+
+#include "feature/sulog.h"
 #include "feature/adb_root.h"
 #include "feature/dynamic_manager.h"
 #include "feature/sucompat.h"
-#include "hook/setuid_hook.h"
-#include "compat/kernel_compat.h"
+#include "feature/selinux_hide.h"
+#include "infra/symbol_resolver.h"
 
 #ifdef CONFIG_ARM64
 #include "compat/apatch_conflict.h"
@@ -87,21 +90,32 @@ bool ksu_late_loaded;
 #ifdef CONFIG_KSU_TRACEPOINT_HOOK
 #include "hook/syscall_hook_manager.h"
 #include "hook/syscall_hook.h"
+#else
+#include "hook/lsm_hooks.h"
 #endif
 
-static inline void ksu_hook_init(void)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
+#include "hook/lsm_hook_magic.h"
+#endif
+
+static inline void __init ksu_hook_init(void)
 {
+    ksu_init_symbol_resolver();
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
+    ksu_lsm_hook_magic_init();
+#endif
+
 #if defined(CONFIG_KSU_TRACEPOINT_HOOK)
     ksu_syscall_hook_init();
     ksu_syscall_hook_manager_init();
 #elif defined(CONFIG_KSU_MANUAL_HOOK)
 // only lsm hook need call init
 #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
-    ksu_lsm_hook_init();
+    ksu_lsm_hook_built_in_init();
 #endif
 #elif defined(CONFIG_KSU_SUSFS)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
-    ksu_lsm_hook_init();
+    ksu_lsm_hook_built_in_init();
 #endif
     susfs_init();
 #else
@@ -109,8 +123,12 @@ static inline void ksu_hook_init(void)
 #endif
 }
 
-static inline void ksu_hook_exit(void)
+static inline void __exit ksu_hook_exit(void)
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
+    ksu_lsm_hook_magic_exit();
+#endif
+
 #if defined(CONFIG_KSU_TRACEPOINT_HOOK)
     ksu_syscall_hook_manager_exit();
 #else
@@ -196,6 +214,7 @@ int __init kernelsu_init(void)
     ksu_feature_init();
     ksu_sulog_init();
     ksu_adb_root_init();
+    ksu_selinux_hide_init();
 
     ksu_supercalls_init();
 
@@ -271,6 +290,7 @@ void __exit kernelsu_exit(void)
 
     ksu_allowlist_exit();
 
+    ksu_selinux_hide_exit();
     ksu_adb_root_exit();
     ksu_sulog_exit();
     ksu_feature_exit();
