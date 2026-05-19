@@ -16,6 +16,14 @@ jobs:
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v8
+
+      - name: Download Manager artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: manager
+          pattern: "Manager-*"
+          merge-multiple: true
+
       - name: Rename ksud
         run: |
           mkdir -p ksud
@@ -30,32 +38,6 @@ jobs:
                  done
               fi
           done
-      - name: Zip AnyKernel3
-        run: |
-          for dir in AnyKernel3-*; do
-            if [ -d "$dir" ]; then
-              echo "----- Zip $dir -----"
-              (cd $dir && zip -r9 "$dir".zip ./* -x .git .gitignore ./*.zip && mv *.zip ..)
-            fi
-          done
-
-      - name: Zip WSA kernel
-        run: |
-          for dir in kernel-WSA-*; do
-            if [ -d "$dir" ]; then
-              echo "------ Zip $dir ----------"
-              (cd $dir && zip -r9 "$dir".zip ./* -x .git .gitignore ./*.zip && mv *.zip ..)
-            fi
-          done
-
-      - name: Zip ChromeOS ARCVM kernel
-        run: |
-          for dir in kernel-ARCVM-*; do
-            if [ -d "$dir" ]; then
-              echo "------ Zip $dir ----------"
-              (cd $dir && zip -r9 "$dir".zip ./* -x .git .gitignore ./*.zip && mv *.zip ..)
-            fi
-          done
 
       - name: Display structure of downloaded files
         run: ls -R
@@ -65,9 +47,4 @@ jobs:
         with:
           files: |
             manager/*.apk
-            android*-lkm/*_kernelsu.ko
-            AnyKernel3-*.zip
-            boot-images-*/Image-*/*.img.gz
-            kernel-WSA*.zip
-            kernel-ARCVM*.zip
             ksud/ksud-*
