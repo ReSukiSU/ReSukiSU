@@ -487,7 +487,7 @@ static int ksu_selinux_hide_enable()
     ksu_for_each_lsm_entry(hp, &security_hook_heads.setprocattr, list)
     {
         // https://github.com/torvalds/linux/commit/d69dece5f5b6bc7a5e39d2b6136ddc69469331fe
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0) || defined(KSU_COMPAT_REQUIRE_PROVIDE_LSM_NAME)
         // when we are in 4.11+, we can ensure we are control "selinux" LSM by that
         if (strcmp("selinux", hp->lsm))
             continue;

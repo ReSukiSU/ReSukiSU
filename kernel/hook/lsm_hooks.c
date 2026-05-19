@@ -87,7 +87,8 @@ void __init ksu_lsm_hook_built_in_init(void)
     if (ARRAY_SIZE(ksu_hooks) == 0)
         return;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+        // https://github.com/torvalds/linux/commit/d69dece5f5b6bc7a5e39d2b6136ddc69469331fe
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0) || defined(KSU_COMPAT_REQUIRE_PROVIDE_LSM_NAME)
     security_add_hooks(ksu_hooks, ARRAY_SIZE(ksu_hooks), "ksu");
 #else
     // https://elixir.bootlin.com/linux/v4.10.17/source/include/linux/lsm_hooks.h#L1892

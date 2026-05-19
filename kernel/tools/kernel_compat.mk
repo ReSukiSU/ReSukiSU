@@ -268,3 +268,8 @@ ifeq ($(shell grep -F -q "int (*setprocattr)(const char *name, void *value, size
 $(info -- $(REPO_NAME)/compat: found new setprocattr prototype)
 ccflags-y += -DKSU_COMPAT_SETPROCATTR_USE_NEW_PROTOTYPE
 endif
+
+ifeq ($(shell grep -F -q "char *lsm_names" $(srctree)/security/security.c; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: found required provide lsm name)
+ccflags-y += -DKSU_COMPAT_REQUIRE_PROVIDE_LSM_NAME
+endif
