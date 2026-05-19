@@ -277,7 +277,7 @@ uintptr_t selinux_setprocattr_hook_ptr = 0;
 extern setprocattr_fn ksu_orig_setprocattr;
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0) || defined(KSU_COMPAT_SETPROCATTR_USE_NEW_PROTOTYPE)
 int __nocfi ksu_handle_selinux_setprocattr(const char *name, void *value, size_t size)
 #else
 int __nocfi ksu_handle_selinux_setprocattr(struct task_struct *p, char *name, void *value, size_t size)
@@ -326,7 +326,7 @@ int __nocfi ksu_handle_selinux_setprocattr(struct task_struct *p, char *name, vo
 call_orig:
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
     return ((setprocattr_fn)selinux_setprocattr_hook.original)(name, value, size);
-#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0) || defined(KSU_COMPAT_SETPROCATTR_USE_NEW_PROTOTYPE)
     return ksu_orig_setprocattr(name, value, size);
 #else
     return ksu_orig_setprocattr(p, name, value, size);
