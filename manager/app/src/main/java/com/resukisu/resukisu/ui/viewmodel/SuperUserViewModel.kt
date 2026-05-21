@@ -323,6 +323,9 @@ class SuperUserViewModel : ViewModel() {
     }
 
     suspend fun fetchAppList() {
+        // prevent multiple concurrent refreshes
+        if (isRefreshing) return
+
         isRefreshing = true
         loadingProgress = 0f
 
