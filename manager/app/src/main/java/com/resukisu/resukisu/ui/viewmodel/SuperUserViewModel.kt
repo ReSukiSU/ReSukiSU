@@ -329,43 +329,52 @@ class SuperUserViewModel : ViewModel() {
         isRefreshing = true
         loadingProgress = 0f
 
-        val binder = connectKsuService() ?: run { isRefreshing = false; return }
+        try {
+            val binder = connectKsuService() ?: run { isRefreshing = false; return }
 
-        withContext(Dispatchers.IO) {
-            val pm = ksuApp.packageManager
-            val allPackages = IKsuInterface.Stub.asInterface(binder)
-            val total = allPackages.packageCount
-            val pageSize = 100
-            val result = mutableListOf<AppInfo>()
+            withContext(Dispatchers.IO) {
+                val pm = ksuApp.packageManager
+                val allPackages = IKsuInterface.Stub.asInterface(binder)
+                val total = allPackages.packageCount
+                val pageSize = 100
+                val result = mutableListOf<AppInfo>()
 
-            var start = 0
-            while (start < total) {
-                val page = allPackages.getPackages(start, pageSize)
-                if (page.isEmpty()) break
+                var start = 0
+                while (start < total) {
+                    val page = allPackages.getPackages(start, pageSize)
+                    if (page.isEmpty()) break
 
-                result += page.mapNotNull { packageInfo ->
-                    packageInfo.applicationInfo?.let { appInfo ->
-                        AppInfo(
-                            label = appInfo.loadLabel(pm).toString(),
-                            packageInfo = packageInfo,
-                            profile = Natives.getAppProfile(packageInfo.packageName, appInfo.uid)
-                        )
+                    result += page.mapNotNull { packageInfo ->
+                        packageInfo.applicationInfo?.let { appInfo ->
+                            AppInfo(
+                                label = appInfo.loadLabel(pm).toString(),
+                                packageInfo = packageInfo,
+                                profile = Natives.getAppProfile(
+                                    packageInfo.packageName,
+                                    appInfo.uid
+                                )
+                            )
+                        }
                     }
+                    start += page.size
+                    loadingProgress = start.toFloat() / total
                 }
-                start += page.size
-                loadingProgress = start.toFloat() / total
-            }
 
-            stopKsuService()
+                stopKsuService()
 
-            appListMutex.withLock {
-                val filteredApps = result.filter { it.packageName != ksuApp.packageName }
-                apps = filteredApps
-                appGroups = groupAppsByUid(filteredApps)
+                appListMutex.withLock {
+                    val filteredApps = result.filter { it.packageName != ksuApp.packageName }
+                    apps = filteredApps
+                    appGroups = groupAppsByUid(filteredApps)
+                }
+                loadingProgress = 1f
             }
-            loadingProgress = 1f
+            isRefreshing = false
+        } catch (e: Exception) {
+            Log.e(TAG, "Error refresh app list", e)
+        } finally {
+            isRefreshing = false
         }
-        isRefreshing = false
     }
 
     val appGroupList by derivedStateOf {
