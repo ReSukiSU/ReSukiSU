@@ -282,20 +282,16 @@ class SuperUserViewModel : ViewModel() {
         }
     }
 
-    private var serviceConnection: ServiceConnection? = null
-
     private suspend fun connectKsuService(onDisconnect: () -> Unit = {}): IBinder? =
         suspendCoroutine { continuation ->
             val connection = object : ServiceConnection {
                 override fun onServiceDisconnected(name: ComponentName?) {
                     onDisconnect()
-                    serviceConnection = null
                 }
                 override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
                     continuation.resume(binder)
                 }
             }
-            serviceConnection = connection
             val intent = Intent(ksuApp, KsuService::class.java)
             try {
                 val task = com.topjohnwu.superuser.ipc.RootService.bindOrTask(
@@ -309,15 +305,12 @@ class SuperUserViewModel : ViewModel() {
         }
 
     private fun stopKsuService() {
-        serviceConnection?.let {
-            viewModelScope.launch(Dispatchers.Main) {
-                try {
-                    val intent = Intent(ksuApp, KsuService::class.java)
-                    com.topjohnwu.superuser.ipc.RootService.stop(intent)
-                    serviceConnection = null
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to stop KsuService", e)
-                }
+        viewModelScope.launch(Dispatchers.Main) {
+            try {
+                val intent = Intent(ksuApp, KsuService::class.java)
+                com.topjohnwu.superuser.ipc.RootService.stop(intent)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to stop KsuService", e)
             }
         }
     }
@@ -360,8 +353,6 @@ class SuperUserViewModel : ViewModel() {
                     loadingProgress = start.toFloat() / total
                 }
 
-                stopKsuService()
-
                 appListMutex.withLock {
                     val filteredApps = result.filter { it.packageName != ksuApp.packageName }
                     apps = filteredApps
@@ -369,11 +360,11 @@ class SuperUserViewModel : ViewModel() {
                 }
                 loadingProgress = 1f
             }
-            isRefreshing = false
         } catch (e: Exception) {
             Log.e(TAG, "Error refresh app list", e)
         } finally {
             isRefreshing = false
+            stopKsuService()
         }
     }
 
