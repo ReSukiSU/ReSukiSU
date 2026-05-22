@@ -744,7 +744,7 @@ private fun BasicTab(
                         SettingsSwitchWidget(
                             icon = Icons.Filled.VisibilityOff,
                             title = stringResource(R.string.susfs_hide_mounts_for_nonsu_procs),
-                            description = stringResource(R.string.susfs_hide_mounts_for_nonsu_procs_description),
+                            description = null,
                             checked = uiState.hideSuSMntsForNonSUProcs,
                             onCheckedChange = viewModel::setHideSusMountsForNonSUProcs
                         )

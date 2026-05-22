@@ -503,12 +503,11 @@
     <string name="kstat_config_description_update_full_clone">• update_sus_kstat_full_clone: Update ino only, keep other original values</string>
     <string name="static_kstat_config">Static Kstat Configuration</string>
     <string name="kstat_path_management">Kstat Path Management</string>
-    <string name="no_kstat_config_message">No Kstat configuration yet, click the button below to add</string>
+    <string name="no_kstat_config_message">No Kstat configuration yet</string>
     <string name="susfs_basic_information">Basic Information</string>
     <string name="susfs_hide_mounts_control_title">SUS Mount Hiding Control</string>
     <string name="susfs_hide_mounts_control_description">Control the hiding behavior of SUS mounts for processes</string>
     <string name="susfs_hide_mounts_for_nonsu_procs">Hide SUS mounts for Non Root processes</string>
-    <string name="susfs_hide_mounts_for_nonsu_procs_description">Decide hide all sus mounts for non-su processes or not</string>
     <string name="susfs_hide_mounts_all_enabled">Enabled hiding SUS mounts for all processes</string>
     <string name="susfs_hide_mounts_all_disabled">Disabled hiding SUS mounts for all processes</string>
     <string name="susfs_hide_mounts_current_setting">Current setting: %s</string>
@@ -592,22 +591,21 @@
     <string name="susfs_reset_loop_paths_message">Are you sure you want to clear all SUS loop paths? This action cannot be undone</string>
     <string name="susfs_loop_path_label">Loop Path</string>
     <string name="susfs_loop_path_placeholder">/data/example/path</string>
-    <string name="susfs_loop_path_restriction_warning">Note: Only paths NOT inside /storage/ and /sdcard/ can be added via loop paths</string>
     <string name="susfs_loop_path_invalid_location">Error: Loop paths cannot be inside /storage/ or /sdcard/ directories</string>
     <string name="loop_paths_section">Loop Paths</string>
     <string name="add_loop_path">Add Loop Path</string>
     <string name="sus_loop_paths_description_title">Loop Path Configuration</string>
-    <string name="sus_loop_paths_description_text">Loop paths are re-flagged as SUS_PATH on each non-root user app or isolated service startup. This helps address issues where added paths may have their inode status reset or inode re-created in the kernel</string>
+    <string name="sus_loop_paths_description_text">"Loop paths are re-flagged as SUS_PATH on each non-root user app or isolated service startup.\n
+This helps address issues where added paths may have their inode status reset or inode re-created in the kernel.\n
+Note: Only paths NOT inside /storage/ and /sdcard/ can be added via loop paths."</string>
     <string name="avc_log_spoofing">AVC Log Spoofing</string>
     <string name="avc_log_spoofing_enabled">AVC log spoofing has been enabled</string>
     <string name="avc_log_spoofing_disabled">AVC log spoofing has been disabled</string>
-    <string name="avc_log_spoofing_description">
-Disabled: Disable spoofing the sus tcontext of \'su\' shown in avc log in kernel\n
-Enabled: Enable spoofing the sus tcontext of \'su\' with \'u:r:priv_app:s0:c512,c768\' shown in avc log in kernel
-</string>
+    <string name="avc_log_spoofing_description">"Disabled: Disable spoofing the sus tcontext of \'su\' shown in avc log in kernel\n
+Enabled: Enable spoofing the sus tcontext of \'su\' with \'u:r:priv_app:s0:c512,c768\' shown in avc log in kernel"</string>
     <string name="avc_log_spoofing_warning">
 Important Note:\n
-- It is set to \'0\' by default in kernel\n
+- It is set to \'disabled\' by default in kernel\n
 - Enabling this will sometimes make developers hard to identify the cause when they are debugging with some permission or SELinux issue, so users are advised to disable this when doing
 </string>
     <string name="home_hook_type">Hook type</string>

@@ -494,12 +494,11 @@
     <string name="kstat_config_description_update_full_clone">• update_sus_kstat_full_clone: 仅更新 ino，其他保持原始值</string>
     <string name="static_kstat_config">静态 Kstat 配置</string>
     <string name="kstat_path_management">Kstat 路径管理</string>
-    <string name="no_kstat_config_message">暂无 Kstat 配置，点击下方按钮添加配置</string>
+    <string name="no_kstat_config_message">暂无 Kstat 配置</string>
     <string name="susfs_basic_information">基本信息</string>
     <string name="susfs_hide_mounts_control_title">SuS 挂载隐藏控制</string>
     <string name="susfs_hide_mounts_control_description">控制 SuS 挂载对进程的隐藏行为</string>
     <string name="susfs_hide_mounts_for_nonsu_procs">对非 Root 进程隐藏 SuS 挂载</string>
-    <string name="susfs_hide_mounts_for_nonsu_procs_description">决定是否要对非 Root 进程隐藏 SuS 挂载</string>
     <string name="susfs_hide_mounts_all_enabled">已启用对所有进程隐藏 SuS 挂载</string>
     <string name="susfs_hide_mounts_all_disabled">已禁用对所有进程隐藏 SuS 挂载</string>
     <string name="susfs_hide_mounts_current_setting">当前设置: %s</string>
@@ -582,19 +581,20 @@
     <string name="susfs_reset_loop_paths_title">重置循环路径</string>
     <string name="susfs_reset_loop_paths_message">确定要清空所有 SuS 循环路径吗？此操作无法撤销。</string>
     <string name="susfs_loop_path_label">循环路径</string>
-    <string name="susfs_loop_path_restriction_warning">注意：只有不在 /storage/ 和 /sdcard/ 内的路径才能通过循环路径添加。</string>
     <string name="susfs_loop_path_invalid_location">错误：循环路径不能位于 /storage/ 或 /sdcard/ 目录内</string>
     <string name="loop_paths_section">循环路径</string>
     <string name="add_loop_path">添加循环路径</string>
     <string name="sus_loop_paths_description_title">循环路径配置</string>
-    <string name="sus_loop_paths_description_text">循环路径会在每次非 root 用户应用或隔离服务启动时重新标记为 SUS_PATH。这有助于解决添加的路径可能因 inode 状态重置或内核中 inode 重新创建而失效的问题</string>
+    <string name="sus_loop_paths_description_text">"循环路径会在每次非 root 用户应用或隔离服务启动时重新标记为 SUS_PATH。\n
+这有助于解决添加的路径可能因 inode 状态重置或内核中 inode 重新创建而失效的问题。\n
+注意：只有不在 /storage/ 和 /sdcard/ 内的路径才能通过循环路径添加。"</string>
     <string name="avc_log_spoofing">AVC 日志欺骗</string>
     <string name="avc_log_spoofing_enabled">AVC 日志欺骗已启用</string>
     <string name="avc_log_spoofing_disabled">AVC 日志欺骗已禁用</string>
-    <string name="avc_log_spoofing_description">禁用: 禁用在内核 AVC 日志中欺骗 \'su\' 的 sus tcontext。\n
-启用: 启用在内核 AVC 日志中将 \'su\' 的 sus tcontext 欺骗为 \'u:r:priv_app:s0:c512,c768\'</string>
+    <string name="avc_log_spoofing_description">"禁用: 禁用在内核 AVC 日志中欺骗 \'su\' 的 sus tcontext。\n
+启用: 启用在内核 AVC 日志中将 \'su\' 的 sus tcontext 欺骗为 \'u:r:priv_app:s0:c512,c768\'"</string>
     <string name="avc_log_spoofing_warning">重要提示：\n
-- 内核中默认设置为 \'0\'\n
+- 内核中默认设置为 \'禁用\'\n
 - 启用此功能有时会使开发人员在调试权限或 SELinux 问题时难以识别原因，因此建议用户在调试时禁用此功能。</string>
     <string name="home_hook_type">钩子类型</string>
     <string name="kpm_patch_options">KPM 修补</string>
