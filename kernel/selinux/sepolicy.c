@@ -165,7 +165,8 @@ static bool remove_avtab_node(struct policydb *db, struct avtab_node *node)
         prev = NULL;
         // https://github.com/torvalds/linux/commit/acdf52d97f824019888422842757013b37441dd1   <- 5.1
         //https://github.com/torvalds/linux/commit/ba39db6e0519aa8362dbda6523ceb69349a18dc3    <- 4.1
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 1, 0) || LINUX_VERSION_CODE < KERNEL_VERSION(4, 1, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 1, 0) || LINUX_VERSION_CODE < KERNEL_VERSION(4, 1, 0) ||                   \
+    defined(KSU_COMPAT_HAS_MODERN_POLICYDB)
         for (n = db->te_avtab.htable[i]; n; prev = n, n = n->next) {
             if (n != node)
                 continue;
@@ -707,7 +708,7 @@ static bool add_type(struct policydb *db, const char *type_name, bool attr)
         return false;
     }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 1, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 1, 0) || defined(KSU_COMPAT_HAS_MODERN_POLICYDB)
     struct ebitmap *new_type_attr_map_array =
         ksu_kvrealloc(db->type_attr_map_array, value * sizeof(struct ebitmap), (value - 1) * sizeof(struct ebitmap));
 
@@ -926,7 +927,7 @@ static bool set_type_state(struct policydb *db, const char *type_name, bool perm
 
 static void add_typeattribute_raw(struct policydb *db, struct type_datum *type, struct type_datum *attr)
 {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 1, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 1, 0) || defined(KSU_COMPAT_HAS_MODERN_POLICYDB)
     struct ebitmap *sattr = &db->type_attr_map_array[type->value - 1];
 
 #elif defined(KSU_COMPAT_IS_HISI_LEGACY_HM2)
