@@ -97,7 +97,7 @@ fun SettingsBaseWidget(
     isError: Boolean = false,
     selected: Boolean = false,
     onClick: ((Offset) -> Unit)? = {},
-    onLongClick: ((Offset) -> Unit)? = {},
+    onLongClick: ((Offset) -> Unit)? = null,
     clickHaptic: HapticFeedbackType? = HapticFeedbackType.ContextClick,
     leadingContent: (@Composable () -> Unit)? = null,
     foreContent: @Composable BoxScope.() -> Unit = {},

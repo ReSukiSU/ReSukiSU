@@ -87,16 +87,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.DialogHandle
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.WarningCard
 import com.resukisu.resukisu.ui.component.rememberCustomDialog
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
+import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
-import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.theme.CardConfig
@@ -104,14 +107,12 @@ import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
+import com.resukisu.resukisu.ui.viewmodel.ConfigurableSuSFSFeature
 import com.resukisu.resukisu.ui.viewmodel.SuSFSAppEntry
 import com.resukisu.resukisu.ui.viewmodel.SuSFSFeatureStatus
 import com.resukisu.resukisu.ui.viewmodel.SuSFSScreenViewModel
 import com.resukisu.resukisu.ui.viewmodel.SuSFSStaticKstatEntry
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
-import coil.compose.AsyncImage
-import coil.request.CachePolicy
-import coil.request.ImageRequest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -246,7 +247,6 @@ private fun SuSFeaturesTab(
                             icon = Icons.Filled.Info,
                             title = null,
                             description = stringResource(R.string.susfs_enabled_features_description),
-                            enabled = false
                         ) {}
                     }
                 }
@@ -340,7 +340,6 @@ private fun SuSKstatTab(
                             stringResource(R.string.kstat_config_description_update),
                             stringResource(R.string.kstat_config_description_update_full_clone)
                         ).joinToString("\n"),
-                        enabled = false
                     ) {}
                 }
             }
@@ -422,7 +421,6 @@ private fun SuSMapTab(
                         icon = Icons.Filled.Security,
                         title = null,
                         description = stringResource(R.string.sus_maps_description_text),
-                        enabled = false
                     ) {}
                 }
             }
@@ -469,7 +467,6 @@ private fun SuSLoopPathTab(
                         icon = Icons.Filled.Info,
                         title = null,
                         description = stringResource(R.string.sus_loop_paths_description_text),
-                        enabled = false
                     ) {}
                 }
             }
@@ -713,7 +710,6 @@ private fun BasicTab(
                             icon = Icons.Filled.Info,
                             title = stringResource(R.string.susfs_config_description),
                             description = stringResource(R.string.susfs_config_description_text),
-                            enabled = false
                         ) {}
                     }
                 }
@@ -762,7 +758,6 @@ private fun BasicTab(
                                     stringResource(R.string.susfs_hide_mounts_setting_non_ksu)
                                 }
                             ),
-                            enabled = false
                         ) {}
                     }
                 }
@@ -870,7 +865,6 @@ private fun BasicTab(
                             icon = Icons.Filled.Info,
                             title = null,
                             description = stringResource(R.string.avc_log_spoofing_warning),
-                            enabled = false
                         ) {}
                     }
                 }
@@ -1214,7 +1208,6 @@ private fun PathGroup(
                     icon = Icons.Filled.Info,
                     title = emptyText,
                     description = null,
-                    enabled = false
                 ) {}
             }
         }
@@ -1267,7 +1260,6 @@ private fun StaticKstatGroup(
                     icon = Icons.Filled.Info,
                     title = stringResource(R.string.no_kstat_config_message),
                     description = null,
-                    enabled = false
                 ) {}
             }
         }
@@ -1309,89 +1301,43 @@ private fun FeatureGroup(
                     icon = Icons.Filled.Info,
                     title = stringResource(R.string.susfs_no_features_found),
                     description = null,
-                    enabled = false
                 ) {}
             }
         }
 
         features.forEach { feature ->
             item(key = feature.key) {
-                var logEnabled by remember(feature.key) { mutableStateOf(viewModel.uiState.susfsLogEnabled) }
-                val logControlDialog = rememberCustomDialog { dismiss ->
-                    AlertDialog(
-                        onDismissRequest = dismiss,
-                        title = { Text(stringResource(R.string.susfs_log_config_title)) },
-                        text = {
-                            LazyColumn(
-                                modifier = Modifier
-                                    .heightIn(max = 325.dp)
-                            ) {
-                                item {
-                                    Text(
-                                        text = stringResource(R.string.susfs_log_config_description),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-
-                                item {
-                                    SettingsSwitchWidget(
-                                        icon = Icons.Filled.Settings,
-                                        title = stringResource(R.string.susfs_enable_log_label),
-                                        checked = logEnabled,
-                                        onCheckedChange = { logEnabled = it }
-                                    )
-                                }
-                            }
+                if (feature.configurable) {
+                    SettingsSwitchWidget(
+                        icon = Icons.Filled.Settings,
+                        title = feature.title,
+                        description = if (feature.enabled) {
+                            stringResource(R.string.susfs_feature_enabled)
+                        } else {
+                            stringResource(R.string.susfs_feature_disabled)
                         },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    viewModel.setSusfsLogEnabled(logEnabled)
-                                    dismiss()
-                                }
-                            ) {
-                                Text(text = stringResource(R.string.susfs_apply))
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(
-                                onClick = {
-                                    logEnabled = viewModel.uiState.susfsLogEnabled
-                                    dismiss()
-                                }
-                            ) {
-                                Text(text = stringResource(R.string.cancel))
-                            }
-                        }
-                    )
-                }
-
-                SettingsBaseWidget(
-                    icon = Icons.Filled.Settings,
-                    title = feature.title,
-                    description = if (feature.enabled) {
-                        stringResource(R.string.susfs_feature_enabled)
-                    } else {
-                        stringResource(R.string.susfs_feature_disabled)
-                    },
-                    enabled = feature.configurable,
-                    onClick = {
-                        if (feature.configurable) {
-                            logEnabled = viewModel.uiState.susfsLogEnabled
-                            logControlDialog.show()
-                        }
-                    },
-                    descriptionColumnContent = {
-                        if (feature.configurable) {
+                        checked = feature.enabled,
+                        descriptionColumnContent = {
                             Text(
                                 text = stringResource(R.string.susfs_feature_configurable),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
+                    ) { checked ->
+                        (feature as ConfigurableSuSFSFeature).onCheckedChange(checked)
                     }
-                ) {}
+                } else {
+                    SettingsBaseWidget(
+                        icon = Icons.Filled.Settings,
+                        title = feature.title,
+                        description = if (feature.enabled) {
+                            stringResource(R.string.susfs_feature_enabled)
+                        } else {
+                            stringResource(R.string.susfs_feature_disabled)
+                        },
+                    )
+                }
             }
         }
     }
@@ -1674,7 +1620,6 @@ private fun AddAppPathDialog(
                                 iconPlaceholder = false,
                                 title = stringResource(R.string.no_apps_found),
                                 description = null,
-                                enabled = false
                             ) {}
                         }
                     } else {
@@ -1797,7 +1742,6 @@ private fun SlotInfoDialog(
                                     modifier = Modifier.padding(top = 16.dp),
                                     icon = Icons.Filled.Storage,
                                     title = info.slotName + currentBadge,
-                                    enabled = false,
                                     description = "${
                                         stringResource(
                                             R.string.susfs_slot_uname,

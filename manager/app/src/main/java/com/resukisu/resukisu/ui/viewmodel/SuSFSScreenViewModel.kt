@@ -65,12 +65,26 @@ private const val DEFAULT_SUSFS_CONFIG_TEMPLATE = """{
 }
 """
 
-data class SuSFSFeatureStatus(
+open class SuSFSFeatureStatus(
     val key: String,
     val title: String,
     val enabled: Boolean,
     val configurable: Boolean = false,
 )
+
+data class NoNConfigurableSuSFSFeature(
+    val featureKey: String,
+    val featureTitle: String,
+    val featureEnabled: Boolean,
+) : SuSFSFeatureStatus(featureKey, featureTitle, featureEnabled, false)
+
+abstract class ConfigurableSuSFSFeature(
+    featureKey: String,
+    featureTitle: String,
+    featureEnabled: Boolean,
+) : SuSFSFeatureStatus(featureKey, featureTitle, featureEnabled, true) {
+    abstract fun onCheckedChange(checked: Boolean)
+}
 
 data class SuSFSStaticKstatEntry(
     val path: String,
@@ -827,12 +841,23 @@ class SuSFSScreenViewModel : ViewModel() {
         )
 
         return mappings.map { (key, titleRes) ->
-            SuSFSFeatureStatus(
-                key = key,
-                title = ksuApp.getString(titleRes),
-                enabled = enabledConfig.contains(key),
-                configurable = key == "CONFIG_KSU_SUSFS_ENABLE_LOG",
-            )
+            if (key == "CONFIG_KSU_SUSFS_ENABLE_LOG") {
+                object : ConfigurableSuSFSFeature(
+                    featureKey = key,
+                    featureTitle = ksuApp.getString(titleRes),
+                    featureEnabled = enabledConfig.contains(key),
+                ) {
+                    override fun onCheckedChange(checked: Boolean) {
+                        setSusfsLogEnabled(checked)
+                    }
+                }
+            } else {
+                NoNConfigurableSuSFSFeature(
+                    featureKey = key,
+                    featureTitle = ksuApp.getString(titleRes),
+                    featureEnabled = enabledConfig.contains(key),
+                )
+            }
         }.sortedBy { it.title }
     }
 
