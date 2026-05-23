@@ -72,7 +72,7 @@ setup_submodule() {
         return 0
     fi
 
-	if [ "$CI" == "true" ] || [ "$GITHUB_ACTIONS" == "true" ]; then
+	if [ "$CI" = "true" ] || [ "$GITHUB_ACTIONS" = "true" ]; then
 		echo '[!] Running in CI. Skipping submodule setup.'
 		return 0
 	fi
