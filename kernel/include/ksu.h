@@ -13,7 +13,7 @@ extern bool ksu_late_loaded;
 extern bool allow_shell;
 extern bool ksu_no_custom_rc;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0) || defined(KSU_COMPAT_HAS_SELINUX_POLICY_STRUCT)
 extern struct selinux_policy *backup_sepolicy;
 #else
 extern struct policydb *backup_policydb;
