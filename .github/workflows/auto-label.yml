@@ -48,24 +48,30 @@ jobs:
               }
             }
 
-            const closeReasons = [
-              { pattern: /No response/i, message: "由于 Issue 中包含未填写的必填项（No response），自动关闭此 Issue。\nThis issue is automatically closed because it contains unfilled required fields (No response)." }
-            ];
+            if (context.payload.issue.state === "open") {
+              const logsMatch = body.match(/### Logs \/ 日志\s*\n+([\s\S]*?)(?=\n###|$)/);
+              const logsContent = logsMatch ? logsMatch[1].trim() : "";
 
-            for (const { pattern, message } of closeReasons) {
-              if (pattern.test(body) && context.payload.issue.state === "open") {
+              if (!logsContent || /No response/i.test(logsContent)) {
+                const closeMessage = "由于 Issue 中未在 Logs / 日志 中提供日志，自动关闭此 Issue。请通过 KernelSU 管理器 - 设置 - 报告日志 上传 bugreport 文件后重新创建 Issue。\nThis issue is automatically closed because no logs were provided in the Logs section. Please upload the bugreport file via KernelSU Manager - Settings - Report log and create a new issue.";
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: context.issue.number,
-                  body: message
+                  body: closeMessage
                 });
                 await github.rest.issues.update({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: context.issue.number,
-                  state: "closed"
+                  state: "closed",
+                  state_reason: "not_planned"
                 });
-                break;
+                await github.rest.issues.lock({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  lock_reason: "resolved"
+                });
               }
             }
