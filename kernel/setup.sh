@@ -72,24 +72,15 @@ setup_submodule() {
         return 0
     fi
 
-    if [ -d "KernelSU" ] && git submodule status -q KernelSU; then
-        if [ "$(git config --get submodule.KernelSU.url)" != "https://github.com/ReSukiSU/ReSukiSU" ]; then
-            echo '[!] KernelSU is already a submodule but with a different URL. Set to correct URL.'
-			git submodule set-url KernelSU https://github.com/ReSukiSU/ReSukiSU
-			cd "$GKI_ROOT/KernelSU"
-			git fetch origin
-			if [ -z "${1-}" ]; then
-				git checkout main
-			else
-				git checkout "$1"
-			fi
-			echo '[+] Done.'
-			return 0
-		else
-			echo '[!] KernelSU has been setup as a submodule. Skipping setup.'
-        	return 0
-		fi
-    fi
+	if [ "$CI" == "true" ] || [ "$GITHUB_ACTIONS" == "true" ]; then
+		echo '[!] Running in CI. Skipping submodule setup.'
+		return 0
+	fi
+
+	if [ -f "$GKI_ROOT/.gitmodules" ] && grep -q 'KernelSU' "$GKI_ROOT/.gitmodules"; then
+		echo '[!] KernelSU is already a submodule. Skipping submodule setup.'
+		return 0
+	fi
 
     echo '[+] Setting up KernelSU as submodule...'
     git submodule add https://github.com/ReSukiSU/ReSukiSU KernelSU
@@ -109,5 +100,5 @@ elif [ "$1" = "--cleanup" ]; then
 else
 	initialize_variables
 	setup_kernelsu "$@"
-	setup_submodule "$@"
+	setup_submodule
 fi
