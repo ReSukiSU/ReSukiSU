@@ -240,3 +240,8 @@ ifeq ($(shell grep -q "struct mutex status_lock" $(srctree)/security/selinux/inc
 $(info -- $(REPO_NAME)/compat: found selinux status variables in selinux_state)
 ccflags-y += -DKSU_COMPAT_SELINUX_STATUS_VAR_IN_SELINUX_STATE
 endif
+
+ifeq ($(shell grep -q "struct selinux_policy" $(srctree)/security/selinux/ss/services.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: found selinux_policy struct)
+ccflags-y += -DKSU_COMPAT_HAS_SELINUX_POLICY_STRUCT
+endif
