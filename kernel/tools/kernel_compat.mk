@@ -263,3 +263,13 @@ ifeq ($(shell grep -q "hlist_head" $(srctree)/include/linux/lsm_hooks.h; echo $$
 $(info -- $(REPO_NAME)/compat: found hlist in security_hook_list)
 ccflags-y += -DKSU_COMPAT_HLIST_FOR_SECURITY_HOOK_LIST
 endif
+
+ifeq ($(shell grep -F -q "int (*setprocattr)(const char *name, void *value, size_t size);" $(srctree)/include/linux/lsm_hooks.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: found new setprocattr prototype)
+ccflags-y += -DKSU_COMPAT_SETPROCATTR_USE_NEW_PROTOTYPE
+endif
+
+ifeq ($(shell grep -F -q "char *lsm_names" $(srctree)/security/security.c; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: found required provide lsm name)
+ccflags-y += -DKSU_COMPAT_REQUIRE_PROVIDE_LSM_NAME
+endif

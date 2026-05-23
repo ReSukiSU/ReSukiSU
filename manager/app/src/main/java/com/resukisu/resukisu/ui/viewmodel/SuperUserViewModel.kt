@@ -284,20 +284,16 @@ class SuperUserViewModel : ViewModel() {
         }
     }
 
-    private var serviceConnection: ServiceConnection? = null
-
     private suspend fun connectKsuService(onDisconnect: () -> Unit = {}): IBinder? =
         suspendCoroutine { continuation ->
             val connection = object : ServiceConnection {
                 override fun onServiceDisconnected(name: ComponentName?) {
                     onDisconnect()
-                    serviceConnection = null
                 }
                 override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
                     continuation.resume(binder)
                 }
             }
-            serviceConnection = connection
             val intent = Intent(ksuApp, KsuService::class.java)
             try {
                 val task = com.topjohnwu.superuser.ipc.RootService.bindOrTask(
@@ -311,68 +307,69 @@ class SuperUserViewModel : ViewModel() {
         }
 
     private fun stopKsuService() {
-        serviceConnection?.let {
-            viewModelScope.launch(Dispatchers.Main) {
-                try {
-                    val intent = Intent(ksuApp, KsuService::class.java)
-                    com.topjohnwu.superuser.ipc.RootService.stop(intent)
-                    serviceConnection = null
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to stop KsuService", e)
-                }
+        viewModelScope.launch(Dispatchers.Main) {
+            try {
+                val intent = Intent(ksuApp, KsuService::class.java)
+                com.topjohnwu.superuser.ipc.RootService.stop(intent)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to stop KsuService", e)
             }
         }
     }
 
     suspend fun fetchAppList() {
+        // prevent multiple concurrent refreshes
+        if (isRefreshing) return
+
         isRefreshing = true
         isAppCacheLoading = true
         isAppCacheReady = false
         loadingProgress = 0f
 
-        val binder = connectKsuService() ?: run {
-            isRefreshing = false
-            isAppCacheLoading = false
-            return
-        }
+        try {
+            val binder = connectKsuService() ?: run { isRefreshing = false; return }
 
-        withContext(Dispatchers.IO) {
-            val pm = ksuApp.packageManager
-            val allPackages = IKsuInterface.Stub.asInterface(binder)
-            val total = allPackages.packageCount
-            val pageSize = 100
-            val result = mutableListOf<AppInfo>()
+            withContext(Dispatchers.IO) {
+                val pm = ksuApp.packageManager
+                val allPackages = IKsuInterface.Stub.asInterface(binder)
+                val total = allPackages.packageCount
+                val pageSize = 100
+                val result = mutableListOf<AppInfo>()
 
-            var start = 0
-            while (start < total) {
-                val page = allPackages.getPackages(start, pageSize)
-                if (page.isEmpty()) break
+                var start = 0
+                while (start < total) {
+                    val page = allPackages.getPackages(start, pageSize)
+                    if (page.isEmpty()) break
 
-                result += page.mapNotNull { packageInfo ->
-                    packageInfo.applicationInfo?.let { appInfo ->
-                        AppInfo(
-                            label = appInfo.loadLabel(pm).toString(),
-                            packageInfo = packageInfo,
-                            profile = Natives.getAppProfile(packageInfo.packageName, appInfo.uid)
-                        )
+                    result += page.mapNotNull { packageInfo ->
+                        packageInfo.applicationInfo?.let { appInfo ->
+                            AppInfo(
+                                label = appInfo.loadLabel(pm).toString(),
+                                packageInfo = packageInfo,
+                                profile = Natives.getAppProfile(
+                                    packageInfo.packageName,
+                                    appInfo.uid
+                                )
+                            )
+                        }
                     }
+                    start += page.size
+                    loadingProgress = start.toFloat() / total
                 }
-                start += page.size
-                loadingProgress = start.toFloat() / total
-            }
 
+                appListMutex.withLock {
+                    val filteredApps = result.filter { it.packageName != ksuApp.packageName }
+                    apps = filteredApps
+                    appGroups = groupAppsByUid(filteredApps)
+                }
+                loadingProgress = 1f
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error refresh app list", e)
+        } finally {
+            isRefreshing = false
             stopKsuService()
-
-            appListMutex.withLock {
-                val filteredApps = result.filter { it.packageName != ksuApp.packageName }
-                apps = filteredApps
-                appGroups = groupAppsByUid(filteredApps)
-            }
-            loadingProgress = 1f
-            isAppCacheReady = true
         }
-        isRefreshing = false
-        isAppCacheLoading = false
     }
 
     val appGroupList by derivedStateOf {
