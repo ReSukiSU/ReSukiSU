@@ -16,7 +16,7 @@
 #include "xfrm.h"
 #include "infra/symbol_resolver.h"
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0) || defined(KSU_COMPAT_HAS_SELINUX_POLICY_STRUCT)
 #define SELINUX_POLICY_INSTEAD_SELINUX_SS
 
 struct selinux_policy *backup_sepolicy;
