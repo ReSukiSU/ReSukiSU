@@ -54,7 +54,7 @@ jobs:
 
               const hasLogFile = /\.(txt|log|old|logcat|dmesg|dump|crash|trace|bugreport|tar|gz|tgz|bz2|xz|lz4|zst|zip|7z|rar)(\b|[)\s])/i.test(logsContent);
 
-              if (!logsContent || /No response/i.test(logsContent) || (!hasLogFile && logsContent.length <= 50)) {
+              if (!logsContent || (!hasLogFile && logsContent.length <= 50)) {
                 const closeMessage = "由于 Issue 中未在 Logs / 日志 中提供日志，自动关闭此 Issue。请通过 KernelSU 管理器 - 设置 - 报告日志 上传 bugreport 文件后重新创建 Issue。\nThis issue is automatically closed because no logs were provided in the Logs section. Please upload the bugreport file via KernelSU Manager - Settings - Report log and create a new issue.";
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
