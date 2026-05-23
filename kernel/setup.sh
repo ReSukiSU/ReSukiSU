@@ -84,7 +84,7 @@ setup_submodule() {
 	fi
 
     echo '[+] Setting up KernelSU as submodule...'
-    git submodule add https://github.com/ReSukiSU/ReSukiSU KernelSU
+    git submodule add https://github.com/ReSukiSU/ReSukiSU KernelSU || echo '[!] Failed to add KernelSU as a submodule.'
     echo '[+] Done.'
 }
 
