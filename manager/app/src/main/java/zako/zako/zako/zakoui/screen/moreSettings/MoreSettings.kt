@@ -11,12 +11,7 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -67,6 +62,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -78,6 +74,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -95,12 +92,12 @@ import com.resukisu.resukisu.ui.component.ConfirmResult
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.rememberCustomDialog
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
+import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
+import com.resukisu.resukisu.ui.component.settings.SegmentedColumnScope
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
-import com.resukisu.resukisu.ui.component.settings.SplicedColumnGroup
-import com.resukisu.resukisu.ui.component.settings.SplicedGroupScope
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.theme.BackgroundManager
 import com.resukisu.resukisu.ui.theme.CardConfig
@@ -333,7 +330,7 @@ fun MoreSettingsScreen() {
                     )
                 }
 
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.predictive_back_settings)
                 ) {
                     item { PredictiveBackAnimationWidget(uiState) { predictiveBackAnimationDialog.show() } }
@@ -495,7 +492,7 @@ private fun AppearanceSettings(
     pickImageLauncher: ManagedActivityResultLauncher<String, Uri?>,
     coroutineScope: CoroutineScope
 ) {
-    SplicedColumnGroup(title = stringResource(R.string.appearance_settings)) {
+    SegmentedColumn(title = stringResource(R.string.appearance_settings)) {
         item {
             // 语言设置
             LanguageSetting(state = state)
@@ -537,19 +534,52 @@ private fun AppearanceSettings(
         }
 
         item {
-            // DPI 设置
-            DpiSettings(state = state, handlers = handlers, coroutineScope = coroutineScope)
+            SettingsBaseWidget(
+                icon = Icons.Default.FormatSize,
+                title = stringResource(R.string.app_dpi_title),
+                description = stringResource(R.string.app_dpi_summary),
+                onClick = {},
+            ) {
+                Text(
+                    text = handlers.getDpiFriendlyName(state.tempDpi),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
 
-        item {
-            // 自定义背景设置
-            CustomBackgroundSettings(
-                state = state,
-                handlers = handlers,
-                pickImageLauncher = pickImageLauncher,
-                coroutineScope = coroutineScope
-            )
+        item(
+            topPadding = 1.dp,
+        ) { shape ->
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
+                    alpha = CardConfig.cardAlpha
+                ),
+                shape = shape
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    DpiSliderControls(
+                        state = state,
+                        handlers = handlers,
+                        coroutineScope = coroutineScope
+                    )
+                }
+            }
         }
+
+        expandableItem(
+            expanded = ThemeConfig.customBackgroundUri != null,
+            topContent = {
+                CustomBackgroundSettings(
+                    state = state,
+                    handlers = handlers,
+                    pickImageLauncher = pickImageLauncher,
+                )
+            },
+            bottomContent = {
+                backgroundAdjustmentControls(state, handlers, coroutineScope)
+            }
+        )
 
         // TODO Add HazeConfig and unify hazeState management
     }
@@ -560,7 +590,7 @@ private fun CustomizationSettings(
     state: MoreSettingsState,
     handlers: MoreSettingsHandlers
 ) {
-    SplicedColumnGroup(title = stringResource(R.string.custom_settings)) {
+    SegmentedColumn(title = stringResource(R.string.custom_settings)) {
         item {
             // 图标切换
             SettingsSwitchWidget(
@@ -598,7 +628,7 @@ private fun CustomizationSettings(
     }
 }
 
-private fun SplicedGroupScope.hideOptionsSettings(
+private fun SegmentedColumnScope.hideOptionsSettings(
     state: MoreSettingsState,
     handlers: MoreSettingsHandlers
 ) {
@@ -734,29 +764,6 @@ private fun ThemeColorSelection(state: MoreSettingsState) {
 }
 
 @Composable
-private fun DpiSettings(
-    state: MoreSettingsState,
-    handlers: MoreSettingsHandlers,
-    coroutineScope: CoroutineScope
-) {
-    SettingsBaseWidget(
-        icon = Icons.Default.FormatSize,
-        title = stringResource(R.string.app_dpi_title),
-        description = stringResource(R.string.app_dpi_summary),
-        onClick = {},
-    ) {
-        Text(
-            text = handlers.getDpiFriendlyName(state.tempDpi),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.primary
-        )
-    }
-
-    // DPI 滑动条和控制
-    DpiSliderControls(state = state, handlers = handlers, coroutineScope = coroutineScope)
-}
-
-@Composable
 private fun DpiSliderControls(
     state: MoreSettingsState,
     handlers: MoreSettingsHandlers,
@@ -769,103 +776,101 @@ private fun DpiSliderControls(
     val confirmText = stringResource(R.string.confirm)
     val cancelText = stringResource(R.string.cancel)
 
-    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-        val sliderValue by animateFloatAsState(
-            targetValue = state.tempDpi.toFloat(),
-            label = "DPI Slider Animation"
+    val sliderValue by animateFloatAsState(
+        targetValue = state.tempDpi.toFloat(),
+        label = "DPI Slider Animation"
+    )
+
+    Slider(
+        value = sliderValue,
+        onValueChange = { newValue ->
+            state.tempDpi = newValue.toInt()
+            state.isDpiCustom = !state.dpiPresets.containsValue(state.tempDpi)
+        },
+        valueRange = 160f..600f,
+        colors = SliderDefaults.colors(
+            thumbColor = MaterialTheme.colorScheme.primary,
+            activeTrackColor = MaterialTheme.colorScheme.primary,
+            inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
         )
+    )
 
-        Slider(
-            value = sliderValue,
-            onValueChange = { newValue ->
-                state.tempDpi = newValue.toInt()
-                state.isDpiCustom = !state.dpiPresets.containsValue(state.tempDpi)
-            },
-            valueRange = 160f..600f,
-            colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.primary,
-                activeTrackColor = MaterialTheme.colorScheme.primary,
-                inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
-            )
-        )
+    // DPI 预设按钮行
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp),
+    ) {
+        state.dpiPresets.forEach { (name, dpi) ->
+            val isSelected = state.tempDpi == dpi
+            val buttonColor = if (isSelected)
+                MaterialTheme.colorScheme.primaryContainer
+            else
+                MaterialTheme.colorScheme.surfaceVariant
 
-        // DPI 预设按钮行
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
-        ) {
-            state.dpiPresets.forEach { (name, dpi) ->
-                val isSelected = state.tempDpi == dpi
-                val buttonColor = if (isSelected)
-                    MaterialTheme.colorScheme.primaryContainer
-                else
-                    MaterialTheme.colorScheme.surfaceVariant
-
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 2.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(buttonColor)
-                        .clickable {
-                            state.tempDpi = dpi
-                            state.isDpiCustom = false
-                        }
-                        .padding(vertical = 8.dp, horizontal = 4.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = name,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = if (isSelected)
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                        else
-                            MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 2.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(buttonColor)
+                    .clickable {
+                        state.tempDpi = dpi
+                        state.isDpiCustom = false
+                    }
+                    .padding(vertical = 8.dp, horizontal = 4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = if (isSelected)
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
+    }
 
-        Text(
-            text = if (state.isDpiCustom)
-                "${stringResource(R.string.dpi_size_custom)}: ${state.tempDpi}"
-            else
-                "${handlers.getDpiFriendlyName(state.tempDpi)}: ${state.tempDpi}",
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(top = 8.dp)
+    Text(
+        text = if (state.isDpiCustom)
+            "${stringResource(R.string.dpi_size_custom)}: ${state.tempDpi}"
+        else
+            "${handlers.getDpiFriendlyName(state.tempDpi)}: ${state.tempDpi}",
+        style = MaterialTheme.typography.bodySmall,
+        modifier = Modifier.padding(top = 8.dp)
+    )
+
+    Button(
+        onClick = {
+            coroutineScope.launch {
+                val confirmResult = confirmDialog.awaitConfirm(
+                    title = dpiConfirmTitle,
+                    content = dpiConfirmMessage,
+                    confirm = confirmText,
+                    dismiss = cancelText
+                )
+
+                if (confirmResult != ConfirmResult.Confirmed) return@launch
+
+                handlers.handleDpiApply()
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp),
+        enabled = state.tempDpi != state.currentDpi
+    ) {
+        Icon(
+            Icons.Default.Check,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp)
         )
-
-        Button(
-            onClick = {
-                coroutineScope.launch {
-                    val confirmResult = confirmDialog.awaitConfirm(
-                        title = dpiConfirmTitle,
-                        content = dpiConfirmMessage,
-                        confirm = confirmText,
-                        dismiss = cancelText
-                    )
-
-                    if (confirmResult != ConfirmResult.Confirmed) return@launch
-
-                    handlers.handleDpiApply()
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
-            enabled = state.tempDpi != state.currentDpi
-        ) {
-            Icon(
-                Icons.Default.Check,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(stringResource(R.string.dpi_apply_settings))
-        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(stringResource(R.string.dpi_apply_settings))
     }
 }
 
@@ -874,10 +879,9 @@ private fun CustomBackgroundSettings(
     state: MoreSettingsState,
     handlers: MoreSettingsHandlers,
     pickImageLauncher: ManagedActivityResultLauncher<String, Uri?>,
-    coroutineScope: CoroutineScope
 ) {
     // TODO Portrait/Landscape wallpaper split
-    // 自定义背景开关
+
     SettingsSwitchWidget(
         icon = Icons.Filled.Wallpaper,
         title = stringResource(id = R.string.settings_custom_background),
@@ -889,90 +893,104 @@ private fun CustomBackgroundSettings(
             } else {
                 handlers.handleRemoveCustomBackground()
             }
-        }
+        },
     )
+}
 
-    // 透明度和亮度调节
-    AnimatedVisibility(
-        visible = ThemeConfig.customBackgroundUri != null,
-        enter = fadeIn() + slideInVertically(),
-        exit = fadeOut() + slideOutVertically()
+private fun SegmentedColumnScope.backgroundAdjustmentControls(
+    state: MoreSettingsState,
+    handlers: MoreSettingsHandlers,
+    coroutineScope: CoroutineScope,
+) {
+    item(
+        topPadding = 1.dp
     ) {
-        BackgroundAdjustmentControls(
+        AlphaSlider(
             state = state,
             handlers = handlers,
             coroutineScope = coroutineScope
         )
     }
-}
 
-@Composable
-private fun BackgroundAdjustmentControls(
-    state: MoreSettingsState,
-    handlers: MoreSettingsHandlers,
-    coroutineScope: CoroutineScope
-) {
-    val context = LocalContext.current
+    item(
+        topPadding = 1.dp
+    ) {
+        DimSlider(
+            state = state,
+            handlers = handlers,
+            coroutineScope = coroutineScope
+        )
+    }
 
-    Column {
-        Column(modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .padding(top = 8.dp)) {
-            AlphaSlider(state = state, handlers = handlers, coroutineScope = coroutineScope)
-            DimSlider(state = state, handlers = handlers, coroutineScope = coroutineScope)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            SettingsSwitchWidget(
-                icon = Icons.Filled.BlurOn,
-                title = stringResource(id = R.string.settings_config_enable_blur),
-                description = stringResource(id = R.string.settings_config_enable_blur_summary),
-                checked = ThemeConfig.isEnableBlur,
-                onCheckedChange = { isChecked ->
-                    BackgroundManager.saveEnableBlur(context, isChecked)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        expandableItem(
+            expanded = ThemeConfig.isEnableBlur,
+            topPadding = 1.dp,
+            topContent = {
+                val context = LocalContext.current
+
+                SettingsSwitchWidget(
+                    icon = Icons.Filled.BlurOn,
+                    title = stringResource(id = R.string.settings_config_enable_blur),
+                    description = stringResource(id = R.string.settings_config_enable_blur_summary),
+                    checked = ThemeConfig.isEnableBlur,
+                    onCheckedChange = { isChecked ->
+                        BackgroundManager.saveEnableBlur(context, isChecked)
+                    }
+                )
+            },
+            bottomContent = {
+                item(
+                    topPadding = 1.dp,
+                ) {
+                    val context = LocalContext.current
+
+                    SettingsSwitchWidget(
+                        icon = Icons.Filled.Draw,
+                        title = stringResource(id = R.string.settings_exp_draw_background_to_blur),
+                        description = stringResource(id = R.string.settings_exp_draw_background_to_blur_description),
+                        isError = true,
+                        checked = ThemeConfig.isEnableBlurExp,
+                        onCheckedChange = { isChecked ->
+                            BackgroundManager.saveEnableBlurExp(context, isChecked)
+                        }
+                    )
                 }
-            )
-            AnimatedVisibility(
-                visible = ThemeConfig.isEnableBlur,
-                enter = fadeIn() + slideInVertically(),
-                exit = fadeOut() + slideOutVertically()
-            ) {
-                SettingsSwitchWidget(
-                    icon = Icons.Filled.Draw,
-                    title = stringResource(id = R.string.settings_exp_draw_background_to_blur),
-                    description = stringResource(id = R.string.settings_exp_draw_background_to_blur_description),
-                    isError = true,
-                    checked = ThemeConfig.isEnableBlurExp,
-                    onCheckedChange = { isChecked ->
-                        BackgroundManager.saveEnableBlurExp(context, isChecked)
-                    }
-                )
-            }
-
-            AnimatedVisibility(
-                visible = state.useDynamicColor,
-                enter = fadeIn() + slideInVertically(),
-                exit = fadeOut() + slideOutVertically()
-            ) {
-                SettingsSwitchWidget(
-                    icon = Icons.Filled.FormatColorFill,
-                    title = stringResource(id = R.string.settings_config_use_custom_background_seed_color),
-                    description = stringResource(id = R.string.settings_config_use_custom_background_seed_color_summary),
-                    checked = ThemeConfig.isUseBackgroundSeedColor,
-                    onCheckedChange = { isChecked ->
-                        BackgroundManager.saveUseBackgroundSeedColor(context, isChecked)
-                    }
-                )
-            }
-        }
-        SettingsSwitchWidget(
-            icon = Icons.Filled.Contrast,
-            title = stringResource(id = R.string.settings_custom_enable_high_contrast),
-            description = stringResource(id = R.string.settings_custom_enable_high_contrast_summary),
-            checked = ThemeConfig.isHighContrastMode,
-            onCheckedChange = { isChecked ->
-                BackgroundManager.saveEnableHighContrastMode(context, isChecked)
             }
         )
+
+        item(
+            visible = state.useDynamicColor,
+            topPadding = 1.dp,
+        ) {
+            val context = LocalContext.current
+
+            SettingsSwitchWidget(
+                icon = Icons.Filled.FormatColorFill,
+                title = stringResource(id = R.string.settings_config_use_custom_background_seed_color),
+                description = stringResource(id = R.string.settings_config_use_custom_background_seed_color_summary),
+                checked = ThemeConfig.isUseBackgroundSeedColor,
+                onCheckedChange = { isChecked ->
+                    BackgroundManager.saveUseBackgroundSeedColor(context, isChecked)
+                }
+            )
+        }
+
+        item(
+            topPadding = 1.dp,
+        ) {
+            val context = LocalContext.current
+
+            SettingsSwitchWidget(
+                icon = Icons.Filled.Contrast,
+                title = stringResource(id = R.string.settings_custom_enable_high_contrast),
+                description = stringResource(id = R.string.settings_custom_enable_high_contrast_summary),
+                checked = ThemeConfig.isHighContrastMode,
+                onCheckedChange = { isChecked ->
+                    BackgroundManager.saveEnableHighContrastMode(context, isChecked)
+                }
+            )
+        }
     }
 }
 
@@ -982,50 +1000,46 @@ private fun AlphaSlider(
     handlers: MoreSettingsHandlers,
     coroutineScope: CoroutineScope
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(bottom = 4.dp)
+    SettingsBaseWidget(
+        icon = Icons.Filled.Opacity,
+        title = stringResource(R.string.settings_card_alpha),
+        descriptionColumnContent = {
+            val alphaSliderValue by animateFloatAsState(
+                targetValue = state.cardAlpha,
+                label = "Alpha Slider Animation"
+            )
+
+            Slider(
+                value = alphaSliderValue,
+                onValueChange = { newValue ->
+                    handlers.handleCardAlphaChange(newValue)
+                },
+                onValueChangeFinished = {
+                    coroutineScope.launch(Dispatchers.IO) {
+                        CardConfig.save(handlers.activity)
+                    }
+                },
+                valueRange = 0f..1f,
+                colors = SliderDefaults.colors(
+                    thumbColor = MaterialTheme.colorScheme.primary,
+                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                    inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            )
+        }
     ) {
-        Icon(
-            Icons.Filled.Opacity,
-            contentDescription = null,
-            modifier = Modifier.size(20.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = stringResource(R.string.settings_card_alpha),
-            style = MaterialTheme.typography.titleSmall
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        Text(
-            text = "${(state.cardAlpha * 100).roundToInt()}%",
-            style = MaterialTheme.typography.labelMedium,
-        )
+        Box(contentAlignment = Alignment.CenterEnd) {
+            Text( // Some stupid way to solve measure problem
+                text = "100%",
+                style = MaterialTheme.typography.labelMediumEmphasized,
+                modifier = Modifier.alpha(0f)
+            )
+            Text(
+                text = "${(state.cardAlpha * 100).roundToInt()}%",
+                style = MaterialTheme.typography.labelMediumEmphasized
+            )
+        }
     }
-
-    val alphaSliderValue by animateFloatAsState(
-        targetValue = state.cardAlpha,
-        label = "Alpha Slider Animation"
-    )
-
-    Slider(
-        value = alphaSliderValue,
-        onValueChange = { newValue ->
-            handlers.handleCardAlphaChange(newValue)
-        },
-        onValueChangeFinished = {
-            coroutineScope.launch(Dispatchers.IO) {
-                CardConfig.save(handlers.activity)
-            }
-        },
-        valueRange = 0f..1f,
-        colors = SliderDefaults.colors(
-            thumbColor = MaterialTheme.colorScheme.primary,
-            activeTrackColor = MaterialTheme.colorScheme.primary,
-            inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    )
 }
 
 @Composable
@@ -1034,50 +1048,47 @@ private fun DimSlider(
     handlers: MoreSettingsHandlers,
     coroutineScope: CoroutineScope
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
+    SettingsBaseWidget(
+        icon = Icons.Filled.LightMode,
+        title = stringResource(R.string.settings_background_dim),
+        descriptionColumnContent = {
+            val dimSliderValue by animateFloatAsState(
+                targetValue = state.backgroundDim,
+                label = "Dim Slider Animation"
+            )
+
+            Slider(
+                value = dimSliderValue,
+                onValueChange = { newValue ->
+                    handlers.handleBackgroundDimChange(newValue)
+                },
+                onValueChangeFinished = {
+                    coroutineScope.launch(Dispatchers.IO) {
+                        CardConfig.save(handlers.activity)
+                    }
+                },
+                valueRange = 0f..1f,
+                colors = SliderDefaults.colors(
+                    thumbColor = MaterialTheme.colorScheme.primary,
+                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                    inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            )
+        }
     ) {
-        Icon(
-            Icons.Filled.LightMode,
-            contentDescription = null,
-            modifier = Modifier.size(20.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = stringResource(R.string.settings_background_dim),
-            style = MaterialTheme.typography.titleSmall
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        Text(
-            text = "${(state.backgroundDim * 100).roundToInt()}%",
-            style = MaterialTheme.typography.labelMedium,
-        )
+        Box(contentAlignment = Alignment.CenterEnd) {
+            Text( // Some stupid way to solve measure problem
+                text = "100%",
+                style = MaterialTheme.typography.labelMediumEmphasized,
+                modifier = Modifier.alpha(0f)
+            )
+
+            Text(
+                text = "${(state.backgroundDim * 100).roundToInt()}%",
+                style = MaterialTheme.typography.labelMediumEmphasized,
+            )
+        }
     }
-
-    val dimSliderValue by animateFloatAsState(
-        targetValue = state.backgroundDim,
-        label = "Dim Slider Animation"
-    )
-
-    Slider(
-        value = dimSliderValue,
-        onValueChange = { newValue ->
-            handlers.handleBackgroundDimChange(newValue)
-        },
-        onValueChangeFinished = {
-            coroutineScope.launch(Dispatchers.IO) {
-                CardConfig.save(handlers.activity)
-            }
-        },
-        valueRange = 0f..1f,
-        colors = SliderDefaults.colors(
-            thumbColor = MaterialTheme.colorScheme.primary,
-            activeTrackColor = MaterialTheme.colorScheme.primary,
-            inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    )
 }
 
 @Composable

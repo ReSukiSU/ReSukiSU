@@ -49,8 +49,8 @@ import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.profile.rootProfileConfig
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
+import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
-import com.resukisu.resukisu.ui.component.settings.SplicedColumnGroup
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
@@ -140,7 +140,7 @@ fun TemplateEditorScreen(
                 }
                 .blurSource()
         ) {
-            SplicedColumnGroup {
+            SegmentedColumn {
                 if (isCreation) {
                     item {
                         var errorHint by remember {

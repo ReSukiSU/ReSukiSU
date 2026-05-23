@@ -108,7 +108,7 @@ import com.resukisu.resukisu.ui.component.SearchAppBar
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.VerticalExpandableFab
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
-import com.resukisu.resukisu.ui.component.settings.splicedLazyColumnGroup
+import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.LabelText
@@ -425,7 +425,7 @@ private fun SuperUserContent(
             item {
                 Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
             }
-            splicedLazyColumnGroup(
+            lazySegmentColumn(
                 items = filteredAndSortedAppGroups,
                 key = { _, appGroup -> "${appGroup.uid}-${appGroup.mainApp.packageName}" },
                 contentType = { _, _ -> "AppGroupItem" }
@@ -812,7 +812,7 @@ private fun AppGroupItem(
                 }
             }
         },
-        rowHeader = {
+        leadingContent = {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(mainApp.packageInfo)

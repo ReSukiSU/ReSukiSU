@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -69,6 +68,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -95,8 +96,8 @@ import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
-import com.resukisu.resukisu.ui.component.settings.SplicedColumnGroup
-import com.resukisu.resukisu.ui.component.settings.splicedLazyColumnGroup
+import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
+import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
@@ -237,7 +238,7 @@ private fun SuSFeaturesTab(
                 Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
             }
             item {
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.susfs_tab_enabled_features)
                 ) {
                     item {
@@ -326,7 +327,7 @@ private fun SuSKstatTab(
             Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
         }
         item {
-            SplicedColumnGroup(
+            SegmentedColumn(
                 title = stringResource(R.string.kstat_config_description_title)
             ) {
                 item {
@@ -413,7 +414,7 @@ private fun SuSMapTab(
             Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
         }
         item {
-            SplicedColumnGroup(
+            SegmentedColumn(
                 title = stringResource(R.string.sus_maps_description_title)
             ) {
                 item {
@@ -460,7 +461,7 @@ private fun SuSLoopPathTab(
             Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
         }
         item {
-            SplicedColumnGroup(
+            SegmentedColumn(
                 title = stringResource(R.string.sus_loop_paths_description_title)
             ) {
                 item {
@@ -586,7 +587,7 @@ private fun SuSPathTab(
                 Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
             }
             item {
-                SplicedColumnGroup(title = stringResource(R.string.susfs_tab_sus_paths)) {
+                SegmentedColumn(title = stringResource(R.string.susfs_tab_sus_paths)) {
                     item {
                         SettingsBaseWidget(
                             icon = Icons.Filled.Apps,
@@ -622,7 +623,7 @@ private fun SuSPathTab(
             }
             if (appGroups.isNotEmpty()) {
                 item {
-                    SplicedColumnGroup(
+                    SegmentedColumn(
                         title = stringResource(R.string.app_paths_section)
                     ) {
                         appGroups.forEach { (label, paths) ->
@@ -704,7 +705,7 @@ private fun BasicTab(
         ) {
             item { Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding())) }
             item {
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.susfs_config_description)
                 ) {
                     item {
@@ -719,7 +720,7 @@ private fun BasicTab(
             }
 
             item {
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.susfs_basic_information)
                 ) {
                     item {
@@ -768,7 +769,7 @@ private fun BasicTab(
             }
 
             item {
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.susfs_tab_basic_settings)
                 ) {
                     item {
@@ -835,7 +836,7 @@ private fun BasicTab(
             }
 
             item {
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.susfs_slot_info_title)
                 ) {
                     item {
@@ -852,7 +853,7 @@ private fun BasicTab(
             }
 
             item {
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.avc_log_spoofing)
                 ) {
                     item {
@@ -931,9 +932,9 @@ fun SuSFSConfigScreen() {
                             },
                             state = rememberTooltipState()
                         ) {
-                            val context = LocalContext.current
-                            var resetTapCount by remember { mutableStateOf(0) }
-                            var lastResetTapAt by remember { mutableStateOf(0L) }
+                            var resetTapCount by remember { mutableIntStateOf(0) }
+                            var lastResetTapAt by remember { mutableLongStateOf(0L) }
+                            val susfsResetAllTopHint = stringResource(R.string.susfs_reset_all_tap_hint)
                             IconButton(
                                 onClick = {
                                     val now = System.currentTimeMillis()
@@ -952,10 +953,7 @@ fun SuSFSConfigScreen() {
                                         resetTapCount = nextTapCount
                                         val remain = 5 - nextTapCount
                                         viewModel.postToast(
-                                            context.getString(
-                                                R.string.susfs_reset_all_tap_hint,
-                                                remain
-                                            )
+                                            susfsResetAllTopHint.format(remain)
                                         )
                                     }
                                 }
@@ -1196,7 +1194,7 @@ private fun PathGroup(
     showAddEntry: Boolean = true,
     onDelete: (String) -> Unit,
 ) {
-    SplicedColumnGroup(
+    SegmentedColumn(
         title = title
     ) {
         if (showAddEntry) {
@@ -1251,7 +1249,7 @@ private fun StaticKstatGroup(
     onEdit: (SuSFSStaticKstatEntry) -> Unit,
     onDelete: (SuSFSStaticKstatEntry) -> Unit,
 ) {
-    SplicedColumnGroup(
+    SegmentedColumn(
         title = title
     ) {
         item {
@@ -1302,7 +1300,7 @@ private fun FeatureGroup(
     viewModel: SuSFSScreenViewModel,
     features: List<SuSFSFeatureStatus>,
 ) {
-    SplicedColumnGroup(
+    SegmentedColumn(
         title = stringResource(R.string.susfs_tab_enabled_features)
     ) {
         if (features.isEmpty()) {
@@ -1436,51 +1434,6 @@ private fun PathEditDialog(
                 onClick = { onConfirm(value) }
             ) {
                 Text(text = stringResource(R.string.add))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(R.string.cancel))
-            }
-        }
-    )
-}
-
-@Composable
-private fun SingleValueDialog(
-    title: String,
-    label: String,
-    placeholder: String,
-    initialValue: String,
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit,
-) {
-    var value by remember(initialValue) { mutableStateOf(initialValue) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            LazyColumn(
-                modifier = Modifier
-                    .heightIn(max = 325.dp)
-            ) {
-                item {
-                    OutlinedTextField(
-                        value = value,
-                        onValueChange = { value = it },
-                        label = { Text(label) },
-                        placeholder = { Text(placeholder) },
-                        singleLine = true
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirm(value) }
-            ) {
-                Text(text = stringResource(R.string.susfs_apply))
             }
         },
         dismissButton = {
@@ -1732,7 +1685,7 @@ private fun AddAppPathDialog(
                                 iconPlaceholder = false,
                                 title = app.label,
                                 description = app.packageName,
-                                rowHeader = {
+                                leadingContent = {
                                     AppEntryIcon(
                                         packageInfo = app.packageInfo,
                                         modifier = Modifier.size(24.dp)
@@ -1831,7 +1784,7 @@ private fun SlotInfoDialog(
                             )
                         }
                     } else {
-                        splicedLazyColumnGroup(
+                        lazySegmentColumn(
                             slotInfoList,
                             key = { _, item -> item.slotName }) { _, info ->
                             Column {
@@ -1856,7 +1809,6 @@ private fun SlotInfoDialog(
                                             info.buildTime
                                         )
                                     }",
-                                    noVerticalPadding = true
                                 ) {}
 
                                 Row(

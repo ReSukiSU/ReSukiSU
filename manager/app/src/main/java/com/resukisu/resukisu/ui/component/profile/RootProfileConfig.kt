@@ -41,11 +41,11 @@ import com.resukisu.resukisu.R
 import com.resukisu.resukisu.profile.Capabilities
 import com.resukisu.resukisu.profile.Groups
 import com.resukisu.resukisu.ui.component.rememberCustomDialog
+import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
+import com.resukisu.resukisu.ui.component.settings.SegmentedColumnScope
 import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
-import com.resukisu.resukisu.ui.component.settings.SplicedColumnGroup
-import com.resukisu.resukisu.ui.component.settings.SplicedGroupScope
 import com.resukisu.resukisu.ui.util.isSepolicyValid
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,7 +54,7 @@ fun RootProfileConfig(
     profile: Natives.Profile,
     onProfileChange: (Natives.Profile) -> Unit,
 ) {
-    SplicedColumnGroup {
+    SegmentedColumn {
         rootProfileConfig(
             profile,
             onProfileChange
@@ -62,7 +62,7 @@ fun RootProfileConfig(
     }
 }
 
-fun SplicedGroupScope.rootProfileConfig(
+fun SegmentedColumnScope.rootProfileConfig(
     profile: Natives.Profile,
     onProfileChange: (Natives.Profile) -> Unit,
 ) {

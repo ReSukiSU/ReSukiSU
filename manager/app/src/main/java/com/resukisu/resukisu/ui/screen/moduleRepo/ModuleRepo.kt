@@ -106,9 +106,8 @@ import com.resukisu.resukisu.ui.navigation.Navigator
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.FlashIt
 import com.resukisu.resukisu.ui.screen.LabelText
+import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.blurSource
-import com.resukisu.resukisu.ui.theme.getCardColors
-import com.resukisu.resukisu.ui.theme.getCardElevation
 import com.resukisu.resukisu.ui.util.LocalPermissionRequestInterface
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.downloader.download
@@ -418,14 +417,13 @@ fun OnlineModuleItem(
     val permissionRequestInterface = LocalPermissionRequestInterface.current
     val navigator = LocalNavigator.current
 
-    ElevatedCard(
-        colors = getCardColors(MaterialTheme.colorScheme.surfaceContainerHighest),
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(CardConfig.cardAlpha),
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
             .clickable {
                 navigator.push(Route.ModuleRepoDetail(module))
             },
-        elevation = getCardElevation(),
     ) {
         Column(
             modifier = Modifier.padding(22.dp, 18.dp, 22.dp, 12.dp)
