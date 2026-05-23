@@ -8,6 +8,7 @@ display_usage() {
 	echo "  --cleanup:			  Cleans up previous modifications made by the script."
 	echo "  <commit-or-tag>:		Sets up or updates the KernelSU to specified tag or commit."
 	echo "  -h, --help:			 Displays this usage information."
+	echo "  --submodule:		  Resets KernelSU as a submodule."
 	echo "  (no args):			  Sets up or updates the KernelSU environment to the latest tagged version."
 }
 
@@ -94,6 +95,10 @@ if [ "$#" -eq 0 ]; then
 	setup_submodule
 elif [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 	display_usage
+elif [ "$1" = "--submodule" ]; then
+	initialize_variables
+	echo '[+] Resetting KernelSU as submodule...'
+	setup_submodule
 elif [ "$1" = "--cleanup" ]; then
 	initialize_variables
 	perform_cleanup
