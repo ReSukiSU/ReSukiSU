@@ -14,6 +14,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.GsonBuilder
+import com.google.gson.annotations.SerializedName
+import com.google.gson.reflect.TypeToken
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.ui.KsuService
@@ -28,42 +31,47 @@ import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.io.SuFile
 import com.topjohnwu.superuser.io.SuFileInputStream
 import com.topjohnwu.superuser.io.SuFileOutputStream
+import com.topjohnwu.superuser.ipc.RootService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
-import org.json.JSONObject
 import java.io.InputStream
 import java.io.OutputStream
 import kotlin.coroutines.resume
 
-private inline val defaultSusfsValue: String
-    get() = "default"
-
 private const val CONFIG_PATH = "/data/adb/ksu/.susfs.json"
-private const val SUSFS_VM_TAG = "SuSFSScreenViewModel"
-private const val DEFAULT_SUSFS_CONFIG_TEMPLATE = """{
-  "common": {
-    "version": "default",
-    "release": "default",
-    "avc_spoofing": false,
-    "enable_susfs_log": false,
-    "hide_sus_mnts_for_non_su_procs": false
-  },
-  "sus_path": {
-    "sus_path_loop": [],
-    "sus_path": []
-  },
-  "sus_map": [],
-  "kstat": {
-    "sus_kstat": [],
-    "update_kstat": [],
-    "full_clone": [],
-    "statically": []
-  }
-}
-"""
+
+private val gson = GsonBuilder()
+    .setPrettyPrinting()
+    .create()
+
+data class SusfsConfig(
+    val common: SusfsCommonConfig = SusfsCommonConfig(),
+    @SerializedName("sus_path") val susPath: SusPathConfig = SusPathConfig(),
+    @SerializedName("sus_map") val susMap: List<String> = emptyList(),
+    val kstat: SusfsKstatConfig = SusfsKstatConfig()
+)
+
+data class SusfsCommonConfig(
+    val version: String = "default",
+    val release: String = "default",
+    @SerializedName("avc_spoofing") val avcSpoofing: Boolean = false,
+    @SerializedName("enable_susfs_log") val enableSusfsLog: Boolean = false,
+    @SerializedName("hide_sus_mnts_for_non_su_procs") val hideSusMntsForNonSuProcs: Boolean = false
+)
+
+data class SusPathConfig(
+    @SerializedName("sus_path_loop") val susPathLoop: List<String> = emptyList(),
+    @SerializedName("sus_path") val susPath: List<String> = emptyList()
+)
+
+data class SusfsKstatConfig(
+    @SerializedName("sus_kstat") val susKstat: List<String> = emptyList(),
+    @SerializedName("update_kstat") val updateKstat: List<String> = emptyList(),
+    @SerializedName("full_clone") val fullClone: List<String> = emptyList(),
+    val statically: List<SuSFSStaticKstatEntry> = emptyList()
+)
 
 open class SuSFSFeatureStatus(
     val key: String,
@@ -87,22 +95,22 @@ abstract class ConfigurableSuSFSFeature(
 }
 
 data class SuSFSStaticKstatEntry(
-    val path: String,
-    val ino: String,
-    val dev: String,
-    val nlink: String,
-    val size: String,
-    val atime: String,
-    val atimeNsec: String,
-    val mtime: String,
-    val mtimeNsec: String,
-    val ctime: String,
-    val ctimeNsec: String,
-    val blocks: String,
-    val blksize: String,
+    val path: String = "",
+    val ino: String = "default",
+    val dev: String = "default",
+    val nlink: String = "default",
+    val size: String = "default",
+    val atime: String = "default",
+    @SerializedName("atime_nsec") val atimeNsec: String = "default",
+    val mtime: String = "default",
+    @SerializedName("mtime_nsec") val mtimeNsec: String = "default",
+    val ctime: String = "default",
+    @SerializedName("ctime_nsec") val ctimeNsec: String = "default",
+    val blocks: String = "default",
+    val blksize: String = "default",
 ) {
-    val summary: String
-        get() = "ino=$ino, dev=$dev, size=$size"
+    @Transient
+    val summary: String = "ino=$ino, dev=$dev, size=$size"
 }
 
 data class SuSFSAppEntry(
@@ -112,9 +120,9 @@ data class SuSFSAppEntry(
 )
 
 data class SuSFSSlotInfo(
-    val slotName: String,
-    val uname: String,
-    val buildTime: String,
+    @SerializedName("slot_name") val slotName: String = "",
+    val uname: String = "",
+    @SerializedName("build_time") val buildTime: String = "",
 )
 
 data class SuSFSUiState(
@@ -122,8 +130,8 @@ data class SuSFSUiState(
     val isRefreshing: Boolean = false,
     val enabled: Boolean = false,
     val versionText: String = "",
-    val unameValue: String = defaultSusfsValue,
-    val buildTimeValue: String = defaultSusfsValue,
+    val unameValue: String = "default",
+    val buildTimeValue: String = "default",
     val hideSuSMntsForNonSUProcs: Boolean = false,
     val hideMountsControlSupported: Boolean = true,
     val susfsLogEnabled: Boolean = false,
@@ -178,34 +186,34 @@ class SuSFSScreenViewModel : ViewModel() {
                 loadError = null,
             )
 
-            val loaded = runCatching { loadState() }
-            loaded.onSuccess { newState ->
-                uiState = newState.copy(
-                    isLoading = false,
-                    isRefreshing = false,
-                )
-            }.onFailure {
-                uiState = uiState.copy(
-                    isLoading = false,
-                    isRefreshing = false,
-                    loadError = it.message ?: ksuApp.getString(R.string.operation_failed),
-                )
-            }
+            runCatching { loadState() }
+                .onSuccess { newState ->
+                    uiState = newState.copy(
+                        isLoading = false,
+                        isRefreshing = false,
+                    )
+                }
+                .onFailure {
+                    uiState = uiState.copy(
+                        isLoading = false,
+                        isRefreshing = false,
+                        loadError = it.message ?: ksuApp.getString(R.string.operation_failed),
+                    )
+                }
         }
     }
 
     fun setUnameAndBuildTime(unameValue: String, buildTimeValue: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val uname = unameValue.trim().ifEmpty { defaultSusfsValue }
-            val buildTime = buildTimeValue.trim().ifEmpty { defaultSusfsValue }
+            val uname = unameValue.trim().ifEmpty { "default" }
+            val buildTime = buildTimeValue.trim().ifEmpty { "default" }
+
             if (uname == uiState.unameValue && buildTime == uiState.buildTimeValue) {
                 return@launch
             }
-            if (uname == defaultSusfsValue && buildTime == defaultSusfsValue) {
+            if (uname == "default" && buildTime == "default") {
                 val success = runCommand("del_uname", showSuccessSnackbar = false)
-                if (success) {
-                    postToast(ksuApp.getString(R.string.susfs_uname_build_time_reset))
-                }
+                if (success) postToast(ksuApp.getString(R.string.susfs_uname_build_time_reset))
                 return@launch
             }
             val success = runCommand("set_uname ${shellQuote(uname)} ${shellQuote(buildTime)}")
@@ -246,9 +254,7 @@ class SuSFSScreenViewModel : ViewModel() {
             }
 
             snackbarText = ksuApp.getString(R.string.feature_status_unsupported_summary)
-            uiState = uiState.copy(
-                hideMountsControlSupported = false,
-            )
+            uiState = uiState.copy(hideMountsControlSupported = false)
         }
     }
 
@@ -270,16 +276,21 @@ class SuSFSScreenViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             var anySuccess = false
             packageNames.forEach { packageName ->
-                val candidates = linkedSetOf<String>()
-                // FIXME Use Environment.getExternalStorageDirectory() and use reflection get current userId to replace hardcode user 0
-                // And, I don't know there really need or not, users can just enable `persist.sys.vold_app_data_isolation_enabled` property,right?
-                candidates += "/sdcard/Android/data/$packageName"
-                candidates += "/data/media/0/Android/data/$packageName"
+                val candidates = setOf(
+                    // FIXME Use Environment.getExternalStorageDirectory() and use reflection get current userId to replace hardcode user 0
+                    // And, I don't know there really need or not, users can just enable `persist.sys.vold_app_data_isolation_enabled` property,right?
+                    "/sdcard/Android/data/$packageName",
+                    "/data/media/0/Android/data/$packageName"
+                )
 
                 candidates.forEach { path ->
-                    val success =
-                        runCommand("add_sus_path ${shellQuote(path)}", showSuccessSnackbar = false)
-                    if (success) anySuccess = true
+                    if (runCommand(
+                            "add_sus_path ${shellQuote(path)}",
+                            showSuccessSnackbar = false
+                        )
+                    ) {
+                        anySuccess = true
+                    }
                 }
             }
             if (anySuccess) {
@@ -298,22 +309,19 @@ class SuSFSScreenViewModel : ViewModel() {
 
     fun restoreConfig(inputStream: InputStream, onFinish: (Boolean) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            val bytes: ByteArray = runCatching {
-                inputStream.use { it.readBytes() }
-            }.getOrElse {
-                ByteArray(0)
-            }
+            val bytes =
+                runCatching { inputStream.use { it.readBytes() } }.getOrDefault(ByteArray(0))
             if (bytes.isEmpty()) {
                 onFinish(false)
                 return@launch
             }
 
-            val ok = runCatching {
-                JSONObject(String(bytes, Charsets.UTF_8))
-                true
+            val isValid = runCatching {
+                val jsonString = String(bytes, Charsets.UTF_8)
+                gson.fromJson(jsonString, SusfsConfig::class.java) != null
             }.getOrDefault(false)
 
-            if (!ok) {
+            if (!isValid) {
                 onFinish(false)
                 return@launch
             }
@@ -324,21 +332,18 @@ class SuSFSScreenViewModel : ViewModel() {
                 }
                 true
             }.getOrDefault(false)
-            if (!writeOk) {
-                onFinish(false)
-                return@launch
-            }
 
-            refresh()
-            onFinish(true)
+            if (writeOk) refresh()
+            onFinish(writeOk)
         }
     }
 
     fun resetAllSusfsConfig() {
         viewModelScope.launch(Dispatchers.IO) {
+            val defaultConfigStr = gson.toJson(SusfsConfig())
             val reset = runCatching {
                 SuFileOutputStream.open(SuFile(CONFIG_PATH)).use { os ->
-                    os.write(DEFAULT_SUSFS_CONFIG_TEMPLATE.toByteArray(Charsets.UTF_8))
+                    os.write(defaultConfigStr.toByteArray(Charsets.UTF_8))
                     os.flush()
                 }
                 true
@@ -356,8 +361,7 @@ class SuSFSScreenViewModel : ViewModel() {
     fun refreshSlotInfo() {
         viewModelScope.launch(Dispatchers.IO) {
             slotInfoLoading = true
-            val loaded = runCatching { loadSlotInfo() }.getOrElse { emptyList() }
-            slotInfoList = loaded
+            slotInfoList = runCatching { loadSlotInfo() }.getOrDefault(emptyList())
             currentActiveSlot = getActiveBootSlot()
             slotInfoLoading = false
         }
@@ -369,29 +373,24 @@ class SuSFSScreenViewModel : ViewModel() {
             .mapNotNull { app ->
                 val applicationInfo = app.packageInfo.applicationInfo ?: return@mapNotNull null
                 val isSystemApp = (applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
-                if (isSystemApp || app.packageName.isBlank()) {
-                    null
-                } else {
-                    SuSFSAppEntry(
-                        packageName = app.packageName,
-                        label = app.label.ifBlank { app.packageName },
-                        packageInfo = app.packageInfo,
-                    )
-                }
+                if (isSystemApp || app.packageName.isBlank()) null
+                else SuSFSAppEntry(
+                    packageName = app.packageName,
+                    label = app.label.ifBlank { app.packageName },
+                    packageInfo = app.packageInfo,
+                )
             }
             .distinctBy { it.packageName }
             .sortedBy { it.label.lowercase() }
             .toList()
-        if (superUserEntries.isNotEmpty()) {
-            return@withContext superUserEntries
-        }
+
+        if (superUserEntries.isNotEmpty()) return@withContext superUserEntries
 
         val packageManager = ksuApp.packageManager
-        val packageInfos = fetchInstalledPackagesViaRootService()
-            .ifEmpty { getInstalledPackagesFallback() }
+        val packageInfos =
+            fetchInstalledPackagesViaRootService().ifEmpty { getInstalledPackagesFallback() }
 
-        val entries = packageInfos
-            .asSequence()
+        packageInfos.asSequence()
             .filter { it.packageName.isNotBlank() }
             .distinctBy { it.packageName }
             .map { packageInfo ->
@@ -406,15 +405,11 @@ class SuSFSScreenViewModel : ViewModel() {
                             @Suppress("DEPRECATION")
                             packageManager.getPackageInfo(packageInfo.packageName, 0)
                         }
-                    } else {
-                        packageInfo
-                    }
+                    } else packageInfo
                 }.getOrNull() ?: packageInfo
 
                 val label = runCatching {
-                    packageInfoWithAppInfo.applicationInfo
-                        ?.loadLabel(packageManager)
-                        ?.toString()
+                    packageInfoWithAppInfo.applicationInfo?.loadLabel(packageManager)?.toString()
                 }.getOrNull()
 
                 SuSFSAppEntry(
@@ -425,7 +420,6 @@ class SuSFSScreenViewModel : ViewModel() {
             }
             .sortedBy { it.label.lowercase() }
             .toList()
-        return@withContext entries
     }
 
     private fun getInstalledPackagesFallback(): List<PackageInfo> {
@@ -455,7 +449,7 @@ class SuSFSScreenViewModel : ViewModel() {
             }
             result
         } catch (t: Throwable) {
-            Log.e(SUSFS_VM_TAG, "fetchInstalledPackagesViaRootService failed", t)
+            Log.e("SuSFSScreenViewModel", "fetchInstalledPackagesViaRootService failed", t)
             emptyList()
         } finally {
             stopKsuService()
@@ -469,154 +463,100 @@ class SuSFSScreenViewModel : ViewModel() {
             }
 
             override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-                if (continuation.isActive) {
-                    continuation.resume(binder)
-                }
+                if (continuation.isActive) continuation.resume(binder)
             }
         }
         serviceConnection = connection
-
         val intent = Intent(ksuApp, KsuService::class.java)
+
         try {
-            val task = com.topjohnwu.superuser.ipc.RootService.bindOrTask(
+            val task = RootService.bindOrTask(
                 intent,
                 Shell.EXECUTOR,
                 connection
             )
             task?.let { Shell.getShell().execTask(it) }
         } catch (t: Throwable) {
-            Log.e(SUSFS_VM_TAG, "connectKsuService failed", t)
-            if (continuation.isActive) {
-                continuation.resume(null)
-            }
+            Log.e("SuSFSScreenViewModel", "connectKsuService failed", t)
+            if (continuation.isActive) continuation.resume(null)
         }
     }
 
     private fun stopKsuService() {
         if (serviceConnection == null) return
-        try {
-            val intent = Intent(ksuApp, KsuService::class.java)
-            com.topjohnwu.superuser.ipc.RootService.stop(intent)
-        } catch (t: Throwable) {
-            Log.e(SUSFS_VM_TAG, "stopKsuService failed", t)
-        } finally {
-            serviceConnection = null
+        serviceConnection?.let {
+            try {
+                RootService.unbind(it)
+            } catch (t: Throwable) {
+                Log.e("SuSFSScreenViewModel", "stopKsuService failed", t)
+            } finally {
+                serviceConnection = null
+            }
         }
     }
+
     fun removeSusPath(path: String) = removePath(path) { "del_sus_path $it" }
     fun removeSusLoopPath(path: String) = removePath(path) { "del_sus_path_loop $it" }
     fun removeSusMap(path: String) = removePath(path) { "del_sus_map $it" }
-
     fun removeKstatPath(path: String) = removePath(path) { "del_sus_kstat $it" }
-
     fun addSusMap(path: String) = addPath(path) { "add_sus_map $it" }
     fun addKstatUpdatePath(path: String) = addPath(path) { "update_sus_kstat $it" }
     fun removeKstatUpdatePath(path: String) = removePath(path) { "del_update_sus_kstat $it" }
-
     fun addKstatFullClonePath(path: String) = addPath(path) { "update_sus_kstat_full_clone $it" }
     fun removeKstatFullClonePath(path: String) = removePath(path) { "del_sus_kstat_full_clone $it" }
 
     fun addStaticKstatPath(path: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val value = path.trim()
-            if (value.isBlank()) return@launch
-            runCommand("add_sus_kstat_statically ${shellQuote(value)}", showSuccessSnackbar = true)
+            if (value.isNotBlank()) {
+                runCommand(
+                    "add_sus_kstat_statically ${shellQuote(value)}",
+                    showSuccessSnackbar = true
+                )
+            }
         }
     }
 
     fun addStaticKstatEntry(
-        path: String,
-        ino: String,
-        dev: String,
-        nlink: String,
-        size: String,
-        atime: String,
-        atimeNsec: String,
-        mtime: String,
-        mtimeNsec: String,
-        ctime: String,
-        ctimeNsec: String,
-        blocks: String,
-        blksize: String,
+        path: String, ino: String, dev: String, nlink: String, size: String,
+        atime: String, atimeNsec: String, mtime: String, mtimeNsec: String,
+        ctime: String, ctimeNsec: String, blocks: String, blksize: String,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             val normalizedPath = normalizePathEntry(path) ?: return@launch
-            val args = listOf(
-                shellQuote(normalizedPath),
-                shellQuote(toDefaultIfBlank(ino)),
-                shellQuote(toDefaultIfBlank(dev)),
-                shellQuote(toDefaultIfBlank(nlink)),
-                shellQuote(toDefaultIfBlank(size)),
-                shellQuote(toDefaultIfBlank(atime)),
-                shellQuote(toDefaultIfBlank(atimeNsec)),
-                shellQuote(toDefaultIfBlank(mtime)),
-                shellQuote(toDefaultIfBlank(mtimeNsec)),
-                shellQuote(toDefaultIfBlank(ctime)),
-                shellQuote(toDefaultIfBlank(ctimeNsec)),
-                shellQuote(toDefaultIfBlank(blocks)),
-                shellQuote(toDefaultIfBlank(blksize)),
-            ).joinToString(" ")
+            val args = buildStaticKstatCommandArgs(
+                normalizedPath, ino, dev, nlink, size, atime, atimeNsec,
+                mtime, mtimeNsec, ctime, ctimeNsec, blocks, blksize
+            )
             runCommand("add_sus_kstat_statically $args", showSuccessSnackbar = true)
         }
     }
 
     fun editStaticKstatEntry(
-        oldEntry: SuSFSStaticKstatEntry,
-        path: String,
-        ino: String,
-        dev: String,
-        nlink: String,
-        size: String,
-        atime: String,
-        atimeNsec: String,
-        mtime: String,
-        mtimeNsec: String,
-        ctime: String,
-        ctimeNsec: String,
-        blocks: String,
-        blksize: String,
+        oldEntry: SuSFSStaticKstatEntry, path: String, ino: String, dev: String,
+        nlink: String, size: String, atime: String, atimeNsec: String,
+        mtime: String, mtimeNsec: String, ctime: String, ctimeNsec: String,
+        blocks: String, blksize: String,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             val normalizedPath = normalizePathEntry(path) ?: return@launch
-            val oldDeleteCommand = buildStaticKstatCommandArgs(
-                oldEntry.path,
-                oldEntry.ino,
-                oldEntry.dev,
-                oldEntry.nlink,
-                oldEntry.size,
-                oldEntry.atime,
-                oldEntry.atimeNsec,
-                oldEntry.mtime,
-                oldEntry.mtimeNsec,
-                oldEntry.ctime,
-                oldEntry.ctimeNsec,
-                oldEntry.blocks,
-                oldEntry.blksize,
+            val oldArgs = buildStaticKstatCommandArgs(
+                oldEntry.path, oldEntry.ino, oldEntry.dev, oldEntry.nlink, oldEntry.size,
+                oldEntry.atime, oldEntry.atimeNsec, oldEntry.mtime, oldEntry.mtimeNsec,
+                oldEntry.ctime, oldEntry.ctimeNsec, oldEntry.blocks, oldEntry.blksize,
             )
-            val deletedOld = runCommand(
-                "del_sus_kstat_statically $oldDeleteCommand",
-                showSuccessSnackbar = false
-            )
-            if (!deletedOld) return@launch
 
-            val newAddCommand = buildStaticKstatCommandArgs(
-                normalizedPath,
-                ino,
-                dev,
-                nlink,
-                size,
-                atime,
-                atimeNsec,
-                mtime,
-                mtimeNsec,
-                ctime,
-                ctimeNsec,
-                blocks,
-                blksize,
+            if (!runCommand(
+                    "del_sus_kstat_statically $oldArgs",
+                    showSuccessSnackbar = false
+                )
+            ) return@launch
+
+            val newArgs = buildStaticKstatCommandArgs(
+                normalizedPath, ino, dev, nlink, size, atime, atimeNsec,
+                mtime, mtimeNsec, ctime, ctimeNsec, blocks, blksize
             )
-            val addedNew =
-                runCommand("add_sus_kstat_statically $newAddCommand", showSuccessSnackbar = false)
-            if (addedNew) {
+            if (runCommand("add_sus_kstat_statically $newArgs", showSuccessSnackbar = false)) {
                 snackbarText = ksuApp.getString(R.string.kpm_control_success)
             }
         }
@@ -629,68 +569,40 @@ class SuSFSScreenViewModel : ViewModel() {
     fun removeStaticKstat(entry: SuSFSStaticKstatEntry) {
         viewModelScope.launch(Dispatchers.IO) {
             val deleteArgs = buildStaticKstatCommandArgs(
-                entry.path,
-                entry.ino,
-                entry.dev,
-                entry.nlink,
-                entry.size,
-                entry.atime,
-                entry.atimeNsec,
-                entry.mtime,
-                entry.mtimeNsec,
-                entry.ctime,
-                entry.ctimeNsec,
-                entry.blocks,
-                entry.blksize,
+                entry.path, entry.ino, entry.dev, entry.nlink, entry.size,
+                entry.atime, entry.atimeNsec, entry.mtime, entry.mtimeNsec,
+                entry.ctime, entry.ctimeNsec, entry.blocks, entry.blksize,
             )
-            val success =
-                runCommand("del_sus_kstat_statically $deleteArgs", showSuccessSnackbar = true)
-            if (success) {
+            if (runCommand("del_sus_kstat_statically $deleteArgs", showSuccessSnackbar = true)) {
                 postRebootToast()
             }
         }
     }
 
-    private fun addPath(
-        rawPath: String,
-        commandBuilder: (String) -> String,
-    ) {
+    private fun addPath(rawPath: String, commandBuilder: (String) -> String) {
         viewModelScope.launch(Dispatchers.IO) {
             val value = normalizePathEntry(rawPath) ?: return@launch
             runCommand(commandBuilder(shellQuote(value)), true)
         }
     }
 
-    private fun addEntries(
-        rawInput: String,
-        commandBuilder: (String) -> String,
-    ) {
+    private fun addEntries(rawInput: String, commandBuilder: (String) -> String) {
         viewModelScope.launch(Dispatchers.IO) {
             val entries = parsePathEntries(rawInput)
-            if (entries.isEmpty()) return@launch
-
             var anySuccess = false
             for (entry in entries) {
-                val success =
-                    runCommand(commandBuilder(shellQuote(entry)), showSuccessSnackbar = false)
-                if (success) anySuccess = true
+                if (runCommand(commandBuilder(shellQuote(entry)), showSuccessSnackbar = false)) {
+                    anySuccess = true
+                }
             }
-            if (anySuccess) {
-                snackbarText = ksuApp.getString(R.string.kpm_control_success)
-            }
+            if (anySuccess) snackbarText = ksuApp.getString(R.string.kpm_control_success)
         }
     }
 
-    private fun removePath(
-        rawPath: String,
-        commandBuilder: (String) -> String,
-    ) {
+    private fun removePath(rawPath: String, commandBuilder: (String) -> String) {
         viewModelScope.launch(Dispatchers.IO) {
             val value = normalizePathEntry(rawPath) ?: return@launch
-            val success = runCommand(commandBuilder(shellQuote(value)), true)
-            if (success) {
-                postRebootToast()
-            }
+            if (runCommand(commandBuilder(shellQuote(value)), true)) postRebootToast()
         }
     }
 
@@ -703,94 +615,66 @@ class SuSFSScreenViewModel : ViewModel() {
             val success = execKsud("susfs $command")
             if (!success) {
                 snackbarText = ksuApp.getString(R.string.operation_failed)
-            }
-
-            if (success) {
-                if (showSuccessSnackbar) {
-                    snackbarText = ksuApp.getString(R.string.kpm_control_success)
-                }
+            } else {
+                if (showSuccessSnackbar) snackbarText =
+                    ksuApp.getString(R.string.kpm_control_success)
                 val newState = runCatching { loadState() }.getOrNull()
                 if (newState != null) {
-                    uiState = newState.copy(
-                        isLoading = false,
-                        isRefreshing = false,
-                    )
+                    uiState = newState.copy(isLoading = false, isRefreshing = false)
                 } else {
                     refresh()
                 }
             }
-            return@withContext success
-    }
+            success
+        }
 
     private suspend fun loadState(): SuSFSUiState {
         val statusEnabled = runCatching { getSuSFSStatus() }.getOrDefault(false)
-
-        val version = runCatching {
-            getSuSFSVersion().trim()
-        }.getOrDefault("")
-
-        val featuresOutput = runCatching {
-            getSuSFSFeatures()
-        }.getOrDefault("")
-        val featureStatus = parseFeatureStatus(featuresOutput)
-
-        val configJson = readSusfsConfigJson()
-        val commonObject = configJson?.optJSONObject("common")
-        val susPathObject = configJson?.optJSONObject("sus_path")
-        val kstatObject = configJson?.optJSONObject("kstat")
+        val version = runCatching { getSuSFSVersion().trim() }.getOrDefault("")
+        val featureStatus = parseFeatureStatus(runCatching { getSuSFSFeatures() }.getOrDefault(""))
+        val config = readSusfsConfig() ?: SusfsConfig()
 
         return SuSFSUiState(
             isLoading = false,
             isRefreshing = false,
             enabled = statusEnabled,
             versionText = version,
-            unameValue = commonObject?.optString("release", defaultSusfsValue) ?: defaultSusfsValue,
-            buildTimeValue = commonObject?.optString("version", defaultSusfsValue) ?: defaultSusfsValue,
-            hideSuSMntsForNonSUProcs = commonObject?.optBoolean(
-                "hide_sus_mnts_for_non_su_procs",
-                false
-            ) ?: false,
+            unameValue = config.common.release.ifBlank { "default" },
+            buildTimeValue = config.common.version.ifBlank { "default" },
+            hideSuSMntsForNonSUProcs = config.common.hideSusMntsForNonSuProcs,
             hideMountsControlSupported = uiState.hideMountsControlSupported,
-            susfsLogEnabled = commonObject?.optBoolean("enable_susfs_log", false) ?: false,
-            avcLogSpoofing = commonObject?.optBoolean("avc_spoofing", false) ?: false,
-            susPaths = jsonArrayToSortedList(susPathObject?.optJSONArray("sus_path")),
-            susLoopPaths = jsonArrayToSortedList(susPathObject?.optJSONArray("sus_path_loop")),
-            susMaps = jsonArrayToSortedList(configJson?.optJSONArray("sus_map")),
-            kstatPaths = jsonArrayToSortedList(kstatObject?.optJSONArray("sus_kstat")),
-            kstatUpdatedPaths = jsonArrayToSortedList(kstatObject?.optJSONArray("update_kstat")),
-            kstatFullClonePaths = jsonArrayToSortedList(kstatObject?.optJSONArray("full_clone")),
-            staticKstatEntries = parseStaticKstatEntries(kstatObject?.optJSONArray("statically")),
+            susfsLogEnabled = config.common.enableSusfsLog,
+            avcLogSpoofing = config.common.avcSpoofing,
+            susPaths = config.susPath.susPath.sorted(),
+            susLoopPaths = config.susPath.susPathLoop.sorted(),
+            susMaps = config.susMap.sorted(),
+            kstatPaths = config.kstat.susKstat.sorted(),
+            kstatUpdatedPaths = config.kstat.updateKstat.sorted(),
+            kstatFullClonePaths = config.kstat.fullClone.sorted(),
+            staticKstatEntries = config.kstat.statically.sortedBy { it.path },
             featureStatus = featureStatus,
             loadError = null,
         )
     }
 
-    private suspend fun readSusfsConfigJson(): JSONObject? = withContext(Dispatchers.IO) {
-        val suFile = SuFile(CONFIG_PATH).apply {
-            shell = getRootShell()
-        }
-        if (!suFile.isFile) {
-            return@withContext null
-        }
+    private suspend fun readSusfsConfig(): SusfsConfig? = withContext(Dispatchers.IO) {
+        val suFile = SuFile(CONFIG_PATH).apply { shell = getRootShell() }
+        if (!suFile.isFile) return@withContext null
 
         val content = SuFileInputStream.open(suFile).bufferedReader().use { it.readText() }
-        if (content.isBlank()) {
-            return@withContext null
-        }
-        return@withContext runCatching { JSONObject(content) }.getOrNull()
+        if (content.isBlank()) return@withContext null
+
+        runCatching { gson.fromJson(content, SusfsConfig::class.java) }.getOrNull()
     }
 
     private val systemPropertiesClass by lazy { @SuppressLint("PrivateApi") Class.forName("android.os.SystemProperties") }
 
     private suspend fun getActiveBootSlot(): String = withContext(Dispatchers.IO) {
         val suffix = systemPropertiesClass
-            .getDeclaredMethod(
-                "get",
-                String::class.java, String::class.java
-            )
-            .invoke(null, "ro.boot.slot_suffix", "unknown") // unknown = A only
+            .getDeclaredMethod("get", String::class.java, String::class.java)
+            .invoke(null, "ro.boot.slot_suffix", "unknown") as String
 
-        return@withContext when (suffix) {
+        when (suffix) {
             "_a" -> "boot_a"
             "_b" -> "boot_b"
             else -> "boot"
@@ -799,32 +683,16 @@ class SuSFSScreenViewModel : ViewModel() {
 
     private suspend fun loadSlotInfo(): List<SuSFSSlotInfo> = withContext(Dispatchers.IO) {
         val raw = runCatching { getSuSFSSlotInfoJson() }.getOrDefault("[]")
-        val json = runCatching { JSONArray(raw) }.getOrElse { JSONArray() }
-        val result = mutableListOf<SuSFSSlotInfo>()
-        for (i in 0 until json.length()) {
-            val item = json.optJSONObject(i) ?: continue
-            val slotName = item.optString("slot_name", "").trim()
-            val uname = item.optString("uname", "").trim()
-            val buildTime = item.optString("build_time", "").trim()
-            if (slotName.isNotEmpty() && uname.isNotEmpty() && buildTime.isNotEmpty()) {
-                result += SuSFSSlotInfo(
-                    slotName = slotName,
-                    uname = uname,
-                    buildTime = buildTime,
-                )
-            }
-        }
-        result
+        runCatching {
+            val listType = object : TypeToken<List<SuSFSSlotInfo>>() {}.type
+            val list: List<SuSFSSlotInfo> = gson.fromJson(raw, listType) ?: emptyList()
+            list.filter { it.slotName.isNotBlank() && it.uname.isNotBlank() && it.buildTime.isNotBlank() }
+        }.getOrDefault(emptyList())
     }
 
     private fun parseFeatureStatus(rawOutput: String): List<SuSFSFeatureStatus> {
         val enabledConfig = rawOutput.lines()
-            .map { line ->
-                line.trim()
-                    .substringBefore("=")
-                    .substringBefore(":")
-                    .trim()
-            }
+            .map { it.trim().substringBefore("=").substringBefore(":").trim() }
             .filter { it.startsWith("CONFIG_KSU_SUSFS_") }
             .toSet()
 
@@ -843,82 +711,39 @@ class SuSFSScreenViewModel : ViewModel() {
         return mappings.map { (key, titleRes) ->
             if (key == "CONFIG_KSU_SUSFS_ENABLE_LOG") {
                 object : ConfigurableSuSFSFeature(
-                    featureKey = key,
-                    featureTitle = ksuApp.getString(titleRes),
-                    featureEnabled = enabledConfig.contains(key),
+                    key,
+                    ksuApp.getString(titleRes),
+                    enabledConfig.contains(key)
                 ) {
-                    override fun onCheckedChange(checked: Boolean) {
-                        setSusfsLogEnabled(checked)
-                    }
+                    override fun onCheckedChange(checked: Boolean) = setSusfsLogEnabled(checked)
                 }
             } else {
                 NoNConfigurableSuSFSFeature(
-                    featureKey = key,
-                    featureTitle = ksuApp.getString(titleRes),
-                    featureEnabled = enabledConfig.contains(key),
+                    key,
+                    ksuApp.getString(titleRes),
+                    enabledConfig.contains(key)
                 )
             }
         }.sortedBy { it.title }
     }
 
-    private fun parseStaticKstatEntries(array: JSONArray?): List<SuSFSStaticKstatEntry> {
-        if (array == null) return emptyList()
-        val result = mutableListOf<SuSFSStaticKstatEntry>()
-        for (index in 0 until array.length()) {
-            val item = array.optJSONObject(index) ?: continue
-            result += SuSFSStaticKstatEntry(
-                path = item.optString("path", ""),
-                ino = item.optString("ino", defaultSusfsValue),
-                dev = item.optString("dev", defaultSusfsValue),
-                nlink = item.optString("nlink", defaultSusfsValue),
-                size = item.optString("size", defaultSusfsValue),
-                atime = item.optString("atime", defaultSusfsValue),
-                atimeNsec = item.optString("atime_nsec", defaultSusfsValue),
-                mtime = item.optString("mtime", defaultSusfsValue),
-                mtimeNsec = item.optString("mtime_nsec", defaultSusfsValue),
-                ctime = item.optString("ctime", defaultSusfsValue),
-                ctimeNsec = item.optString("ctime_nsec", defaultSusfsValue),
-                blocks = item.optString("blocks", defaultSusfsValue),
-                blksize = item.optString("blksize", defaultSusfsValue),
-            )
-        }
-        return result.sortedBy { it.path }
-    }
-
-    private fun jsonArrayToSortedList(array: JSONArray?): List<String> {
-        if (array == null) return emptyList()
-        val values = buildList {
-            for (index in 0 until array.length()) {
-                val value = array.optString(index).trim()
-                if (value.isNotEmpty()) {
-                    add(value)
-                }
-            }
-        }
-        return values.sorted()
-    }
-
     private fun parsePathEntries(rawInput: String): List<String> {
-        extractJsonLikePathEntries(rawInput).takeIf { it.isNotEmpty() }?.let { return it }
+        val jsonLikeEntries = extractJsonLikePathEntries(rawInput)
+        if (jsonLikeEntries.isNotEmpty()) return jsonLikeEntries
 
-        val seen = linkedSetOf<String>()
-        rawInput.lineSequence()
+        return rawInput.lineSequence()
             .mapNotNull { normalizePathEntry(it) }
-            .forEach { seen.add(it) }
-        return seen.toList()
+            .distinct()
+            .toList()
     }
 
     private fun extractJsonLikePathEntries(rawInput: String): List<String> {
         val quotedPathRegex = Regex("['\"]([^'\"]+)['\"]")
-        val seen = linkedSetOf<String>()
-        quotedPathRegex.findAll(rawInput).forEach { match ->
-            val candidate = match.groupValues.getOrNull(1)?.trim().orEmpty()
-            val normalized = normalizePathEntry(candidate)
-            if (normalized != null && normalized.startsWith("/")) {
-                seen += normalized
-            }
-        }
-        return seen.toList()
+        return quotedPathRegex.findAll(rawInput)
+            .mapNotNull { normalizePathEntry(it.groupValues.getOrNull(1).orEmpty()) }
+            .filter { it.startsWith("/") }
+            .distinct()
+            .toList()
     }
 
     private fun normalizePathEntry(raw: String): String? {
@@ -926,56 +751,18 @@ class SuSFSScreenViewModel : ViewModel() {
         if (value.isEmpty()) return null
 
         value = value.removePrefix("[").removeSuffix("]").trim()
-        while (value.endsWith(",")) {
-            value = value.dropLast(1).trimEnd()
-        }
+        while (value.endsWith(",")) value = value.dropLast(1).trimEnd()
         value = value.trim().trim('"', '\'').trim()
-        if (value.isEmpty()) return null
-
-        while (value.endsWith(",")) {
-            value = value.dropLast(1).trimEnd()
-        }
+        while (value.endsWith(",")) value = value.dropLast(1).trimEnd()
 
         return value.takeIf { it.isNotEmpty() }
     }
 
-    private fun toDefaultIfBlank(value: String): String {
-        return value.trim().ifBlank { defaultSusfsValue }
+    private fun toDefaultIfBlank(value: String): String = value.trim().ifBlank { "default" }
+
+    private fun buildStaticKstatCommandArgs(vararg args: String): String {
+        return args.joinToString(" ") { shellQuote(toDefaultIfBlank(it)) }
     }
 
-    private fun buildStaticKstatCommandArgs(
-        path: String,
-        ino: String,
-        dev: String,
-        nlink: String,
-        size: String,
-        atime: String,
-        atimeNsec: String,
-        mtime: String,
-        mtimeNsec: String,
-        ctime: String,
-        ctimeNsec: String,
-        blocks: String,
-        blksize: String,
-    ): String {
-        return listOf(
-            shellQuote(path),
-            shellQuote(toDefaultIfBlank(ino)),
-            shellQuote(toDefaultIfBlank(dev)),
-            shellQuote(toDefaultIfBlank(nlink)),
-            shellQuote(toDefaultIfBlank(size)),
-            shellQuote(toDefaultIfBlank(atime)),
-            shellQuote(toDefaultIfBlank(atimeNsec)),
-            shellQuote(toDefaultIfBlank(mtime)),
-            shellQuote(toDefaultIfBlank(mtimeNsec)),
-            shellQuote(toDefaultIfBlank(ctime)),
-            shellQuote(toDefaultIfBlank(ctimeNsec)),
-            shellQuote(toDefaultIfBlank(blocks)),
-            shellQuote(toDefaultIfBlank(blksize)),
-        ).joinToString(" ")
-    }
-
-    private fun shellQuote(text: String): String {
-        return "'${text.replace("'", "'\"'\"'")}'"
-    }
+    private fun shellQuote(text: String): String = "'${text.replace("'", "'\"'\"'")}'"
 }

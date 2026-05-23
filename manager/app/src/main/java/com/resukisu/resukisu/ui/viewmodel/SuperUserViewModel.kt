@@ -25,12 +25,14 @@ import com.resukisu.resukisu.ui.KsuService
 import com.resukisu.resukisu.ui.util.HanziToPinyin
 import com.resukisu.zako.IKsuInterface
 import com.topjohnwu.superuser.Shell
+import com.topjohnwu.superuser.ipc.RootService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -42,7 +44,6 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 enum class AppCategory(val displayNameRes: Int, val persistKey: String) {
     ALL(com.resukisu.resukisu.R.string.category_all_apps, "ALL"),
@@ -284,33 +285,33 @@ class SuperUserViewModel : ViewModel() {
         }
     }
 
-    private suspend fun connectKsuService(onDisconnect: () -> Unit = {}): IBinder? =
-        suspendCoroutine { continuation ->
+    private suspend fun connectKsuService(onDisconnect: () -> Unit = {}): Pair<ServiceConnection?, IBinder?> =
+        suspendCancellableCoroutine { continuation ->
             val connection = object : ServiceConnection {
                 override fun onServiceDisconnected(name: ComponentName?) {
                     onDisconnect()
                 }
+
                 override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-                    continuation.resume(binder)
+                    continuation.resume(Pair(this, binder))
                 }
             }
             val intent = Intent(ksuApp, KsuService::class.java)
             try {
-                val task = com.topjohnwu.superuser.ipc.RootService.bindOrTask(
+                val task = RootService.bindOrTask(
                     intent, Shell.EXECUTOR, connection
                 )
                 task?.let { Shell.getShell().execTask(it) }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to bind KsuService", e)
-                continuation.resume(null)
+                continuation.resume(Pair(null, null))
             }
         }
 
-    private fun stopKsuService() {
+    private fun stopKsuService(serviceConnection: ServiceConnection) {
         viewModelScope.launch(Dispatchers.Main) {
             try {
-                val intent = Intent(ksuApp, KsuService::class.java)
-                com.topjohnwu.superuser.ipc.RootService.stop(intent)
+                RootService.unbind(serviceConnection)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to stop KsuService", e)
             }
@@ -325,9 +326,9 @@ class SuperUserViewModel : ViewModel() {
         isAppCacheLoading = true
         isAppCacheReady = false
         loadingProgress = 0f
+        val (connection, binder) = connectKsuService() ?: run { isRefreshing = false; return }
 
         try {
-            val binder = connectKsuService() ?: run { isRefreshing = false; return }
 
             withContext(Dispatchers.IO) {
                 val pm = ksuApp.packageManager
@@ -368,7 +369,9 @@ class SuperUserViewModel : ViewModel() {
             Log.e(TAG, "Error refresh app list", e)
         } finally {
             isRefreshing = false
-            stopKsuService()
+            connection?.let { connection ->
+                stopKsuService(connection)
+            }
         }
     }
 
@@ -407,9 +410,11 @@ class SuperUserViewModel : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         try {
-            stopKsuService()
             appProcessingThreadPool.close()
             configChangeListeners.clear()
+
+            val intent = Intent(ksuApp, KsuService::class.java)
+            RootService.stop(intent)
         } catch (e: Exception) {
             Log.e(TAG, "Error cleaning up resources", e)
         }

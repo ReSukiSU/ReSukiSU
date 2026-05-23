@@ -541,6 +541,8 @@ class HomeViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
+
+
         loadingJobs.forEach { it.cancel() }
         loadingJobs.clear()
     }
