@@ -1,9 +1,9 @@
-name: Auto Label Issues
+name: Auto Label and Close Invalid Issues
 on:
   issues:
     types: [opened, edited]
 jobs:
-  label:
+  label-and-close:
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -13,19 +13,19 @@ jobs:
           script: |
             const body = context.payload.issue.body || "";
             const expectedLabels = [];
-            
+
             if (body.match(/### Kernel Version Category \/ 内核版本分类\s+5\.10-/)) expectedLabels.push("nongki");
             if (body.match(/### Kernel Version Category \/ 内核版本分类\s+5\.10\+/)) expectedLabels.push("gki");
             if (body.match(/### Hook Type \/ Hook 类型\s+susfs/)) expectedLabels.push("susfs");
             if (body.match(/### Hook Type \/ Hook 类型\s+tracepoint/)) expectedLabels.push("tracepoint");
             if (body.match(/### Hook Type \/ Hook 类型\s+manual/)) expectedLabels.push("manual");
-            
+
             const managedLabels = ["nongki", "gki", "susfs", "tracepoint", "manual"];
             const currentLabels = context.payload.issue.labels.map(l => l.name);
-            
+
             const labelsToAdd = expectedLabels.filter(l => !currentLabels.includes(l));
             const labelsToRemove = currentLabels.filter(l => managedLabels.includes(l) && !expectedLabels.includes(l));
-            
+
             if (labelsToAdd.length > 0) {
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
@@ -34,7 +34,7 @@ jobs:
                 labels: labelsToAdd
               });
             }
-            
+
             for (const label of labelsToRemove) {
               try {
                 await github.rest.issues.removeLabel({
@@ -45,5 +45,27 @@ jobs:
                 });
               } catch (error) {
                 console.error(error);
+              }
+            }
+
+            const closeReasons = [
+              { pattern: /No response/i, message: "由于 Issue 中包含未填写的必填项（No response），自动关闭此 Issue。\nThis issue is automatically closed because it contains unfilled required fields (No response)." }
+            ];
+
+            for (const { pattern, message } of closeReasons) {
+              if (pattern.test(body) && context.payload.issue.state === "open") {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: message
+                });
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  state: "closed"
+                });
+                break;
               }
             }
