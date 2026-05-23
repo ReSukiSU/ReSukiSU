@@ -6,7 +6,6 @@ import android.os.Build
 import android.os.PowerManager
 import android.system.Os
 import android.widget.Toast
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -55,8 +54,9 @@ import androidx.compose.material.icons.twotone.Error
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -64,6 +64,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -414,11 +415,20 @@ fun UpdateCard() {
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun RebootDropdownItem(@StringRes id: Int, reason: String = "") {
-    DropdownMenuItem(
-        text = { Text(stringResource(id)) },
-        onClick = { reboot(reason) })
+fun RebootDropdownItems(items: Map<Int, String>) {
+    items.onEachIndexed { index, (id, reason) ->
+        DropdownMenuItem(
+            selected = false,
+            text = { Text(stringResource(id)) },
+            onClick = { reboot(reason) },
+            shapes = MenuDefaults.itemShape(
+                index = index,
+                count = items.size
+            )
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -473,22 +483,30 @@ private fun TopBar(
                             contentDescription = stringResource(id = R.string.reboot)
                         )
 
-                        DropdownMenu(expanded = showDropdown, onDismissRequest = {
+                        DropdownMenuPopup(expanded = showDropdown, onDismissRequest = {
                             showDropdown = false
                         }) {
-                            RebootDropdownItem(id = R.string.reboot)
-                            RebootDropdownItem(id = R.string.reboot_soft, reason = "soft_reboot")
+                            DropdownMenuGroup(
+                                shapes = MenuDefaults.groupShapes()
+                            ) {
+                                val pm =
+                                    LocalContext.current.getSystemService(Context.POWER_SERVICE) as PowerManager?
+                                var methods = mapOf(
+                                    R.string.reboot to "",
+                                    R.string.reboot_soft to "soft_reboot",
+                                    R.string.reboot_recovery to "recovery",
+                                    R.string.reboot_bootloader to "bootloader",
+                                    R.string.reboot_download to "download",
+                                    R.string.reboot_edl to "edl"
+                                )
 
-                            val pm =
-                                LocalContext.current.getSystemService(Context.POWER_SERVICE) as PowerManager?
-                            @Suppress("DEPRECATION")
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && pm?.isRebootingUserspaceSupported == true) {
-                                RebootDropdownItem(id = R.string.reboot_userspace, reason = "userspace")
+                                @Suppress("DEPRECATION")
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && pm?.isRebootingUserspaceSupported == true) {
+                                    methods = methods + (R.string.reboot_userspace to "userspace")
+                                }
+
+                                RebootDropdownItems(methods)
                             }
-                            RebootDropdownItem(id = R.string.reboot_recovery, reason = "recovery")
-                            RebootDropdownItem(id = R.string.reboot_bootloader, reason = "bootloader")
-                            RebootDropdownItem(id = R.string.reboot_download, reason = "download")
-                            RebootDropdownItem(id = R.string.reboot_edl, reason = "edl")
                         }
                     }
                 }

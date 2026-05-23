@@ -102,11 +102,11 @@ import com.resukisu.resukisu.ui.component.ksuIsValid
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.rememberCustomDialog
 import com.resukisu.resukisu.ui.component.rememberLoadingDialog
+import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
-import com.resukisu.resukisu.ui.component.settings.SplicedColumnGroup
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.FlashIt
@@ -204,7 +204,7 @@ fun SettingsPage(bottomPadding: Dp) {
                         stringResource(id = R.string.settings_mode_disable_always),
                     )
 
-                    SplicedColumnGroup(
+                    SegmentedColumn(
                         title = stringResource(R.string.configuration),
                         content = {
                             item {
@@ -482,7 +482,7 @@ fun SettingsPage(bottomPadding: Dp) {
 
             item {
                 // 应用设置卡片
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.app_settings),
                     content = {
                         item {
@@ -519,7 +519,7 @@ fun SettingsPage(bottomPadding: Dp) {
 
             item {
                 // 工具卡片
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.tools),
                     content = {
                         item {
@@ -603,7 +603,7 @@ fun SettingsPage(bottomPadding: Dp) {
 
             // 关于卡片
             item {
-                SplicedColumnGroup(
+                SegmentedColumn(
                     title = stringResource(R.string.about),
                     content = {
                         item {

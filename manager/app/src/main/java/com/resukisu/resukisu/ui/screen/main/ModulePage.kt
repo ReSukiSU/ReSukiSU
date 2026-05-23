@@ -64,7 +64,6 @@ import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
@@ -140,17 +139,16 @@ import com.resukisu.resukisu.ui.component.ZipFileInfo
 import com.resukisu.resukisu.ui.component.ZipType
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.rememberLoadingDialog
+import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
-import com.resukisu.resukisu.ui.component.settings.SplicedColumnGroup
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.FlashIt
 import com.resukisu.resukisu.ui.screen.LabelText
+import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.blurSource
-import com.resukisu.resukisu.ui.theme.getCardColors
-import com.resukisu.resukisu.ui.theme.getCardElevation
 import com.resukisu.resukisu.ui.util.LocalPermissionRequestInterface
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.downloader.download
@@ -1127,7 +1125,7 @@ private fun ModuleList(
                         )
                     }
                 }
-                SplicedColumnGroup {
+                SegmentedColumn {
                     if (shortcutIconUri == defaultShortcutIconUri) {
                         item {
                             SettingsBaseWidget(
@@ -1268,9 +1266,9 @@ fun ModuleItem(
     val clipboardManager = context.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
     val hapticFeedback = LocalHapticFeedback.current
 
-    ElevatedCard(
-        colors = getCardColors(MaterialTheme.colorScheme.surfaceContainerHighest),
-        elevation = getCardElevation(),
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(CardConfig.cardAlpha),
+        shape = RoundedCornerShape(16.dp)
     ) {
         val textDecoration = if (!module.remove) null else TextDecoration.LineThrough
         val interactionSource = remember { MutableInteractionSource() }

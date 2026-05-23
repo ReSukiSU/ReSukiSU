@@ -1,7 +1,4 @@
-use std::{
-    fs::{self},
-    path::Path,
-};
+use std::fs;
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
@@ -25,13 +22,11 @@ impl Config {
 }
 
 pub fn booted_load() -> Result<()> {
-    let path = Path::new(defs::DYNAMIC_MANAGER);
-
-    if !path.exists() {
-        return Ok(());
-    }
-
-    let buf = fs::read_to_string(path)?;
+    let buf = match fs::read_to_string(defs::DYNAMIC_MANAGER) {
+        Ok(s) => s,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+        Err(e) => return Err(e.into()),
+    };
 
     let json: Config = serde_json::from_str(&buf)?;
     if json.hash.is_empty() || json.size == 0 {
@@ -46,16 +41,9 @@ pub fn booted_load() -> Result<()> {
 }
 
 pub fn parse_hash(s: &str) -> Result<[u8; 64], String> {
-    let bytes = s.as_bytes();
-
-    if bytes.len() != 64 {
-        return Err("Incorrect hash".to_string());
-    }
-
-    let mut hash = [0u8; 64];
-    hash.copy_from_slice(bytes);
-
-    Ok(hash)
+    s.as_bytes()
+        .try_into()
+        .map_err(|_| "Incorrect hash".to_string())
 }
 
 pub fn clear() -> Result<()> {
