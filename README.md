@@ -47,6 +47,12 @@
 | **Manual Hook** | Most compatible hook, supports Linux kernel 3.4 – 6.18. |
 | **SuSFS Inline Hook** | Hook from [SuSFS](https://github.com/simonpunk/susfs4ksu), similar to Manual Hook but provided by the SuSFS project. |
 
+## Integration
+### Here is the command to add KittiSU to your kernel source.
+```
+curl -LSs "https://raw.githubusercontent.com/anotheranhiutangerine/KittiSU/main/kernel/setup.sh" | bash
+```
+
 ## Building the Kernel
 
 KittiSU uses GitHub Actions for kernel builds. See the [GKI_KernelSU_SUSFS](https://github.com/anotheranhiutangerine/GKI_KernelSU_SUSFS) repository for build workflows.
