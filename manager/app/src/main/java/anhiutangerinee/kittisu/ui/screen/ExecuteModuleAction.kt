@@ -70,7 +70,7 @@ import java.util.Locale
 fun ExecuteModuleActionScreen(moduleId: String) {
     var text by rememberSaveable { mutableStateOf("") }
     var tempText : String
-    val logContent = rememberSaveable { StringBuilder() }
+	val logContent = remember { StringBuilder() }	
     val snackBarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
     val state = rememberLazyListState()
