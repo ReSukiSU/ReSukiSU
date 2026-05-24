@@ -449,7 +449,9 @@ pub fn patch(args: BootPatchArgs) -> Result<()> {
             no_install,
             #[cfg(target_os = "android")]
             ota,
+            #[cfg(target_os = "android")]
             flash,
+            #[cfg(target_os = "android")]
             partition,
             ..
         } = args;
