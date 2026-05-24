@@ -8,3 +8,5 @@ captures
 .cxx
 local.properties
 key.jks
+*.jks
+sign.properties
