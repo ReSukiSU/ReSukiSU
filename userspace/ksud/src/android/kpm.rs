@@ -7,8 +7,7 @@ use std::{
 
 use anyhow::{Result, bail};
 
-use crate::android::ksucalls::ksuctl;
-use crate::ksu_uapi;
+use crate::android::{ksucalls::ksuctl, uapi};
 
 const KPM_DIR: &str = "/data/adb/kpm";
 
@@ -20,14 +19,14 @@ where
     let args = args.map_or_else(|| CString::new(String::new()), CString::new)?;
 
     let mut ret = -1;
-    let mut cmd = ksu_uapi::ksu_kpm_cmd {
-        control_code: ksu_uapi::KSU_KPM_LOAD_RUST,
+    let mut cmd = uapi::ksu_kpm_cmd {
+        control_code: uapi::KSU_KPM_LOAD_RUST,
         arg1: path.as_ptr() as u64,
         arg2: args.as_ptr() as u64,
         result_code: &raw mut ret as u64,
     };
 
-    ksuctl(ksu_uapi::KSU_IOCTL_KPM_RUST, &raw mut cmd)?;
+    ksuctl(uapi::KSU_IOCTL_KPM_RUST, &raw mut cmd)?;
 
     if ret < 0 {
         println!("Failed to load kpm: {}", io::Error::from_raw_os_error(ret));
@@ -39,14 +38,14 @@ pub fn list() -> Result<()> {
     let mut buf = vec![0u8; 1024];
 
     let mut ret = -1;
-    let mut cmd = ksu_uapi::ksu_kpm_cmd {
-        control_code: ksu_uapi::KSU_KPM_LIST_RUST,
+    let mut cmd = uapi::ksu_kpm_cmd {
+        control_code: uapi::KSU_KPM_LIST_RUST,
         arg1: buf.as_mut_ptr() as u64,
         arg2: buf.len() as u64,
         result_code: &raw mut ret as u64,
     };
 
-    ksuctl(ksu_uapi::KSU_IOCTL_KPM_RUST, &raw mut cmd)?;
+    ksuctl(uapi::KSU_IOCTL_KPM_RUST, &raw mut cmd)?;
 
     if ret < 0 {
         println!(
@@ -65,14 +64,14 @@ pub fn unload_module(name: String) -> Result<()> {
     let name = CString::new(name)?;
 
     let mut ret = -1;
-    let mut cmd = ksu_uapi::ksu_kpm_cmd {
-        control_code: ksu_uapi::KSU_KPM_UNLOAD_RUST,
+    let mut cmd = uapi::ksu_kpm_cmd {
+        control_code: uapi::KSU_KPM_UNLOAD_RUST,
         arg1: name.as_ptr() as u64,
         arg2: 0,
         result_code: &raw mut ret as u64,
     };
 
-    ksuctl(ksu_uapi::KSU_IOCTL_KPM_RUST, &raw mut cmd)?;
+    ksuctl(uapi::KSU_IOCTL_KPM_RUST, &raw mut cmd)?;
 
     if ret < 0 {
         println!(
@@ -88,14 +87,14 @@ pub fn info(name: String) -> Result<()> {
     let mut buf = vec![0u8; 256];
 
     let mut ret = -1;
-    let mut cmd = ksu_uapi::ksu_kpm_cmd {
-        control_code: ksu_uapi::KSU_KPM_INFO_RUST,
+    let mut cmd = uapi::ksu_kpm_cmd {
+        control_code: uapi::KSU_KPM_INFO_RUST,
         arg1: name.as_ptr() as u64,
         arg2: buf.as_mut_ptr() as u64,
         result_code: &raw mut ret as u64,
     };
 
-    ksuctl(ksu_uapi::KSU_IOCTL_KPM_RUST, &raw mut cmd)?;
+    ksuctl(uapi::KSU_IOCTL_KPM_RUST, &raw mut cmd)?;
 
     if ret < 0 {
         println!(
@@ -113,14 +112,14 @@ pub fn control(name: String, args: String) -> Result<i32> {
     let args = CString::new(args)?;
 
     let mut ret = -1;
-    let mut cmd = ksu_uapi::ksu_kpm_cmd {
-        control_code: ksu_uapi::KSU_KPM_CONTROL_RUST,
+    let mut cmd = uapi::ksu_kpm_cmd {
+        control_code: uapi::KSU_KPM_CONTROL_RUST,
         arg1: name.as_ptr() as u64,
         arg2: args.as_ptr() as u64,
         result_code: &raw mut ret as u64,
     };
 
-    ksuctl(ksu_uapi::KSU_IOCTL_KPM_RUST, &raw mut cmd)?;
+    ksuctl(uapi::KSU_IOCTL_KPM_RUST, &raw mut cmd)?;
 
     if ret < 0 {
         println!(
@@ -134,14 +133,14 @@ pub fn control(name: String, args: String) -> Result<i32> {
 
 pub fn num() -> Result<i32> {
     let mut ret = -1;
-    let mut cmd = ksu_uapi::ksu_kpm_cmd {
-        control_code: ksu_uapi::KSU_KPM_NUM_RUST,
+    let mut cmd = uapi::ksu_kpm_cmd {
+        control_code: uapi::KSU_KPM_NUM_RUST,
         arg1: 0,
         arg2: 0,
         result_code: &raw mut ret as u64,
     };
 
-    ksuctl(ksu_uapi::KSU_IOCTL_KPM_RUST, &raw mut cmd)?;
+    ksuctl(uapi::KSU_IOCTL_KPM_RUST, &raw mut cmd)?;
 
     if ret < 0 {
         println!(
@@ -158,14 +157,14 @@ pub fn version() -> Result<()> {
     let mut buf = vec![0u8; 1024];
 
     let mut ret = -1;
-    let mut cmd = ksu_uapi::ksu_kpm_cmd {
-        control_code: ksu_uapi::KSU_KPM_VERSION_RUST,
+    let mut cmd = uapi::ksu_kpm_cmd {
+        control_code: uapi::KSU_KPM_VERSION_RUST,
         arg1: buf.as_mut_ptr() as u64,
         arg2: buf.len() as u64,
         result_code: &raw mut ret as u64,
     };
 
-    ksuctl(ksu_uapi::KSU_IOCTL_KPM_RUST, &raw mut cmd)?;
+    ksuctl(uapi::KSU_IOCTL_KPM_RUST, &raw mut cmd)?;
 
     if ret < 0 {
         println!(
@@ -186,14 +185,14 @@ pub fn check_version() -> Result<String> {
     let mut buf = vec![0u8; 1024];
 
     let mut ret = -1;
-    let mut cmd = ksu_uapi::ksu_kpm_cmd {
-        control_code: ksu_uapi::KSU_KPM_VERSION_RUST,
+    let mut cmd = uapi::ksu_kpm_cmd {
+        control_code: uapi::KSU_KPM_VERSION_RUST,
         arg1: buf.as_mut_ptr() as u64,
         arg2: buf.len() as u64,
         result_code: &raw mut ret as u64,
     };
 
-    ksuctl(ksu_uapi::KSU_IOCTL_KPM_RUST, &raw mut cmd)?;
+    ksuctl(uapi::KSU_IOCTL_KPM_RUST, &raw mut cmd)?;
 
     if ret < 0 {
         println!(

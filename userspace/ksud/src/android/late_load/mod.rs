@@ -1,3 +1,5 @@
+pub mod magica;
+
 use anyhow::{Context, Result};
 use log::{info, warn};
 use rustix::cstr;
