@@ -39,11 +39,11 @@ pub use android::*;
 #[folder = "bin/x86_64"]
 struct Asset;
 
-// IF NOT x86_64 ANDROID, ie. macos, linux, windows, always use aarch64
-#[cfg(any(
-    all(target_arch = "aarch64", target_os = "android"),
-    not(all(target_arch = "aarch64", target_os = "android"))
-))]
+// IF NOT x86_64/aarch64/arm ANDROID, ie. macos, linux, windows, always use aarch64
+#[cfg(not(any(
+    all(target_arch = "x86_64", target_os = "android"),
+    all(target_arch = "arm", target_os = "android")
+)))]
 #[derive(RustEmbed)]
 #[folder = "bin/aarch64"]
 struct Asset;
