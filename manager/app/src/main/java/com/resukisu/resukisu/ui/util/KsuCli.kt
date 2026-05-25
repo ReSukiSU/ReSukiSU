@@ -578,9 +578,21 @@ fun restartApp(packageName: String) {
 }
 
 fun getSuSFSStatus(): Boolean {
-    val shell = getRootShell()
-    val cmd = "${getKsuDaemonPath()} susfs show version"
-    return shell.newJob().add(cmd).exec().isSuccess
+    // Check if any susfs feature is enabled in the kernel
+    // Instead of relying on "susfs show version" which may fail if some CONFIG options are missing,
+    // we check if any CONFIG_KSU_SUSFS_* option is enabled
+    val features = getSuSFSFeatures()
+    if (features.isEmpty()) {
+        return false
+    }
+
+    // Check if any susfs config option is present/enabled
+    val hasSusfsConfig = features.lines().any { line ->
+        line.trim().startsWith("CONFIG_KSU_SUSFS_") &&
+        (line.contains("=y") || line.contains("=Y") || line.contains(": yes"))
+    }
+
+    return hasSusfsConfig
 }
 
 fun getSuSFSVersion(): String {

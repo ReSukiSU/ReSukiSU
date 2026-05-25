@@ -629,10 +629,13 @@ class SuSFSScreenViewModel : ViewModel() {
         }
 
     private suspend fun loadState(): SuSFSUiState {
-        val statusEnabled = runCatching { getSuSFSStatus() }.getOrDefault(false)
-        val version = runCatching { getSuSFSVersion().trim() }.getOrDefault("")
         val featureStatus = parseFeatureStatus(runCatching { getSuSFSFeatures() }.getOrDefault(""))
+        val version = runCatching { getSuSFSVersion().trim() }.getOrDefault("")
         val config = readSusfsConfig() ?: SusfsConfig()
+
+        // Determine if susfs is enabled based on whether any feature is enabled
+        // This fixes the issue where missing a single CONFIG option would disable all susfs functionality
+        val statusEnabled = featureStatus.any { it.enabled }
 
         return SuSFSUiState(
             isLoading = false,
