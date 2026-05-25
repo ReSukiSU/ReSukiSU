@@ -30,7 +30,7 @@ lateinit var ksuApp: KernelSUApplication
 class KernelSUApplication : Application(), ViewModelStoreOwner {
 
     lateinit var okhttpClient: OkHttpClient
-    val UserAgent = "ReSukiSU/${BuildConfig.VERSION_CODE}"
+    val UserAgent = "KittiSU/${BuildConfig.VERSION_CODE}"
     private val appViewModelStore by lazy { ViewModelStore() }
 
     @SuppressLint("RestrictedApi")

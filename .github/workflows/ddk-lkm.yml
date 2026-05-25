@@ -41,7 +41,7 @@ jobs:
         EXPECTED_PR_BUILD_SIZE: ${{ inputs.expected_pr_build_size }}
         EXPECTED_PR_BUILD_HASH: ${{ inputs.expected_pr_build_hash }}
       run: |
-        git config --global --add safe.directory /__w/ReSukiSU/ReSukiSU
+        git config --global --add safe.directory /__w/KittiSU/KittiSU
         cd kernel
 
         echo "=== Building kernelsu.ko for KMI: ${{ inputs.kmi }} ==="

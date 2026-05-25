@@ -118,10 +118,10 @@ menu "KernelSU - Manual Hook Auto hook"
     depends on KSU_MANUAL_HOOK
 
 comment "------------------------WARNING-------------------------------"
-comment "ReSukiSU will check EVERY hooks in kernel compile process"
+comment "KittiSU will check EVERY hooks in kernel compile process"
 comment "If anything mismatch with document, Kernel compile maybe FAILED!"
 comment "See document if you face any compile failed due to hook check"
-comment "Document: https://resukisu.github.io/guide/manual-integrate.html"
+comment "Document: https://github.com/anotheranhiutangerine/KittiSU"
 comment "--------------------------------------------------------------"
 
 config KSU_MANUAL_HOOK_AUTO_SETUID_HOOK
@@ -163,7 +163,7 @@ menu "KernelSU - SUSFS"
     depends on KSU_SUSFS
 
 comment "------------------------WARNING-------------------------------"
-comment "ReSukiSU will check EVERY hooks in kernel compile process"
+comment "KittiSU will check EVERY hooks in kernel compile process"
 comment "If anything mismatch with simonpunk's patch, Kernel compile maybe FAILED!"
 comment "See simonpunk's original patch if you face any compile failed due to hook check"
 comment "Repo: https://gitlab.com/simonpunk/susfs4ksu"

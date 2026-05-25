@@ -160,7 +160,7 @@ fun AboutScreen() {
                             icon = Icons.Rounded.Code,
                             title = stringResource(R.string.get_source_code),
                             description = stringResource(R.string.get_source_code_detail),
-                            onClick = { uriHandler.openUri("https://github.com/ReSukiSU/ReSukiSU") }
+                            onClick = { uriHandler.openUri("https://github.com/anotheranhiutangerine/KittiSU") }
                         )
                     }
                     item {
@@ -168,7 +168,7 @@ fun AboutScreen() {
                             icon = Icons.Rounded.Group,
                             title = stringResource(R.string.join_telegram_group),
                             description = stringResource(R.string.join_telegram_group_detail),
-                            onClick = { uriHandler.openUri("https://t.me/ReSukiSU") }
+                            onClick = { uriHandler.openUri("https://t.me/KittiSU") }
                         )
                     }
                     item {
