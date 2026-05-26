@@ -134,3 +134,6 @@ The APK will be at `manager/app/build/outputs/apk/release/`.
 - [genuine](https://github.com/brevent/genuine/) — APK v2 signature validation.
 - [Diamorphine](https://github.com/m0nad/Diamorphine) — Some rootkit skills.
 </details>
+
+## Contact us
+You can contact us in this Telegram group: [[link]](https://t.me/terebiko_KittiSU)
