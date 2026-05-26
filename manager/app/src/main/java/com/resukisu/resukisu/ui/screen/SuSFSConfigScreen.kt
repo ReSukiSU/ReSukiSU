@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.twotone.Error
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -701,6 +702,24 @@ private fun BasicTab(
             modifier = Modifier.weight(1f),
         ) {
             item { Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding())) }
+
+            if (viewModel.hasEnabledThirdPartySusfsModule) {
+                item {
+                    WarningCard(
+                        message = stringResource(R.string.home_susfs_third_party_conflict_warning),
+                        icon = {
+                            Icon(
+                                imageVector = Icons.TwoTone.Error,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onErrorContainer,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
+
             item {
                 SegmentedColumn(
                     title = stringResource(R.string.susfs_config_description)

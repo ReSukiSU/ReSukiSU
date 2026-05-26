@@ -26,6 +26,7 @@ import com.resukisu.resukisu.ui.util.getSuSFSFeatures
 import com.resukisu.resukisu.ui.util.getSuSFSSlotInfoJson
 import com.resukisu.resukisu.ui.util.getSuSFSStatus
 import com.resukisu.resukisu.ui.util.getSuSFSVersion
+import com.resukisu.resukisu.ui.util.listModules
 import com.resukisu.zako.IKsuInterface
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.io.SuFile
@@ -36,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import java.io.InputStream
 import java.io.OutputStream
 import kotlin.coroutines.resume
@@ -163,6 +165,9 @@ class SuSFSScreenViewModel : ViewModel() {
     var slotInfoLoading by mutableStateOf(true)
         private set
 
+    var hasEnabledThirdPartySusfsModule by mutableStateOf(false)
+        private set
+
     private var serviceConnection: ServiceConnection? = null
 
     init {
@@ -192,6 +197,8 @@ class SuSFSScreenViewModel : ViewModel() {
                         isLoading = false,
                         isRefreshing = false,
                     )
+                    // Detect third-party susfs modules
+                    hasEnabledThirdPartySusfsModule = detectEnabledThirdPartySusfsModule()
                 }
                 .onFailure {
                     uiState = uiState.copy(
@@ -768,4 +775,24 @@ class SuSFSScreenViewModel : ViewModel() {
     }
 
     private fun shellQuote(text: String): String = "'${text.replace("'", "'\"'\"'")}'"
+
+    private suspend fun detectEnabledThirdPartySusfsModule(): Boolean {
+        return withContext(Dispatchers.IO) {
+            runCatching {
+                val modulesJson = listModules()
+                val array = JSONArray(modulesJson)
+                for (i in 0 until array.length()) {
+                    val module = array.optJSONObject(i) ?: continue
+                    val enabled = module.optBoolean("enabled", false)
+                    if (!enabled) continue
+
+                    val id = module.optString("id", "")
+                    if (id.contains("susfs", ignoreCase = true)) {
+                        return@withContext true
+                    }
+                }
+                false
+            }.getOrDefault(false)
+        }
+    }
 }
