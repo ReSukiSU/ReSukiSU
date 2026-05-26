@@ -589,15 +589,15 @@
     <string name="loop_paths_section">循环路径</string>
     <string name="add_loop_path">添加循环路径</string>
     <string name="sus_loop_paths_description_title">循环路径配置</string>
-    <string name="sus_loop_paths_description_text">"循环路径会在每次非 root 用户应用或隔离服务启动时重新标记为 SUS_PATH。
-这有助于解决添加的路径可能因 inode 状态重置或内核中 inode 重新创建而失效的问题。
+    <string name="sus_loop_paths_description_text">"循环路径会在每次非 root 用户应用或隔离服务启动时重新标记为 SUS_PATH。\n
+这有助于解决添加的路径可能因 inode 状态重置或内核中 inode 重新创建而失效的问题。\n
 注意：只有不在 /storage/ 和 /sdcard/ 内的路径才能通过循环路径添加。"</string>
     <string name="avc_log_spoofing">AVC 日志欺骗</string>
     <string name="avc_log_spoofing_enabled">AVC 日志欺骗已启用</string>
     <string name="avc_log_spoofing_disabled">AVC 日志欺骗已禁用</string>
     <string name="avc_log_spoofing_description">"禁用: 禁用在内核 AVC 日志中欺骗su的sus tcontext。
 启用: 启用在内核 AVC 日志中将 su 的 sus tcontext 欺骗为u:r:priv_app:s0:c512,c768"</string>
-    <string name="avc_log_spoofing_warning">重要提示：内核中默认设置为禁用；启用此功能有时会使开发人员在调试权限或 SELinux 问题时难以识别原因，因此建议用户在调试时禁用此功能。</string>
+    <string name="avc_log_spoofing_warning">默认设置为禁用；启用此功能有时会使开发人员在调试权限或 SELinux 问题时难以识别原因，因此建议用户在调试时禁用此功能。</string>
     <string name="home_hook_type">钩子类型</string>
     <string name="kpm_patch_options">KPM 修补</string>
     <string name="kpm_patch_description">用于添加附加的 KPM 功能</string>
@@ -647,7 +647,8 @@
     <string name="susfs_reset_sus_maps_message">这将移除所有已配置的SUS映射。此操作无法撤销。</string>
     <string name="sus_maps_section">内存映射隐藏</string>
     <string name="sus_maps_description_title">隐藏/proc/self/中各种映射中的mmap真实文件</string>
-    <string name="sus_maps_description_text">从 /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap] 中隐藏内存映射的真实文件路径。请注意：此功能不支持隐藏匿名内存映射，也无法隐藏由注入库本身产生的内联钩子或 PLT 钩子。</string>
+    <string name="sus_maps_description_text">从 /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap] 中隐藏内存映射的真实文件路径。\n
+请注意：此功能不支持隐藏匿名内存映射，也无法隐藏由注入库本身产生的内联钩子或 PLT 钩子。</string>
     <string name="sus_maps_warning">重要提示：对于具备完善注入检测机制的应用，此功能可能无法有效绕过检测。</string>
     <string name="sus_maps_debug_info">首先通过 ps -enf 查找目标应用的 PID 和 UID，然后检查 /proc/&lt;pid&gt;/maps 中的相关路径，并与 /proc/1/mountinfo 中的设备号进行比对以确保一致性。只有当设备号一致时，隐藏映射才能正常工作。</string>
     <string name="incompatible_kernel_msg">当前管理器与此内核不兼容！请将内核升级至版本 %2$d 或以上（当前 %1$d）</string>
