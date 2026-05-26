@@ -1,7 +1,7 @@
 use anyhow::Result;
 use clap::{Args, Parser, Subcommand, error::ErrorKind};
 
-use crate::android::susfs::{api, config};
+use crate::android::susfs::{api, config, slot_info};
 
 #[derive(Debug, Args)]
 pub struct SusfsArgs {
@@ -40,6 +40,13 @@ pub enum SuSFSSubCommands {
     DelSusPathLoop {
         #[arg(help = "Path not inside sdcard")]
         path: String,
+    },
+    /// Hide/Unhide all sus mounts for non-su processes
+    #[command(name = "hide_sus_mnts_for_non_su_procs")]
+    HideSusMntsForNonSuProcs {
+        /// 0: do not hide sus mounts for non-su processes
+        /// 1: hide sus mounts for non-su processes
+        enabled: u8,
     },
     /// Add path to store original stat info in kernel memory (before bind mount/overlay)
     #[command(name = "add_sus_kstat")]
@@ -190,13 +197,25 @@ pub enum SuSFSSubCommands {
         #[arg(default_value = "default")]
         blksize: String,
     },
+    /// Read boot slot kernel uname/build-time (auto-decompress kernel payload)
+    #[command(name = "slot_info")]
+    SlotInfo {
+        #[command(subcommand)]
+        info_type: SlotInfoType,
+    },
 }
 
 #[derive(Subcommand, Debug)]
 pub enum ShowType {
     Version,
+    #[command(name = "enabled_features")]
     EnabledFeatures,
     Variant,
+}
+
+#[derive(Subcommand, Debug)]
+pub enum SlotInfoType {
+    Json,
 }
 
 #[derive(Debug, Parser)]
@@ -250,8 +269,13 @@ pub fn run_main(command: SuSFSSubCommands) -> Result<()> {
             config::operation::set_uname(&release, &version);
             api::set_uname(&release, &version)?;
         }
+        SuSFSSubCommands::HideSusMntsForNonSuProcs { enabled } => {
+            api::hide_sus_mnts_for_non_su_procs(enabled)?;
+            config::operation::set_hide_sus_mnts_for_non_su_procs(enabled);
+        }
         SuSFSSubCommands::EnableLog { enabled } => {
             api::enable_log(enabled)?;
+            config::operation::enable_susfs_log(enabled);
         }
         SuSFSSubCommands::SetCmdlineOrBootconfig { path } => {
             api::set_cmdline_or_bootconfig(path)?;
@@ -381,6 +405,9 @@ pub fn run_main(command: SuSFSSubCommands) -> Result<()> {
                 &blksize,
             );
         }
+        SuSFSSubCommands::SlotInfo { info_type } => match info_type {
+            SlotInfoType::Json => slot_info::show_slot_info_json()?,
+        },
     }
 
     Ok(())

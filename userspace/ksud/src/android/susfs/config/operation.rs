@@ -26,6 +26,24 @@ pub fn enable_avc_spoofing(enabled: u8) {
     save_config(&config);
 }
 
+pub fn enable_susfs_log(enabled: u8) {
+    let Some(mut config) = read_config() else {
+        return;
+    };
+    config.common.enable_susfs_log = enabled == 1;
+
+    save_config(&config);
+}
+
+pub fn set_hide_sus_mnts_for_non_su_procs(enabled: u8) {
+    let Some(mut config) = read_config() else {
+        return;
+    };
+    config.common.hide_sus_mnts_for_non_su_procs = enabled == 1;
+
+    save_config(&config);
+}
+
 pub fn set_uname<S>(release: &S, version: &S)
 where
     S: ToString,

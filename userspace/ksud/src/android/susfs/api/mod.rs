@@ -5,6 +5,7 @@ mod show;
 mod spoof_cmdline_or_bootconfig;
 mod spoof_uname;
 mod sus_kstat;
+mod sus_mount;
 mod sus_map;
 mod sus_path;
 
@@ -17,5 +18,6 @@ pub use spoof_uname::set_uname;
 pub use sus_kstat::{
     add_sus_kstat, add_sus_kstat_statically, update_sus_kstat, update_sus_kstat_full_clone,
 };
+pub use sus_mount::hide_sus_mnts_for_non_su_procs;
 pub use sus_map::add_sus_map;
 pub use sus_path::{SusPathType, add_sus_path};

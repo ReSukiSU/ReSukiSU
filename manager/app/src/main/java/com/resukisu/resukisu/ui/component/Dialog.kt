@@ -12,8 +12,10 @@ import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -439,14 +441,22 @@ private fun ConfirmDialog(visuals: ConfirmDialogVisuals, confirm: () -> Unit, di
             Text(text = visuals.title)
         },
         text = {
-            if (visuals.isMarkdown) {
-                MarkdownContent(content = visuals.content)
-            }
-            else if (visuals.isHtml) {
-                GithubMarkdown(content = visuals.content, backgroundColor = MaterialTheme.colorScheme.surfaceContainerHigh)
-            }
-            else {
-                Text(text = visuals.content)
+            LazyColumn(
+                modifier = Modifier
+                    .heightIn(max = 325.dp)
+            ) {
+                item {
+                    if (visuals.isMarkdown) {
+                        MarkdownContent(content = visuals.content)
+                    } else if (visuals.isHtml) {
+                        GithubMarkdown(
+                            content = visuals.content,
+                            backgroundColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                        )
+                    } else {
+                        Text(text = visuals.content)
+                    }
+                }
             }
         },
         confirmButton = {
