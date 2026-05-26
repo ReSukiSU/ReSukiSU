@@ -607,8 +607,7 @@ fun getSuSFSFeatures(): String {
     val shell = getRootShell()
     val daemon = getKsuDaemonPath()
     val candidates = listOf(
-        "$daemon susfs show enabled_features",
-        "$daemon susfs show enabled-features"
+        "$daemon susfs show enabled_features"
     )
 
     for (cmd in candidates) {
