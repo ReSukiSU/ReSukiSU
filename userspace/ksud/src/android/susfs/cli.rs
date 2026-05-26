@@ -208,6 +208,7 @@ pub enum SuSFSSubCommands {
 #[derive(Subcommand, Debug)]
 pub enum ShowType {
     Version,
+    #[command(name = "enabled_features")]
     EnabledFeatures,
     Variant,
 }
