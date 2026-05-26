@@ -594,21 +594,8 @@ fun getSuSFSVersion(): String {
 
 fun getSuSFSFeatures(): String {
     val shell = getRootShell()
-    val daemon = getKsuDaemonPath()
-    val candidates = listOf(
-        "$daemon susfs show enabled_features"
-    )
-
-    for (cmd in candidates) {
-        val result = shell.newJob().add(cmd).to(ArrayList<String>(), null).exec()
-        if (!result.isSuccess) continue
-        val output = result.out.joinToString("\n").trim()
-        if (output.isNotEmpty()) {
-            return output
-        }
-    }
-
-    return ""
+    val cmd = "${getKsuDaemonPath()} susfs show features"
+    return runCmd(shell, cmd)
 }
 
 fun getSuSFSSlotInfoJson(): String {
