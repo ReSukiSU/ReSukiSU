@@ -594,7 +594,7 @@ fun getSuSFSVersion(): String {
 
 fun getSuSFSFeatures(): String {
     val shell = getRootShell()
-    val cmd = "${getKsuDaemonPath()} susfs show features"
+    val cmd = "${getKsuDaemonPath()} susfs show enabled_features"
     return runCmd(shell, cmd)
 }
 
