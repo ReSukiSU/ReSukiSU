@@ -605,13 +605,9 @@ Note: Only paths NOT inside /storage/ and /sdcard/ can be added via loop paths."
     <string name="avc_log_spoofing">AVC Log Spoofing</string>
     <string name="avc_log_spoofing_enabled">AVC log spoofing has been enabled</string>
     <string name="avc_log_spoofing_disabled">AVC log spoofing has been disabled</string>
-    <string name="avc_log_spoofing_description">"Disabled: Disable spoofing the sus tcontext of \'su\' shown in avc log in kernel\n
-Enabled: Enable spoofing the sus tcontext of \'su\' with \'u:r:priv_app:s0:c512,c768\' shown in avc log in kernel"</string>
-    <string name="avc_log_spoofing_warning">
-Important Note:\n
-- It is set to \'disabled\' by default in kernel\n
-- Enabling this will sometimes make developers hard to identify the cause when they are debugging with some permission or SELinux issue, so users are advised to disable this when doing
-</string>
+    <string name="avc_log_spoofing_description">"Disabled: Disable spoofing the sus tcontext of su shown in avc log in kernel\n
+Enabled: Enable spoofing the sus tcontext of su with u:r:priv_app:s0:c512,c768 shown in avc log in kernel"</string>
+    <string name="avc_log_spoofing_warning">It is set to disabled by default in kernel.Enabling this will sometimes make developers hard to identify the cause when they are debugging with some permission or SELinux issue, so users are advised to disable this when doing.</string>
     <string name="home_hook_type">Hook type</string>
     <string name="kpm_patch_options">KPM Patch</string>
     <string name="kpm_patch_description">For adding additional KPM features</string>
