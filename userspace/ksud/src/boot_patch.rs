@@ -449,7 +449,9 @@ pub fn patch(args: BootPatchArgs) -> Result<()> {
             no_install,
             #[cfg(target_os = "android")]
             ota,
+            #[cfg(target_os = "android")]
             flash,
+            #[cfg(target_os = "android")]
             partition,
             ..
         } = args;
@@ -557,21 +559,21 @@ pub fn patch(args: BootPatchArgs) -> Result<()> {
         } else {
             println!("- Adding KernelSU LKM");
 
-            let kernelsu_ko = if let Some(kmod) = kmod {
+            let kernelsu_ko: Box<dyn AsRef<[u8]>> = if let Some(kmod) = kmod {
                 Box::new(map_file(&kmod)?)
             } else if !no_install {
                 // If kmod is not specified, extract from assets
                 println!("- KMI: {kmi}");
                 let name = format!("{kmi}_kernelsu.ko");
-                assets::get_asset(&name)?
+                Box::new(assets::get_asset(&name)?)
             } else {
                 bail!("");
             };
 
-            let ksu_init = if let Some(init) = init {
+            let ksu_init: Box<dyn AsRef<[u8]>> = if let Some(init) = init {
                 Box::new(map_file(&init)?)
             } else if !no_install {
-                assets::get_asset("ksuinit")?
+                Box::new(assets::get_asset("ksuinit")?)
             } else {
                 bail!("");
             };

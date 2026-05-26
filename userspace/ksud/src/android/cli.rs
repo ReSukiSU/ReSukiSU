@@ -782,7 +782,7 @@ pub fn run() -> Result<()> {
             Debug::Test => assets::ensure_binaries(false),
             Debug::ExtractBinary { name, path } => {
                 let data = assets::get_asset(&name)?;
-                utils::ensure_binary(&path, data.as_ref().as_ref(), false)
+                utils::ensure_binary(&path, data.as_ref(), false)
             }
             Debug::Mark { command } => match command {
                 MarkCommand::Get { pid } => debug::mark_get(pid),

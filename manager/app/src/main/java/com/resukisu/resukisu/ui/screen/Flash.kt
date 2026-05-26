@@ -192,7 +192,7 @@ fun FlashScreen(flashIt: FlashIt) {
     val navigator = LocalNavigator.current
     var text by rememberSaveable { mutableStateOf("") }
     var tempText: String
-    val logContent = rememberSaveable { StringBuilder() }
+    val logContent = remember { StringBuilder() }
     var showFloatAction by rememberSaveable { mutableStateOf(false) }
     var shouldWarningUserMetaModule by rememberSaveable { mutableStateOf(false) }
     // 添加状态跟踪是否已经完成刷写

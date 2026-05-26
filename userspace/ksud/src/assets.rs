@@ -45,8 +45,11 @@ pub use android::*;
 #[folder = "bin/x86_64"]
 struct Asset;
 
-// IF NOT x86_64 ANDROID, ie. macos, linux, windows, always use aarch64
-#[cfg(all(target_arch = "aarch64", target_os = "android"))]
+// IF NOT x86_64/aarch64/arm ANDROID, ie. macos, linux, windows, always use aarch64
+#[cfg(not(any(
+    all(target_arch = "x86_64", target_os = "android"),
+    all(target_arch = "arm", target_os = "android")
+)))]
 #[derive(RustEmbed)]
 #[folder = "bin/aarch64"]
 struct Asset;
@@ -67,12 +70,7 @@ pub fn list_supported_kmi() -> std::vec::Vec<std::string::String> {
     list
 }
 
-pub fn get_asset(name: &str) -> Result<Box<dyn AsRef<[u8]>>> {
-    let asset = Asset::get(name).ok_or_else(|| anyhow::anyhow!("asset not found: {name}"))?;
-    Ok(Box::new(asset.data))
-}
-
-pub fn get_asset_data(name: &str) -> Result<std::borrow::Cow<'static, [u8]>> {
+pub fn get_asset(name: &str) -> Result<std::borrow::Cow<'static, [u8]>> {
     let asset = Asset::get(name).ok_or_else(|| anyhow::anyhow!("asset not found: {name}"))?;
     Ok(asset.data)
 }
