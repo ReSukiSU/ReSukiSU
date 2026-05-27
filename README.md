@@ -28,7 +28,7 @@
 5. KPM Support
 6. Custom manager theme with KittiSU branding
 7. Built-in SuSFS management tool
-8. Multi-manager support — works with [Official KernelSU](https://github.com/tiann/KernelSU) / [RKSU](https://github.com/rsuntk/KernelSU) / [MKSU](https://github.com/5ec1cff/KernelSU) / [SukiSU](https://github.com/SukiSU-Ultra/SukiSU-Ultra) backends
+8. Multi-manager support — works with [Official KernelSU](https://github.com/tiann/KernelSU) / [RKSU](https://github.com/rsuntk/KernelSU) / [MKSU](https://github.com/5ec1cff/KernelSU) / [SukiSU](https://github.com/SukiSU-Ultra/SukiSU-Ultra) / [KernelSU Next](https://github.com/KernelSU-Next) and more backends!
 
 
 ## Compatibility Status
