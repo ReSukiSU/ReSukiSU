@@ -130,11 +130,15 @@ fn detect_format(buf: &[u8]) -> CompressionFormat {
     if buf.starts_with(&BZIP_MAGIC) {
         return CompressionFormat::Bzip2;
     }
-    if buf.starts_with(&LZ4_FRAME_MAGIC_1) || buf.starts_with(&LZ4_FRAME_MAGIC_2) {
-        return CompressionFormat::Lz4Frame;
-    }
-    if buf.starts_with(&LZ4_LEGACY_MAGIC) {
-        return detect_lz4_legacy_kind(buf);
+    // Check LZ4 Frame before Legacy to avoid conflicts
+    if buf.len() >= 4 {
+        let first_four = &buf[0..4];
+        if first_four == LZ4_FRAME_MAGIC_1 || first_four == LZ4_FRAME_MAGIC_2 {
+            return CompressionFormat::Lz4Frame;
+        }
+        if first_four == LZ4_LEGACY_MAGIC {
+            return detect_lz4_legacy_kind(buf);
+        }
     }
     CompressionFormat::Unknown
 }
@@ -233,8 +237,22 @@ fn find_embedded_compressed_blob(buf: &[u8]) -> Option<Vec<u8>> {
     if buf.len() <= 0x28 {
         return None;
     }
+    // Search from offset 0x28 onwards with larger step to find compression signatures
+    for i in (0x28..buf.len()).step_by(16) {
+        let rest = &buf[i..];
+        if rest.len() < 4 {
+            continue;
+        }
+        if detect_format(rest) != CompressionFormat::Unknown {
+            return Some(rest.to_vec());
+        }
+    }
+    // Fallback: search with smaller step (every byte) if large step search fails
     for i in 0x28..buf.len() {
         let rest = &buf[i..];
+        if rest.len() < 4 {
+            continue;
+        }
         if detect_format(rest) != CompressionFormat::Unknown {
             return Some(rest.to_vec());
         }
@@ -257,16 +275,26 @@ fn extract_linux_version_line(buf: &[u8]) -> Option<(String, String)> {
         if line.is_empty() {
             continue;
         }
+
+        // Extract release version (e.g., "5.15.0-generic")
         let release = line
             .split_whitespace()
             .nth(2)
             .unwrap_or("")
             .trim()
             .to_string();
+
+        // Extract build time (e.g., "#1 SMP ...")
         let build_time = line
             .split_once('#')
-            .map(|(_, v)| format!("#{}", v.trim()))
+            .map(|(_, v)| {
+                let trimmed = v.trim();
+                // Only take first meaningful part of build time
+                let first_word = trimmed.split_whitespace().next().unwrap_or("");
+                format!("#{}", first_word)
+            })
             .unwrap_or_default();
+
         if release.is_empty() || build_time.is_empty() {
             continue;
         }

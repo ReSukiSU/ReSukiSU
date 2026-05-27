@@ -219,13 +219,16 @@ class SuSFSScreenViewModel : ViewModel() {
 
     fun setAvcLogSpoofing(enabled: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
-            runCommand("enable_avc_log_spoofing ${if (enabled) 1 else 0}")
+            val success = runCommand("enable_avc_log_spoofing ${if (enabled) 1 else 0}", showSuccessSnackbar = false)
+            if (success) {
+                uiState = uiState.copy(avcLogSpoofing = enabled)
+            }
         }
     }
 
     fun setHideSusMountsForNonSUProcs(enabled: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
-            val success = runCommand("hide_sus_mnts_for_non_su_procs ${if (enabled) 1 else 0}")
+            val success = runCommand("hide_sus_mnts_for_non_su_procs ${if (enabled) 1 else 0}", showSuccessSnackbar = false)
 
             if (success) {
                 snackbarText = ksuApp.getString(
@@ -246,7 +249,7 @@ class SuSFSScreenViewModel : ViewModel() {
 
     fun setSusfsLogEnabled(enabled: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
-            val success = runCommand("enable_log ${if (enabled) 1 else 0}")
+            val success = runCommand("enable_log ${if (enabled) 1 else 0}", showSuccessSnackbar = false)
             if (success) {
                 snackbarText = ksuApp.getString(
                     if (enabled) R.string.susfs_log_enabled else R.string.susfs_log_disabled
