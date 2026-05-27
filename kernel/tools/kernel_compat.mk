@@ -273,3 +273,9 @@ ifeq ($(shell grep -F -q "char *lsm_names" $(srctree)/security/security.c; echo 
 $(info -- $(REPO_NAME)/compat: found required provide lsm name)
 ccflags-y += -DKSU_COMPAT_REQUIRE_PROVIDE_LSM_NAME
 endif
+
+# https://github.com/torvalds/linux/commit/4b36cb773a8153417a080f8025d522322f915aea
+ifeq ($(shell grep -q "struct mutex status_lock" $(srctree)/security/selinux/include/security.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: found selinux status variables in selinux_state)
+ccflags-y += -DKSU_COMPAT_SELINUX_STATUS_VAR_IN_SELINUX_STATE
+endif

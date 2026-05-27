@@ -11,6 +11,7 @@
 #include <linux/moduleparam.h>
 #include <linux/mutex.h>
 #include <linux/version.h>
+#include <linux/jump_label.h>
 
 // security/selinux/include/security.h
 #include <security.h>
@@ -43,6 +44,29 @@
 #else
 #define __maybe_static static
 #endif
+
+#ifndef CONFIG_KALLSYMS_ALL
+#warning Due to extern hooks for selinux_hide are not completed
+#warning You maybe face selinux_hide does not working when you disable CONFIG_KALLSYMS_ALL
+#error So, ReSukiSU let your build broken before this completed, you can enable CONFIG_KALLSYMS_ALL to solve that
+#endif
+
+static DEFINE_MUTEX(selinux_hide_mutex);
+__maybe_static bool ksu_selinux_hide_enabled __read_mostly = false;
+// remove static in susfs
+__maybe_static bool ksu_selinux_hide_running __read_mostly = false;
+
+#ifdef KSU_COMPAT_USE_STATIC_KEY
+// We should talk to you, susfs
+// Why use manual hook instead of auto hook
+__maybe_static DEFINE_STATIC_KEY_FALSE(fake_status_initialize_key);
+#else
+static bool fake_status_initialize_key __read_mostly = false;
+#endif
+
+__maybe_static struct page *fake_status = NULL;
+static struct mutex *ksu_selinux_status_lock = NULL;
+__maybe_static void initialize_fake_status();
 
 #ifndef KSU_COMPAT_HAS_SUSFS_FEATURE_SELINUX_HIDE
 enum sel_inos {
@@ -333,6 +357,56 @@ call_orig:
 #endif
 }
 
+typedef int (*sel_open_handle_status_fn)(struct inode *inode, struct file *filp);
+static sel_open_handle_status_fn orig_sel_open_handle_status, *sel_open_handle_status_slot;
+static int my_sel_open_handle_status(struct inode *inode, struct file *filp)
+{
+    if (likely(ksu_get_uid_t(current_uid()) >= 10000 && ksu_selinux_hide_enabled)) {
+        void *data;
+        mutex_lock(ksu_selinux_status_lock);
+        data = fake_status;
+        mutex_unlock(ksu_selinux_status_lock);
+        if (data) {
+            filp->private_data = data;
+            return 0;
+        }
+    }
+
+    int ret = orig_sel_open_handle_status(inode, filp);
+#ifdef KSU_COMPAT_USE_STATIC_KEY
+    if (static_branch_unlikely(&fake_status_initialize_key) && !ret && !fake_status) {
+        initialize_fake_status();
+    }
+#else
+    if (!fake_status_initialize_key && !ret && !fake_status) {
+        initialize_fake_status();
+    }
+#endif
+    return ret;
+}
+
+static void hook_selinux_status_open()
+{
+    if (orig_sel_open_handle_status)
+        return;
+    if (!sel_open_handle_status_slot) {
+        struct file_operations *ops = (struct file_operations *)find_kernel_symbol_exact("sel_handle_status_ops");
+        if (!ops) {
+            pr_err("selinux_hide: sel_handle_status_ops not found, fake status will not work\n");
+            return;
+        }
+        sel_open_handle_status_slot = &ops->open;
+    }
+    sel_open_handle_status_fn new_fn = my_sel_open_handle_status;
+    orig_sel_open_handle_status = *sel_open_handle_status_slot;
+    int ret = ksu_patch_text(sel_open_handle_status_slot, &new_fn, sizeof(new_fn), KSU_PATCH_TEXT_FLUSH_DCACHE);
+    if (ret) {
+        pr_err("selinux_hide: init: patch_text sel_open_handle_status err: %d\n", ret);
+        sel_open_handle_status_slot = NULL;
+        orig_sel_open_handle_status = NULL;
+    }
+}
+
 extern void ksu_unregister_setprocattr_lsm_hook();
 
 static void ksu_selinux_hide_unhook()
@@ -391,6 +465,10 @@ static int ksu_selinux_hide_enable()
         return -EAGAIN;
     }
 
+#ifndef KSU_COMPAT_HAS_SUSFS_FEATURE_SELINUX_HIDE
+    hook_selinux_status_open();
+#endif
+
     if (!backup_sidtab) {
         pr_err("no backup sidtab available, please save feature and reboot to retry!\n");
         return -EAGAIN;
@@ -422,6 +500,8 @@ static int ksu_selinux_hide_enable()
         kfree(fake_state.ss);
         return -ENOMEM;
     }
+
+    fake_state.ss->latest_granting = selinux_state.ss->latest_granting;
 
     rwlock_init(&(fake_state.ss->policy_rwlock));
     memcpy(&fake_state.ss->policydb, backup_policydb, sizeof(struct policydb));
@@ -542,10 +622,6 @@ static void ksu_selinux_hide_disable()
     ksu_selinux_hide_unhook();
 }
 
-static DEFINE_MUTEX(selinux_hide_mutex);
-static bool ksu_selinux_hide_enabled __read_mostly = false;
-bool ksu_selinux_hide_running __read_mostly = false;
-
 static int selinux_hide_feature_get(u64 *value)
 {
     *value = ksu_selinux_hide_enabled ? 1 : 0;
@@ -583,11 +659,50 @@ static const struct ksu_feature_handler selinux_hide_handler = {
     .set_handler = selinux_hide_feature_set,
 };
 
+void ksu_selinux_hide_handle_second_stage()
+{
+    initialize_fake_status();
+    // https://github.com/torvalds/linux/blame/e8c2f9fdadee7cbc75134dc463c1e0d856d6e5c7/security/selinux/selinuxfs.c#L2014
+    if (fake_status) {
+#ifdef KSU_COMPAT_USE_STATIC_KEY
+        static_key_disable(&fake_status_initialize_key.key);
+#else
+        fake_status_initialize_key = true;
+#endif
+    } else {
+        pr_warn("selinux_hide: fake status need late initialization\n");
+    }
+}
+
+void ksu_selinux_hide_handle_post_fs_data()
+{
+#ifdef KSU_COMPAT_USE_STATIC_KEY
+    static_key_disable(&fake_status_initialize_key.key);
+#else
+    fake_status_initialize_key = true;
+#endif
+    if (!fake_status) {
+        pr_err("selinux_hide: fake status is not initialized after post-fs-data!\n");
+    }
+}
+
 void __init ksu_selinux_hide_init()
 {
     if (ksu_register_feature_handler(&selinux_hide_handler)) {
         pr_err("Failed to register selinux_hide feature handler\n");
     }
+    if (ksu_late_loaded) {
+        initialize_fake_status();
+    } else {
+#ifdef KSU_COMPAT_USE_STATIC_KEY
+        static_key_enable(&fake_status_initialize_key.key);
+#else
+        fake_status_initialize_key = false;
+#endif
+    }
+#ifndef KSU_COMPAT_HAS_SUSFS_FEATURE_SELINUX_HIDE
+    hook_selinux_status_open();
+#endif
 }
 
 void __exit ksu_selinux_hide_exit()
@@ -599,6 +714,11 @@ void __exit ksu_selinux_hide_exit()
     }
     mutex_unlock(&selinux_hide_mutex);
     ksu_unregister_feature_handler(KSU_FEATURE_SELINUX_HIDE);
+    mutex_lock(ksu_selinux_status_lock);
+    if (fake_status)
+        __free_page(fake_status);
+    fake_status = NULL;
+    mutex_unlock(ksu_selinux_status_lock);
 }
 
 void ksu_selinux_hide_drop_backup_if_unused()
@@ -633,6 +753,65 @@ void ksu_selinux_hide_drop_backup_if_unused()
     }
 #endif
     mutex_unlock(&selinux_hide_mutex);
+}
+
+// for susfs xN
+__maybe_static void initialize_fake_status()
+{
+    // https://github.com/torvalds/linux/commit/4b36cb773a8153417a080f8025d522322f915aea
+#if LINUX_VERSION_CODE > KERNEL_VERSION(5, 7, 0) || defined(KSU_COMPAT_SELINUX_STATUS_VAR_IN_SELINUX_STATE)
+    ksu_selinux_status_lock = &selinux_state.status_lock;
+#elif defined(KSU_COMPAT_USE_SELINUX_STATE)
+    ksu_selinux_status_lock = &selinux_state.ss->status_lock;
+#else
+    ksu_selinux_status_lock = (struct mutex *)find_kernel_symbol_exact("selinux_status_lock");
+#endif
+
+    mutex_lock(ksu_selinux_status_lock);
+    if (fake_status)
+        goto out;
+
+#if LINUX_VERSION_CODE > KERNEL_VERSION(5, 7, 0) || defined(KSU_COMPAT_SELINUX_STATUS_VAR_IN_SELINUX_STATE)
+    struct page *selinux_status_page = selinux_state.status_page;
+#elif defined(KSU_COMPAT_USE_SELINUX_STATE)
+    struct page *selinux_status_page = selinux_state.ss->status_page;
+#else
+    struct page *selinux_status_page = *((struct page **)find_kernel_symbol_exact("selinux_status_page"));
+#endif
+
+    if (!selinux_status_page) {
+        pr_warn("initialize_fake_status: status_page not exist\n");
+        goto out;
+    }
+
+    struct selinux_kernel_status *status = page_address(selinux_status_page);
+    if (!status->enforcing && !ksu_late_loaded) {
+        pr_warn("initialize_fake_status: skip not enforcing\n");
+        goto out;
+    }
+
+    struct page *new_page = alloc_page(GFP_KERNEL | __GFP_ZERO);
+    if (!new_page) {
+        pr_err("initialize_fake_status: failed to allocate page\n");
+        goto out;
+    }
+
+    struct selinux_kernel_status *new_status = page_address(new_page);
+    memcpy(new_status, status, sizeof(*status));
+    if (ksu_late_loaded && !new_status->enforcing) {
+        // In late_load mode, we may be loaded when selinux was set to permissive
+        // So we need to adjust the sequence value
+        // We assume that setenforce 0 is just called once
+        new_status->enforcing = 1;
+        new_status->sequence = 4;
+    }
+
+    fake_status = new_page;
+    pr_info("initialize_fake_status initialized: sequence=%d, policyload=%d, enforcing=%d\n", new_status->sequence,
+            new_status->policyload, new_status->enforcing);
+
+out:
+    mutex_unlock(ksu_selinux_status_lock);
 }
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 6, 0)
@@ -1539,7 +1718,7 @@ static void avd_init(struct av_decision *avd)
     avd->allowed = 0;
     avd->auditallow = 0;
     avd->auditdeny = 0xffffffff;
-    avd->seqno = 0;
+    avd->seqno = 1;
     avd->flags = 0;
 }
 
