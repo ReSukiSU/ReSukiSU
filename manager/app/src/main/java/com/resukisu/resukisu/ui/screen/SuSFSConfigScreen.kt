@@ -592,7 +592,7 @@ private fun SuSPathTab(
                                     title = label,
                                     description = paths.joinToString("\n"),
                                 ) {
-                                    IconButton(onClick = { paths.forEach(viewModel::removeSusPath) }) {
+                                    IconButton(onClick = { paths.forEach { path -> runCatching { viewModel.removeSusPath(path) }.onFailure { viewModel.postToast("Failed to remove: $path") } } }) {
                                         Icon(
                                             imageVector = Icons.Filled.Delete,
                                             contentDescription = stringResource(R.string.delete),
@@ -613,7 +613,7 @@ private fun SuSPathTab(
                     paths = otherPaths,
                     onAddClick = pathEditDialog::show,
                     showAddEntry = false,
-                    onDelete = viewModel::removeSusPath,
+                    onDelete = { path -> runCatching { viewModel.removeSusPath(path) }.onFailure { viewModel.postToast("Failed to remove: $path") } },
                 )
             }
 
@@ -748,8 +748,9 @@ private fun BasicTab(
                     title = stringResource(R.string.susfs_tab_basic_settings)
                 ) {
                     item {
-                        key(uiState.unameValue, uiState.buildTimeValue) {
-                            val state = rememberTextFieldState(initialText = uiState.unameValue)
+                        key(uiState.unameValue) {
+                            var unameEditValue by remember { mutableStateOf(uiState.unameValue) }
+                            val state = rememberTextFieldState(initialText = unameEditValue)
 
                             SettingsTextFieldWidget(
                                 icon = Icons.Filled.Edit,
@@ -761,21 +762,29 @@ private fun BasicTab(
                                 }
                             )
 
-                            LaunchedEffect(state) {
-                                snapshotFlow { state.text }
-                                    .drop(1)
-                                    .collect { newText ->
-                                        viewModel.setUnameAndBuildTime(
-                                            newText.toString(),
-                                            uiState.buildTimeValue
-                                        )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                TextButton(
+                                    modifier = Modifier.weight(1f),
+                                    onClick = {
+                                        unameEditValue = state.text.toString()
+                                        viewModel.setUnameAndBuildTime(unameEditValue, uiState.buildTimeValue)
+                                        keyboardController?.hide()
                                     }
+                                ) {
+                                    Text(stringResource(R.string.susfs_apply))
+                                }
                             }
                         }
                     }
                     item {
-                        key(uiState.buildTimeValue, uiState.unameValue) {
-                            val state = rememberTextFieldState(initialText = uiState.buildTimeValue)
+                        key(uiState.buildTimeValue) {
+                            var buildTimeEditValue by remember { mutableStateOf(uiState.buildTimeValue) }
+                            val state = rememberTextFieldState(initialText = buildTimeEditValue)
 
                             SettingsTextFieldWidget(
                                 icon = Icons.Filled.Edit,
@@ -787,15 +796,22 @@ private fun BasicTab(
                                 }
                             )
 
-                            LaunchedEffect(state) {
-                                snapshotFlow { state.text }
-                                    .drop(1)
-                                    .collect { newText ->
-                                        viewModel.setUnameAndBuildTime(
-                                            uiState.unameValue,
-                                            newText.toString()
-                                        )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                TextButton(
+                                    modifier = Modifier.weight(1f),
+                                    onClick = {
+                                        buildTimeEditValue = state.text.toString()
+                                        viewModel.setUnameAndBuildTime(uiState.unameValue, buildTimeEditValue)
+                                        keyboardController?.hide()
                                     }
+                                ) {
+                                    Text(stringResource(R.string.susfs_apply))
+                                }
                             }
                         }
                     }
@@ -804,7 +820,7 @@ private fun BasicTab(
                             icon = Icons.Filled.Delete,
                             title = stringResource(R.string.susfs_reset_to_default),
                             description = null,
-                            onClick = { viewModel.setUnameAndBuildTime("", "") }
+                            onClick = { viewModel.resetUnameAndBuildTime() }
                         ) {}
                     }
                 }
@@ -1204,7 +1220,7 @@ private fun PathGroup(
                     description = null,
                 ) {
                     IconButton(
-                        onClick = { onDelete(path) }
+                        onClick = { runCatching { onDelete(path) }.onFailure { } }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
@@ -1257,7 +1273,7 @@ private fun StaticKstatGroup(
                     onClick = { onEdit(entry) }
                 ) {
                     IconButton(
-                        onClick = { onDelete(entry) }
+                        onClick = { runCatching { onDelete(entry) }.onFailure { } }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Delete,

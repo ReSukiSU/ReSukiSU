@@ -209,6 +209,17 @@ class SuSFSScreenViewModel : ViewModel() {
         }
     }
 
+    fun resetUnameAndBuildTime() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val success = runCommand("del_uname", showSuccessSnackbar = false)
+            if (success) {
+                postToast(ksuApp.getString(R.string.susfs_uname_build_time_reset))
+            } else {
+                postToast(ksuApp.getString(R.string.operation_failed))
+            }
+        }
+    }
+
     fun useSlotUname(uname: String) {
         setUnameAndBuildTime(uname, uiState.buildTimeValue)
     }
@@ -248,11 +259,15 @@ class SuSFSScreenViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             val success = runCommand("enable_log ${if (enabled) 1 else 0}")
             if (success) {
+                // Update UI state immediately
+                uiState = uiState.copy(susfsLogEnabled = enabled)
                 snackbarText = ksuApp.getString(
                     if (enabled) R.string.susfs_log_enabled else R.string.susfs_log_disabled
                 )
-                uiState = uiState.copy(susfsLogEnabled = enabled)
                 postToast(ksuApp.getString(R.string.reboot_to_apply))
+            } else {
+                // Revert UI state on failure
+                uiState = uiState.copy(susfsLogEnabled = !enabled)
             }
         }
     }
@@ -261,6 +276,7 @@ class SuSFSScreenViewModel : ViewModel() {
         if (packageNames.isEmpty()) return
         viewModelScope.launch(Dispatchers.IO) {
             var anySuccess = false
+            var failedCount = 0
             packageNames.forEach { packageName ->
                 val candidates = setOf(
                     // FIXME Use Environment.getExternalStorageDirectory() and use reflection get current userId to replace hardcode user 0
@@ -270,26 +286,38 @@ class SuSFSScreenViewModel : ViewModel() {
                 )
 
                 candidates.forEach { path ->
-                    if (runCommand(
+                    val success = runCatching {
+                        runCommand(
                             "add_sus_path ${shellQuote(path)}",
                             showSuccessSnackbar = false
                         )
-                    ) {
+                    }.getOrDefault(false)
+
+                    if (success) {
                         anySuccess = true
+                    } else {
+                        failedCount++
                     }
                 }
             }
+
             if (anySuccess) {
                 snackbarText = ksuApp.getString(R.string.kpm_control_success)
                 refresh()
+            } else if (failedCount > 0) {
+                snackbarText = ksuApp.getString(R.string.operation_failed)
             }
         }
     }
 
     fun backupConfig(outputStream: OutputStream) =
         viewModelScope.launch(Dispatchers.IO) {
-            outputStream.use { os ->
-                SuFileInputStream.open(SuFile(CONFIG_PATH)).use { it.copyTo(os) }
+            runCatching {
+                outputStream.use { os ->
+                    SuFileInputStream.open(SuFile(CONFIG_PATH)).use { it.copyTo(os) }
+                }
+            }.onFailure {
+                postToast(ksuApp.getString(R.string.operation_failed))
             }
         }
 
@@ -440,7 +468,11 @@ class SuSFSScreenViewModel : ViewModel() {
     private fun addPath(rawPath: String, commandBuilder: (String) -> String) {
         viewModelScope.launch(Dispatchers.IO) {
             val value = normalizePathEntry(rawPath) ?: return@launch
-            runCommand(commandBuilder(shellQuote(value)), true)
+            runCatching {
+                runCommand(commandBuilder(shellQuote(value)), true)
+            }.onFailure {
+                snackbarText = ksuApp.getString(R.string.operation_failed)
+            }
         }
     }
 
@@ -460,7 +492,11 @@ class SuSFSScreenViewModel : ViewModel() {
     private fun removePath(rawPath: String, commandBuilder: (String) -> String) {
         viewModelScope.launch(Dispatchers.IO) {
             val value = normalizePathEntry(rawPath) ?: return@launch
-            if (runCommand(commandBuilder(shellQuote(value)), true)) postRebootToast()
+            runCatching {
+                if (runCommand(commandBuilder(shellQuote(value)), true)) postRebootToast()
+            }.onFailure {
+                snackbarText = ksuApp.getString(R.string.operation_failed)
+            }
         }
     }
 
@@ -470,7 +506,7 @@ class SuSFSScreenViewModel : ViewModel() {
 
     private suspend fun runCommand(command: String, showSuccessSnackbar: Boolean = false): Boolean =
         withContext(Dispatchers.IO) {
-            val success = execKsud("susfs $command")
+            val success = runCatching { execKsud("susfs $command") }.getOrDefault(false)
             if (!success) {
                 snackbarText = ksuApp.getString(R.string.operation_failed)
             } else {
