@@ -18,6 +18,7 @@ import com.resukisu.resukisu.ui.util.getSuSFSFeatures
 import com.resukisu.resukisu.ui.util.getSuSFSSlotInfoJson
 import com.resukisu.resukisu.ui.util.getSuSFSVersion
 import com.resukisu.resukisu.ui.util.listModules
+import com.topjohnwu.superuser.ShellUtils
 import com.topjohnwu.superuser.io.SuFile
 import com.topjohnwu.superuser.io.SuFileInputStream
 import com.topjohnwu.superuser.io.SuFileOutputStream
@@ -147,10 +148,50 @@ class SuSFSScreenViewModel : ViewModel() {
     var hasEnabledThirdPartySusfsModule by mutableStateOf(false)
         private set
 
+    /**
+     * Resolved kernel-default uname from the currently active boot slot.
+     * Empty when slot information is not yet available.
+     */
+    val kernelDefaultUname: String
+        get() = slotInfoList.firstOrNull { it.slotName == currentActiveSlot }
+            ?.uname.orEmpty().takeIf { it.isNotBlank() }.orEmpty()
+
+    /**
+     * Resolved kernel-default build time from the currently active boot slot.
+     * Empty when slot information is not yet available.
+     */
+    val kernelDefaultBuildTime: String
+        get() = slotInfoList.firstOrNull { it.slotName == currentActiveSlot }
+            ?.buildTime.orEmpty().takeIf { it.isNotBlank() }.orEmpty()
+
+    /**
+     * Value that should be shown in the uname text field. Falls back to the
+     * active slot's actual kernel uname so the field never displays the literal
+     * "default" placeholder. May be empty if slot info has not been read yet.
+     */
+    val displayUnameValue: String
+        get() {
+            val raw = uiState.unameValue
+            return if (raw.isBlank() || raw == "default") kernelDefaultUname else raw
+        }
+
+    /**
+     * Value that should be shown in the build-time text field. Falls back to
+     * the active slot's actual kernel build time so the field never displays
+     * the literal "default" placeholder. May be empty if slot info has not
+     * been read yet.
+     */
+    val displayBuildTimeValue: String
+        get() {
+            val raw = uiState.buildTimeValue
+            return if (raw.isBlank() || raw == "default") kernelDefaultBuildTime else raw
+        }
+
     private var serviceConnection: ServiceConnection? = null
 
     init {
         refresh()
+        refreshSlotInfo()
     }
 
     fun consumeToastMessage() {
@@ -191,18 +232,41 @@ class SuSFSScreenViewModel : ViewModel() {
 
     fun setUnameAndBuildTime(unameValue: String, buildTimeValue: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val uname = unameValue.trim().ifEmpty { "default" }
-            val buildTime = buildTimeValue.trim().ifEmpty { "default" }
+            val trimmedUname = unameValue.trim()
+            val trimmedBuildTime = buildTimeValue.trim()
 
-            if (uname == uiState.unameValue && buildTime == uiState.buildTimeValue) {
+            // If either field is empty, the user wants that single field reset to
+            // the kernel default. Resolve those defaults from the active boot
+            // slot via ksud so we apply the actual kernel value (not the literal
+            // "default" placeholder).
+            val needsActiveSlot = trimmedUname.isEmpty() || trimmedBuildTime.isEmpty()
+            if (needsActiveSlot && !hasActiveSlotInfo()) {
+                ensureSlotInfoLoaded()
+            }
+
+            val resolvedUname = when {
+                trimmedUname.isNotEmpty() -> trimmedUname
+                kernelDefaultUname.isNotBlank() -> kernelDefaultUname
+                else -> "default"
+            }
+            val resolvedBuildTime = when {
+                trimmedBuildTime.isNotEmpty() -> trimmedBuildTime
+                kernelDefaultBuildTime.isNotBlank() -> kernelDefaultBuildTime
+                else -> "default"
+            }
+
+            if (resolvedUname == uiState.unameValue && resolvedBuildTime == uiState.buildTimeValue) {
                 return@launch
             }
-            if (uname == "default" && buildTime == "default") {
-                val success = runCommand("del_uname", showSuccessSnackbar = false)
-                if (success) postToast(ksuApp.getString(R.string.susfs_uname_build_time_reset))
-                return@launch
+
+            val success = if (resolvedUname == "default" && resolvedBuildTime == "default") {
+                runCommand("del_uname", showSuccessSnackbar = false)
+            } else {
+                runCommand(
+                    "set_uname ${shellQuote(resolvedUname)} ${shellQuote(resolvedBuildTime)}",
+                    showSuccessSnackbar = false,
+                )
             }
-            val success = runCommand("set_uname ${shellQuote(uname)} ${shellQuote(buildTime)}")
             if (success) {
                 postToast(ksuApp.getString(R.string.susfs_uname_build_time_updated))
             }
@@ -211,12 +275,50 @@ class SuSFSScreenViewModel : ViewModel() {
 
     fun resetUnameAndBuildTime() {
         viewModelScope.launch(Dispatchers.IO) {
-            val success = runCommand("del_uname", showSuccessSnackbar = false)
+            // Read the active boot slot's actual kernel uname / build time so
+            // that we can apply (not erase) those values. This guarantees the
+            // text fields can later display the real kernel value instead of
+            // the literal "default" placeholder.
+            if (!hasActiveSlotInfo()) {
+                ensureSlotInfoLoaded()
+            }
+
+            val uname = kernelDefaultUname
+            val buildTime = kernelDefaultBuildTime
+
+            val success = if (uname.isNotBlank() && buildTime.isNotBlank()) {
+                runCommand(
+                    "set_uname ${shellQuote(uname)} ${shellQuote(buildTime)}",
+                    showSuccessSnackbar = false,
+                )
+            } else {
+                // Fall back to erasing the override when slot info is
+                // unavailable (e.g. encrypted boot image, unsupported device).
+                runCommand("del_uname", showSuccessSnackbar = false)
+            }
+
             if (success) {
                 postToast(ksuApp.getString(R.string.susfs_uname_build_time_reset))
             } else {
                 postToast(ksuApp.getString(R.string.operation_failed))
             }
+        }
+    }
+
+    private fun hasActiveSlotInfo(): Boolean {
+        if (currentActiveSlot.isBlank()) return false
+        val slot = slotInfoList.firstOrNull { it.slotName == currentActiveSlot } ?: return false
+        return slot.uname.isNotBlank() && slot.buildTime.isNotBlank()
+    }
+
+    private suspend fun ensureSlotInfoLoaded() {
+        if (hasActiveSlotInfo()) return
+        slotInfoLoading = true
+        try {
+            slotInfoList = runCatching { loadSlotInfo() }.getOrDefault(emptyList())
+            currentActiveSlot = getActiveBootSlot()
+        } finally {
+            slotInfoLoading = false
         }
     }
 
@@ -275,36 +377,86 @@ class SuSFSScreenViewModel : ViewModel() {
     fun addAppPaths(packageNames: Collection<String>) {
         if (packageNames.isEmpty()) return
         viewModelScope.launch(Dispatchers.IO) {
-            var anySuccess = false
-            var failedCount = 0
+            val shell = runCatching { getRootShell() }.getOrNull()
+            var successCount = 0
+            var failureCount = 0
             packageNames.forEach { packageName ->
-                val candidates = setOf(
-                    // FIXME Use Environment.getExternalStorageDirectory() and use reflection get current userId to replace hardcode user 0
-                    // And, I don't know there really need or not, users can just enable `persist.sys.vold_app_data_isolation_enabled` property,right?
+                // Susfs add_sus_path performs a kern_path() resolution against
+                // the supplied path and rejects the request if the path does
+                // not currently exist. For app data directories this often
+                // happens before the user has launched the app, so create the
+                // directory tree as root first.
+                val candidates = listOf(
+                    "/storage/emulated/0/Android/data/$packageName",
+                    "/data/media/0/Android/data/$packageName",
                     "/sdcard/Android/data/$packageName",
-                    "/data/media/0/Android/data/$packageName"
                 )
 
-                candidates.forEach { path ->
-                    val success = runCatching {
-                        runCommand(
-                            "add_sus_path ${shellQuote(path)}",
-                            showSuccessSnackbar = false
-                        )
-                    }.getOrDefault(false)
-
-                    if (success) {
-                        anySuccess = true
-                    } else {
-                        failedCount++
+                if (shell != null) {
+                    candidates.forEach { candidate ->
+                        runCatching {
+                            ShellUtils.fastCmdResult(
+                                shell,
+                                "mkdir -p ${shellQuote(candidate)} 2>/dev/null"
+                            )
+                        }
                     }
                 }
+
+                var packageSucceeded = false
+                for (path in candidates) {
+                    val ok = runCatching {
+                        runCommand(
+                            "add_sus_path ${shellQuote(path)}",
+                            showSuccessSnackbar = false,
+                            showFailureSnackbar = false,
+                        )
+                    }.getOrDefault(false)
+                    if (ok) {
+                        packageSucceeded = true
+                        break
+                    }
+                }
+
+                if (packageSucceeded) successCount++ else failureCount++
             }
 
+            when {
+                successCount > 0 -> {
+                    snackbarText = ksuApp.getString(R.string.kpm_control_success)
+                }
+                failureCount > 0 -> {
+                    snackbarText = ksuApp.getString(R.string.operation_failed)
+                }
+            }
+        }
+    }
+
+    /**
+     * Remove every sus path under an app group as a single sequential batch so
+     * that concurrent updates of the underlying config cannot race each other
+     * (which previously caused the manager to crash when deleting multi-path
+     * groups quickly).
+     */
+    fun removeSusPaths(paths: Collection<String>) {
+        if (paths.isEmpty()) return
+        viewModelScope.launch(Dispatchers.IO) {
+            var anySuccess = false
+            for (raw in paths) {
+                val value = normalizePathEntry(raw) ?: continue
+                val ok = runCatching {
+                    runCommand(
+                        "del_sus_path ${shellQuote(value)}",
+                        showSuccessSnackbar = false,
+                        showFailureSnackbar = false,
+                    )
+                }.getOrDefault(false)
+                if (ok) anySuccess = true
+            }
             if (anySuccess) {
                 snackbarText = ksuApp.getString(R.string.kpm_control_success)
-                refresh()
-            } else if (failedCount > 0) {
+                postRebootToast()
+            } else {
                 snackbarText = ksuApp.getString(R.string.operation_failed)
             }
         }
@@ -504,11 +656,15 @@ class SuSFSScreenViewModel : ViewModel() {
         postToast(ksuApp.getString(R.string.reboot_to_apply))
     }
 
-    private suspend fun runCommand(command: String, showSuccessSnackbar: Boolean = false): Boolean =
+    private suspend fun runCommand(
+        command: String,
+        showSuccessSnackbar: Boolean = false,
+        showFailureSnackbar: Boolean = true,
+    ): Boolean =
         withContext(Dispatchers.IO) {
             val success = runCatching { execKsud("susfs $command") }.getOrDefault(false)
             if (!success) {
-                snackbarText = ksuApp.getString(R.string.operation_failed)
+                if (showFailureSnackbar) snackbarText = ksuApp.getString(R.string.operation_failed)
             } else {
                 if (showSuccessSnackbar) snackbarText =
                     ksuApp.getString(R.string.kpm_control_success)
@@ -523,9 +679,12 @@ class SuSFSScreenViewModel : ViewModel() {
         }
 
     private suspend fun loadState(): SuSFSUiState {
-        val featureStatus = parseFeatureStatus(runCatching { getSuSFSFeatures() }.getOrDefault(""))
-        val version = runCatching { getSuSFSVersion().trim() }.getOrDefault("")
         val config = readSusfsConfig() ?: SusfsConfig()
+        val featureStatus = parseFeatureStatus(
+            runCatching { getSuSFSFeatures() }.getOrDefault(""),
+            config,
+        )
+        val version = runCatching { getSuSFSVersion().trim() }.getOrDefault("")
 
         // Determine if susfs is enabled based on whether any feature is enabled
         // This fixes the issue where missing a single CONFIG option would disable all susfs functionality
@@ -587,7 +746,10 @@ class SuSFSScreenViewModel : ViewModel() {
         }.getOrDefault(emptyList())
     }
 
-    private fun parseFeatureStatus(rawOutput: String): List<SuSFSFeatureStatus> {
+    private fun parseFeatureStatus(
+        rawOutput: String,
+        config: SusfsConfig,
+    ): List<SuSFSFeatureStatus> {
         val enabledConfig = rawOutput.lines()
             .map { it.trim().substringBefore("=").substringBefore(":").trim() }
             .filter { it.startsWith("CONFIG_KSU_SUSFS_") }
@@ -606,11 +768,16 @@ class SuSFSScreenViewModel : ViewModel() {
         )
 
         return mappings.map { (key, titleRes) ->
-            if (key == "CONFIG_KSU_SUSFS_ENABLE_LOG") {
+            val kernelHasFeature = enabledConfig.contains(key)
+            if (key == "CONFIG_KSU_SUSFS_ENABLE_LOG" && kernelHasFeature) {
+                // The switch in the "Enabled feature status" tab represents
+                // the runtime configuration, not just the kernel build flag.
+                // Reading config.common.enableSusfsLog here lets the switch
+                // visually flip every time the user toggles it.
                 object : ConfigurableSuSFSFeature(
                     key,
                     ksuApp.getString(titleRes),
-                    enabledConfig.contains(key)
+                    config.common.enableSusfsLog,
                 ) {
                     override fun onCheckedChange(checked: Boolean) = setSusfsLogEnabled(checked)
                 }
@@ -618,7 +785,7 @@ class SuSFSScreenViewModel : ViewModel() {
                 NoNConfigurableSuSFSFeature(
                     key,
                     ksuApp.getString(titleRes),
-                    enabledConfig.contains(key)
+                    kernelHasFeature,
                 )
             }
         }.sortedBy { it.title }

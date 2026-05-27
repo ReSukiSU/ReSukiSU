@@ -29,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Backup
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
@@ -537,12 +538,16 @@ private fun SuSPathTab(
             }
         }
 
+        // Preserve the package name alongside the label/paths so the lazy
+        // list can build a stable, unique key per entry. Different installed
+        // apps occasionally resolve to the same display label, which would
+        // otherwise produce duplicate Compose keys and crash the manager
+        // when the user removed a path from one of them.
         val appSection = appGroupsMap.entries
             .map { entry ->
-                val label = packageToLabel[entry.key] ?: entry.key
-                label to entry.value.sorted()
+                Triple(entry.key, packageToLabel[entry.key] ?: entry.key, entry.value.sorted())
             }
-            .sortedBy { it.first.lowercase() }
+            .sortedBy { it.second.lowercase() }
 
         appSection to others.sorted()
     }
@@ -585,14 +590,25 @@ private fun SuSPathTab(
                     SegmentedColumn(
                         title = stringResource(R.string.app_paths_section)
                     ) {
-                        appGroups.forEach { (label, paths) ->
-                            item(key = label) {
+                        appGroups.forEach { (pkg, label, paths) ->
+                            item(key = "app:$pkg") {
                                 SettingsBaseWidget(
                                     icon = Icons.Filled.Apps,
                                     title = label,
                                     description = paths.joinToString("\n"),
                                 ) {
-                                    IconButton(onClick = { paths.forEach { path -> runCatching { viewModel.removeSusPath(path) }.onFailure { viewModel.postToast("Failed to remove: $path") } } }) {
+                                    IconButton(
+                                        onClick = {
+                                            // Hand the whole group off to the
+                                            // viewmodel so the deletes are
+                                            // serialised in a single coroutine
+                                            // — issuing them as concurrent
+                                            // launches from this click handler
+                                            // was racing the JSON config writer
+                                            // and crashing the manager.
+                                            viewModel.removeSusPaths(paths)
+                                        }
+                                    ) {
                                         Icon(
                                             imageVector = Icons.Filled.Delete,
                                             contentDescription = stringResource(R.string.delete),
@@ -613,7 +629,7 @@ private fun SuSPathTab(
                     paths = otherPaths,
                     onAddClick = pathEditDialog::show,
                     showAddEntry = false,
-                    onDelete = { path -> runCatching { viewModel.removeSusPath(path) }.onFailure { viewModel.postToast("Failed to remove: $path") } },
+                    onDelete = { path -> viewModel.removeSusPaths(listOf(path)) },
                 )
             }
 
@@ -744,84 +760,71 @@ private fun BasicTab(
             }
 
             item {
-                SegmentedColumn(
-                    title = stringResource(R.string.susfs_tab_basic_settings)
-                ) {
-                    item {
-                        key(uiState.unameValue) {
-                            var unameEditValue by remember { mutableStateOf(uiState.unameValue) }
-                            val state = rememberTextFieldState(initialText = unameEditValue)
+                val displayUname = viewModel.displayUnameValue
+                val displayBuildTime = viewModel.displayBuildTimeValue
 
+                // Re-create the text field state whenever the externally
+                // observed display value (which always falls back to the live
+                // kernel uname / build time so the field never shows the
+                // literal "default" placeholder) changes — that is, after a
+                // committed apply or reset.
+                key(displayUname, displayBuildTime) {
+                    val unameState = rememberTextFieldState(initialText = displayUname)
+                    val buildTimeState = rememberTextFieldState(initialText = displayBuildTime)
+
+                    SegmentedColumn(
+                        title = stringResource(R.string.susfs_tab_basic_settings)
+                    ) {
+                        item {
                             SettingsTextFieldWidget(
                                 icon = Icons.Filled.Edit,
                                 lineLimits = TextFieldLineLimits.SingleLine,
                                 title = stringResource(R.string.susfs_uname_label),
-                                state = state,
+                                state = unameState,
                                 onKeyboardAction = {
                                     keyboardController?.hide()
                                 }
                             )
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                TextButton(
-                                    modifier = Modifier.weight(1f),
-                                    onClick = {
-                                        unameEditValue = state.text.toString()
-                                        viewModel.setUnameAndBuildTime(unameEditValue, uiState.buildTimeValue)
-                                        keyboardController?.hide()
-                                    }
-                                ) {
-                                    Text(stringResource(R.string.susfs_apply))
-                                }
-                            }
                         }
-                    }
-                    item {
-                        key(uiState.buildTimeValue) {
-                            var buildTimeEditValue by remember { mutableStateOf(uiState.buildTimeValue) }
-                            val state = rememberTextFieldState(initialText = buildTimeEditValue)
-
+                        item {
                             SettingsTextFieldWidget(
                                 icon = Icons.Filled.Edit,
                                 lineLimits = TextFieldLineLimits.SingleLine,
                                 title = stringResource(R.string.susfs_build_time_label),
-                                state = state,
+                                state = buildTimeState,
                                 onKeyboardAction = {
                                     keyboardController?.hide()
                                 }
                             )
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                TextButton(
-                                    modifier = Modifier.weight(1f),
-                                    onClick = {
-                                        buildTimeEditValue = state.text.toString()
-                                        viewModel.setUnameAndBuildTime(uiState.unameValue, buildTimeEditValue)
-                                        keyboardController?.hide()
-                                    }
-                                ) {
-                                    Text(stringResource(R.string.susfs_apply))
-                                }
-                            }
                         }
-                    }
-                    item {
-                        SettingsBaseWidget(
-                            icon = Icons.Filled.Delete,
-                            title = stringResource(R.string.susfs_reset_to_default),
-                            description = null,
-                            onClick = { viewModel.resetUnameAndBuildTime() }
-                        ) {}
+                        item {
+                            // Single apply menu sitting beneath the build-time
+                            // field — values are committed only when the user
+                            // taps here. An empty field is treated as "restore
+                            // this single field to the kernel default" without
+                            // affecting the other field (handled in the
+                            // viewmodel).
+                            SettingsBaseWidget(
+                                icon = Icons.Filled.Check,
+                                title = stringResource(R.string.susfs_apply),
+                                description = null,
+                                onClick = {
+                                    viewModel.setUnameAndBuildTime(
+                                        unameState.text.toString(),
+                                        buildTimeState.text.toString(),
+                                    )
+                                    keyboardController?.hide()
+                                }
+                            ) {}
+                        }
+                        item {
+                            SettingsBaseWidget(
+                                icon = Icons.Filled.Delete,
+                                title = stringResource(R.string.susfs_reset_to_default),
+                                description = null,
+                                onClick = { viewModel.resetUnameAndBuildTime() }
+                            ) {}
+                        }
                     }
                 }
             }
@@ -1142,12 +1145,30 @@ fun SuSFSConfigScreen() {
                     .fillMaxSize()
                     .blurSource(),
             ) {
+                if (viewModel.slotInfoLoading) {
+                    // Indicate that ksud is still reading the active boot
+                    // slot's kernel uname / build time. Reset cannot finish
+                    // until this loading completes, so surface the same kind
+                    // of progress indicator that the "Slot Info" sub-menu uses.
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                top = innerPadding.calculateTopPadding() + 8.dp,
+                                bottom = 8.dp,
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        LoadingIndicator()
+                    }
+                }
+
                 if (uiState.loadError != null) {
                     WarningCard(
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                             .padding(
-                                top = innerPadding.calculateTopPadding() + 8.dp,
+                                top = if (viewModel.slotInfoLoading) 0.dp else innerPadding.calculateTopPadding() + 8.dp,
                                 bottom = 12.dp
                             ),
                         message = uiState.loadError,
@@ -1161,7 +1182,11 @@ fun SuSFSConfigScreen() {
                     verticalAlignment = Alignment.Top
                 ) { page ->
                     val tabPadding = PaddingValues(
-                        top = if (uiState.loadError != null) 0.dp else innerPadding.calculateTopPadding() + 5.dp,
+                        top = when {
+                            viewModel.slotInfoLoading -> 0.dp
+                            uiState.loadError != null -> 0.dp
+                            else -> innerPadding.calculateTopPadding() + 5.dp
+                        },
                         start = 0.dp,
                         end = 0.dp,
                         bottom = innerPadding.calculateBottomPadding() + 15.dp
