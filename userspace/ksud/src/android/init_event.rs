@@ -128,9 +128,7 @@ pub fn on_post_data_fs() -> Result<()> {
     }
 
     // Load susfs config
-    if let Err(e) = crate::android::susfs::on_post_fs_data() {
-        warn!("load susfs post-fs-data config failed: {e}");
-    }
+    crate::android::susfs::init_event::on_post_fs_data();
 
     run_stage("post-mount", true);
 
@@ -175,9 +173,7 @@ pub fn on_services() {
 pub fn on_boot_completed() {
     ksucalls::report_boot_complete();
     // Load susfs boot-completed
-    if let Err(e) = crate::android::susfs::on_boot_completed() {
-        log::warn!("load susfs boot-completed failed: {e}");
-    }
+    crate::android::susfs::init_event::on_boot_completed();
     info!("on_boot_completed triggered!");
 
     run_stage("boot-completed", false);

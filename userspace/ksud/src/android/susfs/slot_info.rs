@@ -12,7 +12,7 @@ use lzma_rust2::{LzmaReader, XzReader};
 use serde::Serialize;
 
 const BY_NAME_DIR: &str = "/dev/block/by-name";
-const LZ4_MAGIC: u32 = 0x184c2102;
+const LZ4_MAGIC: u32 = 0x184c_2102;
 const GZIP_MAGIC_1: [u8; 2] = [0x1f, 0x8b];
 const GZIP_MAGIC_2: [u8; 2] = [0x1f, 0x9e];
 const LZOP_MAGIC: [u8; 4] = [0x89, b'L', b'Z', b'O'];
@@ -71,8 +71,10 @@ fn list_boot_slots() -> Vec<(String, PathBuf)> {
 }
 
 fn extract_slot_kernel_info(path: &Path) -> Result<(String, String)> {
-    let image = std::fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
-    let boot = BootImage::parse(&image).with_context(|| format!("failed to parse {}", path.display()))?;
+    let image =
+        std::fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
+    let boot =
+        BootImage::parse(&image).with_context(|| format!("failed to parse {}", path.display()))?;
     let kernel = boot
         .get_blocks()
         .get_kernel()
@@ -255,7 +257,12 @@ fn extract_linux_version_line(buf: &[u8]) -> Option<(String, String)> {
         if line.is_empty() {
             continue;
         }
-        let release = line.split_whitespace().nth(2).unwrap_or("").trim().to_string();
+        let release = line
+            .split_whitespace()
+            .nth(2)
+            .unwrap_or("")
+            .trim()
+            .to_string();
         let build_time = line
             .split_once('#')
             .map(|(_, v)| format!("#{}", v.trim()))
