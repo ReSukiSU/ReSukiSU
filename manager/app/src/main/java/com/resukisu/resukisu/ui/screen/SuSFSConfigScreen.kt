@@ -1175,25 +1175,21 @@ private fun PathGroup(
     SegmentedColumn(
         title = title
     ) {
-        if (showAddEntry) {
-            item {
-                SettingsBaseWidget(
-                    icon = Icons.Filled.Add,
-                    title = addTitle,
-                    description = null,
-                    onClick = { onAddClick() }
-                ) {}
-            }
+        item(visible = showAddEntry) {
+            SettingsBaseWidget(
+                icon = Icons.Filled.Add,
+                title = addTitle,
+                description = null,
+                onClick = { onAddClick() }
+            ) {}
         }
 
-        if (paths.isEmpty()) {
-            item {
-                SettingsBaseWidget(
-                    icon = Icons.Filled.Info,
-                    title = emptyText,
-                    description = null,
-                ) {}
-            }
+        item(visible = paths.isEmpty()) {
+            SettingsBaseWidget(
+                icon = Icons.Filled.Info,
+                title = emptyText,
+                description = null,
+            ) {}
         }
 
         paths.forEach { path ->
