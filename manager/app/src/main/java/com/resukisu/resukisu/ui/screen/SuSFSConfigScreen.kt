@@ -77,7 +77,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -116,7 +115,6 @@ import com.resukisu.resukisu.ui.viewmodel.SuSFSFeatureStatus
 import com.resukisu.resukisu.ui.viewmodel.SuSFSScreenViewModel
 import com.resukisu.resukisu.ui.viewmodel.SuSFSStaticKstatEntry
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -238,10 +236,10 @@ private fun SuSFeaturesTab(
         LazyColumn(
             modifier = Modifier.weight(1f),
         ) {
-            item {
+            item(key = "spacer_top", contentType = "spacer") {
                 Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
             }
-            item {
+            item(key = "features_header", contentType = "segmented") {
                 SegmentedColumn(
                     title = stringResource(R.string.susfs_tab_enabled_features)
                 ) {
@@ -254,10 +252,10 @@ private fun SuSFeaturesTab(
                     }
                 }
             }
-            item {
+            item(key = "features_group", contentType = "segmented") {
                 FeatureGroup(features = uiState.featureStatus)
             }
-            item {
+            item(key = "spacer_bottom", contentType = "spacer") {
                 Spacer(modifier = Modifier.height(contentPadding.calculateBottomPadding()))
             }
         }
@@ -412,10 +410,10 @@ private fun SuSMapTab(
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection),
     ) {
-        item {
+        item(key = "spacer_top", contentType = "spacer") {
             Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
         }
-        item {
+        item(key = "sus_maps_header", contentType = "segmented") {
             SegmentedColumn(
                 title = stringResource(R.string.sus_maps_description_title)
             ) {
@@ -428,7 +426,7 @@ private fun SuSMapTab(
                 }
             }
         }
-        item {
+        item(key = "sus_maps_paths", contentType = "segmented") {
             PathGroup(
                 title = stringResource(R.string.susfs_tab_sus_maps),
                 addTitle = stringResource(R.string.susfs_add_sus_map),
@@ -438,7 +436,7 @@ private fun SuSMapTab(
                 onDelete = viewModel::removeSusMap,
             )
         }
-        item {
+        item(key = "spacer_bottom", contentType = "spacer") {
             Spacer(modifier = Modifier.height(contentPadding.calculateBottomPadding()))
         }
     }
@@ -458,10 +456,10 @@ private fun SuSLoopPathTab(
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection),
     ) {
-        item {
+        item(key = "spacer_top", contentType = "spacer") {
             Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
         }
-        item {
+        item(key = "sus_loop_paths_header", contentType = "segmented") {
             SegmentedColumn(
                 title = stringResource(R.string.sus_loop_paths_description_title)
             ) {
@@ -474,7 +472,7 @@ private fun SuSLoopPathTab(
                 }
             }
         }
-        item {
+        item(key = "sus_loop_paths_list", contentType = "segmented") {
             PathGroup(
                 title = stringResource(R.string.susfs_tab_sus_loop_paths),
                 addTitle = stringResource(R.string.susfs_add_sus_loop_path),
@@ -484,7 +482,7 @@ private fun SuSLoopPathTab(
                 onDelete = viewModel::removeSusLoopPath,
             )
         }
-        item {
+        item(key = "spacer_bottom", contentType = "spacer") {
             Spacer(modifier = Modifier.height(contentPadding.calculateBottomPadding()))
         }
     }
@@ -504,9 +502,17 @@ private fun SuSPathTab(
     val uiState = viewModel.uiState
     val pathEditDialog = rememberPathEditDialog(AddPathTarget.SusPath, viewModel)
 
-    var addAppDialog: DialogHandle? by remember { mutableStateOf(null) }
-
-    addAppDialog = rememberCustomDialog { dismiss ->
+    // Build the add-app dialog handle eagerly during composition. The previous
+    // implementation kept the handle in a `mutableStateOf(null)` and reassigned
+    // it during composition, which produced an extra recomposition every time
+    // the parent state changed. Now the handle is owned by the same `remember`
+    // slot as the dialog itself so it stays stable, and the captured
+    // `uiState.susPaths` (which the dialog uses to filter already-added
+    // packages) is observed lazily inside the dialog lambda. This also avoids
+    // a state-write-during-composition pattern that could interact with the
+    // delete recomposition path and crash the manager when the very last sus
+    // path was removed.
+    val addAppDialog = rememberCustomDialog { dismiss ->
         AddAppPathDialog(
             apps = appListSnapshot,
             existingSusPaths = uiState.susPaths,
@@ -560,10 +566,17 @@ private fun SuSPathTab(
         LazyColumn(
             modifier = Modifier.weight(1f),
         ) {
-            item {
+            // Every top-level item gets an explicit string key and content
+            // type so the LazyColumn diff is stable when the optional
+            // app-groups section appears or disappears. Without these, the
+            // implicit positional keys of the trailing items shifted whenever
+            // the conditional `if (appGroups.isNotEmpty())` branch toggled,
+            // which crashed the manager during the recomposition triggered by
+            // removing the final sus path.
+            item(key = "spacer_top", contentType = "spacer") {
                 Spacer(modifier = Modifier.height(contentPadding.calculateTopPadding()))
             }
-            item {
+            item(key = "sus_path_actions", contentType = "segmented") {
                 SegmentedColumn(title = stringResource(R.string.susfs_tab_sus_paths)) {
                     item {
                         SettingsBaseWidget(
@@ -571,7 +584,7 @@ private fun SuSPathTab(
                             title = stringResource(R.string.add_app_path),
                             description = null,
                             onClick = {
-                                addAppDialog?.show()
+                                addAppDialog.show()
                             }
                         ) {}
                     }
@@ -585,8 +598,12 @@ private fun SuSPathTab(
                     }
                 }
             }
+            // Render the app-groups section as a dedicated lazy item only
+            // when there are app paths to show. The item carries an explicit
+            // key so its appearance/disappearance doesn't shift the positional
+            // identity of items that follow it.
             if (appGroups.isNotEmpty()) {
-                item {
+                item(key = "app_groups", contentType = "segmented") {
                     SegmentedColumn(
                         title = stringResource(R.string.app_paths_section)
                     ) {
@@ -606,7 +623,9 @@ private fun SuSPathTab(
                                             // launches from this click handler
                                             // was racing the JSON config writer
                                             // and crashing the manager.
-                                            viewModel.removeSusPaths(paths)
+                                            runCatching {
+                                                viewModel.removeSusPaths(paths)
+                                            }.onFailure { }
                                         }
                                     ) {
                                         Icon(
@@ -621,7 +640,7 @@ private fun SuSPathTab(
                     }
                 }
             }
-            item {
+            item(key = "other_paths", contentType = "segmented") {
                 PathGroup(
                     title = stringResource(R.string.other_paths_section),
                     addTitle = stringResource(R.string.susfs_add_sus_path),
@@ -633,7 +652,7 @@ private fun SuSPathTab(
                 )
             }
 
-            item {
+            item(key = "spacer_bottom", contentType = "spacer") {
                 Spacer(modifier = Modifier.height(contentPadding.calculateBottomPadding()))
             }
         }
@@ -1217,7 +1236,7 @@ private fun PathGroup(
         title = title
     ) {
         if (showAddEntry) {
-            item {
+            item(key = "path_group_add") {
                 SettingsBaseWidget(
                     icon = Icons.Filled.Add,
                     title = addTitle,
@@ -1228,7 +1247,12 @@ private fun PathGroup(
         }
 
         if (paths.isEmpty()) {
-            item {
+            // Give the empty placeholder a stable string key so it never
+            // collides with positional integer keys assigned by the
+            // SegmentedColumn scope, and so its identity stays consistent
+            // as the path list transitions between empty and non-empty
+            // states (e.g. when the user deletes the very last entry).
+            item(key = "path_group_empty") {
                 SettingsBaseWidget(
                     icon = Icons.Filled.Info,
                     title = emptyText,
@@ -1238,7 +1262,10 @@ private fun PathGroup(
         }
 
         paths.forEach { path ->
-            item(key = path) {
+            // Prefix the user-supplied path with a fixed sentinel so the
+            // resulting key cannot accidentally collide with the placeholder
+            // keys defined above.
+            item(key = "path_group_item:$path") {
                 SettingsBaseWidget(
                     icon = Icons.Filled.Folder,
                     title = path,

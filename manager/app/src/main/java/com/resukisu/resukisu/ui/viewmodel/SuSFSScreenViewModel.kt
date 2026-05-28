@@ -701,13 +701,21 @@ class SuSFSScreenViewModel : ViewModel() {
             hideMountsControlSupported = uiState.hideMountsControlSupported,
             susfsLogEnabled = config.common.enableSusfsLog,
             avcLogSpoofing = config.common.avcSpoofing,
-            susPaths = config.susPath.susPath.sorted(),
-            susLoopPaths = config.susPath.susPathLoop.sorted(),
-            susMaps = config.susMap.sorted(),
-            kstatPaths = config.kstat.susKstat.sorted(),
-            kstatUpdatedPaths = config.kstat.updateKstat.sorted(),
-            kstatFullClonePaths = config.kstat.fullClone.sorted(),
-            staticKstatEntries = config.kstat.statically.sortedBy { it.path },
+            // Gson bypasses Kotlin's default-argument initialisers when it
+            // constructs data classes via reflection, so a `null` (or an
+            // entirely missing) JSON array deserialises into a plain `null`
+            // even though the property is typed as a non-null `List`. Calling
+            // `.sorted()` on such a value previously produced an NPE during
+            // the recomposition that fired right after the very last sus_path
+            // was deleted, which surfaced as a manager crash. Coerce every
+            // collection to a non-null list before sorting.
+            susPaths = config.susPath.susPath.orEmpty().sorted(),
+            susLoopPaths = config.susPath.susPathLoop.orEmpty().sorted(),
+            susMaps = config.susMap.orEmpty().sorted(),
+            kstatPaths = config.kstat.susKstat.orEmpty().sorted(),
+            kstatUpdatedPaths = config.kstat.updateKstat.orEmpty().sorted(),
+            kstatFullClonePaths = config.kstat.fullClone.orEmpty().sorted(),
+            staticKstatEntries = config.kstat.statically.orEmpty().sortedBy { it.path },
             featureStatus = featureStatus,
             loadError = null,
         )
