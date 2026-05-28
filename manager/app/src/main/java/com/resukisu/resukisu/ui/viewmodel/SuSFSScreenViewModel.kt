@@ -2,6 +2,7 @@ package com.resukisu.resukisu.ui.viewmodel
 
 import android.annotation.SuppressLint
 import android.content.ServiceConnection
+import androidx.annotation.Keep
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -37,6 +38,7 @@ private val gson = GsonBuilder()
     .setPrettyPrinting()
     .create()
 
+@Keep
 data class SusfsConfig(
     val common: SusfsCommonConfig = SusfsCommonConfig(),
     @SerializedName("sus_path") val susPath: SusPathConfig = SusPathConfig(),
@@ -44,6 +46,7 @@ data class SusfsConfig(
     val kstat: SusfsKstatConfig = SusfsKstatConfig()
 )
 
+@Keep
 data class SusfsCommonConfig(
     val version: String = "default",
     val release: String = "default",
@@ -52,11 +55,13 @@ data class SusfsCommonConfig(
     @SerializedName("hide_sus_mnts_for_non_su_procs") val hideSusMntsForNonSuProcs: Boolean = false
 )
 
+@Keep
 data class SusPathConfig(
     @SerializedName("sus_path_loop") val susPathLoop: List<String> = emptyList(),
     @SerializedName("sus_path") val susPath: List<String> = emptyList()
 )
 
+@Keep
 data class SusfsKstatConfig(
     @SerializedName("sus_kstat") val susKstat: List<String> = emptyList(),
     @SerializedName("update_kstat") val updateKstat: List<String> = emptyList(),
@@ -64,6 +69,7 @@ data class SusfsKstatConfig(
     val statically: List<SuSFSStaticKstatEntry> = emptyList()
 )
 
+@Keep
 open class SuSFSFeatureStatus(
     val key: String,
     val title: String,
@@ -71,12 +77,14 @@ open class SuSFSFeatureStatus(
     val configurable: Boolean = false,
 )
 
+@Keep
 data class NoNConfigurableSuSFSFeature(
     val featureKey: String,
     val featureTitle: String,
     val featureEnabled: Boolean,
 ) : SuSFSFeatureStatus(featureKey, featureTitle, featureEnabled, false)
 
+@Keep
 abstract class ConfigurableSuSFSFeature(
     featureKey: String,
     featureTitle: String,
@@ -85,6 +93,7 @@ abstract class ConfigurableSuSFSFeature(
     abstract fun onCheckedChange(checked: Boolean)
 }
 
+@Keep
 data class SuSFSStaticKstatEntry(
     val path: String = "",
     val ino: String = "default",
@@ -103,6 +112,8 @@ data class SuSFSStaticKstatEntry(
     @Transient
     val summary: String = "ino=$ino, dev=$dev, size=$size"
 }
+
+@Keep
 data class SuSFSSlotInfo(
     @SerializedName("slot_name") val slotName: String = "",
     val uname: String = "",
