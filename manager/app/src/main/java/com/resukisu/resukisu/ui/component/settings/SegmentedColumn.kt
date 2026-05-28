@@ -71,7 +71,6 @@ data class SegmentedItemData(
 class SegmentedColumnScope {
     val items = mutableListOf<SegmentedItemData>()
 
-    // 内部维护的嵌套上下文状态：用于无感向后代传递“顶部强制扁平”和“全局可见性遮罩”
     private var isInsideExpandableBody: Boolean = false
     private var parentVisibilityMask: Boolean = true
 
@@ -134,6 +133,9 @@ class SegmentedColumnScope {
 
 /**
  * A highly customized vertical layout group that visually splices multiple composable items together.
+ *
+ * You should **ONLY** use this component when every content won't change during runtime.
+ * Or you should use [lazySegmentedColumn] instead.
  */
 @Composable
 fun SegmentedColumn(
