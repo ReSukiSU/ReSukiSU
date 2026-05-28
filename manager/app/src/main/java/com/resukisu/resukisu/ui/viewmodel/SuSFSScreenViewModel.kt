@@ -24,6 +24,8 @@ import com.topjohnwu.superuser.io.SuFileInputStream
 import com.topjohnwu.superuser.io.SuFileOutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import java.io.InputStream
@@ -188,6 +190,17 @@ class SuSFSScreenViewModel : ViewModel() {
         }
 
     private var serviceConnection: ServiceConnection? = null
+
+    /**
+     * Serialises every susfs-related batch operation. The susfs JSON config
+     * is the source of truth for the UI: each `runCommand` / batch reload
+     * reads the file and writes `uiState`, and two batches racing against
+     * each other could observe partially-written intermediate states and
+     * crash the manager during the recomposition that followed. Wrapping
+     * each user-facing batch in this mutex guarantees they are observed in
+     * a strictly serial order, even if the user double-taps a delete button.
+     */
+    private val batchMutex = Mutex()
 
     init {
         refresh()
@@ -377,56 +390,67 @@ class SuSFSScreenViewModel : ViewModel() {
     fun addAppPaths(packageNames: Collection<String>) {
         if (packageNames.isEmpty()) return
         viewModelScope.launch(Dispatchers.IO) {
-            val shell = runCatching { getRootShell() }.getOrNull()
-            var successCount = 0
-            var failureCount = 0
-            packageNames.forEach { packageName ->
-                // Susfs add_sus_path performs a kern_path() resolution against
-                // the supplied path and rejects the request if the path does
-                // not currently exist. For app data directories this often
-                // happens before the user has launched the app, so create the
-                // directory tree as root first.
-                val candidates = listOf(
-                    "/storage/emulated/0/Android/data/$packageName",
-                    "/data/media/0/Android/data/$packageName",
-                    "/sdcard/Android/data/$packageName",
-                )
+            // Run the entire add-batch as one logical operation so that the
+            // recomposition triggered by the final `uiState` write happens
+            // exactly once. Issuing the per-package state reloads inline
+            // produced N intermediate recompositions and visibly flickered
+            // the path list while the batch was in flight.
+            batchMutex.withLock {
+                val shell = runCatching { getRootShell() }.getOrNull()
+                var successCount = 0
+                var failureCount = 0
+                packageNames.forEach { packageName ->
+                    // Susfs add_sus_path performs a kern_path() resolution against
+                    // the supplied path and rejects the request if the path does
+                    // not currently exist. For app data directories this often
+                    // happens before the user has launched the app, so create the
+                    // directory tree as root first.
+                    val candidates = listOf(
+                        "/storage/emulated/0/Android/data/$packageName",
+                        "/data/media/0/Android/data/$packageName",
+                        "/sdcard/Android/data/$packageName",
+                    )
 
-                if (shell != null) {
-                    candidates.forEach { candidate ->
-                        runCatching {
-                            ShellUtils.fastCmdResult(
-                                shell,
-                                "mkdir -p ${shellQuote(candidate)} 2>/dev/null"
-                            )
+                    if (shell != null) {
+                        candidates.forEach { candidate ->
+                            runCatching {
+                                ShellUtils.fastCmdResult(
+                                    shell,
+                                    "mkdir -p ${shellQuote(candidate)} 2>/dev/null"
+                                )
+                            }
                         }
                     }
-                }
 
-                var packageSucceeded = false
-                for (path in candidates) {
-                    val ok = runCatching {
-                        runCommand(
-                            "add_sus_path ${shellQuote(path)}",
-                            showSuccessSnackbar = false,
-                            showFailureSnackbar = false,
-                        )
-                    }.getOrDefault(false)
-                    if (ok) {
-                        packageSucceeded = true
-                        break
+                    var packageSucceeded = false
+                    for (path in candidates) {
+                        val ok = runCatching {
+                            execSusfsCommand(
+                                "add_sus_path ${shellQuote(path)}",
+                                showFailureSnackbar = false,
+                            )
+                        }.getOrDefault(false)
+                        if (ok) {
+                            packageSucceeded = true
+                            break
+                        }
                     }
+
+                    if (packageSucceeded) successCount++ else failureCount++
                 }
 
-                if (packageSucceeded) successCount++ else failureCount++
-            }
-
-            when {
-                successCount > 0 -> {
-                    snackbarText = ksuApp.getString(R.string.kpm_control_success)
+                if (successCount > 0) {
+                    // Reload exactly once after the whole batch so Compose
+                    // only sees a single state transition.
+                    reloadSusfsState()
                 }
-                failureCount > 0 -> {
-                    snackbarText = ksuApp.getString(R.string.operation_failed)
+                when {
+                    successCount > 0 -> {
+                        snackbarText = ksuApp.getString(R.string.kpm_control_success)
+                    }
+                    failureCount > 0 -> {
+                        snackbarText = ksuApp.getString(R.string.operation_failed)
+                    }
                 }
             }
         }
@@ -437,27 +461,37 @@ class SuSFSScreenViewModel : ViewModel() {
      * that concurrent updates of the underlying config cannot race each other
      * (which previously caused the manager to crash when deleting multi-path
      * groups quickly).
+     *
+     * The state reload is performed exactly once after every `del_sus_path`
+     * invocation completes. Previously each iteration reloaded the file and
+     * wrote `uiState` separately, which produced one recomposition per path
+     * and made the LazyColumn diff toggle through several intermediate sizes
+     * before settling on the empty state. That cadence intermittently raced
+     * the lazy-list machinery and crashed the manager when the user removed
+     * an app whose group still contained multiple paths.
      */
     fun removeSusPaths(paths: Collection<String>) {
         if (paths.isEmpty()) return
         viewModelScope.launch(Dispatchers.IO) {
-            var anySuccess = false
-            for (raw in paths) {
-                val value = normalizePathEntry(raw) ?: continue
-                val ok = runCatching {
-                    runCommand(
-                        "del_sus_path ${shellQuote(value)}",
-                        showSuccessSnackbar = false,
-                        showFailureSnackbar = false,
-                    )
-                }.getOrDefault(false)
-                if (ok) anySuccess = true
-            }
-            if (anySuccess) {
-                snackbarText = ksuApp.getString(R.string.kpm_control_success)
-                postRebootToast()
-            } else {
-                snackbarText = ksuApp.getString(R.string.operation_failed)
+            batchMutex.withLock {
+                var anySuccess = false
+                for (raw in paths) {
+                    val value = normalizePathEntry(raw) ?: continue
+                    val ok = runCatching {
+                        execSusfsCommand(
+                            "del_sus_path ${shellQuote(value)}",
+                            showFailureSnackbar = false,
+                        )
+                    }.getOrDefault(false)
+                    if (ok) anySuccess = true
+                }
+                if (anySuccess) {
+                    reloadSusfsState()
+                    snackbarText = ksuApp.getString(R.string.kpm_control_success)
+                    postRebootToast()
+                } else {
+                    snackbarText = ksuApp.getString(R.string.operation_failed)
+                }
             }
         }
     }
@@ -656,27 +690,51 @@ class SuSFSScreenViewModel : ViewModel() {
         postToast(ksuApp.getString(R.string.reboot_to_apply))
     }
 
+    /**
+     * Execute a single susfs CLI command via ksud without touching
+     * `uiState`. Used by batch operations that want to amortise the state
+     * reload over many commands.
+     */
+    private suspend fun execSusfsCommand(
+        command: String,
+        showFailureSnackbar: Boolean = true,
+    ): Boolean = withContext(Dispatchers.IO) {
+        val success = runCatching { execKsud("susfs $command") }.getOrDefault(false)
+        if (!success && showFailureSnackbar) {
+            snackbarText = ksuApp.getString(R.string.operation_failed)
+        }
+        success
+    }
+
+    /**
+     * Read the current susfs config from disk and publish it to the UI as
+     * a single `uiState` write. Batch operations call this once, after all
+     * the underlying CLI commands have completed, so Compose only observes
+     * one state transition for the entire user action.
+     */
+    private suspend fun reloadSusfsState() = withContext(Dispatchers.IO) {
+        val newState = runCatching { loadState() }.getOrNull()
+        if (newState != null) {
+            uiState = newState.copy(isLoading = false, isRefreshing = false)
+        } else {
+            refresh()
+        }
+    }
+
     private suspend fun runCommand(
         command: String,
         showSuccessSnackbar: Boolean = false,
         showFailureSnackbar: Boolean = true,
-    ): Boolean =
-        withContext(Dispatchers.IO) {
-            val success = runCatching { execKsud("susfs $command") }.getOrDefault(false)
-            if (!success) {
-                if (showFailureSnackbar) snackbarText = ksuApp.getString(R.string.operation_failed)
-            } else {
-                if (showSuccessSnackbar) snackbarText =
-                    ksuApp.getString(R.string.kpm_control_success)
-                val newState = runCatching { loadState() }.getOrNull()
-                if (newState != null) {
-                    uiState = newState.copy(isLoading = false, isRefreshing = false)
-                } else {
-                    refresh()
-                }
+    ): Boolean {
+        val success = execSusfsCommand(command, showFailureSnackbar)
+        if (success) {
+            if (showSuccessSnackbar) {
+                snackbarText = ksuApp.getString(R.string.kpm_control_success)
             }
-            success
+            reloadSusfsState()
         }
+        return success
+    }
 
     private suspend fun loadState(): SuSFSUiState {
         val config = readSusfsConfig() ?: SusfsConfig()

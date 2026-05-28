@@ -598,12 +598,20 @@ private fun SuSPathTab(
                     }
                 }
             }
-            // Render the app-groups section as a dedicated lazy item only
-            // when there are app paths to show. The item carries an explicit
-            // key so its appearance/disappearance doesn't shift the positional
-            // identity of items that follow it.
-            if (appGroups.isNotEmpty()) {
-                item(key = "app_groups", contentType = "segmented") {
+            // Render the app-groups section as a dedicated lazy item that
+            // is *always* present. Previously this `item { ... }` was wrapped
+            // in `if (appGroups.isNotEmpty())`, so deleting the final path
+            // of the last app group made the entire lazy item disappear and
+            // shifted the positional identity of items that follow. Even
+            // with stable keys on the surviving items, the disappearance
+            // sometimes raced the recomposition that fired when the user
+            // removed an app whose group still contained multiple paths,
+            // crashing the manager. Keeping the item permanently mounted
+            // and letting `SegmentedColumn` short-circuit on an empty
+            // child list (it early-returns when `allItems.isEmpty()`)
+            // gives the LazyColumn a strictly stable structure.
+            item(key = "app_groups", contentType = "segmented") {
+                if (appGroups.isNotEmpty()) {
                     SegmentedColumn(
                         title = stringResource(R.string.app_paths_section)
                     ) {
