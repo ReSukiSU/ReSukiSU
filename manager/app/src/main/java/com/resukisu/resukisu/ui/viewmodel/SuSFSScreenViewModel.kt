@@ -483,10 +483,20 @@ class SuSFSScreenViewModel : ViewModel() {
      */
     fun removeSusPaths(paths: Collection<String>) {
         if (paths.isEmpty()) return
+        // Snapshot the caller-supplied collection up-front. The caller passes
+        // a list captured from a Compose closure (the app-group row) — that
+        // closure's identity changes on every recomposition triggered by
+        // `uiState` updates, so the underlying reference could in theory be
+        // garbage-collected (or in the case of `MutableList` backing some
+        // intermediate buffer, mutated) before this coroutine reaches the
+        // `for (raw in paths)` loop and racing the next recomposition.
+        // Copying eagerly to an immutable `List` decouples the coroutine
+        // from the UI lifecycle entirely.
+        val pathsCopy = paths.toList()
         viewModelScope.launch(Dispatchers.IO) {
             batchMutex.withLock {
                 var anySuccess = false
-                for (raw in paths) {
+                for (raw in pathsCopy) {
                     val value = normalizePathEntry(raw) ?: continue
                     val ok = runCatching {
                         execSusfsCommand(
@@ -778,13 +788,43 @@ class SuSFSScreenViewModel : ViewModel() {
             // the recomposition that fired right after the very last sus_path
             // was deleted, which surfaced as a manager crash. Coerce every
             // collection to a non-null list before sorting.
-            susPaths = config.susPath.susPath.orEmpty().sorted(),
-            susLoopPaths = config.susPath.susPathLoop.orEmpty().sorted(),
-            susMaps = config.susMap.orEmpty().sorted(),
-            kstatPaths = config.kstat.susKstat.orEmpty().sorted(),
-            kstatUpdatedPaths = config.kstat.updateKstat.orEmpty().sorted(),
-            kstatFullClonePaths = config.kstat.fullClone.orEmpty().sorted(),
-            staticKstatEntries = config.kstat.statically.orEmpty().sortedBy { it.path },
+            //
+            // Each list is also de-duplicated and stripped of blank entries
+            // before being handed to Compose. The sus path list is the source
+            // of the Compose keys used by the LazyColumn / SegmentedColumn
+            // pair on the "Sus paths" tab — duplicates (which can sneak in
+            // from a hand-edited or partially-restored config) would otherwise
+            // produce two LazyColumn items with the same key and crash the
+            // manager with `IllegalArgumentException: Key ... was already used`
+            // the next time the user removed or added an entry. Blank entries
+            // would similarly produce items with an unstable identity.
+            susPaths = config.susPath.susPath.orEmpty()
+                .filter { it.isNotBlank() }
+                .distinct()
+                .sorted(),
+            susLoopPaths = config.susPath.susPathLoop.orEmpty()
+                .filter { it.isNotBlank() }
+                .distinct()
+                .sorted(),
+            susMaps = config.susMap.orEmpty()
+                .filter { it.isNotBlank() }
+                .distinct()
+                .sorted(),
+            kstatPaths = config.kstat.susKstat.orEmpty()
+                .filter { it.isNotBlank() }
+                .distinct()
+                .sorted(),
+            kstatUpdatedPaths = config.kstat.updateKstat.orEmpty()
+                .filter { it.isNotBlank() }
+                .distinct()
+                .sorted(),
+            kstatFullClonePaths = config.kstat.fullClone.orEmpty()
+                .filter { it.isNotBlank() }
+                .distinct()
+                .sorted(),
+            staticKstatEntries = config.kstat.statically.orEmpty()
+                .distinctBy { "${it.path}|${it.ino}|${it.dev}|${it.size}" }
+                .sortedBy { it.path },
             featureStatus = featureStatus,
             loadError = null,
         )

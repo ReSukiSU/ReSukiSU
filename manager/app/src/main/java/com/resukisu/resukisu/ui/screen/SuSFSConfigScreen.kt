@@ -534,11 +534,17 @@ private fun SuSPathTab(
         val others = mutableListOf<String>()
         val packageToLabel = uidToPackage.mapValues { it.value.label }
 
-        uiState.susPaths.forEach { path ->
+        // Compose keys derived from the path strings must be unique across the
+        // entire LazyColumn, so dedupe the input list before bucketising it.
+        // The viewmodel already filters duplicates that come from the JSON
+        // config, but a defensive `distinct()` here keeps the lazy list safe
+        // even if a future code path reintroduces a duplicate.
+        uiState.susPaths.distinct().forEach { path ->
             val pkg = appPathRegex.find(path)?.groupValues?.getOrNull(1)
 
             if (!pkg.isNullOrBlank()) {
-                appGroupsMap.getOrPut(pkg) { mutableListOf() } += path
+                val bucket = appGroupsMap.getOrPut(pkg) { mutableListOf() }
+                if (path !in bucket) bucket += path
             } else {
                 others += path
             }
@@ -551,11 +557,11 @@ private fun SuSPathTab(
         // when the user removed a path from one of them.
         val appSection = appGroupsMap.entries
             .map { entry ->
-                Triple(entry.key, packageToLabel[entry.key] ?: entry.key, entry.value.sorted())
+                Triple(entry.key, packageToLabel[entry.key] ?: entry.key, entry.value.distinct().sorted())
             }
             .sortedBy { it.second.lowercase() }
 
-        appSection to others.sorted()
+        appSection to others.distinct().sorted()
     }
 
     Column(
@@ -617,10 +623,26 @@ private fun SuSPathTab(
                     ) {
                         appGroups.forEach { (pkg, label, paths) ->
                             item(key = "app:$pkg") {
+                                // Snapshot the path list captured from this
+                                // closure so the IconButton click handler holds
+                                // a strong reference to an immutable copy. The
+                                // surrounding `appGroups` value is rebuilt on
+                                // every recomposition (it lives in a
+                                // `remember(uiState.susPaths, …)` slot whose
+                                // key changes whenever the user adds or removes
+                                // a path), so without this snapshot the click
+                                // lambda would dereference a list owned by a
+                                // composition that may already have been
+                                // discarded by the time the user taps delete.
+                                // That race was a frequent source of the
+                                // manager-crash-on-delete report.
+                                val pathsSnapshot = remember(pkg, paths) {
+                                    paths.toList()
+                                }
                                 SettingsBaseWidget(
                                     icon = Icons.Filled.Apps,
                                     title = label,
-                                    description = paths.joinToString("\n"),
+                                    description = pathsSnapshot.joinToString("\n"),
                                 ) {
                                     IconButton(
                                         onClick = {
@@ -632,7 +654,7 @@ private fun SuSPathTab(
                                             // was racing the JSON config writer
                                             // and crashing the manager.
                                             runCatching {
-                                                viewModel.removeSusPaths(paths)
+                                                viewModel.removeSusPaths(pathsSnapshot)
                                             }.onFailure { }
                                         }
                                     ) {
@@ -1240,6 +1262,15 @@ private fun PathGroup(
     showAddEntry: Boolean = true,
     onDelete: (String) -> Unit,
 ) {
+    // Snapshot the caller-supplied path list and dedupe it for the lazy list.
+    // Compose keys must be unique within a single LazyColumn / SegmentedColumn
+    // scope, so two equal path strings would crash the manager with
+    // `IllegalArgumentException: Key … was already used`. The viewmodel
+    // already dedupes when it reads the JSON config, but the defensive
+    // dedupe here keeps `PathGroup` robust against any caller that might
+    // forward a list straight from a future code path.
+    val uniquePaths = remember(paths) { paths.distinct() }
+
     SegmentedColumn(
         title = title
     ) {
@@ -1254,7 +1285,7 @@ private fun PathGroup(
             }
         }
 
-        if (paths.isEmpty()) {
+        if (uniquePaths.isEmpty()) {
             // Give the empty placeholder a stable string key so it never
             // collides with positional integer keys assigned by the
             // SegmentedColumn scope, and so its identity stays consistent
@@ -1269,7 +1300,7 @@ private fun PathGroup(
             }
         }
 
-        paths.forEach { path ->
+        uniquePaths.forEach { path ->
             // Prefix the user-supplied path with a fixed sentinel so the
             // resulting key cannot accidentally collide with the placeholder
             // keys defined above.
