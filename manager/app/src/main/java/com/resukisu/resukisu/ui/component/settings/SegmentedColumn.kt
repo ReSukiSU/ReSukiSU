@@ -201,8 +201,30 @@ fun SegmentedColumn(
                         val isDynamicDpSupported =
                             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
+                        // The shared `dpSpring` is intentionally under-damped
+                        // (dampingRatio = 0.5f) to give the segmented list its
+                        // bouncy feel, but an under-damped spring overshoots
+                        // its target on the way in. When the target is small
+                        // (0.dp for the corner-radius of a forced-flat side or
+                        // for the top padding of the first item) the overshoot
+                        // drives the animated value *negative* for a few
+                        // frames. Compose's `Modifier.padding(...)` and
+                        // `RoundedCornerShape(...)` both reject negative Dp
+                        // with `IllegalArgumentException: Padding must be
+                        // non-negative`, and that exception fires from inside
+                        // a Choreographer frame callback — i.e. it crashes
+                        // the entire manager.
+                        //
+                        // This regressed visibly on the "Sus paths" tab,
+                        // where deleting a path causes the surviving rows to
+                        // re-target their first/last paddings & radii in
+                        // quick succession. Coerce every animated Dp to
+                        // `>= 0.dp` here so an overshoot can never escape
+                        // into the modifier graph.
                         val currentTopRadius = if (isDynamicDpSupported) {
-                            animateDpAsState(targetTopRadius, dpSpring, label = "TopRadius").value
+                            animateDpAsState(targetTopRadius, dpSpring, label = "TopRadius")
+                                .value
+                                .coerceAtLeast(0.dp)
                         } else targetTopRadius
 
                         val currentBottomRadius = if (isDynamicDpSupported) {
@@ -210,7 +232,9 @@ fun SegmentedColumn(
                                 targetBottomRadius,
                                 dpSpring,
                                 label = "BottomRadius"
-                            ).value
+                            )
+                                .value
+                                .coerceAtLeast(0.dp)
                         } else targetBottomRadius
 
                         val shape = RoundedCornerShape(
@@ -223,7 +247,9 @@ fun SegmentedColumn(
                         val targetTopPadding = itemData.customTopPadding
                             ?: (if (isFirst) 0.dp else ListItemDefaults.SegmentedGap)
                         val currentTopPadding = if (isDynamicDpSupported) {
-                            animateDpAsState(targetTopPadding, dpSpring, label = "TopPadding").value
+                            animateDpAsState(targetTopPadding, dpSpring, label = "TopPadding")
+                                .value
+                                .coerceAtLeast(0.dp)
                         } else targetTopPadding
 
                         var hasFocus by remember { mutableStateOf(false) }
