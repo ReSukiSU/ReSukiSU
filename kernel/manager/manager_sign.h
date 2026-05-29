@@ -65,6 +65,10 @@
 #define EXPECTED_SIZE_KITTISU 0x0390
 #define EXPECTED_HASH_KITTISU "8a38ea45034a145e29234c4927743b088ef502441f8d24583a1a18f20e4c879a"
 
+// backslashxx/KernelSU
+#define EXPECTED_SIZE_xxksu 0x363
+#define EXPECTED_HASH_xxksu "4359c171f32543394cbc23ef908c4bb94cad7c8087002ba164c8230948c21549"
+
 typedef struct {
     unsigned size;
     const char *sha256;

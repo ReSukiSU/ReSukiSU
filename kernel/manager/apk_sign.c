@@ -42,11 +42,12 @@ static apk_sign_key_t apk_sign_keys[] = {
     { EXPECTED_SIZE_NEXT, EXPECTED_HASH_NEXT }, /* KernelSU-Next */
     { EXPECTED_SIZE_WILD, EXPECTED_HASH_WILD }, /* WildKsu */
     { EXPECTED_SIZE_YUKI1, EXPECTED_HASH_YUKI1 }, /* yukisu */
-    { EXPECTED_SIZE_KAMISU, EXPECTED_HASH_KAMISU }, /* YUKISU */
-    { EXPECTED_SIZE_YUKI2, EXPECTED_HASH_YUKI2 }, /* Kaminarich/KamiSU */
+    { EXPECTED_SIZE_KAMISU, EXPECTED_HASH_KAMISU }, /* Kaminarich/KamiSU */
+    { EXPECTED_SIZE_YUKI2, EXPECTED_HASH_YUKI2 }, /* YUKISU */
     { EXPECTED_SIZE_pershoot, EXPECTED_HASH_pershoot }, /* KernelSU-pershoot */
     { EXPECTED_SIZE_VORTEX, EXPECTED_HASH_VORTEX }, /* kingfinik98/VorteX */
     { EXPECTED_SIZE_AGNESSU, EXPECTED_HASH_AGNESSU }, /* AgnesSU */
+    { EXPECTED_SIZE_xxksu, EXPECTED_HASH_xxksu }, /* xxksu */
 #ifdef EXPECTED_SIZE
     { EXPECTED_SIZE, EXPECTED_HASH }, /* Custom */
 #endif
