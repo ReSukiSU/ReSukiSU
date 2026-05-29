@@ -78,6 +78,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -115,6 +116,7 @@ import com.resukisu.resukisu.ui.viewmodel.ConfigurableSuSFSFeature
 import com.resukisu.resukisu.ui.viewmodel.SuSFSScreenViewModel
 import com.resukisu.resukisu.ui.viewmodel.SuSFSStaticKstatEntry
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -669,13 +671,13 @@ private fun SuSPathTab(
             if (appGroups.isNotEmpty()) {
                 lazySegmentedColumn(
                     appGroups,
-                    key = { _, (label, paths) -> "$label $paths" }) { _, (label, paths) ->
+                    key = { _, (pkg, label, paths) -> "$pkg:$label" }) { _, (pkg, label, paths) ->
                     SettingsBaseWidget(
                         icon = Icons.Filled.Apps,
                         title = label,
                         description = paths.joinToString("\n"),
                     ) {
-                        IconButton(onClick = { paths.forEach(viewModel::removeSusPath) }) {
+                        IconButton(onClick = { viewModel.removeSusPaths(paths) }) {
                             Icon(
                                 imageVector = Icons.Filled.Delete,
                                 contentDescription = stringResource(R.string.delete),
@@ -859,14 +861,14 @@ private fun BasicTab(
                                 }
                             )
                         }
-                    }
-                    item {
-                        SettingsBaseWidget(
-                            icon = Icons.Filled.Delete,
-                            title = stringResource(R.string.susfs_reset_to_default),
-                            description = null,
-                            onClick = { viewModel.setUnameAndBuildTime("", "") }
-                        )
+                        item {
+                            SettingsBaseWidget(
+                                icon = Icons.Filled.Delete,
+                                title = stringResource(R.string.susfs_reset_to_default),
+                                description = null,
+                                onClick = { viewModel.setUnameAndBuildTime("", "") }
+                            )
+                        }
                     }
                 }
             }
