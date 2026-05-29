@@ -226,8 +226,7 @@ pub fn uninstall(package_name: &str) -> Result<()> {
         boot: None,
         flash: true,
         out_name: None,
-        stock: false,
-        partition: None,
+        out: None,
     })?;
     println!("- Uninstall KernelSU manager..");
     Command::new("pm")
