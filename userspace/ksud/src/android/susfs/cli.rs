@@ -208,8 +208,17 @@ pub enum SuSFSSubCommands {
         blksize: String,
     },
     /// Read boot slot kernel uname/build-time (auto-decompress kernel payload)
+    /// Can optionally specify a boot image path for direct analysis
     #[command(name = "slot_info")]
-    SlotInfo,
+    SlotInfo {
+        /// Optional path to a boot image file to analyze directly
+        /// If not specified, reads from /dev/block/by-name/boot_a, boot_b, or boot
+        #[arg(value_name = "BOOT_IMAGE", help = "Path to boot image file (optional)")]
+        boot_image: Option<String>,
+        /// Enable verbose debug logging
+        #[arg(short, long, help = "Enable verbose debug output")]
+        verbose: bool,
+    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -429,7 +438,13 @@ pub fn run_main(command: SuSFSSubCommands) -> Result<()> {
                 &blksize,
             );
         }
-        SuSFSSubCommands::SlotInfo => slot_info::show_slot_info_json()?,
+        SuSFSSubCommands::SlotInfo { boot_image, verbose } => {
+            if let Some(path) = boot_image {
+                slot_info::analyze_boot_image(&path, verbose)?;
+            } else {
+                slot_info::show_slot_info_json(verbose)?;
+            }
+        }
     }
 
     Ok(())
