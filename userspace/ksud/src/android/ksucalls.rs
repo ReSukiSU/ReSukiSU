@@ -1,9 +1,7 @@
 #![allow(clippy::unreadable_literal)]
-use crate::android::uapi;
-use crate::defs::MountInfo;
-use std::fs;
-use std::os::fd::RawFd;
-use std::sync::OnceLock;
+use std::{fs, os::fd::RawFd, sync::OnceLock};
+
+use crate::{android::uapi, defs::MountInfo};
 
 // Global driver fd cache
 static DRIVER_FD: OnceLock<RawFd> = OnceLock::new();

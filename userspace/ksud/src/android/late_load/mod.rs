@@ -1,13 +1,19 @@
 pub mod magica;
 
+use std::process::Command;
+
 use anyhow::{Context, Result};
 use log::{info, warn};
 use rustix::cstr;
-use std::process::Command;
 
-use crate::android::module::{handle_updated_modules, metamodule, prune_modules};
-use crate::android::{dynamic_manager, init_event, restorecon, utils};
-use crate::{assets, defs};
+use crate::{
+    android::{
+        dynamic_manager, init_event,
+        module::{handle_updated_modules, metamodule, prune_modules},
+        restorecon, utils,
+    },
+    assets, defs,
+};
 
 fn dump_process_info(label: &str) {
     use rustix::process::{getgid, getgroups, getpid, getuid};

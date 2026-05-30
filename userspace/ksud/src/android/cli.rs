@@ -1,16 +1,15 @@
+use std::path::PathBuf;
+
 use android_logger::Config;
 use anyhow::{Context, Ok, Result};
 use clap::Parser;
-use std::path::PathBuf;
-
 use log::{LevelFilter, error, info};
 
-use crate::android::susfs;
 use crate::{
     android::{
         debug, dynamic_manager, feature, init_event, ksucalls,
         module::{self, module_config},
-        profile, sepolicy, su, sulog, umount_config, utils,
+        profile, sepolicy, su, sulog, susfs, umount_config, utils,
     },
     apk_sign, assets,
     boot_patch::{BootPatchArgs, BootRestoreArgs},

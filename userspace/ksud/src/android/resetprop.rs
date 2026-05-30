@@ -1,14 +1,15 @@
+use std::{
+    fmt,
+    fs::File,
+    io::{BufRead, BufReader},
+    path::Path,
+    time::Duration,
+};
+
 use anyhow::{Context, Result, bail};
-use clap::Parser;
-use clap::error::ErrorKind;
+use clap::{Parser, error::ErrorKind};
 use log::info;
-use prop_rs_android::resetprop::ResetProp;
-use prop_rs_android::sys_prop;
-use std::fmt;
-use std::fs::File;
-use std::io::{BufRead, BufReader};
-use std::path::Path;
-use std::time::Duration;
+use prop_rs_android::{resetprop::ResetProp, sys_prop};
 
 #[derive(Debug)]
 pub struct WaitTimeoutError {

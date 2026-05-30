@@ -1,7 +1,7 @@
+use std::{fs, process::Command};
+
 use anyhow::Result;
 use log::{info, warn};
-use std::fs;
-use std::process::Command;
 
 use crate::android::utils;
 
