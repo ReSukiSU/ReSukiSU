@@ -1,16 +1,15 @@
+use std::path::PathBuf;
+
 use android_logger::Config;
 use anyhow::{Context, Ok, Result};
 use clap::Parser;
-use std::path::PathBuf;
-
 use log::{LevelFilter, error, info};
 
-use crate::android::susfs;
 use crate::{
     android::{
         debug, dynamic_manager, feature, init_event, ksucalls,
         module::{self, module_config},
-        profile, sepolicy, su, sulog, umount_config, utils,
+        profile, sepolicy, su, sulog, susfs, umount_config, utils,
     },
     apk_sign, assets,
     boot_patch::{BootPatchArgs, BootRestoreArgs},
@@ -730,17 +729,16 @@ pub fn run() -> Result<()> {
             package_name,
         } => {
             if let Some(port) = magica {
-                return crate::android::magica::run(port, &package_name, allow_shell).map_err(
-                    |e| {
+                return crate::android::late_load::magica::run(port, &package_name, allow_shell)
+                    .map_err(|e| {
                         error!("Error running magica: {e}");
                         e
-                    },
-                );
+                    });
             }
             let result = crate::android::late_load::run(&package_name, kmi, allow_shell);
             if post_magica {
                 info!("Restoring adb properties (post-magica cleanup)...");
-                if let Err(e) = crate::android::magica::disable_adb_root() {
+                if let Err(e) = crate::android::late_load::magica::disable_adb_root() {
                     error!("disable adb root failed: {e}");
                 }
             }

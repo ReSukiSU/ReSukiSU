@@ -1,3 +1,11 @@
+use std::{path::Path, process::Command};
+
+use anyhow::{Context, Result};
+use libc::_exit;
+use log::{info, warn};
+use prop_rs_android::{resetprop::ResetProp, sys_prop};
+use rustix::process::chdir;
+
 #[cfg(all(target_arch = "aarch64", target_os = "android"))]
 use crate::android::kpm;
 use crate::{
@@ -9,14 +17,6 @@ use crate::{
     },
     assets, defs,
 };
-use anyhow::{Context, Result};
-use libc::_exit;
-use log::{info, warn};
-use prop_rs_android::resetprop::ResetProp;
-use prop_rs_android::sys_prop;
-use rustix::process::chdir;
-use std::path::Path;
-use std::process::Command;
 
 pub fn on_post_data_fs() -> Result<()> {
     ksucalls::report_post_fs_data();

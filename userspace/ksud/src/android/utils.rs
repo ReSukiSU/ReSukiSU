@@ -1,7 +1,3 @@
-use anyhow::{Context, Error, Ok, Result, bail};
-use rustix::fs::{Mode, OFlags, open};
-use rustix::process::setpgid;
-use rustix::stdio::{dup2_stderr, dup2_stdin, dup2_stdout};
 #[cfg(unix)]
 use std::os::unix::prelude::PermissionsExt;
 use std::{
@@ -14,8 +10,12 @@ use std::{
     process::Command,
 };
 
+use anyhow::{Context, Error, Ok, Result, bail};
 use rustix::{
+    fs::{Mode, OFlags, open},
     process,
+    process::setpgid,
+    stdio::{dup2_stderr, dup2_stdin, dup2_stdout},
     thread::{LinkNameSpaceType, move_into_link_name_space},
 };
 

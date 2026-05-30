@@ -219,7 +219,6 @@ mod android {
         slot_suffix
     }
 
-    #[cfg(target_os = "android")]
     pub fn list_available_partitions() -> Vec<String> {
         let slot_suffix = get_slot_suffix(false);
         let candidates = vec!["boot", "init_boot", "vendor_boot"];
@@ -230,7 +229,6 @@ mod android {
             .collect()
     }
 
-    #[cfg(target_os = "android")]
     pub(super) fn post_ota() -> Result<()> {
         use crate::{assets::BOOTCTL_PATH, defs::ADB_DIR};
         let status = Command::new(BOOTCTL_PATH).arg("hal-info").status()?;
