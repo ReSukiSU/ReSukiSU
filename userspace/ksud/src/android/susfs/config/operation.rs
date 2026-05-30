@@ -186,10 +186,6 @@ where
     save_config(&config);
 }
 
-pub fn del_uname() {
-    del_uname_selective("all").ok();
-}
-
 use anyhow::Result;
 
 pub fn del_uname_selective(target: &str) -> Result<()> {

@@ -43,7 +43,7 @@ pub fn read_config() -> Option<Data> {
 /// Normalize legacy configuration and apply any necessary migrations.
 /// This function checks for and corrects common configuration issues that may
 /// have existed in older versions of the susfs config file.
-fn normalize_legacy_config(mut config: Data) -> Data {
+fn normalize_legacy_config(config: Data) -> Data {
     // Note: The version and release fields in susfs.json:
     // - version: should contain kernel uname information
     // - release: should contain kernel build time information
