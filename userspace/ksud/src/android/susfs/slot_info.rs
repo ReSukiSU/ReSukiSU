@@ -260,33 +260,70 @@ fn extract_kernel_fallback(boot_image: &[u8], _boot: &BootImage) -> Result<Vec<u
 
     // Last resort: try to extract from boot image buffer directly
     // Search for common kernel magic bytes within the image
-    debug_log("Searching for kernel signatures in boot image buffer");
+    debug_log(&format!("Searching for kernel signatures in {} byte boot image buffer", boot_image.len()));
 
-    // Look for compressed kernel signatures
+    // Look for compressed kernel signatures - try all of them, not just the first match
     let search_signatures = vec![
-        (vec![0x1f, 0x8b], "GZIP"),           // GZIP header
-        (vec![0xfd, 0x37, 0x7a, 0x58, 0x5a], "XZ"),  // XZ header
-        (vec![0x89, 0x4c, 0x5a, 0x4f], "LZOP"),      // LZOP header
-        (vec![0x42, 0x5a, 0x68], "BZIP2"),   // BZIP2 header
-        (vec![0x04, 0x22, 0x4d, 0x18], "LZ4_FRAME"), // LZ4 frame magic
+        (&[0x1fu8, 0x8bu8] as &[u8], "GZIP"),           // GZIP header
+        (&[0xfdu8, 0x37u8, 0x7au8, 0x58u8, 0x5au8] as &[u8], "XZ"),  // XZ header
+        (&[0x89u8, 0x4cu8, 0x5au8, 0x4fu8] as &[u8], "LZOP"),      // LZOP header
+        (&[0x42u8, 0x5au8, 0x68u8] as &[u8], "BZIP2"),   // BZIP2 header
+        (&[0x04u8, 0x22u8, 0x4du8, 0x18u8] as &[u8], "LZ4_FRAME"), // LZ4 frame magic
     ];
 
+    // For each signature type, try to find and extract
     for (signature, name) in search_signatures {
-        if let Some(offset) = find_signature_in_buffer(boot_image, &signature) {
-            debug_log(&format!(
-                "Found {} signature at offset 0x{:x}, attempting extraction",
-                name, offset
-            ));
-            // Extract from this point onwards (reasonable for compressed kernels)
-            if offset < boot_image.len() {
-                let extracted = boot_image[offset..].to_vec();
-                if extracted.len() > 256 {
-                    // Only consider valid if reasonably large
-                    debug_log(&format!("Fallback extraction succeeded: {} bytes from offset 0x{:x}",
-                        extracted.len(), offset));
-                    return Ok(extracted);
+        let mut search_offset = 0;
+        let mut found_count = 0;
+
+        // Search for all occurrences of this signature in the buffer
+        while search_offset < boot_image.len() {
+            if let Some(relative_offset) = find_signature_in_buffer(&boot_image[search_offset..], signature) {
+                let absolute_offset = search_offset + relative_offset;
+                found_count += 1;
+
+                debug_log(&format!(
+                    "Found {} signature #{} at offset 0x{:x}",
+                    name, found_count, absolute_offset
+                ));
+
+                // Try to extract from this position
+                if absolute_offset < boot_image.len() {
+                    let extracted = boot_image[absolute_offset..].to_vec();
+
+                    // Validate: should be reasonably large (> 256 bytes)
+                    if extracted.len() > 256 {
+                        debug_log(&format!(
+                            "Fallback extraction candidate: {} bytes from offset 0x{:x}, signature {}",
+                            extracted.len(), absolute_offset, name
+                        ));
+
+                        // For the first valid occurrence of each signature type, return it
+                        // But log all findings for debugging
+                        if found_count == 1 {
+                            debug_log(&format!(
+                                "Using first {} occurrence at offset 0x{:x}",
+                                name, absolute_offset
+                            ));
+                            return Ok(extracted);
+                        }
+                    } else {
+                        debug_log(&format!(
+                            "Skipping {} at 0x{:x}: too small ({} bytes)",
+                            name, absolute_offset, extracted.len()
+                        ));
+                    }
                 }
+
+                // Continue searching for more occurrences
+                search_offset = absolute_offset + signature.len();
+            } else {
+                break;
             }
+        }
+
+        if found_count > 0 {
+            debug_log(&format!("Found {} total {} signature(s) in boot image", found_count, name));
         }
     }
 
@@ -301,6 +338,15 @@ fn extract_kernel_fallback(boot_image: &[u8], _boot: &BootImage) -> Result<Vec<u
             debug_log(&format!("Fallback extraction (uncompressed): {} bytes", extracted.len()));
             return Ok(extracted);
         }
+    }
+
+    // Debug: log first few KB of boot image to understand structure
+    if boot_image.len() >= 512 {
+        let hex_str = boot_image[0..512].iter()
+            .map(|b| format!("{:02x}", b))
+            .collect::<Vec<_>>()
+            .join(" ");
+        debug_log(&format!("First 512 bytes of boot image (hex): {}", hex_str));
     }
 
     Err(anyhow::anyhow!(
@@ -373,6 +419,17 @@ fn decompress_kernel_payload(input: &[u8]) -> Result<Vec<u8>> {
                     debug_log("Returning uncompressed/partially corrupted kernel data");
                     break;
                 }
+
+                // Final attempt: for small depth, try deep search for any compressible data
+                if depth == 0 {
+                    debug_log("Attempting deep search for valid compressed data in entire buffer");
+                    if let Some(deep_payload) = try_deep_search_compressed(&payload) {
+                        debug_log(&format!("Deep search found valid data: {} bytes", deep_payload.len()));
+                        payload = deep_payload;
+                        break;
+                    }
+                }
+
                 return Err(e);
             }
         }
@@ -380,6 +437,35 @@ fn decompress_kernel_payload(input: &[u8]) -> Result<Vec<u8>> {
 
     debug_log(&format!("Decompression complete, final payload: {} bytes", payload.len()));
     Ok(payload)
+}
+
+// Try to find valid compressed data by searching at different offsets
+fn try_deep_search_compressed(buf: &[u8]) -> Option<Vec<u8>> {
+    use flate2::read::DeflateDecoder;
+
+    debug_log("Starting deep search for valid compressed data");
+
+    // Try to find gzip streams at different offsets
+    // Look for gzip magic (0x1f 0x8b) and try to decompress from there
+    for offset in (0..buf.len()).step_by(4096) {
+        if offset + 18 >= buf.len() {
+            break;
+        }
+
+        // Try raw deflate decompression from this offset
+        let mut out = Vec::<u8>::new();
+        if let Ok(_) = DeflateDecoder::new(&buf[offset..]).read_to_end(&mut out) {
+            if !out.is_empty() && out.len() > 512 {
+                debug_log(&format!(
+                    "Deep search found valid deflate at offset 0x{:x}: {} bytes",
+                    offset, out.len()
+                ));
+                return Some(out);
+            }
+        }
+    }
+
+    None
 }
 
 fn detect_format(buf: &[u8]) -> CompressionFormat {
@@ -435,6 +521,20 @@ fn decompress_bytes(buf: &[u8], fmt: CompressionFormat) -> Result<Vec<u8>> {
                 }
                 Err(e) => {
                     warn_log(&format!("GZIP decompression failed: {}", e));
+
+                    // Try raw deflate decompression (skip invalid gzip header)
+                    // This handles cases where gzip header is corrupted but deflate stream is valid
+                    debug_log("Attempting raw deflate decompression to handle invalid gzip header");
+                    match try_raw_deflate_decompression(buf) {
+                        Ok(decompressed) => {
+                            debug_log(&format!("Raw deflate decompression succeeded: {} bytes", decompressed.len()));
+                            return Ok(decompressed);
+                        }
+                        Err(deflate_err) => {
+                            warn_log(&format!("Raw deflate decompression also failed: {}", deflate_err));
+                        }
+                    }
+
                     Err(anyhow::anyhow!("gzip decompression failed: {}", e))
                 }
             }
@@ -512,6 +612,67 @@ fn decompress_lz4_blocks(buf: &[u8]) -> Result<Vec<u8>> {
     }
     debug_log(&format!("LZ4 decompression complete: {} blocks, {} bytes total", block_count, out.len()));
     Ok(out)
+}
+
+// Try raw deflate decompression by skipping gzip header
+// Gzip format: 10-18 byte header + deflate stream + trailer
+// When gzip header is corrupted, we can try to decompress from different offsets
+fn try_raw_deflate_decompression(buf: &[u8]) -> Result<Vec<u8>> {
+    use flate2::read::DeflateDecoder;
+
+    debug_log("Attempting raw deflate decompression with different header skips");
+
+    // Try common gzip header sizes (10, 11, 12, 16, 18, 20 bytes)
+    let header_sizes_to_try = [10, 11, 12, 16, 18, 20];
+
+    for skip_size in header_sizes_to_try.iter() {
+        if *skip_size >= buf.len() {
+            debug_log(&format!("Skipping offset 0x{:x}: buffer too small", skip_size));
+            continue;
+        }
+
+        debug_log(&format!("Trying raw deflate decompression skipping first 0x{:x} bytes", skip_size));
+
+        let mut out = Vec::<u8>::new();
+        match DeflateDecoder::new(&buf[*skip_size..]).read_to_end(&mut out) {
+            Ok(_) => {
+                if !out.is_empty() && out.len() > 512 {
+                    debug_log(&format!(
+                        "Raw deflate decompression succeeded with skip=0x{:x}: {} bytes",
+                        skip_size, out.len()
+                    ));
+                    return Ok(out);
+                } else {
+                    debug_log(&format!(
+                        "Raw deflate produced invalid result (too small): {} bytes",
+                        out.len()
+                    ));
+                }
+            }
+            Err(e) => {
+                debug_log(&format!("Raw deflate decompression failed with skip=0x{:x}: {}", skip_size, e));
+            }
+        }
+    }
+
+    // Also try without skipping, in case the gzip header is already parsed away
+    debug_log("Trying raw deflate decompression without header skip");
+    let mut out = Vec::<u8>::new();
+    match DeflateDecoder::new(buf).read_to_end(&mut out) {
+        Ok(_) => {
+            if !out.is_empty() && out.len() > 512 {
+                debug_log(&format!("Raw deflate decompression succeeded (no skip): {} bytes", out.len()));
+                return Ok(out);
+            }
+        }
+        Err(e) => {
+            debug_log(&format!("Raw deflate decompression (no skip) failed: {}", e));
+        }
+    }
+
+    Err(anyhow::anyhow!(
+        "raw deflate decompression failed: could not decompress with any header skip offset"
+    ))
 }
 
 fn guess_lzma(buf: &[u8]) -> bool {
