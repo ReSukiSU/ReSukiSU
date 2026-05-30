@@ -191,11 +191,33 @@ fn extract_slot_kernel_info(path: &Path) -> Result<(String, String)> {
         .get_kernel()
         .ok_or_else(|| anyhow::anyhow!("kernel block not found"))?;
 
+    // Try to dump kernel block, with fallback for abnormal boot images
     let mut raw_kernel = Vec::<u8>::new();
-    kernel.dump(&mut raw_kernel, false)
-        .with_context(|| format!("failed to dump kernel block from {}", path.display()))?;
+    match kernel.dump(&mut raw_kernel, false) {
+        Ok(_) => {
+            debug_log(&format!("Extracted kernel block, size: {} bytes", raw_kernel.len()));
+        }
+        Err(dump_err) => {
+            warn_log(&format!("Failed to dump kernel block normally: {}", dump_err));
+            debug_log("Attempting fallback direct kernel extraction from boot image buffer");
 
-    debug_log(&format!("Extracted kernel block, size: {} bytes", raw_kernel.len()));
+            // Fallback: try to extract kernel data directly from the boot image buffer
+            // This handles abnormal boot images that the library's dump() method rejects
+            match extract_kernel_fallback(&image, &boot) {
+                Ok(fallback_kernel) => {
+                    debug_log(&format!("Fallback extraction succeeded, size: {} bytes", fallback_kernel.len()));
+                    raw_kernel = fallback_kernel;
+                }
+                Err(fallback_err) => {
+                    warn_log(&format!("Fallback extraction also failed: {}", fallback_err));
+                    return Err(anyhow::anyhow!(
+                        "failed to extract kernel block: primary: {}, fallback: {}",
+                        dump_err, fallback_err
+                    ));
+                }
+            }
+        }
+    }
 
     // Validate kernel data is not empty
     if raw_kernel.is_empty() {
@@ -231,8 +253,75 @@ fn extract_slot_kernel_info(path: &Path) -> Result<(String, String)> {
     bail!("failed to extract kernel uname/build-time from {}", path.display())
 }
 
+// Fallback kernel extraction when android-bootimg library's dump() fails
+// This directly extracts kernel data from the boot image buffer
+fn extract_kernel_fallback(boot_image: &[u8], _boot: &BootImage) -> Result<Vec<u8>> {
+    debug_log("Using fallback kernel extraction method");
+
+    // Last resort: try to extract from boot image buffer directly
+    // Search for common kernel magic bytes within the image
+    debug_log("Searching for kernel signatures in boot image buffer");
+
+    // Look for compressed kernel signatures
+    let search_signatures = vec![
+        (vec![0x1f, 0x8b], "GZIP"),           // GZIP header
+        (vec![0xfd, 0x37, 0x7a, 0x58, 0x5a], "XZ"),  // XZ header
+        (vec![0x89, 0x4c, 0x5a, 0x4f], "LZOP"),      // LZOP header
+        (vec![0x42, 0x5a, 0x68], "BZIP2"),   // BZIP2 header
+        (vec![0x04, 0x22, 0x4d, 0x18], "LZ4_FRAME"), // LZ4 frame magic
+    ];
+
+    for (signature, name) in search_signatures {
+        if let Some(offset) = find_signature_in_buffer(boot_image, &signature) {
+            debug_log(&format!(
+                "Found {} signature at offset 0x{:x}, attempting extraction",
+                name, offset
+            ));
+            // Extract from this point onwards (reasonable for compressed kernels)
+            if offset < boot_image.len() {
+                let extracted = boot_image[offset..].to_vec();
+                if extracted.len() > 256 {
+                    // Only consider valid if reasonably large
+                    debug_log(&format!("Fallback extraction succeeded: {} bytes from offset 0x{:x}",
+                        extracted.len(), offset));
+                    return Ok(extracted);
+                }
+            }
+        }
+    }
+
+    // If no compressed format found, check for uncompressed kernel (Linux version string)
+    if let Some(offset) = find_signature_in_buffer(boot_image, b"Linux version") {
+        debug_log(&format!(
+            "Found 'Linux version' signature at offset 0x{:x}",
+            offset
+        ));
+        if offset < boot_image.len() {
+            let extracted = boot_image[offset..].to_vec();
+            debug_log(&format!("Fallback extraction (uncompressed): {} bytes", extracted.len()));
+            return Ok(extracted);
+        }
+    }
+
+    Err(anyhow::anyhow!(
+        "fallback kernel extraction: could not locate kernel data in boot image"
+    ))
+}
+
+// Helper function to find a signature pattern in a buffer
+fn find_signature_in_buffer(buffer: &[u8], signature: &[u8]) -> Option<usize> {
+    buffer
+        .windows(signature.len())
+        .position(|window| window == signature)
+}
+
 fn decompress_kernel_payload(input: &[u8]) -> Result<Vec<u8>> {
     debug_log(&format!("Starting kernel payload decompression, size: {} bytes", input.len()));
+
+    // Detect initial format and log it
+    let initial_fmt = detect_format(input);
+    debug_log(&format!("Initial detected compression format: {}", initial_fmt));
+    info_log(&format!("Kernel compression format: {}", initial_fmt));
 
     let mut payload = input.to_vec();
     let mut depth = 0usize;
