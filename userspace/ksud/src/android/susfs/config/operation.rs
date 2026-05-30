@@ -187,14 +187,40 @@ where
 }
 
 pub fn del_uname() {
+    del_uname_selective("all").ok();
+}
+
+use anyhow::Result;
+
+pub fn del_uname_selective(target: &str) -> Result<()> {
     let Some(mut config) = read_config() else {
-        return;
+        return Ok(());
     };
 
-    config.common.version = "default".to_string();
-    config.common.release = "default".to_string();
+    match target {
+        "version" => {
+            // Reset only uname information
+            config.common.version = "default".to_string();
+        }
+        "release" => {
+            // Reset only build time information
+            config.common.release = "default".to_string();
+        }
+        "all" => {
+            // Reset both
+            config.common.version = "default".to_string();
+            config.common.release = "default".to_string();
+        }
+        _ => {
+            return Err(anyhow::anyhow!(
+                "invalid target '{}': expected 'version', 'release', or 'all'",
+                target
+            ));
+        }
+    }
 
     save_config(&config);
+    Ok(())
 }
 
 pub fn del_sus_path_loop<P>(path: P)

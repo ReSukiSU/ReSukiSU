@@ -98,6 +98,8 @@ fn decompress_kernel_payload(input: &[u8]) -> Result<Vec<u8>> {
     while depth < 3 {
         let fmt = detect_format(&payload);
         if fmt == CompressionFormat::Unknown {
+            // If format is unknown, try to find embedded compressed blob
+            // Start searching from a larger offset to skip boot partition headers
             if let Some(found) = find_embedded_compressed_blob(&payload) {
                 payload = found;
                 depth += 1;
@@ -230,10 +232,12 @@ fn guess_lzma(buf: &[u8]) -> bool {
 }
 
 fn find_embedded_compressed_blob(buf: &[u8]) -> Option<Vec<u8>> {
-    if buf.len() <= 0x28 {
+    if buf.len() <= 0x40 {
         return None;
     }
-    for i in 0x28..buf.len() {
+    // Skip potential boot partition header (typically 0x40 bytes or more)
+    // and start searching from 0x40 to avoid misidentifying boot headers as kernel
+    for i in 0x40..buf.len() {
         let rest = &buf[i..];
         if detect_format(rest) != CompressionFormat::Unknown {
             return Some(rest.to_vec());

@@ -284,10 +284,12 @@ class SuSFSScreenViewModel : ViewModel() {
             }
 
             val success = if (resolvedUname == "default" && resolvedBuildTime == "default") {
-                runCommand("del_uname", showSuccessSnackbar = false)
+                runCommand("del_uname all", showSuccessSnackbar = false)
             } else {
+                // set_uname takes (release, version) arguments:
+                // release = buildTime, version = uname
                 runCommand(
-                    "set_uname ${shellQuote(resolvedUname)} ${shellQuote(resolvedBuildTime)}",
+                    "set_uname ${shellQuote(resolvedBuildTime)} ${shellQuote(resolvedUname)}",
                     showSuccessSnackbar = false,
                 )
             }
@@ -311,14 +313,16 @@ class SuSFSScreenViewModel : ViewModel() {
             val buildTime = kernelDefaultBuildTime
 
             val success = if (uname.isNotBlank() && buildTime.isNotBlank()) {
+                // set_uname takes (release, version) arguments:
+                // release = buildTime, version = uname
                 runCommand(
-                    "set_uname ${shellQuote(uname)} ${shellQuote(buildTime)}",
+                    "set_uname ${shellQuote(buildTime)} ${shellQuote(uname)}",
                     showSuccessSnackbar = false,
                 )
             } else {
                 // Fall back to erasing the override when slot info is
                 // unavailable (e.g. encrypted boot image, unsupported device).
-                runCommand("del_uname", showSuccessSnackbar = false)
+                runCommand("del_uname all", showSuccessSnackbar = false)
             }
 
             if (success) {
@@ -774,8 +778,8 @@ class SuSFSScreenViewModel : ViewModel() {
             isRefreshing = false,
             enabled = statusEnabled,
             versionText = version,
-            unameValue = config.common.release.ifBlank { "default" },
-            buildTimeValue = config.common.version.ifBlank { "default" },
+            unameValue = config.common.version.ifBlank { "default" },
+            buildTimeValue = config.common.release.ifBlank { "default" },
             hideSuSMntsForNonSUProcs = config.common.hideSusMntsForNonSuProcs,
             hideMountsControlSupported = uiState.hideMountsControlSupported,
             susfsLogEnabled = config.common.enableSusfsLog,

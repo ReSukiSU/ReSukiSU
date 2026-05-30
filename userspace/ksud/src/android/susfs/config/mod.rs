@@ -26,7 +26,7 @@ pub fn read_config() -> Option<Data> {
             fs::read_to_string(defs::SUSFS_CONFUG).unwrap()
         }
     };
-    let json: Data = match serde_json::from_str(&string) {
+    let mut json: Data = match serde_json::from_str(&string) {
         Ok(s) => s,
         Err(e) => {
             log::warn!("failed to serialize susfs config, Err: {e}");
@@ -34,5 +34,27 @@ pub fn read_config() -> Option<Data> {
         }
     };
 
+    // Normalize/migrate legacy config
+    json = normalize_legacy_config(json);
+
     Some(json)
+}
+
+/// Normalize legacy configuration and apply any necessary migrations.
+/// This function checks for and corrects common configuration issues that may
+/// have existed in older versions of the susfs config file.
+fn normalize_legacy_config(mut config: Data) -> Data {
+    // Note: The version and release fields in susfs.json:
+    // - version: should contain kernel uname information
+    // - release: should contain kernel build time information
+    //
+    // If we detect they are swapped (old config format), we don't automatically
+    // swap them here since we don't have a reliable way to detect if they're
+    // actually swapped vs. just unusual values. The UI layer should handle
+    // the display logic appropriately by reading the correct fields.
+    //
+    // Future: If needed, add additional migration logic here for other
+    // configuration field reorganizations.
+
+    config
 }

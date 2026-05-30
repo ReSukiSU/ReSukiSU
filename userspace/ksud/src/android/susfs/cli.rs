@@ -91,11 +91,21 @@ pub enum SuSFSSubCommands {
         path: String,
     },
     /// Spoof uname for all processes, set string to 'default' to imply the function to use original string
+    /// Arguments:
+    ///   build-time  - The kernel build time information to spoof (e.g., "#1 SMP PREEMPT_DYNAMIC")
+    ///   uname       - The kernel uname information to spoof (e.g., "6.1.0-test")
     #[command(name = "set_uname")]
     SetUname { release: String, version: String },
-    /// Deleted Spoof uname for all processes, set string to 'default' to imply the function to use original string
+    /// Delete uname/build-time spoofing configuration
+    /// Arguments:
+    ///   version  - Reset only kernel uname information (stored in 'version' field)
+    ///   release  - Reset only kernel build time information (stored in 'release' field)
+    ///   all      - Reset both kernel uname and build time information
     #[command(name = "del_uname")]
-    DelUname,
+    DelUname {
+        #[arg(value_name = "TYPE")]
+        target: Option<String>,
+    },
     /// Enable/Disable susfs log in kernel
     #[command(name = "enable_log")]
     EnableLog {
@@ -360,8 +370,30 @@ pub fn run_main(command: SuSFSSubCommands) -> Result<()> {
         SuSFSSubCommands::DelSusKstatFullClone { path } => {
             config::operation::del_sus_kstat_full_clone(&path);
         }
-        SuSFSSubCommands::DelUname => {
-            config::operation::del_uname();
+        SuSFSSubCommands::DelUname { target } => {
+            let target_str = target.as_deref().unwrap_or("");
+            match target_str {
+                "version" => {
+                    config::operation::del_uname_selective("version")?;
+                }
+                "release" => {
+                    config::operation::del_uname_selective("release")?;
+                }
+                "all" => {
+                    config::operation::del_uname_selective("all")?;
+                }
+                "" => {
+                    return Err(anyhow::anyhow!(
+                        "del_uname requires an argument: version, release, or all"
+                    ));
+                }
+                _ => {
+                    return Err(anyhow::anyhow!(
+                        "invalid argument '{}': expected 'version', 'release', or 'all'",
+                        target_str
+                    ));
+                }
+            }
         }
         SuSFSSubCommands::DelSusMap { path } => {
             config::operation::del_sus_map(&path);

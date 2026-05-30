@@ -866,7 +866,7 @@ private fun BasicTab(
                                 icon = Icons.Filled.Delete,
                                 title = stringResource(R.string.susfs_reset_to_default),
                                 description = null,
-                                onClick = { viewModel.setUnameAndBuildTime("", "") }
+                                onClick = { viewModel.resetUnameAndBuildTime() }
                             )
                         }
                     }
