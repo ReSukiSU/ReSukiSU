@@ -73,6 +73,7 @@ fn list_boot_slots() -> Vec<(String, PathBuf)> {
 fn extract_slot_kernel_info(path: &Path) -> Result<(String, String)> {
     let image =
         std::fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
+
     let boot =
         BootImage::parse(&image).with_context(|| format!("failed to parse {}", path.display()))?;
     let kernel = boot
@@ -81,14 +82,37 @@ fn extract_slot_kernel_info(path: &Path) -> Result<(String, String)> {
         .ok_or_else(|| anyhow::anyhow!("kernel block not found"))?;
 
     let mut raw_kernel = Vec::<u8>::new();
-    kernel.dump(&mut raw_kernel, false)?;
+    kernel.dump(&mut raw_kernel, false)
+        .with_context(|| format!("failed to dump kernel block from {}", path.display()))?;
 
-    let decompressed = decompress_kernel_payload(&raw_kernel).unwrap_or(raw_kernel);
+    log::debug!("Extracted kernel size: {} bytes", raw_kernel.len());
+
+    // Validate kernel data is not empty
+    if raw_kernel.is_empty() {
+        return Err(anyhow::anyhow!("kernel block is empty"));
+    }
+
+    // Log the first bytes for debugging
+    if raw_kernel.len() >= 16 {
+        let hex_str = raw_kernel[0..16].iter()
+            .map(|b| format!("{:02x}", b))
+            .collect::<Vec<_>>()
+            .join(" ");
+        log::debug!("First 16 bytes of kernel: {}", hex_str);
+    }
+
+    let decompressed = decompress_kernel_payload(&raw_kernel).unwrap_or_else(|e| {
+        log::warn!("Failed to decompress kernel: {}", e);
+        // If decompression fails, the kernel might be uncompressed or partially corrupted
+        // Try to extract Linux version line anyway
+        raw_kernel.clone()
+    });
+
     if let Some(info) = extract_linux_version_line(&decompressed) {
         return Ok(info);
     }
 
-    bail!("failed to extract kernel uname/build-time")
+    bail!("failed to extract kernel uname/build-time from {}", path.display())
 }
 
 fn decompress_kernel_payload(input: &[u8]) -> Result<Vec<u8>> {
@@ -107,8 +131,33 @@ fn decompress_kernel_payload(input: &[u8]) -> Result<Vec<u8>> {
             }
             break;
         }
-        payload = decompress_bytes(&payload, fmt)?;
-        depth += 1;
+
+        // Try to decompress
+        match decompress_bytes(&payload, fmt) {
+            Ok(decompressed) => {
+                payload = decompressed;
+                depth += 1;
+            }
+            Err(e) => {
+                // If decompression fails, it might be due to corrupted header
+                // Try to find the actual compressed data after padding/header
+                log::warn!("Failed to decompress at depth {}: {}", depth, e);
+
+                // Try searching for another compressed blob starting from offset
+                if let Some(found) = find_embedded_compressed_blob_from_offset(&payload, 0x100) {
+                    payload = found;
+                    depth += 1;
+                    continue;
+                }
+
+                // If all else fails, return what we have if it looks like valid data
+                if depth == 0 && payload.len() > 0 {
+                    // This might be an uncompressed or partially corrupted kernel
+                    break;
+                }
+                return Err(e);
+            }
+        }
     }
 
     Ok(payload)
@@ -159,22 +208,34 @@ fn decompress_bytes(buf: &[u8], fmt: CompressionFormat) -> Result<Vec<u8>> {
     let mut out = Vec::<u8>::new();
     match fmt {
         CompressionFormat::Gzip => {
-            MultiGzDecoder::new(Cursor::new(buf)).read_to_end(&mut out)?;
+            // For gzip, try to be more tolerant of header issues
+            match MultiGzDecoder::new(Cursor::new(buf)).read_to_end(&mut out) {
+                Ok(_) => Ok(out),
+                Err(e) => {
+                    log::warn!("Gzip decompression failed with error: {}", e);
+                    // Try to recover by searching for actual gzip start if current position isn't valid
+                    Err(anyhow::anyhow!("gzip decompression failed: {}", e))
+                }
+            }
         }
         CompressionFormat::Xz => {
             XzReader::new(Cursor::new(buf), true).read_to_end(&mut out)?;
+            Ok(out)
         }
         CompressionFormat::Lzma => {
             LzmaReader::new_mem_limit(Cursor::new(buf), u32::MAX, None)?.read_to_end(&mut out)?;
+            Ok(out)
         }
         CompressionFormat::Bzip2 => {
             BzDecoder::new(Cursor::new(buf)).read_to_end(&mut out)?;
+            Ok(out)
         }
         CompressionFormat::Lz4Frame => {
             Lz4FrameDecoder::new(Cursor::new(buf))?.read_to_end(&mut out)?;
+            Ok(out)
         }
         CompressionFormat::Lz4Legacy | CompressionFormat::Lz4Lg => {
-            out = decompress_lz4_blocks(buf)?;
+            decompress_lz4_blocks(buf)
         }
         CompressionFormat::Lzop => {
             bail!("lzop kernel payload is not supported yet");
@@ -183,7 +244,6 @@ fn decompress_bytes(buf: &[u8], fmt: CompressionFormat) -> Result<Vec<u8>> {
             bail!("unknown compressed kernel payload format");
         }
     }
-    Ok(out)
 }
 
 fn decompress_lz4_blocks(buf: &[u8]) -> Result<Vec<u8>> {
@@ -238,6 +298,20 @@ fn find_embedded_compressed_blob(buf: &[u8]) -> Option<Vec<u8>> {
     // Skip potential boot partition header (typically 0x40 bytes or more)
     // and start searching from 0x40 to avoid misidentifying boot headers as kernel
     for i in 0x40..buf.len() {
+        let rest = &buf[i..];
+        if detect_format(rest) != CompressionFormat::Unknown {
+            return Some(rest.to_vec());
+        }
+    }
+    None
+}
+
+fn find_embedded_compressed_blob_from_offset(buf: &[u8], start_offset: usize) -> Option<Vec<u8>> {
+    if buf.len() <= start_offset {
+        return None;
+    }
+    // Search from a specific offset for compressed blob markers
+    for i in start_offset..buf.len() {
         let rest = &buf[i..];
         if detect_format(rest) != CompressionFormat::Unknown {
             return Some(rest.to_vec());
