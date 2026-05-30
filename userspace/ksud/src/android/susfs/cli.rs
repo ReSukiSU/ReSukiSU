@@ -92,10 +92,10 @@ pub enum SuSFSSubCommands {
     },
     /// Spoof uname for all processes, set string to 'default' to imply the function to use original string
     /// Arguments:
-    ///   build-time  - The kernel build time information to spoof (e.g., "#1 SMP PREEMPT_DYNAMIC")
-    ///   uname       - The kernel uname information to spoof (e.g., "6.1.0-test")
+    ///   version  - The kernel uname/release information to spoof (e.g., "6.1.0-test")
+    ///   release  - The kernel build time information to spoof (e.g., "#1 SMP PREEMPT_DYNAMIC")
     #[command(name = "set_uname")]
-    SetUname { release: String, version: String },
+    SetUname { version: String, release: String },
     /// Delete uname/build-time spoofing configuration
     /// Arguments:
     ///   version  - Reset only kernel uname information (stored in 'version' field)
@@ -276,9 +276,9 @@ pub fn run_main(command: SuSFSSubCommands) -> Result<()> {
             api::update_sus_kstat_full_clone(&path)?;
             config::operation::add_sus_kstat_full_clone(&path);
         }
-        SuSFSSubCommands::SetUname { release, version } => {
-            api::set_uname(&release, &version)?;
-            config::operation::set_uname(&release, &version);
+        SuSFSSubCommands::SetUname { version, release } => {
+            api::set_uname(&version, &release)?;
+            config::operation::set_uname(&version, &release);
         }
         SuSFSSubCommands::HideSusMntsForNonSuProcs { enabled } => {
             api::hide_sus_mnts_for_non_su_procs(enabled)?;
@@ -383,12 +383,17 @@ pub fn run_main(command: SuSFSSubCommands) -> Result<()> {
             let target_str = target.as_deref().unwrap_or("");
             match target_str {
                 "version" => {
+                    let release = config::read_config().unwrap_or_default().common.release;
+                    api::set_uname(&"default".to_string(), &release)?;
                     config::operation::del_uname_selective("version")?;
                 }
                 "release" => {
+                    let version = config::read_config().unwrap_or_default().common.version;
+                    api::set_uname(&version, &"default".to_string())?;
                     config::operation::del_uname_selective("release")?;
                 }
                 "all" => {
+                    api::set_uname(&"default".to_string(), &"default".to_string())?;
                     config::operation::del_uname_selective("all")?;
                 }
                 "" => {

@@ -863,6 +863,19 @@ private fun BasicTab(
                         }
                         item {
                             SettingsBaseWidget(
+                                icon = Icons.Filled.Check,
+                                title = stringResource(R.string.susfs_apply),
+                                description = null,
+                                onClick = {
+                                    viewModel.setUnameAndBuildTime(
+                                        unameState.text.toString(),
+                                        buildTimeState.text.toString(),
+                                    )
+                                }
+                            )
+                        }
+                        item {
+                            SettingsBaseWidget(
                                 icon = Icons.Filled.Delete,
                                 title = stringResource(R.string.susfs_reset_to_default),
                                 description = null,

@@ -22,13 +22,16 @@ impl Default for SusfsUname {
     }
 }
 
-pub fn set_uname<S>(release: &S, version: &S) -> Result<()>
+pub fn set_uname<S>(version: &S, release: &S) -> Result<()>
 where
     S: ToString,
 {
     let mut info = SusfsUname::default();
-    str_to_c_array(release.to_string().as_str(), &mut info.release);
-    str_to_c_array(version.to_string().as_str(), &mut info.version);
+    // ksud CLI stores version as the visible uname/release value and release
+    // as the kernel build-time string; the susfs ABI struct keeps the kernel
+    // field order (release, then version).
+    str_to_c_array(version.to_string().as_str(), &mut info.release);
+    str_to_c_array(release.to_string().as_str(), &mut info.version);
     info.err = ERR_CMD_NOT_SUPPORTED;
 
     susfs_ctl(&mut info, CMD_SUSFS_SET_UNAME);

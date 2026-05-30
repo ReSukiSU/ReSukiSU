@@ -29,7 +29,7 @@ pub fn on_post_fs_data() {
         return;
     };
 
-    if let Err(e) = api::set_uname(&config.common.release, &config.common.version) {
+    if let Err(e) = api::set_uname(&config.common.version, &config.common.release) {
         warn!("failed to set uname: {e}");
     }
 

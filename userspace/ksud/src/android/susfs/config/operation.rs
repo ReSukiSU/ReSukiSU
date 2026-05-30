@@ -44,7 +44,7 @@ pub fn set_hide_sus_mnts_for_non_su_procs(enabled: u8) {
     save_config(&config);
 }
 
-pub fn set_uname<S>(release: &S, version: &S)
+pub fn set_uname<S>(version: &S, release: &S)
 where
     S: ToString,
 {

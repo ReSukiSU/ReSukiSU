@@ -38,6 +38,83 @@ private val gson = GsonBuilder()
     .setPrettyPrinting()
     .create()
 
+private fun susfsConfigFile(): SuFile =
+    SuFile(CONFIG_PATH).apply { shell = getRootShell(globalMnt = true) }
+
+private fun ensureSusfsConfigDir(): Boolean =
+    runCatching {
+        SuFile("/data/adb/ksu").apply { shell = getRootShell(globalMnt = true) }.mkdirs()
+    }.getOrDefault(false)
+
+private fun normalizeSusfsConfig(config: SusfsConfig): SusfsConfig {
+    val common = runCatching { config.common }.getOrNull() ?: SusfsCommonConfig()
+    val susPath = runCatching { config.susPath }.getOrNull() ?: SusPathConfig()
+    val kstat = runCatching { config.kstat }.getOrNull() ?: SusfsKstatConfig()
+
+    return SusfsConfig(
+        common = SusfsCommonConfig(
+            version = safeString("default") { common.version },
+            release = safeString("default") { common.release },
+            avcSpoofing = safeBoolean { common.avcSpoofing },
+            enableSusfsLog = safeBoolean { common.enableSusfsLog },
+            hideSusMntsForNonSuProcs = safeBoolean { common.hideSusMntsForNonSuProcs },
+        ),
+        susPath = SusPathConfig(
+            susPathLoop = safeStringList { susPath.susPathLoop },
+            susPath = safeStringList { susPath.susPath },
+        ),
+        susMap = safeStringList { config.susMap },
+        kstat = SusfsKstatConfig(
+            susKstat = safeStringList { kstat.susKstat },
+            updateKstat = safeStringList { kstat.updateKstat },
+            fullClone = safeStringList { kstat.fullClone },
+            statically = safeStaticKstatEntries { kstat.statically },
+        ),
+    )
+}
+
+private inline fun safeString(default: String, block: () -> String): String =
+    runCatching { block().trim().ifBlank { default } }.getOrDefault(default)
+
+private inline fun safeBoolean(block: () -> Boolean): Boolean =
+    runCatching { block() }.getOrDefault(false)
+
+private inline fun safeStringList(block: () -> List<String>): List<String> =
+    runCatching {
+        block()
+            .mapNotNull { value ->
+                runCatching { value.trim().takeIf { it.isNotEmpty() } }.getOrNull()
+            }
+            .distinct()
+    }.getOrDefault(emptyList())
+
+private inline fun safeStaticKstatEntries(
+    block: () -> List<SuSFSStaticKstatEntry>
+): List<SuSFSStaticKstatEntry> =
+    runCatching {
+        block().mapNotNull { entry ->
+            runCatching {
+                val path = entry.path.trim()
+                if (path.isEmpty()) return@runCatching null
+                SuSFSStaticKstatEntry(
+                    path = path,
+                    ino = safeString("default") { entry.ino },
+                    dev = safeString("default") { entry.dev },
+                    nlink = safeString("default") { entry.nlink },
+                    size = safeString("default") { entry.size },
+                    atime = safeString("default") { entry.atime },
+                    atimeNsec = safeString("default") { entry.atimeNsec },
+                    mtime = safeString("default") { entry.mtime },
+                    mtimeNsec = safeString("default") { entry.mtimeNsec },
+                    ctime = safeString("default") { entry.ctime },
+                    ctimeNsec = safeString("default") { entry.ctimeNsec },
+                    blocks = safeString("default") { entry.blocks },
+                    blksize = safeString("default") { entry.blksize },
+                )
+            }.getOrNull()
+        }
+    }.getOrDefault(emptyList())
+
 @Keep
 data class SusfsConfig(
     val common: SusfsCommonConfig = SusfsCommonConfig(),
@@ -200,6 +277,12 @@ class SuSFSScreenViewModel : ViewModel() {
             return if (raw.isBlank() || raw == "default") kernelDefaultBuildTime else raw
         }
 
+    private fun currentUnameValueForApply(): String =
+        displayUnameValue.ifBlank { uiState.unameValue }
+
+    private fun currentBuildTimeValueForApply(): String =
+        displayBuildTimeValue.ifBlank { uiState.buildTimeValue }
+
     private var serviceConnection: ServiceConnection? = null
 
     /**
@@ -286,10 +369,8 @@ class SuSFSScreenViewModel : ViewModel() {
             val success = if (resolvedUname == "default" && resolvedBuildTime == "default") {
                 runCommand("del_uname all", showSuccessSnackbar = false)
             } else {
-                // set_uname takes (release, version) arguments:
-                // release = buildTime, version = uname
                 runCommand(
-                    "set_uname ${shellQuote(resolvedBuildTime)} ${shellQuote(resolvedUname)}",
+                    "set_uname ${shellQuote(resolvedUname)} ${shellQuote(resolvedBuildTime)}",
                     showSuccessSnackbar = false,
                 )
             }
@@ -313,10 +394,8 @@ class SuSFSScreenViewModel : ViewModel() {
             val buildTime = kernelDefaultBuildTime
 
             val success = if (uname.isNotBlank() && buildTime.isNotBlank()) {
-                // set_uname takes (release, version) arguments:
-                // release = buildTime, version = uname
                 runCommand(
-                    "set_uname ${shellQuote(buildTime)} ${shellQuote(uname)}",
+                    "set_uname ${shellQuote(uname)} ${shellQuote(buildTime)}",
                     showSuccessSnackbar = false,
                 )
             } else {
@@ -351,16 +430,22 @@ class SuSFSScreenViewModel : ViewModel() {
     }
 
     fun useSlotUname(uname: String) {
-        setUnameAndBuildTime(uname, uiState.buildTimeValue)
+        setUnameAndBuildTime(uname, currentBuildTimeValueForApply())
     }
 
     fun useSlotBuildTime(buildTime: String) {
-        setUnameAndBuildTime(uiState.unameValue, buildTime)
+        setUnameAndBuildTime(currentUnameValueForApply(), buildTime)
     }
 
     fun setAvcLogSpoofing(enabled: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
-            runCommand("enable_avc_log_spoofing ${if (enabled) 1 else 0}")
+            val previous = uiState.avcLogSpoofing
+            val success = runCommand("enable_avc_log_spoofing ${if (enabled) 1 else 0}")
+            if (success) {
+                uiState = uiState.copy(avcLogSpoofing = enabled)
+            } else {
+                uiState = uiState.copy(avcLogSpoofing = previous)
+            }
         }
     }
 
@@ -387,6 +472,7 @@ class SuSFSScreenViewModel : ViewModel() {
 
     fun setSusfsLogEnabled(enabled: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
+            val previous = uiState.susfsLogEnabled
             val success = runCommand("enable_log ${if (enabled) 1 else 0}")
             if (success) {
                 // Update UI state immediately
@@ -397,7 +483,7 @@ class SuSFSScreenViewModel : ViewModel() {
                 postToast(ksuApp.getString(R.string.reboot_to_apply))
             } else {
                 // Revert UI state on failure
-                uiState = uiState.copy(susfsLogEnabled = !enabled)
+                uiState = uiState.copy(susfsLogEnabled = previous)
             }
         }
     }
@@ -525,7 +611,7 @@ class SuSFSScreenViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 outputStream.use { os ->
-                    SuFileInputStream.open(SuFile(CONFIG_PATH)).use { it.copyTo(os) }
+                    SuFileInputStream.open(susfsConfigFile()).use { it.copyTo(os) }
                 }
             }.onFailure {
                 postToast(ksuApp.getString(R.string.operation_failed))
@@ -543,7 +629,7 @@ class SuSFSScreenViewModel : ViewModel() {
 
             val isValid = runCatching {
                 val jsonString = String(bytes, Charsets.UTF_8)
-                gson.fromJson(jsonString, SusfsConfig::class.java) != null
+                gson.fromJson(jsonString, SusfsConfig::class.java)?.let(::normalizeSusfsConfig) != null
             }.getOrDefault(false)
 
             if (!isValid) {
@@ -552,7 +638,8 @@ class SuSFSScreenViewModel : ViewModel() {
             }
 
             val writeOk = runCatching {
-                SuFileOutputStream.open(SuFile(CONFIG_PATH)).use { os ->
+                ensureSusfsConfigDir()
+                SuFileOutputStream.open(susfsConfigFile()).use { os ->
                     bytes.inputStream().use { it.copyTo(os) }
                 }
                 true
@@ -567,7 +654,8 @@ class SuSFSScreenViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             val defaultConfigStr = gson.toJson(SusfsConfig())
             val reset = runCatching {
-                SuFileOutputStream.open(SuFile(CONFIG_PATH)).use { os ->
+                ensureSusfsConfigDir()
+                SuFileOutputStream.open(susfsConfigFile()).use { os ->
                     os.write(defaultConfigStr.toByteArray(Charsets.UTF_8))
                     os.flush()
                 }
@@ -835,13 +923,15 @@ class SuSFSScreenViewModel : ViewModel() {
     }
 
     private suspend fun readSusfsConfig(): SusfsConfig? = withContext(Dispatchers.IO) {
-        val suFile = SuFile(CONFIG_PATH).apply { shell = getRootShell() }
+        val suFile = susfsConfigFile()
         if (!suFile.isFile) return@withContext null
 
         val content = SuFileInputStream.open(suFile).bufferedReader().use { it.readText() }
         if (content.isBlank()) return@withContext null
 
-        runCatching { gson.fromJson(content, SusfsConfig::class.java) }.getOrNull()
+        runCatching {
+            gson.fromJson(content, SusfsConfig::class.java)?.let(::normalizeSusfsConfig)
+        }.getOrNull()
     }
 
     private val systemPropertiesClass by lazy { @SuppressLint("PrivateApi") Class.forName("android.os.SystemProperties") }
