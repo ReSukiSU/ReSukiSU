@@ -1186,13 +1186,13 @@ int ksu_dup_policydb(struct policydb *old_db, struct policydb *new_db)
 
     new_db->len = old_db->len;
 
-    kvfree(data);
+    vfree(data);
     ret = len;
 
     return ret;
 
 out_free_data:
-    kvfree(data);
+    vfree(data);
     return ret;
 }
 

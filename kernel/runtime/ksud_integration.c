@@ -31,6 +31,7 @@
 #include <linux/module.h>
 #include <linux/jump_label.h>
 #include <linux/static_key.h>
+#include <linux/vmalloc.h>
 #include <linux/stat.h>
 
 #include "arch.h"
@@ -412,7 +413,7 @@ static void load_module_rc_once(void)
         goto out_close_file;
     }
 
-    module_rc_buf = kvmalloc(fsize, GFP_KERNEL);
+    module_rc_buf = vmalloc(fsize);
     if (!module_rc_buf) {
         pr_err("module rc: alloc %zu failed\n", fsize);
         goto out_close_file;
@@ -422,7 +423,7 @@ static void load_module_rc_once(void)
 
     if (r <= 0) {
         pr_err("module rc: read failed: %zd\n", r);
-        kvfree(module_rc_buf);
+        vfree(module_rc_buf);
         module_rc_buf = NULL;
         goto out_close_file;
     }
@@ -440,7 +441,7 @@ out_revert_creds:
 
 static void free_module_rc(void)
 {
-    kvfree(module_rc_buf);
+    vfree(module_rc_buf);
     module_rc_buf = NULL;
     module_rc_len = 0;
 }
