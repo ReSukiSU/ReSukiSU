@@ -452,7 +452,7 @@ static void ksu_selinux_hide_unhook()
         }
     }
 #else
-    ksu_unregister_setprocattr_lsm_hook();
+    stop_machine(ksu_unregister_setprocattr_lsm_hook, NULL, NULL);
 #endif
 }
 
@@ -514,7 +514,14 @@ static int ksu_selinux_hide_enable()
         return -ENOMEM;
     }
 
-    fake_state.ss->latest_granting = selinux_state.ss->latest_granting;
+    // In normal android
+    // Only set selinux policy once
+    // So let's just hardcode to 1 to avoid avdSeqNo detect
+    //
+    // fake_state.ss->latest_granting = selinux_state.ss->latest_granting;
+    // ^^ Don't do that, it will cause we may put an abnormal latest_granting to avdSeqNo
+    // Because there will be called in any time, and i am too lazy move it to before apply_kernelsu_rules :)
+    fake_state.ss->latest_granting = 1;
 
     rwlock_init(&(fake_state.ss->policy_rwlock));
     memcpy(&fake_state.ss->policydb, backup_policydb, sizeof(struct policydb));
@@ -602,7 +609,7 @@ out:
 #else
     // for 4.2-, We handle it in lsm_hooks.c
 
-    ksu_register_setprocattr_lsm_hook();
+    stop_machine(ksu_register_setprocattr_lsm_hook, NULL, NULL);
 #endif // #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
 
 #endif // #ifndef KSU_COMPAT_HAS_SUSFS_FEATURE_SELINUX_HIDE
@@ -634,10 +641,6 @@ static void ksu_selinux_hide_disable()
 
     ksu_selinux_hide_unhook();
 }
-
-static DEFINE_MUTEX(selinux_hide_mutex);
-bool ksu_selinux_hide_enabled __read_mostly = false;
-bool ksu_selinux_hide_running __read_mostly = false;
 
 static int selinux_hide_feature_get(u64 *value)
 {
@@ -1472,8 +1475,8 @@ static void security_dump_masked_av(struct context *scontext, struct context *tc
     if (!permissions)
         return;
 
-    tclass_name = sym_name(&policydb, SYM_CLASSES, tclass - 1);
-    tclass_dat = policydb.class_val_to_struct[tclass - 1];
+    tclass_name = sym_name(backup_policydb, SYM_CLASSES, tclass - 1);
+    tclass_dat = backup_policydb->class_val_to_struct[tclass - 1];
     common_dat = tclass_dat->comdatum;
 
     /* init permission_names */
@@ -1560,8 +1563,8 @@ static int constraint_expr_eval(struct context *scontext, struct context *tconte
             case CEXPR_ROLE:
                 val1 = scontext->role;
                 val2 = tcontext->role;
-                r1 = policydb.role_val_to_struct[val1 - 1];
-                r2 = policydb.role_val_to_struct[val2 - 1];
+                r1 = backup_policydb->role_val_to_struct[val1 - 1];
+                r2 = backup_policydb->role_val_to_struct[val2 - 1];
                 switch (e->op) {
                 case CEXPR_DOM:
                     s[++sp] = ebitmap_get_bit(&r1->dominates, val2 - 1);
@@ -1696,13 +1699,13 @@ static void type_attribute_bounds_av(struct context *scontext, struct context *t
     struct type_datum *target;
     u32 masked = 0;
 
-    source = flex_array_get_ptr(policydb.type_val_to_struct_array, scontext->type - 1);
+    source = flex_array_get_ptr(backup_policydb->type_val_to_struct_array, scontext->type - 1);
     BUG_ON(!source);
 
     if (!source->bounds)
         return;
 
-    target = flex_array_get_ptr(policydb.type_val_to_struct_array, tcontext->type - 1);
+    target = flex_array_get_ptr(backup_policydb->type_val_to_struct_array, tcontext->type - 1);
     BUG_ON(!target);
 
     memset(&lo_avd, 0, sizeof(lo_avd));
@@ -1735,6 +1738,13 @@ static void avd_init(struct av_decision *avd)
     avd->allowed = 0;
     avd->auditallow = 0;
     avd->auditdeny = 0xffffffff;
+
+    // hardcode 1 to avoid detect for "avdSeqNo"
+    // Normal android only set selinux policy once,
+    // So there can be simple hardcode to 1
+    // For other kernel version
+    // kernel with selinux_policy backup real seqno before KernelSU apply rules
+    // kernel with selinux_state hardcode to 1 when userspace call selinux hide enable
     avd->seqno = 1;
     avd->flags = 0;
 }
@@ -1773,13 +1783,13 @@ static void context_struct_compute_av(struct context *scontext, struct context *
         xperms->len = 0;
     }
 
-    if (unlikely(!tclass || tclass > policydb.p_classes.nprim)) {
+    if (unlikely(!tclass || tclass > backup_policydb->p_classes.nprim)) {
         if (printk_ratelimit())
             printk(KERN_WARNING "SELinux:  Invalid class %hu\n", tclass);
         return;
     }
 
-    tclass_datum = policydb.class_val_to_struct[tclass - 1];
+    tclass_datum = backup_policydb->class_val_to_struct[tclass - 1];
 
     /*
 	 * If a specific type enforcement rule was defined for
@@ -1787,9 +1797,9 @@ static void context_struct_compute_av(struct context *scontext, struct context *
 	 */
     avkey.target_class = tclass;
     avkey.specified = AVTAB_AV | AVTAB_XPERMS;
-    sattr = flex_array_get(policydb.type_attr_map_array, scontext->type - 1);
+    sattr = flex_array_get(backup_policydb->type_attr_map_array, scontext->type - 1);
     BUG_ON(!sattr);
-    tattr = flex_array_get(policydb.type_attr_map_array, tcontext->type - 1);
+    tattr = flex_array_get(backup_policydb->type_attr_map_array, tcontext->type - 1);
     BUG_ON(!tattr);
     ebitmap_for_each_positive_bit(sattr, snode, i)
     {
@@ -1797,7 +1807,7 @@ static void context_struct_compute_av(struct context *scontext, struct context *
         {
             avkey.source_type = i + 1;
             avkey.target_type = j + 1;
-            for (node = avtab_search_node(&policydb.te_avtab, &avkey); node;
+            for (node = avtab_search_node(&backup_policydb->te_avtab, &avkey); node;
                  node = avtab_search_node_next(node, avkey.specified)) {
                 if (node->key.specified == AVTAB_ALLOWED)
                     avd->allowed |= node->datum.u.data;
@@ -1810,7 +1820,7 @@ static void context_struct_compute_av(struct context *scontext, struct context *
             }
 
             /* Check conditional av table for additional permissions */
-            cond_compute_av(&policydb.te_cond_avtab, &avkey, avd, xperms);
+            cond_compute_av(&backup_policydb->te_cond_avtab, &avkey, avd, xperms);
         }
     }
 
@@ -1832,14 +1842,14 @@ static void context_struct_compute_av(struct context *scontext, struct context *
 	 * role is changing, then check the (current_role, new_role)
 	 * pair.
 	 */
-    if (tclass == policydb.process_class && (avd->allowed & policydb.process_trans_perms) &&
+    if (tclass == backup_policydb->process_class && (avd->allowed & backup_policydb->process_trans_perms) &&
         scontext->role != tcontext->role) {
-        for (ra = policydb.role_allow; ra; ra = ra->next) {
+        for (ra = backup_policydb->role_allow; ra; ra = ra->next) {
             if (scontext->role == ra->role && tcontext->role == ra->new_role)
                 break;
         }
         if (!ra)
-            avd->allowed &= ~policydb.process_trans_perms;
+            avd->allowed &= ~backup_policydb->process_trans_perms;
     }
 
     /*
@@ -1876,9 +1886,9 @@ static int context_struct_to_string(struct context *context, char **scontext, u3
     }
 
     /* Compute the size of the context. */
-    *scontext_len += strlen(sym_name(&policydb, SYM_USERS, context->user - 1)) + 1;
-    *scontext_len += strlen(sym_name(&policydb, SYM_ROLES, context->role - 1)) + 1;
-    *scontext_len += strlen(sym_name(&policydb, SYM_TYPES, context->type - 1)) + 1;
+    *scontext_len += strlen(sym_name(backup_policydb, SYM_USERS, context->user - 1)) + 1;
+    *scontext_len += strlen(sym_name(backup_policydb, SYM_ROLES, context->role - 1)) + 1;
+    *scontext_len += strlen(sym_name(backup_policydb, SYM_TYPES, context->type - 1)) + 1;
     *scontext_len += mls_compute_context_len(context);
 
     if (!scontext)
@@ -1893,9 +1903,9 @@ static int context_struct_to_string(struct context *context, char **scontext, u3
     /*
 	 * Copy the user name, role name and type name into the context.
 	 */
-    scontextp +=
-        sprintf(scontextp, "%s:%s:%s", sym_name(&policydb, SYM_USERS, context->user - 1),
-                sym_name(&policydb, SYM_ROLES, context->role - 1), sym_name(&policydb, SYM_TYPES, context->type - 1));
+    scontextp += sprintf(scontextp, "%s:%s:%s", sym_name(backup_policydb, SYM_USERS, context->user - 1),
+                         sym_name(backup_policydb, SYM_ROLES, context->role - 1),
+                         sym_name(backup_policydb, SYM_TYPES, context->type - 1));
 
     mls_sid_to_context(context, &scontextp);
 
@@ -2053,7 +2063,7 @@ static void ksu_security_compute_av_user(u32 ssid, u32 tsid, u16 tclass, struct 
     }
 
     /* permissive domain? */
-    if (ebitmap_get_bit(&policydb.permissive_map, scontext->type))
+    if (ebitmap_get_bit(&backup_policydb->permissive_map, scontext->type))
         avd->flags |= AVD_FLAGS_PERMISSIVE;
 
     tcontext = sidtab_search(backup_sidtab, tsid);
@@ -2063,7 +2073,7 @@ static void ksu_security_compute_av_user(u32 ssid, u32 tsid, u16 tclass, struct 
     }
 
     if (unlikely(!tclass)) {
-        if (policydb.allow_unknown)
+        if (backup_policydb->allow_unknown)
             goto allow;
         goto out;
     }
