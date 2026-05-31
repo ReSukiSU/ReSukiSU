@@ -15,7 +15,7 @@ mod restorecon;
 mod sepolicy;
 mod su;
 mod sulog;
-mod susfs;
+pub mod susfs;
 mod umount_config;
 mod unload;
 pub mod utils;
