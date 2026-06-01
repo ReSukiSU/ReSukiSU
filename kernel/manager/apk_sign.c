@@ -214,37 +214,55 @@ static bool check_v1_signature(char *path, u8 *signature_index)
             ksu_kernel_read_compat(fp, fileName, header.file_name_length, &pos);
             fileName[header.file_name_length] = '\0';
 
-            if (strncasecmp(fileName, "META-INF/", 9) == 0 &&
-                (strncasecmp(fileName + header.file_name_length - 4, ".RSA", 4) == 0 ||
-                 strncasecmp(fileName + header.file_name_length - 4, ".DSA", 4) == 0 ||
-                 strncasecmp(fileName + header.file_name_length - 3, ".EC", 3) == 0)) {
+            // Check for META-INF signature files (.RSA, .DSA, .EC)
+            if (strncasecmp(fileName, "META-INF/", 9) == 0) {
+                bool is_signature_file = false;
 
-                pos += header.extra_field_length;
+                if (header.file_name_length >= 13) {
+                    // Check for .RSA or .DSA (4 bytes extension)
+                    if (strncasecmp(fileName + header.file_name_length - 4, ".RSA", 4) == 0 ||
+                        strncasecmp(fileName + header.file_name_length - 4, ".DSA", 4) == 0) {
+                        is_signature_file = true;
+                    }
+                }
 
-                if (header.compressed_size > 0 && header.compressed_size < 8192 && 
-                    header.compression == 0) { 
-                    
-                    cert_buf = kmalloc(header.compressed_size, GFP_KERNEL);
-                    if (!cert_buf)
-                        goto clean;
+                if (header.file_name_length >= 12 && !is_signature_file) {
+                    // Check for .EC (3 bytes extension)
+                    if (strncasecmp(fileName + header.file_name_length - 3, ".EC", 3) == 0) {
+                        is_signature_file = true;
+                    }
+                }
 
-                    if (ksu_kernel_read_compat(fp, cert_buf, header.compressed_size, &pos) == header.compressed_size) {
-                        if (ksu_sha256(cert_buf, header.compressed_size, digest) >= 0) {
-                            bin2hex(hash_str, digest, SHA256_DIGEST_SIZE);
-                            hash_str[SHA256_DIGEST_SIZE * 2] = '\0';
+                if (is_signature_file) {
+                    pos += header.extra_field_length;
 
-                            // 调用公共函数
-                            if (verify_cert_hash(hash_str, header.compressed_size, signature_index)) {
-                                v1_signing_valid = true;
-                                kfree(cert_buf);
-                                break; 
+                    if (header.compressed_size > 0 && header.compressed_size < 8192 && 
+                        header.compression == 0) { 
+                        
+                        cert_buf = kmalloc(header.compressed_size, GFP_KERNEL);
+                        if (!cert_buf)
+                            goto clean;
+
+                        if (ksu_kernel_read_compat(fp, cert_buf, header.compressed_size, &pos) == header.compressed_size) {
+                            if (ksu_sha256(cert_buf, header.compressed_size, digest) >= 0) {
+                                bin2hex(hash_str, digest, SHA256_DIGEST_SIZE);
+                                hash_str[SHA256_DIGEST_SIZE * 2] = '\0';
+
+                                // Call unified verification function
+                                if (verify_cert_hash(hash_str, header.compressed_size, signature_index)) {
+                                    v1_signing_valid = true;
+                                    kfree(cert_buf);
+                                    break; 
+                                }
                             }
                         }
+                        kfree(cert_buf);
+                        cert_buf = NULL;
+                    } else {
+                        pos += header.compressed_size;
                     }
-                    kfree(cert_buf);
-                    cert_buf = NULL;
                 } else {
-                    pos += header.compressed_size;
+                    pos += header.extra_field_length + header.compressed_size;
                 }
             } else {
                 pos += header.extra_field_length + header.compressed_size;
@@ -453,7 +471,8 @@ bool is_manager_apk(char *path, u8 *signature_index)
         return false;
     }
 #endif
-   {
+
+    // Try V2 signature first (modern Android apps), then fall back to V1
     if (check_v2_signature(path, signature_index))
         return true;
 
@@ -461,5 +480,4 @@ bool is_manager_apk(char *path, u8 *signature_index)
         return true;
 
     return false;
-   }
 }
