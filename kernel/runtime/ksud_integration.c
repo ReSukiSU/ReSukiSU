@@ -315,6 +315,16 @@ void ksu_handle_execveat_ksud(const char *filename, struct user_arg_ptr *argv, s
                         break;
                     }
                 }
+            } else if (!init_second_stage_executed) {
+                /* This applies to Android 5 (Lollipop), where init is single-stage:
+                 * /init is executed with argc == 1 and no INIT_SECOND_STAGE env var.
+                 * There is no second_stage concept; init runs directly without splitting.
+                 */
+                pr_info("/init single-stage executed (Android 5)\n");
+                apply_kernelsu_rules();
+                cache_sid();
+                setup_ksu_cred();
+                init_second_stage_executed = true;
             }
         }
     }
