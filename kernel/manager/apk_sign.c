@@ -305,14 +305,6 @@ static __always_inline bool check_v2_signature(char *path, u8 *signature_index)
         v2_signing_valid = false;
     }
 
-    if (v2_signing_valid) {
-        int has_v1_signing = has_v1_signature_file(fp);
-        if (has_v1_signing) {
-            pr_err("Unexpected v1 signature scheme found!\n");
-            filp_close(fp, 0);
-            return false;
-        }
-    }
 clean:
     filp_close(fp, 0);
 
