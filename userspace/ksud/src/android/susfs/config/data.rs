@@ -6,7 +6,7 @@ fn default_uname_value() -> String {
     "default".to_string()
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 pub struct Data {
     #[serde(default)]
     pub common: Common,
@@ -32,7 +32,7 @@ pub struct Common {
     pub hide_sus_mnts_for_non_su_procs: bool,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 pub struct SusPath {
     #[serde(default)]
     pub sus_path_loop: HashSet<String>,
@@ -41,7 +41,7 @@ pub struct SusPath {
 }
 
 #[allow(clippy::struct_field_names)]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 pub struct SusKstat {
     #[serde(default)]
     pub sus_kstat: HashSet<String>,
@@ -83,17 +83,6 @@ pub struct SusKstatStatically {
     pub blksize: String,
 }
 
-impl Default for Data {
-    fn default() -> Self {
-        Self {
-            common: Common::default(),
-            sus_path: SusPath::default(),
-            sus_map: HashSet::new(),
-            kstat: SusKstat::default(),
-        }
-    }
-}
-
 impl Default for Common {
     fn default() -> Self {
         Self {
@@ -102,26 +91,6 @@ impl Default for Common {
             avc_spoofing: false,
             enable_susfs_log: false,
             hide_sus_mnts_for_non_su_procs: false,
-        }
-    }
-}
-
-impl Default for SusPath {
-    fn default() -> Self {
-        Self {
-            sus_path_loop: HashSet::new(),
-            sus_path: HashSet::new(),
-        }
-    }
-}
-
-impl Default for SusKstat {
-    fn default() -> Self {
-        Self {
-            sus_kstat: HashSet::new(),
-            update_kstat: HashSet::new(),
-            full_clone: HashSet::new(),
-            statically: HashSet::new(),
         }
     }
 }

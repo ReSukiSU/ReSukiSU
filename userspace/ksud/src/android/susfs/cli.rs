@@ -443,7 +443,10 @@ pub fn run_main(command: SuSFSSubCommands) -> Result<()> {
                 &blksize,
             );
         }
-        SuSFSSubCommands::SlotInfo { boot_image, verbose } => {
+        SuSFSSubCommands::SlotInfo {
+            boot_image,
+            verbose,
+        } => {
             if let Some(path) = boot_image {
                 slot_info::analyze_boot_image(&path, verbose)?;
             } else {

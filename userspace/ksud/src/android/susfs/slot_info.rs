@@ -24,7 +24,7 @@ const LZ4_FRAME_MAGIC_2: [u8; 4] = [0x04, 0x22, 0x4d, 0x18];
 
 // Global verbose flag for debug output
 thread_local! {
-    static VERBOSE: std::cell::RefCell<bool> = std::cell::RefCell::new(false);
+    static VERBOSE: std::cell::RefCell<bool> = const { std::cell::RefCell::new(false) };
 }
 
 #[derive(Serialize)]
@@ -101,7 +101,11 @@ pub fn show_slot_info_json(verbose: bool) -> Result<()> {
     let mut result = Vec::<SlotInfo>::new();
 
     for (slot_name, slot_path) in list_boot_slots() {
-        debug_log(&format!("Processing slot: {} at {}", slot_name, slot_path.display()));
+        debug_log(&format!(
+            "Processing slot: {} at {}",
+            slot_name,
+            slot_path.display()
+        ));
         match extract_slot_kernel_info(&slot_path) {
             Ok((uname, build_time)) => {
                 info_log(&format!("Successfully extracted info from {}", slot_name));
@@ -135,7 +139,10 @@ pub fn analyze_boot_image(path: &str, verbose: bool) -> Result<()> {
         bail!("Boot image file not found: {}", path);
     }
 
-    debug_log(&format!("File exists, size: {} bytes", std::fs::metadata(&path_buf)?.len()));
+    debug_log(&format!(
+        "File exists, size: {} bytes",
+        std::fs::metadata(&path_buf)?.len()
+    ));
 
     match extract_slot_kernel_info(&path_buf) {
         Ok((uname, build_time)) => {
@@ -195,24 +202,37 @@ fn extract_slot_kernel_info(path: &Path) -> Result<(String, String)> {
     let mut raw_kernel = Vec::<u8>::new();
     match kernel.dump(&mut raw_kernel, false) {
         Ok(_) => {
-            debug_log(&format!("Extracted kernel block, size: {} bytes", raw_kernel.len()));
+            debug_log(&format!(
+                "Extracted kernel block, size: {} bytes",
+                raw_kernel.len()
+            ));
         }
         Err(dump_err) => {
-            warn_log(&format!("Failed to dump kernel block normally: {}", dump_err));
+            warn_log(&format!(
+                "Failed to dump kernel block normally: {}",
+                dump_err
+            ));
             debug_log("Attempting fallback direct kernel extraction from boot image buffer");
 
             // Fallback: try to extract kernel data directly from the boot image buffer
             // This handles abnormal boot images that the library's dump() method rejects
             match extract_kernel_fallback(&image, &boot) {
                 Ok(fallback_kernel) => {
-                    debug_log(&format!("Fallback extraction succeeded, size: {} bytes", fallback_kernel.len()));
+                    debug_log(&format!(
+                        "Fallback extraction succeeded, size: {} bytes",
+                        fallback_kernel.len()
+                    ));
                     raw_kernel = fallback_kernel;
                 }
                 Err(fallback_err) => {
-                    warn_log(&format!("Fallback extraction also failed: {}", fallback_err));
+                    warn_log(&format!(
+                        "Fallback extraction also failed: {}",
+                        fallback_err
+                    ));
                     return Err(anyhow::anyhow!(
                         "failed to extract kernel block: primary: {}, fallback: {}",
-                        dump_err, fallback_err
+                        dump_err,
+                        fallback_err
                     ));
                 }
             }
@@ -226,7 +246,8 @@ fn extract_slot_kernel_info(path: &Path) -> Result<(String, String)> {
 
     // Log the first bytes for debugging
     if raw_kernel.len() >= 16 {
-        let hex_str = raw_kernel[0..16].iter()
+        let hex_str = raw_kernel[0..16]
+            .iter()
             .map(|b| format!("{:02x}", b))
             .collect::<Vec<_>>()
             .join(" ");
@@ -234,7 +255,10 @@ fn extract_slot_kernel_info(path: &Path) -> Result<(String, String)> {
 
         // Try to detect format at offset 0
         let fmt = detect_format(&raw_kernel);
-        debug_log(&format!("Detected compression format at offset 0x00: {}", fmt));
+        debug_log(&format!(
+            "Detected compression format at offset 0x00: {}",
+            fmt
+        ));
     }
 
     let decompressed = decompress_kernel_payload(&raw_kernel).unwrap_or_else(|e| {
@@ -250,7 +274,10 @@ fn extract_slot_kernel_info(path: &Path) -> Result<(String, String)> {
         return Ok(info);
     }
 
-    bail!("failed to extract kernel uname/build-time from {}", path.display())
+    bail!(
+        "failed to extract kernel uname/build-time from {}",
+        path.display()
+    )
 }
 
 // Fallback kernel extraction when android-bootimg library's dump() fails
@@ -260,14 +287,17 @@ fn extract_kernel_fallback(boot_image: &[u8], _boot: &BootImage) -> Result<Vec<u
 
     // Last resort: try to extract from boot image buffer directly
     // Search for common kernel magic bytes within the image
-    debug_log(&format!("Searching for kernel signatures in {} byte boot image buffer", boot_image.len()));
+    debug_log(&format!(
+        "Searching for kernel signatures in {} byte boot image buffer",
+        boot_image.len()
+    ));
 
     // Look for compressed kernel signatures - try all of them, not just the first match
     let search_signatures = vec![
-        (&[0x1fu8, 0x8bu8] as &[u8], "GZIP"),           // GZIP header
-        (&[0xfdu8, 0x37u8, 0x7au8, 0x58u8, 0x5au8] as &[u8], "XZ"),  // XZ header
-        (&[0x89u8, 0x4cu8, 0x5au8, 0x4fu8] as &[u8], "LZOP"),      // LZOP header
-        (&[0x42u8, 0x5au8, 0x68u8] as &[u8], "BZIP2"),   // BZIP2 header
+        (&[0x1fu8, 0x8bu8] as &[u8], "GZIP"), // GZIP header
+        (&[0xfdu8, 0x37u8, 0x7au8, 0x58u8, 0x5au8] as &[u8], "XZ"), // XZ header
+        (&[0x89u8, 0x4cu8, 0x5au8, 0x4fu8] as &[u8], "LZOP"), // LZOP header
+        (&[0x42u8, 0x5au8, 0x68u8] as &[u8], "BZIP2"), // BZIP2 header
         (&[0x04u8, 0x22u8, 0x4du8, 0x18u8] as &[u8], "LZ4_FRAME"), // LZ4 frame magic
     ];
 
@@ -278,7 +308,9 @@ fn extract_kernel_fallback(boot_image: &[u8], _boot: &BootImage) -> Result<Vec<u
 
         // Search for all occurrences of this signature in the buffer
         while search_offset < boot_image.len() {
-            if let Some(relative_offset) = find_signature_in_buffer(&boot_image[search_offset..], signature) {
+            if let Some(relative_offset) =
+                find_signature_in_buffer(&boot_image[search_offset..], signature)
+            {
                 let absolute_offset = search_offset + relative_offset;
                 found_count += 1;
 
@@ -295,7 +327,9 @@ fn extract_kernel_fallback(boot_image: &[u8], _boot: &BootImage) -> Result<Vec<u
                     if extracted.len() > 256 {
                         debug_log(&format!(
                             "Fallback extraction candidate: {} bytes from offset 0x{:x}, signature {}",
-                            extracted.len(), absolute_offset, name
+                            extracted.len(),
+                            absolute_offset,
+                            name
                         ));
 
                         // For the first valid occurrence of each signature type, return it
@@ -310,7 +344,9 @@ fn extract_kernel_fallback(boot_image: &[u8], _boot: &BootImage) -> Result<Vec<u
                     } else {
                         debug_log(&format!(
                             "Skipping {} at 0x{:x}: too small ({} bytes)",
-                            name, absolute_offset, extracted.len()
+                            name,
+                            absolute_offset,
+                            extracted.len()
                         ));
                     }
                 }
@@ -323,7 +359,10 @@ fn extract_kernel_fallback(boot_image: &[u8], _boot: &BootImage) -> Result<Vec<u
         }
 
         if found_count > 0 {
-            debug_log(&format!("Found {} total {} signature(s) in boot image", found_count, name));
+            debug_log(&format!(
+                "Found {} total {} signature(s) in boot image",
+                found_count, name
+            ));
         }
     }
 
@@ -335,14 +374,18 @@ fn extract_kernel_fallback(boot_image: &[u8], _boot: &BootImage) -> Result<Vec<u
         ));
         if offset < boot_image.len() {
             let extracted = boot_image[offset..].to_vec();
-            debug_log(&format!("Fallback extraction (uncompressed): {} bytes", extracted.len()));
+            debug_log(&format!(
+                "Fallback extraction (uncompressed): {} bytes",
+                extracted.len()
+            ));
             return Ok(extracted);
         }
     }
 
     // Debug: log first few KB of boot image to understand structure
     if boot_image.len() >= 512 {
-        let hex_str = boot_image[0..512].iter()
+        let hex_str = boot_image[0..512]
+            .iter()
             .map(|b| format!("{:02x}", b))
             .collect::<Vec<_>>()
             .join(" ");
@@ -362,11 +405,17 @@ fn find_signature_in_buffer(buffer: &[u8], signature: &[u8]) -> Option<usize> {
 }
 
 fn decompress_kernel_payload(input: &[u8]) -> Result<Vec<u8>> {
-    debug_log(&format!("Starting kernel payload decompression, size: {} bytes", input.len()));
+    debug_log(&format!(
+        "Starting kernel payload decompression, size: {} bytes",
+        input.len()
+    ));
 
     // Detect initial format and log it
     let initial_fmt = detect_format(input);
-    debug_log(&format!("Initial detected compression format: {}", initial_fmt));
+    debug_log(&format!(
+        "Initial detected compression format: {}",
+        initial_fmt
+    ));
     info_log(&format!("Kernel compression format: {}", initial_fmt));
 
     let mut payload = input.to_vec();
@@ -374,7 +423,10 @@ fn decompress_kernel_payload(input: &[u8]) -> Result<Vec<u8>> {
 
     while depth < 3 {
         let fmt = detect_format(&payload);
-        debug_log(&format!("Decompression iteration {}: format={}", depth, fmt));
+        debug_log(&format!(
+            "Decompression iteration {}: format={}",
+            depth, fmt
+        ));
 
         if fmt == CompressionFormat::Unknown {
             debug_log("Unknown format, searching for embedded compressed blob from 0x40");
@@ -391,11 +443,18 @@ fn decompress_kernel_payload(input: &[u8]) -> Result<Vec<u8>> {
         }
 
         // Try to decompress
-        debug_log(&format!("Attempting {} decompression at depth {}", fmt, depth));
+        debug_log(&format!(
+            "Attempting {} decompression at depth {}",
+            fmt, depth
+        ));
         match decompress_bytes(&payload, fmt) {
             Ok(decompressed) => {
-                debug_log(&format!("Successfully decompressed {}: {} -> {} bytes",
-                    fmt, payload.len(), decompressed.len()));
+                debug_log(&format!(
+                    "Successfully decompressed {}: {} -> {} bytes",
+                    fmt,
+                    payload.len(),
+                    decompressed.len()
+                ));
                 payload = decompressed;
                 depth += 1;
             }
@@ -414,7 +473,7 @@ fn decompress_kernel_payload(input: &[u8]) -> Result<Vec<u8>> {
                 }
 
                 // If all else fails, return what we have if it looks like valid data
-                if depth == 0 && payload.len() > 0 {
+                if depth == 0 && !payload.is_empty() {
                     // This might be an uncompressed or partially corrupted kernel
                     debug_log("Returning uncompressed/partially corrupted kernel data");
                     break;
@@ -424,7 +483,10 @@ fn decompress_kernel_payload(input: &[u8]) -> Result<Vec<u8>> {
                 if depth == 0 {
                     debug_log("Attempting deep search for valid compressed data in entire buffer");
                     if let Some(deep_payload) = try_deep_search_compressed(&payload) {
-                        debug_log(&format!("Deep search found valid data: {} bytes", deep_payload.len()));
+                        debug_log(&format!(
+                            "Deep search found valid data: {} bytes",
+                            deep_payload.len()
+                        ));
                         payload = deep_payload;
                         break;
                     }
@@ -435,7 +497,10 @@ fn decompress_kernel_payload(input: &[u8]) -> Result<Vec<u8>> {
         }
     }
 
-    debug_log(&format!("Decompression complete, final payload: {} bytes", payload.len()));
+    debug_log(&format!(
+        "Decompression complete, final payload: {} bytes",
+        payload.len()
+    ));
     Ok(payload)
 }
 
@@ -454,14 +519,14 @@ fn try_deep_search_compressed(buf: &[u8]) -> Option<Vec<u8>> {
 
         // Try raw deflate decompression from this offset
         let mut out = Vec::<u8>::new();
-        if let Ok(_) = DeflateDecoder::new(&buf[offset..]).read_to_end(&mut out) {
-            if !out.is_empty() && out.len() > 512 {
-                debug_log(&format!(
-                    "Deep search found valid deflate at offset 0x{:x}: {} bytes",
-                    offset, out.len()
-                ));
-                return Some(out);
-            }
+        if DeflateDecoder::new(&buf[offset..]).read_to_end(&mut out).is_ok()
+            && !out.is_empty() && out.len() > 512 {
+            debug_log(&format!(
+                "Deep search found valid deflate at offset 0x{:x}: {} bytes",
+                offset,
+                out.len()
+            ));
+            return Some(out);
         }
     }
 
@@ -527,11 +592,17 @@ fn decompress_bytes(buf: &[u8], fmt: CompressionFormat) -> Result<Vec<u8>> {
                     debug_log("Attempting raw deflate decompression to handle invalid gzip header");
                     match try_raw_deflate_decompression(buf) {
                         Ok(decompressed) => {
-                            debug_log(&format!("Raw deflate decompression succeeded: {} bytes", decompressed.len()));
+                            debug_log(&format!(
+                                "Raw deflate decompression succeeded: {} bytes",
+                                decompressed.len()
+                            ));
                             return Ok(decompressed);
                         }
                         Err(deflate_err) => {
-                            warn_log(&format!("Raw deflate decompression also failed: {}", deflate_err));
+                            warn_log(&format!(
+                                "Raw deflate decompression also failed: {}",
+                                deflate_err
+                            ));
                         }
                     }
 
@@ -593,15 +664,22 @@ fn decompress_lz4_blocks(buf: &[u8]) -> Result<Vec<u8>> {
             u32::from_le_bytes([buf[pos], buf[pos + 1], buf[pos + 2], buf[pos + 3]]) as usize;
         pos += 4;
         if block_size == 0 || pos + block_size > buf.len() {
-            debug_log(&format!("LZ4 block stream ended after {} blocks", block_count));
+            debug_log(&format!(
+                "LZ4 block stream ended after {} blocks",
+                block_count
+            ));
             break;
         }
 
         let block = &buf[pos..pos + block_size];
         let decompressed = lz4_block::decompress(block, Some(8 * 1024 * 1024))
             .context("lz4 legacy block decompression failed")?;
-        debug_log(&format!("Decompressed LZ4 block {}: {} -> {} bytes",
-            block_count, block_size, decompressed.len()));
+        debug_log(&format!(
+            "Decompressed LZ4 block {}: {} -> {} bytes",
+            block_count,
+            block_size,
+            decompressed.len()
+        ));
         out.extend_from_slice(&decompressed);
         pos += block_size;
         block_count += 1;
@@ -610,7 +688,11 @@ fn decompress_lz4_blocks(buf: &[u8]) -> Result<Vec<u8>> {
     if out.is_empty() {
         bail!("empty lz4 output");
     }
-    debug_log(&format!("LZ4 decompression complete: {} blocks, {} bytes total", block_count, out.len()));
+    debug_log(&format!(
+        "LZ4 decompression complete: {} blocks, {} bytes total",
+        block_count,
+        out.len()
+    ));
     Ok(out)
 }
 
@@ -627,11 +709,17 @@ fn try_raw_deflate_decompression(buf: &[u8]) -> Result<Vec<u8>> {
 
     for skip_size in header_sizes_to_try.iter() {
         if *skip_size >= buf.len() {
-            debug_log(&format!("Skipping offset 0x{:x}: buffer too small", skip_size));
+            debug_log(&format!(
+                "Skipping offset 0x{:x}: buffer too small",
+                skip_size
+            ));
             continue;
         }
 
-        debug_log(&format!("Trying raw deflate decompression skipping first 0x{:x} bytes", skip_size));
+        debug_log(&format!(
+            "Trying raw deflate decompression skipping first 0x{:x} bytes",
+            skip_size
+        ));
 
         let mut out = Vec::<u8>::new();
         match DeflateDecoder::new(&buf[*skip_size..]).read_to_end(&mut out) {
@@ -639,7 +727,8 @@ fn try_raw_deflate_decompression(buf: &[u8]) -> Result<Vec<u8>> {
                 if !out.is_empty() && out.len() > 512 {
                     debug_log(&format!(
                         "Raw deflate decompression succeeded with skip=0x{:x}: {} bytes",
-                        skip_size, out.len()
+                        skip_size,
+                        out.len()
                     ));
                     return Ok(out);
                 } else {
@@ -650,7 +739,10 @@ fn try_raw_deflate_decompression(buf: &[u8]) -> Result<Vec<u8>> {
                 }
             }
             Err(e) => {
-                debug_log(&format!("Raw deflate decompression failed with skip=0x{:x}: {}", skip_size, e));
+                debug_log(&format!(
+                    "Raw deflate decompression failed with skip=0x{:x}: {}",
+                    skip_size, e
+                ));
             }
         }
     }
@@ -661,12 +753,18 @@ fn try_raw_deflate_decompression(buf: &[u8]) -> Result<Vec<u8>> {
     match DeflateDecoder::new(buf).read_to_end(&mut out) {
         Ok(_) => {
             if !out.is_empty() && out.len() > 512 {
-                debug_log(&format!("Raw deflate decompression succeeded (no skip): {} bytes", out.len()));
+                debug_log(&format!(
+                    "Raw deflate decompression succeeded (no skip): {} bytes",
+                    out.len()
+                ));
                 return Ok(out);
             }
         }
         Err(e) => {
-            debug_log(&format!("Raw deflate decompression (no skip) failed: {}", e));
+            debug_log(&format!(
+                "Raw deflate decompression (no skip) failed: {}",
+                e
+            ));
         }
     }
 
@@ -699,7 +797,11 @@ fn find_embedded_compressed_blob(buf: &[u8]) -> Option<Vec<u8>> {
     for i in 0x40..buf.len() {
         let rest = &buf[i..];
         if detect_format(rest) != CompressionFormat::Unknown {
-            debug_log(&format!("Found {} at offset 0x{:x}", detect_format(rest), i));
+            debug_log(&format!(
+                "Found {} at offset 0x{:x}",
+                detect_format(rest),
+                i
+            ));
             return Some(rest.to_vec());
         }
     }
@@ -710,12 +812,19 @@ fn find_embedded_compressed_blob_from_offset(buf: &[u8], start_offset: usize) ->
     if buf.len() <= start_offset {
         return None;
     }
-    debug_log(&format!("Searching for embedded compressed blob from offset 0x{:x}", start_offset));
+    debug_log(&format!(
+        "Searching for embedded compressed blob from offset 0x{:x}",
+        start_offset
+    ));
     // Search from a specific offset for compressed blob markers
     for i in start_offset..buf.len() {
         let rest = &buf[i..];
         if detect_format(rest) != CompressionFormat::Unknown {
-            debug_log(&format!("Found {} at offset 0x{:x}", detect_format(rest), i));
+            debug_log(&format!(
+                "Found {} at offset 0x{:x}",
+                detect_format(rest),
+                i
+            ));
             return Some(rest.to_vec());
         }
     }
@@ -758,7 +867,10 @@ fn extract_linux_version_line(buf: &[u8]) -> Option<(String, String)> {
             continue;
         }
         found += 1;
-        debug_log(&format!("Found valid version line #{}: {} {}", found, release, build_time));
+        debug_log(&format!(
+            "Found valid version line #{}: {} {}",
+            found, release, build_time
+        ));
         if found >= 2 {
             return Some((release, build_time));
         }
