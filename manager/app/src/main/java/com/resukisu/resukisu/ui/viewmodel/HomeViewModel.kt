@@ -13,7 +13,6 @@ import com.resukisu.resukisu.KernelVersion
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.getKernelVersion
 import com.resukisu.resukisu.ksuApp
-import com.resukisu.resukisu.ui.susfs.util.SuSFSManager
 import com.resukisu.resukisu.ui.util.downloader.checkNewVersion
 import com.resukisu.resukisu.ui.util.getKpmModuleCount
 import com.resukisu.resukisu.ui.util.getKpmVersion
@@ -27,12 +26,14 @@ import com.resukisu.resukisu.ui.util.getSuperuserCount
 import com.resukisu.resukisu.ui.util.getZygiskImplement
 import com.resukisu.resukisu.ui.util.isOfficialSignature
 import com.resukisu.resukisu.ui.util.isSELinuxPermissive
+import com.resukisu.resukisu.ui.util.listModules
 import com.resukisu.resukisu.ui.util.module.LatestVersionInfo
 import com.resukisu.resukisu.ui.util.rootAvailable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 
 class HomeViewModel : ViewModel() {
 
@@ -60,7 +61,6 @@ class HomeViewModel : ViewModel() {
         val selinuxStatus: String = "",
         val kpmVersion: String = "",
         val susfsEnabled: Boolean = false,
-        val susfsVersionSupported: Boolean = false,
         val susfsVersion: String = "",
         val susfsFeatures: String = "",
         val superuserCount: Int = 0,
@@ -105,6 +105,9 @@ class HomeViewModel : ViewModel() {
     var isExtendedDataLoaded by mutableStateOf(false)
         private set
     var isRefreshing by mutableStateOf(false)
+        private set
+
+    var hasEnabledThirdPartySusfsModule by mutableStateOf(false)
         private set
 
     private var loadingJobs = mutableListOf<Job>()
@@ -216,26 +219,25 @@ class HomeViewModel : ViewModel() {
                 )
 
                 if (!isSimpleMode) {
-                    val moduleInfo = loadModuleInfo()
+                    val (kpmVersion, superUserCount, moduleCount, kpmCount, zygiskImplement, metamoduleImplement) = loadModuleInfo()
                     systemInfo = systemInfo.copy(
-                        kpmVersion = moduleInfo.first,
-                        superuserCount = moduleInfo.second,
-                        moduleCount = moduleInfo.third,
-                        kpmModuleCount = moduleInfo.fourth,
-                        zygiskImplement = moduleInfo.fifth,
-                        metaModuleImplement = moduleInfo.sixth
+                        kpmVersion = kpmVersion,
+                        superuserCount = superUserCount,
+                        moduleCount = moduleCount,
+                        kpmModuleCount = kpmCount,
+                        zygiskImplement = zygiskImplement,
+                        metaModuleImplement = metamoduleImplement
                     )
                 }
 
+                hasEnabledThirdPartySusfsModule = detectEnabledThirdPartySusfsModule()
+
                 if (!isHideSusfsStatus) {
-                    val susfsInfo = loadSuSFSInfo()
+                    val (enabled, version, features) = loadSuSFSInfo()
                     systemInfo = systemInfo.copy(
-                        susfsEnabled = susfsInfo.first,
-                        susfsVersionSupported = susfsInfo.first && SuSFSManager.isBinaryAvailable(
-                            context
-                        ), // enabled & have binary
-                        susfsVersion = susfsInfo.second,
-                        susfsFeatures = susfsInfo.third,
+                        susfsEnabled = enabled,
+                        susfsVersion = version,
+                        susfsFeatures = features,
                     )
                 }
 
@@ -385,7 +387,7 @@ class HomeViewModel : ViewModel() {
     private suspend fun loadSuSFSInfo(): Triple<Boolean, String, String> {
         return withContext(Dispatchers.IO) {
             val susfsEnabled = try {
-                getSuSFSStatus().equals("true", ignoreCase = true)
+                getSuSFSStatus()
             } catch (_: Exception) {
                 false
             }
@@ -411,6 +413,26 @@ class HomeViewModel : ViewModel() {
             }
 
             Triple(true, susfsVersion, susfsFeatures)
+        }
+    }
+
+    private suspend fun detectEnabledThirdPartySusfsModule(): Boolean {
+        return withContext(Dispatchers.IO) {
+            runCatching {
+                val modulesJson = listModules()
+                val array = JSONArray(modulesJson)
+                for (i in 0 until array.length()) {
+                    val module = array.optJSONObject(i) ?: continue
+                    val enabled = module.optBoolean("enabled", false)
+                    if (!enabled) continue
+
+                    val id = module.optString("id", "")
+                    if (id.contains("susfs", ignoreCase = true)) {
+                        return@withContext true
+                    }
+                }
+                false
+            }.getOrDefault(false)
         }
     }
 
@@ -519,6 +541,8 @@ class HomeViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
+
+
         loadingJobs.forEach { it.cancel() }
         loadingJobs.clear()
     }

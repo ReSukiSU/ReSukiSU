@@ -127,6 +127,9 @@ pub fn on_post_data_fs() -> Result<()> {
         warn!("load umount config failed: {e}");
     }
 
+    // Load susfs config
+    crate::android::susfs::init_event::on_post_fs_data();
+
     run_stage("post-mount", true);
 
     std::env::set_current_dir("/").with_context(|| "failed to chdir to /")?;
@@ -169,6 +172,8 @@ pub fn on_services() {
 
 pub fn on_boot_completed() {
     ksucalls::report_boot_complete();
+    // Load susfs boot-completed
+    crate::android::susfs::init_event::on_boot_completed();
     info!("on_boot_completed triggered!");
 
     run_stage("boot-completed", false);

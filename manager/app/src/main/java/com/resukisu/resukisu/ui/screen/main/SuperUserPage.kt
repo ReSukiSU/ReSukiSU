@@ -108,7 +108,7 @@ import com.resukisu.resukisu.ui.component.SearchAppBar
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.VerticalExpandableFab
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
-import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
+import com.resukisu.resukisu.ui.component.settings.lazySegmentedColumn
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.LabelText
@@ -357,7 +357,7 @@ private fun SuperUserContent(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                if ((viewModel.isRefreshing || viewModel.appGroupList.isEmpty()) && viewModel.search.isEmpty()) {
+                if ((SuperUserViewModel.isRefreshing || viewModel.appGroupList.isEmpty()) && viewModel.search.isEmpty()) {
                     LoadingIndicator()
                 }
                 else {
@@ -394,7 +394,7 @@ private fun SuperUserContent(
     PullToRefreshBox(
         state = pullRefreshState,
         onRefresh = { scope.launch { viewModel.fetchAppList() } },
-        isRefreshing = viewModel.isRefreshing,
+        isRefreshing = SuperUserViewModel.isRefreshing,
         modifier = Modifier
             .fillMaxSize()
             .blurSource(),
@@ -404,7 +404,7 @@ private fun SuperUserContent(
                     .padding(top = innerPadding.calculateTopPadding())
                     .align(Alignment.TopCenter),
                 state = pullRefreshState,
-                isRefreshing = viewModel.isRefreshing,
+                isRefreshing = SuperUserViewModel.isRefreshing,
             )
         },
     ) {
@@ -425,7 +425,7 @@ private fun SuperUserContent(
             item {
                 Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
             }
-            lazySegmentColumn(
+            lazySegmentedColumn(
                 items = filteredAndSortedAppGroups,
                 key = { _, appGroup -> "${appGroup.uid}-${appGroup.mainApp.packageName}" },
                 contentType = { _, _ -> "AppGroupItem" }

@@ -27,7 +27,7 @@ fun SettingsJumpPageWidget(
     enabled: Boolean = true,
     isError: Boolean = false,
     onClick: (Offset) -> Unit = {},
-    onLongClick: (Offset) -> Unit = {},
+    onLongClick: ((Offset) -> Unit)? = null,
     hapticFeedbackType: HapticFeedbackType = HapticFeedbackType.ContextClick,
     leadingContent: (@Composable () -> Unit)? = null,
     foreContent: @Composable BoxScope.() -> Unit = {},

@@ -8,6 +8,7 @@ mod android {
     use crate::{android::utils::ensure_binary, assets::Asset, defs::BINARY_DIR};
 
     pub const RESETPROP_PATH: &str = concatcp!(BINARY_DIR, "resetprop");
+    pub const KSU_SUSFS: &str = concatcp!(BINARY_DIR, "ksu_susfs");
     pub const BUSYBOX_PATH: &str = concatcp!(BINARY_DIR, "busybox");
     pub const BOOTCTL_PATH: &str = concatcp!(BINARY_DIR, "bootctl");
 
@@ -27,6 +28,12 @@ mod android {
         let _ = std::fs::remove_file(resetprop_link);
         std::os::unix::fs::symlink("/data/adb/ksud", resetprop_link)?;
 
+        // Create ksu_susfs -> ksud symlink (hard link)
+        if crate::android::susfs::show_version().is_ok() {
+            let ksu_susfs = KSU_SUSFS;
+            let _ = std::fs::remove_file(ksu_susfs);
+            std::fs::hard_link("/data/adb/ksud", ksu_susfs)?;
+        }
         Ok(())
     }
 }
