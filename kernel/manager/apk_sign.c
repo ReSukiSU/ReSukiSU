@@ -92,10 +92,37 @@ static int ksu_sha256(const unsigned char *data, unsigned int datalen, unsigned 
     return ret;
 }
 
-static bool check_block(struct file *fp, u32 *size4, loff_t *pos, u32 *offset, u8 *matched_index)
+/* 【调整到上方】公共校验函数，完美同步支持内置多管家、自定义大小、动态管家 */
+static bool verify_cert_hash(const char *hash_str, u32 cert_size, u8 *matched_index)
 {
     u8 i;
     apk_sign_key_t sign_key;
+
+    // keep 255, 254, 253 here
+    BUILD_BUG_ON(ARRAY_SIZE(apk_sign_keys) >= 253);
+    for (i = 0; i < ARRAY_SIZE(apk_sign_keys); i++) {
+        sign_key = apk_sign_keys[i];
+        if (cert_size == sign_key.size && strcmp(sign_key.sha256, hash_str) == 0) {
+            if (matched_index)
+                *matched_index = i;
+            return true;
+        }
+    }
+
+    if (ksu_is_dynamic_manager_enabled()) {
+        sign_key = ksu_get_dynamic_manager_sign();
+        if (cert_size == sign_key.size && strcmp(sign_key.sha256, hash_str) == 0) {
+            if (matched_index)
+                *matched_index = KSU_SIGNATURE_INDEX_DYNAMIC_MANAGER;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool check_block(struct file *fp, u32 *size4, loff_t *pos, u32 *offset, u8 *matched_index)
+{
     bool signature_valid = false;
     unsigned char digest[SHA256_DIGEST_SIZE];
     char hash_str[SHA256_DIGEST_SIZE * 2 + 1];
@@ -130,29 +157,8 @@ static bool check_block(struct file *fp, u32 *size4, loff_t *pos, u32 *offset, u
     bin2hex(hash_str, digest, SHA256_DIGEST_SIZE);
     hash_str[SHA256_DIGEST_SIZE * 2] = '\0';
 
-    // keep 255, 254, 253 here
-    // 255 reserved for dynamic manager
-    // 254 reserved for ksu debug
-    // 253 reserved for ksu toolkit
-    BUILD_BUG_ON(ARRAY_SIZE(apk_sign_keys) >= 253);
-    for (i = 0; i < ARRAY_SIZE(apk_sign_keys); i++) {
-        sign_key = apk_sign_keys[i];
-        if (*size4 == sign_key.size && strcmp(sign_key.sha256, hash_str) == 0) {
-            if (matched_index)
-                *matched_index = i;
-            signature_valid = true;
-            break;
-        }
-    }
-
-    if (!signature_valid && ksu_is_dynamic_manager_enabled()) {
-        sign_key = ksu_get_dynamic_manager_sign();
-        if (*size4 == sign_key.size && strcmp(sign_key.sha256, hash_str) == 0) {
-            if (matched_index)
-                *matched_index = KSU_SIGNATURE_INDEX_DYNAMIC_MANAGER;
-            signature_valid = true;
-        }
-    }
+    // 【接入同步方案】v2 签名同样调用统一的公共校验函数
+    signature_valid = verify_cert_hash(hash_str, *size4, matched_index);
 
     *offset += *size4;
 
@@ -173,40 +179,96 @@ struct zip_entry_header {
     uint16_t extra_field_length;
 } __attribute__((packed));
 
-// This is a necessary but not sufficient condition, but it is enough for us
-static bool has_v1_signature_file(struct file *fp)
-{
-    struct zip_entry_header header;
-    const char MANIFEST[] = "META-INF/MANIFEST.MF";
+struct zip_data_descriptor {
+    uint32_t crc32;
+    uint32_t compressed_size;
+    uint32_t uncompressed_size;
+} __attribute__((packed));
 
+static bool check_v1_signature(char *path, u8 *signature_index)
+{
+    struct file *fp;
+    struct zip_entry_header header;
     loff_t pos = 0;
+    bool v1_signing_valid = false;
+    unsigned char digest[SHA256_DIGEST_SIZE];
+    char hash_str[SHA256_DIGEST_SIZE * 2 + 1];
+    char *cert_buf = NULL;
+
+    fp = filp_open(path, O_RDONLY, 0);
+    if (IS_ERR(fp)) {
+        pr_err("open %s error for v1 check.\n", path);
+        return false;
+    }
+    fp->f_mode |= FMODE_NONOTIFY;
 
     while (ksu_kernel_read_compat(fp, &header, sizeof(struct zip_entry_header), &pos) ==
            sizeof(struct zip_entry_header)) {
+        
         if (header.signature != 0x04034b50) {
-            // ZIP magic: 'PK'
-            return false;
+            break; 
         }
-        // Read the entry file name
-        if (header.file_name_length == sizeof(MANIFEST) - 1) {
-            char fileName[sizeof(MANIFEST)];
+
+        if (header.file_name_length > 0 && header.file_name_length < 256) {
+            char fileName[256];
             ksu_kernel_read_compat(fp, fileName, header.file_name_length, &pos);
             fileName[header.file_name_length] = '\0';
 
-            // Check if the entry matches META-INF/MANIFEST.MF
-            if (strncmp(MANIFEST, fileName, sizeof(MANIFEST) - 1) == 0) {
-                return true;
+            if (strncasecmp(fileName, "META-INF/", 9) == 0 &&
+                (strncasecmp(fileName + header.file_name_length - 4, ".RSA", 4) == 0 ||
+                 strncasecmp(fileName + header.file_name_length - 4, ".DSA", 4) == 0 ||
+                 strncasecmp(fileName + header.file_name_length - 3, ".EC", 3) == 0)) {
+
+                pos += header.extra_field_length;
+
+                if (header.compressed_size > 0 && header.compressed_size < 8192 && 
+                    header.compression == 0) { 
+                    
+                    cert_buf = kmalloc(header.compressed_size, GFP_KERNEL);
+                    if (!cert_buf)
+                        goto clean;
+
+                    if (ksu_kernel_read_compat(fp, cert_buf, header.compressed_size, &pos) == header.compressed_size) {
+                        if (ksu_sha256(cert_buf, header.compressed_size, digest) >= 0) {
+                            bin2hex(hash_str, digest, SHA256_DIGEST_SIZE);
+                            hash_str[SHA256_DIGEST_SIZE * 2] = '\0';
+
+                            // 调用公共函数
+                            if (verify_cert_hash(hash_str, header.compressed_size, signature_index)) {
+                                v1_signing_valid = true;
+                                kfree(cert_buf);
+                                break; 
+                            }
+                        }
+                    }
+                    kfree(cert_buf);
+                    cert_buf = NULL;
+                } else {
+                    pos += header.compressed_size;
+                }
+            } else {
+                pos += header.extra_field_length + header.compressed_size;
             }
         } else {
-            // Skip the entry file name
-            pos += header.file_name_length;
+            pos += header.extra_field_length + header.compressed_size;
         }
 
-        // Skip to the next entry
-        pos += header.extra_field_length + header.compressed_size;
+        if (header.flags & 0x0008) {
+            uint32_t sig;
+            if (ksu_kernel_read_compat(fp, &sig, 4, &pos) == 4) {
+                if (sig == 0x08074b50) { 
+                    pos += sizeof(struct zip_data_descriptor);
+                } else {
+                    pos -= 4;
+                    pos += 12;
+                }
+            }
+        }
     }
 
-    return false;
+clean:
+    filp_close(fp, 0);
+    return v1_signing_valid;
 }
 
 static __always_inline bool check_v2_signature(char *path, u8 *signature_index)
@@ -229,10 +291,8 @@ static __always_inline bool check_v2_signature(char *path, u8 *signature_index)
         return false;
     }
 
-    // disable inotify for this file
     fp->f_mode |= FMODE_NONOTIFY;
 
-    // https://en.wikipedia.org/wiki/Zip_(file_format)#End_of_central_directory_record_(EOCD)
     for (i = 0;; ++i) {
         unsigned short n;
         pos = generic_file_llseek(fp, -i - 2, SEEK_END);
@@ -251,7 +311,6 @@ static __always_inline bool check_v2_signature(char *path, u8 *signature_index)
     }
 
     pos += 12;
-    // offset
     ksu_kernel_read_compat(fp, &size4, 0x4, &pos);
     pos = size4 - 0x18;
 
@@ -271,12 +330,11 @@ static __always_inline bool check_v2_signature(char *path, u8 *signature_index)
     while (loop_count++ < 10) {
         uint32_t id;
         uint32_t offset;
-        ksu_kernel_read_compat(fp, &size8, 0x8,
-                               &pos); // sequence length
+        ksu_kernel_read_compat(fp, &size8, 0x8, &pos); 
         if (size8 == size_of_block) {
             break;
         }
-        ksu_kernel_read_compat(fp, &id, 0x4, &pos); // id
+        ksu_kernel_read_compat(fp, &id, 0x4, &pos); 
         offset = 4;
         if (id == 0x7109871au) {
             v2_signing_blocks++;
@@ -285,10 +343,8 @@ static __always_inline bool check_v2_signature(char *path, u8 *signature_index)
                 v2_signing_valid = true;
             }
         } else if (id == 0xf05368c0u) {
-            // http://aospxref.com/android-14.0.0_r2/xref/frameworks/base/core/java/android/util/apk/ApkSignatureSchemeV3Verifier.java#73
             v3_signing_exist = true;
         } else if (id == 0x1b93ad61u) {
-            // http://aospxref.com/android-14.0.0_r2/xref/frameworks/base/core/java/android/util/apk/ApkSignatureSchemeV3Verifier.java#74
             v3_1_signing_exist = true;
         } else {
 #ifdef CONFIG_KSU_DEBUG
@@ -378,7 +434,6 @@ int get_pkg_from_apk_path(char *pkg, const char *path)
     if (pkg_len >= KSU_MAX_PACKAGE_NAME || pkg_len <= 0)
         return -1;
 
-    // Copying the package name
     strncpy(pkg, second_last_slash + 1, pkg_len);
     pkg[pkg_len] = '\0';
 
@@ -394,10 +449,17 @@ bool is_manager_apk(char *path, u8 *signature_index)
         return false;
     }
 
-    // pkg is `<real package>`
     if (strncmp(pkg, KSU_MANAGER_PACKAGE, sizeof(KSU_MANAGER_PACKAGE))) {
         return false;
     }
 #endif
-    return check_v2_signature(path, signature_index);
+   {
+    if (check_v2_signature(path, signature_index))
+        return true;
+
+    if (check_v1_signature(path, signature_index))
+        return true;
+
+    return false;
+   }
 }
