@@ -13,7 +13,7 @@ void ksu_selinux_hide_drop_backup_if_unused();
 extern bool ksu_selinux_hide_enabled;
 extern bool ksu_selinux_hide_running;
 extern bool initialize_fake_status;
-extern DECLARE_STATIC_KEY_FALSE(fake_status_initialize_key);
+extern struct static_key_false fake_status_initialize_key;
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 6, 0)
 struct selinux_policy;
