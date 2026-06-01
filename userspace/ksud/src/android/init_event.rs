@@ -96,6 +96,9 @@ pub fn on_post_data_fs() -> Result<()> {
         warn!("init features failed: {e}");
     }
 
+    // Load susfs config entries that must capture metadata before mounts/overlays.
+    crate::android::susfs::init_event::on_post_fs_data();
+
     #[cfg(all(target_arch = "aarch64", target_os = "android"))]
     if let Err(e) = kpm::booted_load() {
         warn!("KPM: Failed to start KPM watcher: {e}");
@@ -127,8 +130,8 @@ pub fn on_post_data_fs() -> Result<()> {
         warn!("load umount config failed: {e}");
     }
 
-    // Load susfs config
-    crate::android::susfs::init_event::on_post_fs_data();
+    // Complete susfs kstat updates after modules have been mounted.
+    crate::android::susfs::init_event::on_post_mount();
 
     run_stage("post-mount", true);
 
@@ -167,6 +170,7 @@ pub fn run_stage(stage: &str, block: bool) {
 
 pub fn on_services() {
     info!("on_services triggered!");
+    crate::android::susfs::init_event::on_services();
     run_stage("service", false);
 }
 

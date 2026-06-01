@@ -1,5 +1,6 @@
 use crate::android::susfs::api;
 use crate::android::susfs::config;
+use crate::android::susfs::config::data::Data;
 use log::warn;
 
 pub fn on_boot_completed() {
@@ -7,18 +8,44 @@ pub fn on_boot_completed() {
         return;
     };
 
-    for sus_path in config.sus_path.sus_path {
-        if let Err(e) = api::add_sus_path(&api::SusPathType::Normal, &sus_path) {
+    apply_sus_paths(&config);
+    apply_sus_maps(&config);
+}
+
+pub fn on_services() {
+    let Some(config) = config::read_config() else {
+        return;
+    };
+
+    apply_sus_paths(&config);
+    apply_sus_maps(&config);
+}
+
+fn apply_sus_paths(config: &Data) {
+    for sus_path in &config.sus_path.sus_path {
+        if sus_path.trim().is_empty() {
+            continue;
+        }
+        if let Err(e) = api::add_sus_path(&api::SusPathType::Normal, sus_path) {
             warn!("failed to add sus_path '{sus_path}': {e}");
         }
     }
-    for sus_path_loop in config.sus_path.sus_path_loop {
-        if let Err(e) = api::add_sus_path(&api::SusPathType::Loop, &sus_path_loop) {
+    for sus_path_loop in &config.sus_path.sus_path_loop {
+        if sus_path_loop.trim().is_empty() {
+            continue;
+        }
+        if let Err(e) = api::add_sus_path(&api::SusPathType::Loop, sus_path_loop) {
             warn!("failed to add sus_path_loop '{sus_path_loop}': {e}");
         }
     }
-    for sus_map in config.sus_map {
-        if let Err(e) = api::add_sus_map(&sus_map) {
+}
+
+fn apply_sus_maps(config: &Data) {
+    for sus_map in &config.sus_map {
+        if sus_map.trim().is_empty() {
+            continue;
+        }
+        if let Err(e) = api::add_sus_map(sus_map.as_str()) {
             warn!("failed to add sus_map '{sus_map}': {e}");
         }
     }
@@ -47,22 +74,20 @@ pub fn on_post_fs_data() {
         warn!("failed to hide sus mnts for non su procs: {e}");
     }
 
-    for sus_kstat in config.kstat.sus_kstat {
-        if let Err(e) = api::add_sus_kstat(&sus_kstat) {
+    apply_sus_paths(&config);
+
+    for sus_kstat in &config.kstat.sus_kstat {
+        if sus_kstat.trim().is_empty() {
+            continue;
+        }
+        if let Err(e) = api::add_sus_kstat(sus_kstat.as_str()) {
             warn!("failed to add sus_kstat '{sus_kstat}': {e}");
         }
     }
-    for update_kstat in config.kstat.update_kstat {
-        if let Err(e) = api::update_sus_kstat(&update_kstat) {
-            warn!("failed to update sus_kstat '{update_kstat}': {e}");
+    for statically in &config.kstat.statically {
+        if statically.path.trim().is_empty() {
+            continue;
         }
-    }
-    for full_clone in config.kstat.full_clone {
-        if let Err(e) = api::update_sus_kstat_full_clone(&full_clone) {
-            warn!("failed to update sus_kstat_full_clone '{full_clone}': {e}");
-        }
-    }
-    for statically in config.kstat.statically {
         if let Err(e) = api::add_sus_kstat_statically(
             &statically.path,
             &statically.ino,
@@ -82,6 +107,32 @@ pub fn on_post_fs_data() {
                 "failed to add sus_kstat_statically '{}': {}",
                 statically.path, e
             );
+        }
+    }
+}
+
+pub fn on_post_mount() {
+    let Some(config) = config::read_config() else {
+        return;
+    };
+
+    apply_sus_paths(&config);
+    apply_sus_maps(&config);
+
+    for update_kstat in &config.kstat.update_kstat {
+        if update_kstat.trim().is_empty() {
+            continue;
+        }
+        if let Err(e) = api::update_sus_kstat(update_kstat.as_str()) {
+            warn!("failed to update sus_kstat '{update_kstat}': {e}");
+        }
+    }
+    for full_clone in &config.kstat.full_clone {
+        if full_clone.trim().is_empty() {
+            continue;
+        }
+        if let Err(e) = api::update_sus_kstat_full_clone(full_clone.as_str()) {
+            warn!("failed to update sus_kstat_full_clone '{full_clone}': {e}");
         }
     }
 }

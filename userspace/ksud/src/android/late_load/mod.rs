@@ -10,7 +10,7 @@ use crate::{
     android::{
         dynamic_manager, init_event,
         module::{handle_updated_modules, metamodule, prune_modules},
-        restorecon, utils,
+        restorecon, susfs, utils,
     },
     assets, defs,
 };
@@ -116,6 +116,9 @@ pub fn run(package_name: &String, kmi: Option<String>, allow_shell: bool) -> Res
         warn!("init features failed: {e}");
     }
 
+    // Late-load skips the kernel boot events, so restore susfs explicitly.
+    susfs::init_event::on_post_fs_data();
+
     // 8. Execute late-load stage scripts (blocking)
     init_event::run_stage("late-load", true);
 
@@ -133,12 +136,17 @@ pub fn run(package_name: &String, kmi: Option<String>, allow_shell: bool) -> Res
         warn!("set dynamic manager failed: {e}");
     }
 
+    susfs::init_event::on_post_mount();
+
     // 12. Execute post-mount stage scripts (blocking)
     init_event::run_stage("post-mount", true);
+
+    susfs::init_event::on_services();
 
     // 13. Execute service stage scripts (non-blocking)
     init_event::run_stage("service", false);
 
+    susfs::init_event::on_boot_completed();
     // 14. Execute boot-completed stage scripts (non-blocking)
     init_event::run_stage("boot-completed", false);
 

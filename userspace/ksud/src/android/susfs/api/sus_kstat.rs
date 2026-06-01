@@ -135,8 +135,7 @@ where
 
     info.is_statically = false;
     info.target_ino = md.ino();
-    info.spoofed_size = md.size() as i64;
-    info.spoofed_blocks = md.blocks();
+    copy_metadata_to_sus_kstat(&mut info, &md);
     info.flags |= KstatSpoofFlags::AUTO_SPOOF.bits();
     info.err = ERR_CMD_NOT_SUPPORTED;
 
