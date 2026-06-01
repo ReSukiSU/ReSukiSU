@@ -519,8 +519,12 @@ fn try_deep_search_compressed(buf: &[u8]) -> Option<Vec<u8>> {
 
         // Try raw deflate decompression from this offset
         let mut out = Vec::<u8>::new();
-        if DeflateDecoder::new(&buf[offset..]).read_to_end(&mut out).is_ok()
-            && !out.is_empty() && out.len() > 512 {
+        if DeflateDecoder::new(&buf[offset..])
+            .read_to_end(&mut out)
+            .is_ok()
+            && !out.is_empty()
+            && out.len() > 512
+        {
             debug_log(&format!(
                 "Deep search found valid deflate at offset 0x{:x}: {} bytes",
                 offset,
