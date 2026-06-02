@@ -139,6 +139,12 @@ ifeq ($(KERNEL_TYPE), GKI 2.0)
   kernelsu-objs += hook/lsm_hook_magic.o
 endif
 
+ifeq ($(CONFIG_KSU),y)
+  ifneq ($(CONFIG_KALLSYMS_ALL),y)
+    include $(KSU_SRC)/tools/static_export_check.mk
+  endif
+endif
+
 ifdef CONFIG_KSU_TRACEPOINT_HOOK
   $(info -- $(REPO_NAME): using Tracepoint Syscall Redirect Hook)
 

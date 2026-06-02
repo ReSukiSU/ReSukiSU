@@ -476,7 +476,7 @@ append_ksu_rc:
             append_count = count - ret;
         // copy_to_user returns the number of bytes that could not be copied
         if (copy_to_user(buf + ret, KERNEL_SU_RC + ksu_rc_pos, append_count)) {
-            pr_info("read_proxy: append error, totally appended %ld\n", ksu_rc_pos);
+            pr_info("read_proxy: append error, totally appended %zd\n", ksu_rc_pos);
             return ret;
         }
         pr_info("read_proxy: append static %zu\n", append_count);

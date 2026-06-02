@@ -1086,9 +1086,7 @@ void ksu_destroy_policydb(struct policydb *db)
 }
 
 // handle backport
-#ifdef KSU_COMPAT_HAS_EXPORTED_POLICY_RWLOCK
-extern rwlock_t policy_rwlock;
-#endif
+extern rwlock_t *ksu_policy_rwlock_ptr;
 
 static inline void ksu_lock_sepolicy_legacy(void)
 {
@@ -1096,12 +1094,9 @@ static inline void ksu_lock_sepolicy_legacy(void)
 // 4.14 - 5.10
 #if defined(KSU_COMPAT_USE_SELINUX_STATE)
     read_lock(&selinux_state.ss->policy_rwlock);
-// 4.14- with manual export rwlock
-#elif defined(KSU_COMPAT_HAS_EXPORTED_POLICY_RWLOCK)
-    read_lock(&policy_rwlock);
-// 4.14- mostly
+// 4.14-
 #else
-    // do nothing
+    read_lock(ksu_policy_rwlock_ptr);
 #endif
 #endif
 }
@@ -1112,12 +1107,9 @@ static inline void ksu_unlock_sepolicy_legacy(void)
 // 4.14 - 5.10
 #if defined(KSU_COMPAT_USE_SELINUX_STATE)
     read_unlock(&selinux_state.ss->policy_rwlock);
-// 4.14- with manual export rwlock
-#elif defined(KSU_COMPAT_HAS_EXPORTED_POLICY_RWLOCK)
-    read_unlock(&policy_rwlock);
-// 4.14- mostly
+// 4.14-
 #else
-    // do nothing
+    read_unlock(ksu_policy_rwlock_ptr);
 #endif
 #endif
 }

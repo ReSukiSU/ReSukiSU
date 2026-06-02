@@ -45,12 +45,6 @@
 #define __maybe_static static
 #endif
 
-#ifndef CONFIG_KALLSYMS_ALL
-#warning Due to extern hooks for selinux_hide are not completed
-#warning You maybe face selinux_hide does not working when you disable CONFIG_KALLSYMS_ALL
-#error So, ReSukiSU let your build broken before this completed, you can enable CONFIG_KALLSYMS_ALL to solve that
-#endif
-
 static DEFINE_MUTEX(selinux_hide_mutex);
 __maybe_static bool ksu_selinux_hide_enabled __read_mostly = false;
 // remove static in susfs
@@ -390,7 +384,12 @@ static void hook_selinux_status_open()
     if (orig_sel_open_handle_status)
         return;
     if (!sel_open_handle_status_slot) {
+#ifdef CONFIG_KALLSYMS_ALL
         struct file_operations *ops = (struct file_operations *)find_kernel_symbol_exact("sel_handle_status_ops");
+#else
+        extern struct file_operations sel_handle_status_ops;
+        struct file_operations *ops = &sel_handle_status_ops;
+#endif
         if (!ops) {
             pr_err("selinux_hide: sel_handle_status_ops not found, fake status will not work\n");
             return;
@@ -465,17 +464,19 @@ static int ksu_selinux_hide_enable()
         return -EAGAIN;
     }
 
-#ifndef KSU_COMPAT_HAS_SUSFS_FEATURE_SELINUX_HIDE
-    hook_selinux_status_open();
-#endif
-
     if (!backup_sidtab) {
         pr_err("no backup sidtab available, please save feature and reboot to retry!\n");
         return -EAGAIN;
     }
 #endif
 
+#ifndef KSU_COMPAT_HAS_SUSFS_FEATURE_SELINUX_HIDE
+    hook_selinux_status_open();
+#endif
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 6, 0)
+
+#ifdef CONFIG_KALLSYMS_ALL
     security_dump_masked_av_fn = find_kernel_symbol_exact("security_dump_masked_av");
     if (!security_dump_masked_av_fn) {
         pr_warn("security_dump_masked_av not found!\n");
@@ -484,6 +485,24 @@ static int ksu_selinux_hide_enable()
     if (!context_struct_compute_av_fn) {
         pr_warn("context_struct_compute_av not found!\n");
     }
+#else
+    extern void security_dump_masked_av(struct policydb * policydb, struct context * scontext,
+                                        struct context * tcontext, u16 tclass, u32 permissions, const char *reason);
+    extern void context_struct_compute_av(struct policydb * policydb, struct context * scontext,
+                                          struct context * tcontext, u16 tclass, struct av_decision * avd,
+                                          struct extended_perms * xperms);
+
+    security_dump_masked_av_fn = &security_dump_masked_av;
+    if (!security_dump_masked_av_fn) {
+        pr_warn("security_dump_masked_av not found!\n");
+    }
+
+    context_struct_compute_av_fn = &context_struct_compute_av;
+    if (!context_struct_compute_av_fn) {
+        pr_warn("context_struct_compute_av not found!\n");
+    }
+#endif
+
 #elif defined(KSU_COMPAT_USE_SELINUX_STATE)
     fake_state.initialized = true;
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
@@ -529,7 +548,13 @@ static int ksu_selinux_hide_enable()
 #endif // #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 6, 0)
 
 #ifndef KSU_COMPAT_HAS_SUSFS_FEATURE_SELINUX_HIDE
+#ifdef CONFIG_KALLSYMS_ALL
     selinux_write_op = (write_op_fn *)find_kernel_symbol_exact("write_op");
+#else
+    extern ssize_t (*const write_op[])(struct file *, char *, size_t);
+
+    selinux_write_op = (write_op_fn *)&write_op;
+#endif
     if (!selinux_write_op) {
         pr_err("selinux_hide: no write_op found!\n");
         return -ENOSYS;
@@ -770,8 +795,11 @@ __maybe_static void initialize_fake_status()
     ksu_selinux_status_lock = &selinux_state.status_lock;
 #elif defined(KSU_COMPAT_USE_SELINUX_STATE)
     ksu_selinux_status_lock = &selinux_state.ss->status_lock;
-#else
+#elif defined(CONFIG_KALLSYMS_ALL)
     ksu_selinux_status_lock = (struct mutex *)find_kernel_symbol_exact("selinux_status_lock");
+#else
+    extern struct mutex selinux_status_lock;
+    ksu_selinux_status_lock = &selinux_status_lock;
 #endif
 
     mutex_lock(ksu_selinux_status_lock);
@@ -782,8 +810,10 @@ __maybe_static void initialize_fake_status()
     struct page *selinux_status_page = selinux_state.status_page;
 #elif defined(KSU_COMPAT_USE_SELINUX_STATE)
     struct page *selinux_status_page = selinux_state.ss->status_page;
-#else
+#elif defined(CONFIG_KALLSYMS_ALL)
     struct page *selinux_status_page = *((struct page **)find_kernel_symbol_exact("selinux_status_page"));
+#else
+    extern struct page *selinux_status_page;
 #endif
 
     if (!selinux_status_page) {
