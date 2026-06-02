@@ -151,19 +151,12 @@ bool allow_shell = true;
 bool allow_shell = false;
 #endif
 
+bool ksu_no_custom_rc = false;
+module_param_named(norc, ksu_no_custom_rc, bool, 0);
+
 int __init kernelsu_init(void)
 {
     pr_info("Initialized on: %s (%s) with driver version: %u\n", UTS_RELEASE, UTS_MACHINE, KSU_VERSION);
-#if defined(KSU_COMPAT_NON_EXPORTED_POLICY_RWLOCK) || defined(KSU_COMPAT_NON_EXPORTED_SEL_MUTEX)
-    pr_alert("*************************************************************");
-    pr_alert("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **");
-    pr_alert("**                                                         **");
-    pr_alert("**          Enable Unsafe memory access for SELinux        **");
-    pr_alert("**                You maybe face Kernel Panic              **");
-    pr_alert("**                                                         **");
-    pr_alert("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **");
-    pr_alert("*************************************************************");
-#endif
 
 #ifdef MODULE
     ksu_late_loaded = (current->pid != 1);
@@ -211,6 +204,7 @@ int __init kernelsu_init(void)
         pr_err("prepare cred failed!\n");
     }
 
+    ksu_selinux_init();
     ksu_feature_init();
     ksu_sulog_init();
     ksu_adb_root_init();

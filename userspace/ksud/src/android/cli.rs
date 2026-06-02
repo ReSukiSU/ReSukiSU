@@ -8,7 +8,7 @@ use log::{LevelFilter, error, info};
 use crate::{
     android::{
         debug, dynamic_manager, feature, init_event, ksucalls,
-        module::{self, module_config},
+        module::{self, module_config, regenerate_preinit_rc},
         profile, sepolicy, su, sulog, susfs, umount_config, utils,
     },
     apk_sign, assets,
@@ -157,6 +157,12 @@ enum Commands {
 
     /// Resetprop - Magisk-compatible system property tool
     Resetprop(crate::android::resetprop::Args),
+
+    /// Manage initrc injection
+    Initrc {
+        #[command(subcommand)]
+        command: Initrc,
+    },
 }
 
 #[derive(clap::Subcommand, Debug)]
@@ -565,6 +571,12 @@ enum Susfs {
     Features,
 }
 
+#[derive(clap::Subcommand, Debug)]
+enum Initrc {
+    /// Regenerate preinit rc file
+    Refresh,
+}
+
 pub fn run() -> Result<()> {
     android_logger::init_once(
         Config::default()
@@ -907,6 +919,9 @@ pub fn run() -> Result<()> {
                 Kpm::Version => kpm::version(),
             }
         }
+        Commands::Initrc { command } => match command {
+            Initrc::Refresh => regenerate_preinit_rc(),
+        },
     };
 
     if let Err(e) = &result {
