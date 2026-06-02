@@ -193,12 +193,7 @@ private fun NavigationRailItem(
                 }
             }
         },
-        label = {
-            Text(
-                stringResource(destination.label),
-                style = MaterialTheme.typography.labelMedium
-            )
-        },
+        label = { }
     )
 }
 
@@ -234,12 +229,7 @@ private fun RowScope.BottomBarNavigationItem(
                 }
             }
         },
-        label = {
-            Text(
-                stringResource(destination.label),
-                style = MaterialTheme.typography.labelMedium
-            )
-        },
+        label = { },
         alwaysShowLabel = false
     )
 }
