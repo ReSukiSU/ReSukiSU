@@ -16,6 +16,9 @@
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 4, 0)
 #include <linux/hex.h>
 #endif
+#ifdef CONFIG_ZLIB_INFLATE
+#include <linux/zlib.h>
+#endif
 
 #include "manager/apk_sign.h"
 #include "manager/manager_identity.h"
@@ -292,6 +295,7 @@ struct zip_entry_header {
 } __attribute__((packed));
 
 #define PKCS7_MAX_SIZE 8192
+#define DEFLATE_METHOD 8
 
 static int find_v1_cert_in_zip(struct file *fp, unsigned char *cert_buf, u32 max_len, u32 *cert_len)
 {
@@ -318,14 +322,69 @@ static int find_v1_cert_in_zip(struct file *fp, unsigned char *cert_buf, u32 max
             bool is_rsa = !strncmp(filename + fn_len - 4, ".RSA", 4);
             bool is_dsa = !strncmp(filename + fn_len - 4, ".DSA", 4);
             if ((is_rsa || is_dsa) && strncmp(filename, "META-INF/", 9) == 0) {
-                if (header.compressed_size > max_len)
+                if (header.compressed_size > max_len || header.uncompressed_size > max_len)
                     return -1;
-                if (header.compression != 0)
-                    return -1;
-                if (ksu_kernel_read_compat(fp, cert_buf, header.compressed_size, &pos) != header.compressed_size)
-                    return -1;
-                *cert_len = header.compressed_size;
-                return 0;
+
+                if (header.compression == 0) {
+                    // Stored (uncompressed)
+                    if (ksu_kernel_read_compat(fp, cert_buf, header.compressed_size, &pos) != header.compressed_size)
+                        return -1;
+                    *cert_len = header.compressed_size;
+                    return 0;
+                }
+#ifdef CONFIG_ZLIB_INFLATE
+                if (header.compression == DEFLATE_METHOD) {
+                    // DEFLATE compressed - decompress in kernel
+                    unsigned char *comp_buf;
+                    z_stream strm;
+                    int ret;
+
+                    comp_buf = kmalloc(header.compressed_size, GFP_KERNEL);
+                    if (!comp_buf)
+                        return -1;
+
+                    if (ksu_kernel_read_compat(fp, comp_buf, header.compressed_size, &pos) != header.compressed_size) {
+                        kfree(comp_buf);
+                        return -1;
+                    }
+
+                    memset(&strm, 0, sizeof(strm));
+                    strm.workspace = kmalloc(zlib_inflate_workspacesize(), GFP_KERNEL);
+                    if (!strm.workspace) {
+                        kfree(comp_buf);
+                        return -1;
+                    }
+
+                    // -MAX_WBITS = raw deflate (no zlib/gzip header), as used in ZIP
+                    ret = zlib_inflateInit2(&strm, -MAX_WBITS);
+                    if (ret != Z_OK) {
+                        pr_err("zlib_inflateInit2 failed: %d\n", ret);
+                        kfree(strm.workspace);
+                        kfree(comp_buf);
+                        return -1;
+                    }
+
+                    strm.next_in = comp_buf;
+                    strm.avail_in = header.compressed_size;
+                    strm.next_out = cert_buf;
+                    strm.avail_out = max_len;
+
+                    ret = zlib_inflate(&strm, Z_FINISH);
+
+                    zlib_inflateEnd(&strm);
+                    kfree(strm.workspace);
+                    kfree(comp_buf);
+
+                    if (ret != Z_STREAM_END) {
+                        pr_err("zlib_inflate failed: %d\n", ret);
+                        return -1;
+                    }
+
+                    *cert_len = strm.total_out;
+                    return 0;
+                }
+#endif
+                return -1; // unknown or unsupported compression method
             }
         }
 
@@ -361,6 +420,38 @@ static int check_v1_signature(struct file *fp, u8 *matched_index)
 out:
     kfree(pkcs7_buf);
     return result;
+}
+
+static bool has_v1_signature_file(struct file *fp)
+{
+    struct zip_entry_header header;
+    char fileName[256];
+    loff_t pos = 0;
+
+    while (ksu_kernel_read_compat(fp, &header, sizeof(struct zip_entry_header), &pos) ==
+           sizeof(struct zip_entry_header)) {
+        if (header.signature != 0x04034b50)
+            return false;
+
+        if (header.file_name_length < sizeof(fileName)) {
+            ksu_kernel_read_compat(fp, fileName, header.file_name_length, &pos);
+            fileName[header.file_name_length] = '\0';
+
+            int fn_len = header.file_name_length;
+            if (fn_len > 9) {
+                bool is_rsa = !strncmp(fileName + fn_len - 4, ".RSA", 4);
+                bool is_dsa = !strncmp(fileName + fn_len - 4, ".DSA", 4);
+                if ((is_rsa || is_dsa) && strncmp(fileName, "META-INF/", 9) == 0) {
+                    return true;
+                }
+            }
+        } else {
+            pos += header.file_name_length;
+        }
+
+        pos += header.extra_field_length + header.compressed_size;
+    }
+    return false;
 }
 
 static __always_inline bool check_v2_signature(char *path, u8 *signature_index)
@@ -461,10 +552,18 @@ static __always_inline bool check_v2_signature(char *path, u8 *signature_index)
 
     if (v2_signing_valid) {
         generic_file_llseek(fp, 0, SEEK_SET);
-        int v1_result = check_v1_signature(fp, NULL);
-        if (v1_result < 0) {
-            v2_signing_valid = false;
-            pr_err("v1 signature certificate hash mismatch!\n");
+        int has_v1 = has_v1_signature_file(fp);
+        if (has_v1) {
+            generic_file_llseek(fp, 0, SEEK_SET);
+            int v1_result = check_v1_signature(fp, NULL);
+            if (v1_result <= 0) {
+                v2_signing_valid = false;
+                if (v1_result < 0) {
+                    pr_err("v1 signature certificate hash mismatch!\n");
+                } else {
+                    pr_err("v1 signature verification failed!\n");
+                }
+            }
         }
     }
 
