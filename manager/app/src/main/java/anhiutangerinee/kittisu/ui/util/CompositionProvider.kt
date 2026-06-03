@@ -10,9 +10,7 @@ val LocalSnackbarHost = compositionLocalOf<SnackbarHostState> {
     error("CompositionLocal LocalSnackbarController not present")
 }
 
-val LocalBlurState = compositionLocalOf<LayerBackdrop?> {
-    error("CompositionLocal LocalBlurState not present")
-}
+val LocalBlurState = compositionLocalOf<LayerBackdrop?> { null }
 
 val LocalPagerState = compositionLocalOf<PagerState> { error("No pager state") }
 val LocalHandlePageChange = compositionLocalOf<(Int) -> Unit> { error("No handle page change") }
