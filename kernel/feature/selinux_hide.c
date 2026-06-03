@@ -113,17 +113,9 @@ static void (*security_dump_masked_av_fn)(struct policydb *policydb, struct cont
 static void (*context_struct_compute_av_fn)(struct policydb *policydb, struct context *scontext,
                                             struct context *tcontext, u16 tclass, struct av_decision *avd,
                                             struct extended_perms *xperms) = NULL;
-/* Exported symbols for external kernel integration (selinuxfs.c patches) */
-struct selinux_policy *fake_status __read_mostly = NULL;
-bool initialize_fake_status __read_mostly = false;
-DEFINE_STATIC_KEY_FALSE(fake_status_initialize_key);
 #elif defined(KSU_COMPAT_USE_SELINUX_STATE)
 // remove static in susfs
 __maybe_static struct selinux_state fake_state;
-/* Exported symbols for external kernel integration (selinuxfs.c patches) */
-struct selinux_state *fake_status __read_mostly = &fake_state;
-bool initialize_fake_status __read_mostly = false;
-DEFINE_STATIC_KEY_FALSE(fake_status_initialize_key);
 #else
 static int dump_masked_av_helper(void *k, void *d, void *args);
 static int context_struct_to_string(struct context *context, char **scontext, u32 *scontext_len);
@@ -143,10 +135,6 @@ static int ksu_security_context_to_sid(const char *scontext, u32 scontext_len, u
 static int ksu_security_context_str_to_sid(const char *scontext, u32 *sid, gfp_t gfp);
 static int ksu_security_sid_to_context(u32 sid, char **scontext, u32 *scontext_len);
 static void ksu_security_compute_av_user(u32 ssid, u32 tsid, u16 tclass, struct av_decision *avd);
-/* Exported symbols for external kernel integration (selinuxfs.c patches) */
-struct selinux_state *fake_status __read_mostly = NULL;
-bool initialize_fake_status __read_mostly = false;
-DEFINE_STATIC_KEY_FALSE(fake_status_initialize_key);
 #endif
 
 #ifndef KSU_COMPAT_HAS_SUSFS_FEATURE_SELINUX_HIDE
