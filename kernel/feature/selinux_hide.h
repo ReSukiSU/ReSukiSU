@@ -11,18 +11,14 @@ void ksu_selinux_hide_drop_backup_if_unused();
 void ksu_selinux_hide_handle_second_stage();
 void ksu_selinux_hide_handle_post_fs_data();
 
-/* Exported symbols for external kernel integration */
+/* Exported symbols for external kernel integration (SUSFS) */
+#ifdef KSU_COMPAT_HAS_SUSFS_FEATURE_SELINUX_HIDE
 extern bool ksu_selinux_hide_enabled;
 extern bool ksu_selinux_hide_running;
-extern bool initialize_fake_status;
 extern struct static_key_false fake_status_initialize_key;
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 6, 0)
-struct selinux_policy;
-extern struct selinux_policy *fake_status;
-#else
-struct selinux_state;
-extern struct selinux_state *fake_status;
+void initialize_fake_status(void);
+struct page;
+extern struct page *fake_status;
 #endif
 
 // https://github.com/torvalds/linux/commit/b21507e272627c434e8dd74e8d51fd8245281b59
