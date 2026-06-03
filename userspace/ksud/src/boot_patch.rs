@@ -239,8 +239,6 @@ mod android {
             .collect()
     }
 
-<<<<<<< HEAD
-=======
     pub(super) fn auto_boot_partition_path(
         kmi: &str,
         ota: bool,
@@ -253,7 +251,6 @@ mod android {
     }
 
     #[cfg(target_os = "android")]
->>>>>>> d2d0b423 (ksud: sync upstream bootimg (https://github.com/tiann/KernelSU/pull/3467))
     pub(super) fn post_ota() -> Result<()> {
         use crate::{assets::BOOTCTL_PATH, defs::ADB_DIR};
         let status = Command::new(BOOTCTL_PATH).arg("hal-info").status()?;
@@ -602,68 +599,6 @@ pub fn patch(args: BootPatchArgs) -> Result<()> {
             println!("- Adding KernelSU LKM");
             let is_kernelsu_patched = cpio.exists("kernelsu.ko");
 
-<<<<<<< HEAD
-            let kernelsu_ko: Box<dyn AsRef<[u8]>> = if let Some(kmod) = kmod {
-                Box::new(map_file(&kmod)?)
-            } else if !no_install {
-                // If kmod is not specified, extract from assets
-                println!("- KMI: {kmi}");
-                let name = format!("{kmi}_kernelsu.ko");
-                Box::new(assets::get_asset(&name)?)
-            } else {
-                bail!("");
-            };
-
-            let ksu_init: Box<dyn AsRef<[u8]>> = if let Some(init) = init {
-                Box::new(map_file(&init)?)
-            } else if !no_install {
-                Box::new(assets::get_asset("ksuinit")?)
-            } else {
-                bail!("");
-            };
-
-            let (mut cpio, vendor_ramdisk_idx) =
-                if let Some(ramdisk_image) = boot_image.get_blocks().get_ramdisk() {
-                    extract_ramdisk(ramdisk_image)?
-                } else {
-                    println!("- No ramdisk, create by default");
-                    (Cpio::new(), None)
-                };
-
-            if !no_install {
-                let is_magisk_patched = cpio.is_magisk_patched();
-                ensure!(!is_magisk_patched, "Cannot work with Magisk patched image");
-
-                let is_kernelsu_patched = cpio.exists("kernelsu.ko");
-
-                if !is_kernelsu_patched {
-                    // kernelsu.ko is not exist, backup init if necessary
-                    if cpio.exists("init") {
-                        cpio.mv("init", "init.real")?;
-                    }
-                }
-
-                let ksu_init = CpioEntry::regular(0o755, ksu_init);
-                let kernelsu_ko = CpioEntry::regular(0o755, kernelsu_ko);
-
-                cpio.add("init", ksu_init)?;
-                cpio.add("kernelsu.ko", kernelsu_ko)?;
-
-                #[cfg(target_os = "android")]
-                if !is_kernelsu_patched
-                    && flash
-                    && let Err(e) = do_backup(&mut cpio, boot_image_file.as_path())
-                {
-                    println!("- Backup stock image failed: {e:?}");
-                }
-            }
-            if allow_shell {
-                println!("- Adding allow shell config");
-                cpio.add("ksu_allow_shell", CpioEntry::regular(0o644, Box::new([])))?;
-            } else if cpio.exists("ksu_allow_shell") {
-                println!("- Removing allow shell config");
-                cpio.rm("ksu_allow_shell", false);
-=======
             if !is_kernelsu_patched && cpio.exists("init") {
                 cpio.mv("init", "init.real")?;
             }
@@ -677,14 +612,9 @@ pub fn patch(args: BootPatchArgs) -> Result<()> {
                 && let Err(e) = do_backup(&mut cpio, &boot_image_file)
             {
                 println!("- Backup stock image failed: {e:?}");
->>>>>>> d2d0b423 (ksud: sync upstream bootimg (https://github.com/tiann/KernelSU/pull/3467))
             }
         }
 
-<<<<<<< HEAD
-            if enable_adbd || adb_debug_prop.is_some() {
-                cpio.add("force_debuggable", CpioEntry::regular(0o644, Box::new([])))?;
-=======
         if allow_shell {
             println!("- Adding allow shell config");
             cpio.add(
@@ -702,7 +632,6 @@ pub fn patch(args: BootPatchArgs) -> Result<()> {
                 "force_debuggable",
                 CpioEntry::regular(0o644, Box::new(Vec::<u8>::new())),
             )?;
->>>>>>> d2d0b423 (ksud: sync upstream bootimg (https://github.com/tiann/KernelSU/pull/3467))
 
             let mut prop = Vec::<u8>::new();
             if enable_adbd {
@@ -752,9 +681,6 @@ pub fn patch(args: BootPatchArgs) -> Result<()> {
             println!("- Flashing new boot image");
             let bootdevice = boot_image_file.display().to_string();
             flash_partition(&bootdevice, &new_boot_bytes)?;
-            if ota {
-                post_ota()?;
-            }
             if ota {
                 post_ota()?;
             }
