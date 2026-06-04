@@ -1,21 +1,3 @@
-//! ## Open Redirect
-//!
-//! Redirect the target path to be opened with user defined path and pre-defined uid scheme
-//!
-//! `<uid_scheme>`
-//! - `0`: Effective for non-app processes (uid < 10000)
-//! - `1`: Effective for non-su processes of which uid is 0 (All root process but not with su domain)
-//! - `2`: Effective for non-su processes (Use it carefully!)
-//! - `3`: Effective for processes that are marked unmounted with uid >= 10000 (Use it carefully!)
-//! - `4`: Effective for processes that are marked unmounted (include most of the init spawned process,
-//! use it carefully!)
-//!
-//! Important Notes:
-//! - Both target_pathname and redirected_pathname must be existed before they can be added to open_redirect
-//! - Users have to take care of the SELinux permission of both target_pathname and redirected_pathname
-//! by themselves
-//! - Only effective for current process that matches the pre-defined uid scheme
-
 use std::{fs, path::Path};
 
 use anyhow::Result;

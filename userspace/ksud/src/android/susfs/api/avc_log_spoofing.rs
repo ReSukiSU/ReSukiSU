@@ -1,12 +1,3 @@
-//! ## AVC Log Spoofing
-//!
-//! Spoofing the sus tcontext `su` with `u:r:priv_app:s0:c512,c768` shown in AVC log in kernel.
-//!
-//! **Important Notes**:
-//! - It is set to `0` by default in kernel.
-//! - Enabling this may sometimes make developers hard to identify the cause when they are debugging
-//! with some permission or SELinux issues, so users are advised to disable this when doing so.
-
 use anyhow::Result;
 
 use crate::android::susfs::{

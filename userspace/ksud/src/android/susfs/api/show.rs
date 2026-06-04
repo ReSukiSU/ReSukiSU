@@ -1,7 +1,3 @@
-//! ## Show
-//!
-//! Show SuSFS version, enabled features, and variant.
-
 use anyhow::Result;
 
 use crate::android::susfs::{

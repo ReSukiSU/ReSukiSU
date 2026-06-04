@@ -1,7 +1,3 @@
-//! ## Spoof Cmdline or Bootconfig
-//!
-//! Spoof the output of /proc/cmdline (non-gki) or /proc/bootconfig (gki) from a text file
-
 use std::{fs, path::Path};
 
 use anyhow::Result;

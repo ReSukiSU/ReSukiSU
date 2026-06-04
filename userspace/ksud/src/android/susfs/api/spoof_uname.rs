@@ -1,11 +1,3 @@
-//! ## Spoof Uname
-//!
-//! Spoof uname for all processes, set string to `default` to imply the function to use original string.
-//!
-//! NOTE: only `release` and `version` are spoofed as others are no longer needed.
-//!
-//! e.g.: `set_uname("4.9.337-g3291538446b7", "#1 SMP PREEMPT Mon Oct 6 16:50:48 UTC 2025")`
-
 use anyhow::{anyhow, Result};
 use rustix::path::Arg;
 use crate::android::susfs::{

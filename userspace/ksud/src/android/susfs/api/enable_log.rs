@@ -1,7 +1,3 @@
-//! ## Enable Log
-//!
-//! Enable SuSFS log in kernel.
-
 use anyhow::Result;
 
 use crate::android::susfs::{

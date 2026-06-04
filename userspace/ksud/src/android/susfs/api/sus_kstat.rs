@@ -125,6 +125,13 @@ fn copy_metadata_to_sus_kstat(info: &mut SusfsSusKstat, md: &fs::Metadata) {
     info.spoofed_blocks = md.blocks() as i64;
 }
 
+/// Add the desired path you have added before via `add_sus_kstat` to complete the kstat spoofing
+/// procedure.
+///
+/// This updates the target ino, but size and blocks are remained the same as current stat.
+///
+/// **Important Notes**:
+/// - Only effective for umounted process with uid >= 10000
 pub fn update_sus_kstat<P>(path: P) -> Result<()>
 where
     P: AsRef<Path>,
@@ -148,6 +155,14 @@ where
     Ok(())
 }
 
+/// Add the desired path BEFORE it gets bind mounted or overlayed, this is used for storing original
+/// stat info in kernel memory.
+///
+/// This command must be completed with `update_sus_kstat` later after the added path is bind
+/// mounted or overlayed.
+///
+/// **Important Notice**:
+/// - Only effective for umounted process with uid >= 10000
 pub fn add_sus_kstat<P>(path: P) -> Result<()>
 where
     P: AsRef<Path>,
@@ -170,6 +185,14 @@ where
     parse_err(CMD_SUSFS_ADD_SUS_KSTAT, info.err)?;
     Ok(())
 }
+
+/// Add the desired path you have added before via `add_sus_kstat` to complete the kstat spoofing
+/// procedure.
+///
+/// This updates the target ino only, other stat members are remained the same as the original stat.
+///
+/// **Important Notes**:
+/// - Only effective for umounted process with uid >= 10000
 pub fn update_sus_kstat_full_clone<P>(path: P) -> Result<()>
 where
     P: AsRef<Path>,
@@ -192,6 +215,61 @@ where
     parse_err(CMD_SUSFS_UPDATE_SUS_KSTAT, info.err)?;
     Ok(())
 }
+
+
+/// Use `stat` tool to find the format:
+/// - `ino` -> `%i`
+/// - `dev` -> `%d`
+/// - `nlink` -> `%h`
+/// - `atime` -> `%X`
+/// - `mtime` -> `%Y`
+/// - `ctime` -> `%Z`
+/// - `size` -> `%s`
+/// - `blocks` -> `%b`
+/// - `blksize` -> `%B`
+///
+/// e.g.
+/// ```rust
+/// add_sus_kstat_statically(
+///     "/system/addon.d",
+///     "1234",
+///     "1234",
+///     "2",
+///     "223344",
+///     "1712592355",
+///     "0",
+///     "1712592355",
+///     "0",
+///     "1712592355",
+///     "0",
+///     "16",
+///     "512"
+/// );
+/// ```
+///
+/// Or pass `default` to use its original value.
+///
+/// e.g.
+/// ```rust
+/// add_sus_kstat_statically(
+///     "/system/addon.d",
+///     "default",
+///     "default",
+///     "default",
+///     "default",
+///     "1712592355",
+///     "default",
+///     "1712592355",
+///     "default",
+///     "1712592355",
+///     "default",
+///     "default",
+///     "default"
+/// );
+/// ```
+///
+/// **Important Notes**
+/// - Only effective for unmounted process with uid >= 10000
 #[allow(clippy::too_many_arguments)]
 pub fn add_sus_kstat_statically(
     path: &str,
