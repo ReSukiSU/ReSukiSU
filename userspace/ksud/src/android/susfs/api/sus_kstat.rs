@@ -111,13 +111,13 @@ where
 }
 
 fn copy_metadata_to_sus_kstat(info: &mut SusfsSusKstat, md: &fs::Metadata) {
-    info.spoofed_ino = md.ino();
-    info.spoofed_dev = md.dev();
+    info.spoofed_ino = md.ino() as c_ulong;
+    info.spoofed_dev = md.dev() as c_ulong;
     info.spoofed_nlink = md.nlink() as u32;
     info.spoofed_size = md.size() as i64;
-    info.spoofed_atime_tv_sec = md.atime();
-    info.spoofed_mtime_tv_sec = md.mtime();
-    info.spoofed_ctime_tv_sec = md.ctime();
+    info.spoofed_atime_tv_sec = md.atime() as c_long;
+    info.spoofed_mtime_tv_sec = md.mtime() as c_long;
+    info.spoofed_ctime_tv_sec = md.ctime() as c_long;
     info.spoofed_atime_tv_nsec = md.atime_nsec() as c_ulong;
     info.spoofed_mtime_tv_nsec = md.mtime_nsec() as c_ulong;
     info.spoofed_ctime_tv_nsec = md.ctime_nsec() as c_ulong;
@@ -145,7 +145,7 @@ where
     );
 
     info.is_statically = false;
-    info.target_ino = md.ino();
+    info.target_ino = md.ino() as c_ulong;
     copy_metadata_to_sus_kstat(&mut info, &md);
     info.flags |= KstatSpoofFlags::AUTO_SPOOF.bits();
     info.err = ERR_CMD_NOT_SUPPORTED;
@@ -177,7 +177,7 @@ where
     copy_metadata_to_sus_kstat(&mut info, &md);
 
     info.is_statically = false;
-    info.target_ino = md.ino();
+    info.target_ino = md.ino() as c_ulong;
     info.flags |= KstatSpoofFlags::AUTO_SPOOF.bits();
     info.err = ERR_CMD_NOT_SUPPORTED;
 
@@ -207,7 +207,7 @@ where
     copy_metadata_to_sus_kstat(&mut info, &md);
 
     info.is_statically = false;
-    info.target_ino = md.ino();
+    info.target_ino = md.ino() as c_ulong;
     info.flags |= KstatSpoofFlags::AUTO_SPOOF_FULL_CLONE.bits();
     info.err = ERR_CMD_NOT_SUPPORTED;
 
@@ -289,7 +289,7 @@ pub fn add_sus_kstat_statically(
     let md = fs::metadata(path)?;
 
     let mut info = SusfsSusKstat {
-        target_ino: md.ino(),
+        target_ino: md.ino() as c_ulong,
         is_statically: true,
         ..Default::default()
     };
