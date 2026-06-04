@@ -1,6 +1,6 @@
 #![allow(clippy::similar_names)]
 
-use std::{fs, os::unix::fs::MetadataExt, path::Path};
+use std::{fs, os::unix::fs::MetadataExt, path::Path, ffi::{c_ulong, c_long}};
 
 use anyhow::Result;
 use bitflags::bitflags;
@@ -10,7 +10,8 @@ use crate::android::susfs::{
         CMD_SUSFS_ADD_SUS_KSTAT, CMD_SUSFS_ADD_SUS_KSTAT_STATICALLY, CMD_SUSFS_UPDATE_SUS_KSTAT,
         ERR_CMD_NOT_SUPPORTED, SUSFS_MAX_LEN_PATHNAME,
     },
-    utils::{handle_result, str_to_c_array, susfs_ctl},
+    utils::str_to_c_array,
+    communicate::{communicate, parse_err}
 };
 
 bitflags! {
@@ -46,20 +47,20 @@ bitflags! {
 #[repr(C)]
 struct SusfsSusKstat {
     is_statically: bool,
-    target_ino: u64,
+    target_ino: c_ulong,
     target_pathname: [u8; SUSFS_MAX_LEN_PATHNAME],
-    spoofed_ino: u64,
-    spoofed_dev: u64,
+    spoofed_ino: c_ulong,
+    spoofed_dev: c_ulong,
     spoofed_nlink: u32,
     spoofed_size: i64,
-    spoofed_atime_tv_sec: i64,
-    spoofed_mtime_tv_sec: i64,
-    spoofed_ctime_tv_sec: i64,
-    spoofed_atime_tv_nsec: i64,
-    spoofed_mtime_tv_nsec: i64,
-    spoofed_ctime_tv_nsec: i64,
-    spoofed_blksize: u64,
-    spoofed_blocks: u64,
+    spoofed_atime_tv_sec: c_long,
+    spoofed_atime_tv_nsec: c_ulong,
+    spoofed_mtime_tv_sec: c_long,
+    spoofed_mtime_tv_nsec: c_ulong,
+    spoofed_ctime_tv_sec: c_long,
+    spoofed_ctime_tv_nsec: c_ulong,
+    spoofed_blocks: i64,
+    spoofed_blksize: c_long,
     flags: i32,
     err: i32,
 }
@@ -90,19 +91,22 @@ impl Default for SusfsSusKstat {
 
 fn parse_or_default<T>(
     val: &str,
-    default: T,
-    info: &mut SusfsSusKstat,
-    flags: KstatSpoofFlags,
-) -> Result<T>
+    flag: &mut i32,
+    flag_add: KstatSpoofFlags,
+) -> Result<Option<T>>
 where
     T: std::str::FromStr,
 {
-    info.flags |= flags.bits();
-    if val == "default" {
-        Ok(default)
+    if val.trim() == "default" {
+        Ok(None)
     } else {
-        val.parse::<T>()
-            .map_err(|_| anyhow::format_err!("Invalid number format: {val}"))
+        match val.parse::<T>() {
+            Ok(val) => {
+                *flag |= flag_add.bits();
+                Ok(Some(val))
+            },
+            Err(_) => Err(anyhow::anyhow!("failed to parse \"{val}\""))
+        }
     }
 }
 
@@ -114,11 +118,11 @@ fn copy_metadata_to_sus_kstat(info: &mut SusfsSusKstat, md: &fs::Metadata) {
     info.spoofed_atime_tv_sec = md.atime();
     info.spoofed_mtime_tv_sec = md.mtime();
     info.spoofed_ctime_tv_sec = md.ctime();
-    info.spoofed_atime_tv_nsec = md.atime_nsec();
-    info.spoofed_mtime_tv_nsec = md.mtime_nsec();
-    info.spoofed_ctime_tv_nsec = md.ctime_nsec();
-    info.spoofed_blksize = md.blksize();
-    info.spoofed_blocks = md.blocks();
+    info.spoofed_atime_tv_nsec = md.atime_nsec() as c_ulong;
+    info.spoofed_mtime_tv_nsec = md.mtime_nsec() as c_ulong;
+    info.spoofed_ctime_tv_nsec = md.ctime_nsec() as c_ulong;
+    info.spoofed_blksize = md.blksize() as c_long;
+    info.spoofed_blocks = md.blocks() as i64;
 }
 
 pub fn update_sus_kstat<P>(path: P) -> Result<()>
@@ -136,11 +140,11 @@ where
     info.is_statically = false;
     info.target_ino = md.ino();
     copy_metadata_to_sus_kstat(&mut info, &md);
-    info.flags |= KstatSpoofFlags::AUTO_SPOOF_FULL_CLONE.bits();
+    info.flags |= KstatSpoofFlags::AUTO_SPOOF.bits();
     info.err = ERR_CMD_NOT_SUPPORTED;
 
-    susfs_ctl(&mut info, CMD_SUSFS_UPDATE_SUS_KSTAT);
-    handle_result(info.err, CMD_SUSFS_UPDATE_SUS_KSTAT)?;
+    communicate(CMD_SUSFS_UPDATE_SUS_KSTAT, &mut info);
+    parse_err(CMD_SUSFS_UPDATE_SUS_KSTAT, info.err)?;
     Ok(())
 }
 
@@ -159,11 +163,11 @@ where
 
     info.is_statically = false;
     info.target_ino = md.ino();
-    info.flags |= KstatSpoofFlags::AUTO_SPOOF_FULL_CLONE.bits();
+    info.flags |= KstatSpoofFlags::AUTO_SPOOF.bits();
     info.err = ERR_CMD_NOT_SUPPORTED;
 
-    susfs_ctl(&mut info, CMD_SUSFS_ADD_SUS_KSTAT);
-    handle_result(info.err, CMD_SUSFS_ADD_SUS_KSTAT)?;
+    communicate(CMD_SUSFS_ADD_SUS_KSTAT, &mut info);
+    parse_err(CMD_SUSFS_ADD_SUS_KSTAT, info.err)?;
     Ok(())
 }
 pub fn update_sus_kstat_full_clone<P>(path: P) -> Result<()>
@@ -184,8 +188,8 @@ where
     info.flags |= KstatSpoofFlags::AUTO_SPOOF_FULL_CLONE.bits();
     info.err = ERR_CMD_NOT_SUPPORTED;
 
-    susfs_ctl(&mut info, CMD_SUSFS_UPDATE_SUS_KSTAT);
-    handle_result(info.err, CMD_SUSFS_UPDATE_SUS_KSTAT)?;
+    communicate(CMD_SUSFS_UPDATE_SUS_KSTAT, &mut info);
+    parse_err(CMD_SUSFS_UPDATE_SUS_KSTAT, info.err)?;
     Ok(())
 }
 #[allow(clippy::too_many_arguments)]
@@ -211,78 +215,95 @@ pub fn add_sus_kstat_statically(
         is_statically: true,
         ..Default::default()
     };
+    let mut flag: i32 = 0;
 
-    let s_ino = parse_or_default(ino, md.ino(), &mut info, KstatSpoofFlags::SPOOF_INO)?;
-    let s_dev = parse_or_default(dev, md.dev(), &mut info, KstatSpoofFlags::SPOOF_DEV)?;
-    let s_nlink = parse_or_default(nlink, md.nlink(), &mut info, KstatSpoofFlags::SPOOF_NLINK)?;
-    let s_size = parse_or_default(size, md.size(), &mut info, KstatSpoofFlags::SPOOF_SIZE)?;
+    let s_ino = parse_or_default(ino, &mut flag, KstatSpoofFlags::SPOOF_INO)?;
+    let s_dev = parse_or_default(dev, &mut flag, KstatSpoofFlags::SPOOF_DEV)?;
+    let s_nlink = parse_or_default(nlink, &mut flag, KstatSpoofFlags::SPOOF_NLINK)?;
+    let s_size = parse_or_default(size, &mut flag, KstatSpoofFlags::SPOOF_SIZE)?;
     let s_atime = parse_or_default(
         atime,
-        md.atime(),
-        &mut info,
+        &mut flag,
         KstatSpoofFlags::SPOOF_ATIME_TV_SEC,
     )?;
     let s_atime_nsec = parse_or_default(
         atime_nsec,
-        md.atime_nsec(),
-        &mut info,
+        &mut flag,
         KstatSpoofFlags::SPOOF_ATIME_TV_NSEC,
     )?;
     let s_mtime = parse_or_default(
         mtime,
-        md.mtime(),
-        &mut info,
+        &mut flag,
         KstatSpoofFlags::SPOOF_MTIME_TV_SEC,
     )?;
     let s_mtime_nsec = parse_or_default(
         mtime_nsec,
-        md.mtime_nsec(),
-        &mut info,
+        &mut flag,
         KstatSpoofFlags::SPOOF_MTIME_TV_NSEC,
     )?;
     let s_ctime = parse_or_default(
         ctime,
-        md.ctime(),
-        &mut info,
+        &mut flag,
         KstatSpoofFlags::SPOOF_CTIME_TV_SEC,
     )?;
     let s_ctime_nsec = parse_or_default(
         ctime_nsec,
-        md.ctime_nsec(),
-        &mut info,
+        &mut flag,
         KstatSpoofFlags::SPOOF_CTIME_TV_NSEC,
     )?;
     let s_blocks = parse_or_default(
         blocks,
-        md.blocks(),
-        &mut info,
+        &mut flag,
         KstatSpoofFlags::SPOOF_BLOCKS,
     )?;
     let s_blksize = parse_or_default(
         blksize,
-        md.blksize(),
-        &mut info,
+        &mut flag,
         KstatSpoofFlags::SPOOF_BLKSIZE,
     )?;
 
     str_to_c_array(path, &mut info.target_pathname);
-
-    info.spoofed_ino = s_ino as u64;
-    info.spoofed_dev = s_dev as u64;
-    info.spoofed_nlink = s_nlink as u32;
-    info.spoofed_size = s_size as i64;
-    info.spoofed_atime_tv_sec = s_atime as i64;
-    info.spoofed_mtime_tv_sec = s_mtime as i64;
-    info.spoofed_ctime_tv_sec = s_ctime as i64;
-    info.spoofed_atime_tv_nsec = s_atime_nsec as i64;
-    info.spoofed_mtime_tv_nsec = s_mtime_nsec as i64;
-    info.spoofed_ctime_tv_nsec = s_ctime_nsec as i64;
-    info.spoofed_blksize = s_blksize as u64;
-    info.spoofed_blocks = s_blocks as u64;
+    info.flags = flag;
+    if let Some(s_ino) = s_ino{
+        info.spoofed_ino = s_ino;
+    }
+    if let Some(s_dev) = s_dev{
+        info.spoofed_dev = s_dev;
+    }
+    if let Some(s_nlink) = s_nlink{
+        info.spoofed_nlink = s_nlink;
+    }
+    if let Some(s_size) = s_size{
+        info.spoofed_size = s_size;
+    }
+    if let Some(s_atime) = s_atime{
+        info.spoofed_atime_tv_sec = s_atime;
+    }
+    if let Some(s_atime_nsec) = s_atime_nsec{
+        info.spoofed_atime_tv_nsec = s_atime_nsec;
+    }
+    if let Some(s_mtime) = s_mtime{
+        info.spoofed_mtime_tv_sec = s_mtime;
+    }
+    if let Some(s_mtime_nsec) = s_mtime_nsec{
+        info.spoofed_mtime_tv_nsec = s_mtime_nsec;
+    }
+    if let Some(s_ctime) = s_ctime{
+        info.spoofed_ctime_tv_sec = s_ctime;
+    }
+    if let Some(s_ctime_nsec) = s_ctime_nsec{
+        info.spoofed_ctime_tv_nsec = s_ctime_nsec;
+    }
+    if let Some(s_blocks) = s_blocks{
+        info.spoofed_blocks = s_blocks;
+    }
+    if let Some(s_blksize) = s_blksize{
+        info.spoofed_blksize = s_blksize;
+    }
 
     info.err = ERR_CMD_NOT_SUPPORTED;
 
-    susfs_ctl(&mut info, CMD_SUSFS_ADD_SUS_KSTAT_STATICALLY);
-    handle_result(info.err, CMD_SUSFS_ADD_SUS_KSTAT_STATICALLY)?;
+    communicate(CMD_SUSFS_ADD_SUS_KSTAT_STATICALLY, &mut info);
+    parse_err(CMD_SUSFS_ADD_SUS_KSTAT_STATICALLY, info.err)?;
     Ok(())
 }

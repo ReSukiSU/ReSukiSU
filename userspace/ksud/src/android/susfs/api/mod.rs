@@ -1,3 +1,7 @@
+//! ## API
+//!
+//! SuSFS API abstraction
+
 mod avc_log_spoofing;
 mod enable_log;
 mod open_redirect;
@@ -12,7 +16,7 @@ mod sus_path;
 pub use avc_log_spoofing::enable_avc_log_spoofing;
 pub use enable_log::enable_log;
 pub use open_redirect::add_open_redirect;
-pub use show::{show_features, show_variant, show_version};
+pub use show::{features, variant, version};
 pub use spoof_cmdline_or_bootconfig::set_cmdline_or_bootconfig;
 pub use spoof_uname::set_uname;
 pub use sus_kstat::{
@@ -20,4 +24,4 @@ pub use sus_kstat::{
 };
 pub use sus_map::add_sus_map;
 pub use sus_mount::hide_sus_mnts_for_non_su_procs;
-pub use sus_path::{SusPathType, add_sus_path};
+pub use sus_path::{add_sus_path, SusPathType};

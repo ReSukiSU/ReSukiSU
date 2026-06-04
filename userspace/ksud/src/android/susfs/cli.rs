@@ -126,7 +126,7 @@ pub enum SuSFSSubCommands {
         ///2: Effective for non-su processes (Use it carefully!)
         ///3: Effective for processes that are marked umounted with uid >= 10000 (Use it carefully!)
         ///4: Effective for processes that are marked umounted (include most of the init spawned process, use it carefully!)
-        uid_scheme: u64,
+        uid_scheme: i32,
     },
     /// Added real file path which gets mmapped will be hidden from /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap]
     #[command(name = "add_sus_map")]
@@ -308,13 +308,16 @@ pub fn run_main(command: SuSFSSubCommands) -> Result<()> {
         }
         SuSFSSubCommands::Show { info_type } => match info_type {
             ShowType::Version => {
-                api::show_version()?;
+                let version = api::version()?;
+                println!("{version}");
             }
             ShowType::EnabledFeatures => {
-                api::show_features()?;
+                let features = api::features()?;
+                println!("{features}");
             }
             ShowType::Variant => {
-                api::show_variant()?;
+                let variant = api::variant()?;
+                println!("{variant}");
             }
         },
         SuSFSSubCommands::AddSusKstatStatically {

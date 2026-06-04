@@ -4,19 +4,7 @@ use crate::android::susfs::config::data::Data;
 use log::warn;
 use std::{thread, time::Duration};
 
-const EXTERNAL_STORAGE_RETRY_COUNT: usize = 15;
-const EXTERNAL_STORAGE_RETRY_INTERVAL_SECS: u64 = 1;
-
 pub fn on_boot_completed() {
-    let Some(config) = config::read_config() else {
-        return;
-    };
-
-    apply_sus_paths_with_retry(&config);
-    apply_sus_maps(&config);
-}
-
-pub fn on_services() {
     let Some(config) = config::read_config() else {
         return;
     };
@@ -25,33 +13,26 @@ pub fn on_services() {
     apply_sus_maps(&config);
 }
 
+pub fn on_services() {
+    let Some(config) = config::read_config() else {
+        return;
+    };
+
+    // apply_sus_paths(&config);
+    // apply_sus_maps(&config);
+}
+
 fn apply_sus_paths(config: &Data) {
     for sus_path in &config.sus_path.sus_path {
         if sus_path.trim().is_empty() {
             continue;
         }
-        apply_sus_path_entry(&api::SusPathType::Normal, "sus_path", sus_path, false);
-    }
-    for sus_path_loop in &config.sus_path.sus_path_loop {
-        if sus_path_loop.trim().is_empty() {
-            continue;
-        }
         apply_sus_path_entry(
-            &api::SusPathType::Loop,
-            "sus_path_loop",
-            sus_path_loop,
-            false,
+            &api::SusPathType::Normal,
+            "sus_path",
+            sus_path,
         );
     }
-}
-
-fn apply_sus_paths_with_retry(config: &Data) {
-    for sus_path in &config.sus_path.sus_path {
-        if sus_path.trim().is_empty() {
-            continue;
-        }
-        apply_sus_path_entry(&api::SusPathType::Normal, "sus_path", sus_path, true);
-    }
     for sus_path_loop in &config.sus_path.sus_path_loop {
         if sus_path_loop.trim().is_empty() {
             continue;
@@ -60,7 +41,6 @@ fn apply_sus_paths_with_retry(config: &Data) {
             &api::SusPathType::Loop,
             "sus_path_loop",
             sus_path_loop,
-            true,
         );
     }
 }
@@ -69,31 +49,16 @@ fn apply_sus_path_entry(
     path_type: &api::SusPathType,
     label: &str,
     path: &str,
-    retry_external_storage: bool,
 ) {
-    let retry_count = if retry_external_storage && is_external_storage_path(path) {
-        EXTERNAL_STORAGE_RETRY_COUNT
-    } else {
-        1
-    };
-
-    let mut last_error = None;
-    for attempt in 0..retry_count {
-        match api::add_sus_path(path_type, &path) {
-            Ok(()) => return,
-            Err(e) => {
-                last_error = Some(e.to_string());
-                if attempt + 1 < retry_count {
-                    thread::sleep(Duration::from_secs(EXTERNAL_STORAGE_RETRY_INTERVAL_SECS));
-                }
-            }
+    match api::add_sus_path(path_type, &path) {
+        Ok(()) => return,
+        Err(e) => {
+            warn!(
+                "failed to add {label} '{path}': {}",
+                e.to_string(),
+            );
         }
     }
-
-    warn!(
-        "failed to add {label} '{path}': {}",
-        last_error.unwrap_or_else(|| "unknown error".to_string())
-    );
 }
 
 fn is_external_storage_path(path: &str) -> bool {
@@ -137,7 +102,7 @@ pub fn on_post_fs_data() {
         warn!("failed to hide sus mnts for non su procs: {e}");
     }
 
-    apply_sus_paths(&config);
+    // apply_sus_paths(&config);
 
     for sus_kstat in &config.kstat.sus_kstat {
         if sus_kstat.trim().is_empty() {
@@ -179,8 +144,8 @@ pub fn on_post_mount() {
         return;
     };
 
-    apply_sus_paths(&config);
-    apply_sus_maps(&config);
+    // apply_sus_paths(&config);
+    // apply_sus_maps(&config);
 
     for update_kstat in &config.kstat.update_kstat {
         if update_kstat.trim().is_empty() {

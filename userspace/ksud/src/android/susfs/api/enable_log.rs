@@ -1,8 +1,12 @@
+//! ## Enable Log
+//!
+//! Enable SuSFS log in kernel.
+
 use anyhow::Result;
 
 use crate::android::susfs::{
     magic::{CMD_SUSFS_ENABLE_LOG, ERR_CMD_NOT_SUPPORTED},
-    utils::{handle_result, susfs_ctl},
+    communicate::{communicate, parse_err},
 };
 
 #[repr(C)]
@@ -11,6 +15,7 @@ struct SusfsLog {
     err: i32,
 }
 
+/// Enable SuSFS log in kernel.
 pub fn enable_log(enabled: u8) -> Result<()> {
     if enabled > 1 {
         return Err(anyhow::format_err!("Invalid value for enabled (0 or 1)"));
@@ -21,7 +26,7 @@ pub fn enable_log(enabled: u8) -> Result<()> {
         err: ERR_CMD_NOT_SUPPORTED,
     };
 
-    susfs_ctl(&mut info, CMD_SUSFS_ENABLE_LOG);
-    handle_result(info.err, CMD_SUSFS_ENABLE_LOG)?;
+    communicate(CMD_SUSFS_ENABLE_LOG, &mut info);
+    parse_err(CMD_SUSFS_ENABLE_LOG, info.err)?;
     Ok(())
 }

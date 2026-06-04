@@ -1,3 +1,7 @@
+//! ## Spoof Cmdline or Bootconfig
+//!
+//! Spoof the output of /proc/cmdline (non-gki) or /proc/bootconfig (gki) from a text file
+
 use std::{fs, path::Path};
 
 use anyhow::Result;
@@ -7,7 +11,7 @@ use crate::android::susfs::{
         CMD_SUSFS_SET_CMDLINE_OR_BOOTCONFIG, ERR_CMD_NOT_SUPPORTED,
         SUSFS_FAKE_CMDLINE_OR_BOOTCONFIG_SIZE,
     },
-    utils::{handle_result, susfs_ctl},
+    communicate::{communicate, parse_err},
 };
 
 #[repr(C)]
@@ -16,6 +20,7 @@ struct SusfsSpoofCmdline {
     err: i32,
 }
 
+/// Spoof the output of /proc/cmdline (non-gki) or /proc/bootconfig (gki) from a text file
 pub fn set_cmdline_or_bootconfig<P>(path: P) -> Result<()>
 where
     P: AsRef<Path>,
@@ -35,7 +40,7 @@ where
         info.fake_cmdline_or_bootconfig[i] = b;
     }
 
-    susfs_ctl(&mut *info, CMD_SUSFS_SET_CMDLINE_OR_BOOTCONFIG);
-    handle_result(info.err, CMD_SUSFS_SET_CMDLINE_OR_BOOTCONFIG)?;
+    communicate(CMD_SUSFS_SET_CMDLINE_OR_BOOTCONFIG, &mut *info);
+    parse_err(CMD_SUSFS_SET_CMDLINE_OR_BOOTCONFIG, info.err)?;
     Ok(())
 }

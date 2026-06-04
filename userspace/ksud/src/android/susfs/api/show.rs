@@ -1,3 +1,7 @@
+//! ## Show
+//!
+//! Show SuSFS version, enabled features, and variant.
+
 use anyhow::Result;
 
 use crate::android::susfs::{
@@ -6,7 +10,8 @@ use crate::android::susfs::{
         ERR_CMD_NOT_SUPPORTED, SUSFS_ENABLED_FEATURES_SIZE, SUSFS_MAX_VARIANT_BUFSIZE,
         SUSFS_MAX_VERSION_BUFSIZE,
     },
-    utils::{handle_result, susfs_ctl},
+    communicate::{communicate, parse_err},
+    utils::c_array_to_string,
 };
 
 #[repr(C)]
@@ -27,73 +32,47 @@ struct SusfsVersion {
     err: i32,
 }
 
-pub fn show_version() -> Result<()> {
+/// Get the current SuSFS version implemented in kernel
+pub fn version() -> Result<String> {
     let mut info = SusfsVersion {
         susfs_version: [0; SUSFS_MAX_VERSION_BUFSIZE],
         err: ERR_CMD_NOT_SUPPORTED,
     };
-    susfs_ctl(&mut info, CMD_SUSFS_SHOW_VERSION);
-    handle_result(info.err, CMD_SUSFS_SHOW_VERSION)?;
+    communicate(CMD_SUSFS_SHOW_VERSION, &mut info);
+    parse_err(CMD_SUSFS_SHOW_VERSION, info.err)?;
 
-    if info.err == 0 {
-        let len = info
-            .susfs_version
-            .iter()
-            .position(|&b| b == 0)
-            .unwrap_or(SUSFS_MAX_VERSION_BUFSIZE);
-        let bytes: Vec<u8> = info.susfs_version[..len].to_vec();
-        let ver = String::from_utf8(bytes).unwrap_or_else(|_| "<invalid>".to_string());
+    let ver = c_array_to_string(&info.susfs_version);
 
-        if ver.starts_with('v') {
-            println!("{ver}");
-        } else {
-            println!("unsupport");
-        }
+    if ver.starts_with('v') {
+        Ok(ver)
+    } else {
+        Ok("Unsupported".to_string())
     }
-
-    Ok(())
 }
 
-pub fn show_variant() -> Result<()> {
+/// Get the current variant (GKI/non-GKI)
+pub fn variant() -> Result<String> {
     let mut info = SusfsVariant {
         susfs_variant: [0; SUSFS_MAX_VARIANT_BUFSIZE],
         err: ERR_CMD_NOT_SUPPORTED,
     };
-    susfs_ctl(&mut info, CMD_SUSFS_SHOW_VARIANT);
-    handle_result(info.err, CMD_SUSFS_SHOW_VARIANT)?;
+    communicate(CMD_SUSFS_SHOW_VARIANT, &mut info);
+    parse_err(CMD_SUSFS_SHOW_VARIANT, info.err)?;
 
-    if info.err == 0 {
-        let len = info
-            .susfs_variant
-            .iter()
-            .position(|&b| b == 0)
-            .unwrap_or(SUSFS_MAX_VARIANT_BUFSIZE);
-        let bytes: Vec<u8> = info.susfs_variant[..len].to_vec();
-        let variant = String::from_utf8(bytes).unwrap_or_else(|_| "<invalid>".to_string());
-        println!("{variant}");
-    }
-
-    Ok(())
+    let variant = c_array_to_string(&info.susfs_variant);
+    Ok(variant)
 }
 
-pub fn show_features() -> Result<()> {
+/// Get the current implemented SuSFS features in kernel
+pub fn features() -> Result<String> {
     let mut info = Box::new(SusfsEnabledFeatures {
         enabled_features: [0; SUSFS_ENABLED_FEATURES_SIZE],
         err: ERR_CMD_NOT_SUPPORTED,
     });
-    susfs_ctl(&mut *info, CMD_SUSFS_SHOW_ENABLED_FEATURES);
-    handle_result(info.err, CMD_SUSFS_SHOW_ENABLED_FEATURES)?;
+    communicate(CMD_SUSFS_SHOW_ENABLED_FEATURES, &mut *info);
+    parse_err(CMD_SUSFS_SHOW_ENABLED_FEATURES, info.err)?;
 
-    if info.err == 0 {
-        let len = info
-            .enabled_features
-            .iter()
-            .position(|&b| b == 0)
-            .unwrap_or(SUSFS_ENABLED_FEATURES_SIZE);
-        let bytes: Vec<u8> = info.enabled_features[..len].to_vec();
-        let features = String::from_utf8(bytes).unwrap_or_else(|_| "<invalid>".to_string());
-        print!("{features}");
-    }
+    let features = c_array_to_string(&info.enabled_features);
 
-    Ok(())
+    Ok(features)
 }

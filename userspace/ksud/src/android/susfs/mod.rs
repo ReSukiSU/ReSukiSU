@@ -5,5 +5,6 @@ pub mod init_event;
 mod magic;
 mod slot_info;
 mod utils;
+mod communicate;
 
-pub use api::show_version;
+pub use api::version;
