@@ -2,8 +2,8 @@
 
 use std::{fs, os::unix::fs::MetadataExt, path::Path, ffi::{c_ulong, c_long}};
 
-use anyhow::Result;
 use bitflags::bitflags;
+use anyhow::Result;
 
 use crate::android::susfs::{
     magic::{

@@ -4,7 +4,8 @@ use anyhow::Result;
 
 use crate::android::susfs::{
     magic::{CMD_SUSFS_ADD_SUS_MAP, ERR_CMD_NOT_SUPPORTED, SUSFS_MAX_LEN_PATHNAME},
-    utils::{handle_result, str_to_c_array, susfs_ctl},
+    utils::str_to_c_array,
+    communicate::{communicate, parse_err},
 };
 
 #[repr(C)]
@@ -33,8 +34,8 @@ where
     );
     info.err = ERR_CMD_NOT_SUPPORTED;
 
-    susfs_ctl(&mut info, CMD_SUSFS_ADD_SUS_MAP);
-    handle_result(info.err, CMD_SUSFS_ADD_SUS_MAP)?;
+    communicate(CMD_SUSFS_ADD_SUS_MAP, &mut info);
+    parse_err(CMD_SUSFS_ADD_SUS_MAP, info.err)?;
 
     Ok(())
 }

@@ -5,7 +5,8 @@ use crate::android::susfs::{
         CMD_SUSFS_ADD_SUS_PATH, CMD_SUSFS_ADD_SUS_PATH_LOOP, ERR_CMD_NOT_SUPPORTED,
         SUSFS_MAX_LEN_PATHNAME,
     },
-    utils::{handle_result, str_to_c_array, susfs_ctl},
+    communicate::{communicate, parse_err},
+    utils::str_to_c_array,
 };
 
 #[repr(C)]
@@ -40,7 +41,7 @@ where
     str_to_c_array(path.to_string().as_str(), &mut info.target_pathname);
     info.err = ERR_CMD_NOT_SUPPORTED;
 
-    susfs_ctl(&mut info, magic);
-    handle_result(info.err, magic)?;
+    communicate(magic, &mut info);
+    parse_err(magic, info.err)?;
     Ok(())
 }
