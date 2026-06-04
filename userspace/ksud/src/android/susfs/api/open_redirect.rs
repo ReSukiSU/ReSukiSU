@@ -1,7 +1,7 @@
 use std::{fs, path::Path};
 
 use anyhow::Result;
-use bitflags::bitflags;
+use num_enum::{TryFromPrimitive, IntoPrimitive};
 
 use crate::android::susfs::{
     magic::{CMD_SUSFS_ADD_OPEN_REDIRECT, ERR_CMD_NOT_SUPPORTED, SUSFS_MAX_LEN_PATHNAME},
@@ -17,15 +17,14 @@ struct SusfsOpenRedirect {
     err: i32,
 }
 
-bitflags! {
-    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-    pub struct UidScheme: i32 {
-        const NonAppProc = 0;
-        const RootProcExceptSuProc=1;
-        const NonSuProc=2;
-        const UnmountedAppProc=3;
-        const  UnmountedProc=4;
-    }
+#[derive(Debug, PartialEq, TryFromPrimitive, IntoPrimitive)]
+#[repr(i32)]
+pub enum UidScheme {
+    NonAppProc = 0,
+    RootProcExceptSuProc = 1,
+    NonSuProc = 2,
+    UnmountedAppProc = 3,
+    UnmountedProc = 4,
 }
 
 impl Default for SusfsOpenRedirect {
@@ -58,8 +57,7 @@ pub fn add_open_redirect<P>(target_path: P, redirected_path: P, uid_scheme: i32)
 where
     P: AsRef<Path>,
 {
-    let all_masks = UidScheme::all().bits();
-    if (uid_scheme & !all_masks) != 0 {
+    if UidScheme::try_from(uid_scheme).is_err() {
         return Err(anyhow::anyhow!("uid_scheme is invalid!"));
     }
 
