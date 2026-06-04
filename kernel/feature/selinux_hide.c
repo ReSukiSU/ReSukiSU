@@ -796,7 +796,11 @@ __maybe_static void initialize_fake_status()
 #elif defined(KSU_COMPAT_USE_SELINUX_STATE)
     ksu_selinux_status_lock = &selinux_state.ss->status_lock;
 #elif defined(CONFIG_KALLSYMS_ALL)
-    ksu_selinux_status_lock = (struct mutex *)find_kernel_symbol_exact("selinux_status_lock");
+    // call ksu_resolve_symbol_for_functable_hook to search selinux_status_lock
+    // because some compiler add suffix for that
+    // e.g:
+    // 0000000000000000 b selinux_status_lock.llvm.9985633631847037644
+    ksu_selinux_status_lock = (struct mutex *)ksu_resolve_symbol_for_functable_hook("selinux_status_lock");
 #else
     extern struct mutex selinux_status_lock;
     ksu_selinux_status_lock = &selinux_status_lock;
@@ -811,7 +815,11 @@ __maybe_static void initialize_fake_status()
 #elif defined(KSU_COMPAT_USE_SELINUX_STATE)
     struct page *selinux_status_page = selinux_state.ss->status_page;
 #elif defined(CONFIG_KALLSYMS_ALL)
-    struct page *selinux_status_page = *((struct page **)find_kernel_symbol_exact("selinux_status_page"));
+    // call ksu_resolve_symbol_for_functable_hook to search selinux_status_page
+    // because some compiler add suffix for that
+    // e.g:
+    // 0000000000000000 b selinux_status_page.llvm.9985633631847037644
+    struct page *selinux_status_page = *((struct page **)ksu_resolve_symbol_for_functable_hook("selinux_status_page"));
 #else
     extern struct page *selinux_status_page;
 #endif

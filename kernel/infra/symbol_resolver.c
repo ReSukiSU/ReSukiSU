@@ -3,6 +3,7 @@
 #include <linux/string.h>
 #include <linux/version.h>
 
+#include "klog.h" // IWYU pragma: keep
 #include "infra/symbol_resolver.h"
 #include "compat/kernel_compat.h"
 

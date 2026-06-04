@@ -758,8 +758,8 @@ void __init ksu_selinux_init()
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 17, 0) && !defined(KSU_COMPAT_USE_SELINUX_STATE)
 
 #ifdef CONFIG_KALLSYMS_ALL
-    ksu_sel_mutex_ptr = (struct mutex *)find_kernel_symbol_exact("sel_mutex");
-    ksu_policy_rwlock_ptr = (rwlock_t *)find_kernel_symbol_exact("policy_rwlock");
+    ksu_sel_mutex_ptr = (struct mutex *)ksu_resolve_symbol_for_functable_hook("sel_mutex");
+    ksu_policy_rwlock_ptr = (rwlock_t *)ksu_resolve_symbol_for_functable_hook("policy_rwlock");
 #else
     extern struct mutex sel_mutex;
     extern rwlock_t policy_rwlock;
