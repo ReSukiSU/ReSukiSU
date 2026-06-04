@@ -119,6 +119,31 @@ void ksu_unregister_manager(u32 uid)
     return;
 }
 
+void ksu_unregister_all_managers(void)
+{
+    struct ksu_manager_node *pos, *tmp;
+    LIST_HEAD(to_free);
+
+    spin_lock(&ksu_manager_list_write_lock);
+    list_for_each_entry_safe (pos, tmp, &ksu_manager_appid_list, list) {
+        if (pos->signature_index == KSU_SIGNATURE_INDEX_DYNAMIC_MANAGER ||
+            pos->signature_index == KSU_SIGNATURE_INDEX_KSU_DEBUG ||
+            pos->signature_index == KSU_SIGNATURE_INDEX_KSU_TOOLKIT)
+            continue;
+        list_del_rcu(&pos->list);
+        list_add_tail(&pos->list, &to_free);
+    }
+    spin_unlock(&ksu_manager_list_write_lock);
+
+    synchronize_rcu();
+    list_for_each_entry_safe (pos, tmp, &to_free, list) {
+        list_del(&pos->list);
+        kfree(pos);
+    }
+
+    ksu_last_manager_appid = KSU_INVALID_APPID;
+}
+
 void ksu_unregister_manager_by_signature_index(u8 signature_index)
 {
     struct ksu_manager_node *node, *pos, *tmp;

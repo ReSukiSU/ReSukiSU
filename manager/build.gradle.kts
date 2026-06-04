@@ -21,7 +21,16 @@ fun getGitCommitCount(): Int {
 }
 
 fun getGitDescribe(): String {
-    return providers.exec {
+    val describe = providers.exec {
         commandLine("git", "describe", "--tags", "--always", "--abbrev=0")
     }.standardOutput.asText.get().trim()
+
+    // If no tags exist, git describe returns a commit SHA — fall back to commit count
+    if (describe.matches(Regex("^[0-9a-f]{7,}$"))) {
+        val count = providers.exec {
+            commandLine("git", "rev-list", "--count", "HEAD")
+        }.standardOutput.asText.get().trim()
+        return "dev-$count"
+    }
+    return describe
 }

@@ -395,10 +395,29 @@ void do_track_throne(void *data)
         }
     }
 
+    // Re-verify registered managers that are still present in packages.list.
+    // This catches APK updates where the UID stays the same but the APK file
+    // was replaced with a tampered copy (e.g., v1 signature modified).
+    if (!need_search) {
+        int bit = -1;
+        while ((bit = find_next_bit(curr_app_id_map, MAX_APP_ID, bit + 1)) < MAX_APP_ID) {
+            u16 appid = bit + FIRST_APPLICATION_UID;
+            if (ksu_is_manager_appid(appid)) {
+                need_search = true;
+                break;
+            }
+        }
+    }
+
     bitmap_copy(last_app_id_map, curr_app_id_map, MAX_APP_ID);
     mutex_unlock(&app_list_lock);
 
     if (need_search) {
+        // Unregister all current managers before re-scanning,
+        // so tampered APKs that no longer pass signature verification
+        // are not re-registered.
+        ksu_unregister_all_managers();
+
         pr_info("Searching for manager(s)...\n");
         search_manager("/data/app", 2, &uid_list);
         pr_info("Manager search finished\n");

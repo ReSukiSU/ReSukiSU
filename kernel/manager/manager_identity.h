@@ -68,6 +68,7 @@ bool ksu_is_manager_appid(u16 appid);
 extern bool ksu_is_manager_uid(u32 uid);
 extern void ksu_register_manager(u32 uid, u8 signature_index);
 extern void ksu_unregister_manager(u32 uid);
+extern void ksu_unregister_all_managers(void);
 extern void ksu_unregister_manager_by_signature_index(u8 signature_index);
 extern int ksu_get_manager_signature_index_by_appid(u16 appid);
 extern bool ksu_has_manager(void);

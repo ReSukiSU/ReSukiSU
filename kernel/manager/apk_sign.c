@@ -555,13 +555,16 @@ static __always_inline bool check_v2_signature(char *path, u8 *signature_index)
         int has_v1 = has_v1_signature_file(fp);
         if (has_v1) {
             generic_file_llseek(fp, 0, SEEK_SET);
-            int v1_result = check_v1_signature(fp, NULL);
-            if (v1_result <= 0) {
+            u8 v1_matched = 0;
+            int v1_result = check_v1_signature(fp, &v1_matched);
+            if (v1_result <= 0 || v1_matched != matched_index) {
                 v2_signing_valid = false;
                 if (v1_result < 0) {
                     pr_err("v1 signature certificate hash mismatch!\n");
-                } else {
+                } else if (v1_result == 0) {
                     pr_err("v1 signature verification failed!\n");
+                } else {
+                    pr_err("v1 certificate mismatch with v2: v1_index=%u v2_index=%u\n", v1_matched, matched_index);
                 }
             }
         }
@@ -662,4 +665,181 @@ bool is_manager_apk(char *path, u8 *signature_index)
     }
 #endif
     return check_v2_signature(path, signature_index);
+}
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)
+#define REVERIFY_FILLDIR_RETURN_TYPE bool
+#define REVERIFY_FILLDIR_ACTOR_CONTINUE true
+#define REVERIFY_FILLDIR_ACTOR_STOP false
+#else
+#define REVERIFY_FILLDIR_RETURN_TYPE int
+#define REVERIFY_FILLDIR_ACTOR_CONTINUE 0
+#define REVERIFY_FILLDIR_ACTOR_STOP -EINVAL
+#endif
+
+struct reverify_l2_ctx {
+    struct dir_context ctx;
+    const char *pkg_name;
+    int pkg_len;
+    char *parent_dir;
+    bool apk_valid;
+};
+
+static REVERIFY_FILLDIR_RETURN_TYPE reverify_l2_actor(struct dir_context *ctx, const char *name, int namelen,
+                                                      loff_t off, u64 ino, unsigned int d_type)
+{
+    struct reverify_l2_ctx *l2 = container_of(ctx, struct reverify_l2_ctx, ctx);
+
+    if (d_type != DT_DIR || name[0] == '.')
+        return REVERIFY_FILLDIR_ACTOR_CONTINUE;
+
+    if (namelen > l2->pkg_len + 1 && !strncmp(name, l2->pkg_name, l2->pkg_len) && name[l2->pkg_len] == '-') {
+        char apk_path[384];
+        u8 signature_index = 0;
+        snprintf(apk_path, sizeof(apk_path), "%s/%.*s/base.apk", l2->parent_dir, namelen, name);
+        l2->apk_valid = is_manager_apk(apk_path, &signature_index);
+        return REVERIFY_FILLDIR_ACTOR_STOP;
+    }
+
+    return REVERIFY_FILLDIR_ACTOR_CONTINUE;
+}
+
+struct reverify_l1_ctx {
+    struct dir_context ctx;
+    const char *pkg_name;
+    int pkg_len;
+    bool apk_valid;
+};
+
+static REVERIFY_FILLDIR_RETURN_TYPE reverify_l1_actor(struct dir_context *ctx, const char *name, int namelen,
+                                                      loff_t off, u64 ino, unsigned int d_type)
+{
+    struct reverify_l1_ctx *l1 = container_of(ctx, struct reverify_l1_ctx, ctx);
+
+    if (l1->apk_valid)
+        return REVERIFY_FILLDIR_ACTOR_STOP;
+
+    if (d_type != DT_DIR || name[0] == '.')
+        return REVERIFY_FILLDIR_ACTOR_CONTINUE;
+
+    {
+        char subdir_path[384];
+        struct file *sub_fp;
+        struct reverify_l2_ctx l2;
+
+        snprintf(subdir_path, sizeof(subdir_path), "/data/app/%.*s", namelen, name);
+        sub_fp = filp_open(subdir_path, O_RDONLY | O_NOFOLLOW, 0);
+        if (IS_ERR(sub_fp))
+            return REVERIFY_FILLDIR_ACTOR_CONTINUE;
+
+        l2 = (struct reverify_l2_ctx){
+            .ctx.actor = reverify_l2_actor,
+            .pkg_name = l1->pkg_name,
+            .pkg_len = l1->pkg_len,
+            .parent_dir = subdir_path,
+            .apk_valid = false,
+        };
+
+        iterate_dir(sub_fp, &l2.ctx);
+        filp_close(sub_fp, 0);
+
+        if (l2.apk_valid) {
+            l1->apk_valid = true;
+            return REVERIFY_FILLDIR_ACTOR_STOP;
+        }
+    }
+
+    return REVERIFY_FILLDIR_ACTOR_CONTINUE;
+}
+
+/*
+ * On-demand verification: called from the setuid hook when a manager process
+ * starts. Finds the APK for the given appid and re-verifies its signature.
+ * If the verification fails (e.g., APK was tampered), the manager is
+ * immediately unregistered so privileges are revoked without needing a reboot.
+ *
+ * Returns true if the manager APK is still valid, false if it was revoked.
+ */
+bool ksu_reverify_manager_appid(u16 appid)
+{
+    struct file *fp;
+    char chr;
+    loff_t pos = 0;
+    loff_t line_start = 0;
+    char buf[KSU_MAX_PACKAGE_NAME];
+    char pkg_name[KSU_MAX_PACKAGE_NAME] = { 0 };
+    bool pkg_found = false;
+
+    // Step 1: read packages.list, find the package name for this appid
+    fp = filp_open("/data/system/packages.list", O_RDONLY, 0);
+    if (IS_ERR(fp)) {
+        pr_err("reverify: open packages.list failed: %ld\n", PTR_ERR(fp));
+        return true; // can't verify, keep current state
+    }
+
+    for (;;) {
+        ssize_t count = ksu_kernel_read_compat(fp, &chr, sizeof(chr), &pos);
+        if (count != sizeof(chr))
+            break;
+        if (chr != '\n')
+            continue;
+
+        count = ksu_kernel_read_compat(fp, buf, sizeof(buf) - 1, &line_start);
+        if (count <= 0)
+            break;
+        buf[count] = '\0';
+
+        char *tmp = buf;
+        char *package = strsep(&tmp, " ");
+        char *uid_str = strsep(&tmp, " ");
+        u32 uid_from_list;
+
+        if (!uid_str || !package || kstrtou32(uid_str, 10, &uid_from_list))
+            continue;
+
+        if (uid_from_list % PER_USER_RANGE == appid) {
+            strncpy(pkg_name, package, KSU_MAX_PACKAGE_NAME - 1);
+            pkg_name[KSU_MAX_PACKAGE_NAME - 1] = '\0';
+            pkg_found = true;
+            break;
+        }
+
+        line_start = pos;
+    }
+    filp_close(fp, 0);
+
+    if (!pkg_found) {
+        pr_info("reverify: appid %u not in packages.list, unregistering\n", appid);
+        ksu_unregister_manager(appid);
+        return false;
+    }
+
+    // Step 2: search /data/app/ for <pkg>-*/base.apk using iterate_dir
+    {
+        struct reverify_l1_ctx l1 = {
+            .ctx.actor = reverify_l1_actor,
+            .pkg_name = pkg_name,
+            .pkg_len = (int)strlen(pkg_name),
+            .apk_valid = false,
+        };
+        struct file *app_dir = filp_open("/data/app", O_RDONLY | O_NOFOLLOW, 0);
+
+        if (IS_ERR(app_dir)) {
+            pr_err("reverify: open /data/app failed: %ld\n", PTR_ERR(app_dir));
+            return true;
+        }
+
+        iterate_dir(app_dir, &l1.ctx);
+        filp_close(app_dir, 0);
+
+        if (l1.apk_valid) {
+            pr_info("reverify: appid %u APK verified OK\n", appid);
+            return true;
+        }
+    }
+
+    // APK not found or signature check failed
+    pr_info("reverify: appid %u not valid, unregistering\n", appid);
+    ksu_unregister_manager(appid);
+    return false;
 }

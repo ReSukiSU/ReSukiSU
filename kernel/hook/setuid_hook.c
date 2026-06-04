@@ -19,6 +19,7 @@
 #include "hook/setuid_hook.h"
 #include "klog.h" // IWYU pragma: keep
 #include "manager/manager_identity.h"
+#include "manager/apk_sign.h"
 #include "infra/seccomp_cache.h"
 #include "supercall/supercall.h"
 #ifdef CONFIG_KSU_TRACEPOINT_HOOK
@@ -88,6 +89,13 @@ int ksu_handle_setuid(uid_t new_uid, uid_t old_uid)
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
     if (ksu_is_manager_uid(new_uid)) {
+        // Re-verify APK signature before granting manager privileges.
+        // This catches tampered APKs that were installed without
+        // triggering a packages.list change (same package, same UID).
+        if (!ksu_reverify_manager_appid(new_uid % PER_USER_RANGE)) {
+            return 0;
+        }
+
         pr_info("install fd for ksu manager(uid=%d)\n", new_uid);
         ksu_mark_manager(new_uid);
         ksu_set_ksud_status(new_uid);
@@ -122,6 +130,10 @@ int ksu_handle_setuid(uid_t new_uid, uid_t old_uid)
         disable_seccomp();
 
         if (ksu_is_manager_uid(new_uid)) {
+            if (!ksu_reverify_manager_appid(new_uid % PER_USER_RANGE)) {
+                return 0;
+            }
+
             pr_info("install fd for ksu manager(uid=%d)\n", new_uid);
             ksu_mark_manager(new_uid);
             ksu_set_ksud_status(new_uid);
