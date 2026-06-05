@@ -165,7 +165,6 @@ fun KernelFlashScreen(
                     context = context,
                     state = horizonKernelState,
                     slot = selectedSlot
-                    // KPM parameters removed - KPM feature has been removed
                 )
                 worker.uri = kernelUri
                 worker.setOnFlashCompleteListener(onFlashComplete)
