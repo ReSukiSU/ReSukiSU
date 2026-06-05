@@ -3,9 +3,9 @@ use std::path::Path;
 use anyhow::Result;
 
 use crate::android::susfs::{
+    communicate::{communicate, parse_err},
     magic::{CMD_SUSFS_ADD_SUS_MAP, ERR_CMD_NOT_SUPPORTED, SUSFS_MAX_LEN_PATHNAME},
     utils::str_to_c_array,
-    communicate::{communicate, parse_err},
 };
 
 #[repr(C)]

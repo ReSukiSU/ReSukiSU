@@ -24,4 +24,4 @@ pub use sus_kstat::{
 };
 pub use sus_map::add_sus_map;
 pub use sus_mount::hide_sus_mnts_for_non_su_procs;
-pub use sus_path::{add_sus_path, SusPathType};
+pub use sus_path::{SusPathType, add_sus_path};

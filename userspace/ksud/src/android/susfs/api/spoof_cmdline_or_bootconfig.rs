@@ -3,11 +3,11 @@ use std::{fs, path::Path};
 use anyhow::Result;
 
 use crate::android::susfs::{
+    communicate::{communicate, parse_err},
     magic::{
         CMD_SUSFS_SET_CMDLINE_OR_BOOTCONFIG, ERR_CMD_NOT_SUPPORTED,
         SUSFS_FAKE_CMDLINE_OR_BOOTCONFIG_SIZE,
     },
-    communicate::{communicate, parse_err},
 };
 
 #[repr(C)]

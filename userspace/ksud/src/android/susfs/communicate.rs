@@ -21,9 +21,7 @@ pub(super) fn communicate<T>(cmd: u64, arg: &mut T) {
 /// Parse error code to Err
 pub(super) fn parse_err(cmd: u64, error: i32) -> Result<()> {
     if error == ERR_CMD_NOT_SUPPORTED {
-        return Err(anyhow::format_err!(
-            "Unsupported SuSFS command: 0x{cmd:x}"
-        ));
+        return Err(anyhow::format_err!("Unsupported SuSFS command: 0x{cmd:x}"));
     }
     if error != 0 {
         return Err(anyhow::format_err!("SuSFS error: {error}"));

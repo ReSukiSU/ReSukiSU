@@ -1,17 +1,22 @@
 #![allow(clippy::similar_names)]
 
-use std::{fs, os::unix::fs::MetadataExt, path::Path, ffi::{c_ulong, c_long}};
+use std::{
+    ffi::{c_long, c_ulong},
+    fs,
+    os::unix::fs::MetadataExt,
+    path::Path,
+};
 
-use bitflags::bitflags;
 use anyhow::Result;
+use bitflags::bitflags;
 
 use crate::android::susfs::{
+    communicate::{communicate, parse_err},
     magic::{
         CMD_SUSFS_ADD_SUS_KSTAT, CMD_SUSFS_ADD_SUS_KSTAT_STATICALLY, CMD_SUSFS_UPDATE_SUS_KSTAT,
         ERR_CMD_NOT_SUPPORTED, SUSFS_MAX_LEN_PATHNAME,
     },
     utils::str_to_c_array,
-    communicate::{communicate, parse_err}
 };
 
 bitflags! {
@@ -89,11 +94,7 @@ impl Default for SusfsSusKstat {
     }
 }
 
-fn parse_or_default<T>(
-    val: &str,
-    flag: &mut i32,
-    flag_add: KstatSpoofFlags,
-) -> Result<Option<T>>
+fn parse_or_default<T>(val: &str, flag: &mut i32, flag_add: KstatSpoofFlags) -> Result<Option<T>>
 where
     T: std::str::FromStr,
 {
@@ -104,8 +105,8 @@ where
             Ok(val) => {
                 *flag |= flag_add.bits();
                 Ok(Some(val))
-            },
-            Err(_) => Err(anyhow::anyhow!("failed to parse \"{val}\""))
+            }
+            Err(_) => Err(anyhow::anyhow!("failed to parse \"{val}\"")),
         }
     }
 }
@@ -216,7 +217,6 @@ where
     Ok(())
 }
 
-
 /// Use `stat` tool to find the format:
 /// - `ino` -> `%i`
 /// - `dev` -> `%d`
@@ -299,83 +299,54 @@ pub fn add_sus_kstat_statically(
     let s_dev = parse_or_default(dev, &mut flag, KstatSpoofFlags::SPOOF_DEV)?;
     let s_nlink = parse_or_default(nlink, &mut flag, KstatSpoofFlags::SPOOF_NLINK)?;
     let s_size = parse_or_default(size, &mut flag, KstatSpoofFlags::SPOOF_SIZE)?;
-    let s_atime = parse_or_default(
-        atime,
-        &mut flag,
-        KstatSpoofFlags::SPOOF_ATIME_TV_SEC,
-    )?;
-    let s_atime_nsec = parse_or_default(
-        atime_nsec,
-        &mut flag,
-        KstatSpoofFlags::SPOOF_ATIME_TV_NSEC,
-    )?;
-    let s_mtime = parse_or_default(
-        mtime,
-        &mut flag,
-        KstatSpoofFlags::SPOOF_MTIME_TV_SEC,
-    )?;
-    let s_mtime_nsec = parse_or_default(
-        mtime_nsec,
-        &mut flag,
-        KstatSpoofFlags::SPOOF_MTIME_TV_NSEC,
-    )?;
-    let s_ctime = parse_or_default(
-        ctime,
-        &mut flag,
-        KstatSpoofFlags::SPOOF_CTIME_TV_SEC,
-    )?;
-    let s_ctime_nsec = parse_or_default(
-        ctime_nsec,
-        &mut flag,
-        KstatSpoofFlags::SPOOF_CTIME_TV_NSEC,
-    )?;
-    let s_blocks = parse_or_default(
-        blocks,
-        &mut flag,
-        KstatSpoofFlags::SPOOF_BLOCKS,
-    )?;
-    let s_blksize = parse_or_default(
-        blksize,
-        &mut flag,
-        KstatSpoofFlags::SPOOF_BLKSIZE,
-    )?;
+    let s_atime = parse_or_default(atime, &mut flag, KstatSpoofFlags::SPOOF_ATIME_TV_SEC)?;
+    let s_atime_nsec =
+        parse_or_default(atime_nsec, &mut flag, KstatSpoofFlags::SPOOF_ATIME_TV_NSEC)?;
+    let s_mtime = parse_or_default(mtime, &mut flag, KstatSpoofFlags::SPOOF_MTIME_TV_SEC)?;
+    let s_mtime_nsec =
+        parse_or_default(mtime_nsec, &mut flag, KstatSpoofFlags::SPOOF_MTIME_TV_NSEC)?;
+    let s_ctime = parse_or_default(ctime, &mut flag, KstatSpoofFlags::SPOOF_CTIME_TV_SEC)?;
+    let s_ctime_nsec =
+        parse_or_default(ctime_nsec, &mut flag, KstatSpoofFlags::SPOOF_CTIME_TV_NSEC)?;
+    let s_blocks = parse_or_default(blocks, &mut flag, KstatSpoofFlags::SPOOF_BLOCKS)?;
+    let s_blksize = parse_or_default(blksize, &mut flag, KstatSpoofFlags::SPOOF_BLKSIZE)?;
 
     str_to_c_array(path, &mut info.target_pathname);
     info.flags = flag;
-    if let Some(s_ino) = s_ino{
+    if let Some(s_ino) = s_ino {
         info.spoofed_ino = s_ino;
     }
-    if let Some(s_dev) = s_dev{
+    if let Some(s_dev) = s_dev {
         info.spoofed_dev = s_dev;
     }
-    if let Some(s_nlink) = s_nlink{
+    if let Some(s_nlink) = s_nlink {
         info.spoofed_nlink = s_nlink;
     }
-    if let Some(s_size) = s_size{
+    if let Some(s_size) = s_size {
         info.spoofed_size = s_size;
     }
-    if let Some(s_atime) = s_atime{
+    if let Some(s_atime) = s_atime {
         info.spoofed_atime_tv_sec = s_atime;
     }
-    if let Some(s_atime_nsec) = s_atime_nsec{
+    if let Some(s_atime_nsec) = s_atime_nsec {
         info.spoofed_atime_tv_nsec = s_atime_nsec;
     }
-    if let Some(s_mtime) = s_mtime{
+    if let Some(s_mtime) = s_mtime {
         info.spoofed_mtime_tv_sec = s_mtime;
     }
-    if let Some(s_mtime_nsec) = s_mtime_nsec{
+    if let Some(s_mtime_nsec) = s_mtime_nsec {
         info.spoofed_mtime_tv_nsec = s_mtime_nsec;
     }
-    if let Some(s_ctime) = s_ctime{
+    if let Some(s_ctime) = s_ctime {
         info.spoofed_ctime_tv_sec = s_ctime;
     }
-    if let Some(s_ctime_nsec) = s_ctime_nsec{
+    if let Some(s_ctime_nsec) = s_ctime_nsec {
         info.spoofed_ctime_tv_nsec = s_ctime_nsec;
     }
-    if let Some(s_blocks) = s_blocks{
+    if let Some(s_blocks) = s_blocks {
         info.spoofed_blocks = s_blocks;
     }
-    if let Some(s_blksize) = s_blksize{
+    if let Some(s_blksize) = s_blksize {
         info.spoofed_blksize = s_blksize;
     }
 

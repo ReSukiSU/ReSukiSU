@@ -2,7 +2,6 @@ use crate::android::susfs::api;
 use crate::android::susfs::config;
 use crate::android::susfs::config::data::Data;
 use log::warn;
-use std::{thread, time::Duration};
 
 pub fn on_boot_completed() {
     let Some(config) = config::read_config() else {
@@ -14,7 +13,7 @@ pub fn on_boot_completed() {
 }
 
 pub fn on_services() {
-    let Some(config) = config::read_config() else {
+    let Some(_config) = config::read_config() else {
         return;
     };
 
@@ -27,45 +26,20 @@ fn apply_sus_paths(config: &Data) {
         if sus_path.trim().is_empty() {
             continue;
         }
-        apply_sus_path_entry(
-            &api::SusPathType::Normal,
-            "sus_path",
-            sus_path,
-        );
+        apply_sus_path_entry(&api::SusPathType::Normal, "sus_path", sus_path);
     }
     for sus_path_loop in &config.sus_path.sus_path_loop {
         if sus_path_loop.trim().is_empty() {
             continue;
         }
-        apply_sus_path_entry(
-            &api::SusPathType::Loop,
-            "sus_path_loop",
-            sus_path_loop,
-        );
+        apply_sus_path_entry(&api::SusPathType::Loop, "sus_path_loop", sus_path_loop);
     }
 }
 
-fn apply_sus_path_entry(
-    path_type: &api::SusPathType,
-    label: &str,
-    path: &str,
-) {
-    match api::add_sus_path(path_type, &path) {
-        Ok(()) => return,
-        Err(e) => {
-            warn!(
-                "failed to add {label} '{path}': {}",
-                e.to_string(),
-            );
-        }
+fn apply_sus_path_entry(path_type: &api::SusPathType, label: &str, path: &str) {
+    if let Err(e) = api::add_sus_path(path_type, &path) {
+        warn!("failed to add {label} '{path}': {e}");
     }
-}
-
-fn is_external_storage_path(path: &str) -> bool {
-    matches!(path, "/sdcard" | "/storage/emulated" | "/data/media")
-        || path.starts_with("/sdcard/")
-        || path.starts_with("/storage/emulated/")
-        || path.starts_with("/data/media/")
 }
 
 fn apply_sus_maps(config: &Data) {

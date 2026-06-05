@@ -1,12 +1,12 @@
 use std::{fs, path::Path};
 
 use anyhow::Result;
-use num_enum::{TryFromPrimitive, IntoPrimitive};
+use num_enum::{IntoPrimitive, TryFromPrimitive};
 
 use crate::android::susfs::{
+    communicate::{communicate, parse_err},
     magic::{CMD_SUSFS_ADD_OPEN_REDIRECT, ERR_CMD_NOT_SUPPORTED, SUSFS_MAX_LEN_PATHNAME},
     utils::str_to_c_array,
-    communicate::{communicate, parse_err}
 };
 
 #[repr(C)]
@@ -20,11 +20,11 @@ struct SusfsOpenRedirect {
 #[derive(Debug, PartialEq, TryFromPrimitive, IntoPrimitive)]
 #[repr(i32)]
 pub enum UidScheme {
-    NonAppProc = 0,
-    RootProcExceptSuProc = 1,
-    NonSuProc = 2,
-    UnmountedAppProc = 3,
-    UnmountedProc = 4,
+    NonApp = 0,
+    RootExceptSu = 1,
+    NonSu = 2,
+    UnmountedApp = 3,
+    Unmounted = 4,
 }
 
 impl Default for SusfsOpenRedirect {
@@ -46,12 +46,12 @@ impl Default for SusfsOpenRedirect {
 /// - `2`: Effective for non-su processes (Use it carefully!)
 /// - `3`: Effective for processes that are marked unmounted with uid >= 10000 (Use it carefully!)
 /// - `4`: Effective for processes that are marked unmounted (include most of the init spawned process,
-/// use it carefully!)
+///   use it carefully!)
 ///
 /// Important Notes:
 /// - Both target_pathname and redirected_pathname must be existed before they can be added to open_redirect
 /// - Users have to take care of the SELinux permission of both target_pathname and redirected_pathname
-/// by themselves
+///   by themselves
 /// - Only effective for current process that matches the pre-defined uid scheme
 pub fn add_open_redirect<P>(target_path: P, redirected_path: P, uid_scheme: i32) -> Result<()>
 where
@@ -65,10 +65,7 @@ where
     let abs_redirect = fs::canonicalize(&redirected_path)?;
 
     let mut info = SusfsOpenRedirect::default();
-    str_to_c_array(
-        abs_target.to_str().unwrap(),
-        &mut info.target_pathname,
-    );
+    str_to_c_array(abs_target.to_str().unwrap(), &mut info.target_pathname);
     str_to_c_array(
         abs_redirect.to_str().unwrap(),
         &mut info.redirected_pathname,

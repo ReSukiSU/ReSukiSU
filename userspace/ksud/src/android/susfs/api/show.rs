@@ -1,12 +1,12 @@
 use anyhow::Result;
 
 use crate::android::susfs::{
+    communicate::{communicate, parse_err},
     magic::{
         CMD_SUSFS_SHOW_ENABLED_FEATURES, CMD_SUSFS_SHOW_VARIANT, CMD_SUSFS_SHOW_VERSION,
         ERR_CMD_NOT_SUPPORTED, SUSFS_ENABLED_FEATURES_SIZE, SUSFS_MAX_VARIANT_BUFSIZE,
         SUSFS_MAX_VERSION_BUFSIZE,
     },
-    communicate::{communicate, parse_err},
     utils::c_array_to_string,
 };
 

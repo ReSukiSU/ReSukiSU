@@ -1,9 +1,9 @@
-use anyhow::{anyhow, Result};
-use rustix::path::Arg;
+use anyhow::{Result, anyhow};
+
 use crate::android::susfs::{
+    communicate::{communicate, parse_err},
     magic::{CMD_SUSFS_SET_UNAME, ERR_CMD_NOT_SUPPORTED, NEW_UTS_LEN},
     utils::str_to_c_array,
-    communicate::{communicate, parse_err}
 };
 
 #[repr(C)]
@@ -36,7 +36,7 @@ where
     let version_str = version.to_string().trim().to_string();
     let release_str = release.to_string().trim().to_string();
 
-    if version_str.len() == 0 || release_str.len() == 0 {
+    if version_str.is_empty() || release_str.is_empty() {
         return Err(anyhow!("Neither version nor release can be empty."));
     }
 

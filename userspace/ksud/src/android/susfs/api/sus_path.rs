@@ -1,11 +1,11 @@
 use anyhow::Result;
 
 use crate::android::susfs::{
+    communicate::{communicate, parse_err},
     magic::{
         CMD_SUSFS_ADD_SUS_PATH, CMD_SUSFS_ADD_SUS_PATH_LOOP, ERR_CMD_NOT_SUPPORTED,
         SUSFS_MAX_LEN_PATHNAME,
     },
-    communicate::{communicate, parse_err},
     utils::str_to_c_array,
 };
 

@@ -1,8 +1,8 @@
 use anyhow::Result;
 
 use crate::android::susfs::{
-    magic::{CMD_SUSFS_ENABLE_LOG, ERR_CMD_NOT_SUPPORTED},
     communicate::{communicate, parse_err},
+    magic::{CMD_SUSFS_ENABLE_LOG, ERR_CMD_NOT_SUPPORTED},
 };
 
 #[repr(C)]
