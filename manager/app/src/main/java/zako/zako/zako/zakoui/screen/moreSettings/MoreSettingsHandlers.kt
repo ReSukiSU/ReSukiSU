@@ -289,17 +289,6 @@ class MoreSettingsHandlers(
     }
 
     /**
-     * 处理显示KPM信息变更
-     */
-    fun handleShowKpmInfoChange(newValue: Boolean) {
-        prefs.edit { putBoolean("show_kpm_info", newValue) }
-        state.isShowKpmInfo = newValue
-        activity.settingsStateFlow.value = activity.settingsStateFlow.value.copy(
-            showKpmInfo = newValue
-        )
-    }
-
-    /**
      * 处理隐藏SuSFS状态变更
      */
     fun handleHideSusfsStatusChange(newValue: Boolean) {

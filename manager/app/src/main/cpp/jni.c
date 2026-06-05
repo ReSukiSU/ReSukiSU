@@ -335,11 +335,6 @@ NativeBridge(getUserName, jstring, jint uid) {
     return NULL;
 }
 
-// Check if KPM is enabled
-NativeBridgeNP(isKPMEnabled, jboolean) {
-	return is_KPM_enable();
-}
-
 // Get HOOK type
 NativeBridgeNP(getHookType, jstring) {
     char hook_type[32] = { 0 };

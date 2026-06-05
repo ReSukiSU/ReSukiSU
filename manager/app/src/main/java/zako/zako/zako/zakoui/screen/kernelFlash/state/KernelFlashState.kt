@@ -81,9 +81,7 @@ class HorizonKernelState {
 class HorizonKernelWorker(
     private val context: Context,
     private val state: HorizonKernelState,
-    private val slot: String? = null,
-    private val kpmPatchEnabled: Boolean = false,
-    private val kpmUndoPatch: Boolean = false
+    private val slot: String? = null
 ) : Thread() {
     var uri: Uri? = null
     private lateinit var filePath: String
@@ -128,19 +126,7 @@ class HorizonKernelWorker(
             state.updateProgress(0.4f)
             getBinary()
 
-            // KPM修补
-            if (kpmPatchEnabled || kpmUndoPatch) {
-                state.updateStep(context.getString(R.string.kpm_preparing_tools))
-                state.updateProgress(0.5f)
-                prepareKpmTools()
-
-                state.updateStep(
-                    if (kpmUndoPatch) context.getString(R.string.kpm_undoing_patch)
-                    else context.getString(R.string.kpm_applying_patch)
-                )
-                state.updateProgress(0.55f)
-                performKpmPatch()
-            }
+            // KPM patch removed - KPM feature has been removed
 
             state.updateStep(context.getString(R.string.horizon_patching_script))
             state.updateProgress(0.6f)
@@ -189,99 +175,6 @@ class HorizonKernelWorker(
                 state.updateProgress(0.8f)
                 runCommand(true, "resetprop ro.boot.slot_suffix $originalSlot")
             }
-        }
-    }
-
-    private fun prepareKpmTools() {
-        File(workDir).mkdirs()
-
-        val kptoolsPath = "$workDir/kptools"
-        val kpimgPath = "$workDir/kpimg"
-
-        AssetsUtil.exportFiles(context, "kptools", kptoolsPath)
-        if (!File(kptoolsPath).exists()) {
-            throw IOException("Local kptools file extraction failed")
-        }
-
-        AssetsUtil.exportFiles(context, "kpimg", kpimgPath)
-        if (!File(kpimgPath).exists()) {
-            throw IOException("Local kpimg file extraction failed")
-        }
-
-        runCommand(true, "chmod a+rx $kptoolsPath")
-    }
-
-    /**
-     * 执行KPM修补操作
-     */
-    private fun performKpmPatch() {
-        try {
-            // 创建临时解压目录
-            val extractDir = "$workDir/extracted"
-            File(extractDir).mkdirs()
-
-            // 解压压缩包到临时目录
-            val unzipResult = runCommand(true, "cd $extractDir && unzip -o \"$filePath\"")
-            if (unzipResult != 0) {
-                throw IOException(context.getString(R.string.kpm_extract_zip_failed))
-            }
-
-            // 查找Image文件
-            val findImageResult = runCommandGetOutput("find $extractDir -name '*Image*' -type f")
-            if (findImageResult.isBlank()) {
-                throw IOException(context.getString(R.string.kpm_image_file_not_found))
-            }
-
-            val imageFile = findImageResult.lines().first().trim()
-            val imageDir = File(imageFile).parent
-            val imageName = File(imageFile).name
-
-            state.addLog(context.getString(R.string.kpm_found_image_file, imageFile))
-
-            // 复制KPM工具到Image文件所在目录
-            runCommand(true, "cp $workDir/kptools $imageDir/")
-            runCommand(true, "cp $workDir/kpimg $imageDir/")
-
-            // 执行KPM修补命令
-            val patchCommand = if (kpmUndoPatch) {
-                "cd $imageDir && chmod a+rx kptools && ./kptools -u -s 123 -i $imageName -k kpimg -o oImage && mv oImage $imageName"
-            } else {
-                "cd $imageDir && chmod a+rx kptools && ./kptools -p -s 123 -i $imageName -k kpimg -o oImage && mv oImage $imageName"
-            }
-
-            val patchResult = runCommand(true, patchCommand)
-            if (patchResult != 0) {
-                throw IOException(
-                    if (kpmUndoPatch) context.getString(R.string.kpm_undo_patch_failed)
-                    else context.getString(R.string.kpm_patch_failed)
-                )
-            }
-
-            state.addLog(
-                if (kpmUndoPatch) context.getString(R.string.kpm_undo_patch_success)
-                else context.getString(R.string.kpm_patch_success)
-            )
-
-            // 清理KPM工具文件
-            runCommand(true, "rm -f $imageDir/kptools $imageDir/kpimg $imageDir/oImage")
-
-            // 重新打包ZIP文件
-            val originalFileName = File(filePath).name
-            val patchedFilePath = "$workDir/patched_$originalFileName"
-
-            repackZipFolder(extractDir, patchedFilePath)
-
-            // 替换原始文件
-            runCommand(true, "mv \"$patchedFilePath\" \"$filePath\"")
-
-            state.addLog(context.getString(R.string.kpm_file_repacked))
-
-        } catch (e: Exception) {
-            state.addLog(context.getString(R.string.kpm_patch_operation_failed, e.message))
-            throw e
-        } finally {
-            // 清理临时文件
-            runCommand(true, "rm -rf $workDir")
         }
     }
 

@@ -42,7 +42,6 @@ import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.util.LocalHandlePageChange
 import com.resukisu.resukisu.ui.util.LocalSelectedPage
-import com.resukisu.resukisu.ui.util.getKpmModuleCount
 import com.resukisu.resukisu.ui.util.getModuleCount
 import com.resukisu.resukisu.ui.util.getSuperuserCount
 import kotlinx.coroutines.Dispatchers
@@ -71,7 +70,6 @@ fun NavigationBar(
     // 收集计数数据
     var superuserCountSaved by rememberSaveable { mutableIntStateOf(0) }
     var moduleCountSaved by rememberSaveable { mutableIntStateOf(0) }
-    var kpmModuleCountSaved by rememberSaveable { mutableIntStateOf(0) }
 
     val superuserCount by produceState(initialValue = superuserCountSaved) {
         withContext(Dispatchers.IO) {
@@ -83,12 +81,6 @@ fun NavigationBar(
         withContext(Dispatchers.IO) {
             value = getModuleCount()
             moduleCountSaved = value
-        }
-    }
-    val kpmModuleCount by produceState(initialValue = kpmModuleCountSaved) {
-        withContext(Dispatchers.IO) {
-            value = getKpmModuleCount()
-            kpmModuleCountSaved = value
         }
     }
 
@@ -113,7 +105,6 @@ fun NavigationBar(
                     onClick = {
                         handlePageChange(index)
                     },
-                    kpmModuleCount = kpmModuleCount,
                     superuserCount = superuserCount,
                     moduleCount = moduleCount,
                     isHideOtherInfo = isHideOtherInfo,
@@ -146,7 +137,6 @@ fun NavigationBar(
                     onClick = {
                         handlePageChange(index)
                     },
-                    kpmModuleCount = kpmModuleCount,
                     superuserCount = superuserCount,
                     moduleCount = moduleCount,
                     isHideOtherInfo = isHideOtherInfo,
@@ -161,7 +151,6 @@ private fun NavigationRailItem(
     isSelected: Boolean,
     destination: BottomBarDestination,
     onClick: () -> Unit,
-    kpmModuleCount: Int,
     superuserCount: Int,
     moduleCount: Int,
     isHideOtherInfo: Boolean
@@ -177,7 +166,6 @@ private fun NavigationRailItem(
                         dest = destination,
                         superUser = superuserCount,
                         module = moduleCount,
-                        kpm = kpmModuleCount,
                         isHideOtherInfo = isHideOtherInfo,
                     )
                 }
@@ -204,7 +192,6 @@ private fun RowScope.BottomBarNavigationItem(
     isSelected: Boolean,
     destination: BottomBarDestination,
     onClick: () -> Unit,
-    kpmModuleCount: Int,
     superuserCount: Int,
     moduleCount: Int,
     isHideOtherInfo: Boolean
@@ -219,7 +206,6 @@ private fun RowScope.BottomBarNavigationItem(
                         dest = destination,
                         superUser = superuserCount,
                         module = moduleCount,
-                        kpm = kpmModuleCount,
                         isHideOtherInfo = isHideOtherInfo,
                     )
                 }
@@ -247,11 +233,9 @@ private fun DestinationBadge(
     dest: BottomBarDestination,
     superUser: Int,
     module: Int,
-    kpm: Int,
-    isHideOtherInfo: Boolean,
+    isHideOtherInfo: Boolean
 ) {
     val count = when (dest) {
-        BottomBarDestination.Kpm -> kpm
         BottomBarDestination.SuperUser -> superUser
         BottomBarDestination.Module -> module
         else -> 0
