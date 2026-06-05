@@ -4,18 +4,14 @@ use crate::android::susfs::config::data::Data;
 use log::warn;
 
 pub fn on_boot_completed() {
-    let Some(config) = config::read_config() else {
-        return;
-    };
+    let config = config::read_config();
 
     apply_sus_paths(&config);
     apply_sus_maps(&config);
 }
 
 pub fn on_services() {
-    let Some(_config) = config::read_config() else {
-        return;
-    };
+    // let config = config::read_config();
 
     // apply_sus_paths(&config);
     // apply_sus_maps(&config);
@@ -54,9 +50,7 @@ fn apply_sus_maps(config: &Data) {
 }
 
 pub fn on_post_fs_data() {
-    let Some(config) = config::read_config() else {
-        return;
-    };
+    let config = config::read_config();
 
     if let Err(e) = api::set_uname(&config.common.version, &config.common.release) {
         warn!("failed to set uname: {e}");
@@ -114,9 +108,7 @@ pub fn on_post_fs_data() {
 }
 
 pub fn on_post_mount() {
-    let Some(config) = config::read_config() else {
-        return;
-    };
+    let config = config::read_config();
 
     // apply_sus_paths(&config);
     // apply_sus_maps(&config);

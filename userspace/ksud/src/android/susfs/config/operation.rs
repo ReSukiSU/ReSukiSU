@@ -6,9 +6,7 @@ pub fn add_sus_path<P>(path: P)
 where
     P: AsRef<Path>,
 {
-    let Some(mut config) = read_config() else {
-        return;
-    };
+    let mut config = read_config();
     config
         .sus_path
         .sus_path
@@ -18,27 +16,21 @@ where
 }
 
 pub fn enable_avc_spoofing(enabled: u8) {
-    let Some(mut config) = read_config() else {
-        return;
-    };
+    let mut config = read_config();
     config.common.avc_spoofing = enabled == 1;
 
     save_config(&config);
 }
 
 pub fn enable_susfs_log(enabled: u8) {
-    let Some(mut config) = read_config() else {
-        return;
-    };
+    let mut config = read_config();
     config.common.enable_susfs_log = enabled == 1;
 
     save_config(&config);
 }
 
 pub fn set_hide_sus_mnts_for_non_su_procs(enabled: u8) {
-    let Some(mut config) = read_config() else {
-        return;
-    };
+    let mut config = read_config();
     config.common.hide_sus_mnts_for_non_su_procs = enabled == 1;
 
     save_config(&config);
@@ -48,9 +40,7 @@ pub fn set_uname<S>(version: &S, release: &S)
 where
     S: ToString,
 {
-    let Some(mut config) = read_config() else {
-        return;
-    };
+    let mut config = read_config();
 
     config.common.version = version.to_string();
     config.common.release = release.to_string();
@@ -62,9 +52,7 @@ pub fn add_sus_path_loop<P>(path: P)
 where
     P: AsRef<Path>,
 {
-    let Some(mut config) = read_config() else {
-        return;
-    };
+    let mut config = read_config();
     config
         .sus_path
         .sus_path_loop
@@ -77,9 +65,7 @@ pub fn add_sus_map<P>(path: P)
 where
     P: AsRef<Path>,
 {
-    let Some(mut config) = read_config() else {
-        return;
-    };
+    let mut config = read_config();
     config
         .sus_map
         .insert(path.as_ref().to_str().unwrap().to_string());
@@ -91,9 +77,7 @@ pub fn add_sus_kstat<P>(path: P)
 where
     P: AsRef<Path>,
 {
-    let Some(mut config) = read_config() else {
-        return;
-    };
+    let mut config = read_config();
     config
         .kstat
         .sus_kstat
@@ -106,9 +90,7 @@ pub fn add_sus_kstat_update<P>(path: P)
 where
     P: AsRef<Path>,
 {
-    let Some(mut config) = read_config() else {
-        return;
-    };
+    let mut config = read_config();
     config
         .kstat
         .update_kstat
@@ -121,9 +103,7 @@ pub fn add_sus_kstat_full_clone<P>(path: P)
 where
     P: AsRef<Path>,
 {
-    let Some(mut config) = read_config() else {
-        return;
-    };
+    let mut config = read_config();
     config
         .kstat
         .full_clone
@@ -148,9 +128,7 @@ pub fn add_sus_kstat_statically(
     blocks: &str,
     blksize: &str,
 ) {
-    let Some(mut config) = read_config() else {
-        return;
-    };
+    let mut config = read_config();
 
     config.kstat.statically.insert(SusKstatStatically {
         path: path.to_string(),
@@ -175,9 +153,7 @@ pub fn del_sus_path<P>(path: P)
 where
     P: AsRef<Path>,
 {
-    let Some(mut config) = read_config() else {
-        return;
-    };
+    let mut config = read_config();
     config
         .sus_path
         .sus_path
@@ -189,9 +165,7 @@ where
 use anyhow::Result;
 
 pub fn del_uname_selective(target: &str) -> Result<()> {
-    let Some(mut config) = read_config() else {
-        return Ok(());
-    };
+    let mut config = read_config();
 
     match target {
         "version" => {
@@ -223,9 +197,7 @@ pub fn del_sus_path_loop<P>(path: P)
 where
     P: AsRef<Path>,
 {
-    let Some(mut config) = read_config() else {
-        return;
-    };
+    let mut config = read_config();
     config
         .sus_path
         .sus_path_loop
@@ -238,9 +210,7 @@ pub fn del_sus_map<P>(path: P)
 where
     P: AsRef<Path>,
 {
-    let Some(mut config) = read_config() else {
-        return;
-    };
+    let mut config = read_config();
     config.sus_map.remove(path.as_ref().to_str().unwrap());
 
     save_config(&config);
@@ -250,9 +220,7 @@ pub fn del_sus_kstat<P>(path: P)
 where
     P: AsRef<Path>,
 {
-    let Some(mut config) = read_config() else {
-        return;
-    };
+    let mut config = read_config();
     config
         .kstat
         .sus_kstat
@@ -265,9 +233,7 @@ pub fn del_sus_kstat_update<P>(path: P)
 where
     P: AsRef<Path>,
 {
-    let Some(mut config) = read_config() else {
-        return;
-    };
+    let mut config = read_config();
     config
         .kstat
         .update_kstat
@@ -280,9 +246,7 @@ pub fn del_sus_kstat_full_clone<P>(path: P)
 where
     P: AsRef<Path>,
 {
-    let Some(mut config) = read_config() else {
-        return;
-    };
+    let mut config = read_config();
     config
         .kstat
         .full_clone
@@ -307,9 +271,7 @@ pub fn del_sus_kstat_statically(
     blocks: &str,
     blksize: &str,
 ) {
-    let Some(mut config) = read_config() else {
-        return;
-    };
+    let mut config = read_config();
 
     config.kstat.statically.remove(&SusKstatStatically {
         path: path.to_string(),

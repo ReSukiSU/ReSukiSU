@@ -31,14 +31,14 @@ fn save_config(config: &Data) {
     }
 }
 
-pub fn read_config() -> Option<Data> {
+pub fn read_config() -> Data {
     let string = match read_config_string() {
         Some(s) => s,
         None => {
             log::warn!("failed to read susfs config, will use default config");
             let config = Data::default();
             save_config(&config);
-            return Some(config);
+            return config;
         }
     };
     let mut json: Data = match serde_json::from_str(&string) {
@@ -47,14 +47,14 @@ pub fn read_config() -> Option<Data> {
             log::warn!("failed to serialize susfs config, Err: {e}, will use default config");
             let config = Data::default();
             save_config(&config);
-            return Some(config);
+            return config;
         }
     };
 
     // Normalize/migrate legacy config
-    json = normalize_legacy_config(json);
+    normalize_legacy_config(&mut json);
 
-    Some(json)
+    json
 }
 
 fn config_paths() -> [&'static str; 2] {
@@ -107,21 +107,10 @@ fn temp_config_path(path: &Path) -> PathBuf {
     path.with_file_name(file_name)
 }
 
-/// Normalize legacy configuration and apply any necessary migrations.
-/// This function checks for and corrects common configuration issues that may
-/// have existed in older versions of the susfs config file.
-fn normalize_legacy_config(config: Data) -> Data {
-    // Note: The version and release fields in susfs.json:
-    // - version: should contain kernel uname information
-    // - release: should contain kernel build time information
-    //
-    // If we detect they are swapped (old config format), we don't automatically
-    // swap them here since we don't have a reliable way to detect if they're
-    // actually swapped vs. just unusual values. The UI layer should handle
-    // the display logic appropriately by reading the correct fields.
-    //
-    // Future: If needed, add additional migration logic here for other
-    // configuration field reorganizations.
-
-    config
+/// Fuck legacy config that swapped release and version field
+fn normalize_legacy_config(config: &mut Data) {
+    if config.common.version.contains(' ') {
+        // version does not contain space, so it is a swapped config
+        std::mem::swap(&mut config.common.version, &mut config.common.release);
+    }
 }
