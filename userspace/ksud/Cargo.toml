@@ -17,6 +17,7 @@ rust-embed = { version = "8", features = [
 which = "8"
 sha1 = "0.11"
 sha256 = "1"
+tempfile = "3"
 chrono = "0.4"
 regex-lite = "0.1"
 android-bootimg = { git = "https://github.com/5ec1cff/android_bootimg" }
