@@ -126,7 +126,6 @@ class HorizonKernelWorker(
             state.updateProgress(0.4f)
             getBinary()
 
-            // KPM patch removed - KPM feature has been removed
 
             state.updateStep(context.getString(R.string.horizon_patching_script))
             state.updateProgress(0.6f)

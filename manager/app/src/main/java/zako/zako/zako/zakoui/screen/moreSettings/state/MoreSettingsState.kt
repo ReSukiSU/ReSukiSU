@@ -46,7 +46,6 @@ class MoreSettingsState(
     var isSimpleMode by mutableStateOf(prefs.getBoolean("is_simple_mode", false))
     var isHideVersion by mutableStateOf(prefs.getBoolean("is_hide_version", false))
     var isHideOtherInfo by mutableStateOf(prefs.getBoolean("is_hide_other_info", false))
-    // isShowKpmInfo removed - KPM feature has been removed
     var isHideZygiskImplement by mutableStateOf(prefs.getBoolean("is_hide_zygisk_Implement", false))
     var isHideMetaModuleImplement by mutableStateOf(prefs.getBoolean("is_hide_meta_module_Implement", false))
     var isHideSusfsStatus by mutableStateOf(prefs.getBoolean("is_hide_susfs_status", false))

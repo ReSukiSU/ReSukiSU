@@ -267,7 +267,6 @@ void get_full_version(char* buff) {
 	}
 }
 
-// is_KPM_enable - REMOVED: KPM feature has been removed
 
 void get_hook_type(char *buff) {
     struct ksu_hook_type_cmd cmd = {0};

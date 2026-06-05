@@ -93,7 +93,6 @@ private object KernelFlashStateHolder {
     var currentState: HorizonKernelState? = null
     var currentUri: Uri? = null
     var currentSlot: String? = null
-    // KPM fields removed - KPM feature has been removed
     var isFlashing = false
 }
 
@@ -105,7 +104,6 @@ private object KernelFlashStateHolder {
 fun KernelFlashScreen(
     kernelUri: Uri,
     selectedSlot: String? = null
-    // kpmPatchEnabled and kpmUndoPatch removed - KPM feature has been removed
 ) {
     val context = LocalContext.current
 

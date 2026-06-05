@@ -62,9 +62,9 @@ enum class BottomBarDestination(
     companion object {
         fun getPages(settings: MainActivity.SettingsState) : List<BottomBarDestination> {
             if (ksuIsValid()) {
-                // 全功能管理器 - KPM page removed
+                // 全功能管理器
                 return BottomBarDestination.entries.filter {
-                    !it.rootRequired || it == BottomBarDestination.SuperUser || it == BottomBarDestination.Module
+                    !it.rootRequired
                 }
             } else {
                 return BottomBarDestination.entries.filter {

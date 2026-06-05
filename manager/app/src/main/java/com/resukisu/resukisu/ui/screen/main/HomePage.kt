@@ -923,7 +923,6 @@ private fun InfoCard(
                 )
             }
 
-            // KPM version display removed - KPM feature has been removed
 
             if (!isSimpleMode && !isHideSusfsStatus && systemInfo.susfsEnabled && systemInfo.susfsVersion.isNotEmpty()) {
                 InfoCardItem(

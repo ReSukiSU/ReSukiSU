@@ -32,7 +32,6 @@ bool set_app_profile(const struct app_profile *profile);
 
 int get_app_profile(struct app_profile* profile);
 
-// is_KPM_enable - REMOVED: KPM feature has been removed
 void get_hook_type(char *buff);
 
 int get_kernel_patch_implement();
@@ -79,8 +78,6 @@ bool legacy_set_app_profile(const struct app_profile* profile);
 bool legacy_get_app_profile(char* key, struct app_profile* profile);
 bool legacy_set_su_enabled(bool enabled);
 bool legacy_is_su_enabled();
-
-// legacy_is_KPM_enable - REMOVED: KPM feature has been removed
 bool legacy_get_hook_type(char* hook_type, size_t size);
 void legacy_get_full_version(char* buff);
 
