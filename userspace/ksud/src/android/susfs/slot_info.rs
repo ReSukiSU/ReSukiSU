@@ -1,6 +1,7 @@
 use std::{
     io::{Cursor, Read},
     path::{Path, PathBuf},
+    sync::atomic::{AtomicBool, Ordering},
 };
 
 use android_bootimg::parser::BootImage;
@@ -23,9 +24,7 @@ const LZ4_FRAME_MAGIC_1: [u8; 4] = [0x03, 0x21, 0x4c, 0x18];
 const LZ4_FRAME_MAGIC_2: [u8; 4] = [0x04, 0x22, 0x4d, 0x18];
 
 // Global verbose flag for debug output
-thread_local! {
-    static VERBOSE: std::cell::RefCell<bool> = const { std::cell::RefCell::new(false) };
-}
+static VERBOSE: AtomicBool = AtomicBool::new(false);
 
 #[derive(Serialize)]
 struct SlotInfo {
@@ -64,11 +63,11 @@ impl std::fmt::Display for CompressionFormat {
 }
 
 fn set_verbose(verbose: bool) {
-    VERBOSE.with(|v| *v.borrow_mut() = verbose);
+    VERBOSE.store(verbose, Ordering::Relaxed);
 }
 
 fn is_verbose() -> bool {
-    VERBOSE.with(|v| *v.borrow())
+    VERBOSE.load(Ordering::Relaxed)
 }
 
 fn debug_log(msg: &str) {
