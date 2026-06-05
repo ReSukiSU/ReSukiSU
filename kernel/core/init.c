@@ -100,7 +100,6 @@ bool ksu_late_loaded;
 
 static inline void __init ksu_hook_init(void)
 {
-    ksu_init_symbol_resolver();
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
     ksu_lsm_hook_magic_init();
 #endif
@@ -204,6 +203,7 @@ int __init kernelsu_init(void)
         pr_err("prepare cred failed!\n");
     }
 
+    ksu_init_symbol_resolver();
     ksu_selinux_init();
     ksu_feature_init();
     ksu_sulog_init();

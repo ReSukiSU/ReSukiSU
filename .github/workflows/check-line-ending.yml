@@ -1,0 +1,29 @@
+name: Check Line Endings
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check-crlf:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Regenerate Git Index based on .gitattributes
+        run: |
+          git config --global core.autocrlf false
+          git rm --cached -r .
+          git reset --hard HEAD
+
+      - name: Verify no line ending conflicts
+        id: check_status
+        run: |
+          STATUS=$(git status --porcelain)
+          if [ -n "$STATUS" ]; then
+            exit 1
+          fi

@@ -1582,6 +1582,7 @@ private fun KstatPairField(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun AddAppPathDialog(
     apps: List<SuperUserViewModel.AppInfo>,
@@ -1701,6 +1702,7 @@ private fun AddAppPathDialog(
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SlotInfoDialog(
     slotInfoList: List<com.resukisu.resukisu.ui.viewmodel.SuSFSSlotInfo>,

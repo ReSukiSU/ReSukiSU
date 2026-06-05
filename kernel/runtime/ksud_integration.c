@@ -529,7 +529,7 @@ static ssize_t read_iter_proxy(struct kiocb *iocb, struct iov_iter *to)
 append_ksu_rc:
     if (ksu_rc_pos < ksu_rc_len) {
         // copy_to_iter returns the number of bytes successfully copied
-        append_count = copy_to_iter(KERNEL_SU_RC + ksu_rc_pos, ksu_rc_len - ksu_rc_pos, to);
+        append_count = copy_to_iter((void *)KERNEL_SU_RC + ksu_rc_pos, ksu_rc_len - ksu_rc_pos, to);
         if (!append_count) {
             pr_info("read_iter_proxy: append error, totally appended %ld\n", ksu_rc_pos);
             return ret;
@@ -544,7 +544,7 @@ append_ksu_rc:
 
 append_module_rc:
     if (module_rc_pos < module_rc_len) {
-        append_count = copy_to_iter(module_rc_buf + module_rc_pos, module_rc_len - module_rc_pos, to);
+        append_count = copy_to_iter((void *)module_rc_buf + module_rc_pos, module_rc_len - module_rc_pos, to);
         if (!append_count) {
             pr_info("read_iter_proxy: module append error, appended %zd\n", module_rc_pos);
             return ret;

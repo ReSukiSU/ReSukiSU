@@ -192,7 +192,8 @@ private fun NavigationRailItem(
         label = {
             Text(
                 stringResource(destination.label),
-                style = MaterialTheme.typography.labelMedium
+                style = MaterialTheme.typography.labelMedium,
+                maxLines = 1
             )
         },
     )
@@ -233,7 +234,8 @@ private fun RowScope.BottomBarNavigationItem(
         label = {
             Text(
                 stringResource(destination.label),
-                style = MaterialTheme.typography.labelMedium
+                style = MaterialTheme.typography.labelMedium,
+                maxLines = 1
             )
         },
         alwaysShowLabel = false
