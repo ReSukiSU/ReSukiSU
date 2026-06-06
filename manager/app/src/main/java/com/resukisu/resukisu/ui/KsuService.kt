@@ -55,6 +55,16 @@ class KsuService : RootService() {
 
     @SuppressLint("PrivateApi")
     private fun getInstalledPackagesAsUser(userId: Int): List<PackageInfo> {
+        // Android 6 (API 23) 及以下版本不支持 getInstalledPackagesAsUser
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            return try {
+                packageManager.getInstalledPackages(0)
+            } catch (e: Throwable) {
+                Log.e(TAG, "getInstalledPackages on Android 6", e)
+                emptyList()
+            }
+        }
+
         return try {
             val pm = packageManager
             val m = pm.javaClass.getDeclaredMethod(
