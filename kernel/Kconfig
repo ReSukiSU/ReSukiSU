@@ -69,17 +69,6 @@ config KSU_MULTI_MANAGER_SUPPORT
 	help
 		Enable multi KernelSU manager support
 
-config KPM
-    bool "Enable SukiSU KPM"
-    depends on KSU && 64BIT
-    select KALLSYMS
-    select KALLSYMS_ALL
-    default n
-    help
-	  Enabling this option will activate the KPM feature of SukiSU.
-	  This option is suitable for scenarios where you need to force KPM to be enabled.
-	  but it may affect system stability.
-
 choice
 	prompt "KernelSU Hooking Method"
 	depends on KSU

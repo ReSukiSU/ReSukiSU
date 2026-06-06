@@ -267,13 +267,6 @@ void get_full_version(char* buff) {
 	}
 }
 
-bool is_KPM_enable(void) {
-    struct ksu_enable_kpm_cmd cmd = {};
-    if (ksuctl(KSU_IOCTL_ENABLE_KPM, &cmd) == 0 && cmd.enabled) {
-        return true;
-    }
-    return legacy_is_KPM_enable();
-}
 
 void get_hook_type(char *buff) {
     struct ksu_hook_type_cmd cmd = {0};

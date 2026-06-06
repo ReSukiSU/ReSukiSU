@@ -17,9 +17,8 @@ A based-on [`SukiSU-Ultra/SukiSU-Ultra`](https://github.com/SukiSU-Ultra/SukiSU-
 2. Module system based on [metamodules](https://kernelsu.org/guide/metamodule.html): Pluggable infrastructure for systemless modifications.
 3. [App Profile](https://kernelsu.org/guide/app-profile.html): Lock up the root power in a cage
 4. Support non-GKI and GKI 1.0
-5. KPM Support
-6. Tweaks to the manager theme and the built-in susfs management tool.
-7. Multi manager support, for default [Official KernelSU](https://github.com/tiann/KernelSU)/[RKSU](https://github.com/rsuntk/KernelSU)/[MKSU](https://github.com/5ec1cff/KernelSU)/[SukiSU](https://github.com/SukiSU-Ultra/SukiSU-Ultra) is supported work as manager with ReSukiSU's kernel
+5. Tweaks to the manager theme and the built-in susfs management tool.
+6. Multi manager support, for default [Official KernelSU](https://github.com/tiann/KernelSU)/[RKSU](https://github.com/rsuntk/KernelSU)/[MKSU](https://github.com/5ec1cff/KernelSU)/[SukiSU](https://github.com/SukiSU-Ultra/SukiSU-Ultra) is supported work as manager with ReSukiSU's kernel
 
 ## Compatibility Status
 
@@ -45,21 +44,6 @@ See the [documentation](https://ReSukiSU.github.io).
 ## Translation
 
 If you need to submit a translation for the manager, please go to [Crowdin](https://crowdin.com/project/ReSukiSU).
-
-## KPM Support
-
-- Based on KernelPatch, we removed features redundant with KSU and retained only KPM support.
-- Work in Progress: Expanding APatch compatibility by integrating additional functions to ensure compatibility across different implementations.
-
-**Open-source repository**: [https://github.com/ShirkNeko/SukiSU_KernelPatch_patch](https://github.com/ShirkNeko/SukiSU_KernelPatch_patch)
-
-**KPM template**: [https://github.com/udochina/KPM-Build-Anywhere](https://github.com/udochina/KPM-Build-Anywhere)
-
-> [!Note]
->
-> 1. Requires `CONFIG_KPM=y`
-> 2. Non-GKI devices requires `CONFIG_KALLSYMS=y` and `CONFIG_KALLSYMS_ALL=y`
-> 3. For kernels below `4.19`, backporting from `set_memory.h` from `4.19` is required.
 
 ## Sponsor
 

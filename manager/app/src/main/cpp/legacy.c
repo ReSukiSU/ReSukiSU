@@ -88,11 +88,6 @@ bool legacy_is_su_enabled() {
     return enabled;
 }
 
-bool legacy_is_KPM_enable() {
-    int enabled = false;
-    ksuctl(CMD_ENABLE_KPM, &enabled, NULL);
-    return enabled;
-}
 
 bool legacy_get_hook_type(char* hook_type, size_t size) {
     if (hook_type == NULL || size == 0) {

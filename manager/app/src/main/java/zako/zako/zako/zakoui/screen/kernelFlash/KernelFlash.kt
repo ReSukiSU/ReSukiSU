@@ -93,8 +93,6 @@ private object KernelFlashStateHolder {
     var currentState: HorizonKernelState? = null
     var currentUri: Uri? = null
     var currentSlot: String? = null
-    var currentKpmPatchEnabled: Boolean = false
-    var currentKpmUndoPatch: Boolean = false
     var isFlashing = false
 }
 
@@ -105,9 +103,7 @@ private object KernelFlashStateHolder {
 @Composable
 fun KernelFlashScreen(
     kernelUri: Uri,
-    selectedSlot: String? = null,
-    kpmPatchEnabled: Boolean = false,
-    kpmUndoPatch: Boolean = false
+    selectedSlot: String? = null
 ) {
     val context = LocalContext.current
 
@@ -126,17 +122,13 @@ fun KernelFlashScreen(
     val horizonKernelState = remember {
         if (KernelFlashStateHolder.currentState != null &&
             KernelFlashStateHolder.currentUri == kernelUri &&
-            KernelFlashStateHolder.currentSlot == selectedSlot &&
-            KernelFlashStateHolder.currentKpmPatchEnabled == kpmPatchEnabled &&
-            KernelFlashStateHolder.currentKpmUndoPatch == kpmUndoPatch) {
+            KernelFlashStateHolder.currentSlot == selectedSlot) {
             KernelFlashStateHolder.currentState!!
         } else {
             HorizonKernelState().also {
                 KernelFlashStateHolder.currentState = it
                 KernelFlashStateHolder.currentUri = kernelUri
                 KernelFlashStateHolder.currentSlot = selectedSlot
-                KernelFlashStateHolder.currentKpmPatchEnabled = kpmPatchEnabled
-                KernelFlashStateHolder.currentKpmUndoPatch = kpmUndoPatch
                 KernelFlashStateHolder.isFlashing = false
             }
         }
@@ -172,9 +164,7 @@ fun KernelFlashScreen(
                 val worker = HorizonKernelWorker(
                     context = context,
                     state = horizonKernelState,
-                    slot = selectedSlot,
-                    kpmPatchEnabled = kpmPatchEnabled,
-                    kpmUndoPatch = kpmUndoPatch
+                    slot = selectedSlot
                 )
                 worker.uri = kernelUri
                 worker.setOnFlashCompleteListener(onFlashComplete)
@@ -218,8 +208,6 @@ fun KernelFlashScreen(
                 KernelFlashStateHolder.currentState = null
                 KernelFlashStateHolder.currentUri = null
                 KernelFlashStateHolder.currentSlot = null
-                KernelFlashStateHolder.currentKpmPatchEnabled = false
-                KernelFlashStateHolder.currentKpmUndoPatch = false
                 KernelFlashStateHolder.isFlashing = false
             }
             navigator.pop()
@@ -232,8 +220,6 @@ fun KernelFlashScreen(
                 KernelFlashStateHolder.currentState = null
                 KernelFlashStateHolder.currentUri = null
                 KernelFlashStateHolder.currentSlot = null
-                KernelFlashStateHolder.currentKpmPatchEnabled = false
-                KernelFlashStateHolder.currentKpmUndoPatch = false
                 KernelFlashStateHolder.isFlashing = false
             }
         }
@@ -302,7 +288,7 @@ fun KernelFlashScreen(
                 .padding(innerPadding)
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
         ) {
-            FlashProgressIndicator(flashState, kpmPatchEnabled, kpmUndoPatch)
+            FlashProgressIndicator(flashState)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -327,9 +313,7 @@ fun KernelFlashScreen(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun FlashProgressIndicator(
-    flashState: FlashState,
-    kpmPatchEnabled: Boolean = false,
-    kpmUndoPatch: Boolean = false
+    flashState: FlashState
 ) {
     val progressColor = when {
         flashState.error.isNotEmpty() -> MaterialTheme.colorScheme.error
@@ -387,17 +371,6 @@ private fun FlashProgressIndicator(
                         )
                     }
                 }
-            }
-
-            // KPM状态显示
-            if (kpmPatchEnabled || kpmUndoPatch) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = if (kpmUndoPatch) stringResource(R.string.kpm_undo_patch_mode)
-                    else stringResource(R.string.kpm_patch_mode),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.tertiary
-                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))

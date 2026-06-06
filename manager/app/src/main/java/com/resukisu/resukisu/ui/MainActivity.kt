@@ -138,7 +138,6 @@ class MainActivity : ComponentActivity() {
 
     data class SettingsState(
         val isHideOtherInfo: Boolean = false,
-        val showKpmInfo: Boolean = false,
         val dpi: Int = 0,
         val predictiveBackAnimation: PredictiveBackAnimation = PredictiveBackAnimation.Scale,
         val predictiveBackExitDirection: PredictiveBackExitDirection = PredictiveBackExitDirection.FOLLOW_GESTURE
@@ -577,9 +576,7 @@ class MainActivity : ComponentActivity() {
                                     entry<Route.KernelFlash> { key ->
                                         KernelFlashScreen(
                                             key.kernelUri,
-                                            key.selectedSlot,
-                                            key.kpmPatchEnabled,
-                                            key.kpmUndoPatch
+                                            key.selectedSlot
                                         )
                                     }
                                 },

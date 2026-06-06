@@ -6,8 +6,6 @@ use log::{info, warn};
 use prop_rs_android::{resetprop::ResetProp, sys_prop};
 use rustix::process::chdir;
 
-#[cfg(all(target_arch = "aarch64", target_os = "android"))]
-use crate::android::kpm;
 use crate::{
     android::{
         dynamic_manager, ksucalls,
@@ -101,11 +99,6 @@ pub fn on_post_data_fs() -> Result<()> {
         warn!("safe mode, skip load feature config");
     } else if let Err(e) = crate::android::feature::init_features() {
         warn!("init features failed: {e}");
-    }
-
-    #[cfg(all(target_arch = "aarch64", target_os = "android"))]
-    if let Err(e) = kpm::booted_load() {
-        warn!("KPM: Failed to start KPM watcher: {e}");
     }
 
     // execute metamodule post-fs-data script first (priority)

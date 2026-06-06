@@ -11,9 +11,7 @@ import android.widget.Toast
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.resukisu.resukisu.ui.util.controlKpmModule
 import com.resukisu.resukisu.ui.util.createRootShell
-import com.resukisu.resukisu.ui.util.listKpmModules
 import com.resukisu.resukisu.ui.util.listModules
 import com.resukisu.resukisu.ui.util.withNewRootShell
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
@@ -265,16 +263,6 @@ class WebViewInterface(private val state: WebUIState) {
     @JavascriptInterface
     fun exit() {
         state.requestExit()
-    }
-
-    @JavascriptInterface
-    fun listAllKpm(): String {
-        return listKpmModules()
-    }
-
-    @JavascriptInterface
-    fun controlKpm(name: String, args: String): Int {
-        return controlKpmModule(name, args)
     }
 }
 

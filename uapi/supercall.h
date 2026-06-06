@@ -162,10 +162,6 @@ struct ksu_hook_type_cmd {
     char hook_type[32]; // Output: hook type string
 };
 
-struct ksu_enable_kpm_cmd {
-    __u8 enabled; // Output: true if KPM is enabled
-};
-
 DEFINE_KSU_UAPI_CONST(__u8, DYNAMIC_MANAGER_OP_SET, 0)
 DEFINE_KSU_UAPI_CONST(__u8, DYNAMIC_MANAGER_OP_GET, 1)
 DEFINE_KSU_UAPI_CONST(__u8, DYNAMIC_MANAGER_OP_WIPE, 2)
@@ -185,21 +181,6 @@ struct ksu_get_managers_cmd {
     __u16 count; // Input / Output: number of managers in array
     __u16 total_count; // Output: total number of managers in requested list
     struct ksu_manager_entry managers[]; // Output: Array of active manager
-} __attribute__((packed));
-
-DEFINE_KSU_UAPI_CONST(__u8, KSU_KPM_LOAD, 1)
-DEFINE_KSU_UAPI_CONST(__u8, KSU_KPM_UNLOAD, 2)
-DEFINE_KSU_UAPI_CONST(__u8, KSU_KPM_NUM, 3)
-DEFINE_KSU_UAPI_CONST(__u8, KSU_KPM_LIST, 4)
-DEFINE_KSU_UAPI_CONST(__u8, KSU_KPM_INFO, 5)
-DEFINE_KSU_UAPI_CONST(__u8, KSU_KPM_CONTROL, 6)
-DEFINE_KSU_UAPI_CONST(__u8, KSU_KPM_VERSION, 7)
-
-struct ksu_kpm_cmd {
-    __u8 __user control_code;
-    __aligned_u64 __user arg1;
-    __aligned_u64 __user arg2;
-    __aligned_u64 __user result_code;
 } __attribute__((packed));
 
 DEFINE_KSU_UAPI_CONST(__u8, KERNEL_PATCH_NOT_FOUND, 0)
@@ -240,12 +221,11 @@ DEFINE_KSU_UAPI_CONST(__u32, KSU_IOCTL_GET_SULOG_FD, _IOW('K', 20, struct ksu_ge
 // Downstream add IOCTL command definitions
 DEFINE_KSU_UAPI_CONST(__u32, KSU_IOCTL_GET_FULL_VERSION, _IOC(_IOC_READ, 'K', 100, 0))
 DEFINE_KSU_UAPI_CONST(__u32, KSU_IOCTL_HOOK_TYPE, _IOC(_IOC_READ, 'K', 101, 0))
-DEFINE_KSU_UAPI_CONST(__u32, KSU_IOCTL_ENABLE_KPM, _IOC(_IOC_READ, 'K', 102, 0))
+// 102 = ENABLE_KPM (KernelPatch Module),deprecated
 DEFINE_KSU_UAPI_CONST(__u32, KSU_IOCTL_DYNAMIC_MANAGER, _IOC(_IOC_READ | _IOC_WRITE, 'K', 103, 0))
 // 104 = old get_managers, deprecated
 DEFINE_KSU_UAPI_CONST(__u32, KSU_IOCTL_GET_MANAGERS, _IOC(_IOC_READ | _IOC_WRITE, 'K', 105, 0))
 DEFINE_KSU_UAPI_CONST(__u32, KSU_IOCTL_GET_KERNEL_PATCH_IMPLEMENT, _IOC(_IOC_READ, 'K', 106, 0))
-DEFINE_KSU_UAPI_CONST(__u32, KSU_IOCTL_KPM, _IOC(_IOC_READ | _IOC_WRITE, 'K', 200, 0))
-
+// 200 = MANAGE_KPM,deprecated
 #undef DEFINE_KSU_UAPI_CONST
 #endif

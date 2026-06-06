@@ -923,35 +923,6 @@ private fun InfoCard(
                 )
             }
 
-            if (lkmMode == false && !isSimpleMode && !showKpmInfo) {
-                val kpmNotSupport =
-                    systemInfo.kpmVersion.isEmpty() || systemInfo.kpmVersion.startsWith("Error")
-                val displayText = when {
-                    kpmNotSupport && Natives.isKPMEnabled() -> {
-                        stringResource(
-                            R.string.kpm_not_supported,
-                            stringResource(R.string.kernel_not_patched)
-                        )
-                    }
-
-                    kpmNotSupport && !Natives.isKPMEnabled() -> {
-                        stringResource(
-                            R.string.kpm_not_supported,
-                            stringResource(R.string.kernel_not_enabled)
-                        )
-                    }
-
-                    else -> {
-                        stringResource(R.string.kpm_supported, systemInfo.kpmVersion)
-                    }
-                }
-
-                InfoCardItem(
-                    stringResource(R.string.home_kpm_version),
-                    displayText,
-                    icon = Icons.Default.Archive
-                )
-            }
 
             if (!isSimpleMode && !isHideSusfsStatus && systemInfo.susfsEnabled && systemInfo.susfsVersion.isNotEmpty()) {
                 InfoCardItem(
