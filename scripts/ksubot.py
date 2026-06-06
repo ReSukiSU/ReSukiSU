@@ -8,6 +8,7 @@ from telegram.constants import ParseMode
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHAT_ID = os.environ.get("CHAT_ID")
 MESSAGE_THREAD_ID = os.environ.get("MESSAGE_THREAD_ID")
+DEVELOPING_THREAD_ID = os.environ.get("DEVELOPING_THREAD_ID")
 RUN_URL = os.environ.get("RUN_URL")
 TITLE = os.environ.get("TITLE")
 VERSION = os.environ.get("VERSION")
@@ -66,6 +67,11 @@ Branch: {branch}
 <a href="{run_url}">Workflow run</a>
 """.strip()
 
+MAIN_UPDATED_MSG ="""
+main branch updated, manager in there may outdated 
+main 分支已更新，此 topic 的管理器可能已过时
+""".strip()
+
 def escape_telegram_html(text: str) -> str:
     return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&#39;")
 
@@ -122,6 +128,12 @@ def check_environ():
         except:
             print("[-] Invalid MESSAGE_THREAD_ID")
             exit(1)
+    if DEVELOPING_THREAD_ID and DEVELOPING_THREAD_ID != "":
+        try:
+            DEVELOPING_THREAD_ID = int(DEVELOPING_THREAD_ID)
+        except:
+            print("[-] Invalid DEVELOPING_THREAD_ID")
+            exit(1)
     else:
         MESSAGE_THREAD_ID = None
 
@@ -172,6 +184,9 @@ async def main():
     print("[+] Debug files uploaded,starting to upload release files")
     if len(upload_release_files) > 0:
         await send_media_group(bot=bot, chat_id=CHAT_ID, media=upload_release_files, message_thread_id=MESSAGE_THREAD_ID)
+    if BRANCH == "main":
+        print("[+] Sending main branch updated message")
+        await bot.send_message(chat_id=CHAT_ID, text=MAIN_UPDATED_MSG, parse_mode=ParseMode.HTML, message_thread_id=DEVELOPING_THREAD_ID, disable_web_page_preview=True)
     print("[+] Done!")
 
 if __name__ == "__main__":
