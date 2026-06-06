@@ -369,6 +369,10 @@ jobs:
             echo "title=Manager" >> $GITHUB_OUTPUT
             echo "topicid=${{ vars.MESSAGE_THREAD_ID }}" >> $GITHUB_OUTPUT
           fi
+
+          if [ ! "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "topicid=${{ vars.MESSAGE_DEVELOPING_MANAGER_THREAD_ID }}" >> $GITHUB_OUTPUT
+          fi
         
       - name: Download Debug artifact
         if: ${{ matrix.manager_type != 'spoofed' }}
