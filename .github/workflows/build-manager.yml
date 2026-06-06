@@ -370,7 +370,7 @@ jobs:
             echo "topicid=${{ vars.MESSAGE_THREAD_ID }}" >> $GITHUB_OUTPUT
           fi
 
-          if [ ! "${{ github.ref }}" == "refs/heads/main" ]; then
+          if [[ "${{ github.ref }}" != "refs/heads/main" && "${{ github.ref_type }}" != "tag" ]]; then
             echo "topicid=${{ vars.MESSAGE_DEVELOPING_MANAGER_THREAD_ID }}" >> $GITHUB_OUTPUT
           fi
         
