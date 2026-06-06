@@ -63,9 +63,7 @@ enum class BottomBarDestination(
         fun getPages(settings: MainActivity.SettingsState) : List<BottomBarDestination> {
             if (ksuIsValid()) {
                 // 全功能管理器
-                return BottomBarDestination.entries.filter {
-                    !it.rootRequired
-                }
+                return BottomBarDestination.entries.toList()
             } else {
                 return BottomBarDestination.entries.filter {
                     !it.rootRequired
