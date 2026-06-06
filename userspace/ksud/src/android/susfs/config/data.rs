@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use serde::{Deserialize, Serialize};
 
-fn default_uname_value() -> String {
+fn default_generator() -> String {
     "default".to_string()
 }
 
@@ -20,10 +20,10 @@ pub struct Data {
 
 #[derive(Serialize, Deserialize)]
 pub struct Common {
-    #[serde(default = "default_uname_value")]
-    pub spoof_version: String,
-    #[serde(default = "default_uname_value")]
-    pub spoof_release: String,
+    #[serde(default = "default_generator")]
+    pub version: String,
+    #[serde(default = "default_generator")]
+    pub release: String,
     #[serde(default)]
     pub avc_spoofing: bool,
     #[serde(default)]
@@ -57,37 +57,37 @@ pub struct SusKstat {
 pub struct SusKstatStatically {
     #[serde(default)]
     pub path: String,
-    #[serde(default = "default_uname_value")]
+    #[serde(default = "default_generator")]
     pub ino: String,
-    #[serde(default = "default_uname_value")]
+    #[serde(default = "default_generator")]
     pub dev: String,
-    #[serde(default = "default_uname_value")]
+    #[serde(default = "default_generator")]
     pub nlink: String,
-    #[serde(default = "default_uname_value")]
+    #[serde(default = "default_generator")]
     pub size: String,
-    #[serde(default = "default_uname_value")]
+    #[serde(default = "default_generator")]
     pub atime: String,
-    #[serde(default = "default_uname_value")]
+    #[serde(default = "default_generator")]
     pub atime_nsec: String,
-    #[serde(default = "default_uname_value")]
+    #[serde(default = "default_generator")]
     pub mtime: String,
-    #[serde(default = "default_uname_value")]
+    #[serde(default = "default_generator")]
     pub mtime_nsec: String,
-    #[serde(default = "default_uname_value")]
+    #[serde(default = "default_generator")]
     pub ctime: String,
-    #[serde(default = "default_uname_value")]
+    #[serde(default = "default_generator")]
     pub ctime_nsec: String,
-    #[serde(default = "default_uname_value")]
+    #[serde(default = "default_generator")]
     pub blocks: String,
-    #[serde(default = "default_uname_value")]
+    #[serde(default = "default_generator")]
     pub blksize: String,
 }
 
 impl Default for Common {
     fn default() -> Self {
         Self {
-            spoof_version: "default".to_string(),
-            spoof_release: "default".to_string(),
+            version: "default".to_string(),
+            release: "default".to_string(),
             avc_spoofing: false,
             enable_susfs_log: false,
             hide_sus_mnts_for_non_su_procs: false,
