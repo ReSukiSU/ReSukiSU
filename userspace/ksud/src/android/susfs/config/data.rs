@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashSet, HashMap};
 
 use serde::{Deserialize, Serialize};
 
@@ -16,9 +16,11 @@ pub struct Data {
     pub sus_map: HashSet<String>,
     #[serde(default)]
     pub kstat: SusKstat,
+    #[serde(default)]
+    pub open_redirect: HashMap<String, String>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 pub struct Common {
     #[serde(default = "default_generator")]
     pub version: String,
@@ -30,6 +32,8 @@ pub struct Common {
     pub enable_susfs_log: bool,
     #[serde(default)]
     pub hide_sus_mnts_for_non_su_procs: bool,
+    #[serde(default = "default_generator")]
+    pub cmdline: String,
 }
 
 #[derive(Serialize, Deserialize, Default)]
@@ -83,14 +87,3 @@ pub struct SusKstatStatically {
     pub blksize: String,
 }
 
-impl Default for Common {
-    fn default() -> Self {
-        Self {
-            version: "default".to_string(),
-            release: "default".to_string(),
-            avc_spoofing: false,
-            enable_susfs_log: false,
-            hide_sus_mnts_for_non_su_procs: false,
-        }
-    }
-}
