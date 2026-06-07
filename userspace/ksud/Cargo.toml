@@ -22,6 +22,7 @@ chrono = "0.4"
 regex-lite = "0.1"
 android-bootimg = { git = "https://github.com/5ec1cff/android_bootimg" }
 memmap2 = "0.9.10"
+bitflags = "2.11.0"
 base16ct = { version = "1.0.0", features = ["alloc"] }
 
 [target.'cfg(target_os = "android")'.dependencies]
@@ -52,12 +53,19 @@ nom = "8"
 derive-new = "0.7"
 getopts = "0.2"
 serde = { version = "1.0", features = ["derive"] }
+bzip2 = "0.6"
+flate2 = "1"
+lz4 = "1"
+lzma-rust2 = { version = "0.15", features = ["std", "xz"] }
 ksuinit = { path = "../ksuinit" }
 adb_client = { git = "https://github.com/Kernel-SU/adb_client" }
 prop-rs-android = { git = "https://github.com/Kernel-SU/ksu_props" }
+num_enum = "0.7"
+inotify = "0.11.2"
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
 env_logger = { version = "0.11.10", default-features = false }
+bitflags = "2.11.0"
 
 [profile.release]
 strip = true

@@ -101,6 +101,9 @@ pub fn on_post_data_fs() -> Result<()> {
         warn!("init features failed: {e}");
     }
 
+    // Load susfs config entries that must capture metadata before mounts/overlays.
+    crate::android::susfs::init_event::on_post_fs_data();
+
     // execute metamodule post-fs-data script first (priority)
     if let Err(e) = metamodule::exec_stage_script("post-fs-data", true) {
         warn!("exec metamodule post-fs-data script failed: {e}");
@@ -126,6 +129,9 @@ pub fn on_post_data_fs() -> Result<()> {
     if let Err(e) = crate::android::umount_config::load_umount_config() {
         warn!("load umount config failed: {e}");
     }
+
+    // Complete susfs kstat updates after modules have been mounted.
+    crate::android::susfs::init_event::on_post_mount();
 
     run_stage("post-mount", true);
 
@@ -164,11 +170,14 @@ pub fn run_stage(stage: &str, block: bool) {
 
 pub fn on_services() {
     info!("on_services triggered!");
+    crate::android::susfs::init_event::on_services();
     run_stage("service", false);
 }
 
 pub fn on_boot_completed() {
     ksucalls::report_boot_complete();
+    // Load susfs boot-completed
+    let _ = crate::android::susfs::init_event::on_boot_completed();
     info!("on_boot_completed triggered!");
 
     run_stage("boot-completed", false);

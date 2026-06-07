@@ -161,6 +161,7 @@
     <string name="settings_check_update_summary">Auto-check for module and manager updates</string>
     <string name="grant_root_failed">Failed to grant root!</string>
     <string name="home_pr_build_warning">This is a PR debug build. Do NOT use it in production!</string>
+    <string name="home_susfs_third_party_conflict_warning">Detected an enabled third-party SuSFS management module, which may conflict with the current manager\'s built-in SuSFS feature!</string>
     <string name="home_pr_kernel_warning">The kernel was built with PR signature support. This is not a production kernel!</string>
     <string name="action">Action</string>
     <string name="close">Close</string>
@@ -411,6 +412,11 @@
     <string name="susfs_current_value">Current value: %s</string>
     <string name="susfs_current_build_time">Current build time: %s</string>
     <string name="susfs_reset_to_default">Reset to Default</string>
+    <string name="susfs_uname_build_time_updated">Updated SuSFS uname/build time</string>
+    <string name="susfs_uname_build_time_reset">Reset SuSFS uname/build time to defaults</string>
+    <string name="susfs_reset_all_config">Reset All SuSFS Config</string>
+    <string name="susfs_reset_all_tap_hint">Tap %1$d more times to reset all SuSFS config</string>
+    <string name="susfs_reset_all_success">SuSFS config reset. Effective after reboot</string>
     <string name="susfs_apply">Apply</string>
     <string name="susfs_reset_confirm_title">Confirm Reset</string>
     <string name="susfs_binary_not_found">Cannot find ksu_susfs file</string>
@@ -447,12 +453,13 @@
     <string name="susfs_feature_enabled">Enabled</string>
     <string name="susfs_feature_disabled">Disabled</string>
     <string name="sus_path_feature_label">SUS Path Support</string>
+    <string name="sus_mount_feature_label">SUS Mount Support</string>
+    <string name="sus_kstat_feature_label">SUS Kstat Support</string>
     <string name="spoof_uname_feature_label">Spoof uname Support</string>
+    <string name="enable_log_feature_label">SuSFS Logging Support</string>
+    <string name="hide_symbols_feature_label">Hide KSU and SUSFS Symbols</string>
     <string name="spoof_cmdline_feature_label">Spoof Cmdline/Bootconfig</string>
     <string name="open_redirect_feature_label">Open Redirect Support</string>
-    <string name="enable_log_feature_label">Logging Support</string>
-    <string name="hide_symbols_feature_label">Hide KSU SUSFS Symbols</string>
-    <string name="sus_kstat_feature_label">SUS Kstat Support</string>
     <string name="sus_map_feature_label">SUS Map Support</string>
     <string name="susfs_feature_configurable">Configurable SuSFS Features</string>
     <string name="susfs_enable_log_label">SuSFS Enable Log</string>
@@ -502,15 +509,13 @@
     <string name="kstat_config_description_update_full_clone">• update_sus_kstat_full_clone: Update ino only, keep other original values</string>
     <string name="static_kstat_config">Static Kstat Configuration</string>
     <string name="kstat_path_management">Kstat Path Management</string>
-    <string name="no_kstat_config_message">No Kstat configuration yet, click the button below to add</string>
+    <string name="no_kstat_config_message">No Kstat configuration yet</string>
+    <string name="susfs_basic_information">Basic Information</string>
     <string name="susfs_hide_mounts_control_title">SUS Mount Hiding Control</string>
     <string name="susfs_hide_mounts_control_description">Control the hiding behavior of SUS mounts for processes</string>
-    <string name="susfs_hide_mounts_for_all_procs_label">Hide SUS mounts for all processes</string>
-    <string name="susfs_hide_mounts_for_all_procs_enabled_description">When enabled, SUS mounts will be hidden from all processes, including KSU processes</string>
-    <string name="susfs_hide_mounts_for_all_procs_disabled_description">When disabled, SUS mounts will only be hidden from non-KSU processes, KSU processes can see the mounts</string>
+    <string name="susfs_hide_mounts_for_nonsu_procs">Hide SUS mounts for Non Root processes</string>
     <string name="susfs_hide_mounts_all_enabled">Enabled hiding SUS mounts for all processes</string>
     <string name="susfs_hide_mounts_all_disabled">Disabled hiding SUS mounts for all processes</string>
-    <string name="susfs_hide_mounts_recommendation">It is recommended to set to disabled after screen is unlocked, or during service.sh or boot-completed.sh stage, as this should fix the issue on some rooted apps that rely on mounts mounted by KSU process</string>
     <string name="susfs_hide_mounts_current_setting">Current setting: %s</string>
     <string name="susfs_hide_mounts_setting_all">Hide for all processes</string>
     <string name="susfs_hide_mounts_setting_non_ksu">Hide only for non-KSU processes</string>
@@ -528,7 +533,7 @@
     <string name="restore">Restore</string>
     <string name="susfs_restore_description">Restore SuSFS configurations from a backup file. This will overwrite all current settings</string>
     <string name="susfs_restore_select_file">Select Backup File</string>
-    <string name="susfs_restore_success" formatted="false">Configuration restored successfully from backup created on %s from device: %s</string>
+    <string name="susfs_restore_success" formatted="false">Configuration restored successfully</string>
     <string name="susfs_restore_failed">Restore failed: %s</string>
     <string name="susfs_restore_confirm_title">Confirm Restore</string>
     <string name="susfs_restore_confirm_description">This will overwrite all current SuSFS configurations. Are you sure you want to continue?</string>
@@ -592,24 +597,19 @@
     <string name="susfs_reset_loop_paths_message">Are you sure you want to clear all SUS loop paths? This action cannot be undone</string>
     <string name="susfs_loop_path_label">Loop Path</string>
     <string name="susfs_loop_path_placeholder">/data/example/path</string>
-    <string name="susfs_loop_path_restriction_warning">Note: Only paths NOT inside /storage/ and /sdcard/ can be added via loop paths</string>
     <string name="susfs_loop_path_invalid_location">Error: Loop paths cannot be inside /storage/ or /sdcard/ directories</string>
     <string name="loop_paths_section">Loop Paths</string>
     <string name="add_loop_path">Add Loop Path</string>
     <string name="sus_loop_paths_description_title">Loop Path Configuration</string>
-    <string name="sus_loop_paths_description_text">Loop paths are re-flagged as SUS_PATH on each non-root user app or isolated service startup. This helps address issues where added paths may have their inode status reset or inode re-created in the kernel</string>
+    <string name="sus_loop_paths_description_text">"Loop paths are re-flagged as SUS_PATH on each non-root user app or isolated service startup.\n
+This helps address issues where added paths may have their inode status reset or inode re-created in the kernel.\n
+Note: Only paths NOT inside /storage/ and /sdcard/ can be added via loop paths."</string>
     <string name="avc_log_spoofing">AVC Log Spoofing</string>
     <string name="avc_log_spoofing_enabled">AVC log spoofing has been enabled</string>
     <string name="avc_log_spoofing_disabled">AVC log spoofing has been disabled</string>
-    <string name="avc_log_spoofing_description">
-Disabled: Disable spoofing the sus tcontext of \'su\' shown in avc log in kernel\n
-Enabled: Enable spoofing the sus tcontext of \'su\' with \'u:r:priv_app:s0:c512,c768\' shown in avc log in kernel
-</string>
-    <string name="avc_log_spoofing_warning">
-Important Note:\n
-- It is set to \'0\' by default in kernel\n
-- Enabling this will sometimes make developers hard to identify the cause when they are debugging with some permission or SELinux issue, so users are advised to disable this when doing
-</string>
+    <string name="avc_log_spoofing_description">"Disabled: Disable spoofing the sus tcontext of su shown in avc log in kernel\n
+Enabled: Enable spoofing the sus tcontext of su with u:r:priv_app:s0:c512,c768 shown in avc log in kernel"</string>
+    <string name="avc_log_spoofing_warning">It is set to disabled by default in kernel.Enabling this will sometimes make developers hard to identify the cause when they are debugging with some permission or SELinux issue, so users are advised to disable this when doing.</string>
     <string name="home_hook_type">Hook type</string>
     <string name="kpm_patch_options">KPM Patch</string>
     <string name="kpm_patch_description">For adding additional KPM features</string>
