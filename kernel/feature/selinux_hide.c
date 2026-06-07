@@ -453,7 +453,7 @@ static int ksu_selinux_hide_enable()
 {
     int ret;
     pr_info("selinux_hide: init selinux hide\n");
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0) || defined(KSU_COMPAT_HAS_SELINUX_POLICY_STRUCT)
     if (!backup_sepolicy) {
         pr_err("no backup sepolicy available, please save feature and reboot to retry!\n");
         return -EAGAIN;
@@ -505,7 +505,7 @@ static int ksu_selinux_hide_enable()
 
 #elif defined(KSU_COMPAT_USE_SELINUX_STATE)
     fake_state.initialized = true;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0) || defined(KSU_COMPAT_HAS_SELINUX_POLICY_STRUCT)
     fake_state.policy = backup_sepolicy;
 #else
     fake_state.ss = kzalloc(sizeof(*fake_state.ss), GFP_KERNEL);
@@ -543,7 +543,7 @@ static int ksu_selinux_hide_enable()
     backup_policydb = NULL;
     backup_sidtab = NULL;
 
-#endif // #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
+#endif // #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0) || defined(KSU_COMPAT_HAS_SELINUX_POLICY_STRUCT)
 
 #endif // #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 6, 0)
 
@@ -639,7 +639,8 @@ static void ksu_selinux_hide_disable()
 {
     pr_info("selinux_hide: exit selinux hide\n");
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 10, 0) && defined(KSU_COMPAT_USE_SELINUX_STATE)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 10, 0) && defined(KSU_COMPAT_USE_SELINUX_STATE) &&                          \
+    !defined(KSU_COMPAT_HAS_SELINUX_POLICY_STRUCT)
     backup_policydb = kzalloc(sizeof(*backup_policydb), GFP_KERNEL);
     backup_sidtab = kzalloc(sizeof(*backup_sidtab), GFP_KERNEL);
     memcpy(backup_policydb, &fake_state.ss->policydb, sizeof(struct policydb));
@@ -756,7 +757,7 @@ void __exit ksu_selinux_hide_exit()
 void ksu_selinux_hide_drop_backup_if_unused()
 {
     mutex_lock(&selinux_hide_mutex);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0) || defined(KSU_COMPAT_HAS_SELINUX_POLICY_STRUCT)
     if (!ksu_selinux_hide_running && backup_sepolicy) {
         pr_info("selinux_hide is not enabled - drop backup_sepolicy\n");
         sidtab_destroy(backup_sepolicy->sidtab);
