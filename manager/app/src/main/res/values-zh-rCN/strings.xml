@@ -131,6 +131,8 @@
     <string name="module_changelog">更新日志</string>
     <string name="settings_profile_template">App Profile 模版</string>
     <string name="settings_profile_template_summary">管理本地和在线的 App Profile 模版</string>
+    <string name="manage_app_profile">管理 App Profile 模版</string>
+    <string name="recently_installed">最近安装</string>
     <string name="app_profile_template_create">创建模版</string>
     <string name="app_profile_template_edit">编辑模版</string>
     <string name="app_profile_template_id">模版 ID</string>

@@ -26,7 +26,7 @@ fun SettingsJumpPageWidget(
     descriptionStyle: TextStyle = MaterialTheme.typography.bodyMedium,
     enabled: Boolean = true,
     isError: Boolean = false,
-    onClick: (Offset) -> Unit = {},
+    onClick: ((Offset) -> Unit)? = null,
     onLongClick: ((Offset) -> Unit)? = null,
     hapticFeedbackType: HapticFeedbackType = HapticFeedbackType.ContextClick,
     leadingContent: (@Composable () -> Unit)? = null,

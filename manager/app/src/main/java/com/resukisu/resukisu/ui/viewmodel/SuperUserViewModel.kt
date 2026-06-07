@@ -45,6 +45,8 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 
+internal const val RECENTLY_INSTALLED_WINDOW_MILLIS = 60 * 60 * 1000L
+
 enum class AppCategory(val displayNameRes: Int, val persistKey: String) {
     ALL(com.resukisu.resukisu.R.string.category_all_apps, "ALL"),
     ROOT(com.resukisu.resukisu.R.string.category_root_apps, "ROOT"),
@@ -97,7 +99,7 @@ class SuperUserViewModel : ViewModel() {
         private const val CORE_POOL_SIZE = 8
         private const val MAX_POOL_SIZE = 16
         private const val KEEP_ALIVE_TIME = 60L
-        private const val BATCH_SIZE = 20
+        private const val BATCH_SIZE = 100
     }
 
     @Immutable
@@ -118,7 +120,8 @@ class SuperUserViewModel : ViewModel() {
     data class AppGroup(
         val uid: Int,
         val apps: List<AppInfo>,
-        val profile: Natives.Profile?
+        val profile: Natives.Profile?,
+
     ) : Parcelable {
         @IgnoredOnParcel
         val mainApp: AppInfo = apps.first()
@@ -130,6 +133,12 @@ class SuperUserViewModel : ViewModel() {
         val userName: String? = Natives.getUserName(uid)
         @IgnoredOnParcel
         val hasCustomProfile : Boolean = profile?.let { if (it.allowSu) !it.rootUseDefault else !it.nonRootUseDefault } ?: false
+
+        @IgnoredOnParcel
+        val isRecentlyInstalled: Boolean = run {
+            val cutoffMillis = System.currentTimeMillis() - RECENTLY_INSTALLED_WINDOW_MILLIS
+            apps.maxOfOrNull { it.packageInfo.firstInstallTime }?.let { it >= cutoffMillis } == true
+        }
     }
 
     private val appProcessingThreadPool = ThreadPoolExecutor(
@@ -235,11 +244,13 @@ class SuperUserViewModel : ViewModel() {
         appListMutex.tryLock().let { locked ->
             if (locked) {
                 try {
-                    apps = apps.map { app ->
+                    val updatedApps = apps.map { app ->
                         if (app.packageName == packageName) {
                             app.copy(profile = updatedProfile)
                         } else app
                     }
+                    apps = updatedApps
+                    appGroups = groupAppsByUid(updatedApps)
                 } finally {
                     appListMutex.unlock()
                 }
@@ -280,13 +291,16 @@ class SuperUserViewModel : ViewModel() {
                     }
                 }.awaitAll().flatten()
 
-                appListMutex.withLock { apps = updatedApps }
+                appListMutex.withLock {
+                    apps = updatedApps
+                    appGroups = groupAppsByUid(updatedApps)
+                }
                 loadingProgress = 1f
             }
         }
     }
 
-    private suspend fun connectKsuService(onDisconnect: () -> Unit = {}): Pair<ServiceConnection?, IBinder?> =
+    private suspend fun connectKsuService(onDisconnect: () -> Unit = {}): Pair<ServiceConnection, IBinder>? =
         suspendCancellableCoroutine { continuation ->
             val connection = object : ServiceConnection {
                 override fun onServiceDisconnected(name: ComponentName?) {
@@ -294,7 +308,11 @@ class SuperUserViewModel : ViewModel() {
                 }
 
                 override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-                    continuation.resume(Pair(this, binder))
+                    if (binder == null) {
+                        continuation.resume(null)
+                    } else {
+                        continuation.resume(this to binder)
+                    }
                 }
             }
             val intent = Intent(ksuApp, KsuService::class.java)
@@ -305,7 +323,7 @@ class SuperUserViewModel : ViewModel() {
                 task?.let { Shell.getShell().execTask(it) }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to bind KsuService", e)
-                continuation.resume(Pair(null, null))
+                continuation.resume(null)
             }
         }
 
@@ -368,9 +386,7 @@ class SuperUserViewModel : ViewModel() {
             Log.e(TAG, "Error refresh app list", e)
         } finally {
             isRefreshing = false
-            connection?.let { connection ->
-                stopKsuService(connection)
-            }
+            stopKsuService(connection)
         }
     }
 
@@ -384,6 +400,48 @@ class SuperUserViewModel : ViewModel() {
         }.filter { group ->
             group.uid == 2000 || showSystemApps ||
                     group.apps.any { it.packageInfo.applicationInfo!!.flags.and(ApplicationInfo.FLAG_SYSTEM) == 0 }
+        }.run {
+            when (selectedCategory) {
+                AppCategory.ALL -> this
+                AppCategory.ROOT -> this.filter { it.allowSu }
+                AppCategory.CUSTOM -> this.filter { !it.allowSu && it.hasCustomProfile }
+                AppCategory.DEFAULT -> this.filter { !it.allowSu && !it.hasCustomProfile }
+            }
+        }.sortedWith { group1, group2 ->
+            val priority1 = when {
+                group1.allowSu -> 0
+                group1.isRecentlyInstalled -> 1
+                group1.hasCustomProfile -> 2
+                else -> 3
+            }
+            val priority2 = when {
+                group2.allowSu -> 0
+                group2.isRecentlyInstalled -> 1
+                group2.hasCustomProfile -> 2
+                else -> 3
+            }
+
+            val priorityComparison = priority1.compareTo(priority2)
+            if (priorityComparison != 0) {
+                priorityComparison
+            } else {
+                when (currentSortType) {
+                    SortType.NAME_ASC -> group1.mainApp.label.lowercase()
+                        .compareTo(group2.mainApp.label.lowercase())
+
+                    SortType.NAME_DESC -> group2.mainApp.label.lowercase()
+                        .compareTo(group1.mainApp.label.lowercase())
+
+                    SortType.INSTALL_TIME_NEW -> group2.mainApp.packageInfo.firstInstallTime
+                        .compareTo(group1.mainApp.packageInfo.firstInstallTime)
+
+                    SortType.INSTALL_TIME_OLD -> group1.mainApp.packageInfo.firstInstallTime
+                        .compareTo(group2.mainApp.packageInfo.firstInstallTime)
+
+                    else -> group1.mainApp.label.lowercase()
+                        .compareTo(group2.mainApp.label.lowercase())
+                }
+            }
         }
     }
 

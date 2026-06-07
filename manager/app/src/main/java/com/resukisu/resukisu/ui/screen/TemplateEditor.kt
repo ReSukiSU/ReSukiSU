@@ -72,7 +72,7 @@ fun TemplateEditorScreen(
 ) {
     val navigator = LocalNavigator.current
     val isCreation = initialTemplate.id.isBlank()
-    val autoSave = !isCreation
+    val autoSave = !isCreation && !readOnly
 
     var template by rememberSaveable {
         mutableStateOf(initialTemplate)
@@ -276,18 +276,19 @@ private fun TopBar(
     scrollBehavior: TopAppBarScrollBehavior
 ) {
     LargeFlexibleTopAppBar(
-        modifier = Modifier.blurEffect(
-        ),
+        modifier = Modifier.blurEffect(),
         title = {
             Text(
                 text = title
             )
         },
-        subtitle = {
-            Text(
-                text = summary,
-            )
-        },
+        subtitle = if (summary.isNotEmpty()) {
+            {
+                Text(
+                    text = summary,
+                )
+            }
+        } else null,
         navigationIcon = {
             AppBackButton(
                 onClick = onBack

@@ -8,12 +8,14 @@ from telegram.constants import ParseMode
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHAT_ID = os.environ.get("CHAT_ID")
 MESSAGE_THREAD_ID = os.environ.get("MESSAGE_THREAD_ID")
+DEVELOPING_THREAD_ID = os.environ.get("DEVELOPING_THREAD_ID")
 RUN_URL = os.environ.get("RUN_URL")
 TITLE = os.environ.get("TITLE")
 VERSION = os.environ.get("VERSION")
 BRANCH = os.environ.get("BRANCH")
 
 GITHUB_EVENT = json.loads(open(os.environ.get("GITHUB_EVENT_PATH"), "r").read())
+GITHUB_REF_TYPE = os.environ.get("GITHUB_REF_TYPE")
 
 commit_message = ''
 commit_line = ''
@@ -66,6 +68,11 @@ Branch: {branch}
 <a href="{run_url}">Workflow run</a>
 """.strip()
 
+MAIN_UPDATED_MSG ="""
+main branch updated, manager in there may outdated 
+main 分支已更新，此 topic 的管理器可能已过时
+""".strip()
+
 def escape_telegram_html(text: str) -> str:
     return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&#39;")
 
@@ -92,7 +99,7 @@ def get_caption_for_debug():
     return msg
 
 def check_environ():
-    global CHAT_ID, MESSAGE_THREAD_ID
+    global CHAT_ID, MESSAGE_THREAD_ID, DEVELOPING_THREAD_ID
     if BOT_TOKEN is None:
         print("[-] Invalid BOT_TOKEN")
         exit(1)
@@ -124,6 +131,14 @@ def check_environ():
             exit(1)
     else:
         MESSAGE_THREAD_ID = None
+    if DEVELOPING_THREAD_ID and DEVELOPING_THREAD_ID != "":
+        try:
+            DEVELOPING_THREAD_ID = int(DEVELOPING_THREAD_ID)
+        except:
+            print("[-] Invalid DEVELOPING_THREAD_ID")
+            exit(1)
+    else:
+        DEVELOPING_THREAD_ID = None
 
 async def send_media_group(bot: Bot, chat_id: int, media: list, message_thread_id=None):
     await asyncio.sleep(random.uniform(0.2, 0.8))
@@ -172,6 +187,9 @@ async def main():
     print("[+] Debug files uploaded,starting to upload release files")
     if len(upload_release_files) > 0:
         await send_media_group(bot=bot, chat_id=CHAT_ID, media=upload_release_files, message_thread_id=MESSAGE_THREAD_ID)
+    if TITLE.lower() == "manager" and (BRANCH == "main" or GITHUB_REF_TYPE == "tag"):
+        print("[+] Sending main branch updated message")
+        await bot.send_message(chat_id=CHAT_ID, text=MAIN_UPDATED_MSG, parse_mode=ParseMode.HTML, message_thread_id=DEVELOPING_THREAD_ID, disable_web_page_preview=True)
     print("[+] Done!")
 
 if __name__ == "__main__":

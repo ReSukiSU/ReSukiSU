@@ -34,21 +34,19 @@ import com.resukisu.resukisu.ui.viewmodel.getTemplateInfoById
 fun TemplateConfig(
     profile: Natives.Profile,
     onViewTemplate: (id: String) -> Unit = {},
-    onManageTemplate: () -> Unit = {},
     onProfileChange: (Natives.Profile) -> Unit
 ) {
-//    var expanded by remember { mutableStateOf(false) }
     var template by rememberSaveable {
         mutableStateOf(profile.rootTemplate ?: "")
     }
     val profileTemplates = listOf("None") + listAppProfileTemplates()
-//    val noTemplates = profileTemplates.isEmpty()
+    val currentIndex = profileTemplates.indexOf(template).let { if (it == -1) 0 else it }
 
     SettingsDropdownWidget(
         icon = Icons.AutoMirrored.Rounded.Article,
         title = stringResource(R.string.profile_template),
         items = profileTemplates,
-        selectedIndex = profileTemplates.indexOf(template) + 1,
+        selectedIndex = currentIndex,
         afterContent = { index ->
             if (index == 0) return@SettingsDropdownWidget
             Icon(
@@ -69,7 +67,7 @@ fun TemplateConfig(
             return@SettingsDropdownWidget
         }
 
-        template = profileTemplates[index - 1]
+        template = profileTemplates[index]
 
         val templateInfo =
             getTemplateInfoById(template) ?: return@SettingsDropdownWidget

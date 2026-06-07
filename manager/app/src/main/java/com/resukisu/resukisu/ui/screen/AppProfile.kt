@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Android
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -69,6 +70,7 @@ import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsDropDownPopupMenuWidget
+import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Route
@@ -315,22 +317,23 @@ private fun AppProfileInner(
                             ) { currentMode ->
                                 when (currentMode) {
                                     Mode.Template -> {
-                                        Surface(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 16.dp, vertical = 8.dp),
-                                            shape = RoundedCornerShape(16.dp),
-                                            color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
-                                                alpha = CardConfig.cardAlpha
-                                            ),
-                                            contentColor = MaterialTheme.colorScheme.onSurface,
-                                        ) {
-                                            Column {
+                                        SegmentedColumn {
+                                            item {
                                                 TemplateConfig(
                                                     profile = profile,
                                                     onViewTemplate = onViewTemplate,
-                                                    onManageTemplate = onManageTemplate,
                                                     onProfileChange = onProfileChange
+                                                )
+                                            }
+
+                                            item {
+                                                SettingsJumpPageWidget(
+                                                    icon = Icons.Filled.Edit,
+                                                    title = stringResource(R.string.manage_app_profile),
+                                                    description = stringResource(R.string.settings_profile_template_summary),
+                                                    onClick = {
+                                                        onManageTemplate()
+                                                    }
                                                 )
                                             }
                                         }
@@ -484,7 +487,7 @@ private fun ProfileBox(
             icon = Icons.Filled.AccountCircle,
             title = stringResource(R.string.profile),
             description = mode.text,
-        ) {}
+        )
 
         Row(
             modifier = Modifier
