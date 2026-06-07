@@ -1,14 +1,16 @@
+#include <linux/gfp.h>
+#include <linux/printk.h>
+#include <linux/slab.h>
+#include <linux/version.h>
+#include <linux/vmalloc.h>
+#include <linux/mutex.h>
+
 #include "ss/avtab.h"
 #include "ss/constraint.h"
 #include "ss/ebitmap.h"
 #include "ss/hashtab.h"
 #include "ss/policydb.h"
 #include "ss/services.h"
-#include <linux/gfp.h>
-#include <linux/printk.h>
-#include <linux/slab.h>
-#include <linux/version.h>
-#include <linux/vmalloc.h>
 
 #include "selinux.h"
 #include "sepolicy.h"
