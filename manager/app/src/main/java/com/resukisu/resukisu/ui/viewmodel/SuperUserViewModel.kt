@@ -349,6 +349,14 @@ class SuperUserViewModel : ViewModel() {
         val cutoff = now - RECENT_INSTALL_WINDOW_MILLIS
 
         appGroupList
+            .filter { group ->
+                when (selectedCategory) {
+                    AppCategory.ALL -> true
+                    AppCategory.ROOT -> group.allowSu
+                    AppCategory.CUSTOM -> !group.allowSu && group.hasCustomProfile
+                    AppCategory.DEFAULT -> !group.allowSu && !group.hasCustomProfile
+                }
+            }
             .filter { it.latestInstallTime in cutoff..now }
             .sortedByDescending { it.latestInstallTime }
             .take(MAX_RECENTLY_INSTALLED_APP_GROUPS)
