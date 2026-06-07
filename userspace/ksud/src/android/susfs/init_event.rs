@@ -8,12 +8,14 @@ use crate::android::susfs::api;
 use crate::android::susfs::config;
 use crate::android::susfs::config::data::Data;
 
-fn is_sdcard_mounted() -> bool {
-    let file = match fs::read_to_string("/proc/self/mounts") {
+const MOUNTS_PATH: &str = "/proc/self/mounts";
+
+fn find_sdcard_mount_signal() -> Option<String> {
+    let file = match fs::read_to_string(MOUNTS_PATH) {
         Ok(f) => f,
         Err(e) => {
-            log::debug!("failed to read mounts");
-            return false;
+            warn!("susfs: failed to read {MOUNTS_PATH} while checking CE storage: {e}");
+            return None;
         }
     };
 
@@ -22,35 +24,113 @@ fn is_sdcard_mounted() -> bool {
         if parts.len() > 1 {
             let mount_point = parts[1];
             if mount_point == "/sdcard" || mount_point.contains("/storage/emulated") {
-                return true;
+                return Some(format!("mount point {mount_point}"));
             }
         }
     }
-    false
+    None
+}
+
+fn count_config_entries(config: &Data) -> usize {
+    config
+        .sus_path
+        .sus_path
+        .iter()
+        .filter(|entry| !entry.trim().is_empty())
+        .count()
+        + config
+            .sus_path
+            .sus_path_loop
+            .iter()
+            .filter(|entry| !entry.trim().is_empty())
+            .count()
+        + config
+            .sus_map
+            .iter()
+            .filter(|entry| !entry.trim().is_empty())
+            .count()
+        + config
+            .kstat
+            .sus_kstat
+            .iter()
+            .filter(|entry| !entry.trim().is_empty())
+            .count()
+        + config
+            .kstat
+            .statically
+            .iter()
+            .filter(|entry| !entry.path.trim().is_empty())
+            .count()
+        + config
+            .kstat
+            .update_kstat
+            .iter()
+            .filter(|entry| !entry.trim().is_empty())
+            .count()
+        + config
+            .kstat
+            .full_clone
+            .iter()
+            .filter(|entry| !entry.trim().is_empty())
+            .count()
 }
 
 pub fn on_boot_completed() -> Result<()> {
+    info!("susfs: boot-completed CE reapply monitor starting");
     let config = config::read_config();
 
     if let Err(e) = crate::android::utils::daemonize(false) {
-        log::error!("failed to spawn process on boot-completed");
+        log::error!("failed to spawn process on boot-completed: {e}");
+    } else {
+        info!("susfs: boot-completed CE reapply monitor daemonized");
     }
 
+    info!("susfs: initializing CE storage inotify watcher");
     let mut inotify = Inotify::init()?;
 
     inotify
         .watches()
-        .add("/proc/self/mounts", WatchMask::MODIFY)?;
+        .add(MOUNTS_PATH, WatchMask::MODIFY)?;
+    info!("susfs: watching {MOUNTS_PATH} for CE storage mount changes");
 
     let mut buffer = [0; 1024];
+    let mut attempt = 1_u64;
+    let signal;
     loop {
-        let mut events = inotify.read_events_blocking(&mut buffer)?;
-        if events.next().is_some() && is_sdcard_mounted() {
-            break;
+        info!("susfs: CE storage wait attempt #{attempt}; waiting for inotify event");
+        let events = inotify.read_events_blocking(&mut buffer)?;
+        let mut event_count = 0;
+        for event in events {
+            event_count += 1;
+            info!(
+                "susfs: CE storage inotify event #{event_count}: mask={:?}, cookie={}",
+                event.mask, event.cookie
+            );
         }
+
+        if event_count > 0 {
+            info!(
+                "susfs: received {event_count} CE storage inotify event(s); checking unlock state"
+            );
+            if let Some(found_signal) = find_sdcard_mount_signal() {
+                info!("susfs: inotify detected CE storage availability: {found_signal}");
+                signal = found_signal;
+                break;
+            }
+        }
+
+        info!("susfs: CE storage is still unavailable after wait attempt #{attempt}");
+        attempt += 1;
     }
 
-    if !apply_config(&config) {
+    let entry_count = count_config_entries(&config);
+    info!(
+        "susfs: CE reapply attempt 1/1 after {signal}; applying {entry_count} configured item(s)"
+    );
+    if apply_config(&config) {
+        info!("susfs: CE reapply attempt 1/1 completed successfully");
+    } else {
+        warn!("susfs: CE reapply attempt 1/1 completed with failures");
         warn!("failed to set susfs config on boot-completed with wait");
     }
 
@@ -87,7 +167,10 @@ fn apply_sus_paths(config: &Data) -> bool {
 
 fn apply_sus_path_entry(path_type: &api::SusPathType, label: &str, path: &str) -> bool {
     match api::add_sus_path(path_type, &path) {
-        Ok(()) => true,
+        Ok(()) => {
+            info!("applied {label} '{path}'");
+            true
+        }
         Err(e) if is_already_applied_error(&e) => {
             info!("{label} '{path}' is already applied");
             true
@@ -107,7 +190,7 @@ fn apply_sus_maps(config: &Data) -> bool {
             continue;
         }
         match api::add_sus_map(sus_map.as_str()) {
-            Ok(()) => {}
+            Ok(()) => info!("applied sus_map '{sus_map}'"),
             Err(e) if is_already_applied_error(&e) => {
                 info!("sus_map '{sus_map}' is already applied");
             }
@@ -174,7 +257,7 @@ fn apply_sus_kstat_additions(config: &Data) -> bool {
             continue;
         }
         match api::add_sus_kstat(sus_kstat.as_str()) {
-            Ok(()) => {}
+            Ok(()) => info!("applied sus_kstat '{sus_kstat}'"),
             Err(e) if is_already_applied_error(&e) => {
                 info!("sus_kstat '{sus_kstat}' is already applied");
             }
@@ -203,7 +286,7 @@ fn apply_sus_kstat_additions(config: &Data) -> bool {
             &statically.blocks,
             &statically.blksize,
         ) {
-            Ok(()) => {}
+            Ok(()) => info!("applied sus_kstat_statically '{}'", statically.path),
             Err(e) if is_already_applied_error(&e) => {
                 info!(
                     "sus_kstat_statically '{}' is already applied",
@@ -231,7 +314,7 @@ fn apply_kstat_updates(config: &Data) -> bool {
             continue;
         }
         match api::update_sus_kstat(update_kstat.as_str()) {
-            Ok(()) => {}
+            Ok(()) => info!("updated sus_kstat '{update_kstat}'"),
             Err(e) if is_already_applied_error(&e) => {
                 info!("sus_kstat '{update_kstat}' is already updated");
             }
@@ -246,7 +329,7 @@ fn apply_kstat_updates(config: &Data) -> bool {
             continue;
         }
         match api::update_sus_kstat_full_clone(full_clone.as_str()) {
-            Ok(()) => {}
+            Ok(()) => info!("updated sus_kstat_full_clone '{full_clone}'"),
             Err(e) if is_already_applied_error(&e) => {
                 info!("sus_kstat_full_clone '{full_clone}' is already updated");
             }
