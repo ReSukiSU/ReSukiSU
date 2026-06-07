@@ -1,98 +1,207 @@
-use std::{
-    path::Path,
-    process::Command,
-    thread,
-    time::{Duration, Instant},
-};
+use std::fs;
 
+use anyhow::Result;
+use inotify::{Inotify, WatchMask};
 use log::{info, warn};
 
 use crate::android::susfs::api;
 use crate::android::susfs::config;
 use crate::android::susfs::config::data::Data;
 
-const USER_0_CE_AVAILABLE_PROP: &str = "sys.user.0.ce_available";
-const CE_AVAILABLE_WAIT_TIMEOUT_SECS: u64 = 10 * 60;
-const CE_AVAILABLE_POLL_INTERVAL_SECS: u64 = 1;
-const USER_0_CE_PATH_PREFIXES: &[&str] = &[
-    "/sdcard",
-    "/storage/emulated/0",
-    "/storage/self/primary",
-    "/mnt/user/0/primary",
-    "/mnt/runtime/default/emulated/0",
-    "/mnt/runtime/read/emulated/0",
-    "/mnt/runtime/write/emulated/0",
-    "/mnt/runtime/full/emulated/0",
-    "/mnt/pass_through/0/emulated/0",
-    "/mnt/installer/0/emulated/0",
-    "/mnt/androidwritable/0/emulated/0",
-    "/mnt/media_rw/emulated/0",
-    "/data/media/0",
-    "/data/user/0",
-    "/data/data",
-    "/data/misc_ce/0",
-    "/data/system_ce/0",
-    "/data/vendor_ce/0",
-    "/data_mirror/data_ce/null/0",
-    "/data_mirror/data_ce/0",
-];
+const MOUNTS_PATH: &str = "/proc/self/mounts";
 
-enum CeAvailability {
-    Available,
-    Locked,
-    Unknown,
+fn find_sdcard_mount_signal() -> Option<String> {
+    let file = match fs::read_to_string(MOUNTS_PATH) {
+        Ok(f) => f,
+        Err(e) => {
+            warn!("susfs: failed to read {MOUNTS_PATH} while checking CE storage: {e}");
+            return None;
+        }
+    };
+
+    for line in file.lines() {
+        let parts: Vec<&str> = line.split_whitespace().collect();
+        if parts.len() > 1 {
+            let mount_point = parts[1];
+            if mount_point == "/sdcard" || mount_point.contains("/storage/emulated") {
+                return Some(format!("mount point {mount_point}"));
+            }
+        }
+    }
+    None
 }
 
-pub fn on_boot_completed() {
-    let has_ce_sensitive_entries = has_ce_sensitive_config_entries();
+fn count_config_entries(config: &Data) -> usize {
+    config
+        .sus_path
+        .sus_path
+        .iter()
+        .filter(|entry| !entry.trim().is_empty())
+        .count()
+        + config
+            .sus_path
+            .sus_path_loop
+            .iter()
+            .filter(|entry| !entry.trim().is_empty())
+            .count()
+        + config
+            .sus_map
+            .iter()
+            .filter(|entry| !entry.trim().is_empty())
+            .count()
+        + config
+            .kstat
+            .sus_kstat
+            .iter()
+            .filter(|entry| !entry.trim().is_empty())
+            .count()
+        + config
+            .kstat
+            .statically
+            .iter()
+            .filter(|entry| !entry.path.trim().is_empty())
+            .count()
+        + config
+            .kstat
+            .update_kstat
+            .iter()
+            .filter(|entry| !entry.trim().is_empty())
+            .count()
+        + config
+            .kstat
+            .full_clone
+            .iter()
+            .filter(|entry| !entry.trim().is_empty())
+            .count()
+}
 
-    if is_user_0_ce_ready() {
-        apply_after_ce_available("user-0-ce-available-at-boot-completed");
-    } else if has_ce_sensitive_entries {
-        wait_for_user_0_ce_available();
+pub fn on_boot_completed() -> Result<()> {
+    info!("susfs: boot-completed CE reapply monitor starting");
+    let config = config::read_config();
+
+    if let Err(e) = crate::android::utils::daemonize(false) {
+        log::error!("failed to spawn process on boot-completed: {e}");
     } else {
-        info!("{USER_0_CE_AVAILABLE_PROP} is unavailable or not required");
-        apply_after_ce_available("boot-completed-without-ce-property");
+        info!("susfs: boot-completed CE reapply monitor daemonized");
     }
+
+    info!("susfs: initializing CE storage inotify watcher");
+    let mut inotify = Inotify::init()?;
+
+    inotify
+        .watches()
+        .add(MOUNTS_PATH, WatchMask::MODIFY)?;
+    info!("susfs: watching {MOUNTS_PATH} for CE storage mount changes");
+
+    let mut buffer = [0; 1024];
+    let mut attempt = 1_u64;
+    let signal;
+    loop {
+        info!("susfs: CE storage wait attempt #{attempt}; waiting for inotify event");
+        let events = inotify.read_events_blocking(&mut buffer)?;
+        let mut event_count = 0;
+        for event in events {
+            event_count += 1;
+            info!(
+                "susfs: CE storage inotify event #{event_count}: mask={:?}, cookie={}",
+                event.mask, event.cookie
+            );
+        }
+
+        if event_count > 0 {
+            info!(
+                "susfs: received {event_count} CE storage inotify event(s); checking unlock state"
+            );
+            if let Some(found_signal) = find_sdcard_mount_signal() {
+                info!("susfs: inotify detected CE storage availability: {found_signal}");
+                signal = found_signal;
+                break;
+            }
+        }
+
+        info!("susfs: CE storage is still unavailable after wait attempt #{attempt}");
+        attempt += 1;
+    }
+
+    let entry_count = count_config_entries(&config);
+    info!(
+        "susfs: CE reapply attempt 1/1 after {signal}; applying {entry_count} configured item(s)"
+    );
+    if apply_config(&config) {
+        info!("susfs: CE reapply attempt 1/1 completed successfully");
+    } else {
+        warn!("susfs: CE reapply attempt 1/1 completed with failures");
+        warn!("failed to set susfs config on boot-completed with wait");
+    }
+
+    Ok(())
 }
 
 pub fn on_services() {
-    // let config = config::read_config();
+    let config = config::read_config();
 
     // apply_sus_paths(&config);
     // apply_sus_maps(&config);
+
+    apply_kstat_updates(&config);
 }
 
-fn apply_sus_paths(config: &Data) {
+fn apply_sus_paths(config: &Data) -> bool {
+    let mut success = true;
+
     for sus_path in &config.sus_path.sus_path {
         if sus_path.trim().is_empty() {
             continue;
         }
-        apply_sus_path_entry(&api::SusPathType::Normal, "sus_path", sus_path);
+        success |= apply_sus_path_entry(&api::SusPathType::Normal, "sus_path", sus_path);
     }
     for sus_path_loop in &config.sus_path.sus_path_loop {
         if sus_path_loop.trim().is_empty() {
             continue;
         }
-        apply_sus_path_entry(&api::SusPathType::Loop, "sus_path_loop", sus_path_loop);
+        success |= apply_sus_path_entry(&api::SusPathType::Loop, "sus_path_loop", sus_path_loop);
+    }
+
+    success
+}
+
+fn apply_sus_path_entry(path_type: &api::SusPathType, label: &str, path: &str) -> bool {
+    match api::add_sus_path(path_type, &path) {
+        Ok(()) => {
+            info!("applied {label} '{path}'");
+            true
+        }
+        Err(e) if is_already_applied_error(&e) => {
+            info!("{label} '{path}' is already applied");
+            true
+        }
+        Err(e) => {
+            warn!("failed to add {label} '{path}': {e}");
+            false
+        }
     }
 }
 
-fn apply_sus_path_entry(path_type: &api::SusPathType, label: &str, path: &str) {
-    if let Err(e) = api::add_sus_path(path_type, &path) {
-        warn!("failed to add {label} '{path}': {e}");
-    }
-}
+fn apply_sus_maps(config: &Data) -> bool {
+    let mut success = true;
 
-fn apply_sus_maps(config: &Data) {
     for sus_map in &config.sus_map {
         if sus_map.trim().is_empty() {
             continue;
         }
-        if let Err(e) = api::add_sus_map(sus_map.as_str()) {
-            warn!("failed to add sus_map '{sus_map}': {e}");
+        match api::add_sus_map(sus_map.as_str()) {
+            Ok(()) => info!("applied sus_map '{sus_map}'"),
+            Err(e) if is_already_applied_error(&e) => {
+                info!("sus_map '{sus_map}' is already applied");
+            }
+            Err(e) => {
+                warn!("failed to add sus_map '{sus_map}': {e}");
+                success = false;
+            }
         }
     }
+
+    success
 }
 
 pub fn on_post_fs_data() {
@@ -127,33 +236,42 @@ pub fn on_post_mount() {
     // apply_sus_paths(&config);
     // apply_sus_maps(&config);
 
-    apply_kstat_updates(&config);
+    // apply_kstat_updates(&config);
 }
 
-fn apply_after_ce_available(reason: &str) {
-    let config = config::read_config();
+fn apply_config(config: &Data) -> bool {
+    let mut success = false;
+    success |= apply_sus_paths(config);
+    success |= apply_sus_maps(config);
+    success |= apply_sus_kstat_additions(config);
+    success |= apply_kstat_updates(config);
 
-    info!("applying susfs CE-sensitive entries for {reason}");
-    apply_sus_paths(&config);
-    apply_sus_maps(&config);
-    apply_sus_kstat_additions(&config);
-    apply_kstat_updates(&config);
+    success
 }
 
-fn apply_sus_kstat_additions(config: &Data) {
+fn apply_sus_kstat_additions(config: &Data) -> bool {
+    let mut success = true;
+
     for sus_kstat in &config.kstat.sus_kstat {
         if sus_kstat.trim().is_empty() {
             continue;
         }
-        if let Err(e) = api::add_sus_kstat(sus_kstat.as_str()) {
-            warn!("failed to add sus_kstat '{sus_kstat}': {e}");
+        match api::add_sus_kstat(sus_kstat.as_str()) {
+            Ok(()) => info!("applied sus_kstat '{sus_kstat}'"),
+            Err(e) if is_already_applied_error(&e) => {
+                info!("sus_kstat '{sus_kstat}' is already applied");
+            }
+            Err(e) => {
+                warn!("failed to add sus_kstat '{sus_kstat}': {e}");
+                success = false;
+            }
         }
     }
     for statically in &config.kstat.statically {
         if statically.path.trim().is_empty() {
             continue;
         }
-        if let Err(e) = api::add_sus_kstat_statically(
+        match api::add_sus_kstat_statically(
             &statically.path,
             &statically.ino,
             &statically.dev,
@@ -168,159 +286,67 @@ fn apply_sus_kstat_additions(config: &Data) {
             &statically.blocks,
             &statically.blksize,
         ) {
-            warn!(
-                "failed to add sus_kstat_statically '{}': {}",
-                statically.path, e
-            );
+            Ok(()) => info!("applied sus_kstat_statically '{}'", statically.path),
+            Err(e) if is_already_applied_error(&e) => {
+                info!(
+                    "sus_kstat_statically '{}' is already applied",
+                    statically.path
+                );
+            }
+            Err(e) => {
+                warn!(
+                    "failed to add sus_kstat_statically '{}': {}",
+                    statically.path, e
+                );
+                success = false;
+            }
         }
     }
+
+    success
 }
 
-fn apply_kstat_updates(config: &Data) {
+fn apply_kstat_updates(config: &Data) -> bool {
+    let mut success = true;
+
     for update_kstat in &config.kstat.update_kstat {
         if update_kstat.trim().is_empty() {
             continue;
         }
-        if let Err(e) = api::update_sus_kstat(update_kstat.as_str()) {
-            warn!("failed to update sus_kstat '{update_kstat}': {e}");
+        match api::update_sus_kstat(update_kstat.as_str()) {
+            Ok(()) => info!("updated sus_kstat '{update_kstat}'"),
+            Err(e) if is_already_applied_error(&e) => {
+                info!("sus_kstat '{update_kstat}' is already updated");
+            }
+            Err(e) => {
+                warn!("failed to update sus_kstat '{update_kstat}': {e}");
+                success = false;
+            }
         }
     }
     for full_clone in &config.kstat.full_clone {
         if full_clone.trim().is_empty() {
             continue;
         }
-        if let Err(e) = api::update_sus_kstat_full_clone(full_clone.as_str()) {
-            warn!("failed to update sus_kstat_full_clone '{full_clone}': {e}");
-        }
-    }
-}
-
-fn user_0_ce_availability() -> CeAvailability {
-    match crate::android::utils::getprop(USER_0_CE_AVAILABLE_PROP)
-        .as_deref()
-        .map(str::trim)
-    {
-        Some(value) if is_true_property_value(value) => CeAvailability::Available,
-        Some(value) if is_false_property_value(value) => CeAvailability::Locked,
-        _ => CeAvailability::Unknown,
-    }
-}
-
-fn is_true_property_value(value: &str) -> bool {
-    value == "1" || value.eq_ignore_ascii_case("true")
-}
-
-fn is_false_property_value(value: &str) -> bool {
-    value == "0" || value.eq_ignore_ascii_case("false")
-}
-
-fn has_ce_sensitive_config_entries() -> bool {
-    let config = config::read_config();
-    any_config_path(&config, is_user_ce_path)
-}
-
-fn is_configured_ce_path_available() -> bool {
-    let config = config::read_config();
-    any_config_path(&config, |path| is_user_ce_path(path) && Path::new(path).exists())
-}
-
-fn is_user_0_ce_ready() -> bool {
-    matches!(user_0_ce_availability(), CeAvailability::Available)
-        || is_configured_ce_path_available()
-        || is_user_0_unlocked_by_cmd()
-}
-
-fn is_user_0_unlocked_by_cmd() -> bool {
-    let Ok(output) = Command::new("cmd")
-        .args(["user", "is-user-unlocked", "0"])
-        .output()
-    else {
-        return false;
-    };
-
-    if !output.status.success() {
-        return false;
-    }
-
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    stdout
-        .split_whitespace()
-        .any(|token| token.eq_ignore_ascii_case("true"))
-}
-
-fn any_config_path<F>(config: &Data, mut predicate: F) -> bool
-where
-    F: FnMut(&str) -> bool,
-{
-    config
-        .sus_path
-        .sus_path
-        .iter()
-        .chain(config.sus_path.sus_path_loop.iter())
-        .chain(config.sus_map.iter())
-        .chain(config.kstat.sus_kstat.iter())
-        .chain(config.kstat.update_kstat.iter())
-        .chain(config.kstat.full_clone.iter())
-        .any(|path| predicate(path.trim()))
-        || config
-            .kstat
-            .statically
-            .iter()
-            .any(|entry| predicate(entry.path.trim()))
-}
-
-fn is_user_ce_path(path: &str) -> bool {
-    let path = path.trim_end_matches('/');
-    USER_0_CE_PATH_PREFIXES
-        .iter()
-        .any(|prefix| is_path_or_child(path, prefix))
-}
-
-fn is_path_or_child(path: &str, prefix: &str) -> bool {
-    if path == prefix {
-        return true;
-    }
-
-    matches!(path.strip_prefix(prefix), Some(rest) if rest.starts_with('/'))
-}
-
-fn wait_for_user_0_ce_available() {
-    match crate::android::utils::create_daemon(false) {
-        Ok(true) => {}
-        Ok(false) => return,
-        Err(e) => {
-            warn!("failed to daemonize susfs CE availability watcher: {e}");
-            return;
+        match api::update_sus_kstat_full_clone(full_clone.as_str()) {
+            Ok(()) => info!("updated sus_kstat_full_clone '{full_clone}'"),
+            Err(e) if is_already_applied_error(&e) => {
+                info!("sus_kstat_full_clone '{full_clone}' is already updated");
+            }
+            Err(e) => {
+                warn!("failed to update sus_kstat_full_clone '{full_clone}': {e}");
+                success = false;
+            }
         }
     }
 
-    let exit_code = if wait_for_user_0_ce_available_inner() {
-        apply_after_ce_available("user-0-ce-available");
-        0
-    } else {
-        0
-    };
-    unsafe {
-        libc::_exit(exit_code);
-    }
+    success
 }
 
-fn wait_for_user_0_ce_available_inner() -> bool {
-    let started_at = Instant::now();
-
-    info!("waiting for {USER_0_CE_AVAILABLE_PROP}, user unlock state, or configured CE paths");
-    loop {
-        if is_user_0_ce_ready() {
-            return true;
-        }
-
-        let elapsed = started_at.elapsed();
-        if elapsed >= Duration::from_secs(CE_AVAILABLE_WAIT_TIMEOUT_SECS) {
-            warn!("timed out waiting for user 0 CE availability");
-            return false;
-        }
-
-        let remaining = Duration::from_secs(CE_AVAILABLE_WAIT_TIMEOUT_SECS).saturating_sub(elapsed);
-        thread::sleep(remaining.min(Duration::from_secs(CE_AVAILABLE_POLL_INTERVAL_SECS)));
-    }
+fn is_already_applied_error(e: &anyhow::Error) -> bool {
+    let message = e.to_string();
+    message.contains("SuSFS error: -17")
+        || message.contains("SuSFS error: 17")
+        || message.contains("File exists")
+        || message.contains("os error 17")
 }
