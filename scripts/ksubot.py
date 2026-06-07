@@ -98,7 +98,7 @@ def get_caption_for_debug():
     return msg
 
 def check_environ():
-    global CHAT_ID, MESSAGE_THREAD_ID
+    global CHAT_ID, MESSAGE_THREAD_ID, DEVELOPING_THREAD_ID
     if BOT_TOKEN is None:
         print("[-] Invalid BOT_TOKEN")
         exit(1)
@@ -128,6 +128,8 @@ def check_environ():
         except:
             print("[-] Invalid MESSAGE_THREAD_ID")
             exit(1)
+    else:
+        MESSAGE_THREAD_ID = None
     if DEVELOPING_THREAD_ID and DEVELOPING_THREAD_ID != "":
         try:
             DEVELOPING_THREAD_ID = int(DEVELOPING_THREAD_ID)
@@ -135,7 +137,7 @@ def check_environ():
             print("[-] Invalid DEVELOPING_THREAD_ID")
             exit(1)
     else:
-        MESSAGE_THREAD_ID = None
+        DEVELOPING_THREAD_ID = None
 
 async def send_media_group(bot: Bot, chat_id: int, media: list, message_thread_id=None):
     await asyncio.sleep(random.uniform(0.2, 0.8))
