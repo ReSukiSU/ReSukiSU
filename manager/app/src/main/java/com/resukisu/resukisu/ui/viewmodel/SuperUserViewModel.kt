@@ -92,6 +92,8 @@ class SuperUserViewModel : ViewModel() {
         private const val MAX_POOL_SIZE = 16
         private const val KEEP_ALIVE_TIME = 60L
         private const val BATCH_SIZE = 20
+        private const val RECENT_INSTALL_WINDOW_MILLIS = 172_800_000L
+        private const val MAX_RECENTLY_INSTALLED_APP_GROUPS = 5
     }
 
     @Immutable
@@ -124,6 +126,8 @@ class SuperUserViewModel : ViewModel() {
         val userName: String? = Natives.getUserName(uid)
         @IgnoredOnParcel
         val hasCustomProfile : Boolean = profile?.let { if (it.allowSu) !it.rootUseDefault else !it.nonRootUseDefault } ?: false
+        @IgnoredOnParcel
+        val latestInstallTime: Long = apps.maxOf { it.packageInfo.firstInstallTime }
     }
 
     private val appProcessingThreadPool = ThreadPoolExecutor(
@@ -338,6 +342,16 @@ class SuperUserViewModel : ViewModel() {
             group.uid == 2000 || showSystemApps ||
                     group.apps.any { it.packageInfo.applicationInfo!!.flags.and(ApplicationInfo.FLAG_SYSTEM) == 0 }
         }
+    }
+
+    val recentlyInstalledAppGroups by derivedStateOf {
+        val now = System.currentTimeMillis()
+        val cutoff = now - RECENT_INSTALL_WINDOW_MILLIS
+
+        appGroupList
+            .filter { it.latestInstallTime in cutoff..now }
+            .sortedByDescending { it.latestInstallTime }
+            .take(MAX_RECENTLY_INSTALLED_APP_GROUPS)
     }
 
     private fun groupAppsByUid(appList: List<AppInfo>): List<AppGroup> {

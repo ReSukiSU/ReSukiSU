@@ -24,6 +24,8 @@
     <string name="seccomp_status_unknown">Unknown</string>
     <string name="unknown">Unknown</string>
     <string name="superuser">Superuser</string>
+    <string name="recently_installed_apps">Recently installed</string>
+    <string name="recently_installed_apps_summary">Recommended for root setup</string>
     <string name="sulog">SU log</string>
     <string name="sulog_log_files">Log files</string>
     <string name="sulog_failed_to_load">Failed to load sulog</string>

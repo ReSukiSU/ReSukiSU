@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -271,6 +272,7 @@ private fun SuperUserContent(
 ) {
     val navigator = LocalNavigator.current
     val pullRefreshState = rememberPullToRefreshState()
+    val recentlyInstalledAppGroups = viewModel.recentlyInstalledAppGroups
 
     if (filteredAndSortedAppGroups.isEmpty()) {
         Box(
@@ -350,6 +352,19 @@ private fun SuperUserContent(
             item {
                 Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
             }
+            if (viewModel.search.isEmpty() && recentlyInstalledAppGroups.isNotEmpty()) {
+                item(
+                    key = "recently_installed_app_groups",
+                    contentType = "RecentlyInstalledAppGroups"
+                ) {
+                    RecentlyInstalledAppGroups(
+                        appGroups = recentlyInstalledAppGroups,
+                        onAppGroupClick = { appGroup ->
+                            navigator.push(Route.AppProfile(appGroup))
+                        }
+                    )
+                }
+            }
             lazySegmentColumn(
                 items = filteredAndSortedAppGroups,
                 key = { _, appGroup -> "${appGroup.uid}-${appGroup.mainApp.packageName}" },
@@ -369,6 +384,79 @@ private fun SuperUserContent(
             }
         }
     }
+}
+
+@Composable
+private fun RecentlyInstalledAppGroups(
+    appGroups: List<SuperUserViewModel.AppGroup>,
+    onAppGroupClick: (SuperUserViewModel.AppGroup) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp, bottom = 12.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.recently_installed_apps),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 24.dp)
+        )
+        Text(
+            text = stringResource(R.string.recently_installed_apps_summary),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp)
+        )
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(
+                items = appGroups,
+                key = { appGroup -> "${appGroup.uid}-${appGroup.mainApp.packageName}" }
+            ) { appGroup ->
+                RecentlyInstalledAppChip(
+                    appGroup = appGroup,
+                    onClick = { onAppGroupClick(appGroup) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecentlyInstalledAppChip(
+    appGroup: SuperUserViewModel.AppGroup,
+    onClick: () -> Unit,
+) {
+    val mainApp = appGroup.mainApp
+
+    FilterChip(
+        onClick = onClick,
+        label = {
+            Text(
+                text = mainApp.label,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        selected = false,
+        leadingIcon = {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(mainApp.packageInfo)
+                    .crossfade(true)
+                    .memoryCachePolicy(CachePolicy.ENABLED)
+                    .build(),
+                contentDescription = mainApp.label,
+                modifier = Modifier.size(24.dp)
+            )
+        },
+        modifier = Modifier.widthIn(max = 220.dp)
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
