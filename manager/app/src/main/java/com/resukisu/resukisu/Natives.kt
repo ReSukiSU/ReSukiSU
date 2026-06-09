@@ -24,7 +24,8 @@ object Natives {
     // 34713: change kernel_su_domain to u:r:ksu:s0
     // 34795: feature id 3 to adb root
     // 34944: Drop KPM support
-    const val MINIMAL_SUPPORTED_KERNEL = 34944
+    // 34966(upstream 32513): add uapi version
+    const val MINIMAL_SUPPORTED_KERNEL = 34966
 
     const val KERNEL_SU_DOMAIN = "u:r:ksu:s0"
 
@@ -189,8 +190,18 @@ object Natives {
         }
     }
 
+    val kernelUAPIVersion: Int
+        external get
+
+    val managerUAPIVersion: Int
+        external get
+
+    fun checkUAPIMismatch(): Boolean {
+        return kernelUAPIVersion != managerUAPIVersion
+    }
+
     fun requireNewKernel(): Boolean {
-        return version != -1 && version < MINIMAL_SUPPORTED_KERNEL
+        return (version != -1 && version < MINIMAL_SUPPORTED_KERNEL) || checkUAPIMismatch()
     }
 
     @Immutable

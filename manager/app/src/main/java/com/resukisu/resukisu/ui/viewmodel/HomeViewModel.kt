@@ -6,6 +6,7 @@ import android.os.Build
 import android.system.Os
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.resukisu.resukisu.BuildConfig
 import com.resukisu.resukisu.KernelVersion
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.data.appPreferences
@@ -57,11 +58,14 @@ class HomeViewModel : ViewModel() {
     data class SystemStatus(
         val isManager: Boolean = false,
         val ksuVersion: Int? = null,
+        val managerUAPIVersion: Int = 1,
+        val kernelUAPIVersion: Int? = 1,
         val ksuFullVersion: String? = null,
         val lkmMode: Boolean? = null,
         val kernelVersion: KernelVersion = getKernelVersion(),
         val isRootAvailable: Boolean = false,
         val requireNewKernel: Boolean = false,
+        val uapiMismatch: Boolean = false,
         val isSELinuxPermissive: Boolean = false,
         val isOfficialSignature: Boolean = true,
         val kernelPatchImplement: Natives.KernelPatchImplement = Natives.KernelPatchImplement.NO_KERNEL_PATCH_SUPPORT,
@@ -71,7 +75,7 @@ class HomeViewModel : ViewModel() {
         val kernelRelease: String = "",
         val androidVersion: String = "",
         val deviceModel: String = "",
-        val managerVersion: Pair<String, Long> = Pair("", 0L),
+        val managerVersion: Triple<String, Int, Int> = Triple("", 0, 0),
         val selinuxStatus: String = "",
         val susfsEnabled: Boolean = false,
         val susfsVersionSupported: Boolean = false,
@@ -106,6 +110,8 @@ class HomeViewModel : ViewModel() {
                 val kernelVersion = getKernelVersion()
                 val isManager = runCatching { Natives.isManager }.getOrDefault(false)
                 val ksuVersion = if (isManager) Natives.version else null
+                val kernelUAPIVersion = if (isManager) Natives.kernelUAPIVersion else null
+                val managerUAPIVersion = Natives.managerUAPIVersion
                 val fullVersion = runCatching { Natives.getFullVersion() }.getOrDefault("Unknown")
                 val lkmMode = ksuVersion?.let {
                     if (kernelVersion.isGKI()) Natives.isLkmMode else null
@@ -113,13 +119,18 @@ class HomeViewModel : ViewModel() {
                 val status = SystemStatus(
                     isManager = isManager,
                     ksuVersion = ksuVersion,
-                    ksuFullVersion = "$fullVersion (${Natives.version})",
+                    ksuFullVersion = "$fullVersion (${Natives.version}/${kernelUAPIVersion})",
                     lkmMode = lkmMode,
                     kernelVersion = kernelVersion,
                     isRootAvailable = runCatching { rootAvailable() }.getOrDefault(false),
                     requireNewKernel = runCatching {
                         isManager && Natives.requireNewKernel()
                     }.getOrDefault(false),
+                    uapiMismatch = runCatching {
+                        isManager && Natives.checkUAPIMismatch()
+                    }.getOrDefault(false),
+                    kernelUAPIVersion = kernelUAPIVersion,
+                    managerUAPIVersion = managerUAPIVersion,
                     isSELinuxPermissive = runCatching { isSELinuxPermissive() }.getOrDefault(false),
                     isOfficialSignature = runCatching { isOfficialSignature() }.getOrDefault(false),
                     kernelPatchImplement = Natives.getKernelPatchImplement(),
@@ -355,14 +366,14 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    private suspend fun loadBasicSystemInfo(context: Context): Tuple6<String, String, String, Pair<String, Long>, String, Int> {
+    private suspend fun loadBasicSystemInfo(context: Context): Tuple6<String, String, String, Triple<String, Int, Int>, String, Int> {
         return withContext(Dispatchers.IO) {
             val uname = runCatching { Os.uname() }.getOrNull()
             Tuple6(
                 uname?.release ?: "Unknown",
                 Build.VERSION.RELEASE ?: "Unknown",
                 runCatching { getDeviceModel() }.getOrDefault("Unknown"),
-                runCatching { getManagerVersion(context) }.getOrDefault(Pair("Unknown", 0L)),
+                runCatching { getManagerVersion() }.getOrDefault(Triple("Unknown", 0, 0)),
                 runCatching { getSELinuxStatus(ksuApp.applicationContext) }.getOrDefault("Unknown"),
                 runCatching { Os.prctl(21, 0, 0, 0, 0) }.getOrDefault(-1),
             )
@@ -456,13 +467,10 @@ class HomeViewModel : ViewModel() {
         }.getOrDefault("Unknown Device")
     }
 
-    private fun getManagerVersion(context: Context): Pair<String, Long> {
+    private fun getManagerVersion(): Triple<String, Int, Int> {
         return runCatching {
-            val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-            val versionCode = androidx.core.content.pm.PackageInfoCompat.getLongVersionCode(packageInfo)
-            val versionName = packageInfo.versionName ?: "Unknown"
-            Pair(versionName, versionCode)
-        }.getOrDefault(Pair("Unknown", 0L))
+            Triple(BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, Natives.managerUAPIVersion)
+        }.getOrDefault(Triple("Unknown", 0, 0))
     }
 
     data class Tuple6<T1, T2, T3, T4, T5, T6>(

@@ -620,7 +620,6 @@
     <string name="sus_maps_description_text">從 /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap] 中隱藏記憶體映射嘅真實檔案路徑。請注意：此功能唔支援隱藏匿名記憶體映射，也無法隱藏由注入庫本身產生嘅內聯鉤子或 PLT 鉤子。</string>
     <string name="sus_maps_warning">重要提示：對於具備完善注入檢測機制嘅應用程式，此功能可能無法有效繞過檢測。</string>
     <string name="sus_maps_debug_info">首先通過 ps -enf 尋找目標應用程式嘅 PID 和 UID，然後檢查 /proc/&lt;pid&gt;/maps 中嘅相關路徑，並同 /proc/1/mountinfo 中嘅裝置號進行比對以確保一致性。只有當裝置號一致時，隱藏映射才能正常工作。</string>
-    <string name="incompatible_kernel_msg">當前管理器同此核心唔兼容！請將核心升級至版本 %2$d 或以上（當前 %1$d）</string>
     <string name="umount_path_manager">Umount 路徑管理</string>
     <string name="umount_path_manager_summary">管理核心卸載路徑</string>
     <string name="no_any_umount_path">冇任何核心卸載路徑</string>

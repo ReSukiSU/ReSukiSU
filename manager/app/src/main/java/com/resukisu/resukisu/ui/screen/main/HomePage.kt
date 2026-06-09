@@ -225,21 +225,39 @@ fun HomePage(
                     )
 
                     if (uiState.systemStatus.requireNewKernel) {
-                        WarningCard(
-                            message = stringResource(
-                                id = R.string.incompatible_kernel_msg,
-                                Natives.version,
-                                Natives.MINIMAL_SUPPORTED_KERNEL
-                            ),
-                            icon = {
-                                Icon(
-                                    imageVector = Icons.TwoTone.Error,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onErrorContainer,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                        )
+                        if ((uiState.systemStatus.ksuVersion ?: 0) > BuildConfig.VERSION_CODE) {
+                            WarningCard(
+                                message = stringResource(
+                                    id = R.string.require_manager_version,
+                                    BuildConfig.VERSION_CODE,
+                                    uiState.systemStatus.ksuVersion ?: 0
+                                ),
+                                icon = {
+                                    Icon(
+                                        imageVector = Icons.TwoTone.Error,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            )
+                        } else {
+                            WarningCard(
+                                message = stringResource(
+                                    id = R.string.require_kernel_version,
+                                    uiState.systemStatus.ksuVersion ?: 0,
+                                    BuildConfig.VERSION_CODE
+                                ),
+                                icon = {
+                                    Icon(
+                                        imageVector = Icons.TwoTone.Error,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            )
+                        }
                     }
 
                     // 警告信息
@@ -347,8 +365,7 @@ fun HomePage(
 
 @Composable
 fun UpdateCard(newVersion: LatestVersionInfo) {
-    val context = LocalContext.current
-    val currentVersionCode = getManagerVersion(context).second
+    val currentVersionCode = BuildConfig.VERSION_CODE
     val newVersionCode = newVersion.versionCode
     val newVersionUrl = newVersion.downloadUrl
     val changelog = newVersion.changelog
@@ -821,7 +838,7 @@ private fun InfoCard(
 
             InfoCardItem(
                 stringResource(R.string.home_manager_version),
-                "${systemInfo.managerVersion.first} (${systemInfo.managerVersion.second.toInt()})",
+                "${systemInfo.managerVersion.first} (${systemInfo.managerVersion.second}/${systemInfo.managerVersion.third})",
                 icon = Icons.Default.SettingsSuggest,
             )
 

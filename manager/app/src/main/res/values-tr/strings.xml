@@ -617,7 +617,6 @@
     <string name="sus_maps_description_text">/proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap] içindeki bellek eşlemelerinin gerçek dosya yollarını gizleyin. Lütfen dikkat: Bu özellik, anonim bellek eşlemelerini gizlemeyi desteklemez ve enjekte edilen kütüphanenin kendisinin neden olduğu satır içi (inline) veya PLT kancalarını gizleyemez</string>
     <string name="sus_maps_warning">Önemli Not: İyi uygulanmış enjeksiyon tespit mekanizmalarına sahip uygulamalar için bu özellik, tespiti etkili bir şekilde atlatamayabilir</string>
     <string name="sus_maps_debug_info">Öncelikle, ps -enf komutunu kullanarak hedef uygulamanın PID ve UID\'sini bulun, ardından /proc/&lt;pid&gt;/maps içindeki ilgili yolları kontrol edin ve tutarlılığı sağlamak için cihaz numaralarını /proc/1/mountinfo içindekilerle karşılaştırın. Yalnızca cihaz numaraları eşleştiğinde eşleme gizleme işlevi düzgün çalışabilir</string>
-    <string name="incompatible_kernel_msg">Mevcut yönetici bu çekirdekle uyumsuz! Lütfen çekirdeği %2$d veya daha yüksek bir sürüme yükseltin (mevcut sürüm %1$d)</string>
     <string name="umount_path_manager">Bağlantı Kaldırma Yolu Yönetimi</string>
     <string name="umount_path_manager_summary">Çekirdek bağlantı kaldırma yollarını yönetin</string>
     <string name="no_any_umount_path">Hiçbir umount yol adı yok</string>

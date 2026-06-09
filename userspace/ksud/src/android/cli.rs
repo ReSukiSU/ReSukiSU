@@ -9,7 +9,7 @@ use crate::{
     android::{
         debug, dynamic_manager, feature, init_event, ksucalls,
         module::{self, module_config, regenerate_preinit_rc},
-        profile, sepolicy, su, sulog, susfs, umount_config, utils,
+        profile, sepolicy, su, sulog, susfs, uapi, umount_config, utils,
     },
     apk_sign, assets,
     boot_patch::{BootPatchArgs, BootRestoreArgs},
@@ -248,6 +248,9 @@ enum Debug {
 
     /// Launch sulogd daemon manually
     Sulogd,
+
+    /// Get kernel info
+    Info,
 }
 
 #[derive(clap::Subcommand, Debug)]
@@ -784,6 +787,24 @@ pub fn run() -> Result<()> {
                 MarkCommand::Refresh => debug::mark_refresh(),
             },
             Debug::Sulogd => sulog::ensure_sulogd_running(),
+            Debug::Info => {
+                let info = ksucalls::get_info();
+                println!("version: {}", info.version);
+                println!("full_version: {}", ksucalls::get_full_version());
+                println!("flags: 0x{:x}", info.flags);
+                println!("uapi_version: {}", info.uapi_version);
+                println!("features: 0x{:x}", info.features);
+                println!("lkm: {}", (info.flags & uapi::KSU_GET_INFO_FLAG_LKM) != 0);
+                println!(
+                    "late_load: {}",
+                    (info.flags & uapi::KSU_GET_INFO_FLAG_LATE_LOAD) != 0
+                );
+                println!(
+                    "pr_build: {}",
+                    (info.flags & uapi::KSU_GET_INFO_FLAG_PR_BUILD) != 0
+                );
+                Ok(())
+            }
         },
 
         Commands::BootPatch(boot_patch) => crate::boot_patch::patch(boot_patch),
