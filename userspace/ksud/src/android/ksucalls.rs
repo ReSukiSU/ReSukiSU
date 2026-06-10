@@ -1,4 +1,6 @@
 #![allow(clippy::unreadable_literal)]
+use anyhow::bail;
+
 use std::{fs, os::fd::RawFd, sync::OnceLock};
 
 use crate::{android::uapi, defs::MountInfo};
@@ -278,6 +280,17 @@ pub fn set_init_pgrp() -> std::io::Result<()> {
         uapi::KSU_IOCTL_SET_INIT_PGRP_RUST,
         std::ptr::null_mut::<u8>(),
     )?;
+    Ok(())
+}
+
+pub fn set_ksu_no_new_privs() -> anyhow::Result<()> {
+    let result = ksuctl(
+        uapi::KSU_IOCTL_DISABLE_ESCAPE_TO_ROOT,
+        std::ptr::null_mut::<u8>(),
+    )?;
+    if result != 0 {
+        bail!("unexpected result: {result}");
+    }
     Ok(())
 }
 

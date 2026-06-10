@@ -316,4 +316,29 @@ __weak long copy_from_kernel_nofault(void *dst, const void *src, size_t size)
 #define __nocfi
 #endif
 
+// https://github.com/torvalds/linux/commit/294f69e662d1570703e9b56e95be37a9fd3afba5
+// f**k old compiler, thx for your notices, but better don't notice next time
+#ifndef __has_attribute
+#define __has_attribute(x) __GCC4_has_attribute_##x
+#define __GCC4_has_attribute___fallthrough__ 0
+#endif
+/*
+ * Add the pseudo keyword 'fallthrough' so case statement blocks
+ * must end with any of these keywords:
+ *   break;
+ *   fallthrough;
+ *   continue;
+ *   goto <label>;
+ *   return [expression];
+ *
+ *  gcc: https://gcc.gnu.org/onlinedocs/gcc/Statement-Attributes.html#Statement-Attributes
+ */
+#if __has_attribute(__fallthrough__)
+#define fallthrough __attribute__((__fallthrough__))
+#else
+#define fallthrough                                                                                                    \
+    do {                                                                                                               \
+    } while (0) /* fallthrough */
+#endif
+
 #endif

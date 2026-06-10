@@ -155,6 +155,7 @@ NativeBridge(getAppProfile, jobject, jstring pkg, jint uid) {
 	jfieldID capabilitiesField = GetEnvironment()->GetFieldID(env, cls, "capabilities", "Ljava/util/List;");
 	jfieldID domainField = GetEnvironment()->GetFieldID(env, cls, "context", "Ljava/lang/String;");
 	jfieldID namespacesField = GetEnvironment()->GetFieldID(env, cls, "namespace", "I");
+	jfieldID flagsField = GetEnvironment()->GetFieldID(env, cls, "flags", "J");
 
 	jfieldID nonRootUseDefaultField = GetEnvironment()->GetFieldID(env, cls, "nonRootUseDefault", "Z");
 	jfieldID umountModulesField = GetEnvironment()->GetFieldID(env, cls, "umountModules", "Z");
@@ -165,7 +166,7 @@ NativeBridge(getAppProfile, jobject, jstring pkg, jint uid) {
 	if (useDefaultProfile) {
 		// no profile found, so just use default profile:
 		// don't allow root and use default profile!
-        LOGD("use default profile for: %s, %d", key, uid);
+		LOGD("use default profile for: %s, %d", key, uid);
 
 		// allow_su = false
 		// non root use default = true
@@ -190,7 +191,7 @@ NativeBridge(getAppProfile, jobject, jstring pkg, jint uid) {
 		jobject groupList = GetEnvironment()->GetObjectField(env, obj, groupsField);
 		int groupCount = profile.rp_config.profile.groups_count;
 		if (groupCount > KSU_MAX_GROUPS) {
-            LOGD("kernel group count too large: %d???", groupCount);
+			LOGD("kernel group count too large: %d???", groupCount);
 			groupCount = KSU_MAX_GROUPS;
 		}
 		fillIntArray(env, groupList, profile.rp_config.profile.groups, groupCount);
@@ -206,6 +207,7 @@ NativeBridge(getAppProfile, jobject, jstring pkg, jint uid) {
 										 GetEnvironment()->NewStringUTF(env, profile.rp_config.profile.selinux_domain));
 		GetEnvironment()->SetIntField(env, obj, namespacesField, profile.rp_config.profile.namespaces);
 		GetEnvironment()->SetBooleanField(env, obj, allowSuField, profile.allow_su);
+		GetEnvironment()->SetLongField(env, obj, flagsField, (jlong) profile.rp_config.profile.flags);
 	} else {
 		GetEnvironment()->SetBooleanField(env, obj, nonRootUseDefaultField, profile.nrp_config.use_default);
 		GetEnvironment()->SetBooleanField(env, obj, umountModulesField, profile.nrp_config.profile.umount_modules);
@@ -230,6 +232,7 @@ NativeBridge(setAppProfile, jboolean, jobject profile) {
 	jfieldID capabilitiesField = GetEnvironment()->GetFieldID(env, cls, "capabilities", "Ljava/util/List;");
 	jfieldID domainField = GetEnvironment()->GetFieldID(env, cls, "context", "Ljava/lang/String;");
 	jfieldID namespacesField = GetEnvironment()->GetFieldID(env, cls, "namespace", "I");
+	jfieldID flagsField = GetEnvironment()->GetFieldID(env, cls, "flags", "J");
 
 	jfieldID nonRootUseDefaultField = GetEnvironment()->GetFieldID(env, cls, "nonRootUseDefault", "Z");
 	jfieldID umountModulesField = GetEnvironment()->GetFieldID(env, cls, "umountModules", "Z");
@@ -278,7 +281,7 @@ NativeBridge(setAppProfile, jboolean, jobject profile) {
 
 		int groups_count = getListSize(env, groups);
 		if (groups_count > KSU_MAX_GROUPS) {
-            LOGD("groups count too large: %d", groups_count);
+			LOGD("groups count too large: %d", groups_count);
 			return false;
 		}
 		p.rp_config.profile.groups_count = groups_count;
@@ -291,6 +294,7 @@ NativeBridge(setAppProfile, jboolean, jobject profile) {
 		GetEnvironment()->ReleaseStringUTFChars(env, (jstring) domain, cdomain);
 
 		p.rp_config.profile.namespaces = GetEnvironment()->GetIntField(env, profile, namespacesField);
+		p.rp_config.profile.flags = GetEnvironment()->GetLongField(env, profile, flagsField);
 	} else {
 		p.nrp_config.use_default = GetEnvironment()->GetBooleanField(env, profile, nonRootUseDefaultField);
 		p.nrp_config.profile.umount_modules = umountModules;
