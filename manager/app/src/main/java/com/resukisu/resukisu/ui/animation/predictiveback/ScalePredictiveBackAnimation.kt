@@ -29,12 +29,12 @@ import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigationevent.NavigationEvent.Companion.EDGE_LEFT
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.NavigationEventTransitionState.InProgress
-import com.resukisu.resukisu.ui.MainActivity
 import com.resukisu.resukisu.ui.util.rememberDeviceCornerRadius
+import com.resukisu.resukisu.ui.viewmodel.PredictiveBackExitDirection
 import kotlinx.coroutines.CoroutineScope
 
 class ScalePredictiveBackAnimation(
-    private val exitDirection: MainActivity.PredictiveBackExitDirection = MainActivity.PredictiveBackExitDirection.ALWAYS_RIGHT
+    private val exitDirection: PredictiveBackExitDirection = PredictiveBackExitDirection.ALWAYS_RIGHT
 ) : PredictiveBackAnimationHandler {
     private var exitingPageKey: String? = null
     private val exitAnimatable = Animatable(0f)
@@ -118,9 +118,9 @@ class ScalePredictiveBackAnimation(
                     // When user choice follow_gesture, we use this logic for calc them
                     // navigation gesture left -> exit to right
                     // navigation gesture right -> exit to left
-                    MainActivity.PredictiveBackExitDirection.FOLLOW_GESTURE -> if (edge == EDGE_LEFT) 1f else -1f
-                    MainActivity.PredictiveBackExitDirection.ALWAYS_RIGHT -> 1f
-                    MainActivity.PredictiveBackExitDirection.ALWAYS_LEFT -> -1f
+                    PredictiveBackExitDirection.FOLLOW_GESTURE -> if (edge == EDGE_LEFT) 1f else -1f
+                    PredictiveBackExitDirection.ALWAYS_RIGHT -> 1f
+                    PredictiveBackExitDirection.ALWAYS_LEFT -> -1f
                 }
 
                 // if we are playing the exit animation, calculate the scaled Page's TranslationX in here

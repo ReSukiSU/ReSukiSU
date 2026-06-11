@@ -1,4 +1,4 @@
-package zako.zako.zako.zakoui.screen.kernelFlash.state
+package com.resukisu.resukisu.ui.screen.kernelFlash.state
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -17,8 +17,6 @@ import kotlinx.coroutines.flow.update
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
 
 
 /**
@@ -174,36 +172,6 @@ class HorizonKernelWorker(
                 state.updateProgress(0.8f)
                 runCommand(true, "resetprop ro.boot.slot_suffix $originalSlot")
             }
-        }
-    }
-
-    private fun repackZipFolder(sourceDir: String, zipFilePath: String) {
-        try {
-            val buffer = ByteArray(1024)
-            val sourceFolder = File(sourceDir)
-
-            FileOutputStream(zipFilePath).use { fos ->
-                ZipOutputStream(fos).use { zos ->
-                    sourceFolder.walkTopDown().forEach { file ->
-                        if (file.isFile) {
-                            val relativePath = file.relativeTo(sourceFolder).path
-                            val zipEntry = ZipEntry(relativePath)
-                            zos.putNextEntry(zipEntry)
-
-                            file.inputStream().use { fis ->
-                                var length: Int
-                                while (fis.read(buffer).also { length = it } > 0) {
-                                    zos.write(buffer, 0, length)
-                                }
-                            }
-
-                            zos.closeEntry()
-                        }
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            throw IOException("Failed to create zip file: ${e.message}", e)
         }
     }
 

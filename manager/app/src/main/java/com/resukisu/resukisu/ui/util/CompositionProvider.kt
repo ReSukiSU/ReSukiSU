@@ -3,6 +3,8 @@ package com.resukisu.resukisu.ui.util
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.layout.LayoutCoordinates
 import com.resukisu.resukisu.ui.activity.PermissionRequestInterface
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 
@@ -17,6 +19,8 @@ val LocalBlurState = compositionLocalOf<LayerBackdrop?> {
 val LocalPagerState = compositionLocalOf<PagerState> { error("No pager state") }
 val LocalHandlePageChange = compositionLocalOf<(Int) -> Unit> { error("No handle page change") }
 val LocalSelectedPage = compositionLocalOf<Int> { error("No selected page") }
+
+val LocalBackgroundBlurAnchor = staticCompositionLocalOf<LayoutCoordinates?> { null }
 
 val LocalPermissionRequestInterface = compositionLocalOf<PermissionRequestInterface> {
     error("CompositionLocal LocalPermissionRequestInterface not present")

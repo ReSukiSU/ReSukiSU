@@ -4,12 +4,9 @@ import android.content.Context
 import android.os.SystemClock
 import android.util.Log
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.ui.util.HanziToPinyin
 import com.resukisu.resukisu.ui.util.getRootShell
@@ -19,6 +16,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.json.JSONArray
@@ -26,40 +25,73 @@ import org.json.JSONObject
 import java.text.Collator
 import java.util.Locale
 
-/**
- * @author ShirkNeko
- * @date 2025/5/31.
- */
+data class ModuleUiState(
+    val moduleList: List<ModuleViewModel.ModuleInfo> = emptyList(),
+    val moduleSizes: Map<String, String> = emptyMap(),
+    val isRefreshing: Boolean = false,
+    val search: String = "",
+    val sortEnabledFirst: Boolean = false,
+    val sortActionFirst: Boolean = false,
+    val hasModuleRequireMount: Boolean = false,
+    val isNeedRefresh: Boolean = false,
+    val showMoreModuleInfo: Boolean = false,
+    val isHideTagRow: Boolean = false
+)
+
 class ModuleViewModel : ViewModel() {
 
     companion object {
         private const val TAG = "ModuleViewModel"
-        private var modules by mutableStateOf<List<ModuleInfo>>(emptyList())
     }
 
-    val moduleSize = MutableStateFlow<Map<String, String>>(emptyMap())
+    private var modules: List<ModuleInfo> = emptyList()
+    private val _uiState = MutableStateFlow(ModuleUiState())
+    val uiState: StateFlow<ModuleUiState> = _uiState.asStateFlow()
 
     fun loadSize(dirId: String) = viewModelScope.launch(Dispatchers.IO) {
-        moduleSize.update {
-            it + (dirId to
-                    formatFileSize(
-                        try {
-                            val shell = getRootShell()
-                            val command =
-                                "/data/adb/ksu/bin/busybox du -sb /data/adb/modules/$dirId"
-                            val result = shell.newJob().add(command).to(ArrayList(), null).exec()
+        val size = formatFileSize(
+            try {
+                val shell = getRootShell()
+                val command = "/data/adb/ksu/bin/busybox du -sb /data/adb/modules/$dirId"
+                val result = shell.newJob().add(command).to(ArrayList(), null).exec()
 
-                            if (result.isSuccess && result.out.isNotEmpty()) {
-                                val sizeStr = result.out.firstOrNull()?.split("\t")?.firstOrNull()
-                                sizeStr?.toLongOrNull() ?: 0L
-                            } else {
-                                0L
-                            }
-                        } catch (e: Exception) {
-                            Log.e(TAG, "计算模块大小失败 $dirId: ${e.message}")
-                            0L
-                        }
-                    ))
+                if (result.isSuccess && result.out.isNotEmpty()) {
+                    val sizeStr = result.out.firstOrNull()?.split("\t")?.firstOrNull()
+                    sizeStr?.toLongOrNull() ?: 0L
+                } else {
+                    0L
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "calculate module size failed $dirId: ${e.message}")
+                0L
+            }
+        )
+        _uiState.update { state ->
+            state.copy(moduleSizes = state.moduleSizes + (dirId to size))
+        }
+    }
+
+    private fun updateBooleanPref(
+        context: Context,
+        key: String,
+        value: Boolean,
+        reducer: (ModuleUiState) -> ModuleUiState,
+    ) {
+        context.appPreferences.putBoolean(key, value)
+        _uiState.update(reducer)
+    }
+
+    fun handleHideTagRowChange(context: Context, newValue: Boolean) {
+        updateBooleanPref(context, "is_hide_tag_row", newValue) { it.copy(isHideTagRow = newValue) }
+    }
+
+    fun handleHideTagRowChange(newValue: Boolean) {
+        handleHideTagRowChange(ksuApp, newValue)
+    }
+
+    fun handleShowMoreModuleInfoChange(context: Context, newValue: Boolean) {
+        updateBooleanPref(context, "show_more_module_info", newValue) {
+            it.copy(showMoreModuleInfo = newValue)
         }
     }
 
@@ -86,53 +118,65 @@ class ModuleViewModel : ViewModel() {
         val metamodule: Boolean,
         val actionIconPath: String?,
         val webUiIconPath: String?,
-        val dirId: String, // real module id (dir name)
+        val dirId: String,
         val moduleUpdate: ModuleUpdateInfo?
     )
 
-    var isRefreshing by mutableStateOf(false)
-        private set
-    var search by mutableStateOf("")
-
-    var sortEnabledFirst by mutableStateOf(false)
-    var sortActionFirst by mutableStateOf(false)
-    val moduleList by derivedStateOf {
-        val comparator =
-            compareBy<ModuleInfo>(
-                {
-                    val executable = it.hasWebUi || it.hasActionScript
-                    when {
-                        it.metamodule && it.enabled -> 0
-                        sortEnabledFirst && sortActionFirst -> when {
-                            it.enabled && executable -> 1
-                            it.enabled -> 2
-                            executable -> 3
-                            else -> 4
-                        }
-                        sortEnabledFirst && !sortActionFirst -> if (it.enabled) 1 else 2
-                        !sortEnabledFirst && sortActionFirst -> if (executable) 1 else 2
-                        else -> 1
-                    }
-                },
-                { if (sortEnabledFirst) !it.enabled else 0 },
-                { if (sortActionFirst) !(it.hasWebUi || it.hasActionScript) else 0 },
-            ).thenBy(Collator.getInstance(Locale.getDefault()), ModuleInfo::id)
-        modules.filter {
-            it.id.contains(search, true) || it.name.contains(search, true) || HanziToPinyin.getInstance()
-                .toPinyinString(it.name)?.contains(search, true) == true
-        }.sortedWith(comparator).also {
-            isRefreshing = false
+    fun updateSearch(search: String) {
+        _uiState.update { state ->
+            state.copy(
+                search = search,
+                moduleList = buildModuleList(
+                    search = search,
+                    sortEnabledFirst = state.sortEnabledFirst,
+                    sortActionFirst = state.sortActionFirst,
+                )
+            )
         }
     }
 
-    var hasModuleRequireMount by mutableStateOf(false)
-        private set
+    fun setSortEnabledFirst(enabled: Boolean) {
+        _uiState.update { state ->
+            state.copy(
+                sortEnabledFirst = enabled,
+                moduleList = buildModuleList(
+                    search = state.search,
+                    sortEnabledFirst = enabled,
+                    sortActionFirst = state.sortActionFirst,
+                )
+            )
+        }
+    }
 
-    var isNeedRefresh by mutableStateOf(false)
-        private set
+    fun setSortActionFirst(enabled: Boolean) {
+        _uiState.update { state ->
+            state.copy(
+                sortActionFirst = enabled,
+                moduleList = buildModuleList(
+                    search = state.search,
+                    sortEnabledFirst = state.sortEnabledFirst,
+                    sortActionFirst = enabled,
+                )
+            )
+        }
+    }
+
+    fun setSortOptions(sortEnabledFirst: Boolean, sortActionFirst: Boolean) {
+        _uiState.update { state ->
+            state.copy(
+                sortEnabledFirst = sortEnabledFirst,
+                sortActionFirst = sortActionFirst,
+                moduleList = buildModuleList(
+                    search = state.search,
+                    sortEnabledFirst = sortEnabledFirst,
+                    sortActionFirst = sortActionFirst,
+                )
+            )
+        }
+    }
 
     fun markNeedRefresh() {
-        isNeedRefresh = true
+        _uiState.update { it.copy(isNeedRefresh = true) }
     }
 
     fun fetchModuleList(
@@ -140,21 +184,19 @@ class ModuleViewModel : ViewModel() {
         callBack: () -> Unit = {},
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            isRefreshing = true
+            _uiState.update { it.copy(isRefreshing = true) }
 
             val oldModuleList = modules
-
             val start = SystemClock.elapsedRealtime()
 
-            kotlin.runCatching {
+            runCatching {
                 val result = listModules()
-
                 Log.i(TAG, "result: $result")
 
-                val moduleList = mutableListOf<String>()
+                val moduleVersionKeys = mutableListOf<String>()
                 if (!manualRefresh) {
                     oldModuleList.forEach { module ->
-                        moduleList.add(module.id + module.versionCode)
+                        moduleVersionKeys.add(module.id + module.versionCode)
                     }
                 }
 
@@ -187,44 +229,57 @@ class ModuleViewModel : ViewModel() {
                             actionIconPath = obj.optString("actionIcon").takeIf { it.isNotBlank() },
                             webUiIconPath = obj.optString("webuiIcon").takeIf { it.isNotBlank() },
                             dirId = obj.optString("dir_id", obj.getString("id")),
-                            moduleUpdate = null // we null moduleUpdate there, because checkUpdate may request network
+                            moduleUpdate = null,
                         )
                     }.toList()
 
-                hasModuleRequireMount = modules.map { module ->
+                val hasModuleRequireMount = modules.map { module ->
                     async(Dispatchers.IO) {
                         SuFile.open("/data/adb/modules/${module.id}/system").exists()
                                 && !SuFile.open("/data/adb/modules/${module.id}/skip_mount")
-                            .exists() // skip_mount
-                                && !SuFile.open("/data/adb/modules/${module.id}/disable")
-                            .exists() // disable
-                                && !SuFile.open("/data/adb/modules/${module.id}/remove")
-                            .exists() // remove
+                            .exists()
+                                && !SuFile.open("/data/adb/modules/${module.id}/disable").exists()
+                                && !SuFile.open("/data/adb/modules/${module.id}/remove").exists()
                     }
                 }.awaitAll().any { it }
 
                 modules = modules.map { module ->
                     async(Dispatchers.IO) {
                         module.copy(
-                            moduleUpdate = if (!moduleList.contains(module.id + module.versionCode) || module.updateJson.isEmpty() || module.remove || module.update || !module.enabled)
+                            moduleUpdate = if (
+                                !moduleVersionKeys.contains(module.id + module.versionCode) ||
+                                module.updateJson.isEmpty() ||
+                                module.remove ||
+                                module.update ||
+                                !module.enabled
+                            ) {
                                 checkUpdate(module.updateJson, module.versionCode)
-                            else null
+                            } else {
+                                null
+                            }
                         )
                     }
                 }.awaitAll()
 
-
-
-                isNeedRefresh = false
+                _uiState.update { state ->
+                    state.copy(
+                        moduleList = buildModuleList(
+                            search = state.search,
+                            sortEnabledFirst = state.sortEnabledFirst,
+                            sortActionFirst = state.sortActionFirst,
+                        ),
+                        hasModuleRequireMount = hasModuleRequireMount,
+                        isNeedRefresh = false,
+                        isRefreshing = false,
+                    )
+                }
             }.onFailure { e ->
                 Log.e(TAG, "fetchModuleList: ", e)
-                isRefreshing = false
+                _uiState.update { it.copy(isRefreshing = false) }
             }
 
-            // when both old and new is kotlin.collections.EmptyList
-            // moduleList update will don't trigger
             if (oldModuleList === modules) {
-                isRefreshing = false
+                _uiState.update { it.copy(isRefreshing = false) }
             }
 
             Log.i(TAG, "load cost: ${SystemClock.elapsedRealtime() - start}, modules: $modules")
@@ -232,26 +287,58 @@ class ModuleViewModel : ViewModel() {
         }
     }
 
+    private fun buildModuleList(
+        search: String,
+        sortEnabledFirst: Boolean,
+        sortActionFirst: Boolean,
+    ): List<ModuleInfo> {
+        val comparator =
+            compareBy<ModuleInfo>(
+                {
+                    val executable = it.hasWebUi || it.hasActionScript
+                    when {
+                        it.metamodule && it.enabled -> 0
+                        sortEnabledFirst && sortActionFirst -> when {
+                            it.enabled && executable -> 1
+                            it.enabled -> 2
+                            executable -> 3
+                            else -> 4
+                        }
+
+                        sortEnabledFirst && !sortActionFirst -> if (it.enabled) 1 else 2
+                        !sortEnabledFirst && sortActionFirst -> if (executable) 1 else 2
+                        else -> 1
+                    }
+                },
+                { if (sortEnabledFirst) !it.enabled else false },
+                { if (sortActionFirst) !(it.hasWebUi || it.hasActionScript) else false },
+            ).thenBy(Collator.getInstance(Locale.getDefault()), ModuleInfo::id)
+
+        return modules.filter {
+            it.id.contains(search, true) ||
+                    it.name.contains(search, true) ||
+                    HanziToPinyin.getInstance().toPinyinString(it.name)
+                        ?.contains(search, true) == true
+        }.sortedWith(comparator)
+    }
+
     private fun sanitizeVersionString(version: String): String {
         return version.replace(Regex("[^a-zA-Z0-9.\\-_]"), "_")
     }
 
     fun checkUpdate(updateUrl: String, versionCode: Int): ModuleUpdateInfo? {
-        val isCheckUpdateEnabled = ksuApp.getSharedPreferences("settings", Context.MODE_PRIVATE)
-            .getBoolean("check_update", true)
+        val isCheckUpdateEnabled =
+            ksuApp.ensurePreferencesRepository().getBoolean("check_update", true)
         if (!isCheckUpdateEnabled) {
             return null
         }
-        // download updateJson
-        val result = kotlin.runCatching {
-            Log.i(TAG, "checkUpdate url: $updateUrl")
 
+        val result = runCatching {
+            Log.i(TAG, "checkUpdate url: $updateUrl")
             val request = okhttp3.Request.Builder()
                 .url(updateUrl)
                 .build()
-
             val response = ksuApp.okhttpClient.newCall(request).execute()
-
             Log.d(TAG, "checkUpdate code: ${response.code}")
             if (response.isSuccessful) {
                 response.body?.string() ?: ""
@@ -270,12 +357,8 @@ class ModuleViewModel : ViewModel() {
             return null
         }
 
-        val updateJson = kotlin.runCatching {
-            JSONObject(result)
-        }.getOrNull() ?: return null
-
-        var version = updateJson.optString("version", "")
-        version = sanitizeVersionString(version)
+        val updateJson = runCatching { JSONObject(result) }.getOrNull() ?: return null
+        val version = sanitizeVersionString(updateJson.optString("version", ""))
         val onlineVersionCode = updateJson.optInt("versionCode", 0)
         val zipUrl = updateJson.optString("zipUrl", "")
         val changelog = updateJson.optString("changelog", "")
@@ -307,9 +390,6 @@ private fun JSONObject.getIntCompat(key: String, default: Int = 0): Int {
     }
 }
 
-/**
- * 格式化文件大小
- */
 fun formatFileSize(bytes: Long): String {
     val kb = 1024.0
     val mb = kb * 1024

@@ -3,7 +3,6 @@ package com.resukisu.resukisu.ui.webui
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ActivityManager
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -19,6 +18,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.webkit.WebViewAssetLoader
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.ui.util.createRootShell
 import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
@@ -44,7 +44,8 @@ internal suspend fun prepareWebView(
             })
         }
 
-        val moduleInfo = moduleViewModel.moduleList.find { info -> info.id == moduleId }
+        val moduleInfo =
+            moduleViewModel.uiState.value.moduleList.find { info -> info.id == moduleId }
 
         if (moduleInfo == null) {
             withContext(Dispatchers.Main) {
@@ -63,7 +64,7 @@ internal suspend fun prepareWebView(
         webUIState.moduleName = moduleInfo.name
         webUIState.modDir = "/data/adb/modules/${moduleId}"
 
-        if (SuperUserViewModel.apps.isEmpty()) {
+        if (SuperUserViewModel.getCachedApps().isEmpty()) {
             SuperUserViewModel().fetchAppList()
         }
         val shell = createRootShell(true)
@@ -83,8 +84,9 @@ internal suspend fun prepareWebView(
             val webView = WebView(activity)
             webView.setBackgroundColor(Color.TRANSPARENT)
 
-            val prefs = activity.getSharedPreferences("settings", Context.MODE_PRIVATE)
-            WebView.setWebContentsDebuggingEnabled(prefs.getBoolean("enable_web_debugging", false))
+            WebView.setWebContentsDebuggingEnabled(
+                activity.appPreferences.getBoolean("enable_web_debugging", false)
+            )
 
             webView.settings.apply {
                 javaScriptEnabled = true

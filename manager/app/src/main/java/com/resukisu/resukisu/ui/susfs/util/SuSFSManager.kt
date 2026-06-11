@@ -2,14 +2,20 @@ package com.resukisu.resukisu.ui.susfs.util
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
-import androidx.core.content.edit
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.data.AppPreferencesRepository
+import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.ui.util.getRootShell
 import com.resukisu.resukisu.ui.util.getSuSFSFeatures
 import com.resukisu.resukisu.ui.util.getSuSFSVersion
@@ -39,7 +45,6 @@ import java.util.Locale
  * 用于管理SuSFS相关的配置和命令执行
  */
 object SuSFSManager {
-    private const val PREFS_NAME = "susfs_config"
     private const val KEY_UNAME_VALUE = "uname_value"
     private const val KEY_BUILD_TIME_VALUE = "build_time_value"
     private const val KEY_AUTO_START_ENABLED = "auto_start_enabled"
@@ -182,8 +187,8 @@ object SuSFSManager {
     }
 
     // 基础工具方法
-    private fun getPrefs(context: Context): SharedPreferences =
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private fun getPrefs(context: Context): AppPreferencesRepository =
+        context.appPreferences
 
     private fun getSuSFSVersionUse(context: Context): String = try {
         val version = getSuSFSVersion()
@@ -280,25 +285,25 @@ object SuSFSManager {
 
     // 配置存取方法
     fun saveUnameValue(context: Context, value: String) =
-        getPrefs(context).edit { putString(KEY_UNAME_VALUE, value) }
+        getPrefs(context).putString(KEY_UNAME_VALUE, value)
 
     fun getUnameValue(context: Context): String =
         getPrefs(context).getString(KEY_UNAME_VALUE, DEFAULT_UNAME) ?: DEFAULT_UNAME
 
     fun saveBuildTimeValue(context: Context, value: String) =
-        getPrefs(context).edit { putString(KEY_BUILD_TIME_VALUE, value)}
+        getPrefs(context).putString(KEY_BUILD_TIME_VALUE, value)
 
     fun getBuildTimeValue(context: Context): String =
         getPrefs(context).getString(KEY_BUILD_TIME_VALUE, DEFAULT_BUILD_TIME) ?: DEFAULT_BUILD_TIME
 
     fun setAutoStartEnabled(context: Context, enabled: Boolean) =
-        getPrefs(context).edit { putBoolean(KEY_AUTO_START_ENABLED, enabled) }
+        getPrefs(context).putBoolean(KEY_AUTO_START_ENABLED, enabled)
 
     fun isAutoStartEnabled(context: Context): Boolean =
         getPrefs(context).getBoolean(KEY_AUTO_START_ENABLED, false)
 
     fun saveEnableLogState(context: Context, enabled: Boolean) =
-        getPrefs(context).edit { putBoolean(KEY_ENABLE_LOG, enabled) }
+        getPrefs(context).putBoolean(KEY_ENABLE_LOG, enabled)
 
     fun getEnableLogState(context: Context): Boolean =
         getPrefs(context).getBoolean(KEY_ENABLE_LOG, false)
@@ -307,7 +312,7 @@ object SuSFSManager {
         getPrefs(context).getBoolean(KEY_EXECUTE_IN_POST_FS_DATA, false)
 
     fun saveExecuteInPostFsData(context: Context, executeInPostFsData: Boolean) {
-        getPrefs(context).edit { putBoolean(KEY_EXECUTE_IN_POST_FS_DATA, executeInPostFsData) }
+        getPrefs(context).putBoolean(KEY_EXECUTE_IN_POST_FS_DATA, executeInPostFsData)
         if (isAutoStartEnabled(context)) {
             CoroutineScope(Dispatchers.Default).launch {
                 updateMagiskModule(context)
@@ -317,14 +322,14 @@ object SuSFSManager {
 
     // SUS挂载隐藏控制
     fun saveHideSusMountsForAllProcs(context: Context, hideForAll: Boolean) =
-        getPrefs(context).edit { putBoolean(KEY_HIDE_SUS_MOUNTS_FOR_ALL_PROCS, hideForAll) }
+        getPrefs(context).putBoolean(KEY_HIDE_SUS_MOUNTS_FOR_ALL_PROCS, hideForAll)
 
     fun getHideSusMountsForAllProcs(context: Context): Boolean =
         getPrefs(context).getBoolean(KEY_HIDE_SUS_MOUNTS_FOR_ALL_PROCS, true)
 
     // 隐藏BL锁脚本
     fun saveEnableHideBl(context: Context, enabled: Boolean) =
-        getPrefs(context).edit { putBoolean(KEY_ENABLE_HIDE_BL, enabled) }
+        getPrefs(context).putBoolean(KEY_ENABLE_HIDE_BL, enabled)
 
     fun getEnableHideBl(context: Context): Boolean =
         getPrefs(context).getBoolean(KEY_ENABLE_HIDE_BL, true)
@@ -332,14 +337,14 @@ object SuSFSManager {
 
     // 清理残留配置
     fun saveEnableCleanupResidue(context: Context, enabled: Boolean) =
-        getPrefs(context).edit { putBoolean(KEY_ENABLE_CLEANUP_RESIDUE, enabled) }
+        getPrefs(context).putBoolean(KEY_ENABLE_CLEANUP_RESIDUE, enabled)
 
     fun getEnableCleanupResidue(context: Context): Boolean =
         getPrefs(context).getBoolean(KEY_ENABLE_CLEANUP_RESIDUE, false)
 
     // AVC日志欺骗配置
     fun saveEnableAvcLogSpoofing(context: Context, enabled: Boolean) =
-        getPrefs(context).edit { putBoolean(KEY_ENABLE_AVC_LOG_SPOOFING, enabled) }
+        getPrefs(context).putBoolean(KEY_ENABLE_AVC_LOG_SPOOFING, enabled)
 
     fun getEnableAvcLogSpoofing(context: Context): Boolean =
         getPrefs(context).getBoolean(KEY_ENABLE_AVC_LOG_SPOOFING, false)
@@ -347,39 +352,39 @@ object SuSFSManager {
 
     // 路径和配置管理
     fun saveSusPaths(context: Context, paths: Set<String>) =
-        getPrefs(context).edit { putStringSet(KEY_SUS_PATHS, paths) }
+        getPrefs(context).putStringSet(KEY_SUS_PATHS, paths)
 
     fun getSusPaths(context: Context): Set<String> =
-        getPrefs(context).getStringSet(KEY_SUS_PATHS, emptySet()) ?: emptySet()
+        getPrefs(context).getStringSet(KEY_SUS_PATHS, emptySet())
 
     // 循环路径管理
     fun saveSusLoopPaths(context: Context, paths: Set<String>) =
-        getPrefs(context).edit { putStringSet(KEY_SUS_LOOP_PATHS, paths) }
+        getPrefs(context).putStringSet(KEY_SUS_LOOP_PATHS, paths)
 
     fun getSusLoopPaths(context: Context): Set<String> =
-        getPrefs(context).getStringSet(KEY_SUS_LOOP_PATHS, emptySet()) ?: emptySet()
+        getPrefs(context).getStringSet(KEY_SUS_LOOP_PATHS, emptySet())
 
     fun saveSusMaps(context: Context, maps: Set<String>) =
-        getPrefs(context).edit { putStringSet(KEY_SUS_MAPS, maps) }
+        getPrefs(context).putStringSet(KEY_SUS_MAPS, maps)
 
     fun getSusMaps(context: Context): Set<String> =
-        getPrefs(context).getStringSet(KEY_SUS_MAPS, emptySet()) ?: emptySet()
+        getPrefs(context).getStringSet(KEY_SUS_MAPS, emptySet())
 
     fun saveKstatConfigs(context: Context, configs: Set<String>) =
-        getPrefs(context).edit { putStringSet(KEY_KSTAT_CONFIGS, configs) }
+        getPrefs(context).putStringSet(KEY_KSTAT_CONFIGS, configs)
 
     fun getKstatConfigs(context: Context): Set<String> =
-        getPrefs(context).getStringSet(KEY_KSTAT_CONFIGS, emptySet()) ?: emptySet()
+        getPrefs(context).getStringSet(KEY_KSTAT_CONFIGS, emptySet())
 
     fun saveAddKstatPaths(context: Context, paths: Set<String>) =
-        getPrefs(context).edit { putStringSet(KEY_ADD_KSTAT_PATHS, paths) }
+        getPrefs(context).putStringSet(KEY_ADD_KSTAT_PATHS, paths)
 
     fun getAddKstatPaths(context: Context): Set<String> =
-        getPrefs(context).getStringSet(KEY_ADD_KSTAT_PATHS, emptySet()) ?: emptySet()
+        getPrefs(context).getStringSet(KEY_ADD_KSTAT_PATHS, emptySet())
 
     @SuppressLint("SdCardPath")
     fun saveAndroidDataPath(context: Context, path: String) =
-        getPrefs(context).edit { putString(KEY_ANDROID_DATA_PATH, path) }
+        getPrefs(context).putString(KEY_ANDROID_DATA_PATH, path)
 
     @SuppressLint("SdCardPath")
     fun getAndroidDataPath(context: Context): String =
@@ -387,7 +392,7 @@ object SuSFSManager {
 
     @SuppressLint("SdCardPath")
     fun saveSdcardPath(context: Context, path: String) =
-        getPrefs(context).edit { putString(KEY_SDCARD_PATH, path) }
+        getPrefs(context).putString(KEY_SDCARD_PATH, path)
 
     @SuppressLint("SdCardPath")
     fun getSdcardPath(context: Context): String =
@@ -400,7 +405,7 @@ object SuSFSManager {
             val allApps = mutableMapOf<String, AppInfo>()
 
             // 从SuperUser中获取应用
-            SuperUserViewModel.apps.forEach { superUserApp ->
+            SuperUserViewModel.getCachedApps().forEach { superUserApp ->
                 try {
                     val isSystemApp = superUserApp.packageInfo.applicationInfo?.let {
                         (it.flags and ApplicationInfo.FLAG_SYSTEM) != 0
@@ -451,7 +456,8 @@ object SuSFSManager {
     private suspend fun getAppUid(context: Context, packageName: String): Int? = withContext(Dispatchers.IO) {
         try {
             // 从SuperUserViewModel中查找
-            val superUserApp = SuperUserViewModel.apps.find { it.packageName == packageName }
+            val superUserApp =
+                SuperUserViewModel.getCachedApps().find { it.packageName == packageName }
             if (superUserApp != null) {
                 return@withContext superUserApp.packageInfo.applicationInfo?.uid
             }
@@ -653,26 +659,25 @@ object SuSFSManager {
     }
 
 
-    // 还原配置到SharedPreferences
-    private fun restoreConfigurations(context: Context, configurations: Map<String, Any>) {
-        val prefs = getPrefs(context)
-        prefs.edit {
+    // Restore configurations to DataStore.
+    private suspend fun restoreConfigurations(context: Context, configurations: Map<String, Any>) {
+        getPrefs(context).editBlocking { prefs ->
             configurations.forEach { (key, value) ->
                 when (value) {
-                    is String -> putString(key, value)
-                    is Boolean -> putBoolean(key, value)
+                    is String -> prefs[stringPreferencesKey(key)] = value
+                    is Boolean -> prefs[booleanPreferencesKey(key)] = value
                     is Set<*> -> {
                         @Suppress("UNCHECKED_CAST")
-                        putStringSet(key, value as Set<String>)
+                        prefs[stringSetPreferencesKey(key)] = value as Set<String>
                     }
-                    is Int -> putInt(key, value)
-                    is Long -> putLong(key, value)
-                    is Float -> putFloat(key, value)
+
+                    is Int -> prefs[intPreferencesKey(key)] = value
+                    is Long -> prefs[longPreferencesKey(key)] = value
+                    is Float -> prefs[floatPreferencesKey(key)] = value
                 }
             }
         }
     }
-
     // 验证备份文件
     suspend fun validateBackupFile(backupFilePath: String): BackupData? = withContext(Dispatchers.IO) {
         try {

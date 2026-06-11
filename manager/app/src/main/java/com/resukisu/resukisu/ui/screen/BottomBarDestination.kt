@@ -3,12 +3,10 @@ package com.resukisu.resukisu.ui.screen
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AdminPanelSettings
-import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.AdminPanelSettings
-import androidx.compose.material.icons.outlined.Archive
 import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
@@ -16,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.ui.MainActivity
 import com.resukisu.resukisu.ui.component.ksuIsValid
 import com.resukisu.resukisu.ui.screen.main.HomePage
 import com.resukisu.resukisu.ui.screen.main.ModulePage
@@ -60,12 +57,12 @@ enum class BottomBarDestination(
     );
 
     companion object {
-        fun getPages(settings: MainActivity.SettingsState) : List<BottomBarDestination> {
-            if (ksuIsValid()) {
+        fun getPages(): List<BottomBarDestination> {
+            return if (ksuIsValid()) {
                 // 全功能管理器
-                return BottomBarDestination.entries.toList()
+                BottomBarDestination.entries.toList()
             } else {
-                return BottomBarDestination.entries.filter {
+                BottomBarDestination.entries.filter {
                     !it.rootRequired
                 }
             }

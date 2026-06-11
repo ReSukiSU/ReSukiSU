@@ -640,7 +640,7 @@
     <string name="please_check_network">Lütfen internet bağlantınızı kontrol edip tekrar deneyin</string>
     <string name="confirm_install_module_title">%s modülünü yüklemek istiyor musun?</string>
     <string name="assets_multiple_select_dialog_title">Yüklemek istediğinizi seçin</string>
-    <string name="assets_multiple_select_dialog_content_description">Boyut: %s, İndirme sayısı: %s</string>
+    <string name="assets_multiple_select_dialog_content_description">Boyut: %1$s, İndirme sayısı: %2$s</string>
     <string name="assets_multiple_select_dialog_warning">Hiçbir şey seçilmedi</string>
     <string name="installed">Yüklü</string>
     <string name="open_module_home_page">Modül ana sayfasını tarayıcıda aç</string>

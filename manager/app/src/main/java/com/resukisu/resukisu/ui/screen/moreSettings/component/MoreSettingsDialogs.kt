@@ -1,6 +1,4 @@
-package zako.zako.zako.zakoui.screen.moreSettings.component
-
-import android.content.Context
+package com.resukisu.resukisu.ui.screen.moreSettings.component
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -27,33 +25,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.edit
 import com.maxkeppeker.sheets.core.models.base.Header
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.list.ListDialog
 import com.maxkeppeler.sheets.list.models.ListOption
 import com.maxkeppeler.sheets.list.models.ListSelection
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.data.appPreferences
+import com.resukisu.resukisu.ui.screen.moreSettings.util.launchSystemLanguageSettings
+import com.resukisu.resukisu.ui.screen.moreSettings.util.useSystemLanguageSettings
 import com.resukisu.resukisu.ui.theme.ThemeColors
 import com.resukisu.resukisu.ui.theme.ThemeConfig
-import zako.zako.zako.zakoui.screen.moreSettings.MoreSettingsHandlers
-import zako.zako.zako.zakoui.screen.moreSettings.state.MoreSettingsState
-import zako.zako.zako.zakoui.screen.moreSettings.util.LocaleHelper
+import com.resukisu.resukisu.ui.viewmodel.SettingsUiState
+import com.resukisu.resukisu.ui.viewmodel.SettingsViewModel
 
 @Composable
 fun MoreSettingsDialogs(
-    state: MoreSettingsState,
-    handlers: MoreSettingsHandlers
+    state: SettingsUiState,
+    viewModel: SettingsViewModel
 ) {
     // 主题色选择对话框
     if (state.showThemeColorDialog) {
+        val context = LocalContext.current
         // FIXME Dynamic calculate
         ThemeColorDialog(
             onColorSelected = { theme ->
-                handlers.handleThemeColorChange(theme)
-                state.showThemeColorDialog = false
+                viewModel.handleThemeColorChange(context, theme)
+                viewModel.setThemeColorDialogVisible(false)
             },
-            onDismiss = { state.showThemeColorDialog = false }
+            onDismiss = { viewModel.setThemeColorDialogVisible(false) }
         )
     }
 }
@@ -65,12 +65,14 @@ fun LanguageSelectionDialog(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+    val languageUseSystemDefault = stringResource(R.string.language_system_default)
+    val systemLanguage = stringResource(R.string.settings_language)
+    val prefs = context.appPreferences
 
     // Check if should use system language settings
-    if (LocaleHelper.useSystemLanguageSettings) {
+    if (useSystemLanguageSettings) {
         // Android 13+ - Jump to system settings
-        LocaleHelper.launchSystemLanguageSettings(context)
+        launchSystemLanguageSettings(context)
         onDismiss()
     } else {
         // Android < 13 - Show app language selector
@@ -111,10 +113,9 @@ fun LanguageSelectionDialog(
 
                     // Try to get a translated string to verify the locale is supported
                     val testString = localizedContext.getString(R.string.settings_language)
-                    val defaultString = context.getString(R.string.settings_language)
 
-                    // If the string is different or it's English, it's supported
-                    if (testString != defaultString || locale.language == "en") {
+                    // If the string is different, or it's English, it's supported
+                    if (testString != systemLanguage || locale.language == "en") {
                         locales.add(locale)
                     }
                 } catch (_: Exception) {
@@ -140,7 +141,7 @@ fun LanguageSelectionDialog(
             }
 
             val displayName = if (locale == java.util.Locale.ROOT) {
-                context.getString(R.string.language_system_default)
+                languageUseSystemDefault
             } else {
                 locale.getDisplayName(locale)
             }
@@ -166,7 +167,7 @@ fun LanguageSelectionDialog(
                 onFinishedRequest = {
                     if (selectedIndex >= 0 && selectedIndex < allOptions.size) {
                         val newLocale = allOptions[selectedIndex].first
-                        prefs.edit { putString("app_locale", newLocale) }
+                        prefs.putString("app_locale", newLocale)
                         onLanguageSelected(newLocale)
                     }
                     onDismiss()

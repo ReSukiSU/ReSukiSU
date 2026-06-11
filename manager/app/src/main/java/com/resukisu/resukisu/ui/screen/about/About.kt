@@ -60,6 +60,7 @@ import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
+import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -208,9 +209,14 @@ fun AboutScreenPreview() {
 @Composable
 private fun StatusCard() {
     Surface(
-        color = MaterialTheme.colorScheme.secondaryContainer.copy(
-            alpha = CardConfig.cardAlpha
-        ),
+        modifier = Modifier
+            .clip(RoundedCornerShape(16.dp))
+            .renderBackgroundBlur(),
+        color =
+            if (ThemeConfig.isEnableBlurExp)
+                Color.Transparent
+            else
+                MaterialTheme.colorScheme.surfaceContainerHighest.copy(CardConfig.cardAlpha),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(

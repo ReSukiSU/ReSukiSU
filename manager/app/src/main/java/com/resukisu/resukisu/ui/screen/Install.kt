@@ -19,15 +19,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
@@ -36,7 +32,6 @@ import androidx.compose.material.icons.automirrored.filled.Input
 import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FileUpload
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -90,6 +85,7 @@ import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Route
+import com.resukisu.resukisu.ui.screen.kernelFlash.component.SlotSelectionDialog
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.CardConfig.cardAlpha
 import com.resukisu.resukisu.ui.theme.ThemeConfig
@@ -97,6 +93,7 @@ import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.theme.getCardColors
 import com.resukisu.resukisu.ui.theme.getCardElevation
+import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
 import com.resukisu.resukisu.ui.util.LkmSelection
 import com.resukisu.resukisu.ui.util.getAvailablePartitions
 import com.resukisu.resukisu.ui.util.getCurrentKmi
@@ -105,7 +102,6 @@ import com.resukisu.resukisu.ui.util.getSlotSuffix
 import com.resukisu.resukisu.ui.util.getSupportedKmis
 import com.resukisu.resukisu.ui.util.isAbDevice
 import com.resukisu.resukisu.ui.util.rootAvailable
-import zako.zako.zako.zakoui.screen.kernelFlash.component.SlotSelectionDialog
 
 /**
  * @author ShirkNeko
@@ -325,7 +321,8 @@ fun InstallScreen(
                         elevation = getCardElevation(),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 12.dp),
+                            .padding(bottom = 12.dp)
+                            .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceVariant),
                     ) {
                         val isOta = installMethod is InstallMethod.DirectInstallToInactiveSlot
                         val suffix = produceState(initialValue = "", isOta) {
@@ -376,7 +373,8 @@ fun InstallScreen(
                         elevation = getCardElevation(),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 12.dp),
+                            .padding(bottom = 12.dp)
+                            .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceVariant),
                     ) {
                         SettingsBaseWidget(
                             title = stringResource(id = R.string.install_upload_lkm_file),
@@ -402,6 +400,7 @@ fun InstallScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 12.dp)
+                                .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceVariant)
                         ) {
                             Text(
                                 text = stringResource(
@@ -604,6 +603,7 @@ private fun SelectInstallMethod(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
+                    .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 MaterialTheme(
                     colorScheme = MaterialTheme.colorScheme.copy(
@@ -710,6 +710,7 @@ private fun SelectInstallMethod(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 12.dp)
+                    .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 MaterialTheme(
                     colorScheme = MaterialTheme.colorScheme.copy(
