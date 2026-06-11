@@ -1,7 +1,5 @@
 package com.resukisu.resukisu.ui.viewmodel
 
-import android.content.Context
-import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.resukisu.resukisu.ksuApp
@@ -27,7 +25,6 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -77,33 +74,16 @@ data class SulogUiState(
 class SulogViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(SulogUiState())
     val uiState: StateFlow<SulogUiState> = _uiState.asStateFlow()
-    private val prefs = ksuApp.getSharedPreferences("settings", Context.MODE_PRIVATE)
-    private val entriesFlow = MutableStateFlow<List<SulogEntry>>(emptyList())
-    private val searchTextFlow = MutableStateFlow("")
-    private val selectedFiltersFlow = MutableStateFlow(defaultSulogEventFilters())
+    private val prefs = ksuApp.ensurePreferencesRepository()
 
     private var refreshJob: Job? = null
 
     init {
-        val savedFilters = prefs.getStringSet(PREF_SULOG_FILTERS, null)
-            ?.mapNotNull { raw -> SulogEventFilter.entries.firstOrNull { it.name == raw } }
-            ?.toSet()
-            ?.ifEmpty { defaultSulogEventFilters() }
-            ?: defaultSulogEventFilters()
-        selectedFiltersFlow.value = savedFilters
+        val savedFilters = prefs.getStringSet(PREF_SULOG_FILTERS, emptySet())
+            .mapNotNull { raw -> SulogEventFilter.entries.firstOrNull { it.name == raw } }
+            .toSet()
+            .ifEmpty { defaultSulogEventFilters() }
         _uiState.update { it.copy(selectedFilters = savedFilters) }
-
-        viewModelScope.launch(Dispatchers.Default) {
-            combine(
-                entriesFlow,
-                searchTextFlow,
-                selectedFiltersFlow
-            ) { entries, searchText, selectedFilters ->
-                buildVisibleSulogEntries(entries, searchText, selectedFilters)
-            }.collect { visibleEntries ->
-                _uiState.update { it.copy(visibleEntries = visibleEntries) }
-            }
-        }
     }
 
     fun refresh(preferredFilePath: String? = _uiState.value.selectedFilePath) {
@@ -132,7 +112,6 @@ class SulogViewModel : ViewModel() {
                 val entries = parseSulogLines(logLines)
                 val currentState = _uiState.value
                 currentCoroutineContext().ensureActive()
-                entriesFlow.value = entries
                 SulogUiState(
                     isLoading = false,
                     isRefreshing = false,
@@ -143,7 +122,11 @@ class SulogViewModel : ViewModel() {
                     files = files,
                     selectedFilePath = selectedFile?.path,
                     entries = entries,
-                    visibleEntries = currentState.visibleEntries,
+                    visibleEntries = buildVisibleSulogEntries(
+                        entries,
+                        currentState.searchText,
+                        currentState.selectedFilters,
+                    ),
                 )
             }.onSuccess { state ->
                 _uiState.value = state
@@ -194,10 +177,14 @@ class SulogViewModel : ViewModel() {
     }
 
     fun setSearchText(searchText: String) {
-        searchTextFlow.value = searchText
         _uiState.update { currentState ->
             currentState.copy(
                 searchText = searchText,
+                visibleEntries = buildVisibleSulogEntries(
+                    currentState.entries,
+                    searchText,
+                    currentState.selectedFilters,
+                )
             )
         }
     }
@@ -207,15 +194,14 @@ class SulogViewModel : ViewModel() {
             val selectedFilters = currentState.selectedFilters.toMutableSet().apply {
                 if (!add(filter)) remove(filter)
             }
-            selectedFiltersFlow.value = selectedFilters
-            prefs.edit {
-                putStringSet(
-                    PREF_SULOG_FILTERS,
-                    selectedFilters.map { it.name }.toSet()
-                )
-            }
+            prefs.putStringSet(PREF_SULOG_FILTERS, selectedFilters.map { it.name }.toSet())
             currentState.copy(
                 selectedFilters = selectedFilters,
+                visibleEntries = buildVisibleSulogEntries(
+                    currentState.entries,
+                    currentState.searchText,
+                    selectedFilters,
+                )
             )
         }
     }

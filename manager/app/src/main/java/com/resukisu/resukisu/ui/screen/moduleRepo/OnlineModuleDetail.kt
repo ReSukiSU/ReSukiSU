@@ -94,6 +94,7 @@ import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
+import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
 import com.resukisu.resukisu.ui.util.LocalPermissionRequestInterface
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.module.ReleaseAssetInfo
@@ -274,18 +275,20 @@ fun InfoTab(
             }
         }
 
-        item {
-            SegmentedColumn(
-                title = stringResource(R.string.source_code)
-            ) {
-                item {
-                    SettingsBaseWidget(
-                        icon = Icons.Default.Code,
-                        title = module.sourceUrl,
-                        onClick = {
-                            uriHandler.openUri(module.sourceUrl)
-                        }
-                    ) {}
+        if (module.sourceUrl.isNotEmpty() && module.sourceUrl != "null") {
+            item {
+                SegmentedColumn(
+                    title = stringResource(R.string.source_code)
+                ) {
+                    item {
+                        SettingsBaseWidget(
+                            icon = Icons.Default.Code,
+                            title = module.sourceUrl,
+                            onClick = {
+                                uriHandler.openUri(module.sourceUrl)
+                            }
+                        ) {}
+                    }
                 }
             }
         }
@@ -340,10 +343,13 @@ fun ReadmeTab(
                 Surface(
                     modifier = Modifier
                         .padding(16.dp)
-                        .clip(RoundedCornerShape(12.dp)),
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
-                        alpha = CardConfig.cardAlpha
-                    )
+                        .clip(RoundedCornerShape(16.dp))
+                        .renderBackgroundBlur(),
+                    color =
+                        if (ThemeConfig.isEnableBlurExp)
+                            Color.Transparent
+                        else
+                            MaterialTheme.colorScheme.surfaceContainerHighest.copy(CardConfig.cardAlpha),
                 ) {
                     GithubMarkdown(
                         content = module.readme,
@@ -397,11 +403,15 @@ fun ReleaseCard(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 12.dp, end = 12.dp, top = 12.dp),
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
-            alpha = CardConfig.cardAlpha
-        ),
+            .padding(start = 12.dp, end = 12.dp, top = 12.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceContainerHigh),
+        shape = RoundedCornerShape(16.dp),
+        color =
+            if (ThemeConfig.isEnableBlurExp)
+                Color.Transparent
+            else
+                MaterialTheme.colorScheme.surfaceContainerHigh.copy(CardConfig.cardAlpha),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -469,7 +479,9 @@ fun ReleaseCard(
                         }
                     }
                     SettingsBaseWidget(
-                        modifier = Modifier.clip(RoundedCornerShape(12.dp)),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .renderBackgroundBlur(tintColor = MaterialTheme.colorScheme.surfaceContainerHighest),
                         title = assetInfo.name,
                         onClick = {
                             onClick()
@@ -513,7 +525,7 @@ fun CollapsibleContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(16.dp))
                 .clickable { expanded = !expanded }
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically

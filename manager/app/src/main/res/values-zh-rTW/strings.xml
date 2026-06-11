@@ -650,7 +650,7 @@
     <string name="please_check_network">請檢查網路連線後重試</string>
     <string name="confirm_install_module_title">您是否要安裝 %s 模組？</string>
     <string name="assets_multiple_select_dialog_title">請選擇您要安裝的附件</string>
-    <string name="assets_multiple_select_dialog_content_description">大小: %s ，下載數量：%s</string>
+    <string name="assets_multiple_select_dialog_content_description">大小: %1$s ，下載數量：%2$s</string>
     <string name="assets_multiple_select_dialog_warning">未選擇任何附件</string>
     <string name="installed">已安裝</string>
     <string name="open_module_home_page">在瀏覽器開啟模組首頁</string>

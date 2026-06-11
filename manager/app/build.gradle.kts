@@ -181,6 +181,7 @@ aboutLibraries {
 dependencies {
     implementation(libs.gson)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.core.splashscreen)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.material.icons.extended)
@@ -189,6 +190,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.documentfile)
+    implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.compose.foundation)
 
     implementation(libs.androidx.compose.runtime.tracing)

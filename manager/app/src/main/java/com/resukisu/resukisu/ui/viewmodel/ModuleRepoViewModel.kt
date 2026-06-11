@@ -4,23 +4,23 @@ import android.os.Parcelable
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ksuApp
-import com.resukisu.resukisu.ui.util.module.ReleaseInfo
-import com.resukisu.resukisu.ui.util.module.fetchModuleDetail
 import com.resukisu.resukisu.ui.activity.util.isNetworkAvailable
 import com.resukisu.resukisu.ui.util.HanziToPinyin
+import com.resukisu.resukisu.ui.util.module.ReleaseInfo
+import com.resukisu.resukisu.ui.util.module.fetchModuleDetail
 import com.topjohnwu.superuser.io.SuFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
@@ -28,36 +28,22 @@ import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
 
-/**
- * @author AlexLiuDev233
- * @date 2025/12/6.
- */
+data class ModuleRepoUiState(
+    val modules: List<ModuleRepoViewModel.RepoModule> = emptyList(),
+    val sortStargazerCountFirst: Boolean = false,
+    val isRefreshing: Boolean = false,
+    val search: String = "",
+)
+
 class ModuleRepoViewModel : ViewModel() {
     companion object {
         private const val TAG = "ModuleRepoViewModel"
         private const val MODULES_URL = "https://modules.kernelsu.org/modules.json"
     }
 
-    var sortStargazerCountFirst by mutableStateOf(false)
-    private var _modules = mutableStateOf<List<RepoModule>>(emptyList())
-    val modules: List<RepoModule> by derivedStateOf {
-        _modules.value
-            // 搜索过滤
-            .filter { module ->
-                module.moduleId.contains(search, true) ||
-                        module.moduleName.contains(search, true) ||
-                        HanziToPinyin.getInstance().toPinyinString(module.moduleName)?.contains(search, true) == true
-            }
-            .sortedWith(compareByDescending<RepoModule> { module ->
-                // 已安装模块优先：存在文件的记为 true（在 compareByDescending 中 true > false）
-                SuFile.open("/data/adb/modules/${module.moduleId}/module.prop").exists()
-            }.thenByDescending { module ->
-                if (sortStargazerCountFirst) module.stargazerCount else 0
-            })
-    }
-
-    var isRefreshing by mutableStateOf(false)
-    var search by mutableStateOf("")
+    private var modulesCache: List<RepoModule> = emptyList()
+    private val _uiState = MutableStateFlow(ModuleRepoUiState())
+    val uiState: StateFlow<ModuleRepoUiState> = _uiState.asStateFlow()
 
     @Immutable
     @Parcelize
@@ -88,25 +74,68 @@ class ModuleRepoViewModel : ViewModel() {
         val releases: List<ReleaseInfo>
     ) : Parcelable
 
+    fun updateSearch(search: String) {
+        _uiState.update { state ->
+            state.copy(
+                search = search,
+                modules = buildModuleList(search, state.sortStargazerCountFirst),
+            )
+        }
+    }
+
+    fun setSortStargazerCountFirst(enabled: Boolean) {
+        _uiState.update { state ->
+            state.copy(
+                sortStargazerCountFirst = enabled,
+                modules = buildModuleList(state.search, enabled),
+            )
+        }
+    }
+
     fun refresh(
         onFailure: (() -> Unit)? = null
     ) {
         viewModelScope.launch {
             val netAvailable = isNetworkAvailable(ksuApp)
-            withContext(Dispatchers.Main) { isRefreshing = true }
-            val parsed = withContext(Dispatchers.IO) { if (!netAvailable) null else fetchModulesInternal(onFailure) }
-            withContext(Dispatchers.Main) {
-                if (parsed != null) {
-                    _modules.value = parsed
-                } else {
-                    Toast.makeText(
-                        ksuApp,
-                        ksuApp.getString(R.string.network_offline), Toast.LENGTH_SHORT
-                    ).show()
+            _uiState.update { it.copy(isRefreshing = true) }
+            val parsed = withContext(Dispatchers.IO) {
+                if (!netAvailable) null else fetchModulesInternal(onFailure)
+            }
+            if (parsed != null) {
+                modulesCache = parsed
+                _uiState.update { state ->
+                    state.copy(
+                        modules = buildModuleList(state.search, state.sortStargazerCountFirst),
+                        isRefreshing = false,
+                    )
                 }
-                isRefreshing = false
+            } else {
+                Toast.makeText(
+                    ksuApp,
+                    ksuApp.getString(R.string.network_offline),
+                    Toast.LENGTH_SHORT
+                ).show()
+                _uiState.update { it.copy(isRefreshing = false) }
             }
         }
+    }
+
+    private fun buildModuleList(
+        search: String,
+        sortStargazerCountFirst: Boolean
+    ): List<RepoModule> {
+        return modulesCache
+            .filter { module ->
+                module.moduleId.contains(search, true) ||
+                        module.moduleName.contains(search, true) ||
+                        HanziToPinyin.getInstance().toPinyinString(module.moduleName)
+                            ?.contains(search, true) == true
+            }
+            .sortedWith(compareByDescending<RepoModule> { module ->
+                SuFile.open("/data/adb/modules/${module.moduleId}/module.prop").exists()
+            }.thenByDescending { module ->
+                if (sortStargazerCountFirst) module.stargazerCount else 0
+            })
     }
 
     private suspend fun fetchModulesInternal(
@@ -156,7 +185,11 @@ class ModuleRepoViewModel : ViewModel() {
         } else {
             emptyList()
         }
-        val authors = if (authorList.isNotEmpty()) authorList.joinToString(", ") { it.name } else item.optString("authors", "")
+        val authors = if (authorList.isNotEmpty()) {
+            authorList.joinToString(", ") { it.name }
+        } else {
+            item.optString("authors", "")
+        }
         val summary = item.optString("summary", "")
         val metamodule = item.optBoolean("metamodule", false)
         val stargazerCount = item.optInt("stargazerCount", 0)
@@ -168,28 +201,28 @@ class ModuleRepoViewModel : ViewModel() {
         var latestVersionCode = 0
         var latestAsset: ReleaseInfo? = null
         val releases: MutableList<ReleaseInfo> = ArrayList()
-        val lr = item.optJSONObject("latestRelease")
-        if (lr != null) {
-            val lrName = lr.optString("name", lr.optString("version", ""))
-            val lrTime = lr.optString("time", "")
-            val vcAny = lr.opt("versionCode")
-            latestVersionCode = when (vcAny) {
-                is Number -> vcAny.toInt()
-                is String -> vcAny.toIntOrNull() ?: 0
+        val latestReleaseObject = item.optJSONObject("latestRelease")
+        if (latestReleaseObject != null) {
+            latestRelease = latestReleaseObject.optString(
+                "name",
+                latestReleaseObject.optString("version", "")
+            )
+            latestReleaseTime = latestReleaseObject.optString("time", "")
+            latestVersionCode = when (val value = latestReleaseObject.opt("versionCode")) {
+                is Number -> value.toInt()
+                is String -> value.toIntOrNull() ?: 0
                 else -> 0
             }
-            latestRelease = lrName
-            latestReleaseTime = lrTime
         }
         val detail = withContext(Dispatchers.IO) {
-            fetchModuleDetail((moduleId))
+            fetchModuleDetail(moduleId)
         }
 
-        detail?.releases?.forEach { it ->
+        detail?.releases?.forEach {
             releases.add(it)
-            if (it.name != latestRelease) return@forEach
-
-            latestAsset = it
+            if (it.name == latestRelease) {
+                latestAsset = it
+            }
         }
 
         return RepoModule(

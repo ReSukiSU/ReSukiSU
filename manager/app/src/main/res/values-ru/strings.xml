@@ -670,7 +670,7 @@
     <string name="please_check_network">Проверьте ваше интернет-соединение и попробуйте снова</string>
     <string name="confirm_install_module_title">Вы хотите установить модуль %s?</string>
     <string name="assets_multiple_select_dialog_title">Выберите нужный ассет</string>
-    <string name="assets_multiple_select_dialog_content_description">Размер: %s, Количество загрузок: %s</string>
+    <string name="assets_multiple_select_dialog_content_description">Размер: %1$s, Количество загрузок: %2$s</string>
     <string name="assets_multiple_select_dialog_warning">Ассет не выбран</string>
     <string name="installed">Установлено</string>
     <string name="open_module_home_page">Открыть страницу модуля в браузере</string>

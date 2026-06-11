@@ -820,7 +820,7 @@ object AppInfoCache {
     }
 
     fun getAppInfoFromSuperUser(packageName: String): CachedAppInfo? {
-        val superUserApp = SuperUserViewModel.apps.find { it.packageName == packageName }
+        val superUserApp = SuperUserViewModel.getCachedApps().find { it.packageName == packageName }
         return superUserApp?.let { app ->
             CachedAppInfo(
                 appName = app.label,
@@ -1426,7 +1426,7 @@ fun AppPathGroupCard(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val superUserApps = SuperUserViewModel.apps
+    val superUserApps = SuperUserViewModel.getCachedApps()
     var cachedAppInfo by remember(packageName, superUserApps.size) {
         mutableStateOf(AppInfoCache.getAppInfo(packageName))
     }

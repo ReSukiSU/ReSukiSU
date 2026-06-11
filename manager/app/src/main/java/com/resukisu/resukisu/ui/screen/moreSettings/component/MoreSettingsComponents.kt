@@ -1,4 +1,4 @@
-package zako.zako.zako.zakoui.screen.moreSettings.component
+package com.resukisu.resukisu.ui.screen.moreSettings.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

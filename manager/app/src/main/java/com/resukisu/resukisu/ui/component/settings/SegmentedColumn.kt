@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.zIndex
 import kotlin.math.roundToInt
 
@@ -214,10 +215,10 @@ fun SegmentedColumn(
                         } else targetBottomRadius
 
                         val shape = RoundedCornerShape(
-                            topStart = currentTopRadius,
-                            topEnd = currentTopRadius,
-                            bottomStart = currentBottomRadius,
-                            bottomEnd = currentBottomRadius
+                            topStart = max(0.dp, currentTopRadius),
+                            topEnd = max(0.dp, currentTopRadius),
+                            bottomStart = max(0.dp, currentBottomRadius),
+                            bottomEnd = max(0.dp, currentBottomRadius)
                         )
 
                         val targetTopPadding = itemData.customTopPadding

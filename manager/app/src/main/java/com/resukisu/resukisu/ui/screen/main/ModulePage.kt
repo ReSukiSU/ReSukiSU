@@ -2,7 +2,6 @@ package com.resukisu.resukisu.ui.screen.main
 
 import android.annotation.SuppressLint
 import android.app.Activity.CLIPBOARD_SERVICE
-import android.app.Activity.MODE_PRIVATE
 import android.app.Activity.RESULT_OK
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -120,7 +119,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -128,6 +126,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kyant.capsule.ContinuousRoundedRectangle
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.data.AppPreferencesRepository
+import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.ui.component.ConfirmResult
 import com.resukisu.resukisu.ui.component.InstallConfirmationDialog
@@ -148,7 +148,9 @@ import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.FlashIt
 import com.resukisu.resukisu.ui.screen.LabelText
 import com.resukisu.resukisu.ui.theme.CardConfig
+import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurSource
+import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
 import com.resukisu.resukisu.ui.util.LocalPermissionRequestInterface
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.downloader.download
@@ -159,6 +161,7 @@ import com.resukisu.resukisu.ui.util.reboot
 import com.resukisu.resukisu.ui.util.toggleModule
 import com.resukisu.resukisu.ui.util.undoUninstallModule
 import com.resukisu.resukisu.ui.util.uninstallModule
+import com.resukisu.resukisu.ui.viewmodel.ModuleUiState
 import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel
 import com.resukisu.resukisu.ui.webui.WebUIActivity
 import com.topjohnwu.superuser.io.SuFile
@@ -184,7 +187,8 @@ fun ModulePage(bottomPadding: Dp) {
     val viewModel = viewModel<ModuleViewModel>(
         viewModelStoreOwner = ksuApp
     )
-    val prefs = context.getSharedPreferences("settings", MODE_PRIVATE)
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val prefs = context.appPreferences
     val snackBarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
     var lastClickTime by remember { mutableStateOf(0L) }
@@ -283,10 +287,12 @@ fun ModulePage(bottomPadding: Dp) {
     }
 
     LaunchedEffect(Unit) {
-        viewModel.search = ""
-        viewModel.sortEnabledFirst = prefs.getBoolean("module_sort_enabled_first", false)
-        viewModel.sortActionFirst = prefs.getBoolean("module_sort_action_first", false)
-        if (viewModel.moduleList.isEmpty() || viewModel.isNeedRefresh) {
+        viewModel.updateSearch("")
+        viewModel.setSortOptions(
+            sortEnabledFirst = prefs.getBoolean("module_sort_enabled_first", false),
+            sortActionFirst = prefs.getBoolean("module_sort_action_first", false),
+        )
+        if (uiState.moduleList.isEmpty() || uiState.isNeedRefresh) {
             viewModel.fetchModuleList()
         }
     }
@@ -302,8 +308,8 @@ fun ModulePage(bottomPadding: Dp) {
         topBar = {
             SearchAppBar(
                 title = stringResource(R.string.module),
-                searchText = viewModel.search,
-                onSearchTextChange = { viewModel.search = it },
+                searchText = uiState.search,
+                onSearchTextChange = viewModel::updateSearch,
                 dropdownContent = {
                     IconButton(
                         onClick = { showBottomSheet = true },
@@ -391,7 +397,7 @@ fun ModulePage(bottomPadding: Dp) {
                     }
                 }
             }
-            viewModel.moduleList.isEmpty() -> {
+            uiState.moduleList.isEmpty() -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -420,6 +426,7 @@ fun ModulePage(bottomPadding: Dp) {
             else -> {
                 ModuleList(
                     viewModel = viewModel,
+                    uiState = uiState,
                     listState = listState,
                     modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
                     onUpdateModule = {
@@ -466,7 +473,9 @@ fun ModulePage(bottomPadding: Dp) {
                 sheetState = bottomSheetState,
                 dragHandle = {
                     Surface(
-                        modifier = Modifier.padding(vertical = 11.dp),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .padding(vertical = 11.dp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                         shape = RoundedCornerShape(16.dp)
                     ) {
@@ -481,6 +490,7 @@ fun ModulePage(bottomPadding: Dp) {
             ) {
                 ModuleBottomSheetContent(
                     viewModel = viewModel,
+                    uiState = uiState,
                     prefs = prefs
                 )
             }
@@ -492,7 +502,8 @@ fun ModulePage(bottomPadding: Dp) {
 @Composable
 private fun ModuleBottomSheetContent(
     viewModel: ModuleViewModel,
-    prefs: android.content.SharedPreferences
+    uiState: ModuleUiState,
+    prefs: AppPreferencesRepository
 ) {
     Column(
         modifier = Modifier
@@ -531,15 +542,13 @@ private fun ModuleBottomSheetContent(
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Switch(
-                    checked = viewModel.sortActionFirst,
+                    checked = uiState.sortActionFirst,
                     onCheckedChange = { checked ->
-                        viewModel.sortActionFirst = checked
-                        prefs.edit {
-                            putBoolean("module_sort_action_first", checked)
-                        }
+                        viewModel.setSortActionFirst(checked)
+                        prefs.putBoolean("module_sort_action_first", checked)
                     },
                     thumbContent = {
-                        if (viewModel.sortActionFirst) {
+                        if (uiState.sortActionFirst) {
                             Icon(
                                 imageVector = Icons.Filled.Check,
                                 contentDescription = null,
@@ -570,15 +579,13 @@ private fun ModuleBottomSheetContent(
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Switch(
-                    checked = viewModel.sortEnabledFirst,
+                    checked = uiState.sortEnabledFirst,
                     onCheckedChange = { checked ->
-                        viewModel.sortEnabledFirst = checked
-                        prefs.edit {
-                            putBoolean("module_sort_enabled_first", checked)
-                        }
+                        viewModel.setSortEnabledFirst(checked)
+                        prefs.putBoolean("module_sort_enabled_first", checked)
                     },
                     thumbContent = {
-                        if (viewModel.sortEnabledFirst) {
+                        if (uiState.sortEnabledFirst) {
                             Icon(
                                 imageVector = Icons.Filled.Check,
                                 contentDescription = null,
@@ -604,11 +611,11 @@ private fun ModuleBottomSheetContent(
 var showMetamoduleWarning by mutableStateOf(true)
 
 private fun getMetaModuleWarningText(
-    viewModel: ModuleViewModel,
+    hasModuleRequireMount: Boolean,
     context: Context
 ) : String? {
     if (!showMetamoduleWarning) return null
-    if (!viewModel.hasModuleRequireMount) return null
+    if (!hasModuleRequireMount) return null
 
     val metaProp = SuFile.open("/data/adb/metamodule/module.prop").exists()
     val metaRemoved = SuFile.open("/data/adb/metamodule/remove").exists()
@@ -654,6 +661,7 @@ private fun MetaModuleWarningCard(
 @Composable
 private fun ModuleList(
     viewModel: ModuleViewModel,
+    uiState: ModuleUiState,
     listState: LazyListState,
     modifier: Modifier = Modifier,
     boxModifier: Modifier = Modifier,
@@ -937,18 +945,18 @@ private fun ModuleList(
                     .padding(top = topPadding)
                     .align(Alignment.TopCenter),
                 state = pullRefreshState,
-                isRefreshing = viewModel.isRefreshing,
+                isRefreshing = uiState.isRefreshing,
             )
         },
-        isRefreshing = viewModel.isRefreshing
+        isRefreshing = uiState.isRefreshing
     ) {
         val metaModuleWarningText by produceState<String?>(
             initialValue = null,
-            viewModel.hasModuleRequireMount,
+            uiState.hasModuleRequireMount,
             showMetamoduleWarning
         ) {
             value = withContext(Dispatchers.IO) {
-                getMetaModuleWarningText(viewModel, context)
+                getMetaModuleWarningText(uiState.hasModuleRequireMount, context)
             }
         }
 
@@ -978,12 +986,13 @@ private fun ModuleList(
             }
 
             items(
-                items = viewModel.moduleList,
+                items = uiState.moduleList,
                 key = { "module-$it.id" }
             ) { module ->
                 ModuleItem(
                     viewModel = viewModel,
                     module = module,
+                    moduleSizes = uiState.moduleSizes,
                     updateUrl = module.moduleUpdate?.zipUrl.orEmpty(),
                     onUninstallClicked = {
                         viewModel.viewModelScope.launch {
@@ -1248,6 +1257,7 @@ private fun ModuleList(
 fun ModuleItem(
     viewModel: ModuleViewModel,
     module: ModuleViewModel.ModuleInfo,
+    moduleSizes: Map<String, String>,
     updateUrl: String,
     onUninstallClicked: (ModuleViewModel.ModuleInfo) -> Unit,
     onCheckChanged: (Boolean) -> Unit,
@@ -1257,7 +1267,7 @@ fun ModuleItem(
 ) {
     val navigator = LocalNavigator.current
     val context = LocalContext.current
-    val prefs = context.getSharedPreferences("settings", MODE_PRIVATE)
+    val prefs = context.appPreferences
     val isHideTagRow = prefs.getBoolean("is_hide_tag_row", false)
     // 获取显示更多模块信息的设置
     val showMoreModuleInfo = prefs.getBoolean("show_more_module_info", false)
@@ -1267,7 +1277,14 @@ fun ModuleItem(
     val hapticFeedback = LocalHapticFeedback.current
 
     Surface(
-        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(CardConfig.cardAlpha),
+        modifier = Modifier
+            .clip(RoundedCornerShape(16.dp))
+            .renderBackgroundBlur(),
+        color =
+            if (ThemeConfig.isEnableBlurExp)
+                Color.Transparent
+            else
+                MaterialTheme.colorScheme.surfaceContainerHighest.copy(CardConfig.cardAlpha),
         shape = RoundedCornerShape(16.dp)
     ) {
         val textDecoration = if (!module.remove) null else TextDecoration.LineThrough
@@ -1277,9 +1294,7 @@ fun ModuleItem(
             viewModel.loadSize(module.dirId)
         }
 
-        val sizes by viewModel.moduleSize.collectAsStateWithLifecycle()
-
-        val sizeStr = sizes[module.dirId]
+        val sizeStr = moduleSizes[module.dirId]
 
         Column(
             modifier = Modifier
@@ -1562,6 +1577,7 @@ fun ModuleItemPreview() {
     ModuleItem(
         viewModel<ModuleViewModel>(),
         module,
+        emptyMap(),
         "",
         {},
         {},

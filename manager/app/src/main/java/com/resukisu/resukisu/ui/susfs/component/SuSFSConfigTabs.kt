@@ -31,13 +31,17 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.ui.susfs.util.SuSFSManager
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
 
@@ -56,8 +60,12 @@ fun SusPathsContent(
     onEditPath: ((String) -> Unit)? = null,
     forceRefreshApps: Boolean = false
 ) {
-    val superUserApps = SuperUserViewModel.apps
-    val superUserIsRefreshing = remember { SuperUserViewModel().isRefreshing }
+    val superUserViewModel = viewModel<SuperUserViewModel>(viewModelStoreOwner = ksuApp)
+    val superUserUiState by superUserViewModel.uiState.collectAsStateWithLifecycle()
+    val superUserApps = remember(superUserUiState.appGroupList) {
+        superUserUiState.appGroupList.flatMap { it.apps }
+    }
+    val superUserIsRefreshing = superUserUiState.isRefreshing
 
     LaunchedEffect(superUserIsRefreshing, superUserApps.size) {
         if (!superUserIsRefreshing && superUserApps.isNotEmpty()) {
@@ -79,7 +87,7 @@ fun SusPathsContent(
         val others = mutableListOf<String>()
 
         // 构建UID到包名的映射
-        SuperUserViewModel.apps.forEach { app ->
+        superUserApps.forEach { app ->
             try {
                 val uid = app.packageInfo.applicationInfo?.uid
                 uidToPackageMap[uid.toString()] = app.packageName

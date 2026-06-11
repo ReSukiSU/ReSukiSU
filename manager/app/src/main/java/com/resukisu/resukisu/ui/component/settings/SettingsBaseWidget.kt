@@ -1,7 +1,15 @@
 package com.resukisu.resukisu.ui.component.settings
 
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.interaction.DragInteraction
+import androidx.compose.foundation.interaction.FocusInteraction
+import androidx.compose.foundation.interaction.HoverInteraction
+import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -13,18 +21,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocal
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,6 +47,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -45,7 +59,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.resukisu.resukisu.ui.component.settings.material3internal.rememberAnimatedShape
 import com.resukisu.resukisu.ui.theme.CardConfig
+import com.resukisu.resukisu.ui.theme.ThemeConfig
+import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
 
 /**
  * A [CompositionLocal] that provides the dynamically calculated [Shape] for items
@@ -125,9 +142,11 @@ fun SettingsBaseWidget(
                 MaterialTheme.colorScheme.surfaceContainerHighest
             }
 
-            color.copy(
-                alpha = CardConfig.cardAlpha
-            )
+            if (ThemeConfig.isEnableBlurExp) Color.Transparent else {
+                color.copy(
+                    alpha = CardConfig.cardAlpha
+                )
+            }
         }
     }
 
@@ -184,7 +203,42 @@ fun SettingsBaseWidget(
         hoveredShape = baseShape
     )
 
-    val itemModifier = modifier.fillMaxWidth()
+    val clickShape = if (onClick != null || onLongClick != null) {
+        val pressed = remember { mutableStateOf(false) }
+        val focused = remember { mutableStateOf(false) }
+        val hovered = remember { mutableStateOf(false) }
+        val dragged = remember { mutableStateOf(false) }
+
+        interactionSource.CollectInteractionsAsState(
+            pressedState = pressed,
+            focusedState = focused,
+            hoveredState = hovered,
+            draggedState = dragged,
+        )
+
+        val shapeAnimationSpec = MaterialTheme.motionScheme.fastSpatialSpec<Float>()
+
+
+        shapes.shapeForInteraction(
+            selected = selected,
+            pressed = pressed.value,
+            focused = focused.value,
+            hovered = hovered.value,
+            dragged = dragged.value,
+            animationSpec = shapeAnimationSpec,
+        )
+    } else RectangleShape
+
+    val clipShape = if (onClick != null || onLongClick != null) {
+        clickShape
+    } else {
+        baseShape
+    }
+
+    val itemModifier = modifier
+        .fillMaxWidth()
+        .clip(clipShape)
+        .renderBackgroundBlur()
 
     val finalLeadingContent: (@Composable () -> Unit)? =
         if (leadingContent == null && icon == null && !iconPlaceholder)
@@ -329,6 +383,107 @@ fun SettingsBaseWidget(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private val ListItemShapes.hasRoundedCornerShapes: Boolean
+    get() =
+        shape is RoundedCornerShape &&
+                selectedShape is RoundedCornerShape &&
+                pressedShape is RoundedCornerShape &&
+                focusedShape is RoundedCornerShape &&
+                hoveredShape is RoundedCornerShape &&
+                draggedShape is RoundedCornerShape
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private val ListItemShapes.hasCornerBasedShapes: Boolean
+    get() =
+        shape is CornerBasedShape &&
+                selectedShape is CornerBasedShape &&
+                pressedShape is CornerBasedShape &&
+                focusedShape is CornerBasedShape &&
+                hoveredShape is CornerBasedShape &&
+                draggedShape is CornerBasedShape
+
+/**
+ * Equivalent to [collectIsPressedAsState], [collectIsFocusedAsState], etc. but only uses one
+ * [LaunchedEffect]. The [MutableState] parameters, if provided, will be set to the corresponding
+ * state value.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun InteractionSource.CollectInteractionsAsState(
+    pressedState: MutableState<Boolean>? = null,
+    focusedState: MutableState<Boolean>? = null,
+    hoveredState: MutableState<Boolean>? = null,
+    draggedState: MutableState<Boolean>? = null,
+) {
+    LaunchedEffect(this) {
+        val pressInteractions = pressedState?.let { mutableListOf<PressInteraction.Press>() }
+        val focusInteractions = focusedState?.let { mutableListOf<FocusInteraction.Focus>() }
+        val hoverInteractions = hoveredState?.let { mutableListOf<HoverInteraction.Enter>() }
+        val dragInteractions = draggedState?.let { mutableListOf<DragInteraction.Start>() }
+
+        interactions.collect { interaction ->
+            when (interaction) {
+                // press
+                is PressInteraction.Press -> pressInteractions?.add(interaction)
+                is PressInteraction.Release -> pressInteractions?.remove(interaction.press)
+                is PressInteraction.Cancel -> pressInteractions?.remove(interaction.press)
+                // focus
+                is FocusInteraction.Focus -> focusInteractions?.add(interaction)
+                is FocusInteraction.Unfocus -> focusInteractions?.remove(interaction.focus)
+                // hover
+                is HoverInteraction.Enter -> hoverInteractions?.add(interaction)
+                is HoverInteraction.Exit -> hoverInteractions?.remove(interaction.enter)
+                // drag
+                is DragInteraction.Start -> dragInteractions?.add(interaction)
+                is DragInteraction.Stop -> dragInteractions?.remove(interaction.start)
+                is DragInteraction.Cancel -> dragInteractions?.remove(interaction.start)
+            }
+            if (pressedState != null && pressInteractions != null) {
+                pressedState.value = pressInteractions.isNotEmpty()
+            }
+            if (focusedState != null && focusInteractions != null) {
+                focusedState.value = focusInteractions.isNotEmpty()
+            }
+            if (hoveredState != null && hoverInteractions != null) {
+                hoveredState.value = hoverInteractions.isNotEmpty()
+            }
+            if (draggedState != null && dragInteractions != null) {
+                draggedState.value = dragInteractions.isNotEmpty()
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+internal fun ListItemShapes.shapeForInteraction(
+    selected: Boolean,
+    pressed: Boolean,
+    focused: Boolean,
+    hovered: Boolean,
+    dragged: Boolean,
+    animationSpec: FiniteAnimationSpec<Float>,
+): Shape {
+    val shape =
+        when {
+            pressed -> pressedShape
+            dragged -> draggedShape
+            selected -> selectedShape
+            focused -> focusedShape
+            hovered -> hoveredShape
+            else -> shape
+        }
+
+    if (hasRoundedCornerShapes) {
+        return key(this) { rememberAnimatedShape(shape as RoundedCornerShape, animationSpec) }
+    } else if (hasCornerBasedShapes) {
+        return key(this) { rememberAnimatedShape(shape as CornerBasedShape, animationSpec) }
+    }
+
+    return shape
+}
+
 @Preview
 @Composable
 fun SettingsBaseWidgetPreview() {
@@ -358,6 +513,23 @@ fun SettingsBaseWidgetPreview() {
                     Text("Hello from descriptionColumnContent")
                 }
             ) {}
+        }
+
+        item {
+            SegmentedColumn {
+                item {
+                    SettingsBaseWidget(
+                        title = "I can click (widget 1)",
+                        onClick = {}
+                    )
+                }
+                item {
+                    SettingsBaseWidget(
+                        title = "I can click (widget 2)",
+                        onClick = {}
+                    )
+                }
+            }
         }
     }
 }

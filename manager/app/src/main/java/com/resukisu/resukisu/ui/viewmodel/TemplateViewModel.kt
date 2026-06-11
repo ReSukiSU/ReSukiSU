@@ -2,10 +2,6 @@ package com.resukisu.resukisu.ui.viewmodel
 
 import android.os.Parcelable
 import android.util.Log
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.ksuApp
@@ -15,6 +11,10 @@ import com.resukisu.resukisu.ui.util.getAppProfileTemplate
 import com.resukisu.resukisu.ui.util.listAppProfileTemplates
 import com.resukisu.resukisu.ui.util.setAppProfileTemplate
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import okhttp3.Request
@@ -23,21 +23,21 @@ import org.json.JSONObject
 import java.text.Collator
 import java.util.Locale
 
-
-/**
- * @author weishu
- * @date 2023/10/20.
- */
 const val TEMPLATE_INDEX_URL = "https://kernelsu.org/templates/index.json"
 const val TEMPLATE_URL = "https://kernelsu.org/templates/%s"
 
 const val TAG = "TemplateViewModel"
 
-class TemplateViewModel : ViewModel() {
-    companion object {
+data class TemplateUiState(
+    val templateList: List<TemplateViewModel.TemplateInfo> = emptyList(),
+    val isRefreshing: Boolean = false,
+)
 
-        private var templates by mutableStateOf<List<TemplateInfo>>(emptyList())
-    }
+class TemplateViewModel : ViewModel() {
+    private var templates: List<TemplateInfo> = emptyList()
+
+    private val _uiState = MutableStateFlow(TemplateUiState())
+    val uiState: StateFlow<TemplateUiState> = _uiState.asStateFlow()
 
     @Parcelize
     data class TemplateInfo(
@@ -56,34 +56,22 @@ class TemplateViewModel : ViewModel() {
         val rules: List<String> = mutableListOf(),
     ) : Parcelable
 
-    var isRefreshing by mutableStateOf(false)
-        private set
-
-    val templateList by derivedStateOf {
-        val comparator = compareBy(TemplateInfo::local).reversed().then(
-            compareBy(
-                Collator.getInstance(Locale.getDefault()), TemplateInfo::id
-            )
-        )
-        templates.sortedWith(comparator).apply {
-            isRefreshing = false
-        }
-    }
-
     suspend fun fetchTemplates(sync: Boolean = false) {
-        isRefreshing = true
+        _uiState.update { it.copy(isRefreshing = true) }
         withContext(Dispatchers.IO) {
             val localTemplateIds = listAppProfileTemplates()
             Log.i(TAG, "localTemplateIds: $localTemplateIds")
             if (localTemplateIds.isEmpty() || sync) {
-                // if no templates, fetch remote templates
                 fetchRemoteTemplates()
             }
 
-            // fetch templates again
             templates = listAppProfileTemplates().mapNotNull(::getTemplateInfoById)
-
-            isRefreshing = false
+            _uiState.update {
+                it.copy(
+                    templateList = buildTemplateList(),
+                    isRefreshing = false,
+                )
+            }
         }
     }
 
@@ -133,6 +121,15 @@ class TemplateViewModel : ViewModel() {
             }).toString().let(callback)
         }
     }
+
+    private fun buildTemplateList(): List<TemplateInfo> {
+        val comparator = compareBy(TemplateInfo::local).reversed().then(
+            compareBy(
+                Collator.getInstance(Locale.getDefault()), TemplateInfo::id
+            )
+        )
+        return templates.sortedWith(comparator)
+    }
 }
 
 private fun fetchRemoteTemplates() {
@@ -160,11 +157,9 @@ private fun fetchRemoteTemplates() {
                 }.getOrNull() ?: return@forEach
                 Log.i(TAG, "template: $templateJson")
 
-                // validate remote template
                 runCatching {
                     val json = JSONObject(templateJson)
                     fromJSON(json)?.let {
-                        // force local template
                         json.put("local", false)
                         setAppProfileTemplate(id, json.toString())
                     }
@@ -211,12 +206,10 @@ private fun getLocaleString(json: JSONObject, key: String): String {
     val locale = Locale.getDefault()
     val localeKey = "${locale.language}_${locale.country}"
     json.optJSONObject("locales")?.let {
-        // check locale first
-        it.optJSONObject(localeKey)?.let { json->
+        it.optJSONObject(localeKey)?.let { json ->
             return json.optString(key, fallback)
         }
-        // fallback to language
-        it.optJSONObject(locale.language)?.let { json->
+        it.optJSONObject(locale.language)?.let { json ->
             return json.optString(key, fallback)
         }
     }
@@ -233,15 +226,13 @@ private fun fromJSON(templateJson: JSONObject): TemplateViewModel.TemplateInfo? 
             ?: Natives.Profile.Namespace.INHERITED.name
 
         val rulesJsonArray = templateJson.optJSONArray("rules")
-        val templateInfo = TemplateViewModel.TemplateInfo(
+        TemplateViewModel.TemplateInfo(
             id = templateJson.getString("id"),
             name = getLocaleString(templateJson, "name"),
             description = getLocaleString(templateJson, "description"),
             author = templateJson.optString("author"),
             local = templateJson.optBoolean("local"),
-            namespace = Natives.Profile.Namespace.valueOf(
-                namespace.uppercase()
-            ).ordinal,
+            namespace = Natives.Profile.Namespace.valueOf(namespace.uppercase()).ordinal,
             uid = templateJson.optInt("uid", Natives.ROOT_UID),
             gid = templateJson.optInt("gid", Natives.ROOT_GID),
             groups = getEnumOrdinals(groupsJsonArray, Groups::class.java).map { it.gid },
@@ -253,7 +244,6 @@ private fun fromJSON(templateJson: JSONObject): TemplateViewModel.TemplateInfo? 
                 Log.e(TAG, "ignore invalid rule: $it", it)
             }).orEmpty()
         )
-        templateInfo
     }.onFailure {
         Log.e(TAG, "ignore invalid template: $it", it)
     }.getOrNull()
@@ -262,7 +252,6 @@ private fun fromJSON(templateJson: JSONObject): TemplateViewModel.TemplateInfo? 
 fun TemplateViewModel.TemplateInfo.toJSON(): JSONObject {
     val template = this
     return JSONObject().apply {
-
         put("id", template.id)
         put("name", template.name.ifBlank { template.id })
         put("description", template.description.ifBlank { template.id })

@@ -3,7 +3,6 @@ package com.resukisu.resukisu.ui.util.module
 import android.app.AppOpsManager
 import android.content.ComponentName
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -17,6 +16,7 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.core.graphics.scale
 import androidx.core.net.toUri
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.ui.MainActivity
 import com.resukisu.resukisu.ui.util.getRootShell
 import com.resukisu.resukisu.ui.util.isColorOS
@@ -36,8 +36,7 @@ object Shortcut {
         name: String,
         iconUri: String?
     ) {
-        val prefs = context.getSharedPreferences("settings", MODE_PRIVATE)
-        val usingAltIcon = prefs.getBoolean("use_alt_icon", false)
+        val usingAltIcon = context.appPreferences.getBoolean("use_alt_icon", false)
         val mainActivity = ComponentName(context, MainActivity::class.java.name)
         val mainActivityAlias = ComponentName(context, "${MainActivity::class.java.name}Alias")
 

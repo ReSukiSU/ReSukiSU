@@ -1,6 +1,5 @@
-package zako.zako.zako.zakoui.screen.kernelFlash
+package com.resukisu.resukisu.ui.screen.kernelFlash
 
-import android.content.Context
 import android.net.Uri
 import android.os.Environment
 import androidx.activity.ComponentActivity
@@ -64,11 +63,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.content.edit
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.ui.component.KeyEventBlocker
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
+import com.resukisu.resukisu.ui.screen.kernelFlash.state.FlashState
+import com.resukisu.resukisu.ui.screen.kernelFlash.state.HorizonKernelState
+import com.resukisu.resukisu.ui.screen.kernelFlash.state.HorizonKernelWorker
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.install
@@ -77,9 +79,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import zako.zako.zako.zakoui.screen.kernelFlash.state.FlashState
-import zako.zako.zako.zakoui.screen.kernelFlash.state.HorizonKernelState
-import zako.zako.zako.zakoui.screen.kernelFlash.state.HorizonKernelWorker
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -108,8 +107,7 @@ fun KernelFlashScreen(
     val context = LocalContext.current
 
     val shouldAutoExit = remember {
-        val sharedPref = context.getSharedPreferences("kernel_flash_prefs", Context.MODE_PRIVATE)
-        sharedPref.getBoolean("auto_exit_after_flash", false)
+        context.appPreferences.getBoolean("auto_exit_after_flash", false)
     }
 
     val scrollState = rememberScrollState()
@@ -147,8 +145,7 @@ fun KernelFlashScreen(
         if (shouldAutoExit) {
             scope.launch {
                 delay(1500)
-                val sharedPref = context.getSharedPreferences("kernel_flash_prefs", Context.MODE_PRIVATE)
-                sharedPref.edit { remove("auto_exit_after_flash") }
+                context.appPreferences.remove("auto_exit_after_flash")
                 (context as? ComponentActivity)?.finish()
             }
         }

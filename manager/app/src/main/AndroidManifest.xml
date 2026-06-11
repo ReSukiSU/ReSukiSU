@@ -38,7 +38,7 @@
             android:launchMode="standard"
             android:documentLaunchMode="intoExisting"
             android:autoRemoveFromRecents="true"
-            android:theme="@style/Theme.KernelSU">
+            android:theme="@style/Theme.KernelSU.Starting">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
