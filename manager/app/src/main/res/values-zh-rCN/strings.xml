@@ -107,11 +107,11 @@
     <string name="profile_namespace_global">全局</string>
     <string name="profile_namespace_individual">独立</string>
     <string name="profile_groups">组</string>
-    <string name="profile_flags">标签</string>
     <string name="profile_capabilities">权能</string>
+    <string name="profile_flags">标签</string>
+    <string name="profile_flags_desc_no_new_privs">禁止从此 Root Profile 的上下文中通过 KernelSU 进一步提升权限</string>
     <string name="profile_selinux_context">SELinux</string>
     <string name="profile_umount_modules">卸载模块</string>
-    <string name="profile_flags_desc_no_new_privs">禁止从此 Root Profile 的上下文中通过 KernelSU 进一步提升权限</string>
     <string name="failed_to_update_app_profile">为 %s 更新 App Profile 失败</string>
     <string name="debug_version_notice">"你正在使用管理器的 DEBUG 构建，如果你不知道什么是 DEBUG 构建，请立即切换至 RELEASE 构建"</string>
     <string name="unofficial_version_notice">"您使用的管理器并非 %s 官方管理器，您可能无法获得权限。"</string>
@@ -461,6 +461,7 @@
     <string name="show_more_module_info_summary">显示额外的模块信息，如更新配置 URL 等</string>
     <string name="susfs_execution_location_label">执行位置</string>
     <string name="susfs_current_execution_location">当前执行位置：%s</string>
+    <string name="susfs_execution_location_post_fs_data">Post-FS-Data</string>
     <string name="susfs_execution_location_service_description">在系统服务启动后执行</string>
     <string name="susfs_execution_location_post_fs_data_description">在文件系统挂载后但系统完全启动前执行,可能会导致循环重启</string>
     <string name="susfs_slot_info_title">槽位信息</string>
