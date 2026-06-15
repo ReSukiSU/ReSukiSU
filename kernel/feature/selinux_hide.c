@@ -30,7 +30,7 @@
 #include "infra/symbol_resolver.h"
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
 #include "hook/lsm_hook_magic.h"
-#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0) || defined(KSU_COMPAT_HAS_LIST_OF_LSM_HOOKS)
 #include <linux/lsm_hooks.h>
 #endif
 
@@ -288,7 +288,8 @@ struct ksu_lsm_hook selinux_setprocattr_hook =
     KSU_LSM_HOOK_INIT(setprocattr, "selinux_setprocattr", ksu_handle_selinux_setprocattr, 0);
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 10, 0) && LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 10, 0) &&                                                                   \
+    (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0) || defined(KSU_COMPAT_HAS_LIST_OF_LSM_HOOKS))
 static setprocattr_fn ksu_orig_setprocattr;
 uintptr_t selinux_setprocattr_hook_ptr = 0;
 #else
@@ -428,7 +429,7 @@ static void ksu_selinux_hide_unhook()
     }
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
     ksu_lsm_unhook(&selinux_setprocattr_hook);
-#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0) || defined(KSU_COMPAT_HAS_LIST_OF_LSM_HOOKS)
     if (ksu_orig_setprocattr) {
         ret = ksu_patch_text((void *)selinux_setprocattr_hook_ptr, &ksu_orig_setprocattr, sizeof(ksu_orig_setprocattr),
                              KSU_PATCH_TEXT_FLUSH_DCACHE);
@@ -586,7 +587,7 @@ static int ksu_selinux_hide_enable()
         pr_err("selinux_hide: init: selinux_setprocattr_hook err: %d\n", ret);
         goto unhook;
     }
-#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0) || defined(KSU_COMPAT_HAS_LIST_OF_LSM_HOOKS)
     struct security_hook_list *hp;
 
     // https://github.com/torvalds/linux/commit/df0ce17331e2501dbffc060041dfc6c5f85227b5

@@ -32,7 +32,7 @@ extern struct static_key_true ksu_init_rc_hook;
 extern bool ksu_init_rc_hook __read_mostly;
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 2, 0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 2, 0) && !defined(KSU_COMPAT_HAS_LIST_OF_LSM_HOOKS)
 #include <linux/stop_machine.h>
 
 static int ksu_unregister_file_permission(void *data);
@@ -47,7 +47,7 @@ static int ksu_file_permission(struct file *file, int mask)
     if (unlikely(ksu_init_rc_hook))
         ksu_handle_initrc(file);
     else {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 2, 0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 2, 0) && !defined(KSU_COMPAT_HAS_LIST_OF_LSM_HOOKS)
         // 4.2- always don't have static key
         // static key since 4.3
         // there really unregister file_permission
@@ -68,7 +68,7 @@ static int ksu_inode_rename(struct inode *old_inode, struct dentry *old_dentry, 
     return 0;
 }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0) || defined(KSU_COMPAT_HAS_LIST_OF_LSM_HOOKS)
 #include <linux/lsm_hooks.h>
 
 static struct security_hook_list ksu_hooks[] = {
@@ -95,7 +95,7 @@ void __init ksu_lsm_hook_built_in_init(void)
     security_add_hooks(ksu_hooks, ARRAY_SIZE(ksu_hooks));
 #endif
 }
-#else // linux kernel >= 4.2
+#else // linux kernel >= 4.2 || KSU_COMPAT_HAS_LIST_OF_LSM_HOOKS
 #include "avc_ss.h"
 #include "feature/selinux_hide.h"
 #include "infra/symbol_resolver.h"
