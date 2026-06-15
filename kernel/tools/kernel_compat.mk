@@ -271,6 +271,7 @@ ccflags-y += -DKSU_COMPAT_HAS_FILENAME_TRANS_KEY
 endif
 
 # https://github.com/torvalds/linux/commit/e20b043a6902ecb61c2c84355c3bae5149f391db
+# https://github.com/torvalds/linux/commit/b1d9e6b0646d0e5ee5d9050bd236b6c65d66faef
 ifeq ($(shell grep -q "security_add_hooks" $(srctree)/include/linux/lsm_hooks.h; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: found security_add_hooks)
 ccflags-y += -DKSU_COMPAT_HAS_LIST_OF_LSM_HOOKS
