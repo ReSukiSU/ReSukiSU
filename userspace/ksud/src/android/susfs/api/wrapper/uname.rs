@@ -1,8 +1,10 @@
 use anyhow::{Result, anyhow};
 
 use crate::android::susfs::{
-    communicate::{communicate, parse_err},
-    magic::{CMD_SUSFS_SET_UNAME, ERR_CMD_NOT_SUPPORTED, NEW_UTS_LEN},
+    api::{
+        communicate::{communicate, parse_err},
+        magic::{CMD_SUSFS_SET_UNAME, ERR_CMD_NOT_SUPPORTED, NEW_UTS_LEN},
+    },
     utils::str_to_c_array,
 };
 
@@ -23,11 +25,6 @@ impl Default for SusfsUname {
     }
 }
 
-/// Spoof uname for all processes, set string to `default` to imply the function to use original string.
-///
-/// NOTE: only `release` and `version` are spoofed as others are no longer needed.
-///
-/// e.g.: `set_uname("4.9.337-g3291538446b7", "#1 SMP PREEMPT Mon Oct 6 16:50:48 UTC 2025")`
 pub fn set_uname<S>(version: &S, release: &S) -> Result<()>
 where
     S: ToString,

@@ -2,7 +2,7 @@ use std::{fs, path::Path};
 
 use anyhow::Result;
 
-use crate::android::susfs::{
+use crate::android::susfs::api::{
     communicate::{communicate, parse_err},
     magic::{
         CMD_SUSFS_SET_CMDLINE_OR_BOOTCONFIG, ERR_CMD_NOT_SUPPORTED,
@@ -16,8 +16,7 @@ struct SusfsSpoofCmdline {
     err: i32,
 }
 
-/// Spoof the output of /proc/cmdline (non-gki) or /proc/bootconfig (gki) from a text file
-pub fn set_cmdline_or_bootconfig<P>(path: P) -> Result<()>
+pub fn set_cmdline<P>(path: P) -> Result<()>
 where
     P: AsRef<Path>,
 {

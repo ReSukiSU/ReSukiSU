@@ -1,9 +1,10 @@
 mod api;
+mod apply;
 pub mod cli;
-mod communicate;
 mod config;
+mod enums;
+mod hybrid;
 pub mod init_event;
-mod magic;
 mod slot_info;
 mod utils;
 

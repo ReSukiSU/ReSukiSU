@@ -1,7 +1,7 @@
-use anyhow::Result;
+use anyhow::{Result, bail};
 use clap::{Args, Parser, Subcommand, error::ErrorKind};
 
-use crate::android::susfs::{api, config, slot_info};
+use crate::android::susfs::{hybrid, slot_info};
 
 #[derive(Debug, Args)]
 pub struct SusfsArgs {
@@ -104,7 +104,7 @@ pub enum SuSFSSubCommands {
     #[command(name = "del_uname")]
     DelUname {
         #[arg(value_name = "TYPE")]
-        target: Option<String>,
+        target: String,
     },
     /// Enable/Disable susfs log in kernel
     #[command(name = "enable_log")]
@@ -127,6 +127,12 @@ pub enum SuSFSSubCommands {
         ///3: Effective for processes that are marked umounted with uid >= 10000 (Use it carefully!)
         ///4: Effective for processes that are marked umounted (include most of the init spawned process, use it carefully!)
         uid_scheme: i32,
+    },
+    /// Delete an existing open redirect entry by its target path
+    #[command(name = "del_open_redirect")]
+    DelOpenRedirect {
+        /// The target path that was previously added via add_open_redirect
+        target_path: String,
     },
     /// Added real file path which gets mmapped will be hidden from /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap]
     #[command(name = "add_sus_map")]
@@ -180,33 +186,7 @@ pub enum SuSFSSubCommands {
     },
     /// (Advanced) Deleted sus kstat statically with manual or default values
     #[command(name = "del_sus_kstat_statically")]
-    DelSusKstatStatically {
-        path: String,
-        #[arg(default_value = "default")]
-        ino: String,
-        #[arg(default_value = "default")]
-        dev: String,
-        #[arg(default_value = "default")]
-        nlink: String,
-        #[arg(default_value = "default")]
-        size: String,
-        #[arg(default_value = "default")]
-        atime: String,
-        #[arg(default_value = "default")]
-        atime_nsec: String,
-        #[arg(default_value = "default")]
-        mtime: String,
-        #[arg(default_value = "default")]
-        mtime_nsec: String,
-        #[arg(default_value = "default")]
-        ctime: String,
-        #[arg(default_value = "default")]
-        ctime_nsec: String,
-        #[arg(default_value = "default")]
-        blocks: String,
-        #[arg(default_value = "default")]
-        blksize: String,
-    },
+    DelSusKstatStatically { path: String },
     /// Read boot slot kernel uname/build-time (auto-decompress kernel payload)
     /// Can optionally specify a boot image path for direct analysis
     #[command(name = "slot_info")]
@@ -254,69 +234,46 @@ pub fn run_from_args(args: &[String]) -> Result<()> {
     run_main(parser.arg.command)
 }
 
+fn ensure_enabled(enabled: u8) -> Result<bool> {
+    if enabled > 1 {
+        bail!("Enabled should be either 1 or 0.");
+    }
+    Ok(enabled == 1)
+}
+
 pub fn run_main(command: SuSFSSubCommands) -> Result<()> {
     match command {
-        SuSFSSubCommands::AddSusPath { path } => {
-            api::add_sus_path(&api::SusPathType::Normal, &path)?;
-            config::operation::add_sus_path(&path);
-        }
-        SuSFSSubCommands::AddSusPathLoop { path } => {
-            api::add_sus_path(&api::SusPathType::Loop, &path)?;
-            config::operation::add_sus_path_loop(&path);
-        }
-        SuSFSSubCommands::AddSusKstat { path } => {
-            api::add_sus_kstat(&path)?;
-            config::operation::add_sus_kstat(&path);
-        }
-        SuSFSSubCommands::UpdateSusKstat { path } => {
-            api::update_sus_kstat(&path)?;
-            config::operation::add_sus_kstat_update(&path);
-        }
-        SuSFSSubCommands::UpdateSusKstatFullClone { path } => {
-            api::update_sus_kstat_full_clone(&path)?;
-            config::operation::add_sus_kstat_full_clone(&path);
-        }
-        SuSFSSubCommands::SetUname { version, release } => {
-            api::set_uname(&version, &release)?;
-            config::operation::set_uname(&version, &release);
-        }
+        SuSFSSubCommands::AddSusPath { path } => hybrid::add_path(&path, false)?,
+        SuSFSSubCommands::AddSusPathLoop { path } => hybrid::add_path(&path, true)?,
+        SuSFSSubCommands::AddSusKstat { path } => hybrid::add_kstat(&path)?,
+        SuSFSSubCommands::UpdateSusKstat { path } => hybrid::update_kstat(&path, false)?,
+        SuSFSSubCommands::UpdateSusKstatFullClone { path } => hybrid::update_kstat(&path, true)?,
+        SuSFSSubCommands::SetUname { version, release } => hybrid::set_uname(&version, &release)?,
         SuSFSSubCommands::HideSusMntsForNonSuProcs { enabled } => {
-            api::hide_sus_mnts_for_non_su_procs(enabled)?;
-            config::operation::set_hide_sus_mnts_for_non_su_procs(enabled);
+            hybrid::ignore_umount(ensure_enabled(enabled)?)?
         }
-        SuSFSSubCommands::EnableLog { enabled } => {
-            api::enable_log(enabled)?;
-            config::operation::enable_susfs_log(enabled);
-        }
-        SuSFSSubCommands::SetCmdlineOrBootconfig { path } => {
-            api::set_cmdline_or_bootconfig(path)?;
-        }
+        SuSFSSubCommands::EnableLog { enabled } => hybrid::log(ensure_enabled(enabled)?)?,
+        SuSFSSubCommands::SetCmdlineOrBootconfig { path } => hybrid::set_cmdline(&path)?,
         SuSFSSubCommands::AddOpenRedirect {
             target_path,
             redirected_path,
             uid_scheme,
-        } => {
-            api::add_open_redirect(target_path, redirected_path, uid_scheme)?;
-        }
-        SuSFSSubCommands::AddSusMap { path } => {
-            api::add_sus_map(&path)?;
-            config::operation::add_sus_map(&path);
-        }
+        } => hybrid::add_open_redirect(&target_path, &redirected_path, uid_scheme)?,
+        SuSFSSubCommands::AddSusMap { path } => hybrid::add_map(&path)?,
         SuSFSSubCommands::EnableAvcLogSpoofing { enabled } => {
-            api::enable_avc_log_spoofing(enabled)?;
-            config::operation::enable_avc_spoofing(enabled);
+            hybrid::avc_spoofing(ensure_enabled(enabled)?)?
         }
         SuSFSSubCommands::Show { info_type } => match info_type {
             ShowType::Version => {
-                let version = api::version()?;
+                let version = hybrid::version()?;
                 println!("{version}");
             }
             ShowType::EnabledFeatures => {
-                let features = api::features()?;
+                let features = hybrid::features()?;
                 println!("{features}");
             }
             ShowType::Variant => {
-                let variant = api::variant()?;
+                let variant = hybrid::variant()?;
                 println!("{variant}");
             }
         },
@@ -334,118 +291,33 @@ pub fn run_main(command: SuSFSSubCommands) -> Result<()> {
             ctime_nsec,
             blocks,
             blksize,
-        } => {
-            api::add_sus_kstat_statically(
-                &path,
-                &ino,
-                &dev,
-                &nlink,
-                &size,
-                &atime,
-                &atime_nsec,
-                &mtime,
-                &mtime_nsec,
-                &ctime,
-                &ctime_nsec,
-                &blocks,
-                &blksize,
-            )?;
-            config::operation::add_sus_kstat_statically(
-                &path,
-                &ino,
-                &dev,
-                &nlink,
-                &size,
-                &atime,
-                &atime_nsec,
-                &mtime,
-                &mtime_nsec,
-                &ctime,
-                &ctime_nsec,
-                &blocks,
-                &blksize,
-            );
-        }
+        } => hybrid::add_kstat_statically(
+            path.as_str(),
+            ino.as_str(),
+            dev.as_str(),
+            nlink.as_str(),
+            size.as_str(),
+            atime.as_str(),
+            atime_nsec.as_str(),
+            mtime.as_str(),
+            mtime_nsec.as_str(),
+            ctime.as_str(),
+            ctime_nsec.as_str(),
+            blocks.as_str(),
+            blksize.as_str(),
+        )?,
         // Del
-        SuSFSSubCommands::DelSusPath { path } => {
-            config::operation::del_sus_path(&path);
+        SuSFSSubCommands::DelSusPath { path } => hybrid::del_path(&path)?,
+        SuSFSSubCommands::DelSusPathLoop { path } => hybrid::del_path(&path)?,
+        SuSFSSubCommands::DelSusKstat { path } => hybrid::del_kstat(&path)?,
+        SuSFSSubCommands::DelUpdateSusKstat { path } => hybrid::del_kstat(&path)?,
+        SuSFSSubCommands::DelSusKstatFullClone { path } => hybrid::del_kstat(&path)?,
+        SuSFSSubCommands::DelUname { target } => hybrid::del_uname(target.as_str())?,
+        SuSFSSubCommands::DelSusMap { path } => hybrid::del_map(&path)?,
+        SuSFSSubCommands::DelOpenRedirect { target_path } => {
+            hybrid::del_open_redirect(&target_path)?
         }
-        SuSFSSubCommands::DelSusPathLoop { path } => {
-            config::operation::del_sus_path_loop(&path);
-        }
-        SuSFSSubCommands::DelSusKstat { path } => {
-            config::operation::del_sus_kstat(&path);
-        }
-        SuSFSSubCommands::DelUpdateSusKstat { path } => {
-            config::operation::del_sus_kstat_update(&path);
-        }
-        SuSFSSubCommands::DelSusKstatFullClone { path } => {
-            config::operation::del_sus_kstat_full_clone(&path);
-        }
-        SuSFSSubCommands::DelUname { target } => {
-            let target_str = target.as_deref().unwrap_or("");
-            match target_str {
-                "version" => {
-                    let release = config::read_config().common.spoof_release;
-                    api::set_uname(&"default".to_string(), &release)?;
-                    config::operation::del_uname_selective("version")?;
-                }
-                "release" => {
-                    let version = config::read_config().common.spoof_version;
-                    api::set_uname(&version, &"default".to_string())?;
-                    config::operation::del_uname_selective("release")?;
-                }
-                "all" => {
-                    api::set_uname(&"default".to_string(), &"default".to_string())?;
-                    config::operation::del_uname_selective("all")?;
-                }
-                "" => {
-                    return Err(anyhow::anyhow!(
-                        "del_uname requires an argument: version, release, or all"
-                    ));
-                }
-                _ => {
-                    return Err(anyhow::anyhow!(
-                        "invalid argument '{}': expected 'version', 'release', or 'all'",
-                        target_str
-                    ));
-                }
-            }
-        }
-        SuSFSSubCommands::DelSusMap { path } => {
-            config::operation::del_sus_map(&path);
-        }
-        SuSFSSubCommands::DelSusKstatStatically {
-            path,
-            ino,
-            dev,
-            nlink,
-            size,
-            atime,
-            atime_nsec,
-            mtime,
-            mtime_nsec,
-            ctime,
-            ctime_nsec,
-            blocks,
-            blksize,
-        } => {
-            config::operation::del_sus_kstat_statically(
-                &path,
-                &ino,
-                &dev,
-                &nlink,
-                &size,
-                &atime,
-                &atime_nsec,
-                &mtime,
-                &mtime_nsec,
-                &ctime,
-                &ctime_nsec,
-                &blocks,
-                &blksize,
-            );
-        }
+        SuSFSSubCommands::DelSusKstatStatically { path } => hybrid::del_kstat(&path)?,
         SuSFSSubCommands::SlotInfo {
             boot_image,
             verbose,

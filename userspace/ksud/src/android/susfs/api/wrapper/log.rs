@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::android::susfs::{
+use crate::android::susfs::api::{
     communicate::{communicate, parse_err},
     magic::{CMD_SUSFS_ENABLE_LOG, ERR_CMD_NOT_SUPPORTED},
 };
@@ -11,14 +11,9 @@ struct SusfsLog {
     err: i32,
 }
 
-/// Enable SuSFS log in kernel.
-pub fn enable_log(enabled: u8) -> Result<()> {
-    if enabled > 1 {
-        return Err(anyhow::format_err!("Invalid value for enabled (0 or 1)"));
-    }
-
+pub fn log(enabled: bool) -> Result<()> {
     let mut info = SusfsLog {
-        enabled: enabled == 1,
+        enabled,
         err: ERR_CMD_NOT_SUPPORTED,
     };
 
