@@ -138,8 +138,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
-import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.shader.isRenderEffectSupported
 import kotlin.coroutines.resume
 
 class MainActivity : ComponentActivity() {
