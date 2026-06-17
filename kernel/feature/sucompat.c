@@ -40,6 +40,7 @@
 #endif
 #include "sulog/event.h"
 #include "compat/kernel_compat.h"
+#include "ksu.h"
 
 #define SU_PATH "/system/bin/su"
 #define SH_PATH "/system/bin/sh"
@@ -117,39 +118,125 @@ static void __user *userspace_stack_buffer(const void *d, size_t len)
 }
 #endif
 
-static char __user *sh_user_path(void)
-{
-    static const char sh_path[] = "/system/bin/sh";
-
-    return userspace_stack_buffer(sh_path, sizeof(sh_path));
-}
+static const char su_path[] = SU_PATH;
+static const char sh_path[] = SH_PATH;
+static const char ksud_path[] = KSUD_PATH;
 
 static char __user *ksud_user_path(void)
 {
-    static const char ksud_path[] = KSUD_PATH;
-
     return userspace_stack_buffer(ksud_path, sizeof(ksud_path));
 }
 
-static const char sh_path[] = SH_PATH;
-static const char su_path[] = SU_PATH;
-static const char ksud_path[] = KSUD_PATH;
+static char __user *sh_user_path(void)
+{
+    return userspace_stack_buffer(sh_path, sizeof(sh_path));
+}
+
+static char __user *empty_user_path(void)
+{
+    return userspace_stack_buffer("", sizeof(""));
+}
+
+static bool is_ksud_exists()
+{
+    struct path path;
+
+    if (kern_path(KSUD_PATH, 0, &path) < 0) {
+        return false;
+    }
+    path_put(&path);
+    return true;
+}
 
 extern bool ksu_kernel_umount_enabled;
 
 #ifdef CONFIG_KSU_TRACEPOINT_HOOK
+#include <linux/file.h>
+#include <linux/namei.h>
+
+long ksu_handle_faccessat_sucompat_internal(int orig_nr, struct pt_regs *regs)
+{
+    const char __user **filename_user, *orig_filename;
+    long ret;
+    const struct cred *old_cred;
+
+    if (!ksu_is_allow_uid_for_current(ksu_get_uid_t(current_uid()))) {
+        goto do_orig_facessat;
+    }
+
+    filename_user = (const char __user **)&PT_REGS_PARM2(regs);
+
+    char path[sizeof(su_path) + 1];
+    memset(path, 0, sizeof(path));
+    strncpy_from_user_nofault(path, *filename_user, sizeof(path));
+
+    if (unlikely(!memcmp(path, su_path, sizeof(su_path)))) {
+        old_cred = override_creds(ksu_cred);
+        if (is_ksud_exists()) {
+            pr_info("faccessat su->ksud!\n");
+            orig_filename = *filename_user;
+            *filename_user = ksud_user_path();
+            ret = ksu_syscall_table[orig_nr](regs);
+            revert_creds(old_cred);
+            *filename_user = orig_filename;
+            return ret;
+        } else {
+            revert_creds(old_cred);
+        }
+    }
+
+do_orig_facessat:
+    return ksu_syscall_table[orig_nr](regs);
+}
+
+long ksu_handle_stat_sucompat_internal(int orig_nr, struct pt_regs *regs)
+{
+    const char __user **filename_user, *orig_filename;
+    long ret;
+    const struct cred *old_cred;
+
+    if (!ksu_is_allow_uid_for_current(ksu_get_uid_t(current_uid()))) {
+        goto do_orig_stat;
+    }
+
+    filename_user = (const char __user **)&PT_REGS_PARM2(regs);
+
+    char path[sizeof(su_path) + 1];
+    memset(path, 0, sizeof(path));
+    strncpy_from_user_nofault(path, *filename_user, sizeof(path));
+
+    if (unlikely(!memcmp(path, su_path, sizeof(su_path)))) {
+        old_cred = override_creds(ksu_cred);
+        if (is_ksud_exists()) {
+            pr_info("newfstatat su->ksud!\n");
+            orig_filename = *filename_user;
+            *filename_user = ksud_user_path();
+            ret = ksu_syscall_table[orig_nr](regs);
+            revert_creds(old_cred);
+            *filename_user = orig_filename;
+            return ret;
+        } else {
+            revert_creds(old_cred);
+        }
+    }
+
+do_orig_stat:
+    return ksu_syscall_table[orig_nr](regs);
+}
 
 // WARNING! THERE HAVE TRYING TO CALL SYSCALL INTERNALLY
 // ENSURE CALL IT ONLY IN TRACEPOINT SYSCALL REDIRECT
-int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user, int orig_nr, const struct pt_regs *regs)
+long ksu_handle_execve_sucompat_internal(const char __user **filename_user, int orig_nr, struct pt_regs *regs)
 {
-    const char su[] = SU_PATH;
     const char __user *fn;
     const char __user *const __user *argv_user = (const char __user *const __user *)PT_REGS_PARM2(regs);
     struct ksu_sulog_pending_event *pending_sucompat = NULL;
-    char path[sizeof(su) + 1];
-    long ret;
+    char path[sizeof(su_path) + 1];
+    long ret, orig_regs[5];
     unsigned long addr;
+    int tmp_fd;
+    struct file *ksud_file;
+    const struct cred *old_cred;
 
     if (unlikely(!filename_user))
         goto do_orig_execve;
@@ -168,29 +255,58 @@ int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user, in
         goto do_orig_execve;
     }
 
-    if (likely(memcmp(path, su, sizeof(su))))
+    if (likely(memcmp(path, su_path, sizeof(su_path))))
         goto do_orig_execve;
 
     pr_info("sys_execve su found\n");
+
+    tmp_fd = get_unused_fd_flags(O_CLOEXEC);
+    if (tmp_fd < 0) {
+        pr_err("alloc tmp fd err: %d\n", tmp_fd);
+        goto do_orig_execve;
+    }
+
+    old_cred = override_creds(ksu_cred);
+    ksud_file = filp_open(KSUD_PATH, O_PATH, 0);
+    revert_creds(old_cred);
+    if (IS_ERR(ksud_file)) {
+        pr_err("open ksud err: %ld\n", PTR_ERR(ksud_file));
+        put_unused_fd(tmp_fd);
+        goto do_orig_execve;
+    }
+
+    fd_install(tmp_fd, ksud_file);
+
     pending_sucompat = ksu_sulog_capture_sucompat_tracepoint(*filename_user, argv_user, GFP_KERNEL);
-    *filename_user = ksud_user_path();
+    // execve(file, argv, environ)
+    // execveat(fd, file, argv, environ, flags)
+    orig_regs[0] = regs->__PT_PARM1_REG;
+    orig_regs[1] = regs->__PT_PARM2_REG;
+    orig_regs[2] = regs->__PT_PARM3_REG;
+    orig_regs[3] = regs->__PT_SYSCALL_PARM4_REG;
+    orig_regs[4] = regs->__PT_PARM5_REG;
+    regs->__PT_PARM5_REG = AT_EMPTY_PATH;
+    regs->__PT_SYSCALL_PARM4_REG = regs->__PT_PARM3_REG;
+    regs->__PT_PARM3_REG = regs->__PT_PARM2_REG;
+    regs->__PT_PARM2_REG = empty_user_path();
+    regs->__PT_PARM1_REG = tmp_fd;
 
     ret = escape_with_root_profile();
     if (ret) {
         pr_err("escape_with_root_profile failed: %ld\n", ret);
-        ksu_sulog_emit_pending(pending_sucompat, ret, GFP_KERNEL);
-        goto do_orig_execve;
     }
+    ksu_sulog_emit_pending(pending_sucompat, ret, GFP_KERNEL);
 
-    ret = ksu_syscall_table[orig_nr](regs);
+    ret = ksu_syscall_table[__NR_execveat](regs);
     if (ret < 0) {
-        pr_err("failed to execve ksud as su: %ld, fallback to sh\n", ret);
-        ksu_sulog_emit_pending(pending_sucompat, ret, GFP_KERNEL);
-        *filename_user = sh_user_path();
-    } else {
-        ksu_sulog_emit_pending(pending_sucompat, ret, GFP_KERNEL);
-        return ret;
+        ksu_close_fd(tmp_fd);
+        regs->__PT_PARM1_REG = orig_regs[0];
+        regs->__PT_PARM2_REG = orig_regs[1];
+        regs->__PT_PARM3_REG = orig_regs[2];
+        regs->__PT_SYSCALL_PARM4_REG = orig_regs[3];
+        regs->__PT_PARM5_REG = orig_regs[4];
     }
+    return ret;
 
 do_orig_execve:
     return ksu_syscall_table[orig_nr](regs);
@@ -344,6 +460,7 @@ int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr, void *
 int ksu_handle_faccessat(int *dfd, const char __user **filename_user, int *mode, int *__unused_flags)
 {
     char path[sizeof(su_path) + 1] = { 0 };
+    const struct cred *old_cred;
 
 #ifndef CONFIG_KSU_TRACEPOINT_HOOK
     if (ksu_is_current_proc_unprivillege()) {
@@ -369,8 +486,15 @@ int ksu_handle_faccessat(int *dfd, const char __user **filename_user, int *mode,
     ksu_strncpy_from_user_nofault(path, *filename_user, sizeof(path));
 
     if (unlikely(!memcmp(path, su_path, sizeof(su_path)))) {
-        pr_info("faccessat su->sh!\n");
-        *filename_user = sh_user_path();
+        old_cred = override_creds(ksu_cred);
+        if (is_ksud_exists()) {
+            pr_info("ksu_handle_faccessat su->sh!\n");
+            *filename_user = sh_user_path();
+        } else {
+            pr_info("no ksud found, don't process faccessat for su!");
+        }
+
+        revert_creds(old_cred);
     }
 
     return 0;
@@ -379,6 +503,8 @@ int ksu_handle_faccessat(int *dfd, const char __user **filename_user, int *mode,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0) && defined(CONFIG_KSU_SUSFS)
 int ksu_handle_stat(int *dfd, struct filename **filename, int *flags)
 {
+    const struct cred *old_cred;
+
     if (ksu_is_current_proc_unprivillege()) {
         return 0;
     }
@@ -400,13 +526,21 @@ int ksu_handle_stat(int *dfd, struct filename **filename, int *flags)
         return 0;
     }
 
-    pr_info("ksu_handle_stat: su->sh!\n");
-    memcpy((void *)((*filename)->name), sh_path, sizeof(sh_path));
+    old_cred = override_creds(ksu_cred);
+    if (is_ksud_exists()) {
+        pr_info("ksu_handle_stat: su->sh!\n");
+        memcpy((void *)((*filename)->name), sh_path, sizeof(sh_path));
+    } else {
+        pr_info("no ksud found, don't process stat for su!");
+    }
+
+    revert_creds(old_cred);
     return 0;
 }
 #else
 int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags)
 {
+    const struct cred *old_cred;
     char path[sizeof(su_path) + 1] = { 0 };
 
 #ifndef CONFIG_KSU_TRACEPOINT_HOOK
@@ -437,8 +571,15 @@ int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags)
     ksu_strncpy_from_user_nofault(path, *filename_user, sizeof(path));
 
     if (unlikely(!memcmp(path, su_path, sizeof(su_path)))) {
-        pr_info("ksu_handle_stat: su->sh!\n");
-        *filename_user = sh_user_path();
+        old_cred = override_creds(ksu_cred);
+        if (is_ksud_exists()) {
+            pr_info("ksu_handle_stat su->sh!\n");
+            *filename_user = sh_user_path();
+        } else {
+            pr_info("no ksud found, don't process stat for su!");
+        }
+
+        revert_creds(old_cred);
     }
 
     return 0;

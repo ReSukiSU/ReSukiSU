@@ -46,7 +46,7 @@ static void ksu_install_fd_to_user(int __user *outp)
 
     if (copy_to_user(outp, &fd, sizeof(fd))) {
         pr_err("install ksu fd reply err\n");
-        do_close_fd(fd);
+        ksu_close_fd(fd);
     }
 }
 

@@ -129,10 +129,6 @@ int ksu_handle_umount(uid_t old_uid, uid_t new_uid)
     const struct cred *saved;
     struct mount_entry *entry;
 
-    if (!ksu_cred) {
-        return 0;
-    }
-
     // There are 6 scenarios:
     // 1. Normal app: zygote -> appuid
     // 2. Isolated process forked from zygote: zygote -> isolated_process

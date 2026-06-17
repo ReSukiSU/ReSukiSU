@@ -52,38 +52,18 @@ static int ksu_handle_init_mark_tracker(const char __user **filename_user)
 
 long __nocfi ksu_hook_newfstatat(int orig_nr, const struct pt_regs *regs)
 {
-    int *dfd;
-    const char __user **filename_user;
-    int *flags;
-
-    // GKI2 always have static_key
     if (!static_branch_unlikely(&ksu_su_compat_enabled))
         return ksu_syscall_table[orig_nr](regs);
 
-    dfd = (int *)&PT_REGS_PARM1(regs);
-    filename_user = (const char __user **)&PT_REGS_PARM2(regs);
-    flags = (int *)&PT_REGS_SYSCALL_PARM4(regs);
-    ksu_handle_stat(dfd, filename_user, flags);
-
-    return ksu_syscall_table[orig_nr](regs);
+    return ksu_handle_stat_sucompat_internal(orig_nr, (struct pt_regs *)regs);
 }
 
 long __nocfi ksu_hook_faccessat(int orig_nr, const struct pt_regs *regs)
 {
-    int *dfd;
-    const char __user **filename_user;
-    int *mode;
-
-    // GKI2 always have static_key
     if (!static_branch_unlikely(&ksu_su_compat_enabled))
         return ksu_syscall_table[orig_nr](regs);
 
-    dfd = (int *)&PT_REGS_PARM1(regs);
-    filename_user = (const char __user **)&PT_REGS_PARM2(regs);
-    mode = (int *)&PT_REGS_PARM3(regs);
-    ksu_handle_faccessat(dfd, filename_user, mode, NULL);
-
-    return ksu_syscall_table[orig_nr](regs);
+    return ksu_handle_faccessat_sucompat_internal(orig_nr, (struct pt_regs *)regs);
 }
 
 // there are for tracepoint syscall redirect hook
@@ -112,7 +92,7 @@ long __nocfi ksu_hook_execve(int orig_nr, const struct pt_regs *regs)
             pr_err("adb root failed: %ld\n", ret);
         }
     } else if (static_branch_likely(&ksu_su_compat_enabled)) {
-        ret = ksu_handle_execve_sucompat_tp_internal(filename_user, orig_nr, regs);
+        ret = ksu_handle_execve_sucompat_internal(filename_user, orig_nr, (struct pt_regs *)regs);
         ksu_sulog_emit_pending(pending_root_execve, ret, GFP_KERNEL);
         return ret;
     }

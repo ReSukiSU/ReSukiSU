@@ -70,15 +70,6 @@ extern ssize_t ksu_kernel_write_compat(struct file *p, const void *buf, size_t c
 #endif
 #endif
 
-static inline int do_close_fd(unsigned int fd)
-{
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
-    return close_fd(fd);
-#else
-    return __close_fd(current->files, fd);
-#endif
-}
-
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3, 9, 0) && !defined(KSU_UL_HAS_FILE_INODE)
 static inline struct inode *file_inode(struct file *f)
 {
@@ -358,5 +349,14 @@ static inline char *sym_name(struct policydb *p, unsigned int sym_num, unsigned 
 #endif
 }
 #endif
+
+static inline int ksu_close_fd(unsigned int fd)
+{
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
+    return close_fd(fd);
+#else
+    return __close_fd(current->files, fd);
+#endif
+}
 
 #endif
