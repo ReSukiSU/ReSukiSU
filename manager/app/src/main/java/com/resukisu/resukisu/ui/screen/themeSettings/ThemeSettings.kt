@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.DesignServices
 import androidx.compose.material.icons.filled.Draw
 import androidx.compose.material.icons.filled.FormatColorFill
 import androidx.compose.material.icons.filled.FormatSize
@@ -46,6 +47,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Opacity
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Wallpaper
@@ -544,14 +546,13 @@ private fun AppearanceSettings(
             visible = !state.useDynamicColor,
             topPadding = 1.dp,
         ) {
-            // TODO ColorPicker seedColor
             // 主题色选择
             ThemeColorSelection(viewModel = viewModel)
         }
 
         item {
             SettingsDropdownWidget(
-                icon = Icons.Filled.Palette,
+                icon = Icons.Filled.Style,
                 title = stringResource(R.string.dynamic_palette_style),
                 items = PaletteStyle.entries.map { it.displayName() },
                 selectedIndex = PaletteStyle.entries.indexOf(state.dynamicPaletteStyle),
@@ -566,7 +567,7 @@ private fun AppearanceSettings(
 
         item {
             SettingsDropdownWidget(
-                icon = Icons.Filled.ColorLens,
+                icon = Icons.Filled.DesignServices,
                 title = stringResource(R.string.dynamic_color_spec),
                 items = ColorSpec.SpecVersion.entries.map { it.displayName() },
                 selectedIndex = ColorSpec.SpecVersion.entries.indexOf(state.dynamicColorSpec),
