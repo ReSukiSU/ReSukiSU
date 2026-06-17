@@ -225,6 +225,7 @@
     <string name="settings_mode_default">默认</string>
     <string name="more_settings">更多设置</string>
     <string name="theme_settings">主题设置</string>
+    <string name="selinux">SELinux</string>
     <string name="selinux_enabled">强制执行</string>
     <string name="selinux_disabled">宽容模式</string>
     <string name="simple_mode">简洁模式</string>
@@ -336,6 +337,7 @@
     <string name="predictive_back_exit_direction">退出方向</string>
     <string name="predictive_back_exit_direction_desc">选择预测性返回的退出方向</string>
     <string name="predictive_back_animation_none">无</string>
+    <string name="predictive_back_animation_aosp">AOSP</string>
     <string name="predictive_back_animation_scale">缩放</string>
     <string name="predictive_back_animation_ksu_classic">KernelSU 经典</string>
     <string name="predictive_back_exit_direction_follow_gesture">跟随手势</string>
@@ -374,6 +376,7 @@
     <string name="warning_of_meta_module_title">需要元模块</string>
     <string name="warning_of_meta_module_summary">这个模块需要挂载一些文件。需要安装元模块，使它正常工作</string>
     <string name="category_all_apps">全部</string>
+    <string name="category_root_apps">Root</string>
     <string name="category_custom_apps">自定义</string>
     <string name="category_default_apps">默认</string>
     <string name="sort_name_asc">名称升序</string>
@@ -464,6 +467,7 @@
     <string name="show_more_module_info_summary">显示额外的模块信息，如更新配置 URL 等</string>
     <string name="susfs_execution_location_label">执行位置</string>
     <string name="susfs_current_execution_location">当前执行位置：%s</string>
+    <string name="susfs_execution_location_service">Service</string>
     <string name="susfs_execution_location_post_fs_data">Post-FS-Data</string>
     <string name="susfs_execution_location_service_description">在系统服务启动后执行</string>
     <string name="susfs_execution_location_post_fs_data_description">在文件系统挂载后但系统完全启动前执行,可能会导致循环重启</string>

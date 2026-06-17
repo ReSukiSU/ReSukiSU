@@ -105,6 +105,7 @@
     <string name="profile_namespace_individual">Індивідуальний</string>
     <string name="profile_groups">Групи</string>
     <string name="profile_capabilities">Можливості</string>
+    <string name="profile_flags_desc_no_new_privs">Запобігти подальшому підвищенню привілеїв через KernelSU в контексті цього root-профілю.</string>
     <string name="profile_selinux_context">Контекст SELinux</string>
     <string name="profile_umount_modules">Відмонтувати модулі</string>
     <string name="failed_to_update_app_profile">Не вдалося оновити профіль додатку для %s</string>
@@ -128,6 +129,8 @@
     <string name="module_changelog">Список змін</string>
     <string name="settings_profile_template">Шаблон профілю додатку</string>
     <string name="settings_profile_template_summary">Керування локальними та онлайн-шаблонами профілю додатку</string>
+    <string name="manage_app_profile">Керувати шаблоном профілю застосунку</string>
+    <string name="recently_installed">Нещодавно встановлені</string>
     <string name="app_profile_template_create">Створити шаблон</string>
     <string name="app_profile_template_edit">Редагувати шаблон</string>
     <string name="app_profile_template_id_invalid">Недійсний ID шаблону</string>
@@ -584,6 +587,11 @@
     <string name="avc_log_spoofing">Підміна журналу AVC</string>
     <string name="avc_log_spoofing_enabled">Підміну журналу AVC увімкнено</string>
     <string name="avc_log_spoofing_disabled">Підміну журналу AVC вимкнено</string>
+    <string name="avc_log_spoofing_description">Вимкнено: Вимкнути підміну sus tcontext \'su\' у журналі avc ядра\n
+Enabled: Увімкнути підміну sus tcontext \'su\' на \'u:r:priv_app:s0:c512,c768\' у журналі avc ядра</string>
+    <string name="avc_log_spoofing_warning">Важлива примітка:\n
+- За замовчуванням у ядрі встановлено значення \'0\'\n
+- Увімкнення цієї функції може іноді ускладнити розробникам визначення причини проблеми під час налагодження дозволів або SELinux, тому користувачам рекомендується вимикати її під час налагодження</string>
     <string name="home_hook_type">Тип хуку</string>
     <string name="kpm_patch_options"></string>
     <string name="kpm_patch_description">Для додавання додаткових функцій KPM</string>
@@ -636,6 +644,9 @@
     <string name="sus_maps_description_text">Приховати реальні шляхи до файлів відображень пам\'яті у /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap]. Зверніть увагу: ця функція не підтримує приховання анонімних відображень пам\'яті та не може приховати inline-хуки або PLT-хуки, спричинені самою впровадженою бібліотекою</string>
     <string name="sus_maps_warning">Важливе попередження: для застосунків з добре реалізованими механізмами виявлення впровадження ця функція може не ефективно обійти виявлення</string>
     <string name="sus_maps_debug_info">Спочатку знайдіть PID та UID цільового застосунку за допомогою ps -enf, потім перевірте відповідні шляхи в /proc/&lt;pid&gt;/maps та порівняйте номери пристроїв із /proc/1/mountinfo для забезпечення відповідності. Тільки при збігу номерів пристроїв функція приховання map працюватиме правильно</string>
+    <string name="uapi_mismatch">Версія uapi менеджера (%1$d) та версія uapi драйвера KernelSU (%2$d) не збігаються.</string>
+    <string name="require_manager_version">Поточна версія менеджера KernelSU %1$d є занадто низькою для коректної роботи KernelSU. Будь ласка, оновіть менеджер до версії %2$d або вище!</string>
+    <string name="require_kernel_version">Поточна версія KernelSU %1$d є занадто низькою для коректної роботи менеджера. Будь ласка, оновіть до версії %2$d або вище!</string>
     <string name="umount_path_manager">Керування шляхами відмонтування</string>
     <string name="umount_path_manager_summary">Керувати шляхами відмонтування ядра</string>
     <string name="no_any_umount_path">Шляхи відмонтування відсутні</string>
@@ -658,6 +669,7 @@
     <string name="please_check_network">Будь ласка, перевірте підключення до Інтернету та спробуйте ще раз</string>
     <string name="confirm_install_module_title">Встановити модуль %s?</string>
     <string name="assets_multiple_select_dialog_title">Виберіть ресурс для встановлення</string>
+    <string name="assets_multiple_select_dialog_content_description">Розмір: %1$s, Кількість завантажень: %2$s</string>
     <string name="assets_multiple_select_dialog_warning">Жодного ресурсу не вибрано</string>
     <string name="installed">Встановлено</string>
     <string name="open_module_home_page">Відкрити домашню сторінку модуля у браузері</string>
