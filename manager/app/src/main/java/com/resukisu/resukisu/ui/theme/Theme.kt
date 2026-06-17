@@ -26,10 +26,9 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
@@ -74,10 +73,13 @@ import androidx.core.net.toUri
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import com.kyant.m3color.hct.Hct
-import com.kyant.m3color.quantize.QuantizerCelebi
-import com.kyant.m3color.scheme.SchemeTonalSpot
-import com.kyant.m3color.score.Score
+import com.kieronquinn.monetcompat.core.MonetCompat
+import com.kieronquinn.monetcompat.interfaces.MonetColorsChangedListener
+import com.materialkolor.PaletteStyle
+import com.materialkolor.dynamicColorScheme
+import com.materialkolor.dynamiccolor.ColorSpec
+import com.materialkolor.quantize.QuantizerCelebi
+import com.materialkolor.score.Score
 import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.ui.theme.util.BackgroundTransformation
 import com.resukisu.resukisu.ui.theme.util.saveTransformedBackground
@@ -99,6 +101,7 @@ import java.security.MessageDigest
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
+import dev.kdrag0n.monet.theme.ColorScheme as MonetCompatColorScheme
 
 @Stable
 object ThemeConfig {
@@ -106,8 +109,11 @@ object ThemeConfig {
     var customBackgroundUri by mutableStateOf<Uri?>(null)
     var backgroundDim by mutableFloatStateOf(0f)
     var forceDarkMode by mutableStateOf<Boolean?>(null)
-    var currentTheme by mutableStateOf<ThemeColors>(ThemeColors.Default)
+    var seedColor by mutableIntStateOf(ThemeSeedColors.Default.toArgb())
     var useDynamicColor by mutableStateOf(false)
+    var monetCompatSeedColor by mutableIntStateOf(ThemeSeedColors.Default.toArgb())
+    var dynamicColorSpec by mutableStateOf(ColorSpec.SpecVersion.SPEC_2021)
+    var dynamicPaletteStyle by mutableStateOf(PaletteStyle.TonalSpot)
 
     // 背景状态
     var backgroundImageLoaded by mutableStateOf(false)
@@ -135,11 +141,11 @@ object ThemeConfig {
     }
 
     fun updateTheme(
-        theme: ThemeColors? = null,
+        seedColor: Int? = null,
         dynamicColor: Boolean? = null,
         darkMode: Boolean? = null
     ) {
-        theme?.let { currentTheme = it }
+        seedColor?.let { this.seedColor = it }
         dynamicColor?.let { useDynamicColor = it }
         darkMode?.let { forceDarkMode = it }
     }
@@ -147,8 +153,11 @@ object ThemeConfig {
     fun reset() {
         customBackgroundUri = null
         forceDarkMode = null
-        currentTheme = ThemeColors.Default
+        seedColor = ThemeSeedColors.Default.toArgb()
         useDynamicColor = false
+        monetCompatSeedColor = ThemeSeedColors.Default.toArgb()
+        dynamicColorSpec = ColorSpec.SpecVersion.SPEC_2021
+        dynamicPaletteStyle = PaletteStyle.TonalSpot
         backgroundImageLoaded = false
         isThemeChanging = false
         preventBackgroundRefresh = false
@@ -178,14 +187,25 @@ object ThemeManager {
         }
     }
 
-    fun saveThemeColors(context: Context, themeName: String) {
-        context.appPreferences.putString("theme_colors", themeName)
-        ThemeConfig.currentTheme = ThemeColors.fromName(themeName)
+    fun saveSeedColor(context: Context, seedColor: Int) {
+        context.appPreferences.putInt("theme_seed_color", seedColor)
+        ThemeConfig.seedColor = seedColor
     }
 
-    fun loadThemeColors(context: Context) {
-        val themeName = context.appPreferences.getString("theme_colors", "default") ?: "default"
-        ThemeConfig.currentTheme = ThemeColors.fromName(themeName)
+    fun loadSeedColor(context: Context) {
+        val prefs = context.appPreferences
+        if (!prefs.contains("theme_seed_color")) {
+            val legacyThemeName = prefs.getString("theme_colors", "default") ?: "default"
+            val migratedSeedColor = ThemeSeedColors.fromLegacyNameArgb(legacyThemeName)
+            prefs.putInt("theme_seed_color", migratedSeedColor)
+            ThemeConfig.seedColor = migratedSeedColor
+            return
+        }
+
+        ThemeConfig.seedColor = prefs.getInt(
+            "theme_seed_color",
+            ThemeSeedColors.Default.toArgb()
+        )
     }
 
     fun saveDynamicColorState(context: Context, enabled: Boolean) {
@@ -197,9 +217,39 @@ object ThemeManager {
     fun loadDynamicColorState(context: Context) {
         val enabled = context.appPreferences.getBoolean(
             "use_dynamic_color",
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+            true
         )
         ThemeConfig.useDynamicColor = enabled
+    }
+
+    fun saveDynamicColorSpec(context: Context, spec: ColorSpec.SpecVersion) {
+        context.appPreferences.putString("dynamic_color_spec", spec.name)
+        ThemeConfig.dynamicColorSpec = spec
+    }
+
+    fun loadDynamicColorSpec(context: Context) {
+        val specName = context.appPreferences.getString(
+            "dynamic_color_spec",
+            ColorSpec.SpecVersion.SPEC_2021.name
+        )
+        ThemeConfig.dynamicColorSpec = ColorSpec.SpecVersion.entries
+            .find { it.name == specName }
+            ?: ColorSpec.SpecVersion.SPEC_2021
+    }
+
+    fun saveDynamicPaletteStyle(context: Context, style: PaletteStyle) {
+        context.appPreferences.putString("dynamic_palette_style", style.name)
+        ThemeConfig.dynamicPaletteStyle = style
+    }
+
+    fun loadDynamicPaletteStyle(context: Context) {
+        val styleName = context.appPreferences.getString(
+            "dynamic_palette_style",
+            PaletteStyle.TonalSpot.name
+        )
+        ThemeConfig.dynamicPaletteStyle = PaletteStyle.entries
+            .find { it.name == styleName }
+            ?: PaletteStyle.TonalSpot
     }
 }
 
@@ -404,14 +454,63 @@ private fun ThemeInitializer(context: Context, systemIsDark: Boolean) {
     LaunchedEffect(Unit) {
         scope.launch {
             ThemeManager.loadThemeMode(context)
-            ThemeManager.loadThemeColors(context)
+            ThemeManager.loadSeedColor(context)
             ThemeManager.loadDynamicColorState(context)
+            ThemeManager.loadDynamicColorSpec(context)
+            ThemeManager.loadDynamicPaletteStyle(context)
             CardConfig.load(context)
 
             if (!ThemeConfig.backgroundImageLoaded && !ThemeConfig.preventBackgroundRefresh) {
                 BackgroundManager.loadCustomBackground(context)
             }
         }
+    }
+
+    MonetCompatInitializer(context)
+}
+
+@Composable
+private fun MonetCompatInitializer(context: Context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) return
+
+    val scope = rememberCoroutineScope()
+
+    DisposableEffect(context) {
+        val monet = MonetCompat.setup(context)
+        monet.defaultPrimaryColor = ThemeConfig.seedColor
+        monet.defaultSecondaryColor = ThemeConfig.seedColor
+        monet.defaultAccentColor = ThemeConfig.seedColor
+
+        val listener = object : MonetColorsChangedListener {
+            override fun onMonetColorsChanged(
+                monet: MonetCompat,
+                monetColors: MonetCompatColorScheme,
+                isInitialChange: Boolean
+            ) {
+                scope.launch {
+                    ThemeConfig.monetCompatSeedColor =
+                        monet.getSelectedWallpaperColor() ?: ThemeConfig.seedColor
+                }
+            }
+        }
+
+        monet.addMonetColorsChangedListener(listener, notifySelf = true)
+        onDispose {
+            monet.removeMonetColorsChangedListener(listener)
+        }
+    }
+
+    LaunchedEffect(ThemeConfig.useDynamicColor, ThemeConfig.seedColor) {
+        if (!ThemeConfig.useDynamicColor) return@LaunchedEffect
+
+        val monet = MonetCompat.setup(context)
+        monet.defaultPrimaryColor = ThemeConfig.seedColor
+        monet.defaultSecondaryColor = ThemeConfig.seedColor
+        monet.defaultAccentColor = ThemeConfig.seedColor
+        monet.updateConfiguration(context)
+        ThemeConfig.monetCompatSeedColor =
+            monet.getSelectedWallpaperColor() ?: ThemeConfig.seedColor
+        monet.updateMonetColors()
     }
 }
 
@@ -1266,63 +1365,42 @@ private fun generateTypography(): androidx.compose.material3.Typography {
     )
 }
 
-// TODO migrate to MaterialKolor, provide scheme settings/dynamic seed color/spec 2025 to user settings
 @Composable
 private fun createColorScheme(
     darkTheme: Boolean,
     dynamicColor: Boolean
 ): ColorScheme {
-    return when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val seedColor =
-                if (ThemeConfig.isUseBackgroundSeedColor) backgroundSeedColor else colorResource(id = R.color.system_accent1_500).toArgb()
-            val hct = Hct.fromInt(seedColor)
-            val scheme = SchemeTonalSpot(hct, darkTheme, 0.0)
+    val seedColor =
+        when {
+            dynamicColor && ThemeConfig.isUseBackgroundSeedColor && backgroundSeedColor != 0 -> {
+                backgroundSeedColor
+            }
 
-            fun Int.toColor(): Color = Color(this)
-            MaterialTheme.colorScheme.copy(
-                primary = scheme.primary.toColor(),
-                onPrimary = scheme.onPrimary.toColor(),
-                primaryContainer = scheme.primaryContainer.toColor(),
-                onPrimaryContainer = scheme.onPrimaryContainer.toColor(),
-                inversePrimary = scheme.inversePrimary.toColor(),
-                secondary = scheme.secondary.toColor(),
-                onSecondary = scheme.onSecondary.toColor(),
-                secondaryContainer = scheme.secondaryContainer.toColor(),
-                onSecondaryContainer = scheme.onSecondaryContainer.toColor(),
-                tertiary = scheme.tertiary.toColor(),
-                onTertiary = scheme.onTertiary.toColor(),
-                tertiaryContainer = scheme.tertiaryContainer.toColor(),
-                onTertiaryContainer = scheme.onTertiaryContainer.toColor(),
-                background = scheme.background.toColor(),
-                onBackground = scheme.onBackground.toColor(),
-                surface = scheme.surface.toColor(),
-                onSurface = scheme.onSurface.toColor(),
-                surfaceVariant = scheme.surfaceVariant.toColor(),
-                onSurfaceVariant = scheme.onSurfaceVariant.toColor(),
-                surfaceTint = scheme.primary.toColor(),
-                inverseSurface = scheme.inverseSurface.toColor(),
-                inverseOnSurface = scheme.inverseOnSurface.toColor(),
-                error = scheme.error.toColor(),
-                onError = scheme.onError.toColor(),
-                errorContainer = scheme.errorContainer.toColor(),
-                onErrorContainer = scheme.onErrorContainer.toColor(),
-                outline = scheme.outline.toColor(),
-                outlineVariant = scheme.outlineVariant.toColor(),
-                scrim = scheme.scrim.toColor(),
-                surfaceBright = scheme.surfaceBright.toColor(),
-                surfaceDim = scheme.surfaceDim.toColor(),
-                surfaceContainer = scheme.surfaceContainer.toColor(),
-                surfaceContainerHigh = scheme.surfaceContainerHigh.toColor(),
-                surfaceContainerHighest = scheme.surfaceContainerHighest.toColor(),
-                surfaceContainerLow = scheme.surfaceContainerLow.toColor(),
-                surfaceContainerLowest = scheme.surfaceContainerLowest.toColor(),
-            )
+            dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+                colorResource(id = R.color.system_accent1_500).toArgb()
+            }
+
+            dynamicColor -> {
+                ThemeConfig.monetCompatSeedColor
+            }
+
+            else -> {
+                ThemeConfig.seedColor
+            }
         }
 
-        darkTheme -> createDarkColorScheme()
-        else -> createLightColorScheme()
-    }
+    return dynamicColorScheme(
+        seedColor = Color(seedColor),
+        isDark = darkTheme,
+        style = ThemeConfig.dynamicPaletteStyle,
+        specVersion = ThemeConfig.dynamicColorSpec,
+        modifyColorScheme = { scheme ->
+            scheme.copy(
+                background = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else scheme.background,
+                surface = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else scheme.surface,
+            )
+        }
+    )
 }
 
 @Composable
@@ -1347,84 +1425,6 @@ private fun SystemBarController(darkMode: Boolean) {
         )
     }
 }
-
-@Composable
-private fun createDarkColorScheme() = darkColorScheme(
-    primary = ThemeConfig.currentTheme.primaryDark,
-    onPrimary = ThemeConfig.currentTheme.onPrimaryDark,
-    primaryContainer = ThemeConfig.currentTheme.primaryContainerDark,
-    onPrimaryContainer = ThemeConfig.currentTheme.onPrimaryContainerDark,
-    secondary = ThemeConfig.currentTheme.secondaryDark,
-    onSecondary = ThemeConfig.currentTheme.onSecondaryDark,
-    secondaryContainer = ThemeConfig.currentTheme.secondaryContainerDark,
-    onSecondaryContainer = ThemeConfig.currentTheme.onSecondaryContainerDark,
-    tertiary = ThemeConfig.currentTheme.tertiaryDark,
-    onTertiary = ThemeConfig.currentTheme.onTertiaryDark,
-    tertiaryContainer = ThemeConfig.currentTheme.tertiaryContainerDark,
-    onTertiaryContainer = ThemeConfig.currentTheme.onTertiaryContainerDark,
-    error = ThemeConfig.currentTheme.errorDark,
-    onError = ThemeConfig.currentTheme.onErrorDark,
-    errorContainer = ThemeConfig.currentTheme.errorContainerDark,
-    onErrorContainer = ThemeConfig.currentTheme.onErrorContainerDark,
-    background = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else ThemeConfig.currentTheme.backgroundDark,
-    onBackground = ThemeConfig.currentTheme.onBackgroundDark,
-    surface = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else ThemeConfig.currentTheme.surfaceDark,
-    onSurface = ThemeConfig.currentTheme.onSurfaceDark,
-    surfaceVariant = ThemeConfig.currentTheme.surfaceVariantDark,
-    onSurfaceVariant = ThemeConfig.currentTheme.onSurfaceVariantDark,
-    outline = ThemeConfig.currentTheme.outlineDark,
-    outlineVariant = ThemeConfig.currentTheme.outlineVariantDark,
-    scrim = ThemeConfig.currentTheme.scrimDark,
-    inverseSurface = ThemeConfig.currentTheme.inverseSurfaceDark,
-    inverseOnSurface = ThemeConfig.currentTheme.inverseOnSurfaceDark,
-    inversePrimary = ThemeConfig.currentTheme.inversePrimaryDark,
-    surfaceDim = ThemeConfig.currentTheme.surfaceDimDark,
-    surfaceBright = ThemeConfig.currentTheme.surfaceBrightDark,
-    surfaceContainerLowest = ThemeConfig.currentTheme.surfaceContainerLowestDark,
-    surfaceContainerLow = ThemeConfig.currentTheme.surfaceContainerLowDark,
-    surfaceContainer = ThemeConfig.currentTheme.surfaceContainerDark,
-    surfaceContainerHigh = ThemeConfig.currentTheme.surfaceContainerHighDark,
-    surfaceContainerHighest = ThemeConfig.currentTheme.surfaceContainerHighestDark,
-)
-
-@Composable
-private fun createLightColorScheme() = lightColorScheme(
-    primary = ThemeConfig.currentTheme.primaryLight,
-    onPrimary = ThemeConfig.currentTheme.onPrimaryLight,
-    primaryContainer = ThemeConfig.currentTheme.primaryContainerLight,
-    onPrimaryContainer = ThemeConfig.currentTheme.onPrimaryContainerLight,
-    secondary = ThemeConfig.currentTheme.secondaryLight,
-    onSecondary = ThemeConfig.currentTheme.onSecondaryLight,
-    secondaryContainer = ThemeConfig.currentTheme.secondaryContainerLight,
-    onSecondaryContainer = ThemeConfig.currentTheme.onSecondaryContainerLight,
-    tertiary = ThemeConfig.currentTheme.tertiaryLight,
-    onTertiary = ThemeConfig.currentTheme.onTertiaryLight,
-    tertiaryContainer = ThemeConfig.currentTheme.tertiaryContainerLight,
-    onTertiaryContainer = ThemeConfig.currentTheme.onTertiaryContainerLight,
-    error = ThemeConfig.currentTheme.errorLight,
-    onError = ThemeConfig.currentTheme.onErrorLight,
-    errorContainer = ThemeConfig.currentTheme.errorContainerLight,
-    onErrorContainer = ThemeConfig.currentTheme.onErrorContainerLight,
-    background = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else ThemeConfig.currentTheme.backgroundLight,
-    onBackground = ThemeConfig.currentTheme.onBackgroundLight,
-    surface = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else ThemeConfig.currentTheme.surfaceLight,
-    onSurface = ThemeConfig.currentTheme.onSurfaceLight,
-    surfaceVariant = ThemeConfig.currentTheme.surfaceVariantLight,
-    onSurfaceVariant = ThemeConfig.currentTheme.onSurfaceVariantLight,
-    outline = ThemeConfig.currentTheme.outlineLight,
-    outlineVariant = ThemeConfig.currentTheme.outlineVariantLight,
-    scrim = ThemeConfig.currentTheme.scrimLight,
-    inverseSurface = ThemeConfig.currentTheme.inverseSurfaceLight,
-    inverseOnSurface = ThemeConfig.currentTheme.inverseOnSurfaceLight,
-    inversePrimary = ThemeConfig.currentTheme.inversePrimaryLight,
-    surfaceDim = ThemeConfig.currentTheme.surfaceDimLight,
-    surfaceBright = ThemeConfig.currentTheme.surfaceBrightLight,
-    surfaceContainerLowest = ThemeConfig.currentTheme.surfaceContainerLowestLight,
-    surfaceContainerLow = ThemeConfig.currentTheme.surfaceContainerLowLight,
-    surfaceContainer = ThemeConfig.currentTheme.surfaceContainerLight,
-    surfaceContainerHigh = ThemeConfig.currentTheme.surfaceContainerHighLight,
-    surfaceContainerHighest = ThemeConfig.currentTheme.surfaceContainerHighestLight,
-)
 
 // 向后兼容
 @OptIn(DelicateCoroutinesApi::class)
@@ -1454,13 +1454,21 @@ fun Context.saveThemeMode(forceDark: Boolean?) {
 }
 
 
-fun Context.saveThemeColors(themeName: String) {
-    ThemeManager.saveThemeColors(this, themeName)
+fun Context.saveThemeSeedColor(seedColor: Int) {
+    ThemeManager.saveSeedColor(this, seedColor)
 }
 
 
 fun Context.saveDynamicColorState(enabled: Boolean) {
     ThemeManager.saveDynamicColorState(this, enabled)
+}
+
+fun Context.saveDynamicColorSpec(spec: ColorSpec.SpecVersion) {
+    ThemeManager.saveDynamicColorSpec(this, spec)
+}
+
+fun Context.saveDynamicPaletteStyle(style: PaletteStyle) {
+    ThemeManager.saveDynamicPaletteStyle(this, style)
 }
 
 @Composable

@@ -1,4 +1,4 @@
-package com.resukisu.resukisu.ui.screen.moreSettings.util
+package com.resukisu.resukisu.ui.screen.themeSettings.util
 
 import android.content.ComponentName
 import android.content.Context

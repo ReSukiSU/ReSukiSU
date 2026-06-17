@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import coil.Coil
 import coil.ImageLoader
+import com.kieronquinn.monetcompat.core.MonetCompat
 import com.resukisu.resukisu.data.AppPreferencesRepository
 import com.resukisu.resukisu.ui.util.generateMainShellBuilder
 import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
@@ -70,6 +71,10 @@ class KernelSUApplication : Application(), ViewModelStoreOwner {
         }
 
         MainShell.setBuilder(generateMainShellBuilder())
+
+        runCatching {
+            MonetCompat.enablePaletteCompat()
+        }
 
         ensurePreferencesRepository()
 

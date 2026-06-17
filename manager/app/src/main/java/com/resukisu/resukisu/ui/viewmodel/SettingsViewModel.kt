@@ -11,22 +11,25 @@ import android.widget.Toast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.materialkolor.PaletteStyle
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.magica.BootCompletedReceiver
-import com.resukisu.resukisu.ui.screen.moreSettings.util.getCurrentAppLocale
-import com.resukisu.resukisu.ui.screen.moreSettings.util.toggleLauncherIcon
+import com.resukisu.resukisu.ui.screen.themeSettings.util.getCurrentAppLocale
+import com.resukisu.resukisu.ui.screen.themeSettings.util.toggleLauncherIcon
 import com.resukisu.resukisu.ui.theme.BackgroundManager
 import com.resukisu.resukisu.ui.theme.CardConfig
-import com.resukisu.resukisu.ui.theme.ThemeColors
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.saveAndApplyCustomBackground
 import com.resukisu.resukisu.ui.theme.saveCustomBackground
+import com.resukisu.resukisu.ui.theme.saveDynamicColorSpec
 import com.resukisu.resukisu.ui.theme.saveDynamicColorState
-import com.resukisu.resukisu.ui.theme.saveThemeColors
+import com.resukisu.resukisu.ui.theme.saveDynamicPaletteStyle
 import com.resukisu.resukisu.ui.theme.saveThemeMode
+import com.resukisu.resukisu.ui.theme.saveThemeSeedColor
 import com.resukisu.resukisu.ui.util.execKsud
 import com.resukisu.resukisu.ui.util.getFeaturePersistValue
 import com.resukisu.resukisu.ui.util.getFeatureStatus
@@ -72,6 +75,8 @@ data class SettingsUiState(
     val themeMode: Int = 0,
     val themeOptions: List<String> = emptyList(),
     val useDynamicColor: Boolean = false,
+    val dynamicColorSpec: ColorSpec.SpecVersion = ColorSpec.SpecVersion.SPEC_2021,
+    val dynamicPaletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
     val showLanguageDialog: Boolean = false,
     val currentAppLocale: Locale? = null,
     val showThemeColorDialog: Boolean = false,
@@ -134,6 +139,8 @@ class SettingsViewModel : ViewModel() {
                     context.getString(R.string.theme_dark)
                 ),
                 useDynamicColor = ThemeConfig.useDynamicColor,
+                dynamicColorSpec = ThemeConfig.dynamicColorSpec,
+                dynamicPaletteStyle = ThemeConfig.dynamicPaletteStyle,
                 currentAppLocale = getCurrentAppLocale(context),
                 useAltIcon = prefs.getBoolean("use_alt_icon", false),
                 cardAlpha = CardConfig.cardAlpha,
@@ -285,25 +292,25 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
-    fun handleThemeColorChange(context: Context, theme: ThemeColors) {
-        context.saveThemeColors(
-            when (theme) {
-                ThemeColors.Green -> "green"
-                ThemeColors.Purple -> "purple"
-                ThemeColors.Orange -> "orange"
-                ThemeColors.Pink -> "pink"
-                ThemeColors.Gray -> "gray"
-                ThemeColors.Yellow -> "yellow"
-                else -> "default"
-            }
-        )
-        ThemeConfig.updateTheme(theme = theme)
+    fun handleThemeColorChange(context: Context, seedColor: Int) {
+        context.saveThemeSeedColor(seedColor)
+        ThemeConfig.updateTheme(seedColor = seedColor)
     }
 
     fun handleDynamicColorChange(context: Context, enabled: Boolean) {
         context.saveDynamicColorState(enabled)
         ThemeConfig.updateTheme(dynamicColor = enabled)
         _uiState.update { it.copy(useDynamicColor = enabled) }
+    }
+
+    fun handleDynamicColorSpecChange(context: Context, spec: ColorSpec.SpecVersion) {
+        context.saveDynamicColorSpec(spec)
+        _uiState.update { it.copy(dynamicColorSpec = spec) }
+    }
+
+    fun handleDynamicPaletteStyleChange(context: Context, style: PaletteStyle) {
+        context.saveDynamicPaletteStyle(style)
+        _uiState.update { it.copy(dynamicPaletteStyle = style) }
     }
 
     fun getDpiFriendlyName(context: Context, dpi: Int): String {

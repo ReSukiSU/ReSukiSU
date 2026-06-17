@@ -348,10 +348,10 @@ fun SettingsPage(bottomPadding: Dp) {
                             // 更多设置
                             SettingsJumpPageWidget(
                                 icon = Icons.Filled.Settings,
-                                title = stringResource(R.string.more_settings),
-                                description = stringResource(R.string.more_settings),
+                                title = stringResource(R.string.theme_settings),
+                                description = stringResource(R.string.theme_settings),
                                 onClick = {
-                                    navigator.push(Route.MoreSettings)
+                                    navigator.push(Route.ThemeSettings)
                                 }
                             )
                         }

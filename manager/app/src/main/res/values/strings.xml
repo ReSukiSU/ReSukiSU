@@ -227,6 +227,7 @@
     <string name="feature_status_managed_summary">This feature is managed by a module</string>
     <string name="settings_mode_default">Default</string>
     <string name="more_settings">More settings</string>
+    <string name="theme_settings">Theme settings</string>
     <string name="selinux">SELinux</string>
     <string name="selinux_enabled">Enabled</string>
     <string name="selinux_disabled">Disabled</string>
@@ -252,6 +253,8 @@
     <string name="theme_dark">Dark</string>
     <string name="dynamic_color_title">Dynamic colours</string>
     <string name="dynamic_color_summary">Dynamic colours using system themes</string>
+    <string name="dynamic_palette_style">Palette style</string>
+    <string name="dynamic_color_spec">Color spec</string>
     <string name="choose_theme_color">Choose a theme colour</string>
     <string name="color_default">Blue</string>
     <string name="color_green">Green</string>

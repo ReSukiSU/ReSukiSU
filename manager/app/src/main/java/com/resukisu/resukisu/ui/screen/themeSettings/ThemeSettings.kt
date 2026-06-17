@@ -1,4 +1,4 @@
-package com.resukisu.resukisu.ui.screen.moreSettings
+package com.resukisu.resukisu.ui.screen.themeSettings
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -85,6 +86,8 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
+import com.materialkolor.PaletteStyle
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.ui.component.ConfirmResult
@@ -98,13 +101,11 @@ import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
-import com.resukisu.resukisu.ui.screen.moreSettings.component.ColorCircle
-import com.resukisu.resukisu.ui.screen.moreSettings.component.LanguageSelectionDialog
-import com.resukisu.resukisu.ui.screen.moreSettings.component.MoreSettingsDialogs
-import com.resukisu.resukisu.ui.screen.moreSettings.util.restartActivity
+import com.resukisu.resukisu.ui.screen.themeSettings.component.LanguageSelectionDialog
+import com.resukisu.resukisu.ui.screen.themeSettings.component.ThemeSettingsDialogs
+import com.resukisu.resukisu.ui.screen.themeSettings.util.restartActivity
 import com.resukisu.resukisu.ui.theme.BackgroundManager
 import com.resukisu.resukisu.ui.theme.CardConfig
-import com.resukisu.resukisu.ui.theme.ThemeColors
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
@@ -123,14 +124,13 @@ import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.math.roundToInt
 
-// TODO Rename this screen to ThemeSettingsScreen, and drop SELinux config, rewrite dynamic manager
 @SuppressLint(
     "LocalContextConfigurationRead", "LocalContextResourcesRead", "ObsoleteSdkInt",
     "RestrictedApi"
 )
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun MoreSettingsScreen() {
+fun ThemeSettingsScreen() {
     // 顶部滚动行为
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
@@ -220,7 +220,7 @@ fun MoreSettingsScreen() {
     }
 
     // 各种设置对话框
-    MoreSettingsDialogs(
+    ThemeSettingsDialogs(
         state = settingsState,
         viewModel = settingsViewModel
     )
@@ -239,7 +239,7 @@ fun MoreSettingsScreen() {
                     .blurEffect(),
                 title = {
                     Text(
-                        text = stringResource(R.string.more_settings)
+                        text = stringResource(R.string.theme_settings)
                     )
                 },
                 navigationIcon = {
@@ -357,6 +357,23 @@ fun MoreSettingsScreen() {
             }
         }
     }
+}
+
+private fun PaletteStyle.displayName(): String = when (this) {
+    PaletteStyle.TonalSpot -> "Tonal Spot"
+    PaletteStyle.Neutral -> "Neutral"
+    PaletteStyle.Vibrant -> "Vibrant"
+    PaletteStyle.Expressive -> "Expressive"
+    PaletteStyle.Rainbow -> "Rainbow"
+    PaletteStyle.FruitSalad -> "Fruit Salad"
+    PaletteStyle.Monochrome -> "Monochrome"
+    PaletteStyle.Fidelity -> "Fidelity"
+    PaletteStyle.Content -> "Content"
+}
+
+private fun ColorSpec.SpecVersion.displayName(): String = when (this) {
+    ColorSpec.SpecVersion.SPEC_2021 -> "Spec 2021"
+    ColorSpec.SpecVersion.SPEC_2025 -> "Spec 2025"
 }
 
 @Composable
@@ -512,26 +529,56 @@ private fun AppearanceSettings(
             )
         }
 
-        // TODO MonetCompat with Android S-, Choose System Seed Color or Custom background color
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            item {
-                // 动态颜色开关
-                SettingsSwitchWidget(
-                    icon = Icons.Filled.ColorLens,
-                    title = stringResource(R.string.dynamic_color_title),
-                    description = stringResource(R.string.dynamic_color_summary),
-                    checked = state.useDynamicColor,
-                    onCheckedChange = { viewModel.handleDynamicColorChange(context, it) }
-                )
-            }
+        item {
+            // 动态颜色开关
+            SettingsSwitchWidget(
+                icon = Icons.Filled.ColorLens,
+                title = stringResource(R.string.dynamic_color_title),
+                description = stringResource(R.string.dynamic_color_summary),
+                checked = state.useDynamicColor,
+                onCheckedChange = { viewModel.handleDynamicColorChange(context, it) }
+            )
         }
 
         item(
-            visible = !state.useDynamicColor || Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+            visible = !state.useDynamicColor,
+            topPadding = 1.dp,
         ) {
             // TODO ColorPicker seedColor
             // 主题色选择
             ThemeColorSelection(viewModel = viewModel)
+        }
+
+        item {
+            SettingsDropdownWidget(
+                icon = Icons.Filled.Palette,
+                title = stringResource(R.string.dynamic_palette_style),
+                items = PaletteStyle.entries.map { it.displayName() },
+                selectedIndex = PaletteStyle.entries.indexOf(state.dynamicPaletteStyle),
+                onSelectedIndexChange = { index ->
+                    viewModel.handleDynamicPaletteStyleChange(
+                        context,
+                        PaletteStyle.entries.getOrElse(index) { PaletteStyle.TonalSpot }
+                    )
+                }
+            )
+        }
+
+        item {
+            SettingsDropdownWidget(
+                icon = Icons.Filled.ColorLens,
+                title = stringResource(R.string.dynamic_color_spec),
+                items = ColorSpec.SpecVersion.entries.map { it.displayName() },
+                selectedIndex = ColorSpec.SpecVersion.entries.indexOf(state.dynamicColorSpec),
+                onSelectedIndexChange = { index ->
+                    viewModel.handleDynamicColorSpecChange(
+                        context,
+                        ColorSpec.SpecVersion.entries.getOrElse(index) {
+                            ColorSpec.SpecVersion.SPEC_2021
+                        }
+                    )
+                }
+            )
         }
 
         item {
@@ -724,42 +771,19 @@ private fun ThemeColorSelection(viewModel: SettingsViewModel) {
     SettingsBaseWidget(
         icon = Icons.Default.Palette,
         title = stringResource(R.string.theme_color),
-        description = when (ThemeConfig.currentTheme) {
-            is ThemeColors.Green -> stringResource(R.string.color_green)
-            is ThemeColors.Purple -> stringResource(R.string.color_purple)
-            is ThemeColors.Orange -> stringResource(R.string.color_orange)
-            is ThemeColors.Pink -> stringResource(R.string.color_pink)
-            is ThemeColors.Gray -> stringResource(R.string.color_gray)
-            is ThemeColors.Yellow -> stringResource(R.string.color_yellow)
-            else -> stringResource(R.string.color_default)
-        },
+        description = ThemeConfig.seedColor.toSeedColorHex(),
         onClick = { viewModel.setThemeColorDialogVisible(true) },
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(start = 8.dp)
-        ) {
-            val theme = ThemeConfig.currentTheme
-            val isDark = isSystemInDarkTheme()
-
-            ColorCircle(
-                color = if (isDark) theme.primaryDark else theme.primaryLight,
-                isSelected = false,
-                modifier = Modifier.padding(horizontal = 2.dp)
-            )
-            ColorCircle(
-                color = if (isDark) theme.secondaryDark else theme.secondaryLight,
-                isSelected = false,
-                modifier = Modifier.padding(horizontal = 2.dp)
-            )
-            ColorCircle(
-                color = if (isDark) theme.tertiaryDark else theme.tertiaryLight,
-                isSelected = false,
-                modifier = Modifier.padding(horizontal = 2.dp)
-            )
-        }
+        Box(
+            modifier = Modifier
+                .size(20.dp)
+                .clip(CircleShape)
+                .background(Color(ThemeConfig.seedColor))
+        )
     }
 }
+
+private fun Int.toSeedColorHex(): String = "#%06X".format(this and 0x00FFFFFF)
 
 @Composable
 private fun DpiSliderControls(

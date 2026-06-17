@@ -26,7 +26,7 @@ object ThemeUtils {
         settingsViewModel.initializeFirstRunSettings(activity)
 
         loadThemeMode()
-        loadThemeColors()
+        loadThemeSeedColor()
         loadDynamicColorState()
         CardConfig.load(activity.applicationContext)
     }
@@ -69,7 +69,7 @@ object ThemeUtils {
     private fun loadThemeMode() {
     }
 
-    private fun loadThemeColors() {
+    private fun loadThemeSeedColor() {
     }
 
     private fun loadDynamicColorState() {

@@ -77,6 +77,9 @@ class AppPreferencesRepository(
     fun getStringSet(key: String, defaultValue: Set<String> = emptySet()): Set<String> =
         _preferences.value[stringSetPreferencesKey(key)] ?: defaultValue
 
+    fun contains(key: String): Boolean =
+        _preferences.value.asMap().keys.any { it.name == key }
+
     fun putBoolean(key: String, value: Boolean) {
         updateCachedValue(booleanPreferencesKey(key), value)
         editAsync { it[booleanPreferencesKey(key)] = value }

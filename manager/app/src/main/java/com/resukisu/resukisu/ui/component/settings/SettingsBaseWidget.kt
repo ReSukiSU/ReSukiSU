@@ -304,7 +304,7 @@ fun SettingsBaseWidget(
                 .alpha(alpha)
                 .padding(
                     top = dynamicInternalPadding,
-                    bottom = if (description == null) dynamicInternalPadding else 0.dp
+                    bottom = if (description == null && descriptionColumnContent == null) dynamicInternalPadding else 0.dp
                 )
         ) {
             title?.let {

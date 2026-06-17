@@ -1,12 +1,14 @@
-package com.resukisu.resukisu.ui.screen.moreSettings.component
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
+package com.resukisu.resukisu.ui.screen.themeSettings.component
+
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
@@ -14,14 +16,20 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -32,25 +40,24 @@ import com.maxkeppeler.sheets.list.models.ListOption
 import com.maxkeppeler.sheets.list.models.ListSelection
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.data.appPreferences
-import com.resukisu.resukisu.ui.screen.moreSettings.util.launchSystemLanguageSettings
-import com.resukisu.resukisu.ui.screen.moreSettings.util.useSystemLanguageSettings
-import com.resukisu.resukisu.ui.theme.ThemeColors
+import com.resukisu.resukisu.ui.screen.themeSettings.util.launchSystemLanguageSettings
+import com.resukisu.resukisu.ui.screen.themeSettings.util.useSystemLanguageSettings
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.viewmodel.SettingsUiState
 import com.resukisu.resukisu.ui.viewmodel.SettingsViewModel
+import android.graphics.Color as AndroidColor
 
 @Composable
-fun MoreSettingsDialogs(
+fun ThemeSettingsDialogs(
     state: SettingsUiState,
     viewModel: SettingsViewModel
 ) {
-    // 主题色选择对话框
     if (state.showThemeColorDialog) {
         val context = LocalContext.current
-        // FIXME Dynamic calculate
         ThemeColorDialog(
-            onColorSelected = { theme ->
-                viewModel.handleThemeColorChange(context, theme)
+            currentSeedColor = ThemeConfig.seedColor,
+            onColorSelected = { seedColor ->
+                viewModel.handleThemeColorChange(context, seedColor)
                 viewModel.setThemeColorDialogVisible(false)
             },
             onDismiss = { viewModel.setThemeColorDialogVisible(false) }
@@ -69,22 +76,14 @@ fun LanguageSelectionDialog(
     val systemLanguage = stringResource(R.string.settings_language)
     val prefs = context.appPreferences
 
-    // Check if should use system language settings
     if (useSystemLanguageSettings) {
-        // Android 13+ - Jump to system settings
         launchSystemLanguageSettings(context)
         onDismiss()
     } else {
-        // Android < 13 - Show app language selector
-        // Dynamically detect supported locales from resources
         val supportedLocales = remember {
             val locales = mutableListOf<java.util.Locale>()
+            locales.add(java.util.Locale.ROOT)
 
-            // Add system default first
-            locales.add(java.util.Locale.ROOT) // This will represent "System Default"
-
-            // Dynamically detect available locales by checking resource directories
-            // FIXME From manifest
             val resourceDirs = listOf(
                 "ar", "bg", "de", "fa", "fr", "hu", "in", "it",
                 "ja", "ko", "pl", "pt-rBR", "ru", "th", "tr",
@@ -101,32 +100,27 @@ fun LanguageSelectionDialog(
                                 .setRegion(parts[1])
                                 .build()
                         }
+
                         else -> java.util.Locale.Builder()
                             .setLanguage(dir)
                             .build()
                     }
 
-                    // Test if this locale has translated resources
                     val config = android.content.res.Configuration()
                     config.setLocale(locale)
                     val localizedContext = context.createConfigurationContext(config)
-
-                    // Try to get a translated string to verify the locale is supported
                     val testString = localizedContext.getString(R.string.settings_language)
 
-                    // If the string is different, or it's English, it's supported
                     if (testString != systemLanguage || locale.language == "en") {
                         locales.add(locale)
                     }
                 } catch (_: Exception) {
-                    // Skip unsupported locales
                 }
             }
 
-            // Sort by display name
             val sortedLocales = locales.drop(1).sortedBy { it.getDisplayName(it) }
             mutableListOf<java.util.Locale>().apply {
-                add(locales.first()) // System default first
+                add(locales.first())
                 addAll(sortedLocales)
             }
         }
@@ -188,76 +182,151 @@ fun LanguageSelectionDialog(
         )
     }
 }
+
 @Composable
 fun ThemeColorDialog(
-    onColorSelected: (ThemeColors) -> Unit,
+    currentSeedColor: Int,
+    onColorSelected: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val themeColorOptions = listOf(
-        stringResource(R.string.color_default) to ThemeColors.Default,
-        stringResource(R.string.color_green) to ThemeColors.Green,
-        stringResource(R.string.color_purple) to ThemeColors.Purple,
-        stringResource(R.string.color_orange) to ThemeColors.Orange,
-        stringResource(R.string.color_pink) to ThemeColors.Pink,
-        stringResource(R.string.color_gray) to ThemeColors.Gray,
-        stringResource(R.string.color_yellow) to ThemeColors.Yellow
-    )
+    val initialHsv = remember(currentSeedColor) {
+        FloatArray(3).also { AndroidColor.colorToHSV(currentSeedColor, it) }
+    }
+    var hue by remember(currentSeedColor) { mutableFloatStateOf(initialHsv[0]) }
+    var saturation by remember(currentSeedColor) { mutableFloatStateOf(initialHsv[1]) }
+    var value by remember(currentSeedColor) { mutableFloatStateOf(initialHsv[2]) }
+    val selectedColor = AndroidColor.HSVToColor(floatArrayOf(hue, saturation, value))
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.choose_theme_color)) },
         text = {
-            Column {
-                themeColorOptions.forEach { (name, theme) ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onColorSelected(theme) }
-                            .padding(vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        val isDark = isSystemInDarkTheme()
-                        Box(
-                            modifier = Modifier.padding(end = 12.dp)
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                ColorCircle(
-                                    color = if (isDark) theme.primaryDark else theme.primaryLight,
-                                    isSelected = false,
-                                    modifier = Modifier.padding(horizontal = 2.dp)
-                                )
-                                ColorCircle(
-                                    color = if (isDark) theme.secondaryDark else theme.secondaryLight,
-                                    isSelected = false,
-                                    modifier = Modifier.padding(horizontal = 2.dp)
-                                )
-                                ColorCircle(
-                                    color = if (isDark) theme.tertiaryDark else theme.tertiaryLight,
-                                    isSelected = false,
-                                    modifier = Modifier.padding(horizontal = 2.dp)
-                                )
-                            }
-                        }
-                        Text(name)
-                        Spacer(modifier = Modifier.weight(1f))
-                        // 当前选中的主题显示选中标记
-                        if (ThemeConfig.currentTheme::class == theme::class) {
-                            Icon(
-                                Icons.Default.Check,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                }
-            }
+            ColorPicker(
+                color = Color(selectedColor),
+                hue = hue,
+                saturation = saturation,
+                value = value,
+                onHueChange = { hue = it },
+                onSaturationChange = { saturation = it },
+                onValueChange = { value = it },
+            )
         },
         confirmButton = {
-            Button(
-                onClick = onDismiss
-            ) {
+            Button(onClick = { onColorSelected(selectedColor) }) {
+                Icon(
+                    Icons.Default.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(stringResource(R.string.confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.cancel))
             }
         }
     )
+}
+
+@Composable
+private fun ColorPicker(
+    color: Color,
+    hue: Float,
+    saturation: Float,
+    value: Float,
+    onHueChange: (Float) -> Unit,
+    onSaturationChange: (Float) -> Unit,
+    onValueChange: (Float) -> Unit,
+) {
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(color)
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            Text(
+                text = color.toHexString(),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+
+        ColorSlider(
+            label = "H",
+            value = hue,
+            valueRange = 0f..360f,
+            onValueChange = onHueChange
+        )
+        ColorSlider(
+            label = "S",
+            value = saturation,
+            valueRange = 0f..1f,
+            onValueChange = onSaturationChange
+        )
+        ColorSlider(
+            label = "V",
+            value = value,
+            valueRange = 0f..1f,
+            onValueChange = onValueChange
+        )
+    }
+}
+
+@Composable
+private fun ColorSlider(
+    label: String,
+    value: Float,
+    valueRange: ClosedFloatingPointRange<Float>,
+    onValueChange: (Float) -> Unit,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(end = 12.dp)
+        )
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = valueRange,
+            modifier = Modifier.weight(1f)
+        )
+        Box(
+            modifier = Modifier.padding(start = 12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text( // Some stupid way to solve measure problem
+                text = "360.00",
+                style = MaterialTheme.typography.labelMediumEmphasized.copy(
+                    fontFeatureSettings = "tnum"
+                ),
+                modifier = Modifier.alpha(0f)
+            )
+            Text(
+                text = "%.2f".format(value),
+                style = MaterialTheme.typography.labelMediumEmphasized.copy(
+                    fontFeatureSettings = "tnum"
+                ),
+            )
+        }
+    }
+}
+
+private fun Color.toHexString(): String {
+    val argb = AndroidColor.rgb(
+        (red * 255).toInt().coerceIn(0, 255),
+        (green * 255).toInt().coerceIn(0, 255),
+        (blue * 255).toInt().coerceIn(0, 255)
+    )
+    return "#%06X".format(argb and 0x00FFFFFF)
 }

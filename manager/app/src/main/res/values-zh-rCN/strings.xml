@@ -224,6 +224,7 @@
     <string name="feature_status_managed_summary">此功能由模块管理。</string>
     <string name="settings_mode_default">默认</string>
     <string name="more_settings">更多设置</string>
+    <string name="theme_settings">主题设置</string>
     <string name="selinux_enabled">强制执行</string>
     <string name="selinux_disabled">宽容模式</string>
     <string name="simple_mode">简洁模式</string>
@@ -248,6 +249,8 @@
     <string name="theme_dark">深色</string>
     <string name="dynamic_color_title">动态颜色</string>
     <string name="dynamic_color_summary">使用系统主题的动态颜色</string>
+    <string name="dynamic_palette_style">调色板样式</string>
+    <string name="dynamic_color_spec">颜色规格</string>
     <string name="choose_theme_color">选择主题色</string>
     <string name="color_default">蓝色</string>
     <string name="color_green">绿色</string>
