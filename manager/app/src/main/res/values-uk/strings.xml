@@ -31,6 +31,7 @@
     <string name="sulog_enable_action">Увімкнути</string>
     <string name="sulog_filter_title">Фільтрувати за типом</string>
     <string name="sulog_clean_title">Очистити журнал</string>
+    <string name="sulog_filter_root_execve">Root execve</string>
     <string name="sulog_filter_sucompat">Класичний SU</string>
     <string name="sulog_filter_ioctl_grant_root">Надання root</string>
     <string name="sulog_filter_daemon_restart">Перезапуск демона</string>
@@ -80,6 +81,7 @@
     <string name="send_log">Надіслати логи</string>
     <string name="safe_mode">Безпечний режим</string>
     <string name="jailbreak_mode">Режим Jailbreak</string>
+    <string name="home_jailbreak">Jailbreak</string>
     <string name="jailbreak_timeout">Jailbreak, можливо, не вдався. Будь ласка, перевірте журнали</string>
     <string name="jailbreak_flash_warning">Ви перебуваєте в **режимі Jailbreak**. Прошивка розділу на пристрої із **заблокованим завантажувачем** порушить AVB (Android Verified Boot) і може призвести до **збою завантаження**.\n\nПереконайтеся, що завантажувач розблоковано, перш ніж продовжити!</string>
     <string name="jailbreak_flash_warning_countdown">Продовжити (%1$d)</string>
@@ -105,6 +107,7 @@
     <string name="profile_namespace_individual">Індивідуальний</string>
     <string name="profile_groups">Групи</string>
     <string name="profile_capabilities">Можливості</string>
+    <string name="profile_flags">Flags</string>
     <string name="profile_flags_desc_no_new_privs">Запобігти подальшому підвищенню привілеїв через KernelSU в контексті цього root-профілю.</string>
     <string name="profile_selinux_context">Контекст SELinux</string>
     <string name="profile_umount_modules">Відмонтувати модулі</string>
@@ -133,6 +136,7 @@
     <string name="recently_installed">Нещодавно встановлені</string>
     <string name="app_profile_template_create">Створити шаблон</string>
     <string name="app_profile_template_edit">Редагувати шаблон</string>
+    <string name="app_profile_template_id">ID</string>
     <string name="app_profile_template_id_invalid">Недійсний ID шаблону</string>
     <string name="app_profile_template_name">Назва</string>
     <string name="app_profile_template_description">Опис</string>
@@ -219,6 +223,8 @@
     <string name="feature_status_managed_summary">Ця функція керується модулем</string>
     <string name="settings_mode_default">За замовчуванням</string>
     <string name="more_settings">Більше налаштувань</string>
+    <string name="theme_settings">Налаштування теми</string>
+    <string name="selinux">SELinux</string>
     <string name="selinux_enabled">Увімкнено</string>
     <string name="selinux_disabled">Вимкнено</string>
     <string name="simple_mode">Спрощений режим</string>
@@ -243,6 +249,8 @@
     <string name="theme_dark">Темна</string>
     <string name="dynamic_color_title">Динамічні кольори</string>
     <string name="dynamic_color_summary">Динамічні кольори з використанням системних тем</string>
+    <string name="dynamic_palette_style">Стиль палітри</string>
+    <string name="dynamic_color_spec">Специфікація кольору</string>
     <string name="choose_theme_color">Вибрати колір теми</string>
     <string name="color_default">Синій</string>
     <string name="color_green">Зелений</string>
@@ -259,6 +267,7 @@
     <string name="yes">Так</string>
     <string name="no">Ні</string>
     <string name="failed_reboot">Не вдалося перезавантажити</string>
+    <string name="kpm_title">KPM</string>
     <string name="kpm_empty">На даний момент немає встановлених модулів ядра</string>
     <string name="kpm_version">Версія</string>
     <string name="kpm_author">Автор</string>
@@ -327,6 +336,7 @@
     <string name="predictive_back_exit_direction">Напрямок виходу</string>
     <string name="predictive_back_exit_direction_desc">Вибрати напрямок виходу для передбачуваного повернення</string>
     <string name="predictive_back_animation_none">Немає</string>
+    <string name="predictive_back_animation_aosp">AOSP</string>
     <string name="predictive_back_animation_scale">Масштабування</string>
     <string name="predictive_back_animation_ksu_classic">Класичний KernelSU</string>
     <string name="predictive_back_exit_direction_follow_gesture">За жестом</string>
@@ -365,6 +375,7 @@
     <string name="warning_of_meta_module_title">Потрібен метамодуль</string>
     <string name="warning_of_meta_module_summary">Цей модуль хоче монтувати /system; цим займатиметься метамодуль. Без нього модуль може не працювати</string>
     <string name="category_all_apps">Всі</string>
+    <string name="category_root_apps">Root</string>
     <string name="category_custom_apps">Власні</string>
     <string name="category_default_apps">За замовчуванням</string>
     <string name="sort_name_asc">Назва за зростанням</string>
@@ -456,11 +467,13 @@
     <string name="susfs_execution_location_label">Місце виконання</string>
     <string name="susfs_current_execution_location">Поточне місце виконання: %s</string>
     <string name="susfs_execution_location_service">Сервіс</string>
+    <string name="susfs_execution_location_post_fs_data">Post-FS-Data</string>
     <string name="susfs_execution_location_service_description">Виконувати після запуску системних сервісів</string>
     <string name="susfs_execution_location_post_fs_data_description">Виконувати після монтування файлової системи, але до повного завантаження системи. Може спричинити бутлуп</string>
     <string name="susfs_slot_info_title">Інформація про слот</string>
     <string name="susfs_slot_info_description">Переглянути інформацію про поточний завантажувальний слот та скопіювати значення</string>
     <string name="susfs_current_active_slot">Поточний активний слот: %s</string>
+    <string name="susfs_slot_uname">Uname: %s</string>
     <string name="susfs_slot_build_time">Час збірки: %s</string>
     <string name="susfs_slot_current_badge">Поточний</string>
     <string name="susfs_slot_use_uname">Використовувати Uname</string>
