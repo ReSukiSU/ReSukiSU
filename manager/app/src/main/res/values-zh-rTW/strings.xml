@@ -224,6 +224,7 @@
     <string name="feature_status_managed_summary">此功能由模組管理</string>
     <string name="settings_mode_default">預設</string>
     <string name="more_settings">更多設定</string>
+	<string name="theme_settings">主題設定</string>
     <string name="selinux">SELinux</string>
     <string name="selinux_enabled">嚴格模式</string>
     <string name="selinux_disabled">寬鬆模式</string>
@@ -249,6 +250,8 @@
     <string name="theme_dark">深色</string>
     <string name="dynamic_color_title">動態色彩</string>
     <string name="dynamic_color_summary">使用系統主題的動態色彩</string>
+	<string name="dynamic_palette_style">調色盤風格</string>
+	<string name="dynamic_color_spec">Color spec</string>
     <string name="choose_theme_color">選擇主題顏色</string>
     <string name="color_default">藍色</string>
     <string name="color_green">綠色</string>
@@ -316,7 +319,7 @@
     <string name="horizon_unknown_error">未知錯誤</string>
     <string name="flash_failed_message">刷寫失敗</string>
     <string name="Lkm_install_methods">LKM 修復/安裝</string>
-    <string name="GKI_install_methods">正在刷寫 AnyKernel3</string>
+    <string name="GKI_install_methods">刷寫 AnyKernel3</string>
     <string name="kernel_version_log">內核版本：%1$s</string>
     <string name="tool_version_log">正在使用修補工具：%1$s</string>
     <string name="configuration">配置</string>
