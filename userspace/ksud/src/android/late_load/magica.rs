@@ -15,6 +15,7 @@ const fn resetprop() -> ResetProp {
         persist_only: false,
         verbose: false,
         show_context: false,
+        rebuild: false,
     }
 }
 
@@ -110,7 +111,7 @@ pub fn disable_adb_root() -> Result<()> {
         info!("Restoring: resetprop --delete {prop}");
         let _ = rp.delete(prop);
         if let Ok(ctx) = sys_prop::get_context(prop) {
-            let _ = sys_prop::compact(Some(&ctx));
+            let _ = rp.rebuild(&ctx);
         }
     }
 
