@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::android::susfs::config::{data::SusKstatStatically, read_config, save_config};
+use crate::android::susfs::config::{data::SusKstatStatically, read_config};
 
 pub fn add_sus_path<P>(path: P)
 where
@@ -11,29 +11,21 @@ where
         .sus_path
         .sus_path
         .insert(path.as_ref().to_str().unwrap().to_string());
-
-    save_config(&config);
 }
 
 pub fn enable_avc_spoofing(enabled: u8) {
     let mut config = read_config();
     config.common.avc_spoofing = enabled == 1;
-
-    save_config(&config);
 }
 
 pub fn enable_susfs_log(enabled: u8) {
     let mut config = read_config();
     config.common.enable_susfs_log = enabled == 1;
-
-    save_config(&config);
 }
 
 pub fn set_hide_sus_mnts_for_non_su_procs(enabled: u8) {
     let mut config = read_config();
     config.common.hide_sus_mnts_for_non_su_procs = enabled == 1;
-
-    save_config(&config);
 }
 
 pub fn set_uname<S>(version: &S, release: &S)
@@ -44,8 +36,6 @@ where
 
     config.common.spoof_version = version.to_string();
     config.common.spoof_release = release.to_string();
-
-    save_config(&config);
 }
 
 pub fn add_sus_path_loop<P>(path: P)
@@ -57,8 +47,6 @@ where
         .sus_path
         .sus_path_loop
         .insert(path.as_ref().to_str().unwrap().to_string());
-
-    save_config(&config);
 }
 
 pub fn add_sus_map<P>(path: P)
@@ -69,8 +57,6 @@ where
     config
         .sus_map
         .insert(path.as_ref().to_str().unwrap().to_string());
-
-    save_config(&config);
 }
 
 pub fn add_sus_kstat<P>(path: P)
@@ -82,8 +68,6 @@ where
         .kstat
         .sus_kstat
         .insert(path.as_ref().to_str().unwrap().to_string());
-
-    save_config(&config);
 }
 
 pub fn add_sus_kstat_update<P>(path: P)
@@ -95,8 +79,6 @@ where
         .kstat
         .update_kstat
         .insert(path.as_ref().to_str().unwrap().to_string());
-
-    save_config(&config);
 }
 
 pub fn add_sus_kstat_full_clone<P>(path: P)
@@ -108,8 +90,6 @@ where
         .kstat
         .full_clone
         .insert(path.as_ref().to_str().unwrap().to_string());
-
-    save_config(&config);
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -145,8 +125,6 @@ pub fn add_sus_kstat_statically(
         blocks: blocks.to_string(),
         blksize: blksize.to_string(),
     });
-
-    save_config(&config);
 }
 
 pub fn del_sus_path<P>(path: P)
@@ -158,8 +136,6 @@ where
         .sus_path
         .sus_path
         .remove(path.as_ref().to_str().unwrap());
-
-    save_config(&config);
 }
 
 use anyhow::Result;
@@ -189,7 +165,6 @@ pub fn del_uname_selective(target: &str) -> Result<()> {
         }
     }
 
-    save_config(&config);
     Ok(())
 }
 
@@ -202,8 +177,6 @@ where
         .sus_path
         .sus_path_loop
         .remove(path.as_ref().to_str().unwrap());
-
-    save_config(&config);
 }
 
 pub fn del_sus_map<P>(path: P)
@@ -212,8 +185,6 @@ where
 {
     let mut config = read_config();
     config.sus_map.remove(path.as_ref().to_str().unwrap());
-
-    save_config(&config);
 }
 
 pub fn del_sus_kstat<P>(path: P)
@@ -225,8 +196,6 @@ where
         .kstat
         .sus_kstat
         .remove(path.as_ref().to_str().unwrap());
-
-    save_config(&config);
 }
 
 pub fn del_sus_kstat_update<P>(path: P)
@@ -238,8 +207,6 @@ where
         .kstat
         .update_kstat
         .remove(path.as_ref().to_str().unwrap());
-
-    save_config(&config);
 }
 
 pub fn del_sus_kstat_full_clone<P>(path: P)
@@ -251,8 +218,6 @@ where
         .kstat
         .full_clone
         .remove(path.as_ref().to_str().unwrap());
-
-    save_config(&config);
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -288,6 +253,4 @@ pub fn del_sus_kstat_statically(
         blocks: blocks.to_string(),
         blksize: blksize.to_string(),
     });
-
-    save_config(&config);
 }

@@ -386,12 +386,12 @@ pub fn run_main(command: SuSFSSubCommands) -> Result<()> {
             let target_str = target.as_deref().unwrap_or("");
             match target_str {
                 "version" => {
-                    let release = config::read_config().common.spoof_release;
+                    let release = config::read_config().common.spoof_release.clone();
                     api::set_uname(&"default".to_string(), &release)?;
                     config::operation::del_uname_selective("version")?;
                 }
                 "release" => {
-                    let version = config::read_config().common.spoof_version;
+                    let version = config::read_config().common.spoof_version.clone();
                     api::set_uname(&version, &"default".to_string())?;
                     config::operation::del_uname_selective("release")?;
                 }

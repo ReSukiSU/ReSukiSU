@@ -12,6 +12,12 @@ use data::Data;
 
 const INIT_NAMESPACE_SUSFS_CONFIG: &str = "/proc/1/root/data/adb/ksu/.susfs.json";
 
+impl Drop for Data {
+    fn drop(&mut self) {
+        save_config(&self);
+    }
+}
+
 fn save_config(config: &Data) {
     let Ok(string) = serde_json::to_string_pretty(&config) else {
         log::warn!("failed to serialize susfs config");

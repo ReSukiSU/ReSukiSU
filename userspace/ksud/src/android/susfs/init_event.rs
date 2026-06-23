@@ -225,7 +225,7 @@ pub fn on_post_fs_data() {
 }
 
 pub fn on_post_mount() {
-    let config = config::read_config();
+    //  let config = config::read_config();
 
     // apply_sus_paths(&config);
     // apply_sus_maps(&config);
