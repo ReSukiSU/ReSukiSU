@@ -185,8 +185,15 @@ class HorizonKernelWorker(
     }
 
     private fun cleanup() {
-        runCommand(false, "find ${context.filesDir.absolutePath} -type f ! -name '*.jpg' ! -name '*.png' -delete")
+        // 只清理 AnyKernel3 刷写过程中创建的临时文件，避免删除 DataStore 偏好设置
+        runCommand(false, "rm -f $filePath")
+        runCommand(false, "rm -f $binaryPath")
         runCommand(false, "rm -rf $workDir")
+        runCommand(false, "rm -f ${context.filesDir.absolutePath}/mkbootfs")
+        runCommand(false, "rm -f ${context.filesDir.absolutePath}/bootslot")
+        runCommand(false, "rm -f ${context.filesDir.absolutePath}/done")
+        // 清理 META-INF 目录
+        runCommand(false, "rm -rf ${context.filesDir.absolutePath}/META-INF")
     }
 
     private fun copy() {
