@@ -134,19 +134,30 @@ void ksu_unregister_manager_by_signature_index(u8 signature_index)
             }
 
             list_del_rcu(&pos->list);
-            spin_unlock(&ksu_manager_list_write_lock);
             kfree_rcu(pos, rcu);
-            return;
+        } else {
+            last_each_alive_appid = pos->appid;
         }
-
-        last_each_alive_appid = pos->appid;
     }
 
     spin_unlock(&ksu_manager_list_write_lock);
 
     if (mark_another_manager)
         ksu_last_manager_appid = last_each_alive_appid;
-    return;
+}
+
+void ksu_unregister_all_manager(void)
+{
+    struct ksu_manager_node *node, *pos, *tmp;
+
+    spin_lock(&ksu_manager_list_write_lock);
+
+    list_for_each_entry_safe (pos, tmp, &ksu_manager_appid_list, list) {
+        list_del_rcu(&pos->list);
+        kfree_rcu(pos, rcu);
+    }
+
+    spin_unlock(&ksu_manager_list_write_lock);
 }
 
 bool ksu_has_manager(void)

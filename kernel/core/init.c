@@ -239,7 +239,7 @@ int __init kernelsu_init(void)
         ksu_file_wrapper_init();
 
         ksu_boot_completed = true;
-        track_throne(TRACK_THRONE_FORCE_SEARCH_MGR);
+        track_throne(0);
 
         if (!getenforce()) {
             pr_info("Permissive SELinux, enforcing\n");
