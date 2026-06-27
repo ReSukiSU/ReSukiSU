@@ -242,7 +242,6 @@ Tanamkan: Secara permanen memasang ke sistem</string>
     <string name="horizon_unknown_error">Kesalahan Tidak Diketahui</string>
     <string name="flash_failed_message">Flash Gagal</string>
     <string name="Lkm_install_methods">Pemulihan/Pemasangan LKM</string>
-    <string name="GKI_install_methods">Flash AnyKernel3</string>
     <string name="kernel_version_log">Versi Kernel: %1$s</string>
     <string name="tool_version_log">Alat patch yang digunakan: %1$s</string>
     <string name="configuration">Konfigurasi</string>
