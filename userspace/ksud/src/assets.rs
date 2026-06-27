@@ -29,7 +29,7 @@ mod android {
         std::os::unix::fs::symlink("/data/adb/ksud", resetprop_link)?;
 
         // Create ksu_susfs -> ksud symlink (hard link)
-        if crate::android::susfs::version().is_ok() {
+        if crate::android::susfs::api::features::show::version().is_ok() {
             let ksu_susfs = KSU_SUSFS;
             let _ = std::fs::remove_file(ksu_susfs);
             std::fs::hard_link("/data/adb/ksud", ksu_susfs)?;

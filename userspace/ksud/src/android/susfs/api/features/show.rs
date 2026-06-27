@@ -1,11 +1,13 @@
 use anyhow::Result;
 
 use crate::android::susfs::{
-    communicate::{communicate, parse_err},
-    magic::{
-        CMD_SUSFS_SHOW_ENABLED_FEATURES, CMD_SUSFS_SHOW_VARIANT, CMD_SUSFS_SHOW_VERSION,
-        ERR_CMD_NOT_SUPPORTED, SUSFS_ENABLED_FEATURES_SIZE, SUSFS_MAX_VARIANT_BUFSIZE,
-        SUSFS_MAX_VERSION_BUFSIZE,
+    api::{
+        magic::{
+            CMD_SUSFS_SHOW_ENABLED_FEATURES, CMD_SUSFS_SHOW_VARIANT, CMD_SUSFS_SHOW_VERSION,
+            ERR_CMD_NOT_SUPPORTED, SUSFS_ENABLED_FEATURES_SIZE, SUSFS_MAX_VARIANT_BUFSIZE,
+            SUSFS_MAX_VERSION_BUFSIZE,
+        },
+        susfsctl::{communicate, parse_err},
     },
     utils::c_array_to_string,
 };
@@ -28,7 +30,6 @@ struct SusfsVersion {
     err: i32,
 }
 
-/// Get the current SuSFS version implemented in kernel
 pub fn version() -> Result<String> {
     let mut info = SusfsVersion {
         susfs_version: [0; SUSFS_MAX_VERSION_BUFSIZE],
@@ -46,7 +47,6 @@ pub fn version() -> Result<String> {
     }
 }
 
-/// Get the current variant (GKI/non-GKI)
 pub fn variant() -> Result<String> {
     let mut info = SusfsVariant {
         susfs_variant: [0; SUSFS_MAX_VARIANT_BUFSIZE],
@@ -59,8 +59,7 @@ pub fn variant() -> Result<String> {
     Ok(variant)
 }
 
-/// Get the current implemented SuSFS features in kernel
-pub fn features() -> Result<String> {
+pub fn enabled_features() -> Result<String> {
     let mut info = Box::new(SusfsEnabledFeatures {
         enabled_features: [0; SUSFS_ENABLED_FEATURES_SIZE],
         err: ERR_CMD_NOT_SUPPORTED,

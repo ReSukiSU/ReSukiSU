@@ -26,10 +26,16 @@ bitflags = "2.11.0"
 base16ct = { version = "1.0.0", features = ["alloc"] }
 
 [target.'cfg(target_os = "android")'.dependencies]
-rustix = { version = "=1.1.4", default-features = false, features = ["process", "thread", "fs", "system", "stdio"] }
+rustix = { version = "=1.1.4", default-features = false, features = [
+    "process",
+    "thread",
+    "fs",
+    "system",
+    "stdio",
+] }
 android-properties = { version = "0.2", features = ["bionic-deprecated"] }
 android_logger = { version = "0.15", default-features = false }
-zip = { version = "8",  features = [
+zip = { version = "8", features = [
     "deflate",
     "deflate64",
     "time",
