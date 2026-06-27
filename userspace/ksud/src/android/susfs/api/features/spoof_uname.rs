@@ -2,10 +2,10 @@ use anyhow::{Result, anyhow};
 
 use crate::android::susfs::{
     api::{
-        communicate::{communicate, parse_err},
         magic::{CMD_SUSFS_SET_UNAME, ERR_CMD_NOT_SUPPORTED, NEW_UTS_LEN},
+        susfsctl::{communicate, parse_err},
     },
-    utils::str_to_c_array,
+    utils::{is_valid_uname_release, is_valid_uname_version, str_to_c_array},
 };
 
 #[repr(C)]
@@ -25,27 +25,26 @@ impl Default for SusfsUname {
     }
 }
 
-pub fn set_uname<S>(version: &S, release: &S) -> Result<()>
-where
-    S: ToString,
-{
+pub fn set_uname(version: &str, release: &str) -> Result<()> {
     let mut info = SusfsUname::default();
-    let version_str = version.to_string().trim().to_string();
-    let release_str = release.to_string().trim().to_string();
+    let version_str = version.trim();
+    let release_str = release.trim();
 
-    if version_str.is_empty() || release_str.is_empty() {
-        return Err(anyhow!("Neither version nor release can be empty."));
+    if is_valid_uname_version(version_str) || is_valid_uname_release(release_str) {
+        return Err(anyhow!(
+            "Uname version ({}) or release ({}) invalid!",
+            version_str,
+            release_str
+        ));
     }
 
     // ksud stores spoof_version as the visible uname/release value and spoof_release
     // as the kernel build-time string.
     // The SuSFS ABI struct keeps the kernel field order (release, then version).
-    str_to_c_array(version_str.as_str(), &mut info.release);
-    str_to_c_array(release_str.as_str(), &mut info.version);
+    str_to_c_array(version_str, &mut info.release);
+    str_to_c_array(release_str, &mut info.version);
     info.err = ERR_CMD_NOT_SUPPORTED;
 
     communicate(CMD_SUSFS_SET_UNAME, &mut info);
-    parse_err(CMD_SUSFS_SET_UNAME, info.err)?;
-
-    Ok(())
+    parse_err(CMD_SUSFS_SET_UNAME, info.err)
 }

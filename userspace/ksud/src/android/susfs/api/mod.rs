@@ -2,8 +2,7 @@
 //!
 //! SuSFS API abstraction
 
-mod communicate;
+pub mod features;
 mod magic;
-mod wrapper;
-
-pub use wrapper::*;
+pub mod prelude;
+mod susfsctl;

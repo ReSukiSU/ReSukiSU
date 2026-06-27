@@ -172,11 +172,12 @@ pub fn on_services() {
 
 pub fn on_boot_completed() {
     ksucalls::report_boot_complete();
-    // Load susfs boot-completed
-    crate::android::susfs::init_event::on_boot_completed();
     info!("on_boot_completed triggered!");
-
     run_stage("boot-completed", false);
+    // Load susfs boot-completed
+    if !is_safe_mode() {
+        crate::android::susfs::init_event::on_boot_completed();
+    }
 }
 
 const fn resetprop() -> ResetProp {

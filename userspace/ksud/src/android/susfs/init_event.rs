@@ -5,10 +5,7 @@ use std::{
     os::fd::AsRawFd,
 };
 
-use crate::android::{
-    susfs::{apply, config::read_config_or_default},
-    utils::daemonize,
-};
+use crate::android::{susfs::config::model::Config, utils::daemonize};
 
 fn is_fuse_mounted() -> bool {
     fs::metadata("/sdcard/Android").is_ok()
@@ -48,7 +45,7 @@ fn wait_for_fuse_mounted() -> Result<()> {
     Ok(())
 }
 
-fn handle_result(ret: Result<()>, msg: &str) {
+fn handle_result<T>(ret: Result<T>, msg: &str) {
     match ret {
         Ok(_) => log::info!("successfully {msg}!"),
         Err(e) => log::warn!("{msg} failed: {e}!"),
@@ -69,27 +66,30 @@ pub fn on_boot_completed() {
     }
     log::info!("Processing SUSFS.");
 
-    let config = read_config_or_default();
+    let config = Config::read_or_default();
 
-    handle_result(apply::set_cmdline(&config), "sus_cmdline");
-    handle_result(apply::kstat_finalize(&config), "finalize sus_kstat");
-    handle_result(apply::map(&config), "sus_map");
-    handle_result(apply::open_redirect(&config), "open_redirect");
-    handle_result(apply::path(&config), "sus_path and sus_path_loop");
+    handle_result(config.apply_cmdline_or_bootconfig(), "sus_cmdline");
+    handle_result(config.final_sus_kstat(), "finalize sus_kstat");
+    handle_result(config.apply_sus_map(), "sus_map");
+    handle_result(config.apply_open_redirect(), "open_redirect");
+    handle_result(config.apply_sus_path(), "sus_path and sus_path_loop");
 
     log::info!("SUSFS finished");
 }
 
 pub fn on_post_fs_data() {
-    let config = read_config_or_default();
+    let config = Config::read_or_default();
 
     log::info!("on_post_fs_data triggered!");
 
-    handle_result(apply::avc_spoofing(&config), "avc_config");
-    handle_result(apply::kstat_initialize(&config), "initialize sus_kstat");
-    handle_result(apply::log(&config), "sus_log");
-    handle_result(apply::ignore_umount(&config), "ignore umount");
-    handle_result(apply::uname(&config), "sus_uname");
+    handle_result(config.apply_avc_log_spoofing(), "avc_config");
+    handle_result(config.init_sus_kstat(), "initialize sus_kstat");
+    handle_result(config.apply_logging(), "sus_log");
+    handle_result(
+        config.apply_hide_sus_mnts_for_non_su_procs(),
+        "hide sus mnts for non su procs",
+    );
+    handle_result(config.apply_uname(), "sus_uname");
 
     log::info!("on_post_fs_data finished!");
 }

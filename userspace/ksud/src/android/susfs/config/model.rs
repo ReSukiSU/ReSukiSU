@@ -1,53 +1,52 @@
-use std::collections::HashSet;
-
-use monostate::MustBe;
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 
 use crate::{android::susfs::enums::SusKstatType, impl_hashset_indexkey};
 
-fn default_generator() -> String {
-    "default".to_string()
+pub(super) const CURRENT_VERSION: u8 = 1;
+
+#[derive(Deserialize)]
+pub(super) struct VersionProbe {
+    pub version: u8,
 }
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize)]
 pub struct Config {
-    #[serde(rename = "$schema", default)]
-    pub schema: MustBe!("https://originalFactor.github.io/ReKittySU/schemas/v1.json"),
-
-    #[serde(default = "default_generator")]
-    pub cmdline: String,
-
-    #[serde(default)]
-    pub avc_spoofing: bool,
-
-    #[serde(default)]
-    pub logging: bool,
-
-    #[serde(default)]
-    pub ignore_umount: bool,
-
-    #[serde(default)]
-    pub uname: Uname,
-
-    #[serde(default)]
-    pub path: HashSet<SusPathItem>,
-
-    #[serde(default)]
-    pub kstat: HashSet<SusKstatItem>,
-
-    #[serde(default)]
-    pub open_redirect: HashSet<OpenRedirectItem>,
-
-    #[serde(default)]
-    pub map: HashSet<String>,
+    pub(super) version: u8,
+    pub(super) cmdline_or_bootconfig: String,
+    pub(super) avc_log_spoofing: bool,
+    pub(super) logging: bool,
+    pub(super) hide_sus_mnts_for_non_su_procs: bool,
+    pub(super) uname: Uname,
+    pub(super) sus_path: HashSet<SusPathItem>,
+    pub(super) sus_kstat: HashSet<SusKstatItem>,
+    pub(super) open_redirect: HashSet<OpenRedirectItem>,
+    pub(super) sus_map: HashSet<String>,
 }
 
-#[derive(Serialize, Deserialize, Default)]
-pub struct Uname {
-    #[serde(default = "default_generator")]
-    pub version: String,
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            version: CURRENT_VERSION,
+            cmdline_or_bootconfig: "".to_string(),
+            avc_log_spoofing: false,
+            logging: false,
+            hide_sus_mnts_for_non_su_procs: false,
+            uname: Uname {
+                version: "default".to_string(),
+                release: "default".to_string(),
+            },
+            sus_path: HashSet::new(),
+            sus_kstat: HashSet::new(),
+            open_redirect: HashSet::new(),
+            sus_map: HashSet::new(),
+        }
+    }
+}
 
-    #[serde(default = "default_generator")]
+#[derive(Serialize, Deserialize)]
+pub struct Uname {
+    pub version: String,
     pub release: String,
 }
 
@@ -61,31 +60,31 @@ impl_hashset_indexkey!(SusPathItem, path);
 #[derive(Serialize, Deserialize)]
 pub struct SusKstatItem {
     pub path: String,
-    pub ktype: SusKstatType,
+    pub spoof_type: SusKstatType,
     pub statically: Option<SusKstatStatically>,
 }
 impl_hashset_indexkey!(SusKstatItem, path);
 
 #[derive(Serialize, Deserialize)]
 pub struct SusKstatStatically {
-    pub ino: String,
-    pub dev: String,
-    pub nlink: String,
-    pub size: String,
-    pub atime: String,
-    pub atime_nsec: String,
-    pub mtime: String,
-    pub mtime_nsec: String,
-    pub ctime: String,
-    pub ctime_nsec: String,
-    pub blocks: String,
-    pub blksize: String,
+    pub ino: Option<i64>,
+    pub dev: Option<i64>,
+    pub nlink: Option<i64>,
+    pub size: Option<i64>,
+    pub atime: Option<i64>,
+    pub atime_nsec: Option<i64>,
+    pub mtime: Option<i64>,
+    pub mtime_nsec: Option<i64>,
+    pub ctime: Option<i64>,
+    pub ctime_nsec: Option<i64>,
+    pub blocks: Option<i64>,
+    pub blksize: Option<i64>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct OpenRedirectItem {
-    pub source: String,
-    pub target: String,
+    pub target_path: String,
+    pub redirected_path: String,
     pub uid_scheme: i32,
 }
-impl_hashset_indexkey!(OpenRedirectItem, source);
+impl_hashset_indexkey!(OpenRedirectItem, target_path);

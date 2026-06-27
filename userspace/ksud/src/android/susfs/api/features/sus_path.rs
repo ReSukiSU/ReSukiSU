@@ -1,14 +1,17 @@
 use anyhow::Result;
 
-use crate::android::susfs::{
-    api::{
-        communicate::{communicate, parse_err},
-        magic::{
-            CMD_SUSFS_ADD_SUS_PATH, CMD_SUSFS_ADD_SUS_PATH_LOOP, ERR_CMD_NOT_SUPPORTED,
-            SUSFS_MAX_LEN_PATHNAME,
+use crate::{
+    android::susfs::{
+        api::{
+            magic::{
+                CMD_SUSFS_ADD_SUS_PATH, CMD_SUSFS_ADD_SUS_PATH_LOOP, ERR_CMD_NOT_SUPPORTED,
+                SUSFS_MAX_LEN_PATHNAME,
+            },
+            susfsctl::{communicate, parse_err},
         },
+        utils::str_to_c_array,
     },
-    utils::str_to_c_array,
+    ensure_path_exists,
 };
 
 #[repr(C)]
@@ -26,16 +29,15 @@ impl Default for SusfsSusPath {
     }
 }
 
-pub fn add_path<S>(path: &S, is_loop: bool) -> Result<()>
-where
-    S: ToString,
-{
+pub fn add_sus_path(path: &str, is_loop: bool) -> Result<()> {
+    ensure_path_exists!(path);
+
     let mut info = SusfsSusPath::default();
     let magic = match is_loop {
         true => CMD_SUSFS_ADD_SUS_PATH_LOOP,
         false => CMD_SUSFS_ADD_SUS_PATH,
     };
-    str_to_c_array(path.to_string().as_str(), &mut info.target_pathname);
+    str_to_c_array(path, &mut info.target_pathname);
     info.err = ERR_CMD_NOT_SUPPORTED;
 
     communicate(magic, &mut info);

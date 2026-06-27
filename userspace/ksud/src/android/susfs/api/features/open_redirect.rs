@@ -1,11 +1,11 @@
-use std::{fs, path::Path};
+use std::fs;
 
 use anyhow::{Result, anyhow};
 
 use crate::android::susfs::{
     api::{
-        communicate::{communicate, parse_err},
         magic::{CMD_SUSFS_ADD_OPEN_REDIRECT, ERR_CMD_NOT_SUPPORTED, SUSFS_MAX_LEN_PATHNAME},
+        susfsctl::{communicate, parse_err},
     },
     enums::UidScheme,
     utils::str_to_c_array,
@@ -30,16 +30,13 @@ impl Default for SusfsOpenRedirect {
     }
 }
 
-pub fn add_open_redirect<P>(target_path: P, redirected_path: P, uid_scheme: i32) -> Result<()>
-where
-    P: AsRef<Path>,
-{
+pub fn add_open_redirect(target_path: &str, redirected_path: &str, uid_scheme: i32) -> Result<()> {
     if UidScheme::try_from(uid_scheme).is_err() {
         return Err(anyhow::anyhow!("uid_scheme is invalid!"));
     }
 
-    let abs_target = fs::canonicalize(&target_path)?;
-    let abs_redirect = fs::canonicalize(&redirected_path)?;
+    let abs_target = fs::canonicalize(target_path)?;
+    let abs_redirect = fs::canonicalize(redirected_path)?;
 
     let mut info = SusfsOpenRedirect::default();
     str_to_c_array(

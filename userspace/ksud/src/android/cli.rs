@@ -529,16 +529,6 @@ enum UmountOp {
 }
 
 #[derive(clap::Subcommand, Debug)]
-enum Susfs {
-    /// Get SUSFS Status
-    Status,
-    /// Get SUSFS Version
-    Version,
-    /// Get SUSFS enable Features
-    Features,
-}
-
-#[derive(clap::Subcommand, Debug)]
 enum Initrc {
     /// Regenerate preinit rc file
     Refresh,
@@ -573,7 +563,7 @@ pub fn run() -> Result<()> {
     log::info!("command: {:?}", cli.command);
 
     let result = match cli.command {
-        Commands::Susfs(args) => crate::android::susfs::cli::run_main(args.command),
+        Commands::Susfs(args) => crate::android::susfs::cli::run_main(args),
         Commands::PostFsData => init_event::on_post_data_fs(),
         Commands::BootCompleted => {
             init_event::on_boot_completed();

@@ -24,3 +24,19 @@ macro_rules! impl_hashset_indexkey {
         }
     };
 }
+
+#[macro_export]
+macro_rules! ensure_path_exists {
+    ($path:expr) => {
+        let p = std::path::Path::new($path);
+        if !p.exists() {
+            anyhow::bail!("Path does not exist: {}", p.display());
+        }
+    };
+    ($path:expr, $msg:expr) => {
+        let p = std::path::Path::new($path);
+        if !p.exists() {
+            anyhow::bail!("{}: {}", $msg, p.display());
+        }
+    };
+}

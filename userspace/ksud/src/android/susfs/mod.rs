@@ -1,11 +1,7 @@
-mod api;
-mod apply;
+pub mod api;
 pub mod cli;
-mod config;
-mod enums;
-mod hybrid;
+pub mod config;
+pub mod enums;
 pub mod init_event;
-mod slot_info;
+pub mod slot_info;
 mod utils;
-
-pub use api::version;

@@ -1,13 +1,14 @@
-use std::path::Path;
-
 use anyhow::Result;
 
-use crate::android::susfs::{
-    api::{
-        communicate::{communicate, parse_err},
-        magic::{CMD_SUSFS_ADD_SUS_MAP, ERR_CMD_NOT_SUPPORTED, SUSFS_MAX_LEN_PATHNAME},
+use crate::{
+    android::susfs::{
+        api::{
+            magic::{CMD_SUSFS_ADD_SUS_MAP, ERR_CMD_NOT_SUPPORTED, SUSFS_MAX_LEN_PATHNAME},
+            susfsctl::{communicate, parse_err},
+        },
+        utils::str_to_c_array,
     },
-    utils::str_to_c_array,
+    ensure_path_exists,
 };
 
 #[repr(C)]
@@ -25,15 +26,10 @@ impl Default for SusfsSusMap {
     }
 }
 
-pub fn add_map<P>(path: P) -> Result<()>
-where
-    P: AsRef<Path>,
-{
+pub fn add_sus_map(path: &str) -> Result<()> {
+    ensure_path_exists!(path);
     let mut info = SusfsSusMap::default();
-    str_to_c_array(
-        path.as_ref().to_str().unwrap_or_default(),
-        &mut info.target_pathname,
-    );
+    str_to_c_array(path, &mut info.target_pathname);
     info.err = ERR_CMD_NOT_SUPPORTED;
 
     communicate(CMD_SUSFS_ADD_SUS_MAP, &mut info);

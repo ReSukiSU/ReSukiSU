@@ -1,18 +1,18 @@
 use anyhow::Result;
 
 use crate::android::susfs::api::{
-    communicate::{communicate, parse_err},
     magic::{CMD_SUSFS_HIDE_SUS_MNTS_FOR_NON_SU_PROCS, ERR_CMD_NOT_SUPPORTED},
+    susfsctl::{communicate, parse_err},
 };
 
 #[repr(C)]
-struct SusfsSusMount {
+struct SusfsHideSusMntsForNonSuProcs {
     enabled: bool,
     err: i32,
 }
 
-pub fn ignore_umount(enabled: bool) -> Result<()> {
-    let mut info = SusfsSusMount {
+pub fn hide_sus_mnts_for_non_su_procs(enabled: bool) -> Result<()> {
+    let mut info = SusfsHideSusMntsForNonSuProcs {
         enabled,
         err: ERR_CMD_NOT_SUPPORTED,
     };
