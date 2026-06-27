@@ -30,7 +30,7 @@ pub fn set_uname(version: &str, release: &str) -> Result<()> {
     let version_str = version.trim();
     let release_str = release.trim();
 
-    if is_valid_uname_version(version_str) || is_valid_uname_release(release_str) {
+    if !is_valid_uname_version(version_str) || !is_valid_uname_release(release_str) {
         return Err(anyhow!(
             "Uname version ({}) or release ({}) invalid!",
             version_str,

@@ -50,7 +50,7 @@ impl Config {
 
     pub fn add_sus_path(&mut self, path: &str, is_loop: bool) -> Result<&mut Self> {
         ensure_path_exists!(path);
-        self.sus_path.insert(SusPathItem {
+        self.sus_path.replace(SusPathItem {
             path: path.to_string(),
             is_loop,
         });
@@ -64,7 +64,7 @@ impl Config {
 
     pub fn add_sus_kstat(&mut self, path: &str, full_clone: bool) -> Result<&mut Self> {
         ensure_path_exists!(path);
-        self.sus_kstat.insert(SusKstatItem {
+        self.sus_kstat.replace(SusKstatItem {
             path: path.to_string(),
             spoof_type: if full_clone {
                 SusKstatType::FullClone
@@ -94,7 +94,7 @@ impl Config {
         blksize: Option<i64>,
     ) -> Result<&mut Self> {
         ensure_path_exists!(path);
-        self.sus_kstat.insert(SusKstatItem {
+        self.sus_kstat.replace(SusKstatItem {
             path: path.to_string(),
             spoof_type: SusKstatType::Statically,
             statically: Some(SusKstatStatically {
@@ -129,7 +129,7 @@ impl Config {
         ensure_path_exists!(target_path);
         ensure_path_exists!(redirected_path);
         UidScheme::try_from(uid_scheme)?;
-        self.open_redirect.insert(OpenRedirectItem {
+        self.open_redirect.replace(OpenRedirectItem {
             target_path: target_path.to_string(),
             redirected_path: redirected_path.to_string(),
             uid_scheme,
