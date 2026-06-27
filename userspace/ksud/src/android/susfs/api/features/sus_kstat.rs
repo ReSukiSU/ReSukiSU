@@ -183,18 +183,18 @@ pub fn add_sus_kstat_statically(
         };
     }
 
-    set_spoof_field!(spoofed_ino, ino, u64, INO);
-    set_spoof_field!(spoofed_dev, dev, u64, DEV);
+    set_spoof_field!(spoofed_ino, ino, c_ulong, INO);
+    set_spoof_field!(spoofed_dev, dev, c_ulong, DEV);
     set_spoof_field!(spoofed_nlink, nlink, u32, NLINK);
     set_spoof_field!(spoofed_size, size, i64, SIZE);
-    set_spoof_field!(spoofed_atime_tv_sec, atime, i64, ATIME_TV_SEC);
-    set_spoof_field!(spoofed_atime_tv_nsec, atime_nsec, u64, ATIME_TV_NSEC);
-    set_spoof_field!(spoofed_mtime_tv_sec, mtime, i64, MTIME_TV_SEC);
-    set_spoof_field!(spoofed_mtime_tv_nsec, mtime_nsec, u64, MTIME_TV_NSEC);
-    set_spoof_field!(spoofed_ctime_tv_sec, ctime, i64, CTIME_TV_SEC);
-    set_spoof_field!(spoofed_ctime_tv_nsec, ctime_nsec, u64, CTIME_TV_NSEC);
+    set_spoof_field!(spoofed_atime_tv_sec, atime, c_long, ATIME_TV_SEC);
+    set_spoof_field!(spoofed_atime_tv_nsec, atime_nsec, c_ulong, ATIME_TV_NSEC);
+    set_spoof_field!(spoofed_mtime_tv_sec, mtime, c_long, MTIME_TV_SEC);
+    set_spoof_field!(spoofed_mtime_tv_nsec, mtime_nsec, c_ulong, MTIME_TV_NSEC);
+    set_spoof_field!(spoofed_ctime_tv_sec, ctime, c_long, CTIME_TV_SEC);
+    set_spoof_field!(spoofed_ctime_tv_nsec, ctime_nsec, c_ulong, CTIME_TV_NSEC);
     set_spoof_field!(spoofed_blocks, blocks, i64, BLOCKS);
-    set_spoof_field!(spoofed_blksize, blksize, i64, BLKSIZE);
+    set_spoof_field!(spoofed_blksize, blksize, c_long, BLKSIZE);
 
     info.err = ERR_CMD_NOT_SUPPORTED;
 
