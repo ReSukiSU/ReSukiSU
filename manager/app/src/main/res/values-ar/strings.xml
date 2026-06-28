@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="home">الرئيسية</string>
+    <string name="learn_more">معرفة المزيد</string>
     <string name="home_not_installed">غير مثبت</string>
     <string name="home_click_to_install">إضغط للتثبيت</string>
     <string name="home_working">يعمل</string>
@@ -14,12 +15,36 @@
     <string name="selinux_status_disabled">معطل</string>
     <string name="selinux_status_enforcing">مفروض</string>
     <string name="selinux_status_permissive">متساهل</string>
+    <string name="home_seccomp_status">حالة Seccomp</string>
+    <string name="seccomp_status_not_supported">غير مدعوم</string>
+    <string name="seccomp_status_disabled">معطل</string>
+    <string name="seccomp_status_strict">صارم</string>
+    <string name="seccomp_status_filter">فلترة</string>
+    <string name="seccomp_status_unknown">غير معروف</string>
     <string name="unknown">مجهول</string>
     <string name="superuser">مستخدم خارق</string>
+    <string name="sulog">سجل SU</string>
+    <string name="sulog_log_files">مِلَفّ السجل</string>
+    <string name="sulog_failed_to_load">أخفق تحميل سجلات SU</string>
+    <string name="sulog_disabled_title">سجلات SU غير مفعلة</string>
+    <string name="sulog_unsupported_title">سجلات SU غير مدعومة</string>
+    <string name="sulog_enable_action">مفعل</string>
+    <string name="sulog_filter_title">فلترة (تصفية) حسب النوع</string>
+    <string name="sulog_clean_title">تنظيف السجلات</string>
+    <string name="sulog_filter_root_execve">تنفيذ بصلاحيات الروت</string>
+    <string name="sulog_filter_sucompat">SU الكلاسيكي</string>
+    <string name="sulog_filter_ioctl_grant_root">منح صلاحيات الجذر</string>
+    <string name="sulog_filter_daemon_restart">إعادة تشغيل الخدمة الخلفية (Deamon)</string>
+    <string name="sulog_event_dropped">تم إلغاء الحدث</string>
+    <string name="sulog_drop_count">%s مفقودة</string>
+    <string name="sulog_daemon_restart_count">إعادة تشغيل #%s</string>
+    <string name="sulog_entry_unknown_event">حدث غير معروف</string>
+    <string name="sulog_search_placeholder">البحث في السجلات</string>
     <string name="module_failed_to_enable">لا يمكن تشغيل %s الوحدة</string>
     <string name="module_failed_to_disable">فشل تعطيل الإضافة : %s</string>
     <string name="module_empty">لا توجد إضافات مثبتة</string>
     <string name="module">الإضافات</string>
+    <string name="module_repo">مستودع الوحدات</string>
     <string name="module_sort_action_first">فرز (الإجراء أولاً)</string>
     <string name="module_sort_enabled_first">فرز (الممكن أولاً)</string>
     <string name="uninstall">إلغاء التثبيت</string>

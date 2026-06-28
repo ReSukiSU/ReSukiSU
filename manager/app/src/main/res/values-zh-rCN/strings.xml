@@ -108,6 +108,8 @@
     <string name="profile_namespace_individual">独立</string>
     <string name="profile_groups">组</string>
     <string name="profile_capabilities">权能</string>
+    <string name="profile_flags">标签</string>
+    <string name="profile_flags_desc_no_new_privs">禁止从此 Root Profile 的上下文中通过 KernelSU 进一步提升权限</string>
     <string name="profile_selinux_context">SELinux</string>
     <string name="profile_umount_modules">卸载模块</string>
     <string name="failed_to_update_app_profile">为 %s 更新 App Profile 失败</string>
@@ -223,6 +225,8 @@
     <string name="feature_status_managed_summary">此功能由模块管理。</string>
     <string name="settings_mode_default">默认</string>
     <string name="more_settings">更多设置</string>
+    <string name="theme_settings">主题设置</string>
+    <string name="selinux">SELinux</string>
     <string name="selinux_enabled">强制执行</string>
     <string name="selinux_disabled">宽容模式</string>
     <string name="simple_mode">简洁模式</string>
@@ -247,6 +251,8 @@
     <string name="theme_dark">深色</string>
     <string name="dynamic_color_title">动态颜色</string>
     <string name="dynamic_color_summary">使用系统主题的动态颜色</string>
+    <string name="dynamic_palette_style">调色板样式</string>
+    <string name="dynamic_color_spec">颜色规格</string>
     <string name="choose_theme_color">选择主题色</string>
     <string name="color_default">蓝色</string>
     <string name="color_green">绿色</string>
@@ -332,6 +338,7 @@
     <string name="predictive_back_exit_direction">退出方向</string>
     <string name="predictive_back_exit_direction_desc">选择预测性返回的退出方向</string>
     <string name="predictive_back_animation_none">无</string>
+    <string name="predictive_back_animation_aosp">AOSP</string>
     <string name="predictive_back_animation_scale">缩放</string>
     <string name="predictive_back_animation_ksu_classic">KernelSU 经典</string>
     <string name="predictive_back_exit_direction_follow_gesture">跟随手势</string>
@@ -370,6 +377,7 @@
     <string name="warning_of_meta_module_title">需要元模块</string>
     <string name="warning_of_meta_module_summary">这个模块需要挂载一些文件。需要安装元模块，使它正常工作</string>
     <string name="category_all_apps">全部</string>
+    <string name="category_root_apps">Root</string>
     <string name="category_custom_apps">自定义</string>
     <string name="category_default_apps">默认</string>
     <string name="sort_name_asc">名称升序</string>
@@ -466,6 +474,8 @@
     <string name="show_more_module_info_summary">显示额外的模块信息，如更新配置 URL 等</string>
     <string name="susfs_execution_location_label">执行位置</string>
     <string name="susfs_current_execution_location">当前执行位置：%s</string>
+    <string name="susfs_execution_location_service">Service</string>
+    <string name="susfs_execution_location_post_fs_data">Post-FS-Data</string>
     <string name="susfs_execution_location_service_description">在系统服务启动后执行</string>
     <string name="susfs_execution_location_post_fs_data_description">在文件系统挂载后但系统完全启动前执行,可能会导致循环重启</string>
     <string name="susfs_slot_info_title">槽位信息</string>
@@ -653,7 +663,9 @@
 请注意：此功能不支持隐藏匿名内存映射，也无法隐藏由注入库本身产生的内联钩子或 PLT 钩子。</string>
     <string name="sus_maps_warning">重要提示：对于具备完善注入检测机制的应用，此功能可能无法有效绕过检测。</string>
     <string name="sus_maps_debug_info">首先通过 ps -enf 查找目标应用的 PID 和 UID，然后检查 /proc/&lt;pid&gt;/maps 中的相关路径，并与 /proc/1/mountinfo 中的设备号进行比对以确保一致性。只有当设备号一致时，隐藏映射才能正常工作。</string>
-    <string name="incompatible_kernel_msg">当前管理器与此内核不兼容！请将内核升级至版本 %2$d 或以上（当前 %1$d）</string>
+    <string name="uapi_mismatch">管理器 uapi 版本 (%1$d) 与 KernelSU 驱动 uapi 版本 (%2$d) 不匹配。</string>
+    <string name="require_manager_version">当前 KernelSU 管理器版本 %1$d 过低，KernelSU 无法正常工作. 请将 KernelSU 管理器版本升级至 %2$d 或以上!</string>
+    <string name="require_kernel_version">当前 KernelSU 版本 %1$d 过低，管理器无法正常工作，请将内核 KernelSU 版本升级至 %2$d 或以上！</string>
     <string name="umount_path_manager">Umount 路径管理</string>
     <string name="umount_path_manager_summary">管理内核卸载路径</string>
     <string name="no_any_umount_path">没有任何内核卸载路径</string>
@@ -676,7 +688,7 @@
     <string name="please_check_network">请检查网络连接情况，然后稍后重试</string>
     <string name="confirm_install_module_title">要安装模块 %1$s 吗?</string>
     <string name="assets_multiple_select_dialog_title">请选择你想安装的附件</string>
-    <string name="assets_multiple_select_dialog_content_description">大小: %s, 下载数: %s</string>
+    <string name="assets_multiple_select_dialog_content_description">大小: %1$s, 下载数: %2$s</string>
     <string name="assets_multiple_select_dialog_warning">没有任何附件被选择</string>
     <string name="installed">已安装</string>
     <string name="open_module_home_page">在浏览器中打开模块主页</string>

@@ -8,7 +8,7 @@ define check_symbol_export
       $$(info -- $$(REPO_NAME)/symbol_export: export $$(_ARG3) found)
   else
       $$(info -- You disabled CONFIG_KALLSYMS_ALL and haven't export $$(_ARG3) in your kernel's $$(notdir $$(_ARG2)) file)
-      $$(info -- Read: https://resukisu.github.io/guide/manual-integrate.html#static-var-export)
+      $$(info -- Read: https://resukisu.github.io/guide/manual-integrate.html#static-symbol-export)
       $$(error You should integrate $$(REPO_NAME) in your kernel. $$(_ARG4))
   endif
 endef

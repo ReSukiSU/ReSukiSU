@@ -60,6 +60,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.getSystemService
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.resukisu.resukisu.R
@@ -87,6 +88,7 @@ import kotlinx.coroutines.launch
 fun AppProfileTemplateScreen() {
     val pullRefreshState = rememberPullToRefreshState()
     val viewModel = viewModel<TemplateViewModel>()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val scrollBehavior =
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
@@ -95,7 +97,7 @@ fun AppProfileTemplateScreen() {
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
 
-        if (viewModel.templateList.isEmpty()) {
+        if (uiState.templateList.isEmpty()) {
             viewModel.fetchTemplates()
         }
 
@@ -186,14 +188,14 @@ fun AppProfileTemplateScreen() {
                     scrollBehavior.nestedScrollConnection
                 )
                 .blurSource(),
-            isRefreshing = viewModel.isRefreshing,
+            isRefreshing = uiState.isRefreshing,
             onRefresh = {
                 scope.launch { viewModel.fetchTemplates() }
             },
             indicator = {
                 PullToRefreshDefaults.LoadingIndicator(
                     state = pullRefreshState,
-                    isRefreshing = viewModel.isRefreshing,
+                    isRefreshing = uiState.isRefreshing,
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .padding(top = innerPadding.calculateTopPadding()),
@@ -213,7 +215,7 @@ fun AppProfileTemplateScreen() {
                 }
 
                 lazySegmentedColumn(
-                    items = viewModel.templateList,
+                    items = uiState.templateList,
                     key = { _, app -> app.id }) { _, app ->
                     TemplateItem(app)
                 }

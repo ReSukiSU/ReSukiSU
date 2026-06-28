@@ -3,9 +3,6 @@ package com.resukisu.resukisu.ui.viewmodel
 import android.content.Context
 import android.util.Log
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.resukisu.resukisu.R
@@ -17,23 +14,28 @@ import com.resukisu.resukisu.ui.util.removeKernelUmountPath
 import com.resukisu.resukisu.ui.util.removeUmountConfigUmountPath
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 
-/**
- * @author AlexLiuDev233
- * @date 2026/02/16.
- */
+data class UmountManagerUiState(
+    val umountPaths: List<UmountManagerScreenViewModel.UmountPathEntry> = emptyList(),
+    val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
+)
+
 class UmountManagerScreenViewModel : ViewModel() {
     companion object {
         const val TAG = "UmountManagerScreenViewModel"
     }
 
-    var umountPaths by mutableStateOf<List<UmountPathEntry>>(emptyList())
-        private set
+    private val _uiState = MutableStateFlow(UmountManagerUiState())
+    val uiState: StateFlow<UmountManagerUiState> = _uiState.asStateFlow()
 
     private var dirty = true
-    var isRefreshing by mutableStateOf(false)
 
     private fun parseUmountPaths(
         paths: String,
@@ -62,24 +64,31 @@ class UmountManagerScreenViewModel : ViewModel() {
         if (!dirty) return
 
         viewModelScope.launch(Dispatchers.IO) {
+            _uiState.update { it.copy(isRefreshing = !it.isLoading) }
             val fetchKernelUmountPathsTask = async {
                 parseUmountPaths(listKernelUmountPaths(), false, context)
             }
 
-            umountPaths = (fetchKernelUmountPathsTask.await() + parseUmountPaths(
+            val paths = (fetchKernelUmountPathsTask.await() + parseUmountPaths(
                 listUmountConfigUmountPaths(),
                 true,
                 context
             ))
                 .groupBy { it.path }
-                .map { (path, entries) -> // first from kernel, second from config
+                .map { (path, entries) ->
                     UmountPathEntry(
                         path = path,
                         flagName = entries.first().flagName,
                         persistent = entries.any { it.persistent },
                     )
                 }
-            isRefreshing = false
+            _uiState.update {
+                it.copy(
+                    umountPaths = paths,
+                    isLoading = false,
+                    isRefreshing = false,
+                )
+            }
             dirty = false
         }
     }
@@ -94,7 +103,6 @@ class UmountManagerScreenViewModel : ViewModel() {
         val persistent: Boolean,
     )
 
-    // https://github.com/torvalds/linux/blob/v6.18/include/linux/fs.h#L1397-L1401
     private fun Int.toUmountFlagName(context: Context): String {
         return when (this) {
             -1 -> context.getString(R.string.unknown)
@@ -117,19 +125,17 @@ class UmountManagerScreenViewModel : ViewModel() {
 
             if (!success) {
                 context?.let {
-                    snackBarHost?.showSnackbar(
-                        context.getString(R.string.operation_failed)
-                    )
+                    snackBarHost?.showSnackbar(context.getString(R.string.operation_failed))
                 }
                 return@launch
             }
 
-            umountPaths = umountPaths.filter { it != entry }
+            _uiState.update { state ->
+                state.copy(umountPaths = state.umountPaths.filter { it != entry })
+            }
 
             context?.let {
-                snackBarHost?.showSnackbar(
-                    context.getString(R.string.umount_path_removed)
-                )
+                snackBarHost?.showSnackbar(context.getString(R.string.umount_path_removed))
             }
         }
     }
@@ -138,20 +144,20 @@ class UmountManagerScreenViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             val success = addUmountConfigUmountPath(path, flags) && addKernelUmountPath(path, flags)
             if (!success) {
-                snackBarHost?.showSnackbar(
-                    context.getString(R.string.operation_failed)
-                )
+                snackBarHost?.showSnackbar(context.getString(R.string.operation_failed))
                 return@launch
             }
-            umountPaths = umountPaths + UmountPathEntry(
-                path = path,
-                flagName = flags.toUmountFlagName(context),
-                persistent = true
-            )
+            _uiState.update { state ->
+                state.copy(
+                    umountPaths = state.umountPaths + UmountPathEntry(
+                        path = path,
+                        flagName = flags.toUmountFlagName(context),
+                        persistent = true
+                    )
+                )
+            }
 
-            snackBarHost?.showSnackbar(
-                context.getString(R.string.umount_path_added)
-            )
+            snackBarHost?.showSnackbar(context.getString(R.string.umount_path_added))
         }
     }
 }

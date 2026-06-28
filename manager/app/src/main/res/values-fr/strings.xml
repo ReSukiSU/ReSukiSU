@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="home">Accueil</string>
+    <string name="learn_more">En savoir plus</string>
     <string name="home_not_installed">Non installé</string>
     <string name="home_click_to_install">Appuyez ici pour installer</string>
     <string name="home_working">Fonctionnel</string>
@@ -12,6 +13,7 @@
     <string name="home_manager_version">Version du gestionnaire</string>
     <string name="home_selinux_status">Mode SELinux</string>
     <string name="selinux_status_disabled">Désactivé</string>
+    <string name="selinux_status_enforcing">Imposer</string>
     <string name="unknown">Inconnu</string>
     <string name="superuser">Super-utilisateur</string>
     <string name="module_failed_to_enable">Échec de l\'activation du module : %s</string>
@@ -30,6 +32,7 @@
     <string name="reboot_download">Redémarrer en mode de téléchargement</string>
     <string name="reboot_edl">Redémarrer en mode EDL</string>
     <string name="about">À propos</string>
+    <string name="about_anime_character_sticker"><![CDATA["Les images des fichiers avec un autocollant de personnage d'anime sont protégées par %1$s, la Propriété Intellectuelle de la Marque dans les images appartient à %2$s. Avant d'utiliser ces fichiers, en plus de se conformer à %3$s, vous devez également vous conformer à l'autorisation des deux auteurs d'utiliser ces contenus artistiques."]]></string>
     <string name="module_uninstall_confirm">Êtes-vous sûr(e) de vouloir désinstaller le module %s \?</string>
     <string name="module_uninstall_success">%s a été désinstallé</string>
     <string name="module_uninstall_failed">Échec de la désinstallation : %s</string>
@@ -39,6 +42,8 @@
     <string name="hide_system_apps">Masquer les applications système</string>
     <string name="send_log">Envoyer les journaux</string>
     <string name="safe_mode">Mode sans échec</string>
+    <string name="jailbreak_flash_warning_countdown">Continuer (%1$d)</string>
+    <string name="settings_auto_jailbreak">Jailbreak automatique</string>
     <string name="reboot_to_apply">Redémarrez pour appliquer les modifications</string>
     <string name="module_magisk_conflict">Les modules sont indisponibles en raison d\'un conflit avec Magisk !</string>
     <string name="home_learn_kernelsu">Découvrir KernelSU</string>

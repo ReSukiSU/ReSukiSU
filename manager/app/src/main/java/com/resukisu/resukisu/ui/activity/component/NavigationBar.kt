@@ -24,18 +24,17 @@ import androidx.compose.material3.WideNavigationRailColors
 import androidx.compose.material3.WideNavigationRailDefaults
 import androidx.compose.material3.WideNavigationRailItem
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import com.resukisu.resukisu.ui.MainActivity
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.ui.screen.BottomBarDestination
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
@@ -44,8 +43,8 @@ import com.resukisu.resukisu.ui.util.LocalHandlePageChange
 import com.resukisu.resukisu.ui.util.LocalSelectedPage
 import com.resukisu.resukisu.ui.util.getModuleCount
 import com.resukisu.resukisu.ui.util.getSuperuserCount
+import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 // TODO Add FloatingBottomBar as an choice to user
@@ -56,12 +55,10 @@ fun NavigationBar(
     destinations: List<BottomBarDestination>,
     isBottomBar: Boolean
 ) {
-    val activity = LocalContext.current as MainActivity
-
     // 是否隐藏 badge
-    val isHideOtherInfo by remember(activity.settingsStateFlow) {
-        activity.settingsStateFlow.map { it.isHideOtherInfo }
-    }.collectAsState(initial = false)
+    val homeViewModel = viewModel<HomeViewModel>(viewModelStoreOwner = ksuApp)
+    val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
+    val isHideOtherInfo = uiState.isHideOtherInfo
 
     // 翻页处理
     val page = LocalSelectedPage.current

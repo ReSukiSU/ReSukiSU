@@ -111,6 +111,8 @@
     <string name="profile_namespace_individual">Individual</string>
     <string name="profile_groups">Groups</string>
     <string name="profile_capabilities">Capabilities</string>
+    <string name="profile_flags">Flags</string>
+    <string name="profile_flags_desc_no_new_privs">Prevent further privilege escalation via KernelSU from within the context of this root profile.</string>
     <string name="profile_selinux_context">SELinux context</string>
     <string name="profile_umount_modules">Umount modules</string>
     <string name="failed_to_update_app_profile">Failed to update App Profile for %s</string>
@@ -226,6 +228,7 @@
     <string name="feature_status_managed_summary">This feature is managed by a module</string>
     <string name="settings_mode_default">Default</string>
     <string name="more_settings">More settings</string>
+    <string name="theme_settings">Theme settings</string>
     <string name="selinux">SELinux</string>
     <string name="selinux_enabled">Enabled</string>
     <string name="selinux_disabled">Disabled</string>
@@ -251,6 +254,8 @@
     <string name="theme_dark">Dark</string>
     <string name="dynamic_color_title">Dynamic colours</string>
     <string name="dynamic_color_summary">Dynamic colours using system themes</string>
+    <string name="dynamic_palette_style">Palette style</string>
+    <string name="dynamic_color_spec">Color spec</string>
     <string name="choose_theme_color">Choose a theme colour</string>
     <string name="color_default">Blue</string>
     <string name="color_green">Green</string>
@@ -318,7 +323,7 @@
     <string name="horizon_unknown_error">Unknown error</string>
     <string name="flash_failed_message">Flash failed</string>
     <string name="Lkm_install_methods">LKM repair/installation</string>
-    <string name="GKI_install_methods">Flashing AnyKernel3</string>
+    <string name="GKI_install_methods">Flash AnyKernel3</string>
     <string name="kernel_version_log">Kernel version：%1$s</string>
     <string name="tool_version_log">Using the patching tool：%1$s</string>
     <string name="configuration">Configure</string>
@@ -663,9 +668,9 @@ Enabled: Enable spoofing the sus tcontext of su with u:r:priv_app:s0:c512,c768 s
     <string name="sus_maps_description_text">Hide the real file paths of memory mappings from /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap]. Please note: This feature does not support hiding anonymous memory mappings, nor can it hide inline hooks or PLT hooks caused by the injected library itself</string>
     <string name="sus_maps_warning">Important Notice: For applications with well-implemented injection detection mechanisms, this feature may not effectively bypass detection</string>
     <string name="sus_maps_debug_info">First, find the target application\'s PID and UID using ps -enf, then check the relevant paths in /proc/&lt;pid&gt;/maps and compare the device numbers with those in /proc/1/mountinfo to ensure consistency. Only when the device numbers match can the map hiding function work properly</string>
-    <string name="incompatible_kernel_msg">
-    The current manager is incompatible with this kernel! Please upgrade the kernel to version %2$d or higher (currently %1$d)
-    </string>
+    <string name="uapi_mismatch">Manager uapi version (%1$d) and KernelSU driver uapi version (%2$d) mismatch.</string>
+    <string name="require_manager_version">The current KernelSU manager version %1$d is too low for KernelSU to work properly. Please upgrade manager to version %2$d or higher!</string>
+    <string name="require_kernel_version">The current KernelSU version %1$d is too low for the manager to work properly. Please upgrade to version %2$d or higher!</string>
     <string name="umount_path_manager">Umount Path Management</string>
     <string name="umount_path_manager_summary">Manage kernel unmount paths</string>
     <string name="no_any_umount_path">Not have any umount path</string>
@@ -688,7 +693,7 @@ Enabled: Enable spoofing the sus tcontext of su with u:r:priv_app:s0:c512,c768 s
     <string name="please_check_network">Please check your internet connection, and try again</string>
     <string name="confirm_install_module_title">Do you want install %s module?</string>
     <string name="assets_multiple_select_dialog_title">Select you want install asset</string>
-    <string name="assets_multiple_select_dialog_content_description">Size: %s, Download count: %s</string>
+    <string name="assets_multiple_select_dialog_content_description">Size: %1$s, Download count: %2$s</string>
     <string name="assets_multiple_select_dialog_warning">No any asset selected</string>
     <string name="installed">Installed</string>
     <string name="open_module_home_page">Open module homepage in browser</string>

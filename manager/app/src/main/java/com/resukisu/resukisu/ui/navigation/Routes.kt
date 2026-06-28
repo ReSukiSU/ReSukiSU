@@ -89,7 +89,7 @@ sealed interface Route : NavKey, Parcelable {
 
     @Parcelize
     @Serializable
-    data object MoreSettings : Route
+    data object ThemeSettings : Route
 
     @Parcelize
     @Serializable

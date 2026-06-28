@@ -95,7 +95,7 @@ config KSU_MANUAL_HOOK
 
 config KSU_SUSFS
 	bool "SUSFS Inline Hook"
-	depends on THREAD_INFO_IN_TASK
+	depends on THREAD_INFO_IN_TASK && 64BIT
 	help
 	  Patch and Enable SUSFS to kernel with KernelSU.
 	  SuSFS Officially support kernel 5.10+

@@ -9,14 +9,19 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import coil.Coil
 import coil.ImageLoader
+import com.kieronquinn.monetcompat.core.MonetCompat
+import com.resukisu.resukisu.data.AppPreferencesRepository
 import com.resukisu.resukisu.ui.util.generateMainShellBuilder
 import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
 import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel
+import com.resukisu.resukisu.ui.viewmodel.SettingsViewModel
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
 import com.topjohnwu.superuser.internal.MainShell
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import me.zhanghai.android.appiconloader.coil.AppIconFetcher
 import me.zhanghai.android.appiconloader.coil.AppIconKeyer
 import okhttp3.Cache
@@ -30,8 +35,27 @@ lateinit var ksuApp: KernelSUApplication
 class KernelSUApplication : Application(), ViewModelStoreOwner {
 
     lateinit var okhttpClient: OkHttpClient
+    lateinit var preferencesRepository: AppPreferencesRepository
     val UserAgent = "ReSukiSU/${BuildConfig.VERSION_CODE}"
+    val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val appViewModelStore by lazy { ViewModelStore() }
+    private var preferencesRepositoryStarted = false
+
+    fun ensurePreferencesRepository(): AppPreferencesRepository {
+        if (!::preferencesRepository.isInitialized) {
+            preferencesRepository = AppPreferencesRepository(this)
+            runBlocking(Dispatchers.IO) {
+                preferencesRepository.preload()
+            }
+        }
+
+        if (!preferencesRepositoryStarted) {
+            preferencesRepository.start(applicationScope)
+            preferencesRepositoryStarted = true
+        }
+
+        return preferencesRepository
+    }
 
     @SuppressLint("RestrictedApi")
     override fun onCreate() {
@@ -48,11 +72,19 @@ class KernelSUApplication : Application(), ViewModelStoreOwner {
 
         MainShell.setBuilder(generateMainShellBuilder())
 
+        runCatching {
+            MonetCompat.enablePaletteCompat()
+        }
+
+        ensurePreferencesRepository()
+
         // For faster response when first entering superuser or webui activity
         val superUserViewModel = ViewModelProvider(this)[SuperUserViewModel::class.java]
         val homeViewModel = ViewModelProvider(this)[HomeViewModel::class.java]
         val moduleViewModel = ViewModelProvider(this)[ModuleViewModel::class.java]
-        CoroutineScope(Dispatchers.Main).launch {
+        val settingsViewModel = ViewModelProvider(this)[SettingsViewModel::class.java]
+        applicationScope.launch {
+            settingsViewModel.initialize(this@KernelSUApplication)
             homeViewModel.refreshData(this@KernelSUApplication)
             superUserViewModel.fetchAppList()
             moduleViewModel.fetchModuleList()

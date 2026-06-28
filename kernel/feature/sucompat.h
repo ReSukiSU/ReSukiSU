@@ -25,6 +25,30 @@ int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
 // WARNING! THERE HAVE TRYING TO CALL SYSCALL INTERNALLY
 // ENSURE CALL IT ONLY IN TRACEPOINT SYSCALL REDIRECT
 int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user, int orig_nr, const struct pt_regs *regs);
+#else // #ifndef CONFIG_KSU_TRACEPOINT_HOOK
+
+// 63 already used as TIF_KSU_DISABLE_ESCAPE_WITH_ROOT (64bit)
+// 31 already used as TIF_KSU_DISABLE_ESCAPE_WITH_ROOT (32bit)
+#ifdef CONFIG_64BIT
+#define TIF_PROC_NON_PRIVILEGE 62
+#else
+#define TIF_PROC_NON_PRIVILEGE 30
+#endif
+
+static inline bool ksu_is_current_proc_unprivillege(void)
+{
+    return (likely(test_thread_flag(TIF_PROC_NON_PRIVILEGE)));
+}
+
+static inline void ksu_set_current_proc_unprivillege(void)
+{
+    set_thread_flag(TIF_PROC_NON_PRIVILEGE);
+}
+
+static inline void ksu_clear_current_proc_unprivillege(void)
+{
+    clear_thread_flag(TIF_PROC_NON_PRIVILEGE);
+}
 #endif
 
 #endif

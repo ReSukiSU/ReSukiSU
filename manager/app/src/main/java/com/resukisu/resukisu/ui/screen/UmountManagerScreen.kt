@@ -52,6 +52,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.ConfirmResult
@@ -76,13 +77,13 @@ import kotlinx.coroutines.withContext
 @Composable
 fun UmountManagerScreen() {
     val viewModel = viewModel<UmountManagerScreenViewModel>()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val snackBarHost = LocalSnackbarHost.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val confirmDialog = rememberConfirmDialog()
 
-    var isLoading by remember { mutableStateOf(false) }
     val pullToRefreshState = rememberPullToRefreshState()
     var showAddDialog by remember { mutableStateOf(false) }
 
@@ -135,7 +136,7 @@ fun UmountManagerScreen() {
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
     ) { paddingValues ->
-        if (isLoading) { // 初次加载时动画
+        if (uiState.isLoading) { // 初次加载时动画
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -148,7 +149,7 @@ fun UmountManagerScreen() {
         else {
             PullToRefreshBox(
                 state = pullToRefreshState,
-                isRefreshing = viewModel.isRefreshing,
+                isRefreshing = uiState.isRefreshing,
                 onRefresh = {
                     viewModel.markUmountPathDirty()
                     viewModel.refreshData(context)
@@ -156,7 +157,7 @@ fun UmountManagerScreen() {
                 indicator = {
                     PullToRefreshDefaults.LoadingIndicator(
                         state = pullToRefreshState,
-                        isRefreshing = viewModel.isRefreshing,
+                        isRefreshing = uiState.isRefreshing,
                         modifier = Modifier
                             .align(Alignment.TopCenter)
                             .padding(top = paddingValues.calculateTopPadding()),
@@ -187,7 +188,7 @@ fun UmountManagerScreen() {
                         Spacer(modifier = Modifier.height(16.dp))
                     }
 
-                    if (viewModel.umountPaths.isEmpty()) {
+                    if (uiState.umountPaths.isEmpty()) {
                         item {
                             WarningCard(
                                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -200,7 +201,7 @@ fun UmountManagerScreen() {
                     }
 
                     lazySegmentedColumn(
-                        viewModel.umountPaths,
+                        uiState.umountPaths,
                         key = { _, it -> it.path }) { _, entry ->
                         SettingsBaseWidget(
                             icon = Icons.Filled.Folder,
@@ -264,7 +265,7 @@ fun UmountManagerScreen() {
                 onConfirm = { path, flags ->
                     showAddDialog = false
 
-                    viewModel.umountPaths.filter { it.path == path }.forEach {
+                    uiState.umountPaths.filter { it.path == path }.forEach {
                         viewModel.removePath(
                             entry = it,
                             snackBarHost = null,

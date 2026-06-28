@@ -1,14 +1,13 @@
 package com.resukisu.resukisu.ui.activity.util
 
-import android.content.Context
 import android.database.ContentObserver
 import android.os.Handler
 import android.provider.Settings
-import androidx.core.content.edit
+import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.ui.MainActivity
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.resukisu.resukisu.ui.viewmodel.SettingsViewModel
 
 class ThemeChangeContentObserver(
     handler: Handler,
@@ -22,35 +21,12 @@ class ThemeChangeContentObserver(
 
 object ThemeUtils {
 
-    fun initializeThemeSettings(activity: MainActivity, settingsStateFlow: MutableStateFlow<MainActivity.SettingsState>) {
-        val prefs = activity.getSharedPreferences("settings", Context.MODE_PRIVATE)
-        val isFirstRun = prefs.getBoolean("is_first_run", true)
+    fun initializeThemeSettings(activity: MainActivity, settingsViewModel: SettingsViewModel) {
+        settingsViewModel.initialize(activity)
+        settingsViewModel.initializeFirstRunSettings(activity)
 
-        settingsStateFlow.value = MainActivity.SettingsState(
-            isHideOtherInfo = prefs.getBoolean("is_hide_other_info", false),
-            dpi = prefs.getInt("app_dpi", 0),
-            predictiveBackAnimation = MainActivity.PredictiveBackAnimation.fromValueOrDefault(
-                prefs.getString(
-                    "predictive_back_animation",
-                    ""
-                )!!
-            ),
-            predictiveBackExitDirection = MainActivity.PredictiveBackExitDirection.fromValueOrDefault(
-                prefs.getString("predictive_back_exit_direction", "")!!
-            ),
-        )
-
-        if (isFirstRun) {
-            ThemeConfig.preventBackgroundRefresh = false
-            activity.getSharedPreferences("theme_prefs", Context.MODE_PRIVATE).edit {
-                putBoolean("prevent_background_refresh", false)
-            }
-            prefs.edit { putBoolean("is_first_run", false) }
-        }
-
-        // 加载保存的背景设置
         loadThemeMode()
-        loadThemeColors()
+        loadThemeSeedColor()
         loadDynamicColorState()
         CardConfig.load(activity.applicationContext)
     }
@@ -80,9 +56,7 @@ object ThemeUtils {
 
     fun onActivityPause(activity: MainActivity) {
         CardConfig.save(activity.applicationContext)
-        activity.getSharedPreferences("theme_prefs", Context.MODE_PRIVATE).edit {
-            putBoolean("prevent_background_refresh", true)
-        }
+        activity.appPreferences.putBoolean("prevent_background_refresh", true)
         ThemeConfig.preventBackgroundRefresh = true
     }
 
@@ -95,7 +69,7 @@ object ThemeUtils {
     private fun loadThemeMode() {
     }
 
-    private fun loadThemeColors() {
+    private fun loadThemeSeedColor() {
     }
 
     private fun loadDynamicColorState() {

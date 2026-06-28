@@ -4,13 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.system.Os
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.resukisu.resukisu.BuildConfig
 import com.resukisu.resukisu.KernelVersion
 import com.resukisu.resukisu.Natives
+import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.getKernelVersion
 import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.ui.util.downloader.checkNewVersion
@@ -27,38 +26,64 @@ import com.resukisu.resukisu.ui.util.isSELinuxPermissive
 import com.resukisu.resukisu.ui.util.listModules
 import com.resukisu.resukisu.ui.util.module.LatestVersionInfo
 import com.resukisu.resukisu.ui.util.rootAvailable
+import com.resukisu.resukisu.ui.susfs.util.SuSFSManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 
+data class HomeUiState(
+    val systemStatus: HomeViewModel.SystemStatus = HomeViewModel.SystemStatus(),
+    val systemInfo: HomeViewModel.SystemInfo = HomeViewModel.SystemInfo(),
+    val latestVersionInfo: LatestVersionInfo = LatestVersionInfo(),
+    val isSimpleMode: Boolean = false,
+    val isHideVersion: Boolean = false,
+    val isHideOtherInfo: Boolean = false,
+    val isHideSusfsStatus: Boolean = false,
+    val isHideZygiskImplement: Boolean = false,
+    val isHideMetaModuleImplement: Boolean = false,
+    val isHideLinkCard: Boolean = false,
+    val isInitialDataLoaded: Boolean = false,
+    val isCoreDataLoaded: Boolean = false,
+    val isExtendedDataLoaded: Boolean = false,
+    val isRefreshing: Boolean = false,
+)
+
 class HomeViewModel : ViewModel() {
 
-    // 系统状态
     data class SystemStatus(
         val isManager: Boolean = false,
         val ksuVersion: Int? = null,
-        val ksuFullVersion : String? = null,
+        val managerUAPIVersion: Int = 1,
+        val kernelUAPIVersion: Int? = 1,
+        val ksuFullVersion: String? = null,
         val lkmMode: Boolean? = null,
         val kernelVersion: KernelVersion = getKernelVersion(),
         val isRootAvailable: Boolean = false,
         val requireNewKernel: Boolean = false,
+        val uapiMismatch: Boolean = false,
         val isSELinuxPermissive: Boolean = false,
         val isOfficialSignature: Boolean = true,
         val kernelPatchImplement: Natives.KernelPatchImplement = Natives.KernelPatchImplement.NO_KERNEL_PATCH_SUPPORT,
     )
 
-    // 系统信息
     data class SystemInfo(
         val kernelRelease: String = "",
         val androidVersion: String = "",
         val deviceModel: String = "",
-        val managerVersion: Pair<String, Long> = Pair("", 0L),
+        val managerVersion: Triple<String, Int, Int> = Triple("", 0, 0),
         val selinuxStatus: String = "",
         val susfsEnabled: Boolean = false,
+        val susfsVersionSupported: Boolean = false,
         val susfsVersion: String = "",
         val susfsFeatures: String = "",
+        val hasEnabledThirdPartySusfsModule: Boolean = false,
         val superuserCount: Int = 0,
         val moduleCount: Int = 0,
         val managersList: Natives.ManagersList? = null,
@@ -68,324 +93,336 @@ class HomeViewModel : ViewModel() {
         val seccompStatus: Int = -1,
     )
 
-    // 状态变量
-    var systemStatus by mutableStateOf(SystemStatus())
-        private set
+    private val _uiState = MutableStateFlow(HomeUiState())
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    var systemInfo by mutableStateOf(SystemInfo())
-        private set
+    private val loadingJobs = mutableListOf<Job>()
+    private var dataLoadJob: Job? = null
 
-    var latestVersionInfo by mutableStateOf(LatestVersionInfo())
-        private set
+    private fun completedJob(): Job = Job().apply { complete() }
 
-    var isSimpleMode by mutableStateOf(false)
-        private set
-    var isHideVersion by mutableStateOf(false)
-        private set
-    var isHideOtherInfo by mutableStateOf(false)
-        private set
-    var isHideSusfsStatus by mutableStateOf(false)
-        private set
-    var isHideZygiskImplement by mutableStateOf(false)
-        private set
-    var isHideMetaModuleImplement by mutableStateOf(false)
-        private set
-    var isHideLinkCard by mutableStateOf(false)
-        private set
-    var showKpmInfo by mutableStateOf(false)
-        private set
-
-    var isCoreDataLoaded by mutableStateOf(false)
-        private set
-    var isExtendedDataLoaded by mutableStateOf(false)
-        private set
-    var isRefreshing by mutableStateOf(false)
-        private set
-
-    var hasEnabledThirdPartySusfsModule by mutableStateOf(false)
-        private set
-
-    private var loadingJobs = mutableListOf<Job>()
-
-    fun loadUserSettings(context: Context) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val settingsPrefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-            isSimpleMode = settingsPrefs.getBoolean("is_simple_mode", false)
-            isHideVersion = settingsPrefs.getBoolean("is_hide_version", false)
-            isHideOtherInfo = settingsPrefs.getBoolean("is_hide_other_info", false)
-            isHideSusfsStatus = settingsPrefs.getBoolean("is_hide_susfs_status", false)
-            isHideLinkCard = settingsPrefs.getBoolean("is_hide_link_card", false)
-            isHideZygiskImplement = settingsPrefs.getBoolean("is_hide_zygisk_Implement", false)
-            isHideMetaModuleImplement = settingsPrefs.getBoolean("is_hide_meta_module_Implement", false)
-        }
+    suspend fun awaitInitialData(context: Context) {
+        refreshData(context, refreshUI = false).join()
     }
 
-    fun loadCoreData() {
-        if (isCoreDataLoaded) return
+    private fun loadCoreData(force: Boolean = false): Job? {
+        if (!force && _uiState.value.isCoreDataLoaded) return null
 
         val job = viewModelScope.launch(Dispatchers.IO) {
-            try {
+            runCatching {
                 val kernelVersion = getKernelVersion()
-                val isManager = try {
-                    Natives.isManager
-                } catch (_: Exception) {
-                    false
-                }
-
+                val isManager = runCatching { Natives.isManager }.getOrDefault(false)
                 val ksuVersion = if (isManager) Natives.version else null
-
-                val fullVersion = try {
-                    Natives.getFullVersion()
-                } catch (_: Exception) {
-                    "Unknown"
-                }
-
+                val kernelUAPIVersion = if (isManager) Natives.kernelUAPIVersion else null
+                val managerUAPIVersion = Natives.managerUAPIVersion
+                val fullVersion = runCatching { Natives.getFullVersion() }.getOrDefault("Unknown")
                 val lkmMode = ksuVersion?.let {
                     if (kernelVersion.isGKI()) Natives.isLkmMode else null
                 }
-
-                val isRootAvailable = try {
-                    rootAvailable()
-                } catch (_: Exception) {
-                    false
-                }
-
-                val requireNewKernel = try {
-                    isManager && Natives.requireNewKernel()
-                } catch (_: Exception) {
-                    false
-                }
-
-                val isSELinuxPermissive = try {
-                    isSELinuxPermissive()
-                } catch (_: Exception) {
-                    false
-                }
-
-                val isOfficialSignature = try {
-                    isOfficialSignature()
-                } catch (_: Exception) {
-                    false
-                }
-
-                systemStatus = SystemStatus(
+                val status = SystemStatus(
                     isManager = isManager,
                     ksuVersion = ksuVersion,
-                    ksuFullVersion = "$fullVersion (${Natives.version})",
+                    ksuFullVersion = "$fullVersion (${Natives.version}/${kernelUAPIVersion})",
                     lkmMode = lkmMode,
                     kernelVersion = kernelVersion,
-                    isRootAvailable = isRootAvailable,
-                    requireNewKernel = requireNewKernel,
-                    isSELinuxPermissive = isSELinuxPermissive,
-                    isOfficialSignature = isOfficialSignature,
+                    isRootAvailable = runCatching { rootAvailable() }.getOrDefault(false),
+                    requireNewKernel = runCatching {
+                        isManager && Natives.requireNewKernel()
+                    }.getOrDefault(false),
+                    uapiMismatch = runCatching {
+                        isManager && Natives.checkUAPIMismatch()
+                    }.getOrDefault(false),
+                    kernelUAPIVersion = kernelUAPIVersion,
+                    managerUAPIVersion = managerUAPIVersion,
+                    isSELinuxPermissive = runCatching { isSELinuxPermissive() }.getOrDefault(false),
+                    isOfficialSignature = runCatching { isOfficialSignature() }.getOrDefault(false),
                     kernelPatchImplement = Natives.getKernelPatchImplement(),
                 )
-
-                isCoreDataLoaded = true
-            } catch (_: Exception) {
+                _uiState.update {
+                    it.copy(
+                        systemStatus = status,
+                        isCoreDataLoaded = true,
+                    )
+                }
             }
         }
         loadingJobs.add(job)
+        return job
     }
 
-    fun loadExtendedData(context: Context) {
-        if (isExtendedDataLoaded) return
+    private fun loadExtendedData(context: Context, force: Boolean = false): Job? {
+        if (!force && _uiState.value.isExtendedDataLoaded) return null
 
         val job = viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val (kernelRelease, androidVersion, deviceModel, managerVersion, selinuxStatus, seccompStatus) = loadBasicSystemInfo(
-                    context
-                )
-                systemInfo = systemInfo.copy(
-                    kernelRelease = kernelRelease,
-                    androidVersion = androidVersion,
-                    deviceModel = deviceModel,
-                    managerVersion = managerVersion,
-                    selinuxStatus = selinuxStatus,
-                    seccompStatus = seccompStatus
-                )
-
-                if (!isSimpleMode) {
-                    val (superUserCount, moduleCount, zygiskImplement, metamoduleImplement) = loadModuleInfo()
-                    systemInfo = systemInfo.copy(
-                        superuserCount = superUserCount,
-                        moduleCount = moduleCount,
-                        zygiskImplement = zygiskImplement,
-                        metaModuleImplement = metamoduleImplement
+            runCatching {
+                val (kernelRelease, androidVersion, deviceModel, managerVersion, selinuxStatus, seccompStatus) =
+                    loadBasicSystemInfo(context)
+                _uiState.update {
+                    it.copy(
+                        systemInfo = it.systemInfo.copy(
+                            kernelRelease = kernelRelease,
+                            androidVersion = androidVersion,
+                            deviceModel = deviceModel,
+                            managerVersion = managerVersion,
+                            selinuxStatus = selinuxStatus,
+                            seccompStatus = seccompStatus,
+                        )
                     )
                 }
 
-                hasEnabledThirdPartySusfsModule = detectEnabledThirdPartySusfsModule()
+                if (!_uiState.value.isSimpleMode) {
+                    val moduleInfo = loadModuleInfo()
+                    _uiState.update {
+                        it.copy(
+                            systemInfo = it.systemInfo.copy(
+                                superuserCount = moduleInfo.first,
+                                moduleCount = moduleInfo.second,
+                                zygiskImplement = moduleInfo.third,
+                                metaModuleImplement = moduleInfo.fourth,
+                            )
+                        )
+                    }
+                }
 
-                if (!isHideSusfsStatus) {
-                    val (enabled, version, features) = loadSuSFSInfo()
-                    systemInfo = systemInfo.copy(
-                        susfsEnabled = enabled,
-                        susfsVersion = version,
-                        susfsFeatures = features,
+                val hasThirdPartySusfsModule = detectEnabledThirdPartySusfsModule()
+                _uiState.update {
+                    it.copy(
+                        systemInfo = it.systemInfo.copy(
+                            hasEnabledThirdPartySusfsModule = hasThirdPartySusfsModule
+                        )
                     )
+                }
+
+                if (!_uiState.value.isHideSusfsStatus) {
+                    val susfsInfo = loadSuSFSInfo()
+                    _uiState.update {
+                        it.copy(
+                            systemInfo = it.systemInfo.copy(
+                                susfsEnabled = susfsInfo.first,
+                                susfsVersionSupported = susfsInfo.first && SuSFSManager.isBinaryAvailable(
+                                    context
+                                ),
+                                susfsVersion = susfsInfo.second,
+                                susfsFeatures = susfsInfo.third,
+                            )
+                        )
+                    }
                 }
 
                 val managerInfo = loadManagerInfo()
-                systemInfo = systemInfo.copy(
-                    managersList = managerInfo.first,
-                    isDynamicSignEnabled = managerInfo.second
-                )
-
-                isExtendedDataLoaded = true
-            } catch (_: Exception) {}
+                _uiState.update {
+                    it.copy(
+                        systemInfo = it.systemInfo.copy(
+                            managersList = managerInfo.first,
+                            isDynamicSignEnabled = managerInfo.second,
+                        ),
+                        isExtendedDataLoaded = true,
+                    )
+                }
+            }
         }
         loadingJobs.add(job)
+        return job
     }
 
+    private fun updateBooleanPref(
+        context: Context,
+        key: String,
+        value: Boolean,
+        reducer: (HomeUiState) -> HomeUiState,
+    ) {
+        context.appPreferences.putBoolean(key, value)
+        _uiState.update(reducer)
+    }
+
+    fun handleHideSusfsStatusChange(newValue: Boolean) {
+        handleHideSusfsStatusChange(ksuApp, newValue)
+    }
+
+    fun handleHideZygiskImplementChange(newValue: Boolean) {
+        handleHideZygiskImplementChange(ksuApp, newValue)
+    }
+
+    fun handleHideMetaModuleImplementChange(newValue: Boolean) {
+        handleHideMetaModuleImplementChange(ksuApp, newValue)
+    }
+
+    fun handleHideLinkCardChange(newValue: Boolean) {
+        handleHideLinkCardChange(ksuApp, newValue)
+    }
+
+    fun handleHideLinkCardChange(context: Context, newValue: Boolean) {
+        updateBooleanPref(
+            context,
+            "is_hide_link_card",
+            newValue
+        ) { it.copy(isHideLinkCard = newValue) }
+    }
+
+    fun handleHideMetaModuleImplementChange(context: Context, newValue: Boolean) {
+        updateBooleanPref(context, "is_hide_meta_module_Implement", newValue) {
+            it.copy(isHideMetaModuleImplement = newValue)
+        }
+    }
+
+    fun handleHideZygiskImplementChange(context: Context, newValue: Boolean) {
+        updateBooleanPref(context, "is_hide_zygisk_Implement", newValue) {
+            it.copy(isHideZygiskImplement = newValue)
+        }
+    }
+
+    fun handleHideSusfsStatusChange(context: Context, newValue: Boolean) {
+        updateBooleanPref(
+            context,
+            "is_hide_susfs_status",
+            newValue
+        ) { it.copy(isHideSusfsStatus = newValue) }
+    }
+
+    fun handleSimpleModeChange(context: Context, newValue: Boolean) {
+        updateBooleanPref(context, "is_simple_mode", newValue) { it.copy(isSimpleMode = newValue) }
+    }
+
+    fun handleHideVersionChange(newValue: Boolean) {
+        handleHideVersionChange(ksuApp, newValue)
+    }
+
+    fun handleHideVersionChange(context: Context, newValue: Boolean) {
+        updateBooleanPref(
+            context,
+            "is_hide_version",
+            newValue
+        ) { it.copy(isHideVersion = newValue) }
+    }
+
+    fun handleHideOtherInfoChange(newValue: Boolean) {
+        handleHideOtherInfoChange(ksuApp, newValue)
+    }
+
+    fun handleHideOtherInfoChange(context: Context, newValue: Boolean) {
+        updateBooleanPref(context, "is_hide_other_info", newValue) {
+            it.copy(isHideOtherInfo = newValue)
+        }
+    }
     fun refreshData(
         context: Context,
         refreshUI: Boolean = false
-    ) {
-        viewModelScope.launch {
-            if (refreshUI)
-                isRefreshing = true
+    ): Job {
+        if (!refreshUI) {
+            dataLoadJob?.takeIf { it.isActive }?.let { return it }
+            if (_uiState.value.isInitialDataLoaded) return completedJob()
+        }
+
+        if (context.appPreferences.getBoolean("check_update", true)) {
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    val versionInfo = checkNewVersion()
+                    _uiState.update {
+                        it.copy(latestVersionInfo = versionInfo)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+
+        val job = viewModelScope.launch(Dispatchers.IO) {
+            if (refreshUI) {
+                _uiState.update {
+                    it.copy(isRefreshing = true)
+                }
+            }
 
             try {
-                // 取消正在进行的加载任务
                 loadingJobs.forEach { it.cancel() }
                 loadingJobs.clear()
 
-                // 重置状态
-                if (refreshUI) {
-                    isCoreDataLoaded = false
-                    isExtendedDataLoaded = false
+                val userSettings = async {
+                    applyUserSettings(context)
                 }
+                val coreJob = loadCoreData(force = refreshUI)
+                val extendedJob = loadExtendedData(context, force = refreshUI)
 
-                // 重新加载用户设置
-                loadUserSettings(context)
-
-                // 重新加载核心数据
-                loadCoreData()
-
-                // 重新加载扩展数据
-                loadExtendedData(context)
-
-                // 检查更新
-                val settingsPrefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-                val checkUpdate = settingsPrefs.getBoolean("check_update", true)
-                if (checkUpdate) {
-                    try {
-                        val newVersionInfo = withContext(Dispatchers.IO) {
-                            checkNewVersion()
-                        }
-                        latestVersionInfo = newVersionInfo
-                    } catch (_: Exception) {
-                    }
-                }
-            } catch (_: Exception) {
-                // 静默处理错误
+                coreJob?.join()
+                extendedJob?.join()
+                userSettings.join()
             } finally {
-                isRefreshing = false
+                _uiState.update {
+                    it.copy(
+                        isInitialDataLoaded = true,
+                        isRefreshing = false,
+                    )
+                }
             }
+        }
+
+        dataLoadJob = job
+        return job
+    }
+
+    private fun applyUserSettings(context: Context) {
+        val settingsPrefs = context.appPreferences
+        _uiState.update {
+            it.copy(
+                isSimpleMode = settingsPrefs.getBoolean("is_simple_mode", false),
+                isHideVersion = settingsPrefs.getBoolean("is_hide_version", false),
+                isHideOtherInfo = settingsPrefs.getBoolean("is_hide_other_info", false),
+                isHideSusfsStatus = settingsPrefs.getBoolean("is_hide_susfs_status", false),
+                isHideLinkCard = settingsPrefs.getBoolean("is_hide_link_card", false),
+                isHideZygiskImplement = settingsPrefs.getBoolean("is_hide_zygisk_Implement", false),
+                isHideMetaModuleImplement = settingsPrefs.getBoolean(
+                    "is_hide_meta_module_Implement",
+                    false
+                ),
+            )
         }
     }
 
-    private suspend fun loadBasicSystemInfo(context: Context): Tuple6<String, String, String, Pair<String, Long>, String, Int> {
+    private suspend fun loadBasicSystemInfo(context: Context): Tuple6<String, String, String, Triple<String, Int, Int>, String, Int> {
         return withContext(Dispatchers.IO) {
-            val uname = try {
-                Os.uname()
-            } catch (_: Exception) {
-                null
-            }
-
-            val deviceModel = try {
-                getDeviceModel()
-            } catch (_: Exception) {
-                "Unknown"
-            }
-
-            val managerVersion = try {
-                getManagerVersion(context)
-            } catch (_: Exception) {
-                Pair("Unknown", 0L)
-            }
-
-            val selinuxStatus = try {
-                getSELinuxStatus(ksuApp.applicationContext)
-            } catch (_: Exception) {
-                "Unknown"
-            }
-
-            val seccompStatus = runCatching {
-                Os.prctl(21 /* PR_GET_SECCOMP */, 0, 0, 0, 0)
-            }.getOrDefault(-1)
-
+            val uname = runCatching { Os.uname() }.getOrNull()
             Tuple6(
                 uname?.release ?: "Unknown",
                 Build.VERSION.RELEASE ?: "Unknown",
-                deviceModel,
-                managerVersion,
-                selinuxStatus,
-                seccompStatus
+                runCatching { getDeviceModel() }.getOrDefault("Unknown"),
+                runCatching { getManagerVersion() }.getOrDefault(Triple("Unknown", 0, 0)),
+                runCatching { getSELinuxStatus(ksuApp.applicationContext) }.getOrDefault("Unknown"),
+                runCatching { Os.prctl(21, 0, 0, 0, 0) }.getOrDefault(-1),
             )
         }
     }
 
     private suspend fun loadModuleInfo(): Tuple4<Int, Int, String, String> {
         return withContext(Dispatchers.IO) {
-            val superuserCount = try {
-                getSuperuserCount()
-            } catch (_: Exception) {
-                0
-            }
-
-            val moduleCount = try {
-                getModuleCount()
-            } catch (_: Exception) {
-                0
-            }
-
-            val zygiskImplement = try {
-                getZygiskImplement()
-            } catch (_: Exception) {
-                "None"
-            }
-
-            val metaModuleImplement = try {
-                getMetaModuleImplement()
-            } catch (_: Exception) {
-                "None"
-            }
-
-            Tuple4(superuserCount, moduleCount, zygiskImplement, metaModuleImplement)
+            Tuple4(
+                runCatching { getSuperuserCount() }.getOrDefault(0),
+                runCatching { getModuleCount() }.getOrDefault(0),
+                runCatching { getZygiskImplement() }.getOrDefault("None"),
+                runCatching { getMetaModuleImplement() }.getOrDefault("None"),
+            )
         }
     }
 
     private suspend fun loadSuSFSInfo(): Triple<Boolean, String, String> {
         return withContext(Dispatchers.IO) {
-            val susfsEnabled = try {
+            val susfsEnabled = runCatching {
                 getSuSFSStatus()
-            } catch (_: Exception) {
-                false
-            }
+            }.getOrDefault(false)
 
             if (!susfsEnabled) {
                 return@withContext Triple(false, "", "")
             }
 
-            val susfsVersion = try {
-                getSuSFSVersion()
-            } catch (_: Exception) {
-                ""
-            }
-
+            val susfsVersion = runCatching { getSuSFSVersion() }.getOrDefault("")
             if (susfsVersion.isEmpty()) {
                 return@withContext Triple(true, "", "")
             }
 
-            val susfsFeatures = try {
-                getSuSFSFeatures()
-            } catch (_: Exception) {
-                ""
-            }
-
-            Triple(true, susfsVersion, susfsFeatures)
+            Triple(
+                true,
+                susfsVersion,
+                runCatching { getSuSFSFeatures() }.getOrDefault(""),
+            )
         }
     }
 
@@ -411,31 +448,17 @@ class HomeViewModel : ViewModel() {
 
     private suspend fun loadManagerInfo(): Pair<Natives.ManagersList?, Boolean> {
         return withContext(Dispatchers.IO) {
-            val dynamicSignConfig = try {
-                Natives.getDynamicManager()
-            } catch (_: Exception) {
-                null
-            }
-
-            val isDynamicSignEnabled = try {
-                dynamicSignConfig?.isValid() == true
-            } catch (_: Exception) {
-                false
-            }
-
-            val managersList = try {
-                Natives.getManagersList()
-            } catch (_: Exception) {
-                null
-            }
-
-            Pair(managersList, isDynamicSignEnabled)
+            val dynamicSignConfig = runCatching { Natives.getDynamicManager() }.getOrNull()
+            Pair(
+                runCatching { Natives.getManagersList() }.getOrNull(),
+                runCatching { dynamicSignConfig?.isValid() == true }.getOrDefault(false),
+            )
         }
     }
 
     @SuppressLint("PrivateApi")
     private fun getDeviceModel(): String {
-        return try {
+        return runCatching {
             val systemProperties = Class.forName("android.os.SystemProperties")
             val getMethod = systemProperties.getMethod("get", String::class.java, String::class.java)
             val marketNameKeys = listOf(
@@ -446,25 +469,19 @@ class HomeViewModel : ViewModel() {
             )
             var result = getDeviceInfo()
             for (key in marketNameKeys) {
-                try {
-                    val marketName = getMethod.invoke(null, key, "") as String
-                    if (marketName.isNotEmpty()) {
-                        result = marketName
-                        break
-                    }
-                } catch (_: Exception) {
+                val marketName = runCatching { getMethod.invoke(null, key, "") as String }
+                    .getOrDefault("")
+                if (marketName.isNotEmpty()) {
+                    result = marketName
+                    break
                 }
             }
             result
-        } catch (
-
-            _: Exception) {
-            getDeviceInfo()
-        }
+        }.getOrDefault(getDeviceInfo())
     }
 
     private fun getDeviceInfo(): String {
-        return try {
+        return runCatching {
             var manufacturer = Build.MANUFACTURER ?: "Unknown"
             manufacturer = manufacturer[0].uppercaseChar().toString() + manufacturer.substring(1)
 
@@ -479,20 +496,13 @@ class HomeViewModel : ViewModel() {
             }
 
             manufacturer
-        } catch (_: Exception) {
-            "Unknown Device"
-        }
+        }.getOrDefault("Unknown Device")
     }
 
-    private fun getManagerVersion(context: Context): Pair<String, Long> {
-        return try {
-            val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-            val versionCode = androidx.core.content.pm.PackageInfoCompat.getLongVersionCode(packageInfo)
-            val versionName = packageInfo.versionName ?: "Unknown"
-            Pair(versionName, versionCode)
-        } catch (_: Exception) {
-            Pair("Unknown", 0L)
-        }
+    private fun getManagerVersion(): Triple<String, Int, Int> {
+        return runCatching {
+            Triple(BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, Natives.managerUAPIVersion)
+        }.getOrDefault(Triple("Unknown", 0, 0))
     }
 
     data class Tuple6<T1, T2, T3, T4, T5, T6>(

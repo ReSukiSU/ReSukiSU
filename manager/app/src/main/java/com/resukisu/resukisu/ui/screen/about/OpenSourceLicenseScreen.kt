@@ -59,6 +59,7 @@ import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
+import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -120,14 +121,15 @@ fun OpenSourceLicenseScreen() {
             libraries = libraries,
             libraryModifier = Modifier
                 .padding(vertical = 4.dp)
-                .clip(RoundedCornerShape(cornerRadius)),
+                .clip(RoundedCornerShape(cornerRadius))
+                .renderBackgroundBlur(),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
                 .blurSource(),
             contentPadding = paddingValues,// PaddingValues(horizontal = 16.dp),
             colors = LibraryDefaults.libraryColors(
-                libraryBackgroundColor = MaterialTheme.colorScheme.surfaceBright.copy(
+                libraryBackgroundColor = if (ThemeConfig.isEnableBlurExp) Color.Transparent else MaterialTheme.colorScheme.surfaceContainerHighest.copy(
                     alpha = CardConfig.cardAlpha
                 ),
                 libraryContentColor = MaterialTheme.colorScheme.onSurface,
@@ -182,6 +184,7 @@ fun OpenSourceLicenseScreen() {
                         item {
                             WarningCard(
                                 color = MaterialTheme.colorScheme.tertiary,
+                                renderBackground = false,
                                 icon = {
                                     Icon(
                                         imageVector = Icons.Rounded.LocalPolice,

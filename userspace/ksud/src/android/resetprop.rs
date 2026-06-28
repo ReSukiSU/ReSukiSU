@@ -60,8 +60,7 @@ pub struct Args {
     #[arg(short = 'f', long = "file")]
     file: Option<String>,
 
-    /// Compact property area memory (reclaim holes left by deleted properties).
-    /// Optionally pass a SELinux context name to compact only that area.
+    /// Rebuild a property area by SELinux context name.
     #[arg(short = 'c', long = "compact")]
     compact: bool,
 
@@ -143,6 +142,7 @@ fn execute(cli: &Args) -> Result<()> {
         persist_only: cli.persist_only,
         verbose: cli.verbose,
         show_context: cli.show_context,
+        rebuild: false,
     };
 
     // Validate: at most one special mode
@@ -170,14 +170,12 @@ fn execute(cli: &Args) -> Result<()> {
         return Ok(());
     }
 
-    // -c: compact property area memory
-    // When a positional argument is given, treat it as a SELinux context name.
+    // -c: rebuild a property area selected by SELinux context name.
     if cli.compact {
-        let context = cli.name().map(std::string::String::as_str);
-        let compacted = sys_prop::compact(context).context("compact failed")?;
-        if !compacted {
-            bail!("nothing to compact");
-        }
+        let context = cli
+            .name()
+            .context("--compact requires a property area context name")?;
+        rp.rebuild(context).context("rebuild failed")?;
         return Ok(());
     }
 
@@ -245,6 +243,7 @@ pub fn load_system_prop_file(path: &Path) -> Result<()> {
         persist_only: false,
         verbose: false,
         show_context: false,
+        rebuild: false,
     };
 
     let file = File::open(path).with_context(|| format!("Failed to open {}", path.display()))?;

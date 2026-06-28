@@ -82,6 +82,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
@@ -102,6 +103,7 @@ import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.module.ModuleModify
 import com.resukisu.resukisu.ui.viewmodel.AppCategory
 import com.resukisu.resukisu.ui.viewmodel.SortType
+import com.resukisu.resukisu.ui.viewmodel.SuperUserUiState
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -119,6 +121,7 @@ fun SuperUserPage(bottomPadding: Dp) {
     val viewModel = viewModel<SuperUserViewModel>(
         viewModelStoreOwner = ksuApp
     )
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
@@ -134,15 +137,15 @@ fun SuperUserPage(bottomPadding: Dp) {
     val navigator = LocalNavigator.current
 
     LaunchedEffect(Unit) {
-        viewModel.search = ""
+        viewModel.updateSearch("")
     }
 
-    val appCounts = remember(viewModel.appGroupList, viewModel.showSystemApps) {
+    val appCounts = remember(uiState.appGroupList, uiState.showSystemApps) {
         mapOf(
-            AppCategory.ALL to viewModel.appGroupList.size,
-            AppCategory.ROOT to viewModel.appGroupList.count { it.allowSu },
-            AppCategory.CUSTOM to viewModel.appGroupList.count { !it.allowSu && it.hasCustomProfile },
-            AppCategory.DEFAULT to viewModel.appGroupList.count { !it.allowSu && !it.hasCustomProfile }
+            AppCategory.ALL to uiState.appGroupList.size,
+            AppCategory.ROOT to uiState.appGroupList.count { it.allowSu },
+            AppCategory.CUSTOM to uiState.appGroupList.count { !it.allowSu && it.hasCustomProfile },
+            AppCategory.DEFAULT to uiState.appGroupList.count { !it.allowSu && !it.hasCustomProfile }
         )
     }
 
@@ -150,8 +153,8 @@ fun SuperUserPage(bottomPadding: Dp) {
         topBar = {
             SearchAppBar(
                 title = stringResource(R.string.superuser),
-                searchText = viewModel.search,
-                onSearchTextChange = { viewModel.search = it },
+                searchText = uiState.search,
+                onSearchTextChange = viewModel::updateSearch,
                 dropdownContent = {
                     IconButton(onClick = { showBottomSheet = true }) {
                         Icon(
@@ -184,7 +187,7 @@ fun SuperUserPage(bottomPadding: Dp) {
         SuperUserContent(
             innerPadding = innerPadding,
             viewModel = viewModel,
-            appGroups = viewModel.appGroupList,
+            uiState = uiState,
             listState = listState,
             scrollBehavior = scrollBehavior,
             scope = scope,
@@ -196,6 +199,7 @@ fun SuperUserPage(bottomPadding: Dp) {
                 bottomSheetState = bottomSheetState,
                 onDismiss = { showBottomSheet = false },
                 viewModel = viewModel,
+                uiState = uiState,
                 appCounts = appCounts,
                 backupLauncher = backupLauncher,
                 restoreLauncher = restoreLauncher
@@ -209,7 +213,7 @@ fun SuperUserPage(bottomPadding: Dp) {
 private fun SuperUserContent(
     innerPadding: PaddingValues,
     viewModel: SuperUserViewModel,
-    appGroups: List<SuperUserViewModel.AppGroup>,
+    uiState: SuperUserUiState,
     listState: androidx.compose.foundation.lazy.LazyListState,
     scrollBehavior: TopAppBarScrollBehavior,
     scope: CoroutineScope,
@@ -218,7 +222,7 @@ private fun SuperUserContent(
     val navigator = LocalNavigator.current
     val pullRefreshState = rememberPullToRefreshState()
 
-    if (appGroups.isEmpty()) {
+    if (uiState.appGroupList.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -228,12 +232,12 @@ private fun SuperUserContent(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                if ((SuperUserViewModel.isRefreshing || viewModel.appGroupList.isEmpty()) && viewModel.search.isEmpty()) {
+                if ((uiState.isRefreshing || uiState.appGroupList.isEmpty()) && uiState.search.isEmpty()) {
                     LoadingIndicator()
                 }
                 else {
-                    val selectedCategory = viewModel.selectedCategory
-                    val isSearchEmpty = viewModel.search.isNotEmpty()
+                    val selectedCategory = uiState.selectedCategory
+                    val isSearchEmpty = uiState.search.isNotEmpty()
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
@@ -265,7 +269,7 @@ private fun SuperUserContent(
     PullToRefreshBox(
         state = pullRefreshState,
         onRefresh = { scope.launch { viewModel.fetchAppList() } },
-        isRefreshing = SuperUserViewModel.isRefreshing,
+        isRefreshing = uiState.isRefreshing,
         modifier = Modifier
             .fillMaxSize()
             .blurSource(),
@@ -275,7 +279,7 @@ private fun SuperUserContent(
                     .padding(top = innerPadding.calculateTopPadding())
                     .align(Alignment.TopCenter),
                 state = pullRefreshState,
-                isRefreshing = SuperUserViewModel.isRefreshing,
+                isRefreshing = uiState.isRefreshing,
             )
         },
     ) {
@@ -297,7 +301,7 @@ private fun SuperUserContent(
                 Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
             }
             lazySegmentedColumn(
-                items = appGroups,
+                items = uiState.appGroupList,
                 key = { _, appGroup -> "${appGroup.uid}-${appGroup.mainApp.packageName}" },
                 contentType = { _, _ -> "AppGroupItem" }
             ) { _, appGroup ->
@@ -321,11 +325,12 @@ private fun SuperUserBottomSheet(
     bottomSheetState: SheetState,
     onDismiss: () -> Unit,
     viewModel: SuperUserViewModel,
+    uiState: SuperUserUiState,
     appCounts: Map<AppCategory, Int>,
     backupLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>,
     restoreLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>
 ) {
-    val bottomSheetMenuItems = remember(viewModel.showSystemApps) {
+    val bottomSheetMenuItems = remember(uiState.showSystemApps) {
         listOf(
             BottomSheetMenuItem(
                 icon = Icons.Filled.Refresh,
@@ -335,10 +340,10 @@ private fun SuperUserBottomSheet(
                 }
             ),
             BottomSheetMenuItem(
-                icon = if (viewModel.showSystemApps) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                titleRes = if (viewModel.showSystemApps) R.string.hide_system_apps else R.string.show_system_apps,
+                icon = if (uiState.showSystemApps) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                titleRes = if (uiState.showSystemApps) R.string.hide_system_apps else R.string.show_system_apps,
                 onClick = {
-                    viewModel.updateShowSystemApps(!viewModel.showSystemApps)
+                    viewModel.updateShowSystemApps(!uiState.showSystemApps)
                 }
             ),
             BottomSheetMenuItem(
@@ -373,11 +378,11 @@ private fun SuperUserBottomSheet(
     ) {
         BottomSheetContent(
             menuItems = bottomSheetMenuItems,
-            currentSortType = viewModel.currentSortType,
+            currentSortType = uiState.currentSortType,
             onSortTypeChanged = { newSortType ->
                 viewModel.updateCurrentSortType(newSortType)
             },
-            selectedCategory = viewModel.selectedCategory,
+            selectedCategory = uiState.selectedCategory,
             onCategorySelected = { newCategory ->
                 viewModel.updateSelectedCategory(newCategory)
             },

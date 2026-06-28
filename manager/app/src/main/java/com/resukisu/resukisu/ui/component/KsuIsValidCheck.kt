@@ -27,16 +27,8 @@ fun ksuIsValid() : Boolean {
     if (tested) return ksuIsValid
 
     val isManager = Natives.isManager
-    val ksuVersion = if (isManager) Natives.version else null
-    ksuIsValid = ksuVersion != null && ksuVersion >= Natives.MINIMAL_SUPPORTED_KERNEL
+    ksuIsValid = isManager && !Natives.requireNewKernel() && rootAvailable()
     tested = true
 
     return ksuIsValid
-}
-
-/**
- * Check is full feature
- */
-fun isFullFeatured(): Boolean {
-    return ksuIsValid() && !Natives.requireNewKernel() && rootAvailable()
 }

@@ -45,6 +45,8 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
@@ -53,6 +55,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntryDecorator
@@ -67,6 +72,7 @@ import androidx.navigation3.ui.NavDisplay
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.NavigationEventState
 import androidx.navigationevent.compose.rememberNavigationEventState
+import com.resukisu.resukisu.KernelSUApplication
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.ui.activity.PermissionRequestInterface
 import com.resukisu.resukisu.ui.activity.component.NavigationBar
@@ -98,13 +104,18 @@ import com.resukisu.resukisu.ui.screen.TemplateEditorScreen
 import com.resukisu.resukisu.ui.screen.UmountManagerScreen
 import com.resukisu.resukisu.ui.screen.about.AboutScreen
 import com.resukisu.resukisu.ui.screen.about.OpenSourceLicenseScreen
+import com.resukisu.resukisu.ui.screen.kernelFlash.KernelFlashScreen
 import com.resukisu.resukisu.ui.screen.moduleRepo.ModuleRepoScreen
 import com.resukisu.resukisu.ui.screen.moduleRepo.OnlineModuleDetailScreen
+import com.resukisu.resukisu.ui.screen.themeSettings.ThemeSettingsScreen
+import com.resukisu.resukisu.ui.screen.themeSettings.util.applyLanguage
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.KernelSUTheme
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.backgroundImagePainter
+import com.resukisu.resukisu.ui.theme.blurBackgroundImageBitmap
 import com.resukisu.resukisu.ui.theme.blurSource
+import com.resukisu.resukisu.ui.util.LocalBackgroundBlurAnchor
 import com.resukisu.resukisu.ui.util.LocalBlurState
 import com.resukisu.resukisu.ui.util.LocalHandlePageChange
 import com.resukisu.resukisu.ui.util.LocalPagerState
@@ -114,6 +125,9 @@ import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.install
 import com.resukisu.resukisu.ui.util.rootAvailable
 import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
+import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel
+import com.resukisu.resukisu.ui.viewmodel.PredictiveBackAnimation
+import com.resukisu.resukisu.ui.viewmodel.SettingsViewModel
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
 import com.resukisu.resukisu.ui.webui.WebUIActivity
 import kotlinx.coroutines.Dispatchers
@@ -125,53 +139,15 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
-import top.yukonga.miuix.kmp.blur.isRenderEffectSupported
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
-import zako.zako.zako.zakoui.screen.kernelFlash.KernelFlashScreen
-import zako.zako.zako.zakoui.screen.moreSettings.MoreSettingsScreen
-import zako.zako.zako.zakoui.screen.moreSettings.util.LocaleHelper
+import top.yukonga.miuix.kmp.shader.isRenderEffectSupported
 import kotlin.coroutines.resume
 
 class MainActivity : ComponentActivity() {
     private lateinit var superUserViewModel: SuperUserViewModel
     private lateinit var homeViewModel: HomeViewModel
-    internal val settingsStateFlow = MutableStateFlow(SettingsState())
-
-    data class SettingsState(
-        val isHideOtherInfo: Boolean = false,
-        val dpi: Int = 0,
-        val predictiveBackAnimation: PredictiveBackAnimation = PredictiveBackAnimation.Scale,
-        val predictiveBackExitDirection: PredictiveBackExitDirection = PredictiveBackExitDirection.FOLLOW_GESTURE
-    )
-
-    enum class PredictiveBackAnimation(val value: String) {
-        None("none"),
-        AOSP("aosp"),
-        MIUIX("miuix"),
-        Scale("scale"),
-        KernelSUClassic("ksu_classic");
-
-        companion object {
-            fun fromValueOrDefault(value: String) =
-                PredictiveBackAnimation.entries.find { it.value == value } ?: Scale
-        }
-    }
-
-    enum class PredictiveBackExitDirection(val value: String) {
-        /** Follows the user's swipe gesture direction (e.g., swipe left -> exit right). */
-        FOLLOW_GESTURE("follow_gesture"),
-
-        /** Always translates to the right, regardless of swipe edge. */
-        ALWAYS_RIGHT("always_right"),
-
-        /** Always translates to the left, regardless of swipe edge. */
-        ALWAYS_LEFT("always_left");
-
-        companion object {
-            fun fromValueOrDefault(value: String) =
-                PredictiveBackExitDirection.entries.find { it.value == value } ?: FOLLOW_GESTURE
-        }
-    }
+    private lateinit var moduleViewModel: ModuleViewModel
+    private lateinit var settingsViewModel: SettingsViewModel
 
     private var showConfirmationDialog = mutableStateOf(false)
     private var pendingZipFiles = mutableStateOf<List<ZipFileInfo>>(emptyList())
@@ -180,13 +156,14 @@ class MainActivity : ComponentActivity() {
     private var isInitialized = false
 
     override fun attachBaseContext(newBase: Context?) {
-        super.attachBaseContext(newBase?.let { LocaleHelper.applyLanguage(it) })
+        super.attachBaseContext(newBase?.let { applyLanguage(it) })
     }
 
     private val intentState = MutableStateFlow(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         try {
+            val splashScreen = installSplashScreen()
 
             // Enable edge to edge
             enableEdgeToEdge()
@@ -196,6 +173,17 @@ class MainActivity : ComponentActivity() {
             }
 
             super.onCreate(savedInstanceState)
+
+            homeViewModel =
+                ViewModelProvider(applicationContext as KernelSUApplication)[HomeViewModel::class.java]
+            splashScreen.setKeepOnScreenCondition {
+                !homeViewModel.uiState.value.isInitialDataLoaded
+                        || (
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                                ThemeConfig.isEnableBlurExp &&
+                                blurBackgroundImageBitmap != null
+                        )
+            }
 
             val isManager = Natives.isManager
             if (isManager && !Natives.requireNewKernel()) {
@@ -265,7 +253,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    val settings by settingsStateFlow.collectAsState()
+                    val settings by settingsViewModel.uiState.collectAsStateWithLifecycle()
                     val systemDensity = LocalDensity.current
 
                     val density = remember(systemDensity, settings.dpi) {
@@ -493,6 +481,16 @@ class MainActivity : ComponentActivity() {
                                         }
                                     ) { content ->
                                         val snackBarHostState = remember { SnackbarHostState() }
+                                        var backgroundBlurAnchorCoordinates by remember {
+                                            mutableStateOf<LayoutCoordinates?>(null)
+                                        }
+
+                                        LaunchedEffect(backgroundImagePainter) {
+                                            if (backgroundImagePainter == null) {
+                                                backgroundBlurAnchorCoordinates = null
+                                            }
+                                        }
+
                                         with(predictiveBackAnimationHandler) {
                                             Box(
                                                 modifier = Modifier
@@ -515,12 +513,19 @@ class MainActivity : ComponentActivity() {
                                                         ThemeConfig.isEnableBlur
                                                     ),
                                                     LocalSnackbarHost provides snackBarHostState,
+                                                    LocalBackgroundBlurAnchor provides backgroundBlurAnchorCoordinates,
                                                 ) {
                                                     backgroundImagePainter?.let {
                                                         Box(
                                                             modifier = Modifier
                                                                 .fillMaxSize()
                                                                 .zIndex(-1f)
+                                                                .onGloballyPositioned { newCoordinates ->
+                                                                    backgroundBlurAnchorCoordinates =
+                                                                        newCoordinates.takeIf { coordinates ->
+                                                                            coordinates.isAttached
+                                                                        }
+                                                                }
                                                                 .paint(
                                                                     painter = it,
                                                                     contentScale = ContentScale.Crop,
@@ -571,7 +576,7 @@ class MainActivity : ComponentActivity() {
                                     entry<Route.SuperUser> { MainScreen() }
                                     entry<Route.Module> { MainScreen() }
                                     entry<Route.Settings> { MainScreen() }
-                                    entry<Route.MoreSettings> { MoreSettingsScreen() }
+                                    entry<Route.ThemeSettings> { ThemeSettingsScreen() }
                                     entry<Route.SuSFSConfig> { SuSFSConfigScreen() }
                                     entry<Route.UmountManager> { UmountManagerScreen() }
                                     entry<Route.KernelFlash> { key ->
@@ -651,8 +656,14 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun initializeViewModels() {
-        superUserViewModel = SuperUserViewModel()
-        homeViewModel = HomeViewModel()
+        superUserViewModel =
+            ViewModelProvider(applicationContext as KernelSUApplication)[SuperUserViewModel::class.java]
+        homeViewModel =
+            ViewModelProvider(applicationContext as KernelSUApplication)[HomeViewModel::class.java]
+        settingsViewModel =
+            ViewModelProvider(applicationContext as KernelSUApplication)[SettingsViewModel::class.java]
+        moduleViewModel =
+            ViewModelProvider(applicationContext as KernelSUApplication)[ModuleViewModel::class.java]
 
         // 设置主题变化监听器
         themeChangeObserver = ThemeUtils.registerThemeChangeObserver(this)
@@ -668,7 +679,7 @@ class MainActivity : ComponentActivity() {
         }
 
         // 初始化主题相关设置
-        ThemeUtils.initializeThemeSettings(this, settingsStateFlow)
+        ThemeUtils.initializeThemeSettings(this, settingsViewModel)
     }
 
     override fun onResume() {
@@ -735,8 +746,7 @@ fun rememberMaterial3BlurBackdrop(enableBlur: Boolean): LayerBackdrop? {
 @Composable
 fun MainScreen() {
     // 页面隐藏处理
-    val activity = LocalActivity.current as MainActivity
-    val settings by activity.settingsStateFlow.collectAsState()
+    LocalActivity.current as MainActivity
 
     var savedPages by rememberSaveable<MutableState<List<BottomBarDestination>>> {
         mutableStateOf(emptyList())
@@ -744,7 +754,7 @@ fun MainScreen() {
 
     val pages by produceState(initialValue = savedPages) {
         value = withContext(Dispatchers.IO) {
-            savedPages = BottomBarDestination.getPages(settings)
+            savedPages = BottomBarDestination.getPages()
             return@withContext savedPages
         }
     }
@@ -802,12 +812,8 @@ fun MainScreen() {
         }
     }
 
-    BackHandler {
-        if (pagerState.currentPage != 0) {
-            handlePageChange(0)
-        } else {
-            activity.moveTaskToBack(true)
-        }
+    BackHandler(pagerState.currentPage != 0) {
+        handlePageChange(0)
     }
 
     CompositionLocalProvider(
@@ -826,6 +832,7 @@ fun MainScreen() {
                         .blurSource(),
                     state = pagerState,
                     userScrollEnabled = userScrollEnabled,
+                    beyondViewportPageCount = 1,
                 ) { pageIndex ->
                     if (pages.isEmpty()) return@HorizontalPager
 

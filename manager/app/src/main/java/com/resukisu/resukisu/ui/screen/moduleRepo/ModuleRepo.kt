@@ -1,8 +1,6 @@
 package com.resukisu.resukisu.ui.screen.moduleRepo
 
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
-import android.content.SharedPreferences
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -88,10 +86,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.core.content.edit
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.data.AppPreferencesRepository
+import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.ui.activity.PermissionRequestInterface
 import com.resukisu.resukisu.ui.activity.util.isNetworkAvailable
 import com.resukisu.resukisu.ui.component.ConfirmDialogHandle
@@ -107,12 +107,15 @@ import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.FlashIt
 import com.resukisu.resukisu.ui.screen.LabelText
 import com.resukisu.resukisu.ui.theme.CardConfig
+import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurSource
+import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
 import com.resukisu.resukisu.ui.util.LocalPermissionRequestInterface
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.downloader.download
 import com.resukisu.resukisu.ui.util.module.ReleaseAssetInfo
 import com.resukisu.resukisu.ui.util.module.ReleaseInfo
+import com.resukisu.resukisu.ui.viewmodel.ModuleRepoUiState
 import com.resukisu.resukisu.ui.viewmodel.ModuleRepoViewModel
 import com.resukisu.resukisu.ui.viewmodel.ModuleRepoViewModel.RepoModule
 import com.resukisu.resukisu.ui.viewmodel.formatFileSize
@@ -130,8 +133,9 @@ import kotlinx.coroutines.withContext
 fun ModuleRepoScreen() {
     val navigator = LocalNavigator.current
     val context = LocalContext.current
-    val prefs = context.getSharedPreferences("settings", MODE_PRIVATE)
+    val prefs = context.appPreferences
     val viewModel = viewModel<ModuleRepoViewModel>()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackBarHost = LocalSnackbarHost.current
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
@@ -150,10 +154,10 @@ fun ModuleRepoScreen() {
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
 
-        viewModel.sortStargazerCountFirst = prefs.getBoolean("module_repo_sort_star_first", false)
+        viewModel.setSortStargazerCountFirst(prefs.getBoolean("module_repo_sort_star_first", false))
     }
 
-    val isLoading = viewModel.modules.isEmpty()
+    val isLoading = uiState.modules.isEmpty()
 
     Scaffold(
         topBar = {
@@ -162,8 +166,8 @@ fun ModuleRepoScreen() {
                     alpha = 0.8f
                 )) else Modifier,
                 title = stringResource(R.string.module_repo),
-                searchText = viewModel.search,
-                onSearchTextChange = { viewModel.search = it },
+                searchText = uiState.search,
+                onSearchTextChange = viewModel::updateSearch,
                 dropdownContent = {
                     IconButton(
                         onClick = { showBottomSheet = true },
@@ -246,14 +250,14 @@ fun ModuleRepoScreen() {
             PullToRefreshBox(
                 modifier = Modifier.blurSource(),
                 state = pullRefreshState,
-                isRefreshing = viewModel.isRefreshing,
+                isRefreshing = uiState.isRefreshing,
                 onRefresh = {
                     viewModel.refresh()
                 },
                 indicator = {
                     PullToRefreshDefaults.LoadingIndicator(
                         state = pullRefreshState,
-                        isRefreshing = viewModel.isRefreshing,
+                        isRefreshing = uiState.isRefreshing,
                         modifier = Modifier
                             .padding(top = innerPadding.calculateTopPadding())
                             .align(Alignment.TopCenter),
@@ -276,7 +280,7 @@ fun ModuleRepoScreen() {
                         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
                     }
 
-                    items(viewModel.modules) { module ->
+                    items(uiState.modules) { module ->
                         OnlineModuleItem(
                             module,
                             viewModel,
@@ -315,6 +319,7 @@ fun ModuleRepoScreen() {
             ) {
                 ModuleRepoBottomSheetContent(
                     viewModel = viewModel,
+                    uiState = uiState,
                     prefs = prefs,
                     scope = scope,
                     bottomSheetState = bottomSheetState,
@@ -329,7 +334,8 @@ fun ModuleRepoScreen() {
 @Composable
 private fun ModuleRepoBottomSheetContent(
     viewModel: ModuleRepoViewModel,
-    prefs: SharedPreferences,
+    uiState: ModuleRepoUiState,
+    prefs: AppPreferencesRepository,
     scope: CoroutineScope,
     bottomSheetState: SheetState,
     onDismiss: () -> Unit
@@ -371,19 +377,17 @@ private fun ModuleRepoBottomSheetContent(
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Switch(
-                    checked = viewModel.sortStargazerCountFirst,
+                    checked = uiState.sortStargazerCountFirst,
                     onCheckedChange = { checked ->
-                        viewModel.sortStargazerCountFirst = checked
-                        prefs.edit {
-                            putBoolean("module_repo_sort_star_first", checked)
-                        }
+                        viewModel.setSortStargazerCountFirst(checked)
+                        prefs.putBoolean("module_repo_sort_star_first", checked)
                         scope.launch {
                             bottomSheetState.hide()
                             onDismiss()
                         }
                     },
                     thumbContent = {
-                        if (viewModel.sortStargazerCountFirst) {
+                        if (uiState.sortStargazerCountFirst) {
                             Icon(
                                 imageVector = Icons.Filled.Check,
                                 contentDescription = null,
@@ -418,12 +422,17 @@ fun OnlineModuleItem(
     val navigator = LocalNavigator.current
 
     Surface(
-        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(CardConfig.cardAlpha),
-        shape = RoundedCornerShape(16.dp),
+        color =
+            if (ThemeConfig.isEnableBlurExp)
+                Color.Transparent
+            else
+                MaterialTheme.colorScheme.surfaceContainerHighest.copy(CardConfig.cardAlpha),
         modifier = Modifier
+            .clip(RoundedCornerShape(16.dp))
             .clickable {
                 navigator.push(Route.ModuleRepoDetail(module))
-            },
+            }
+            .renderBackgroundBlur(),
     ) {
         Column(
             modifier = Modifier.padding(22.dp, 18.dp, 22.dp, 12.dp)

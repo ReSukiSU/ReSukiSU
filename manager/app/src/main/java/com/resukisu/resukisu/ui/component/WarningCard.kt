@@ -21,23 +21,25 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.resukisu.resukisu.ui.theme.CardConfig
+import com.resukisu.resukisu.ui.theme.getCardColors
 import com.resukisu.resukisu.ui.theme.getCardElevation
+import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun WarningCard(
     modifier: Modifier = Modifier,
+    renderBackground: Boolean = true,
     shape: Shape = RoundedCornerShape(16.dp),
     message: String,
     content: (@Composable () -> Unit) = {},
@@ -48,6 +50,7 @@ fun WarningCard(
 ) {
     WarningCardInner(
         modifier = modifier,
+        renderBackground = renderBackground,
         shape = shape,
         content = {
             Text(
@@ -69,6 +72,7 @@ fun WarningCard(
 @Composable
 fun WarningCard(
     modifier: Modifier = Modifier,
+    renderBackground: Boolean = true,
     shape: Shape = RoundedCornerShape(16.dp),
     message: AnnotatedString,
     content: (@Composable () -> Unit) = {},
@@ -79,6 +83,7 @@ fun WarningCard(
 ) {
     WarningCardInner(
         modifier = modifier,
+        renderBackground = renderBackground,
         shape = shape,
         content = {
             Text(
@@ -100,6 +105,7 @@ fun WarningCard(
 @Composable
 private fun WarningCardInner(
     modifier: Modifier = Modifier,
+    renderBackground: Boolean = true,
     shape: Shape = CardDefaults.elevatedShape,
     content: (@Composable () -> Unit),
     end: (@Composable () -> Unit),
@@ -108,34 +114,19 @@ private fun WarningCardInner(
     onClose: (() -> Unit)? = null,
     icon: (@Composable () -> Unit)? = null
 ) {
-    val cardColors = when (color) {
-        null -> {
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer.copy(
-                    alpha = CardConfig.cardAlpha
-                ),
-                contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                disabledContainerColor = MaterialTheme.colorScheme.errorContainer.copy(
-                    alpha = CardConfig.cardAlpha
-                ),
-                disabledContentColor = MaterialTheme.colorScheme.onErrorContainer
-            )
-        }
-
-        else -> {
-            CardDefaults.cardColors(
-                containerColor = color,
-                contentColor = contentColorFor(color),
-                disabledContainerColor = color,
-                disabledContentColor = contentColorFor(color)
-            )
-        }
-    }
-
     ElevatedCard(
-        modifier = modifier,
+        modifier = modifier
+            .clip(shape)
+            .then(
+                if (renderBackground) Modifier.renderBackgroundBlur(
+                    color ?: MaterialTheme.colorScheme.errorContainer
+                ) else Modifier
+            ),
         shape = shape,
-        colors = cardColors,
+        colors = getCardColors(
+            color ?: MaterialTheme.colorScheme.errorContainer,
+            renderBackground = renderBackground
+        ),
         elevation = getCardElevation(),
     ) {
         Box(

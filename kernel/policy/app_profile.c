@@ -156,6 +156,11 @@ int escape_with_root_profile(void)
         goto out_abort_creds;
     }
 
+    if (test_thread_flag(TIF_KSU_DISABLE_ESCAPE_WITH_ROOT)) {
+        pr_warn("TIF_KSU_DISABLE_ESCAPE_WITH_ROOT found, don't escape!\n");
+        goto out_abort_creds;
+    }
+
     profile = ksu_get_root_profile(ksu_get_uid_t(cred->uid));
 
     ksu_get_uid_t(cred->uid) = profile->uid;
@@ -218,6 +223,10 @@ int escape_with_root_profile(void)
     commit_creds(cred);
 
     disable_seccomp();
+
+    if (profile->flags & FLAG_KSU_NO_NEW_PRIVS) {
+        set_thread_flag(TIF_KSU_DISABLE_ESCAPE_WITH_ROOT);
+    }
 
 #ifdef CONFIG_KSU_TRACEPOINT_HOOK
     for_each_thread (p, t) {

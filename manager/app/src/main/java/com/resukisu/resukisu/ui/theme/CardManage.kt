@@ -1,8 +1,8 @@
 package com.resukisu.resukisu.ui.theme
 
 import android.content.Context
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -10,9 +10,9 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.resukisu.resukisu.data.appPreferences
 
 @Stable
 object CardConfig {
@@ -101,20 +101,17 @@ object CardConfig {
     }
 
     fun save(context: Context) {
-        val prefs = context.getSharedPreferences("card_settings", Context.MODE_PRIVATE)
-        prefs.edit().apply {
-            putFloat(Keys.CARD_ALPHA, cardAlpha)
-            putBoolean(Keys.CUSTOM_BACKGROUND_ENABLED, isCustomBackgroundEnabled)
-            putBoolean(Keys.IS_SHADOW_ENABLED, isShadowEnabled)
-            putBoolean(Keys.IS_CUSTOM_ALPHA_SET, isCustomAlphaSet)
-            putBoolean(Keys.IS_USER_DARK_MODE_ENABLED, isUserDarkModeEnabled)
-            putBoolean(Keys.IS_USER_LIGHT_MODE_ENABLED, isUserLightModeEnabled)
-            apply()
-        }
+        val prefs = context.appPreferences
+        prefs.putFloat(Keys.CARD_ALPHA, cardAlpha)
+        prefs.putBoolean(Keys.CUSTOM_BACKGROUND_ENABLED, isCustomBackgroundEnabled)
+        prefs.putBoolean(Keys.IS_SHADOW_ENABLED, isShadowEnabled)
+        prefs.putBoolean(Keys.IS_CUSTOM_ALPHA_SET, isCustomAlphaSet)
+        prefs.putBoolean(Keys.IS_USER_DARK_MODE_ENABLED, isUserDarkModeEnabled)
+        prefs.putBoolean(Keys.IS_USER_LIGHT_MODE_ENABLED, isUserLightModeEnabled)
     }
 
     fun load(context: Context) {
-        val prefs = context.getSharedPreferences("card_settings", Context.MODE_PRIVATE)
+        val prefs = context.appPreferences
         cardAlpha = prefs.getFloat(Keys.CARD_ALPHA, 1f).coerceIn(0f, 1f)
         isCustomBackgroundEnabled = prefs.getBoolean(Keys.CUSTOM_BACKGROUND_ENABLED, false)
         isShadowEnabled = prefs.getBoolean(Keys.IS_SHADOW_ENABLED, true)
@@ -135,11 +132,11 @@ object CardConfig {
 object CardStyleProvider {
 
     @Composable
-    fun getCardColors(originalColor: Color) = CardDefaults.cardColors(
-        containerColor = originalColor.copy(alpha = CardConfig.cardAlpha),
-        contentColor = determineContentColor(originalColor),
-        disabledContainerColor = originalColor.copy(alpha = CardConfig.cardAlpha * 0.38f),
-        disabledContentColor = determineContentColor(originalColor).copy(alpha = 0.38f)
+    fun getCardColors(originalColor: Color, transparent: Boolean) = CardDefaults.cardColors(
+        containerColor = if (transparent) Color.Transparent else originalColor.copy(alpha = CardConfig.cardAlpha),
+        contentColor = contentColorFor(originalColor),
+        disabledContainerColor = if (transparent) Color.Transparent else originalColor.copy(alpha = CardConfig.cardAlpha * 0.38f),
+        disabledContentColor = contentColorFor(originalColor).copy(alpha = 0.38f)
     )
 
     @Composable
@@ -159,29 +156,12 @@ object CardStyleProvider {
         } else 0.dp,
         disabledElevation = 0.dp
     )
-
-    @Composable
-    private fun determineContentColor(originalColor: Color): Color {
-        val isDarkTheme = isSystemInDarkTheme()
-
-        return when {
-            ThemeConfig.isThemeChanging -> {
-                if (isDarkTheme) Color.White else Color.Black
-            }
-            CardConfig.isUserLightModeEnabled -> Color.Black
-            CardConfig.isUserDarkModeEnabled -> Color.White
-            else -> {
-                val luminance = originalColor.luminance()
-                val threshold = if (isDarkTheme) 0.4f else 0.6f
-                if (luminance > threshold) Color.Black else Color.White
-            }
-        }
-    }
 }
 
 // 向后兼容
 @Composable
-fun getCardColors(originalColor: Color) = CardStyleProvider.getCardColors(originalColor)
+fun getCardColors(originalColor: Color, renderBackground: Boolean = true) =
+    CardStyleProvider.getCardColors(originalColor, renderBackground && ThemeConfig.isEnableBlurExp)
 
 @Composable
 fun getCardElevation() = CardStyleProvider.getCardElevation()
