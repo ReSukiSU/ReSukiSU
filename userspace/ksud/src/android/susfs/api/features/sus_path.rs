@@ -1,17 +1,15 @@
 use anyhow::Result;
 
-use crate::{
-    android::susfs::{
-        api::{
-            magic::{
-                CMD_SUSFS_ADD_SUS_PATH, CMD_SUSFS_ADD_SUS_PATH_LOOP, ERR_CMD_NOT_SUPPORTED,
-                SUSFS_MAX_LEN_PATHNAME,
-            },
-            susfsctl::{communicate, parse_err},
+use crate::android::susfs::{
+    api::{
+        magic::{
+            CMD_SUSFS_ADD_SUS_PATH, CMD_SUSFS_ADD_SUS_PATH_LOOP, ERR_CMD_NOT_SUPPORTED,
+            SUSFS_MAX_LEN_PATHNAME,
         },
-        utils::str_to_c_array,
+        susfsctl::{communicate, parse_err},
     },
-    ensure_path_exists,
+    macros::ensure_path_exists,
+    utils::str_to_c_array,
 };
 
 #[repr(C)]

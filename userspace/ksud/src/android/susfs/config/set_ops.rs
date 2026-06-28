@@ -1,10 +1,8 @@
-use crate::{
-    android::susfs::{
-        config::model::{Config, OpenRedirectItem, SusKstatItem, SusKstatStatically, SusPathItem},
-        enums::{SusKstatType, UidScheme},
-        utils::{is_valid_uname_release, is_valid_uname_version},
-    },
-    ensure_path_exists,
+use crate::android::susfs::{
+    config::model::{Config, OpenRedirectItem, SusKstatItem, SusKstatStatically, SusPathItem},
+    enums::{SusKstatType, UidScheme},
+    macros::ensure_path_exists,
+    utils::{is_valid_uname_release, is_valid_uname_version},
 };
 use anyhow::{Result, bail};
 

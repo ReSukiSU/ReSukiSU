@@ -1,3 +1,5 @@
+#![feature(decl_macro)]
+
 #[cfg(target_os = "android")]
 mod android;
 mod apk_sign;
@@ -6,7 +8,6 @@ mod boot_patch;
 #[cfg(not(target_os = "android"))]
 mod cli_non_android;
 mod defs;
-mod macros;
 
 fn main() -> anyhow::Result<()> {
     #[cfg(target_os = "android")]
