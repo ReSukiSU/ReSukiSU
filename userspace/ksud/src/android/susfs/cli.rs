@@ -3,7 +3,7 @@
 use std::{fmt::Display, str::FromStr};
 
 use anyhow::Result;
-use clap::{Args, Parser, Subcommand, error::ErrorKind};
+use clap::{ArgAction, Args, Parser, Subcommand, error::ErrorKind};
 
 use crate::android::susfs::{api::prelude as api, config::model::Config, slot_info};
 
@@ -78,7 +78,7 @@ pub enum SuSFSSubCommands {
     HideSusMntsForNonSuProcs {
         /// 0: DO NOT hide sus mounts for non-su processes
         /// 1: hide all sus mounts for non-su processes
-        #[arg(value_parser = treat_int_as_boolean)]
+        #[arg(action = ArgAction::Set, value_parser = treat_int_as_boolean)]
         enabled: bool,
     },
 
@@ -169,7 +169,7 @@ pub enum SuSFSSubCommands {
     EnableLog {
         /// 0: Disable
         /// 1: Enable
-        #[arg(value_parser = treat_int_as_boolean)]
+        #[arg(action = ArgAction::Set, value_parser = treat_int_as_boolean)]
         enabled: bool,
     },
 
@@ -232,7 +232,7 @@ pub enum SuSFSSubCommands {
     EnableAvcLogSpoofing {
         /// 0: Disable
         /// 1: Enable
-        #[arg(value_parser = treat_int_as_boolean)]
+        #[arg(action = ArgAction::Set, value_parser = treat_int_as_boolean)]
         enabled: bool,
     },
 
