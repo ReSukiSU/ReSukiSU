@@ -151,7 +151,7 @@ int ksu_handle_setuid(uid_t new_uid, uid_t old_uid)
 
 int ksu_handle_setresuid(uid_t ruid, uid_t euid, uid_t suid)
 {
-#ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK
+#ifdef KSU_HOOK_AUTO_SETUID_HOOK
     return 0; // dummy hook here
 #else
     // we rely on the fact that zygote always call setresuid(3) with same uids

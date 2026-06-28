@@ -116,10 +116,14 @@ $(info -- KERNEL_TYPE: $(KERNEL_TYPE))
 
 ifeq ($(CONFIG_ARM64),y)
   kernelsu-objs += hook/arm64/patch_memory.o
+  kernelsu-objs += hook/arm64/inline_hook.o
+  kernelsu-objs += hook/arm64/inline_hook_entry.o
 else ifeq ($(CONFIG_X86_64),y)
   kernelsu-objs += hook/x86_64/patch_memory.o
+  kernelsu-objs += hook/x86_64/inline_hook.o
 else ifeq ($(CONFIG_ARM),y)
   kernelsu-objs += hook/arm32/patch_memory.o
+  kernelsu-objs += hook/arm32/inline_hook.o
 else
   ifeq ($(CONFIG_KSU),y)
     $(info -- Unsupported arch)
@@ -127,6 +131,8 @@ else
   endif
 endif
 
+kernelsu-objs += hook/inline_hook.o
+kernelsu-objs += hook/auto_hook.o
 kernelsu-objs += infra/symbol_resolver.o
 
 ifeq ($(KERNEL_TYPE), GKI 2.0)
@@ -173,9 +179,15 @@ ifdef CONFIG_KSU_TRACEPOINT_HOOK
 
 else ifdef CONFIG_KSU_MANUAL_HOOK
   $(info -- $(REPO_NAME): using Manual Hook)
-  include $(KSU_SRC)/tools/manual_hook_check.mk
+  include $(KSU_SRC)/tools/check_incompatible.mk
+  include $(KSU_SRC)/tools/auto_hook_detect.mk
+  ifneq ($(CONFIG_KALLSYMS_ALL),y)
+    include $(KSU_SRC)/tools/manual_hook_check.mk
+  endif
 else ifdef CONFIG_KSU_SUSFS
   $(info -- $(REPO_NAME): using SuSFS Inline hook)
+  include $(KSU_SRC)/tools/check_incompatible.mk
+  include $(KSU_SRC)/tools/auto_hook_detect.mk
   include $(KSU_SRC)/tools/inline_hook_check.mk
   include $(KSU_SRC)/tools/susfs_compat.mk
   ifeq ($(shell test -e $(srctree)/fs/susfs.c; echo $$?),0)

@@ -276,3 +276,9 @@ ifeq ($(shell grep -q "security_add_hooks" $(srctree)/include/linux/lsm_hooks.h;
 $(info -- $(REPO_NAME)/compat: found security_add_hooks)
 ccflags-y += -DKSU_COMPAT_HAS_LIST_OF_LSM_HOOKS
 endif
+
+# https://github.com/torvalds/linux/commit/c4ad8f98bef77c7356aa6a9ad9188a6acc6b849d
+ifeq ($(shell grep -q "int do_execve.struct filename .filename" $(srctree)/fs/exec.c; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: found 'struct filename *' for executable name passing)
+ccflags-y += -DKSU_COMPAT_DO_EXECVE_STRUCT_FILENAME
+endif
