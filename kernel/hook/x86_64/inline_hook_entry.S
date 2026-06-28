@@ -4,6 +4,16 @@
 
 #include <linux/linkage.h>
 
+#ifndef SYM_FUNC_START
+#define SYM_FUNC_START(name) \
+    ENTRY(name)
+#endif
+
+#ifndef SYM_FUNC_END
+#define SYM_FUNC_END(name) \
+    END(name)
+#endif
+
 SYM_FUNC_START(ksu_inline_hook_x86_64_entry_with_after)
     pushq %rbp
     movq %rsp, %rbp
