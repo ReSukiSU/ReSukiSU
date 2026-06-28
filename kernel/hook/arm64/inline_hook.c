@@ -12,6 +12,10 @@
 #include <linux/set_memory.h>
 #include <linux/string.h>
 #include <linux/vmalloc.h>
+#include <linux/version.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 10, 0)
+#include <linux/execmem.h>
+#endif
 
 #include <asm/memory.h>
 #include <asm/module.h>
@@ -262,8 +266,10 @@ void ksu_inline_hook_arch_set_ret(struct pt_regs *regs, unsigned long ret)
     regs->regs[0] = ret;
 }
 
-static void *ksu_inline_hook_clone_code_alloc(size_t size)
+static inline void *ksu_inline_hook_clone_code_alloc(size_t size)
 {
+// https://github.com/torvalds/linux/commit/223b5e57d0d50b0c07b933350dbcde92018d3080
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 10, 0)
     u64 module_alloc_end = module_alloc_base + MODULES_VSIZE;
 
     if (IS_ENABLED(CONFIG_KASAN))
@@ -271,6 +277,9 @@ static void *ksu_inline_hook_clone_code_alloc(size_t size)
 
     return __vmalloc_node_range(size, MODULE_ALIGN, module_alloc_base, module_alloc_end, GFP_KERNEL, PAGE_KERNEL_EXEC,
                                 0, NUMA_NO_NODE, __builtin_return_address(0));
+#else
+    return execmem_alloc(EXECMEM_DEFAULT, size);
+#endif
 }
 
 static void ksu_inline_make_entry_stub(struct ksu_inline_hook *hook, void *buf)
@@ -576,7 +585,11 @@ int ksu_inline_hook_arch_prepare(struct ksu_inline_hook *hook, u8 *patch, size_t
     return 0;
 
 err_free:
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 10, 0)
     vfree(code);
+#else
+    execmem_free(code);
+#endif
     hook->clone = NULL;
     hook->code = NULL;
     hook->code_size = 0;
@@ -586,7 +599,11 @@ err_free:
 void ksu_inline_hook_arch_release(struct ksu_inline_hook *hook)
 {
     if (!hook->active && hook->code) {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 10, 0)
         vfree(hook->code);
+#else
+        execmem_free(hook->code);
+#endif
         hook->code = NULL;
         hook->code_size = 0;
         hook->clone = NULL;

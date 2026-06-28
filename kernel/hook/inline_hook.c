@@ -19,13 +19,22 @@ void *ksu_inline_hook_before(struct ksu_inline_hook *hook, unsigned long *arg_re
     if (!hook)
         return NULL;
 
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
+    int marked;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
+    marked = test_task_syscall_work(current, SYSCALL_TRACEPOINT) ? 1 : 0;
+#else
+    marked = test_tsk_thread_flag(current, TIF_SYSCALL_TRACEPOINT) ? 1 : 0;
+#endif
+    if (!marked)
+        goto out;
+#else
     if (ksu_is_current_proc_unprivillege())
         goto out;
+#endif
 
     if (!hook->before)
         goto out;
-
-    memset(&regs, 0, sizeof(regs));
 
     ksu_inline_hook_arch_setup_regs(&regs, arg_regs);
 
@@ -45,13 +54,22 @@ unsigned long ksu_inline_hook_after(struct ksu_inline_hook *hook, unsigned long 
     if (!hook)
         return ret;
 
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
+    int marked;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
+    marked = test_task_syscall_work(current, SYSCALL_TRACEPOINT) ? 1 : 0;
+#else
+    marked = test_tsk_thread_flag(current, TIF_SYSCALL_TRACEPOINT) ? 1 : 0;
+#endif
+    if (!marked)
+        return ret;
+#else
     if (ksu_is_current_proc_unprivillege())
         return ret;
+#endif
 
     if (!hook->after)
         return ret;
-
-    memset(&regs, 0, sizeof(regs));
 
     ksu_inline_hook_arch_setup_regs(&regs, arg_regs);
     ksu_inline_hook_arch_set_ret(&regs, ret);
@@ -64,7 +82,7 @@ unsigned long ksu_inline_hook_after(struct ksu_inline_hook *hook, unsigned long 
     return ret;
 }
 
-struct ksu_inline_hook *ksu_inline_hook_register(const struct ksu_inline_hook_config *config)
+struct ksu_inline_hook *ksu_inline_hook_register(const struct ksu_inline_hook_config config)
 {
     struct ksu_inline_hook *hook;
     u8 patch[KSU_INLINE_MAX_PATCH_SIZE];
@@ -72,7 +90,7 @@ struct ksu_inline_hook *ksu_inline_hook_register(const struct ksu_inline_hook_co
     size_t patch_size;
     int ret;
 
-    if (!config || !config->target || (!config->before && !config->after))
+    if (!config.target || (!config.before && !config.after))
         return ERR_PTR(-EINVAL);
 
     patch_size = ksu_inline_hook_arch_patch_size();
@@ -83,10 +101,10 @@ struct ksu_inline_hook *ksu_inline_hook_register(const struct ksu_inline_hook_co
     if (!hook)
         return ERR_PTR(-ENOMEM);
 
-    target = ksu_inline_hook_arch_normalize_target(config->target);
+    target = ksu_inline_hook_arch_normalize_target(config.target);
     hook->target = target;
-    hook->before = config->before;
-    hook->after = config->after;
+    hook->before = config.before;
+    hook->after = config.after;
     hook->patch_size = patch_size;
     hook->slot = KSU_INLINE_INVALID_SLOT;
     memcpy(hook->orig, target, hook->patch_size);
@@ -100,7 +118,7 @@ struct ksu_inline_hook *ksu_inline_hook_register(const struct ksu_inline_hook_co
         goto err_release;
 
     hook->active = true;
-    pr_info("inline_hook: hooked target=%px before=%px after=%px\n", config->target, config->before, config->after);
+    pr_info("inline_hook: hooked target=%px before=%px after=%px\n", config.target, config.before, config.after);
     return hook;
 
 err_release:

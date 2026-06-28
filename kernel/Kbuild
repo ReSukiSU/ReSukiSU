@@ -121,9 +121,11 @@ ifeq ($(CONFIG_ARM64),y)
 else ifeq ($(CONFIG_X86_64),y)
   kernelsu-objs += hook/x86_64/patch_memory.o
   kernelsu-objs += hook/x86_64/inline_hook.o
+  kernelsu-objs += hook/x86_64/inline_hook_entry.o
 else ifeq ($(CONFIG_ARM),y)
   kernelsu-objs += hook/arm32/patch_memory.o
   kernelsu-objs += hook/arm32/inline_hook.o
+  kernelsu-objs += hook/arm32/inline_hook_entry.o
 else
   ifeq ($(CONFIG_KSU),y)
     $(info -- Unsupported arch)

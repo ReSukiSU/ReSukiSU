@@ -41,7 +41,7 @@ static __init void ksu_hook_sys_reboot(void)
     if (ksu_reboot_hook)
         return;
 
-    ksu_reboot_hook = ksu_inline_hook_register(&config);
+    ksu_reboot_hook = ksu_inline_hook_register(config);
     if (IS_ERR(ksu_reboot_hook)) {
         pr_err("%s: failed to hook sys_reboot: %ld\n", __func__, PTR_ERR(ksu_reboot_hook));
         ksu_reboot_hook = NULL;
@@ -205,7 +205,7 @@ static void __init ksu_hook_sys_execve(void)
     if (ksu_execve_hook)
         return;
 
-    ksu_execve_hook = ksu_inline_hook_register(&config);
+    ksu_execve_hook = ksu_inline_hook_register(config);
     if (IS_ERR(ksu_execve_hook)) {
         pr_err("%s: failed to hook do_execveat_common/__do_execve_file/do_execve_common: %ld\n", __func__,
                PTR_ERR(ksu_execve_hook));
@@ -232,7 +232,7 @@ common_hook_failed:
     if (ksu_execve_hook)
         return;
 
-    ksu_execve_hook = ksu_inline_hook_register(&execve_config);
+    ksu_execve_hook = ksu_inline_hook_register(execve_config);
     if (IS_ERR(ksu_execve_hook)) {
         pr_err("%s: failed to hook do_execve: %ld\n", __func__, PTR_ERR(ksu_execve_hook));
         ksu_execve_hook = NULL;
@@ -298,7 +298,7 @@ static __init void ksu_hook_sys_faccessat(void)
     if (ksu_faccessat_hook)
         return;
 
-    ksu_faccessat_hook = ksu_inline_hook_register(&config);
+    ksu_faccessat_hook = ksu_inline_hook_register(config);
     if (IS_ERR(ksu_faccessat_hook)) {
         pr_err("%s: failed to hook sys_faccessat: %ld\n", __func__, PTR_ERR(ksu_faccessat_hook));
         ksu_faccessat_hook = NULL;
@@ -349,7 +349,7 @@ static __init void ksu_hook_sys_newfstatat(void)
     if (ksu_newfstatat_hook)
         goto ksu_fstatat64_hook;
 
-    ksu_newfstatat_hook = ksu_inline_hook_register(&config);
+    ksu_newfstatat_hook = ksu_inline_hook_register(config);
     if (IS_ERR(ksu_newfstatat_hook)) {
         pr_err("%s: failed to hook sys_newfstatat: %ld\n", __func__, PTR_ERR(ksu_newfstatat_hook));
         ksu_newfstatat_hook = NULL;
@@ -368,7 +368,9 @@ ksu_fstatat64_hook:
 
     pr_info("%s: ksu_fstatat64_hook target=%px (%pS)\n", __func__, (void *)addr, (void *)addr);
 
-    ksu_fstatat64_hook = ksu_inline_hook_register(&config);
+    config.target = addr;
+
+    ksu_fstatat64_hook = ksu_inline_hook_register(config);
     if (IS_ERR(ksu_fstatat64_hook)) {
         pr_err("%s: failed to hook sys_fstatat64: %ld\n", __func__, PTR_ERR(ksu_fstatat64_hook));
         ksu_fstatat64_hook = NULL;
@@ -425,7 +427,7 @@ static __init void ksu_hook_sys_newfstat(void)
     if (ksu_newfstat_hook)
         return;
 
-    ksu_newfstat_hook = ksu_inline_hook_register(&config);
+    ksu_newfstat_hook = ksu_inline_hook_register(config);
     if (IS_ERR(ksu_newfstat_hook)) {
         pr_err("%s: failed to hook sys_newfstat: %ld\n", __func__, PTR_ERR(ksu_newfstat_hook));
         ksu_newfstat_hook = NULL;
@@ -480,7 +482,7 @@ static __init void ksu_hook_sys_fstat64(void)
     if (ksu_fstat64_hook)
         return;
 
-    ksu_fstat64_hook = ksu_inline_hook_register(&config);
+    ksu_fstat64_hook = ksu_inline_hook_register(config);
     if (IS_ERR(ksu_fstat64_hook)) {
         pr_err("%s: failed to hook sys_fstat64: %ld\n", __func__, PTR_ERR(ksu_fstat64_hook));
         ksu_fstat64_hook = NULL;

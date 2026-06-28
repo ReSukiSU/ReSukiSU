@@ -29,7 +29,7 @@ struct ksu_inline_hook_config {
     ksu_inline_hook_callback_t after;
 };
 
-struct ksu_inline_hook *ksu_inline_hook_register(const struct ksu_inline_hook_config *config);
+struct ksu_inline_hook *ksu_inline_hook_register(const struct ksu_inline_hook_config config);
 void ksu_inline_hook_unregister(struct ksu_inline_hook *hook);
 
 #endif
