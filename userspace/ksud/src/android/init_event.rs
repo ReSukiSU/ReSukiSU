@@ -106,6 +106,9 @@ pub fn on_post_data_fs() -> Result<()> {
         warn!("init features failed: {e}");
     }
 
+    // Load susfs config entries that must capture metadata before mounts/overlays.
+    crate::android::susfs::init_event::on_post_fs_data();
+
     // execute metamodule post-fs-data script first (priority)
     if let Err(e) = metamodule::exec_stage_script("post-fs-data", true) {
         warn!("exec metamodule post-fs-data script failed: {e}");
@@ -185,8 +188,11 @@ pub fn on_boot_completed() {
 
     ksucalls::report_boot_complete();
     info!("on_boot_completed triggered!");
-
     run_stage("boot-completed", false);
+    // Load susfs boot-completed
+    if !is_safe_mode() {
+        crate::android::susfs::init_event::on_boot_completed();
+    }
 }
 
 const fn resetprop() -> ResetProp {

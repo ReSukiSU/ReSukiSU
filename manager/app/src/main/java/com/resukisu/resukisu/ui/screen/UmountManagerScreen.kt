@@ -61,7 +61,7 @@ import com.resukisu.resukisu.ui.component.WarningCard
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
-import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
+import com.resukisu.resukisu.ui.component.settings.lazySegmentedColumn
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
@@ -200,7 +200,7 @@ fun UmountManagerScreen() {
                         }
                     }
 
-                    lazySegmentColumn(
+                    lazySegmentedColumn(
                         uiState.umountPaths,
                         key = { _, it -> it.path }) { _, entry ->
                         SettingsBaseWidget(

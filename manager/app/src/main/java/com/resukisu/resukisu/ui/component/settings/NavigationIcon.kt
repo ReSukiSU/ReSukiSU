@@ -10,11 +10,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults.rememberTooltipPositionProvider
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
 
@@ -39,26 +46,39 @@ fun AppBackButton(
     contentDescription: String = stringResource(id = R.string.back)
 ) {
     Row {
-        IconButton(
-            onClick = onClick,
-            modifier = modifier.size(36.dp),
-            // Consistent shapes for the button.
-            shapes = IconButtonDefaults.shapes(
-                // shape = CircleShape
-            ),
-            // Consistent colors for the button.
-            colors = IconButtonDefaults.iconButtonColors(
-                // The color of the icon inside the button.
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                // The background color of the button.
-                // Using a more standard color for a filled icon button variant.
-                containerColor = containerColor,
-            )
+        TooltipBox(
+            positionProvider = rememberTooltipPositionProvider(TooltipAnchorPosition.Below),
+            tooltip = {
+                PlainTooltip {
+                    Text(
+                        text = contentDescription,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            },
+            state = rememberTooltipState()
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = contentDescription
-            )
+            IconButton(
+                onClick = onClick,
+                modifier = modifier.size(36.dp),
+                // Consistent shapes for the button.
+                shapes = IconButtonDefaults.shapes(
+                    // shape = CircleShape
+                ),
+                // Consistent colors for the button.
+                colors = IconButtonDefaults.iconButtonColors(
+                    // The color of the icon inside the button.
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    // The background color of the button.
+                    // Using a more standard color for a filled icon button variant.
+                    containerColor = containerColor,
+                )
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = contentDescription
+                )
+            }
         }
 
         Spacer(modifier = Modifier.size(16.dp))

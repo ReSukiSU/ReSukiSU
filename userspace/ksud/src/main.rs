@@ -1,3 +1,5 @@
+#![feature(decl_macro)]
+
 #[cfg(target_os = "android")]
 mod android;
 mod apk_sign;

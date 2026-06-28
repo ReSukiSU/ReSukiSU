@@ -19,13 +19,20 @@ import com.resukisu.resukisu.ui.KsuService
 import com.resukisu.resukisu.ui.util.HanziToPinyin
 import com.resukisu.zako.IKsuInterface
 import com.topjohnwu.superuser.Shell
+import com.topjohnwu.superuser.ipc.RootService
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -81,6 +88,8 @@ class SuperUserViewModel : ViewModel() {
         private const val TAG = "SuperUserViewModel"
         private val appsLock = Any()
         private var appsCache: List<AppInfo> = emptyList()
+        var isRefreshing by mutableStateOf(false)
+            private set
 
         @JvmStatic
         fun getAppIconDrawable(context: Context, packageName: String): Drawable? {
@@ -95,9 +104,13 @@ class SuperUserViewModel : ViewModel() {
         private const val CORE_POOL_SIZE = 8
         private const val MAX_POOL_SIZE = 16
         private const val KEEP_ALIVE_TIME = 60L
+        private const val BATCH_SIZE = 100
 
         @JvmStatic
         fun getCachedApps(): List<AppInfo> = synchronized(appsLock) { appsCache }
+
+        @JvmStatic
+        fun getAppListSnapshot(): List<AppInfo> = getCachedApps()
     }
 
     @Immutable
@@ -155,6 +168,10 @@ class SuperUserViewModel : ViewModel() {
     private val prefs = ksuApp.ensurePreferencesRepository()
     private var appGroupsCache: List<AppGroup> = emptyList()
 
+    var showBatchActions by mutableStateOf(false)
+        internal set
+    var selectedApps by mutableStateOf<Set<String>>(emptySet())
+        internal set
     private val _uiState = MutableStateFlow(
         SuperUserUiState(
             showSystemApps = prefs.getBoolean(KEY_SHOW_SYSTEM_APPS, false),
@@ -235,7 +252,134 @@ class SuperUserViewModel : ViewModel() {
         }
     }
 
-    private suspend fun connectKsuService(onDisconnect: () -> Unit = {}): IBinder? =
+    fun toggleBatchMode() {
+        showBatchActions = !showBatchActions
+        if (!showBatchActions) clearSelection()
+    }
+
+    fun toggleAppSelection(packageName: String) {
+        selectedApps = if (selectedApps.contains(packageName)) {
+            selectedApps - packageName
+        } else {
+            selectedApps + packageName
+        }
+    }
+
+    fun clearSelection() {
+        selectedApps = emptySet()
+    }
+
+    suspend fun updateBatchPermissions(allowSu: Boolean, umountModules: Boolean? = null) {
+        selectedApps.forEach { packageName ->
+            getCachedApps().find { it.packageName == packageName }?.let { app ->
+                val profile = Natives.getAppProfile(packageName, app.uid)
+                val updatedProfile = profile.copy(
+                    allowSu = allowSu,
+                    umountModules = umountModules ?: profile.umountModules,
+                    nonRootUseDefault = false
+                )
+                if (Natives.setAppProfile(updatedProfile)) {
+                    updateAppProfileLocally(packageName, updatedProfile)
+                    notifyConfigChange(packageName)
+                }
+            }
+        }
+        clearSelection()
+        showBatchActions = false
+        refreshAppConfigurations()
+    }
+
+    fun updateAppProfileLocally(packageName: String, updatedProfile: Natives.Profile) {
+        appListMutex.tryLock().let { locked ->
+            if (locked) {
+                try {
+                    val updatedApps = getCachedApps().map { app ->
+                        if (app.packageName == packageName) {
+                            app.copy(profile = updatedProfile)
+                        } else app
+                    }
+                    synchronized(appsLock) {
+                        appsCache = updatedApps
+                    }
+                    appGroupsCache = groupAppsByUid(updatedApps)
+                    _uiState.update { state ->
+                        state.copy(
+                            appGroupList = buildAppGroupList(
+                                search = state.search,
+                                showSystemApps = state.showSystemApps,
+                                selectedCategory = state.selectedCategory,
+                                currentSortType = state.currentSortType,
+                            )
+                        )
+                    }
+                } finally {
+                    appListMutex.unlock()
+                }
+            }
+        }
+    }
+
+    private fun notifyConfigChange(packageName: String) {
+        configChangeListeners.forEach { listener ->
+            try {
+                listener(packageName)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error notifying config change for $packageName", e)
+            }
+        }
+    }
+
+    suspend fun refreshAppConfigurations() {
+        withContext(appProcessingThreadPool) {
+            supervisorScope {
+                val currentApps = getCachedApps()
+                val batches = currentApps.chunked(BATCH_SIZE)
+                _uiState.update { it.copy(loadingProgress = 0f) }
+                if (batches.isEmpty()) {
+                    _uiState.update { it.copy(loadingProgress = 1f) }
+                    return@supervisorScope
+                }
+
+                val updatedApps = batches.mapIndexed { batchIndex, batch ->
+                    async {
+                        val batchResult = batch.map { app ->
+                            try {
+                                val updatedProfile = Natives.getAppProfile(app.packageName, app.uid)
+                                app.copy(profile = updatedProfile)
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Error refreshing profile for ${app.packageName}", e)
+                                app
+                            }
+                        }
+                        _uiState.update {
+                            it.copy(loadingProgress = (batchIndex + 1).toFloat() / batches.size)
+                        }
+                        batchResult
+                    }
+                }.awaitAll().flatten()
+
+                appListMutex.withLock {
+                    synchronized(appsLock) {
+                        appsCache = updatedApps
+                    }
+                    appGroupsCache = groupAppsByUid(updatedApps)
+                }
+                _uiState.update { state ->
+                    state.copy(
+                        appGroupList = buildAppGroupList(
+                            search = state.search,
+                            showSystemApps = state.showSystemApps,
+                            selectedCategory = state.selectedCategory,
+                            currentSortType = state.currentSortType,
+                        ),
+                        loadingProgress = 1f,
+                    )
+                }
+            }
+        }
+    }
+
+    private suspend fun connectKsuService(onDisconnect: () -> Unit = {}): Pair<ServiceConnection, IBinder>? =
         suspendCancellableCoroutine { continuation ->
             val connection = object : ServiceConnection {
                 override fun onServiceDisconnected(name: ComponentName?) {
@@ -243,12 +387,16 @@ class SuperUserViewModel : ViewModel() {
                 }
 
                 override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-                    continuation.resume(binder)
+                    if (binder == null) {
+                        continuation.resume(null)
+                    } else {
+                        continuation.resume(this to binder)
+                    }
                 }
             }
             val intent = Intent(ksuApp, KsuService::class.java)
             try {
-                val task = com.topjohnwu.superuser.ipc.RootService.bindOrTask(
+                val task = RootService.bindOrTask(
                     intent, Shell.EXECUTOR, connection
                 )
                 task?.let { Shell.getShell().execTask(it) }
@@ -258,11 +406,10 @@ class SuperUserViewModel : ViewModel() {
             }
         }
 
-    private fun stopKsuService() {
+    private fun stopKsuService(serviceConnection: ServiceConnection) {
         viewModelScope.launch(Dispatchers.Main) {
             try {
-                val intent = Intent(ksuApp, KsuService::class.java)
-                com.topjohnwu.superuser.ipc.RootService.stop(intent)
+                RootService.unbind(serviceConnection)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to stop KsuService", e)
             }
@@ -272,14 +419,15 @@ class SuperUserViewModel : ViewModel() {
     suspend fun fetchAppList() {
         if (_uiState.value.isRefreshing) return
 
+        isRefreshing = true
         _uiState.update { it.copy(isRefreshing = true, loadingProgress = 0f) }
+        val (connection, binder) = connectKsuService() ?: run {
+            isRefreshing = false
+            _uiState.update { it.copy(isRefreshing = false) }
+            return
+        }
 
         try {
-            val binder = connectKsuService() ?: run {
-                _uiState.update { it.copy(isRefreshing = false) }
-                return
-            }
-
             withContext(Dispatchers.IO) {
                 val pm = ksuApp.packageManager
                 val allPackages = IKsuInterface.Stub.asInterface(binder)
@@ -330,8 +478,9 @@ class SuperUserViewModel : ViewModel() {
         } catch (e: Exception) {
             Log.e(TAG, "Error refresh app list", e)
         } finally {
+            isRefreshing = false
             _uiState.update { it.copy(isRefreshing = false) }
-            stopKsuService()
+            stopKsuService(connection)
         }
     }
 
@@ -414,9 +563,11 @@ class SuperUserViewModel : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         try {
-            stopKsuService()
             appProcessingThreadPool.close()
             configChangeListeners.clear()
+
+            val intent = Intent(ksuApp, KsuService::class.java)
+            RootService.stop(intent)
         } catch (e: Exception) {
             Log.e(TAG, "Error cleaning up resources", e)
         }
