@@ -26,7 +26,6 @@ import com.resukisu.resukisu.ui.util.isSELinuxPermissive
 import com.resukisu.resukisu.ui.util.listModules
 import com.resukisu.resukisu.ui.util.module.LatestVersionInfo
 import com.resukisu.resukisu.ui.util.rootAvailable
-import com.resukisu.resukisu.ui.susfs.util.SuSFSManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -80,7 +79,6 @@ class HomeViewModel : ViewModel() {
         val managerVersion: Triple<String, Int, Int> = Triple("", 0, 0),
         val selinuxStatus: String = "",
         val susfsEnabled: Boolean = false,
-        val susfsVersionSupported: Boolean = false,
         val susfsVersion: String = "",
         val susfsFeatures: String = "",
         val hasEnabledThirdPartySusfsModule: Boolean = false,
@@ -197,14 +195,11 @@ class HomeViewModel : ViewModel() {
                     val susfsInfo = loadSuSFSInfo()
                     _uiState.update {
                         it.copy(
-                            systemInfo = it.systemInfo.copy(
-                                susfsEnabled = susfsInfo.first,
-                                susfsVersionSupported = susfsInfo.first && SuSFSManager.isBinaryAvailable(
-                                    context
-                                ),
-                                susfsVersion = susfsInfo.second,
-                                susfsFeatures = susfsInfo.third,
-                            )
+                        systemInfo = it.systemInfo.copy(
+                            susfsEnabled = susfsInfo.first,
+                            susfsVersion = susfsInfo.second,
+                            susfsFeatures = susfsInfo.third,
+                        )
                         )
                     }
                 }
