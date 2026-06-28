@@ -1,7 +1,4 @@
 //! Helper functions
-
-use std::sync::OnceLock;
-
 use regex_lite::Regex;
 
 /// Write a &str to C-style char* with length cutdown.

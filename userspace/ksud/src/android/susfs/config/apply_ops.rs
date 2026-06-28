@@ -69,7 +69,7 @@ impl Config {
                 let Some(statically) = &i.statically else {
                     bail!(
                         "sus kstat statically undefined for {} which type is statically.",
-                        &i.path
+                        i.path
                     );
                 };
                 api::add_sus_kstat_statically(
