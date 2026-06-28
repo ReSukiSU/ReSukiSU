@@ -70,6 +70,7 @@ impl Config {
 
 impl Drop for Config {
     fn drop(&mut self) {
+        log::info!("Saving SUSFS config...");
         self.save()
             .unwrap_or_else(|e| log::error!("Failed to save SUSFS config: {e}"));
     }

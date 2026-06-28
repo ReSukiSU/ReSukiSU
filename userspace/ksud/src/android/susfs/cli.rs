@@ -67,6 +67,8 @@ pub enum SuSFSSubCommands {
         path: String,
     },
 
+    /// Hide SUS mounts for non-SU processes.
+    ///
     /// * Important Notes *
     /// - It is set to 0 in kernel by default.
     /// - For ReZygisk without TreatWheel module, it is recommended to set to 1 in post-fs-data.sh to prevent
@@ -117,36 +119,38 @@ pub enum SuSFSSubCommands {
         path: String,
     },
 
+    /// Spoof the kstat of a file or directory by static fields.
+    ///
     /// * Important Notes *
     /// - Only effective for umounted process with uid >= 10000.
     #[command(name = "add_sus_kstat_statically")]
     AddSusKstatStatically {
         /// Path of file or directory
         path: String,
-        #[arg(value_parser = treat_default_as_none::<i64>)]
-        ino: Option<i64>,
-        #[arg(value_parser = treat_default_as_none::<i64>)]
-        dev: Option<i64>,
-        #[arg(value_parser = treat_default_as_none::<i64>)]
-        nlink: Option<i64>,
-        #[arg(value_parser = treat_default_as_none::<i64>)]
-        size: Option<i64>,
-        #[arg(value_parser = treat_default_as_none::<i64>)]
-        atime: Option<i64>,
-        #[arg(value_parser = treat_default_as_none::<i64>)]
-        atime_nsec: Option<i64>,
-        #[arg(value_parser = treat_default_as_none::<i64>)]
-        mtime: Option<i64>,
-        #[arg(value_parser = treat_default_as_none::<i64>)]
-        mtime_nsec: Option<i64>,
-        #[arg(value_parser = treat_default_as_none::<i64>)]
-        ctime: Option<i64>,
-        #[arg(value_parser = treat_default_as_none::<i64>)]
-        ctime_nsec: Option<i64>,
-        #[arg(value_parser = treat_default_as_none::<i64>)]
-        blocks: Option<i64>,
-        #[arg(value_parser = treat_default_as_none::<i64>)]
-        blksize: Option<i64>,
+        #[arg(default_value = "default", value_parser = treat_default_as_none::<i64>)]
+        ino: std::option::Option<i64>, // do not change `std::option::Option` to `Option`, it's in long form because need to bypass clap magic.
+        #[arg(default_value = "default", value_parser = treat_default_as_none::<i64>)]
+        dev: std::option::Option<i64>,
+        #[arg(default_value = "default", value_parser = treat_default_as_none::<i64>)]
+        nlink: std::option::Option<i64>,
+        #[arg(default_value = "default", value_parser = treat_default_as_none::<i64>)]
+        size: std::option::Option<i64>,
+        #[arg(default_value = "default", value_parser = treat_default_as_none::<i64>)]
+        atime: std::option::Option<i64>,
+        #[arg(default_value = "default", value_parser = treat_default_as_none::<i64>)]
+        atime_nsec: std::option::Option<i64>,
+        #[arg(default_value = "default", value_parser = treat_default_as_none::<i64>)]
+        mtime: std::option::Option<i64>,
+        #[arg(default_value = "default", value_parser = treat_default_as_none::<i64>)]
+        mtime_nsec: std::option::Option<i64>,
+        #[arg(default_value = "default", value_parser = treat_default_as_none::<i64>)]
+        ctime: std::option::Option<i64>,
+        #[arg(default_value = "default", value_parser = treat_default_as_none::<i64>)]
+        ctime_nsec: std::option::Option<i64>,
+        #[arg(default_value = "default", value_parser = treat_default_as_none::<i64>)]
+        blocks: std::option::Option<i64>,
+        #[arg(default_value = "default", value_parser = treat_default_as_none::<i64>)]
+        blksize: std::option::Option<i64>,
     },
 
     /// Remove sus_kstat or sus_kstat_statically previously added to be auto-applied when boot-up.
