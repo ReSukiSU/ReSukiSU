@@ -57,6 +57,7 @@ static __exit void ksu_unhook_sys_reboot(void)
 #endif
 
 #ifdef KSU_HOOK_AUTO_EXECVE_HOOK
+#include <linux/fcntl.h>
 #include "runtime/ksud.h"
 
 static struct ksu_inline_hook *ksu_execve_hook;
@@ -281,17 +282,16 @@ common_hook_failed:
     }
 
 #ifdef CONFIG_COMPAT
-    // 32bit userspace + 64bit kernel
-    // mostly don't have these devices,
-    // and the compiler mostly won't inline do_execveat_common when this case
-    //
-    // so just alert
+    // This shouldn't happen!
+    // Or stupid compiler inline everything
     pr_alert("****************************************************************");
     pr_alert("**      NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE      **");
     pr_alert("**                                                            **");
-    pr_alert("**   CONFIG_COMPAT enabled but compat_do_execve won't hook    **");
-    pr_alert("**  ReSukiSU may not work when you are using 32bit userspace  **");
-    pr_alert("**                                                            **");
+    pr_alert("**    CONFIG_COMPAT enabled but fallback to do_execve hook    **");
+    pr_alert("**                  ReSukiSU may not work                     **");
+    pr_alert("**              Please submit issue to ReSukiSU               **")
+        pr_alert("**        With your vmlinux, System.map, config.gz file       **")
+            pr_alert("**                                                            **");
     pr_alert("**      NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE      **");
     pr_alert("****************************************************************");
 #endif

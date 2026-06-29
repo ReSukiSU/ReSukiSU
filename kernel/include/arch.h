@@ -102,11 +102,12 @@
 #define SYS_SETNS_SYMBOL sys_setns
 #define SYS_FSTAT_SYMBOL "sys_newfstat"
 #define SYS_FSTATAT64_SYMBOL "sys_fstatat64"
+#define SYS_FACCESSAT_SYMBOL "sys_faccessat"
+#define SYS_NEWFSTATAT_SYMBOL "sys_newfstatat"
+#define SYS_FSTAT64_SYMBOL "sys_fstat64"
 
 #else
-#ifdef CONFIG_KSU_TRACEPOINT_HOOK
 #error "Unsupported arch"
-#endif
 #endif
 
 /* allow some architecutres to override `struct pt_regs` */

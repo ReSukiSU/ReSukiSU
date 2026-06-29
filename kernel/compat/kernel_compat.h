@@ -320,8 +320,9 @@ __weak long copy_from_kernel_nofault(void *dst, const void *src, size_t size)
 // f**k old compiler, thx for your notices, but better don't notice next time
 #ifndef __has_attribute
 #define __has_attribute(x) __GCC4_has_attribute_##x
-#define __GCC4_has_attribute___fallthrough__ 0
 #endif
+
+#define __GCC4_has_attribute___fallthrough__ 0
 /*
  * Add the pseudo keyword 'fallthrough' so case statement blocks
  * must end with any of these keywords:
