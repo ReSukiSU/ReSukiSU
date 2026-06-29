@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="home">Strona główna</string>
+    <string name="learn_more">Dowiedz się więcej</string>
     <string name="home_not_installed">Nie zainstalowano</string>
     <string name="home_click_to_install">Kliknij, aby zainstalować</string>
     <string name="home_working">Działa</string>
