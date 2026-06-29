@@ -289,9 +289,9 @@ common_hook_failed:
     pr_alert("**                                                            **");
     pr_alert("**    CONFIG_COMPAT enabled but fallback to do_execve hook    **");
     pr_alert("**                  ReSukiSU may not work                     **");
-    pr_alert("**              Please submit issue to ReSukiSU               **")
-        pr_alert("**        With your vmlinux, System.map, config.gz file       **")
-            pr_alert("**                                                            **");
+    pr_alert("**              Please submit issue to ReSukiSU               **");
+    pr_alert("**        With your vmlinux, System.map, config.gz file       **");
+    pr_alert("**                                                            **");
     pr_alert("**      NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE      **");
     pr_alert("****************************************************************");
 #endif
