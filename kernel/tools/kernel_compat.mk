@@ -294,3 +294,21 @@ ifneq ($(shell grep -q "module_alloc_base" $(srctree)/arch/arm64/include/asm/mod
 $(info -- $(REPO_NAME)/compat: found module_alloc_base removed)
 ccflags-y += -DKSU_COMPAT_MODULE_ALLOC_BASE_IN_MODULE_C
 endif
+
+# https://github.com/torvalds/linux/commit/299878bac326c890699c696ebba26f56fe93fc75
+ifneq ($(wildcard $(srctree)/include/asm-generic/set_memory.h),)
+$(info -- $(REPO_NAME)/compat: found set_memory header)
+ccflags-y += -DKSU_COMPAT_HAVE_SET_MEMORY_HEADER
+endif
+
+# https://github.com/torvalds/linux/commit/cb9e3c292d0115499c660028ad35ac5501d722b5
+ifeq ($(shell grep -q "vm_flags" $(srctree)/include/linux/vmalloc.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: found vmflags in __vmalloc_node_range)
+ccflags-y += -DKSU_COMPAT_HAVE_VMFLAGS_IN_VMALLOC_NODE_RANGE
+endif
+
+# https://github.com/torvalds/linux/commit/51f39a1f0cea1cacf8c787f652f26dfee9611874
+ifeq ($(shell grep -q "do_execveat_common" $(srctree)/fs/exec.c; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: found do_execveat_common)
+ccflags-y += -DKSU_COMPAT_HAVE_DO_EXECVEAT_COMMON
+endif

@@ -121,8 +121,13 @@ static void *ksu_inline_hook_clone_code_alloc(size_t size)
     if (PAGE_ALIGN(size) > MODULES_LEN)
         return NULL;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0) || defined(KSU_COMPAT_HAVE_VMFLAGS_IN_VMALLOC_NODE_RANGE)
     p = __vmalloc_node_range(size, KSU_X86_64_MODULE_ALIGN, MODULES_VADDR + ksu_inline_get_module_load_offset(),
                              MODULES_END, GFP_KERNEL, PAGE_KERNEL, 0, NUMA_NO_NODE, __builtin_return_address(0));
+#else
+    p = __vmalloc_node_range(size, KSU_X86_64_MODULE_ALIGN, MODULES_VADDR + ksu_inline_get_module_load_offset(),
+                             MODULES_END, GFP_KERNEL, PAGE_KERNEL, NUMA_NO_NODE, __builtin_return_address(0));
+#endif
     if (p && kasan_module_alloc(p, size) < 0) {
         vfree(p);
         return NULL;

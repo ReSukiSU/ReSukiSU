@@ -36,7 +36,7 @@ static __init void ksu_hook_sys_reboot(void)
 
     pr_info("%s: sys_reboot target=%px (%pS)\n", __func__, (void *)addr, (void *)addr);
 
-    struct ksu_inline_hook_config config = { .target = addr, .before = ksu_on_sys_reboot, .after = NULL };
+    struct ksu_inline_hook_config config = { .target = (void *)addr, .before = ksu_on_sys_reboot, .after = NULL };
 
     if (ksu_reboot_hook)
         return;
@@ -93,36 +93,56 @@ static unsigned long ksu_user_arg_ptr_value(struct user_arg_ptr arg)
 extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv, void *envp, int *flags);
 extern int ksu_handle_execve(int *fd, const char *filename, void *argv, void *envp, int *flags);
 
-extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv, void *envp, int *flags);
-extern int ksu_handle_execve(int *fd, const char *filename, void *argv, void *envp, int *flags);
-
 static void ksu_before_do_execve_common(struct pt_regs *regs)
 {
     struct pt_regs *real_regs = regs;
 
+    // https://github.com/torvalds/linux/commit/51f39a1f0cea1cacf8c787f652f26dfee9611874
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0) || defined(KSU_COMPAT_HAVE_DO_EXECVEAT_COMMON)
     int fd = (int)PT_REGS_PARM1(real_regs);
+#else
+    int fd = AT_FDCWD;
+#endif
     int flags;
 
-    // https://github.com/torvalds/linux/commit/c4ad8f98bef77c7356aa6a9ad9188a6acc6b849d
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0) || defined(KSU_COMPAT_DO_EXECVE_STRUCT_FILENAME)
+    // https://github.com/torvalds/linux/commit/51f39a1f0cea1cacf8c787f652f26dfee9611874
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0) || defined(KSU_COMPAT_HAVE_DO_EXECVEAT_COMMON)
     struct filename *filename = (struct filename *)PT_REGS_PARM2(real_regs);
+
+    // https://github.com/torvalds/linux/commit/c4ad8f98bef77c7356aa6a9ad9188a6acc6b849d
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0) || defined(KSU_COMPAT_DO_EXECVE_STRUCT_FILENAME)
+    struct filename *filename = (struct filename *)PT_REGS_PARM1(real_regs);
 #else
-    const char *filename = (const char *)PT_REGS_PARM2(real_regs);
+    const char *filename = (const char *)PT_REGS_PARM1(real_regs);
 #endif
 
     if (!filename)
         // we only care the call from compat_do_execve/do_execve
         return;
 
-#ifdef CONFIG_COMPAT
-    struct user_arg_ptr argv = ksu_get_user_arg_ptr(PT_REGS_PARM3(real_regs), PT_REGS_CCALL_PARM4(real_regs));
-    struct user_arg_ptr envp = ksu_get_user_arg_ptr(PT_REGS_PARM5(real_regs), PT_REGS_PARM6(real_regs));
-    flags = (int)PT_REGS_PARM7(real_regs);
+        // clang-format off
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0) || defined(KSU_COMPAT_HAVE_DO_EXECVEAT_COMMON)
+    #ifdef CONFIG_COMPAT
+        struct user_arg_ptr argv = ksu_get_user_arg_ptr(PT_REGS_PARM3(real_regs), PT_REGS_CCALL_PARM4(real_regs));
+        struct user_arg_ptr envp = ksu_get_user_arg_ptr(PT_REGS_PARM5(real_regs), PT_REGS_PARM6(real_regs));
+        flags = (int)PT_REGS_PARM7(real_regs);
+    #else
+        struct user_arg_ptr argv = ksu_get_user_arg_ptr(PT_REGS_PARM3(real_regs), 0);
+        struct user_arg_ptr envp = ksu_get_user_arg_ptr(PT_REGS_CCALL_PARM4(real_regs), 0);
+        flags = (int)PT_REGS_PARM5(real_regs);
+    #endif
 #else
-    struct user_arg_ptr argv = ksu_get_user_arg_ptr(PT_REGS_PARM3(real_regs), 0);
-    struct user_arg_ptr envp = ksu_get_user_arg_ptr(PT_REGS_CCALL_PARM4(real_regs), 0);
-    flags = (int)PT_REGS_PARM5(real_regs);
+    #ifdef CONFIG_COMPAT
+        struct user_arg_ptr argv = ksu_get_user_arg_ptr(PT_REGS_PARM2(real_regs), PT_REGS_PARM3(real_regs));
+        struct user_arg_ptr envp = ksu_get_user_arg_ptr(PT_REGS_CCALL_PARM4(real_regs), PT_REGS_PARM5(real_regs));
+        flags = (int)PT_REGS_PARM6(real_regs);
+    #else
+        struct user_arg_ptr argv = ksu_get_user_arg_ptr(PT_REGS_PARM2(real_regs), 0);
+        struct user_arg_ptr envp = ksu_get_user_arg_ptr(PT_REGS_PARM3(real_regs), 0);
+        flags = (int)PT_REGS_CCALL_PARM4(real_regs);
+    #endif
 #endif
+    // clang-format on
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0) || defined(KSU_COMPAT_DO_EXECVE_STRUCT_FILENAME)
     ksu_handle_execveat(&fd, &filename, &argv, &envp, &flags);
@@ -130,20 +150,38 @@ static void ksu_before_do_execve_common(struct pt_regs *regs)
     ksu_handle_execve(&fd, filename, &argv, &envp, &flags);
 #endif
 
+    // clang-format off
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0) || defined(KSU_COMPAT_HAVE_DO_EXECVEAT_COMMON)
     PT_REGS_PARM1(real_regs) = (unsigned long)fd;
     PT_REGS_PARM2(real_regs) = (unsigned long)filename;
 
-#ifdef CONFIG_COMPAT
-    PT_REGS_PARM3(real_regs) = (unsigned long)argv.is_compat;
-    PT_REGS_CCALL_PARM4(real_regs) = ksu_user_arg_ptr_value(argv);
-    PT_REGS_PARM5(real_regs) = (unsigned long)envp.is_compat;
-    PT_REGS_PARM6(real_regs) = ksu_user_arg_ptr_value(envp);
-    PT_REGS_PARM7(real_regs) = (unsigned long)flags;
+    #ifdef CONFIG_COMPAT
+        PT_REGS_PARM3(real_regs) = (unsigned long)argv.is_compat;
+        PT_REGS_CCALL_PARM4(real_regs) = ksu_user_arg_ptr_value(argv);
+        PT_REGS_PARM5(real_regs) = (unsigned long)envp.is_compat;
+        PT_REGS_PARM6(real_regs) = ksu_user_arg_ptr_value(envp);
+        PT_REGS_PARM7(real_regs) = (unsigned long)flags;
+    #else
+        PT_REGS_PARM3(real_regs) = ksu_user_arg_ptr_value(argv);
+        PT_REGS_CCALL_PARM4(real_regs) = ksu_user_arg_ptr_value(envp);
+        PT_REGS_PARM5(real_regs) = (unsigned long)flags;
+    #endif
 #else
-    PT_REGS_PARM3(real_regs) = ksu_user_arg_ptr_value(argv);
-    PT_REGS_CCALL_PARM4(real_regs) = ksu_user_arg_ptr_value(envp);
-    PT_REGS_PARM5(real_regs) = (unsigned long)flags;
+    PT_REGS_PARM1(real_regs) = (unsigned long)filename;
+
+    #ifdef CONFIG_COMPAT
+        PT_REGS_PARM2(real_regs) = (unsigned long)argv.is_compat;
+        PT_REGS_PARM3(real_regs) = ksu_user_arg_ptr_value(argv);
+        PT_REGS_CCALL_PARM4(real_regs) = (unsigned long)envp.is_compat;
+        PT_REGS_PARM5(real_regs) = ksu_user_arg_ptr_value(envp);
+        PT_REGS_PARM6(real_regs) = (unsigned long)flags;
+    #else
+        PT_REGS_PARM2(real_regs) = ksu_user_arg_ptr_value(argv);
+        PT_REGS_PARM3(real_regs) = ksu_user_arg_ptr_value(envp);
+        PT_REGS_CCALL_PARM4(real_regs) = (unsigned long)flags;
+    #endif
 #endif
+    // clang-format on
 }
 
 // fallback of do_execveat_common/__do_execve_file/do_execve_common hook failed
@@ -182,14 +220,14 @@ static void __init ksu_hook_sys_execve(void)
     // hook do_execveat_common/__do_execve_file/do_execve_common
     unsigned long addr;
 
-    addr = find_kernel_symbol_exact("do_execve_common");
+    addr = (unsigned long)ksu_resolve_symbol_for_functable_hook("do_execve_common");
 
     if (!addr) {
-        addr = find_kernel_symbol_exact("__do_execve_file");
+        addr = (unsigned long)ksu_resolve_symbol_for_functable_hook("__do_execve_file");
     }
 
     if (!addr) {
-        addr = find_kernel_symbol_exact("do_execveat_common");
+        addr = (unsigned long)ksu_resolve_symbol_for_functable_hook("do_execveat_common");
     }
 
     if (!addr) {
@@ -200,7 +238,9 @@ static void __init ksu_hook_sys_execve(void)
     pr_info("%s: do_execveat_common/__do_execve_file/do_execve_common target=%px (%pS)\n", __func__, (void *)addr,
             (void *)addr);
 
-    struct ksu_inline_hook_config config = { .target = addr, .before = ksu_before_do_execve_common, .after = NULL };
+    struct ksu_inline_hook_config config = { .target = (void *)addr,
+                                             .before = ksu_before_do_execve_common,
+                                             .after = NULL };
 
     if (ksu_execve_hook)
         return;
@@ -227,7 +267,9 @@ common_hook_failed:
 
     pr_info("%s: do_execve target=%px (%pS)\n", __func__, (void *)addr, (void *)addr);
 
-    struct ksu_inline_hook_config execve_config = { .target = addr, .before = ksu_before_do_execve, .after = NULL };
+    struct ksu_inline_hook_config execve_config = { .target = (void *)addr,
+                                                    .before = ksu_before_do_execve,
+                                                    .after = NULL };
 
     if (ksu_execve_hook)
         return;
@@ -293,7 +335,7 @@ static __init void ksu_hook_sys_faccessat(void)
 
     pr_info("%s: ksu_faccessat_hook target=%px (%pS)\n", __func__, (void *)addr, (void *)addr);
 
-    struct ksu_inline_hook_config config = { .target = addr, .before = ksu_on_sys_faccessat, .after = NULL };
+    struct ksu_inline_hook_config config = { .target = (void *)addr, .before = ksu_on_sys_faccessat, .after = NULL };
 
     if (ksu_faccessat_hook)
         return;
@@ -344,7 +386,7 @@ static __init void ksu_hook_sys_newfstatat(void)
 
     pr_info("%s: ksu_newfstatat_hook target=%px (%pS)\n", __func__, (void *)addr, (void *)addr);
 
-    struct ksu_inline_hook_config config = { .target = addr, .before = ksu_on_sys_stat, .after = NULL };
+    struct ksu_inline_hook_config config = { .target = (void *)addr, .before = ksu_on_sys_stat, .after = NULL };
 
     if (ksu_newfstatat_hook)
         goto ksu_fstatat64_hook;
@@ -368,7 +410,7 @@ ksu_fstatat64_hook:
 
     pr_info("%s: ksu_fstatat64_hook target=%px (%pS)\n", __func__, (void *)addr, (void *)addr);
 
-    config.target = addr;
+    config.target = (void *)addr;
 
     ksu_fstatat64_hook = ksu_inline_hook_register(config);
     if (IS_ERR(ksu_fstatat64_hook)) {
@@ -422,7 +464,7 @@ static __init void ksu_hook_sys_newfstat(void)
 
     pr_info("%s: sys_newfstat target=%px (%pS)\n", __func__, (void *)addr, (void *)addr);
 
-    struct ksu_inline_hook_config config = { .target = addr, .before = NULL, .after = ksu_on_sys_newfstat };
+    struct ksu_inline_hook_config config = { .target = (void *)addr, .before = NULL, .after = ksu_on_sys_newfstat };
 
     if (ksu_newfstat_hook)
         return;
@@ -477,7 +519,7 @@ static __init void ksu_hook_sys_fstat64(void)
 
     pr_info("%s: sys_fstat64 target=%px (%pS)\n", __func__, (void *)addr, (void *)addr);
 
-    struct ksu_inline_hook_config config = { .target = addr, .before = NULL, .after = ksu_on_sys_fstat64 };
+    struct ksu_inline_hook_config config = { .target = (void *)addr, .before = NULL, .after = ksu_on_sys_fstat64 };
 
     if (ksu_fstat64_hook)
         return;

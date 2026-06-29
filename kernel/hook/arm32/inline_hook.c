@@ -98,13 +98,24 @@ static void *ksu_inline_hook_clone_code_alloc(size_t size)
     if (IS_ENABLED(CONFIG_ARM_MODULE_PLTS))
         gfp_mask |= __GFP_NOWARN;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0) || defined(KSU_COMPAT_HAVE_VMFLAGS_IN_VMALLOC_NODE_RANGE)
     p = __vmalloc_node_range(size, 1, MODULES_VADDR, MODULES_END, gfp_mask, PAGE_KERNEL_EXEC, 0, NUMA_NO_NODE,
                              __builtin_return_address(0));
+#else
+    p = __vmalloc_node_range(size, 1, MODULES_VADDR, MODULES_END, gfp_mask, PAGE_KERNEL_EXEC, NUMA_NO_NODE,
+                             __builtin_return_address(0));
+#endif
+
     if (!IS_ENABLED(CONFIG_ARM_MODULE_PLTS) || p)
         return p;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0) || defined(KSU_COMPAT_HAVE_VMFLAGS_IN_VMALLOC_NODE_RANGE)
     return __vmalloc_node_range(size, 1, VMALLOC_START, VMALLOC_END, GFP_KERNEL, PAGE_KERNEL_EXEC, 0, NUMA_NO_NODE,
                                 __builtin_return_address(0));
+#else
+    return __vmalloc_node_range(size, 1, VMALLOC_START, VMALLOC_END, GFP_KERNEL, PAGE_KERNEL_EXEC, NUMA_NO_NODE,
+                                __builtin_return_address(0));
+#endif
 #else
     return execmem_alloc_rw(EXECMEM_DEFAULT, size);
 #endif

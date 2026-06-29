@@ -9,11 +9,15 @@
 #include <linux/kernel.h>
 #include <linux/moduleloader.h>
 #include <linux/numa.h>
-#include <linux/set_memory.h>
+#include <linux/version.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0) || defined(KSU_COMPAT_HAVE_SET_MEMORY_HEADER)
+#include <asm/set_memory.h>
+#else
+#include <asm/cacheflush.h>
+#endif
 #include <linux/sizes.h>
 #include <linux/string.h>
 #include <linux/vmalloc.h>
-#include <linux/version.h>
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 10, 0)
 #include <linux/execmem.h>
 #endif
@@ -311,6 +315,16 @@ static inline u64 ksu_inline_get_module_alloc_base(void)
 }
 #endif
 
+#ifndef MODULES_VSIZE
+#include <linux/sizes.h>
+
+#define MODULES_VSIZE (SZ_2G)
+#endif
+
+#ifndef MODULE_ALIGN
+#define MODULE_ALIGN PAGE_SIZE
+#endif
+
 static inline void *ksu_inline_hook_clone_code_alloc(size_t size)
 {
 // https://github.com/torvalds/linux/commit/223b5e57d0d50b0c07b933350dbcde92018d3080
@@ -326,13 +340,23 @@ static inline void *ksu_inline_hook_clone_code_alloc(size_t size)
     if (IS_ENABLED(CONFIG_ARM64_MODULE_PLTS))
         gfp_mask |= __GFP_NOWARN;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0) || defined(KSU_COMPAT_HAVE_VMFLAGS_IN_VMALLOC_NODE_RANGE)
     p = __vmalloc_node_range(size, MODULE_ALIGN, base, module_alloc_end, gfp_mask, PAGE_KERNEL_EXEC, 0, NUMA_NO_NODE,
                              __builtin_return_address(0));
+#else
+    p = __vmalloc_node_range(size, MODULE_ALIGN, base, module_alloc_end, gfp_mask, PAGE_KERNEL_EXEC, NUMA_NO_NODE,
+                             __builtin_return_address(0));
+#endif
     if (p || !IS_ENABLED(CONFIG_ARM64_MODULE_PLTS) || IS_ENABLED(CONFIG_KASAN))
         return p;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0) || defined(KSU_COMPAT_HAVE_VMFLAGS_IN_VMALLOC_NODE_RANGE)
     return __vmalloc_node_range(size, MODULE_ALIGN, base, base + SZ_2G, GFP_KERNEL, PAGE_KERNEL_EXEC, 0, NUMA_NO_NODE,
                                 __builtin_return_address(0));
+#else
+    return __vmalloc_node_range(size, MODULE_ALIGN, base, base + SZ_2G, GFP_KERNEL, PAGE_KERNEL_EXEC, NUMA_NO_NODE,
+                                __builtin_return_address(0));
+#endif
 #else
     return execmem_alloc_rw(EXECMEM_DEFAULT, size);
 #endif
