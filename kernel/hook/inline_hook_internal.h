@@ -37,6 +37,9 @@ void ksu_inline_hook_arch_set_ret(struct pt_regs *regs, unsigned long ret);
 unsigned long ksu_inline_hook_arch_get_ret(const struct pt_regs *regs);
 void *ksu_inline_hook_before(struct ksu_inline_hook *hook, unsigned long *arg_regs);
 unsigned long ksu_inline_hook_after(struct ksu_inline_hook *hook, unsigned long ret, unsigned long *arg_regs);
+unsigned long ksu_inline_hook_entry_dispatch(struct ksu_inline_hook *hook, unsigned long arg0, unsigned long arg1,
+                                             unsigned long arg2, unsigned long arg3, unsigned long arg4,
+                                             unsigned long arg5, unsigned long arg6);
 int ksu_inline_hook_set_fallback(struct ksu_inline_hook *hook);
 void ksu_inline_hook_clear_fallback(struct ksu_inline_hook *hook);
 

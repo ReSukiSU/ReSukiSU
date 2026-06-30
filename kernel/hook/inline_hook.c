@@ -82,6 +82,48 @@ unsigned long ksu_inline_hook_after(struct ksu_inline_hook *hook, unsigned long 
     return ret;
 }
 
+unsigned long ksu_inline_hook_entry_dispatch(struct ksu_inline_hook *hook, unsigned long arg0, unsigned long arg1,
+                                             unsigned long arg2, unsigned long arg3, unsigned long arg4,
+                                             unsigned long arg5, unsigned long arg6)
+{
+    typedef unsigned long (*ksu_inline_clone_fn_t)(unsigned long, unsigned long, unsigned long, unsigned long,
+                                                   unsigned long, unsigned long, unsigned long);
+    unsigned long args[] = { arg0, arg1, arg2, arg3, arg4, arg5, arg6, 0, 0 };
+    ksu_inline_clone_fn_t clone;
+    unsigned long ret;
+
+    if (!hook)
+        return 0;
+
+    clone = (ksu_inline_clone_fn_t)(hook->clone ?: (void *)((unsigned long)hook->target + hook->patch_size));
+
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
+    int marked;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
+    marked = test_task_syscall_work(current, SYSCALL_TRACEPOINT) ? 1 : 0;
+#else
+    marked = test_tsk_thread_flag(current, TIF_SYSCALL_TRACEPOINT) ? 1 : 0;
+#endif
+    if (!marked)
+        goto orig;
+#else
+    if (ksu_is_current_proc_unprivillege())
+        goto orig;
+#endif
+
+    if (hook->before)
+        clone = (ksu_inline_clone_fn_t)ksu_inline_hook_before(hook, args);
+
+    ret = clone(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+
+    if (hook->after)
+        ret = ksu_inline_hook_after(hook, ret, args);
+
+    return ret;
+orig:
+    return clone(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+}
+
 struct ksu_inline_hook *ksu_inline_hook_register(const struct ksu_inline_hook_config config)
 {
     struct ksu_inline_hook *hook;
