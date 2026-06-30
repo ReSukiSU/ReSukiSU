@@ -26,9 +26,11 @@
 #include <asm/memory.h>
 #include <asm/module.h>
 #include <asm/sections.h>
+#include <asm/thread_info.h>
 
 #include <linux/gfp.h>
 #include <linux/mm.h>
+#include "feature/sucompat.h"
 #include "hook/patch_memory.h"
 #include "infra/symbol_resolver.h"
 #include "compat/kernel_compat.h"
@@ -38,8 +40,9 @@
 #else
 #define KSU_INLINE_PATCH_SIZE 16
 #endif
-#define KSU_INLINE_ENTRY_SIZE 48
+#define KSU_INLINE_ENTRY_SIZE 96
 #define KSU_INLINE_VENEER_SIZE 32
+#define KSU_INLINE_BRANCH_RANGE SZ_128M
 #define KSU_AARCH64_LDR_X16_8 0x58000050
 #define KSU_AARCH64_LDR_X16_12 0x58000070
 #define KSU_AARCH64_LDR_X16_16 0x58000090
@@ -48,15 +51,42 @@
 #define KSU_AARCH64_BR_X17 0xd61f0220
 #define KSU_AARCH64_BLR_X16 0xd63f0200
 #define KSU_AARCH64_RET 0xd65f03c0
+#define KSU_AARCH64_MRS_X16_SP_EL0 0xd5384110
+#define KSU_AARCH64_LDR_X16_X16 0xf9400210
+#define KSU_AARCH64_MOV_X16_SP 0x910003f0
+#define KSU_AARCH64_AND_X16_X16_X17 0x8a110210
+#define KSU_AARCH64_TBNZ_X16_TIF_PROC_NON_PRIVILEGE                                                                    \
+    (0x37000010 | ((TIF_PROC_NON_PRIVILEGE & 0x20) << 26) | ((TIF_PROC_NON_PRIVILEGE & 0x1f) << 19))
 #define KSU_AARCH64_STP_X16_X30_PRE 0xa9bf7bf0
 #define KSU_AARCH64_LDP_X16_X30_POST 0xa8c17bf0
 #define KSU_AARCH64_LDR_X_LITERAL 0x58000000
 #define KSU_AARCH64_NOP 0xd503201f
 #define KSU_AARCH64_BTI_JC 0xd50324df
+#define KSU_AARCH64_B 0x14000000
 
-extern void ksu_inline_hook_arm64_entry_with_after(void);
-extern void ksu_inline_hook_arm64_entry_with_before(void);
-extern void ksu_inline_hook_arm64_entry_with_before_and_after(void);
+typedef unsigned long (*ksu_inline_arm64_clone_fn_t)(unsigned long, unsigned long, unsigned long, unsigned long,
+                                                     unsigned long, unsigned long, unsigned long, unsigned long);
+
+static unsigned long __nocfi noinline ksu_inline_hook_arm64_entry_dispatch(unsigned long arg0, unsigned long arg1,
+                                                                           unsigned long arg2, unsigned long arg3,
+                                                                           unsigned long arg4, unsigned long arg5,
+                                                                           unsigned long arg6, unsigned long arg7)
+{
+    struct ksu_inline_hook *hook;
+    unsigned long args[] = { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, 0 };
+    ksu_inline_arm64_clone_fn_t clone;
+    unsigned long ret;
+
+    asm volatile("mov %0, x16" : "=r"(hook));
+
+    if (!hook)
+        return 0;
+
+    clone = (ksu_inline_arm64_clone_fn_t)ksu_inline_hook_before(hook, args);
+    ret = clone(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
+
+    return ksu_inline_hook_after(hook, ret, args);
+}
 
 static void ksu_inline_dump_target(const char *reason, struct ksu_inline_hook *hook, unsigned long size)
 {
@@ -260,6 +290,33 @@ int ksu_inline_hook_arch_make_branch(void *to, u8 *patch, size_t patch_size)
 #endif
 }
 
+static int ksu_inline_hook_arch_make_direct_branch(void *from, void *to, u8 *patch, size_t patch_size)
+{
+    u32 *insn = (u32 *)patch;
+    int ret;
+
+    if (patch_size != KSU_INLINE_PATCH_SIZE)
+        return -EINVAL;
+
+    memset(patch, 0, patch_size);
+
+#ifdef CONFIG_ARM64_BTI_KERNEL
+    insn[0] = KSU_AARCH64_BTI_JC;
+    ret = ksu_inline_encode_branch(KSU_AARCH64_B, (unsigned long)from + sizeof(u32), (unsigned long)to, &insn[1]);
+#else
+    ret = ksu_inline_encode_branch(KSU_AARCH64_B, (unsigned long)from, (unsigned long)to, &insn[0]);
+#endif
+    if (ret)
+        return ret;
+
+    for (; (u8 *)insn < patch + patch_size; insn++) {
+        if (!*insn)
+            *insn = KSU_AARCH64_NOP;
+    }
+
+    return 0;
+}
+
 unsigned long ksu_inline_hook_arch_get_ret(const struct pt_regs *regs)
 {
     return regs->regs[0];
@@ -337,12 +394,47 @@ static inline int ksu_inline_kasan_module_alloc(void *p, size_t size, gfp_t flag
 }
 #endif
 
-static inline void *ksu_inline_hook_clone_code_alloc(size_t size)
+static inline bool ksu_inline_branch_in_range(unsigned long from, unsigned long to)
+{
+    s64 diff = (s64)to - (s64)from;
+
+    return !(diff & 0x3) && ksu_inline_simm_fits(diff >> 2, 26);
+}
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 10, 0) && !defined(KSU_COMPAT_HAVE_EXECMEM_API)
+static void *ksu_inline_vmalloc_exec_range(size_t size, unsigned long start, unsigned long end, gfp_t gfp_mask)
+{
+    void *p;
+
+    if (end <= start || end - start < PAGE_ALIGN(size))
+        return NULL;
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0) || defined(KSU_COMPAT_HAVE_VMFLAGS_IN_VMALLOC_NODE_RANGE)
+    p = __vmalloc_node_range(size, MODULE_ALIGN, start, end, gfp_mask, PAGE_KERNEL_EXEC, 0, NUMA_NO_NODE,
+                             __builtin_return_address(0));
+#else
+    p = __vmalloc_node_range(size, MODULE_ALIGN, start, end, gfp_mask, PAGE_KERNEL_EXEC, NUMA_NO_NODE,
+                             __builtin_return_address(0));
+#endif
+
+    if (p && ksu_inline_kasan_module_alloc(p, size, gfp_mask) < 0) {
+        vfree(p);
+        return NULL;
+    }
+
+    return kasan_reset_tag(p);
+}
+#endif
+
+static inline void *ksu_inline_hook_code_alloc(void *target, size_t size, bool near)
 {
 // https://github.com/torvalds/linux/commit/223b5e57d0d50b0c07b933350dbcde92018d3080
 #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 10, 0) && !defined(KSU_COMPAT_HAVE_EXECMEM_API)
     u64 base = ksu_inline_get_module_alloc_base();
     u64 module_alloc_end = base + MODULES_VSIZE;
+    u64 module_fallback_end;
+    unsigned long start;
+    unsigned long end;
     gfp_t gfp_mask = GFP_KERNEL;
     void *p;
 
@@ -352,87 +444,133 @@ static inline void *ksu_inline_hook_clone_code_alloc(size_t size)
     if (IS_ENABLED(CONFIG_KASAN_GENERIC) || IS_ENABLED(CONFIG_KASAN_SW_TAGS))
         module_alloc_end = MODULES_END;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0) || defined(KSU_COMPAT_HAVE_VMFLAGS_IN_VMALLOC_NODE_RANGE)
-    p = __vmalloc_node_range(size, MODULE_ALIGN, base, module_alloc_end, gfp_mask, PAGE_KERNEL_EXEC, 0, NUMA_NO_NODE,
-                             __builtin_return_address(0));
-#else
-    p = __vmalloc_node_range(size, MODULE_ALIGN, base, module_alloc_end, gfp_mask, PAGE_KERNEL_EXEC, NUMA_NO_NODE,
-                             __builtin_return_address(0));
-#endif
+    module_fallback_end = module_alloc_end;
 
-    if (!p && IS_ENABLED(CONFIG_ARM64_MODULE_PLTS) &&
-        (IS_ENABLED(CONFIG_KASAN_VMALLOC) ||
-         (!IS_ENABLED(CONFIG_KASAN_GENERIC) && !IS_ENABLED(CONFIG_KASAN_SW_TAGS)))) {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0) || defined(KSU_COMPAT_HAVE_VMFLAGS_IN_VMALLOC_NODE_RANGE)
-        p = __vmalloc_node_range(size, MODULE_ALIGN, base, base + SZ_2G, GFP_KERNEL, PAGE_KERNEL_EXEC, 0, NUMA_NO_NODE,
-                                 __builtin_return_address(0));
-#else
-        p = __vmalloc_node_range(size, MODULE_ALIGN, base, base + SZ_2G, GFP_KERNEL, PAGE_KERNEL_EXEC, NUMA_NO_NODE,
-                                 __builtin_return_address(0));
-#endif
-    }
+    if (IS_ENABLED(CONFIG_ARM64_MODULE_PLTS) &&
+        (IS_ENABLED(CONFIG_KASAN_VMALLOC) || (!IS_ENABLED(CONFIG_KASAN_GENERIC) && !IS_ENABLED(CONFIG_KASAN_SW_TAGS))))
+        module_fallback_end = base + SZ_2G;
 
-    if (p && ksu_inline_kasan_module_alloc(p, size, gfp_mask) < 0) {
-        vfree(p);
+    if (near) {
+        start = (unsigned long)target > KSU_INLINE_BRANCH_RANGE ? (unsigned long)target - KSU_INLINE_BRANCH_RANGE : 0;
+        end = (unsigned long)target + KSU_INLINE_BRANCH_RANGE;
+        start = max_t(unsigned long, start, base);
+        end = min_t(unsigned long, end, module_alloc_end);
+        p = ksu_inline_vmalloc_exec_range(size, start, end, gfp_mask);
+        if (p)
+            return p;
+
+        if (module_fallback_end > module_alloc_end) {
+            start =
+                (unsigned long)target > KSU_INLINE_BRANCH_RANGE ? (unsigned long)target - KSU_INLINE_BRANCH_RANGE : 0;
+            end = (unsigned long)target + KSU_INLINE_BRANCH_RANGE;
+            start = max_t(unsigned long, start, module_alloc_end);
+            end = min_t(unsigned long, end, module_fallback_end);
+            p = ksu_inline_vmalloc_exec_range(size, start, end, GFP_KERNEL);
+            if (p)
+                return p;
+        }
+
+        pr_warn("inline_hook: near alloc failed target=%px size=%zu base=%llx module_end=%llx fallback_end=%llx\n",
+                target, size, (unsigned long long)base, (unsigned long long)module_alloc_end,
+                (unsigned long long)module_fallback_end);
         return NULL;
     }
 
-    return kasan_reset_tag(p);
+    p = ksu_inline_vmalloc_exec_range(size, base, module_alloc_end, gfp_mask);
+
+    if (!p && module_fallback_end > module_alloc_end)
+        p = ksu_inline_vmalloc_exec_range(size, base, module_fallback_end, GFP_KERNEL);
+
+    return p;
 #else
+    (void)target;
+    (void)near;
     return execmem_alloc_rw(EXECMEM_DEFAULT, size);
 #endif
 }
 
-static void ksu_inline_make_entry_stub(struct ksu_inline_hook *hook, void *buf)
+static int ksu_inline_make_entry_stub(struct ksu_inline_hook *hook, void *buf)
 {
     u32 *insn = buf;
-    u64 literal[3];
-    void *entry;
+    unsigned long hook_literal;
+    unsigned long dispatcher_literal;
+    unsigned long stack_mask_literal;
+    u32 *fast_branch = NULL;
+    u64 stack_mask = ~((u64)THREAD_SIZE - 1);
+    u64 hook_addr = (u64)hook;
+    u64 dispatcher = (u64)ksu_inline_hook_arm64_entry_dispatch;
+    int ret;
 
-    if (hook->before && hook->after)
-        entry = ksu_inline_hook_arm64_entry_with_before_and_after;
-    else if (hook->before)
-        entry = ksu_inline_hook_arm64_entry_with_before;
-    else
-        entry = ksu_inline_hook_arm64_entry_with_after;
+    memset(buf, 0, KSU_INLINE_ENTRY_SIZE);
 
 #ifdef CONFIG_ARM64_BTI_KERNEL
-    insn[0] = KSU_AARCH64_BTI_JC;
-    if (hook->before) {
-        insn[1] = KSU_AARCH64_LDR_X16_12;
-        insn[2] = 0x58000091; /* ldr x17, #16 -> slot + 24 */
-        insn[3] = KSU_AARCH64_BR_X17;
-        literal[0] = (u64)hook;
-        literal[1] = (u64)entry;
-        memcpy((u8 *)buf + 16, literal, sizeof(literal[0]) * 2);
-    } else {
-        insn[1] = 0x580000b0; /* ldr x16, #20 -> slot + 24 */
-        insn[2] = 0x580000d1; /* ldr x17, #24 -> slot + 32 */
-        insn[3] = 0x580000e9; /* ldr x9, #28 -> slot + 40 */
-        insn[4] = 0xd61f0120; /* br x9 */
-        insn[5] = KSU_AARCH64_NOP;
-        literal[0] = (u64)hook;
-        literal[1] = (u64)hook->clone;
-        literal[2] = (u64)entry;
-        memcpy((u8 *)buf + 24, literal, sizeof(literal));
-    }
-#else
-    insn[0] = KSU_AARCH64_LDR_X16_16;
-    insn[1] = KSU_AARCH64_LDR_X17_20;
-    if (hook->before) {
-        insn[2] = KSU_AARCH64_BR_X17;
-        literal[0] = (u64)hook;
-        literal[1] = (u64)entry;
-        memcpy((u8 *)buf + 16, literal, sizeof(literal[0]) * 2);
-    } else {
-        insn[2] = 0x580000c9; /* ldr x9, #24 -> slot + 32 */
-        insn[3] = 0xd61f0120; /* br x9 */
-        literal[0] = (u64)hook;
-        literal[1] = (u64)hook->clone;
-        literal[2] = (u64)entry;
-        memcpy((u8 *)buf + 16, literal, sizeof(literal));
-    }
+    *insn++ = KSU_AARCH64_BTI_JC;
 #endif
+
+#ifndef CONFIG_KSU_TRACEPOINT_HOOK
+#ifdef CONFIG_THREAD_INFO_IN_TASK
+    *insn++ = KSU_AARCH64_MRS_X16_SP_EL0;
+    *insn++ = KSU_AARCH64_LDR_X16_X16;
+#else
+    *insn++ = KSU_AARCH64_MOV_X16_SP;
+#endif
+    fast_branch = insn++;
+#endif
+
+    hook_literal = (unsigned long)buf + 64;
+    dispatcher_literal = hook_literal + sizeof(u64);
+    stack_mask_literal = dispatcher_literal + sizeof(u64);
+
+#if !defined(CONFIG_KSU_TRACEPOINT_HOOK) && !defined(CONFIG_THREAD_INFO_IN_TASK)
+    ret = ksu_inline_encode_ldr_literal(17, (unsigned long)(fast_branch + 1), stack_mask_literal, fast_branch + 1);
+    if (ret)
+        return ret;
+    insn = fast_branch + 2;
+    *insn++ = KSU_AARCH64_AND_X16_X16_X17;
+    *insn++ = KSU_AARCH64_LDR_X16_X16;
+#endif
+
+    ret = ksu_inline_encode_ldr_literal(16, (unsigned long)insn, hook_literal, insn);
+    if (ret)
+        return ret;
+    insn++;
+
+    if (ksu_inline_branch_in_range((unsigned long)insn, (unsigned long)ksu_inline_hook_arm64_entry_dispatch)) {
+        ret = ksu_inline_encode_branch(KSU_AARCH64_B, (unsigned long)insn,
+                                       (unsigned long)ksu_inline_hook_arm64_entry_dispatch, insn);
+        if (ret)
+            return ret;
+        insn++;
+    } else {
+        ret = ksu_inline_encode_ldr_literal(17, (unsigned long)insn, dispatcher_literal, insn);
+        if (ret)
+            return ret;
+        insn++;
+        *insn++ = KSU_AARCH64_BR_X17;
+    }
+
+    if (fast_branch) {
+        unsigned long fast_label = (unsigned long)insn;
+
+        ret = ksu_inline_encode_branch(KSU_AARCH64_B, fast_label, (unsigned long)hook->clone, insn);
+        if (ret)
+            return ret;
+        insn++;
+
+        ret = ksu_inline_encode_tbz(KSU_AARCH64_TBNZ_X16_TIF_PROC_NON_PRIVILEGE, (unsigned long)fast_branch, fast_label,
+                                    fast_branch);
+        if (ret)
+            return ret;
+    }
+
+    while ((unsigned long)insn < hook_literal)
+        *insn++ = KSU_AARCH64_NOP;
+
+    memcpy((void *)hook_literal, &hook_addr, sizeof(hook_addr));
+    memcpy((void *)dispatcher_literal, &dispatcher, sizeof(dispatcher));
+    memcpy((void *)stack_mask_literal, &stack_mask, sizeof(stack_mask));
+
+    return 0;
 }
 
 static int ksu_inline_relocate_adr(const struct ksu_inline_reloc_ctx *ctx, u32 insn, unsigned long old_pc,
@@ -606,14 +744,13 @@ static int ksu_inline_relocate_insn(const struct ksu_inline_reloc_ctx *ctx, u32 
     return 0;
 }
 
-static int ksu_inline_build_clone(struct ksu_inline_hook *hook, unsigned long clone, unsigned long size,
-                                  unsigned long *veneer_cursor)
+static int ksu_inline_build_reinsn(struct ksu_inline_hook *hook, unsigned long clone, unsigned long *veneer_cursor)
 {
     struct ksu_inline_reloc_ctx ctx = {
         .old_base = (unsigned long)hook->target,
         .new_base = clone,
-        .size = size,
-        .veneer_cursor = clone + size,
+        .size = hook->patch_size,
+        .veneer_cursor = clone + hook->patch_size * 2,
         .veneer_end = (unsigned long)hook->code + hook->code_size - KSU_INLINE_ENTRY_SIZE - 15,
     };
     unsigned long old_pc = (unsigned long)hook->target;
@@ -621,22 +758,36 @@ static int ksu_inline_build_clone(struct ksu_inline_hook *hook, unsigned long cl
     unsigned long i;
     int ret;
 
-    for (i = 0; i < size; i += sizeof(u32)) {
+    for (i = 0; i < hook->patch_size; i += sizeof(u32)) {
         u32 insn;
         u32 relocated;
 
         memcpy(&insn, (void *)(old_pc + i), sizeof(insn));
         ret = ksu_inline_relocate_insn(&ctx, insn, old_pc + i, new_pc + i, &relocated);
         if (ret) {
-            pr_err("inline_hook: relocate failed target=%px off=0x%lx insn=%08x ret=%d\n", hook->target, i, insn, ret);
+            pr_err("inline_hook: reinsn failed target=%px off=0x%lx insn=%08x ret=%d\n", hook->target, i, insn, ret);
             return ret;
         }
 
         memcpy((void *)(new_pc + i), &relocated, sizeof(relocated));
     }
 
+    ret = ksu_inline_hook_arch_make_branch((void *)((unsigned long)hook->target + hook->patch_size),
+                                           (u8 *)(clone + hook->patch_size), hook->patch_size);
+    if (ret)
+        return ret;
+
     *veneer_cursor = ctx.veneer_cursor;
     return 0;
+}
+
+static void ksu_inline_code_free(void *code)
+{
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 10, 0) && !defined(KSU_COMPAT_HAVE_EXECMEM_API)
+    vfree(code);
+#else
+    execmem_free(code);
+#endif
 }
 
 static int ksu_inline_check_target(struct ksu_inline_hook *hook, unsigned long *size)
@@ -666,66 +817,69 @@ static int ksu_inline_check_target(struct ksu_inline_hook *hook, unsigned long *
 
 int ksu_inline_hook_arch_prepare(struct ksu_inline_hook *hook, u8 *patch, size_t patch_size)
 {
-    u8 entry[KSU_INLINE_ENTRY_SIZE] __aligned(16);
     void *entry_slot;
     void *clone;
     void *code;
     size_t code_size;
-    unsigned long clone_size;
+    unsigned long target_size;
     unsigned long veneer_budget;
     unsigned long veneer_cursor;
-    int pages;
     int ret;
 
     if (patch_size != KSU_INLINE_PATCH_SIZE)
         return -EINVAL;
 
-    ret = ksu_inline_check_target(hook, &clone_size);
+    ret = ksu_inline_check_target(hook, &target_size);
     if (ret)
         return ret;
 
-    // clear entry
-    for (ret = 0; ret < ARRAY_SIZE(entry) / sizeof(u32); ret++)
-        ((u32 *)entry)[ret] = KSU_AARCH64_NOP;
-
-    // calculate how much memory we need and alloc it
-    veneer_budget = (clone_size / sizeof(u32)) * KSU_INLINE_VENEER_SIZE;
-    code_size = PAGE_ALIGN(((unsigned long)hook->target & ~PAGE_MASK) + clone_size + veneer_budget +
+    veneer_budget = (hook->patch_size / sizeof(u32)) * KSU_INLINE_VENEER_SIZE;
+    code_size = PAGE_ALIGN(((unsigned long)hook->target & ~PAGE_MASK) + hook->patch_size * 2 + veneer_budget +
                            KSU_INLINE_ENTRY_SIZE + 15);
-    code = ksu_inline_hook_clone_code_alloc(code_size);
-    if (!code)
-        return -ENOMEM;
+    code = ksu_inline_hook_code_alloc(hook->target, code_size, true);
+    if (!code) {
+        pr_warn("inline_hook: near reinsn alloc failed target=%px (%pS) size=%zu, fallback to far reinsn\n",
+                hook->target, hook->target, code_size);
+        code = ksu_inline_hook_code_alloc(hook->target, code_size, false);
+        if (!code)
+            return -ENOMEM;
+    }
 
     hook->keep_storage = true;
     hook->code = code;
     hook->code_size = code_size;
 
-    // keep same page offset
     clone = (u8 *)code + ((unsigned long)hook->target & ~PAGE_MASK);
     hook->clone = clone;
 
-    // insn copy and relocate
-    ret = ksu_inline_build_clone(hook, (unsigned long)clone, clone_size, &veneer_cursor);
+    ret = ksu_inline_build_reinsn(hook, (unsigned long)clone, &veneer_cursor);
     if (ret)
         goto err_free;
 
     entry_slot = PTR_ALIGN((void *)veneer_cursor, 16);
-    // init first trampoline
-    ksu_inline_make_entry_stub(hook, entry);
-    memcpy(entry_slot, entry, sizeof(entry));
-
-    ret = ksu_inline_hook_arch_make_branch(entry_slot, patch, patch_size);
+    ret = ksu_inline_make_entry_stub(hook, entry_slot);
     if (ret)
         goto err_free;
+    hook->trampoline = entry_slot;
+    flush_icache_range((unsigned long)code, (unsigned long)code + code_size);
+
+    ret = ksu_inline_hook_arch_make_direct_branch(hook->target, entry_slot, patch, patch_size);
+    if (ret) {
+        pr_info("inline_hook: dispatcher out of +/-128MiB target=%px trampoline=%px, using long jump\n", hook->target,
+                entry_slot);
+        ret = ksu_inline_hook_arch_make_branch(entry_slot, patch, patch_size);
+        if (ret)
+            goto err_free;
+    }
+
+    pr_info("inline_hook: prepared target=%px mode=reinsn trampoline=%px clone=%px\n", hook->target, entry_slot,
+            hook->clone);
 
     return 0;
 
 err_free:
-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 10, 0) && !defined(KSU_COMPAT_HAVE_EXECMEM_API)
-    vfree(code);
-#else
-    execmem_free(code);
-#endif
+    ksu_inline_code_free(code);
+    hook->trampoline = NULL;
     hook->clone = NULL;
     hook->code = NULL;
     hook->code_size = 0;
@@ -742,6 +896,7 @@ void ksu_inline_hook_arch_release(struct ksu_inline_hook *hook)
 #endif
         hook->code = NULL;
         hook->code_size = 0;
+        hook->trampoline = NULL;
         hook->clone = NULL;
     }
 

@@ -126,9 +126,7 @@ int ksu_handle_setuid(uid_t new_uid, uid_t old_uid)
 #else // #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
     if (ksu_is_allow_uid_for_current(new_uid)) {
         disable_seccomp();
-#ifndef CONFIG_KSU_TRACEPOINT_HOOK
         ksu_clear_current_proc_unprivillege();
-#endif
 
         if (ksu_is_manager_uid(new_uid)) {
             pr_info("install fd for ksu manager(uid=%d)\n", new_uid);
