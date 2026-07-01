@@ -1,5 +1,3 @@
-/* SPDX-License-Identifier: GPL-2.0-only */
-
 #ifndef __KSU_INLINE_HOOK_INTERNAL_H
 #define __KSU_INLINE_HOOK_INTERNAL_H
 
