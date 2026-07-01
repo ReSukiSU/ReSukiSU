@@ -104,51 +104,6 @@ config KSU_SUSFS
 
 endchoice
 
-menu "KernelSU - Manual Hook Auto hook"
-    depends on KSU_MANUAL_HOOK
-
-comment "------------------------WARNING-------------------------------"
-comment "ReSukiSU will check EVERY hooks in kernel compile process"
-comment "If anything mismatch with document, Kernel compile maybe FAILED!"
-comment "See document if you face any compile failed due to hook check"
-comment "Document: https://resukisu.github.io/guide/manual-integrate.html"
-comment "--------------------------------------------------------------"
-
-config KSU_MANUAL_HOOK_AUTO_SETUID_HOOK
-	bool "Automatically hook setuid by lsm"
-	depends on KSU_MANUAL_HOOK
-	default y
-	help
-	  THIS OPTION CAN NOT BE USED IN KERNEL_VERSION >= 6.8 DUE TO LSM CHANGES
-	  YOU MUST MANUALLY HOOK SETRESUID
-
-	  If you turn off this option, edit kernel/sys.c.
-	  In __sys_setresuid(uid_t ruid, uid_t euid, uid_t suid)
-	  add a call to ksu_handle_setresuid there.
-
-config KSU_MANUAL_HOOK_AUTO_INITRC_HOOK
-    bool "Automatically hook ksu init rc by lsm"
-	depends on KSU_MANUAL_HOOK
-	default y
-	help
-	  THIS OPTION CAN NOT BE USED IN KERNEL_VERSION >= 6.8 DUE TO LSM CHANGES
-	  YOU MUST MANUALLY HOOK SYS_READ
-
-	  If you turn off this option, edit fs/read_write.c.
-	  in SYSCALL_DEFINE3(read, unsigned int, fd, char __user *, buf, size_t, count)
-	  add a call to ksu_handle_sys_read there.
-
-config KSU_MANUAL_HOOK_AUTO_INPUT_HOOK
-    bool "Automatically hook input hook by input_handler"
-       depends on KSU_MANUAL_HOOK
-       default y
-       help
-         If you turn off this option, edit drivers/input/input.c.
-         in void input_event(struct input_dev *dev, unsigned int type, unsigned int code, int value)
-         add a call to ksu_handle_input_handle_event there.
-
-endmenu
-
 menu "KernelSU - SUSFS"
     depends on KSU_SUSFS
 
