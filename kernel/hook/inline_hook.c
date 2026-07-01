@@ -1,5 +1,3 @@
-/* SPDX-License-Identifier: GPL-2.0-only */
-
 #include "hook/inline_hook_internal.h"
 
 #include <linux/errno.h>
@@ -18,20 +16,6 @@ void *ksu_inline_hook_before(struct ksu_inline_hook *hook, unsigned long *arg_re
 
     if (!hook)
         return NULL;
-
-#ifdef CONFIG_KSU_TRACEPOINT_HOOK
-    int marked;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
-    marked = test_task_syscall_work(current, SYSCALL_TRACEPOINT) ? 1 : 0;
-#else
-    marked = test_tsk_thread_flag(current, TIF_SYSCALL_TRACEPOINT) ? 1 : 0;
-#endif
-    if (!marked)
-        goto out;
-#else
-    if (ksu_is_current_proc_unprivillege())
-        goto out;
-#endif
 
     if (!hook->before)
         goto out;
@@ -53,20 +37,6 @@ unsigned long ksu_inline_hook_after(struct ksu_inline_hook *hook, unsigned long 
 
     if (!hook)
         return ret;
-
-#ifdef CONFIG_KSU_TRACEPOINT_HOOK
-    int marked;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
-    marked = test_task_syscall_work(current, SYSCALL_TRACEPOINT) ? 1 : 0;
-#else
-    marked = test_tsk_thread_flag(current, TIF_SYSCALL_TRACEPOINT) ? 1 : 0;
-#endif
-    if (!marked)
-        return ret;
-#else
-    if (ksu_is_current_proc_unprivillege())
-        return ret;
-#endif
 
     if (!hook->after)
         return ret;
@@ -97,20 +67,6 @@ unsigned long ksu_inline_hook_entry_dispatch(struct ksu_inline_hook *hook, unsig
 
     clone = (ksu_inline_clone_fn_t)(hook->clone ?: (void *)((unsigned long)hook->target + hook->patch_size));
 
-#ifdef CONFIG_KSU_TRACEPOINT_HOOK
-    int marked;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
-    marked = test_task_syscall_work(current, SYSCALL_TRACEPOINT) ? 1 : 0;
-#else
-    marked = test_tsk_thread_flag(current, TIF_SYSCALL_TRACEPOINT) ? 1 : 0;
-#endif
-    if (!marked)
-        goto orig;
-#else
-    if (ksu_is_current_proc_unprivillege())
-        goto orig;
-#endif
-
     if (hook->before)
         clone = (ksu_inline_clone_fn_t)ksu_inline_hook_before(hook, args);
 
@@ -120,8 +76,6 @@ unsigned long ksu_inline_hook_entry_dispatch(struct ksu_inline_hook *hook, unsig
         ret = ksu_inline_hook_after(hook, ret, args);
 
     return ret;
-orig:
-    return clone(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
 }
 
 struct ksu_inline_hook *ksu_inline_hook_register(const struct ksu_inline_hook_config config)

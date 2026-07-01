@@ -1,5 +1,3 @@
-/* SPDX-License-Identifier: GPL-2.0-only */
-
 #ifdef __aarch64__
 
 #include "hook/inline_hook_internal.h"
@@ -297,6 +295,8 @@ int ksu_inline_hook_arch_make_branch(void *to, u8 *patch, size_t patch_size)
 #endif
 }
 
+// generate first stage trampoline
+// attempt to generate b insn first, if failed, use long jump
 static int ksu_inline_hook_arch_make_direct_branch(void *from, void *to, u8 *patch, size_t patch_size)
 {
     u32 *insn = (u32 *)patch;
@@ -307,6 +307,8 @@ static int ksu_inline_hook_arch_make_direct_branch(void *from, void *to, u8 *pat
 
     memset(patch, 0, patch_size);
 
+    // bti jc
+    // b <second stage trampoline>
 #ifdef CONFIG_ARM64_BTI_KERNEL
     insn[0] = KSU_AARCH64_BTI_JC;
     ret = ksu_inline_encode_branch(KSU_AARCH64_B, (unsigned long)from + sizeof(u32), (unsigned long)to, &insn[1]);
@@ -503,92 +505,149 @@ static inline void *ksu_inline_hook_code_alloc(void *target, size_t size, bool n
 
     return p;
 #else
-    (void)target;
-    (void)near;
     return execmem_alloc_rw(EXECMEM_DEFAULT, size);
 #endif
 }
 
+// Generate second stage trampoline
+//
+// There have a lot of magic number
+// but there are memory patch to gen trampoline dynamic
+// Check comments to know what insn will be generated
+//
+// NOTE: We check thread flags internally
+// when caller mark "TIF_PROC_NON_PRIVILEGE"
+// simple skip to avoid hunt unrelated process
 static int ksu_inline_make_entry_stub(struct ksu_inline_hook *hook, void *buf)
 {
     u32 *insn = buf;
     unsigned long hook_literal;
     unsigned long dispatcher_literal;
     unsigned long stack_mask_literal;
+    unsigned long clone_literal;
     u32 *fast_branch = NULL;
     u64 stack_mask = ~((u64)THREAD_SIZE - 1);
     u64 hook_addr = (u64)hook;
     u64 dispatcher = (u64)ksu_inline_hook_arm64_entry_dispatch;
+    u64 clone_addr = (u64)hook->clone;
     int ret;
 
     memset(buf, 0, KSU_INLINE_ENTRY_SIZE);
 
+    // +64: .Lhook
+    // +72: .Ldispatcher
+    // +80: .Lstack_mask
+    // +88: .Lclone
     hook_literal = (unsigned long)buf + 64;
     dispatcher_literal = hook_literal + sizeof(u64);
     stack_mask_literal = dispatcher_literal + sizeof(u64);
+    clone_literal = stack_mask_literal + sizeof(u64);
 
 #ifdef CONFIG_ARM64_BTI_KERNEL
     *insn++ = KSU_AARCH64_BTI_JC;
 #endif
 
-#ifdef CONFIG_THREAD_INFO_IN_TASK
-    // mrs x16 sp_el0
-    //
+#if defined(CONFIG_THREAD_INFO_IN_TASK) || !defined(KSU_ARM64_THREAD_INFO_BY_SP)
+    // mrs x16, sp_el0
+    // ldr x16, [x16]
     *insn++ = KSU_AARCH64_MRS_X16_SP_EL0;
     *insn++ = KSU_AARCH64_LDR_X16_X16;
-#elif defined(KSU_ARM64_THREAD_INFO_BY_SP)
+#else
+    // mov x16, sp
+    // ldr x17, .Lstack_mask
+    // and x16, x16, x17
+    // ldr x16, [x16]
     *insn++ = KSU_AARCH64_MOV_X16_SP;
+
     ret = ksu_inline_encode_ldr_literal(17, (unsigned long)insn, stack_mask_literal, insn);
     if (ret)
         return ret;
     insn++;
+
     *insn++ = KSU_AARCH64_AND_X16_X16_X17;
     *insn++ = KSU_AARCH64_LDR_X16_X16;
-#else
-    *insn++ = KSU_AARCH64_MRS_X16_SP_EL0;
-    *insn++ = KSU_AARCH64_LDR_X16_X16;
 #endif
+    // tbnz x16, #TIF_PROC_NON_PRIVILEGE, .Lfast
+    //
+    // init it later, because we need know the address of .Lfast
     fast_branch = insn++;
 
+    // ldr x16, .Lhook
     ret = ksu_inline_encode_ldr_literal(16, (unsigned long)insn, hook_literal, insn);
     if (ret)
         return ret;
     insn++;
 
     if (ksu_inline_branch_in_range((unsigned long)insn, (unsigned long)ksu_inline_hook_arm64_entry_dispatch)) {
+        // b ksu_inline_hook_arm64_entry_dispatch
         ret = ksu_inline_encode_branch(KSU_AARCH64_B, (unsigned long)insn,
                                        (unsigned long)ksu_inline_hook_arm64_entry_dispatch, insn);
         if (ret)
             return ret;
         insn++;
     } else {
+        // ldr x17, .Ldispatcher
+        // br x17
         ret = ksu_inline_encode_ldr_literal(17, (unsigned long)insn, dispatcher_literal, insn);
         if (ret)
             return ret;
         insn++;
+
         *insn++ = KSU_AARCH64_BR_X17;
     }
 
     if (fast_branch) {
         unsigned long fast_label = (unsigned long)insn;
 
-        ret = ksu_inline_encode_branch(KSU_AARCH64_B, fast_label, (unsigned long)hook->clone, insn);
-        if (ret)
-            return ret;
-        insn++;
+        // .Lfast:
+        //     b hook->clone
+        if (ksu_inline_branch_in_range(fast_label, (unsigned long)hook->clone)) {
+            ret = ksu_inline_encode_branch(KSU_AARCH64_B, fast_label, (unsigned long)hook->clone, insn);
+            if (ret)
+                return ret;
+            insn++;
+        }
+        // .Lfast:
+        //     ldr x16, .Lclone
+        //     br  x16
+        else {
+            ret = ksu_inline_encode_ldr_literal(16, (unsigned long)insn, clone_literal, insn);
+            if (ret)
+                return ret;
+            insn++;
 
+            *insn++ = KSU_AARCH64_BR_X16;
+        }
+
+        // tbnz x16, #TIF_PROC_NON_PRIVILEGE, .Lfast
         ret = ksu_inline_encode_tbz(KSU_AARCH64_TBNZ_X16_TIF_PROC_NON_PRIVILEGE, (unsigned long)fast_branch, fast_label,
                                     fast_branch);
         if (ret)
             return ret;
     }
 
+    if ((unsigned long)insn > hook_literal)
+        return -ENOSPC;
+
     while ((unsigned long)insn < hook_literal)
         *insn++ = KSU_AARCH64_NOP;
 
+    // .Lhook:
+    //     .quad hook
+    //
+    // .Ldispatcher:
+    //     .quad ksu_inline_hook_arm64_entry_dispatch
+    //
+    // .Lstack_mask:
+    //     .quad ~(THREAD_SIZE - 1)
+    //
+    // .Lclone:
+    //     .quad hook->clone
+    //
     memcpy((void *)hook_literal, &hook_addr, sizeof(hook_addr));
     memcpy((void *)dispatcher_literal, &dispatcher, sizeof(dispatcher));
     memcpy((void *)stack_mask_literal, &stack_mask, sizeof(stack_mask));
+    memcpy((void *)clone_literal, &clone_addr, sizeof(clone_addr));
 
     return 0;
 }
