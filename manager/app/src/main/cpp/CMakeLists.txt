@@ -22,6 +22,11 @@ target_link_libraries(
         ${log-lib}
 )
 
+# 禁用 DT_FLAGS_1 标志以兼容 Android 6
+if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_link_options(kernelsu PRIVATE "-Wl,-z,lazy")
+endif()
+
 find_package(cxx REQUIRED CONFIG)
 link_libraries(cxx::cxx)
 

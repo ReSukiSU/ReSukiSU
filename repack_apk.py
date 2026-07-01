@@ -393,7 +393,7 @@ def do_repack(args: argparse.Namespace) -> int:
                 str(apksigner),
                 "sign",
                 "--v1-signing-enabled",
-                "false",
+                "true",
                 "--v2-signing-enabled",
                 "true",
                 "--v3-signing-enabled",

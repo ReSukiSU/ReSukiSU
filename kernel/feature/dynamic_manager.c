@@ -83,7 +83,7 @@ int ksu_handle_dynamic_manager(struct ksu_dynamic_manager_cmd *cmd)
 
         dynamic_manager.is_set = 1;
 
-        track_throne(TRACK_THRONE_FORCE_SEARCH_MGR);
+        track_throne(0);
         pr_info("dynamic manager updated: size=0x%x, hash=%.16s\n", cmd->size, cmd->hash);
         break;
 
