@@ -1,8 +1,9 @@
 import asyncio
-import os
+import os,re
 import random
 import sys,json
 from telegram import Bot,InputMediaDocument
+from telegram.error import RetryAfter
 from telegram.constants import ParseMode
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
@@ -32,7 +33,7 @@ try:
                 commit_message = f'(other {i} commits)\n{commit_message}'
                 break
             else:
-                commit_message = f'{msg}\n{commit_message}'
+                commit_message = f'{msg}\n{commit_message}\n'
             i -= 1
         commit_message = f'{commit_message.strip()}'
         last_commit = commits[-1]
@@ -66,6 +67,7 @@ Branch: {branch}
 </pre>
 {commit_line}
 <a href="{run_url}">Workflow run</a>
+<a href="https://nightly.link/ReSukiSU/ReSukiSU/workflows/build-manager/main/Manager-debug.zip">Get latest main Debug build</a>
 """.strip()
 
 MAIN_UPDATED_MSG ="""
@@ -139,11 +141,30 @@ def check_environ():
             exit(1)
     else:
         DEVELOPING_THREAD_ID = None
+        
+async def send_message(bot: Bot, chat_id: int, text: str, message_thread_id=None):
+    try:
+        await asyncio.sleep(random.uniform(0.2, 0.8))
+        return await bot.send_message(chat_id=chat_id, text=text, parse_mode=ParseMode.HTML, message_thread_id=message_thread_id,
+                                       read_timeout=350,write_timeout=350,connect_timeout=350,pool_timeout=350)
+    except RetryAfter as e:
+        print(f"[-] Hit Telegram flood limit, retrying after {e.retry_after} seconds...")
+        await asyncio.sleep(e.retry_after)
+        return await send_message(bot, chat_id, text, message_thread_id)
+    except:
+        raise
 
 async def send_media_group(bot: Bot, chat_id: int, media: list, message_thread_id=None):
-    await asyncio.sleep(random.uniform(0.2, 0.8))
-    return await bot.send_media_group(chat_id=chat_id, media=media, message_thread_id=message_thread_id,
-                                   read_timeout=350,write_timeout=350,connect_timeout=350,pool_timeout=350)
+    try:
+        await asyncio.sleep(random.uniform(0.2, 0.8))
+        return await bot.send_media_group(chat_id=chat_id, media=media, message_thread_id=message_thread_id,
+                                       read_timeout=350,write_timeout=350,connect_timeout=350,pool_timeout=350)
+    except RetryAfter as e:
+        print(f"[-] Hit Telegram flood limit, retrying after {e.retry_after} seconds...")
+        await asyncio.sleep(e.retry_after)
+        return await send_media_group(bot, chat_id, media, message_thread_id)
+    except:
+        raise
 
 async def main():
     print("[+] Uploading to telegram")
@@ -162,12 +183,10 @@ async def main():
         print("[-] Caption is too long,so it will be sent as a separate message without caption for files")
         no_caption = True
     upload_release_files = []
-    upload_debug_files = []
 
     for index, file in enumerate(files):
         if os.path.basename(file).find("debug") != -1:
-            # If the filename contains "debug", treat it as a debug file and add caption to it
-            upload_debug_files.append(InputMediaDocument(media=open(file, "rb"), filename=os.path.basename(file), caption=f"{caption_debug if not no_caption else '<b>DEBUG Manager</b>'}", parse_mode=ParseMode.HTML))
+            # If the filename contains "debug", skip it.
             continue
         elif index == len(files) - 1:
             # Only add caption to the last file
@@ -179,17 +198,17 @@ async def main():
     print("---")
     print(caption)
     print("---")
-    print("[+] Sending")
-    if no_caption:
-        await bot.send_message(chat_id=CHAT_ID, text=caption, parse_mode=ParseMode.HTML, message_thread_id=MESSAGE_THREAD_ID, disable_web_page_preview=True)
-    if len(upload_debug_files) > 0:
-        await send_media_group(bot=bot, chat_id=CHAT_ID, media=upload_debug_files, message_thread_id=MESSAGE_THREAD_ID)
-    print("[+] Debug files uploaded,starting to upload release files")
-    if len(upload_release_files) > 0:
-        await send_media_group(bot=bot, chat_id=CHAT_ID, media=upload_release_files, message_thread_id=MESSAGE_THREAD_ID)
-    if TITLE.lower() == "manager" and (BRANCH == "main" or GITHUB_REF_TYPE == "tag"):
-        print("[+] Sending main branch updated message")
-        await bot.send_message(chat_id=CHAT_ID, text=MAIN_UPDATED_MSG, parse_mode=ParseMode.HTML, message_thread_id=DEVELOPING_THREAD_ID, disable_web_page_preview=True)
+    if TITLE.lower() == "spoofed-manager" and (BRANCH != "main" and GITHUB_REF_TYPE != "tag"):
+        print("[!] Spoofed Manager is not allowed to be uploaded for non-main branch")
+    else:
+        print("[+] Sending")
+        if no_caption:
+            await send_message(bot=bot, chat_id=CHAT_ID, text=caption, message_thread_id=MESSAGE_THREAD_ID)
+        if len(upload_release_files) > 0:
+            await send_media_group(bot=bot, chat_id=CHAT_ID, media=upload_release_files, message_thread_id=MESSAGE_THREAD_ID)
+        if TITLE.lower() == "manager" and (BRANCH == "main" or GITHUB_REF_TYPE == "tag"):
+            print("[+] Sending main branch updated message")
+            await send_message(bot=bot,chat_id=CHAT_ID, text=MAIN_UPDATED_MSG, message_thread_id=DEVELOPING_THREAD_ID)
     print("[+] Done!")
 
 if __name__ == "__main__":
