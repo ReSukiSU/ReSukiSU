@@ -6,11 +6,13 @@
 
 #include <linux/errno.h>
 #include <linux/kallsyms.h>
-#include <linux/kasan.h>
 #include <linux/kernel.h>
 #include <linux/moduleloader.h>
 #include <linux/numa.h>
 #include <linux/version.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0)
+#include <linux/kasan.h>
+#endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0) || defined(KSU_COMPAT_HAVE_SET_MEMORY_HEADER)
 #include <asm/set_memory.h>
 #else
@@ -63,6 +65,11 @@
 #define KSU_AARCH64_NOP 0xd503201f
 #define KSU_AARCH64_BTI_JC 0xd50324df
 #define KSU_AARCH64_B 0x14000000
+
+#if !defined(CONFIG_THREAD_INFO_IN_TASK) &&                                                                            \
+    (LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0) || defined(KSU_COMPAT_ARM64_THREAD_INFO_BY_SP))
+#define KSU_ARM64_THREAD_INFO_BY_SP
+#endif
 
 typedef unsigned long (*ksu_inline_arm64_clone_fn_t)(unsigned long, unsigned long, unsigned long, unsigned long,
                                                      unsigned long, unsigned long, unsigned long, unsigned long);
@@ -386,10 +393,23 @@ static inline u64 ksu_inline_get_module_alloc_base(void)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 10, 0) && !defined(KSU_COMPAT_HAVE_EXECMEM_API)
 static inline int ksu_inline_kasan_module_alloc(void *p, size_t size, gfp_t flags)
 {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 0, 0)
+    return 0;
+#else
 #ifdef KSU_COMPAT_HAVE_KASAN_ALLOC_MODULE_SHADOW
     return kasan_alloc_module_shadow(p, size, flags);
 #else
     return kasan_module_alloc(p, size);
+#endif
+#endif
+}
+
+static inline void *ksu_inline_kasan_reset_tag(void *p)
+{
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 0, 0)
+    return p;
+#else
+    return kasan_reset_tag(p);
 #endif
 }
 #endif
@@ -422,7 +442,7 @@ static void *ksu_inline_vmalloc_exec_range(size_t size, unsigned long start, uns
         return NULL;
     }
 
-    return kasan_reset_tag(p);
+    return ksu_inline_kasan_reset_tag(p);
 }
 #endif
 
@@ -503,32 +523,32 @@ static int ksu_inline_make_entry_stub(struct ksu_inline_hook *hook, void *buf)
 
     memset(buf, 0, KSU_INLINE_ENTRY_SIZE);
 
-#ifdef CONFIG_ARM64_BTI_KERNEL
-    *insn++ = KSU_AARCH64_BTI_JC;
-#endif
-
-#ifndef CONFIG_KSU_TRACEPOINT_HOOK
-#ifdef CONFIG_THREAD_INFO_IN_TASK
-    *insn++ = KSU_AARCH64_MRS_X16_SP_EL0;
-    *insn++ = KSU_AARCH64_LDR_X16_X16;
-#else
-    *insn++ = KSU_AARCH64_MOV_X16_SP;
-#endif
-    fast_branch = insn++;
-#endif
-
     hook_literal = (unsigned long)buf + 64;
     dispatcher_literal = hook_literal + sizeof(u64);
     stack_mask_literal = dispatcher_literal + sizeof(u64);
 
-#if !defined(CONFIG_KSU_TRACEPOINT_HOOK) && !defined(CONFIG_THREAD_INFO_IN_TASK)
-    ret = ksu_inline_encode_ldr_literal(17, (unsigned long)(fast_branch + 1), stack_mask_literal, fast_branch + 1);
+#ifdef CONFIG_ARM64_BTI_KERNEL
+    *insn++ = KSU_AARCH64_BTI_JC;
+#endif
+
+#ifdef CONFIG_THREAD_INFO_IN_TASK
+    // mrs x16 sp_el0
+    //
+    *insn++ = KSU_AARCH64_MRS_X16_SP_EL0;
+    *insn++ = KSU_AARCH64_LDR_X16_X16;
+#elif defined(KSU_ARM64_THREAD_INFO_BY_SP)
+    *insn++ = KSU_AARCH64_MOV_X16_SP;
+    ret = ksu_inline_encode_ldr_literal(17, (unsigned long)insn, stack_mask_literal, insn);
     if (ret)
         return ret;
-    insn = fast_branch + 2;
+    insn++;
     *insn++ = KSU_AARCH64_AND_X16_X16_X17;
     *insn++ = KSU_AARCH64_LDR_X16_X16;
+#else
+    *insn++ = KSU_AARCH64_MRS_X16_SP_EL0;
+    *insn++ = KSU_AARCH64_LDR_X16_X16;
 #endif
+    fast_branch = insn++;
 
     ret = ksu_inline_encode_ldr_literal(16, (unsigned long)insn, hook_literal, insn);
     if (ret)

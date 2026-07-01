@@ -307,7 +307,7 @@ $(info -- $(REPO_NAME)/compat: found vmflags in __vmalloc_node_range)
 ccflags-y += -DKSU_COMPAT_HAVE_VMFLAGS_IN_VMALLOC_NODE_RANGE
 endif
 
-ifeq ($(shell grep -q "kasan_alloc_module_shadow" $(srctree)/include/linux/kasan.h; echo $$?),0)
+ifeq ($(shell grep -q "kasan_alloc_module_shadow" $(srctree)/include/linux/kasan.h 2>/dev/null; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: found kasan_alloc_module_shadow)
 ccflags-y += -DKSU_COMPAT_HAVE_KASAN_ALLOC_MODULE_SHADOW
 endif

@@ -115,6 +115,9 @@ $(info -- KERNEL_VERSION: $(KERNEL_VERSION))
 $(info -- KERNEL_TYPE: $(KERNEL_TYPE))
 
 ifeq ($(CONFIG_ARM64),y)
+  ifeq ($(shell grep -Fq 'return (struct thread_info *)(sp & ~(THREAD_SIZE - 1));' $(srctree)/arch/arm64/include/asm/thread_info.h 2>/dev/null; echo $$?),0)
+    ccflags-y += -DKSU_COMPAT_ARM64_THREAD_INFO_BY_SP
+  endif
   kernelsu-objs += hook/arm64/patch_memory.o
   kernelsu-objs += hook/arm64/inline_hook.o
   kernelsu-objs += hook/arm64/inline_hook_entry.o

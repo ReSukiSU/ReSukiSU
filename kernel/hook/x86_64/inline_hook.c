@@ -6,7 +6,6 @@
 
 #include <linux/errno.h>
 #include <linux/gfp.h>
-#include <linux/kasan.h>
 #include <linux/mm.h>
 #include <linux/mutex.h>
 #include <linux/numa.h>
@@ -14,6 +13,9 @@
 #include <linux/string.h>
 #include <linux/vmalloc.h>
 #include <linux/version.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0)
+#include <linux/kasan.h>
+#endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 10, 0)
 #include <linux/execmem.h>
 #endif
@@ -26,7 +28,7 @@
 
 #define KSU_X86_64_PATCH_SIZE 12
 #define KSU_X86_64_ENTRY_SIZE 40
-#ifdef CONFIG_KASAN
+#if defined(CONFIG_KASAN) && LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0)
 #define KSU_X86_64_MODULE_ALIGN (PAGE_SIZE << KASAN_SHADOW_SCALE_SHIFT)
 #else
 #define KSU_X86_64_MODULE_ALIGN PAGE_SIZE
@@ -113,6 +115,15 @@ static unsigned long ksu_inline_get_module_load_offset(void)
 }
 #endif
 
+static inline int ksu_inline_kasan_module_alloc(void *p, size_t size)
+{
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 0, 0)
+    return 0;
+#else
+    return kasan_module_alloc(p, size);
+#endif
+}
+
 static void *ksu_inline_hook_clone_code_alloc(size_t size)
 {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 10, 0) && !defined(KSU_COMPAT_HAVE_EXECMEM_API)
@@ -128,7 +139,7 @@ static void *ksu_inline_hook_clone_code_alloc(size_t size)
     p = __vmalloc_node_range(size, KSU_X86_64_MODULE_ALIGN, MODULES_VADDR + ksu_inline_get_module_load_offset(),
                              MODULES_END, GFP_KERNEL, PAGE_KERNEL, NUMA_NO_NODE, __builtin_return_address(0));
 #endif
-    if (p && kasan_module_alloc(p, size) < 0) {
+    if (p && ksu_inline_kasan_module_alloc(p, size) < 0) {
         vfree(p);
         return NULL;
     }
