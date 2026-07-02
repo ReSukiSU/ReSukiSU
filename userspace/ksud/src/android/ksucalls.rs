@@ -87,8 +87,33 @@ pub fn is_late_load() -> bool {
     get_info().flags & uapi::KSU_GET_INFO_FLAG_LATE_LOAD_RUST != 0
 }
 
-pub fn is_uapi_version_mismatch() -> bool {
-    get_info().uapi_version != uapi::KERNEL_SU_UAPI_VERSION
+pub fn is_lkm() -> bool {
+    get_info().flags & uapi::KSU_GET_INFO_FLAG_LKM != 0
+}
+
+pub const fn uapi_version() -> u32 {
+    uapi::KERNEL_SU_UAPI_VERSION
+}
+
+pub fn runtime_mode() -> &'static str {
+    if is_late_load() {
+        "late-load"
+    } else if is_lkm() {
+        "lkm"
+    } else {
+        "built-in"
+    }
+}
+
+pub fn ensure_uapi_version_matched() -> anyhow::Result<()> {
+    let kernel_uapi = get_info().uapi_version;
+    let userspace_uapi = uapi_version();
+    if kernel_uapi != userspace_uapi {
+        bail!(
+            "UAPI version mismatch: kernel={kernel_uapi}, ksud={userspace_uapi}. Please update KernelSU!"
+        );
+    }
+    Ok(())
 }
 
 pub fn get_full_version() -> String {

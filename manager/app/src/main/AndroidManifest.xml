@@ -108,6 +108,11 @@
             android:configChanges="density|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|locale|layoutDirection|fontScale|keyboard|keyboardHidden"
             />
 
+        <activity
+            android:name=".ui.screen.themeSettings.crop.BackgroundCropActivity"
+            android:exported="false"
+            android:theme="@style/Theme.KernelSU" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

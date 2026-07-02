@@ -15,7 +15,7 @@ activity-compose = "1.13.0"
 core-splashscreen = "1.2.0"
 kotlinx-coroutines = "1.11.0"
 coil-compose = "2.7.0"
-sheets-compose-dialogs = "1.3.0"
+ucrop = "2.2.11"
 markdown = "4.6.2"
 webkit = "1.16.0"
 appiconloader-coil = "1.5.0"
@@ -75,6 +75,7 @@ dev-rikka-rikkax-parcelablelist = { module = "dev.rikka.rikkax.parcelablelist:pa
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "core-splashscreen" }
 io-coil-kt-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil-compose" }
+ucrop = { module = "com.github.yalantis:ucrop", version.ref = "ucrop" }
 
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 
@@ -84,10 +85,6 @@ androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runt
 miuix-navigation = { group = "top.yukonga.miuix.kmp", name = "miuix-navigation3-ui-android", version.ref = "miuix" }
 miuix-blur = { group = "top.yukonga.miuix.kmp", name = "miuix-blur-android", version.ref = "miuix" }
 androidx-navigationevent = { module = "androidx.navigationevent:navigationevent", version.ref = "navigationevent" }
-
-sheet-compose-dialogs-core = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "core", version.ref = "sheets-compose-dialogs" }
-sheet-compose-dialogs-list = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "list", version.ref = "sheets-compose-dialogs" }
-sheet-compose-dialogs-input = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "input", version.ref = "sheets-compose-dialogs" }
 
 markdown = { group = "io.noties.markwon", name = "core", version.ref = "markdown" }
 

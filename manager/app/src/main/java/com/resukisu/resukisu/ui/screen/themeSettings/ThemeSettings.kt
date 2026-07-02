@@ -1,14 +1,16 @@
 package com.resukisu.resukisu.ui.screen.themeSettings
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -27,10 +29,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.BlurOn
@@ -53,27 +53,26 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material.icons.rounded.Animation
 import androidx.compose.material.icons.rounded.SwapHoriz
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -94,17 +93,18 @@ import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.ui.component.ConfirmResult
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
-import com.resukisu.resukisu.ui.component.rememberCustomDialog
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumnScope
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
-import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
+import com.resukisu.resukisu.ui.component.settings.SettingsChooseDialog
+import com.resukisu.resukisu.ui.component.settings.SettingsChooseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.screen.themeSettings.component.LanguageSelectionDialog
 import com.resukisu.resukisu.ui.screen.themeSettings.component.ThemeSettingsDialogs
+import com.resukisu.resukisu.ui.screen.themeSettings.crop.BackgroundCropActivity
 import com.resukisu.resukisu.ui.screen.themeSettings.util.restartActivity
 import com.resukisu.resukisu.ui.theme.BackgroundManager
 import com.resukisu.resukisu.ui.theme.CardConfig
@@ -120,6 +120,7 @@ import com.resukisu.resukisu.ui.viewmodel.PredictiveBackAnimation
 import com.resukisu.resukisu.ui.viewmodel.PredictiveBackExitDirection
 import com.resukisu.resukisu.ui.viewmodel.SettingsUiState
 import com.resukisu.resukisu.ui.viewmodel.SettingsViewModel
+import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -148,63 +149,96 @@ fun ThemeSettingsScreen() {
     val homeUiState by homeViewModel.uiState.collectAsStateWithLifecycle()
 
     val moduleViewModel = viewModel<ModuleViewModel>(viewModelStoreOwner = ksuApp)
-    val moduleUiState by moduleViewModel.uiState.collectAsStateWithLifecycle()    
+    val moduleUiState by moduleViewModel.uiState.collectAsStateWithLifecycle()
 
-    // TODO Add In app crop as fallback
-    // 图片选择器
-    val cropImageLauncher = rememberLauncherForActivityResult(
-        object : ActivityResultContract<Uri, Uri?>() {
-            override fun createIntent(context: Context, input: Uri): Intent {
-                val tempFile = File(context.cacheDir, "background_crop_cache").apply {
-                    parentFile?.mkdirs()
-                    delete()
-                    createNewFile()
-                    deleteOnExit()
-                }
+    // Image selection and cropping
+    var pendingBackgroundImageUri by remember { mutableStateOf<Uri?>(null) }
+    var pendingExternalCropOutputUri by remember { mutableStateOf<Uri?>(null) }
+    var showCropMethodDialog by remember { mutableStateOf(false) }
 
-                context.contentResolver.openInputStream(input)?.use { inputStream ->
-                    tempFile.outputStream().use { outputStream ->
-                        inputStream.copyTo(outputStream)
-                    }
-                }
-
-                val tempUri = FileProvider.getUriForFile(
-                    context,
-                    "${context.packageName}.fileprovider",
-                    tempFile
-                )
-
-                return Intent("com.android.camera.action.CROP").apply {
-                    setDataAndType(tempUri, "image/*")
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                    putExtra("crop", "true")
-
-                    val displayMetrics = context.resources.displayMetrics
-                    val screenWidth = displayMetrics.widthPixels
-                    val screenHeight = displayMetrics.heightPixels
-
-                    putExtra("aspectX", screenWidth)
-                    putExtra("aspectY", screenHeight)
-                    putExtra("outputX", screenWidth)
-                    putExtra("outputY", screenHeight)
-
-                    putExtra("return-data", false)
-
-                    putExtra(MediaStore.EXTRA_OUTPUT, tempUri)
+    val uCropLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.let { data ->
+                UCrop.getOutput(data)?.let {
+                    settingsViewModel.handleCustomBackground(context, it)
                 }
             }
+        } else if (result.resultCode == UCrop.RESULT_ERROR) {
+            Toast.makeText(
+                context,
+                context.getString(R.string.background_crop_failed),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
 
-            override fun parseResult(
-                resultCode: Int,
-                intent: Intent?
-            ): Uri? {
-                return intent?.data
+    val externalCropLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val outputUri = pendingExternalCropOutputUri ?: result.data?.data
+            outputUri?.let {
+                settingsViewModel.handleCustomBackground(context, it)
             }
         }
-    ) { uri: Uri? ->
-        uri?.let {
-            settingsViewModel.handleCustomBackground(context, it)
+        pendingExternalCropOutputUri = null
+    }
+
+    val launchInAppCrop = { sourceUri: Uri ->
+        val outputUri = createBackgroundCropOutputUri(context, "background_crop_ucrop")
+        val (screenWidth, screenHeight) = context.backgroundCropSize()
+        val intent = Intent(context, BackgroundCropActivity::class.java).apply {
+            putExtra(UCrop.EXTRA_INPUT_URI, sourceUri)
+            putExtra(UCrop.EXTRA_OUTPUT_URI, outputUri)
+            putExtra(UCrop.EXTRA_ASPECT_RATIO_X, screenWidth.toFloat())
+            putExtra(UCrop.EXTRA_ASPECT_RATIO_Y, screenHeight.toFloat())
+            putExtra(UCrop.EXTRA_MAX_SIZE_X, screenWidth)
+            putExtra(UCrop.EXTRA_MAX_SIZE_Y, screenHeight)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        }
+
+        uCropLauncher.launch(intent)
+    }
+
+    val launchExternalCrop = { sourceUri: Uri ->
+        val uri = createBackgroundCropOutputUri(context, "background_crop_external")
+        context.contentResolver.openInputStream(sourceUri)?.use { inputStream ->
+            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+        }
+
+        val (screenWidth, screenHeight) = context.backgroundCropSize()
+        val intent = Intent("com.android.camera.action.CROP").apply {
+            setDataAndType(uri, "image/*")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            putExtra("crop", "true")
+            putExtra("aspectX", screenWidth)
+            putExtra("aspectY", screenHeight)
+            putExtra("outputX", screenWidth)
+            putExtra("outputY", screenHeight)
+            putExtra("return-data", false)
+            putExtra(MediaStore.EXTRA_OUTPUT, uri)
+        }
+
+        try {
+            if (intent.resolveActivity(context.packageManager) == null) {
+                throw ActivityNotFoundException()
+            }
+            pendingExternalCropOutputUri = uri
+            externalCropLauncher.launch(intent)
+        } catch (_: ActivityNotFoundException) {
+            pendingExternalCropOutputUri = null
+            Toast.makeText(
+                context,
+                context.getString(R.string.background_external_crop_unavailable),
+                Toast.LENGTH_SHORT
+            ).show()
+            launchInAppCrop(sourceUri)
         }
     }
 
@@ -212,9 +246,32 @@ fun ThemeSettingsScreen() {
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            cropImageLauncher.launch(uri)
+            pendingBackgroundImageUri = it
+            showCropMethodDialog = true
         }
     }
+
+    SettingsChooseDialog(
+        show = showCropMethodDialog,
+        title = stringResource(R.string.background_crop_method_title),
+        items = listOf(
+            stringResource(R.string.background_crop_method_in_app),
+            stringResource(R.string.background_crop_method_external)
+        ),
+        selectedIndex = 0,
+        onDismiss = {
+            showCropMethodDialog = false
+            pendingBackgroundImageUri = null
+        },
+        onSelectedIndexChange = { index ->
+            pendingBackgroundImageUri?.let { sourceUri ->
+                when (index) {
+                    0 -> launchInAppCrop(sourceUri)
+                    1 -> launchExternalCrop(sourceUri)
+                }
+            }
+        }
+    )
 
     // 初始化设置
     LaunchedEffect(Unit) {
@@ -294,11 +351,11 @@ fun ThemeSettingsScreen() {
                 // Predictive Back Settings
                 val transition = LocalNavAnimatedContentScope.current.transition
 
-                val predictiveBackAnimationDialog = rememberCustomDialog { dismiss ->
-                    PredictiveBackAnimationDialog(
-                        currentAnimation = settingsState.predictiveBackAnimation,
-                        onDismiss = dismiss,
-                        onSelect = { animation ->
+                SegmentedColumn(
+                    title = stringResource(R.string.predictive_back_settings)
+                ) {
+                    item {
+                        PredictiveBackAnimationWidget(settingsState) { animation ->
                             // Hey Google
                             // Why you keep playing the animation even we are already play completed?
 
@@ -310,33 +367,15 @@ fun ThemeSettingsScreen() {
                             )
 
                             settingsViewModel.setPredictiveBackAnimation(context, animation)
-
-                            dismiss()
                         }
-                    )
-                }
-
-                val predictiveBackExitDirectionDialog = rememberCustomDialog { dismiss ->
-                    PredictiveBackExitDirectionDialog(
-                        currentDirection = settingsState.predictiveBackExitDirection,
-                        onDismiss = dismiss,
-                        onSelect = { direction ->
-                            settingsViewModel.setPredictiveBackExitDirection(context, direction)
-
-                            dismiss()
-                        }
-                    )
-                }
-
-                SegmentedColumn(
-                    title = stringResource(R.string.predictive_back_settings)
-                ) {
-                    item { PredictiveBackAnimationWidget(settingsState) { predictiveBackAnimationDialog.show() } }
+                    }
                     item(
                         visible = settingsState.predictiveBackAnimation == PredictiveBackAnimation.Scale ||
                                 settingsState.predictiveBackAnimation == PredictiveBackAnimation.AOSP
                     ) {
-                        PredictiveBackAnimationDirectionWidget(settingsState) { predictiveBackExitDirectionDialog.show() }
+                        PredictiveBackAnimationDirectionWidget(settingsState) { direction ->
+                            settingsViewModel.setPredictiveBackExitDirection(context, direction)
+                        }
                     }
                 }
             }
@@ -378,128 +417,64 @@ private fun ColorSpec.SpecVersion.displayName(): String = when (this) {
     ColorSpec.SpecVersion.SPEC_2025 -> "Spec 2025"
 }
 
+private fun Context.backgroundCropSize(): Pair<Int, Int> {
+    val displayMetrics = resources.displayMetrics
+    return displayMetrics.widthPixels to displayMetrics.heightPixels
+}
+
+private fun createBackgroundCropOutputUri(context: Context, prefix: String): Uri {
+    val outputFile = File(context.cacheDir, "${prefix}_${System.currentTimeMillis()}.jpg").apply {
+        parentFile?.mkdirs()
+        delete()
+        createNewFile()
+        deleteOnExit()
+    }
+
+    return FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.fileprovider",
+        outputFile
+    )
+}
+
 @Composable
 fun PredictiveBackAnimationWidget(
     uiState: SettingsUiState,
-    onClick: () -> Unit
-) {
-    SettingsBaseWidget(
-        icon = Icons.Rounded.Animation,
-        title = stringResource(R.string.predictive_back_animation),
-        description = when (uiState.predictiveBackAnimation) {
-            PredictiveBackAnimation.None -> stringResource(R.string.predictive_back_animation_none)
-            PredictiveBackAnimation.AOSP -> stringResource(R.string.predictive_back_animation_aosp)
-            PredictiveBackAnimation.MIUIX -> stringResource(R.string.predictive_back_animation_miuix)
-            PredictiveBackAnimation.Scale -> stringResource(R.string.predictive_back_animation_scale)
-            PredictiveBackAnimation.KernelSUClassic -> stringResource(R.string.predictive_back_animation_ksu_classic)
-        },
-        onClick = {
-            onClick()
-        }
-    ) {}
-}
-
-@Composable
-fun PredictiveBackAnimationDirectionWidget(
-    uiState: SettingsUiState,
-    onClick: () -> Unit
-) {
-    SettingsBaseWidget(
-        icon = Icons.Rounded.SwapHoriz,
-        title = stringResource(R.string.predictive_back_exit_direction),
-        description = when (uiState.predictiveBackExitDirection) {
-            PredictiveBackExitDirection.FOLLOW_GESTURE -> stringResource(R.string.predictive_back_exit_direction_follow_gesture)
-            PredictiveBackExitDirection.ALWAYS_RIGHT -> stringResource(R.string.predictive_back_exit_direction_always_right)
-            PredictiveBackExitDirection.ALWAYS_LEFT -> stringResource(R.string.predictive_back_exit_direction_always_left)
-        },
-        onClick = {
-            onClick()
-        }
-    ) {}
-}
-
-@Composable
-fun PredictiveBackAnimationDialog(
-    currentAnimation: PredictiveBackAnimation,
-    onDismiss: () -> Unit,
     onSelect: (PredictiveBackAnimation) -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.predictive_back_animation_desc)) },
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                PredictiveBackAnimation.entries.forEach { animation ->
-                    val animationText = when (animation) {
-                        PredictiveBackAnimation.None -> stringResource(R.string.predictive_back_animation_none)
-                        PredictiveBackAnimation.AOSP -> stringResource(R.string.predictive_back_animation_aosp)
-                        PredictiveBackAnimation.MIUIX -> stringResource(R.string.predictive_back_animation_miuix)
-                        PredictiveBackAnimation.Scale -> stringResource(R.string.predictive_back_animation_scale)
-                        PredictiveBackAnimation.KernelSUClassic -> stringResource(R.string.predictive_back_animation_ksu_classic)
-                    }
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable { onSelect(animation) }
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = (animation == currentAnimation),
-                            onClick = { onSelect(animation) }
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(animationText)
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.close))
-            }
+    SettingsChooseWidget(
+        icon = Icons.Rounded.Animation,
+        title = stringResource(R.string.predictive_back_animation),
+        items = listOf(
+            stringResource(R.string.predictive_back_animation_none),
+            stringResource(R.string.predictive_back_animation_aosp),
+            stringResource(R.string.predictive_back_animation_miuix),
+            stringResource(R.string.predictive_back_animation_scale),
+            stringResource(R.string.predictive_back_animation_ksu_classic)
+        ),
+        selectedIndex = uiState.predictiveBackAnimation.ordinal,
+        onSelectedIndexChange = { index ->
+            PredictiveBackAnimation.entries.getOrNull(index)?.let(onSelect)
         }
     )
 }
 
 @Composable
-fun PredictiveBackExitDirectionDialog(
-    currentDirection: PredictiveBackExitDirection,
-    onDismiss: () -> Unit,
+fun PredictiveBackAnimationDirectionWidget(
+    uiState: SettingsUiState,
     onSelect: (PredictiveBackExitDirection) -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.predictive_back_exit_direction_desc)) },
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                PredictiveBackExitDirection.entries.forEach { direction ->
-                    val directionText = when (direction) {
-                        PredictiveBackExitDirection.FOLLOW_GESTURE -> stringResource(R.string.predictive_back_exit_direction_follow_gesture)
-                        PredictiveBackExitDirection.ALWAYS_RIGHT -> stringResource(R.string.predictive_back_exit_direction_always_right)
-                        PredictiveBackExitDirection.ALWAYS_LEFT -> stringResource(R.string.predictive_back_exit_direction_always_left)
-                    }
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable { onSelect(direction) }
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = (direction == currentDirection),
-                            onClick = { onSelect(direction) }
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(directionText)
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.close))
-            }
+    SettingsChooseWidget(
+        icon = Icons.Rounded.SwapHoriz,
+        title = stringResource(R.string.predictive_back_exit_direction),
+        items = listOf(
+            stringResource(R.string.predictive_back_exit_direction_follow_gesture),
+            stringResource(R.string.predictive_back_exit_direction_always_right),
+            stringResource(R.string.predictive_back_exit_direction_always_left)
+        ),
+        selectedIndex = uiState.predictiveBackExitDirection.ordinal,
+        onSelectedIndexChange = { index ->
+            PredictiveBackExitDirection.entries.getOrNull(index)?.let(onSelect)
         }
     )
 }
@@ -520,7 +495,7 @@ private fun AppearanceSettings(
 
         item {
             // 主题模式
-            SettingsDropdownWidget(
+            SettingsChooseWidget(
                 icon = Icons.Default.DarkMode,
                 title = stringResource(R.string.theme_mode),
                 items = state.themeOptions,
@@ -551,7 +526,7 @@ private fun AppearanceSettings(
         }
 
         item {
-            SettingsDropdownWidget(
+            SettingsChooseWidget(
                 icon = Icons.Filled.Style,
                 title = stringResource(R.string.dynamic_palette_style),
                 items = PaletteStyle.entries.map { it.displayName() },
@@ -566,7 +541,7 @@ private fun AppearanceSettings(
         }
 
         item {
-            SettingsDropdownWidget(
+            SettingsChooseWidget(
                 icon = Icons.Filled.DesignServices,
                 title = stringResource(R.string.dynamic_color_spec),
                 items = ColorSpec.SpecVersion.entries.map { it.displayName() },
@@ -690,7 +665,7 @@ private fun SegmentedColumnScope.hideOptionsSettings(
     moduleViewModel: ModuleViewModel,
 ) {
     item {
-        // 隐藏内核版本号
+        // 隐藏内核版本信息
         SettingsSwitchWidget(
             icon = Icons.Filled.VisibilityOff,
             title = stringResource(R.string.hide_kernel_kernelsu_version),

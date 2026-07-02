@@ -81,8 +81,6 @@ import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.quantize.QuantizerCelebi
 import com.materialkolor.score.Score
 import com.resukisu.resukisu.data.appPreferences
-import com.resukisu.resukisu.ui.theme.util.BackgroundTransformation
-import com.resukisu.resukisu.ui.theme.util.saveTransformedBackground
 import com.resukisu.resukisu.ui.util.LocalBackgroundBlurAnchor
 import com.resukisu.resukisu.ui.util.LocalBlurState
 import com.resukisu.resukisu.ui.webui.MonetColorsProvider
@@ -283,15 +281,10 @@ object BackgroundManager {
 
     fun saveAndApplyCustomBackground(
         context: Context,
-        uri: Uri,
-        transformation: BackgroundTransformation? = null
+        uri: Uri
     ) {
         try {
-            val finalUri = if (transformation != null) {
-                context.saveTransformedBackground(uri, transformation)
-            } else {
-                copyImageToInternalStorage(context, uri)
-            }
+            val finalUri = copyImageToInternalStorage(context, uri)
 
             saveBackgroundUri(context, finalUri)
             ThemeConfig.customBackgroundUri = finalUri
@@ -1429,14 +1422,12 @@ private fun SystemBarController(darkMode: Boolean) {
 // 向后兼容
 @OptIn(DelicateCoroutinesApi::class)
 fun Context.saveAndApplyCustomBackground(
-    uri: Uri,
-    transformation: BackgroundTransformation? = null
+    uri: Uri
 ) {
     GlobalScope.launch {
         BackgroundManager.saveAndApplyCustomBackground(
             this@saveAndApplyCustomBackground,
-            uri,
-            transformation
+            uri
         )
     }
 }

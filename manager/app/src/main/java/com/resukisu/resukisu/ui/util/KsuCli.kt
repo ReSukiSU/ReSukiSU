@@ -94,13 +94,13 @@ fun createRootShell(globalMnt: Boolean = false): Shell {
     }
 }
 
-fun execKsud(args: String, newShell: Boolean = false, globalMnt: Boolean = false): Boolean {
+fun execKsud(args: String, newShell: Boolean = false): Boolean {
     return if (newShell) {
-        withNewRootShell(globalMnt) {
+        withNewRootShell {
             ShellUtils.fastCmdResult(this, "${getKsuDaemonPath()} $args")
         }
     } else {
-        ShellUtils.fastCmdResult(getRootShell(globalMnt), "${getKsuDaemonPath()} $args")
+        ShellUtils.fastCmdResult(getRootShell(), "${getKsuDaemonPath()} $args")
     }
 }
 
@@ -258,7 +258,7 @@ fun runModuleAction(
 fun restoreBoot(
     onFinish: (Boolean, Int) -> Unit, onStdout: (String) -> Unit, onStderr: (String) -> Unit
 ): Boolean {
-    File(ksuApp.applicationInfo.nativeLibraryDir, "libmagiskboot.so")
+    val magiskboot = File(ksuApp.applicationInfo.nativeLibraryDir, "libmagiskboot.so")
     val result = flashWithIO(
         "${getKsuDaemonPath()} boot-restore -f",
         onStdout,
@@ -523,33 +523,21 @@ fun restartApp(packageName: String) {
     launchApp(packageName)
 }
 
-fun getSuSFSStatus(): Boolean {
-    val shell = getRootShell(true)
-    val result = shell.newJob().add("${getKsuDaemonPath()} susfs show enabled_features").exec()
-    Log.i(TAG, "susfs enabled_features result: ${result.isSuccess}, code: ${result.code}")
-    return result.isSuccess && result.code == 0
+fun getSuSFSStatus(): String {
+    val shell = getRootShell()
+    return ShellUtils.fastCmd(shell, "${getKsuDaemonPath()} susfs status").trim()
 }
 
 fun getSuSFSVersion(): String {
     val shell = getRootShell()
-    val cmd = "${getKsuDaemonPath()} susfs show version"
-    val result = shell.newJob().add(cmd).to(ArrayList<String>(), null).exec()
-    if (!result.isSuccess) return ""
-    return result.out.joinToString("\n").trim()
+    val result = ShellUtils.fastCmd(shell, "${getKsuDaemonPath()} susfs version")
+    return result
 }
 
 fun getSuSFSFeatures(): String {
     val shell = getRootShell()
-    val cmd = "${getKsuDaemonPath()} susfs show enabled_features"
+    val cmd = "${getKsuDaemonPath()} susfs features"
     return runCmd(shell, cmd)
-}
-
-fun getSuSFSSlotInfoJson(): String {
-    val shell = getRootShell()
-    val cmd = "${getKsuDaemonPath()} susfs slot_info"
-    val result = shell.newJob().add(cmd).to(ArrayList<String>(), null).exec()
-    if (!result.isSuccess) return "[]"
-    return result.out.joinToString("\n").trim().ifBlank { "[]" }
 }
 
 fun getMetaModuleImplement(): String {

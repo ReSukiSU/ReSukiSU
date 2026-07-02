@@ -14,7 +14,7 @@ mod su;
 mod sulog;
 pub mod susfs;
 #[allow(nonstandard_style, unused, unsafe_op_in_unsafe_fn)]
-mod uapi;
+pub mod uapi;
 mod umount_config;
 mod unload;
 pub mod utils;

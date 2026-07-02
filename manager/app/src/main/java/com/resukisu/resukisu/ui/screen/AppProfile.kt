@@ -69,7 +69,7 @@ import com.resukisu.resukisu.ui.component.profile.TemplateConfig
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
-import com.resukisu.resukisu.ui.component.settings.SettingsDropDownPopupMenuWidget
+import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
@@ -217,7 +217,7 @@ private fun AppProfileInner(
         }
 
         item {
-            SettingsDropDownPopupMenuWidget(
+            SettingsDropdownWidget(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 title = appGroup.mainApp.label,
                 description = appGroup.mainApp.packageName,

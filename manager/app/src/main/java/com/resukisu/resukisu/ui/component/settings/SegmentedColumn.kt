@@ -72,6 +72,7 @@ data class SegmentedItemData(
 class SegmentedColumnScope {
     val items = mutableListOf<SegmentedItemData>()
 
+    // 内部维护的嵌套上下文状态：用于无感向后代传递“顶部强制扁平”和“全局可见性遮罩”
     private var isInsideExpandableBody: Boolean = false
     private var parentVisibilityMask: Boolean = true
 
@@ -134,9 +135,6 @@ class SegmentedColumnScope {
 
 /**
  * A highly customized vertical layout group that visually splices multiple composable items together.
- *
- * You should **ONLY** use this component when every content won't change during runtime.
- * Or you should use [lazySegmentedColumn] instead.
  */
 @Composable
 fun SegmentedColumn(
@@ -204,30 +202,8 @@ fun SegmentedColumn(
                         val isDynamicDpSupported =
                             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
-                        // The shared `dpSpring` is intentionally under-damped
-                        // (dampingRatio = 0.5f) to give the segmented list its
-                        // bouncy feel, but an under-damped spring overshoots
-                        // its target on the way in. When the target is small
-                        // (0.dp for the corner-radius of a forced-flat side or
-                        // for the top padding of the first item) the overshoot
-                        // drives the animated value *negative* for a few
-                        // frames. Compose's `Modifier.padding(...)` and
-                        // `RoundedCornerShape(...)` both reject negative Dp
-                        // with `IllegalArgumentException: Padding must be
-                        // non-negative`, and that exception fires from inside
-                        // a Choreographer frame callback — i.e. it crashes
-                        // the entire manager.
-                        //
-                        // This regressed visibly on the "Sus paths" tab,
-                        // where deleting a path causes the surviving rows to
-                        // re-target their first/last paddings & radii in
-                        // quick succession. Coerce every animated Dp to
-                        // `>= 0.dp` here so an overshoot can never escape
-                        // into the modifier graph.
                         val currentTopRadius = if (isDynamicDpSupported) {
-                            animateDpAsState(targetTopRadius, dpSpring, label = "TopRadius")
-                                .value
-                                .coerceAtLeast(0.dp)
+                            animateDpAsState(targetTopRadius, dpSpring, label = "TopRadius").value
                         } else targetTopRadius
 
                         val currentBottomRadius = if (isDynamicDpSupported) {
@@ -235,9 +211,7 @@ fun SegmentedColumn(
                                 targetBottomRadius,
                                 dpSpring,
                                 label = "BottomRadius"
-                            )
-                                .value
-                                .coerceAtLeast(0.dp)
+                            ).value
                         } else targetBottomRadius
 
                         val shape = RoundedCornerShape(
@@ -250,9 +224,7 @@ fun SegmentedColumn(
                         val targetTopPadding = itemData.customTopPadding
                             ?: (if (isFirst) 0.dp else ListItemDefaults.SegmentedGap)
                         val currentTopPadding = if (isDynamicDpSupported) {
-                            animateDpAsState(targetTopPadding, dpSpring, label = "TopPadding")
-                                .value
-                                .coerceAtLeast(0.dp)
+                            animateDpAsState(targetTopPadding, dpSpring, label = "TopPadding").value
                         } else targetTopPadding
 
                         var hasFocus by remember { mutableStateOf(false) }

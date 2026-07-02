@@ -12,6 +12,7 @@ import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.getKernelVersion
 import com.resukisu.resukisu.ksuApp
+import com.resukisu.resukisu.ui.susfs.util.SuSFSManager
 import com.resukisu.resukisu.ui.util.downloader.checkNewVersion
 import com.resukisu.resukisu.ui.util.getMetaModuleImplement
 import com.resukisu.resukisu.ui.util.getModuleCount
@@ -23,7 +24,6 @@ import com.resukisu.resukisu.ui.util.getSuperuserCount
 import com.resukisu.resukisu.ui.util.getZygiskImplement
 import com.resukisu.resukisu.ui.util.isOfficialSignature
 import com.resukisu.resukisu.ui.util.isSELinuxPermissive
-import com.resukisu.resukisu.ui.util.listModules
 import com.resukisu.resukisu.ui.util.module.LatestVersionInfo
 import com.resukisu.resukisu.ui.util.rootAvailable
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +35,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
 
 data class HomeUiState(
     val systemStatus: HomeViewModel.SystemStatus = HomeViewModel.SystemStatus(),
@@ -79,9 +78,9 @@ class HomeViewModel : ViewModel() {
         val managerVersion: Triple<String, Int, Int> = Triple("", 0, 0),
         val selinuxStatus: String = "",
         val susfsEnabled: Boolean = false,
+        val susfsVersionSupported: Boolean = false,
         val susfsVersion: String = "",
         val susfsFeatures: String = "",
-        val hasEnabledThirdPartySusfsModule: Boolean = false,
         val superuserCount: Int = 0,
         val moduleCount: Int = 0,
         val managersList: Natives.ManagersList? = null,
@@ -182,24 +181,18 @@ class HomeViewModel : ViewModel() {
                     }
                 }
 
-                val hasThirdPartySusfsModule = detectEnabledThirdPartySusfsModule()
-                _uiState.update {
-                    it.copy(
-                        systemInfo = it.systemInfo.copy(
-                            hasEnabledThirdPartySusfsModule = hasThirdPartySusfsModule
-                        )
-                    )
-                }
-
                 if (!_uiState.value.isHideSusfsStatus) {
                     val susfsInfo = loadSuSFSInfo()
                     _uiState.update {
                         it.copy(
-                        systemInfo = it.systemInfo.copy(
-                            susfsEnabled = susfsInfo.first,
-                            susfsVersion = susfsInfo.second,
-                            susfsFeatures = susfsInfo.third,
-                        )
+                            systemInfo = it.systemInfo.copy(
+                                susfsEnabled = susfsInfo.first,
+                                susfsVersionSupported = susfsInfo.first && SuSFSManager.isBinaryAvailable(
+                                    context
+                                ),
+                                susfsVersion = susfsInfo.second,
+                                susfsFeatures = susfsInfo.third,
+                            )
                         )
                     }
                 }
@@ -401,7 +394,7 @@ class HomeViewModel : ViewModel() {
     private suspend fun loadSuSFSInfo(): Triple<Boolean, String, String> {
         return withContext(Dispatchers.IO) {
             val susfsEnabled = runCatching {
-                getSuSFSStatus()
+                getSuSFSStatus().equals("true", ignoreCase = true)
             }.getOrDefault(false)
 
             if (!susfsEnabled) {
@@ -418,26 +411,6 @@ class HomeViewModel : ViewModel() {
                 susfsVersion,
                 runCatching { getSuSFSFeatures() }.getOrDefault(""),
             )
-        }
-    }
-
-    private suspend fun detectEnabledThirdPartySusfsModule(): Boolean {
-        return withContext(Dispatchers.IO) {
-            runCatching {
-                val modulesJson = listModules()
-                val array = JSONArray(modulesJson)
-                for (i in 0 until array.length()) {
-                    val module = array.optJSONObject(i) ?: continue
-                    val enabled = module.optBoolean("enabled", false)
-                    if (!enabled) continue
-
-                    val id = module.optString("id", "")
-                    if (id.contains("susfs", ignoreCase = true)) {
-                        return@withContext true
-                    }
-                }
-                false
-            }.getOrDefault(false)
         }
     }
 
@@ -518,8 +491,6 @@ class HomeViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-
-
         loadingJobs.forEach { it.cancel() }
         loadingJobs.clear()
     }

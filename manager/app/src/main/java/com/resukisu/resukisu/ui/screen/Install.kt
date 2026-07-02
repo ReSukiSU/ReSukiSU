@@ -70,11 +70,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import com.maxkeppeker.sheets.core.models.base.Header
-import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
-import com.maxkeppeler.sheets.list.ListDialog
-import com.maxkeppeler.sheets.list.models.ListOption
-import com.maxkeppeler.sheets.list.models.ListSelection
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.getKernelVersion
 import com.resukisu.resukisu.ui.component.DialogHandle
@@ -82,7 +77,8 @@ import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.rememberCustomDialog
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
-import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
+import com.resukisu.resukisu.ui.component.settings.SettingsChooseDialog
+import com.resukisu.resukisu.ui.component.settings.SettingsChooseWidget
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.kernelFlash.component.SlotSelectionDialog
@@ -346,7 +342,7 @@ fun InstallScreen(
                         if (!hasCustomSelected) partitionSelectionIndex = defaultIndex
 
                         if (displayPartitions.isNotEmpty()) {
-                            SettingsDropdownWidget(
+                            SettingsChooseWidget(
                                 icon = Icons.Default.Edit,
                                 items = displayPartitions,
                                 selectedIndex = partitionSelectionIndex,
@@ -819,31 +815,22 @@ fun rememberSelectKmiDialog(onSelected: (String?) -> Unit): DialogHandle {
         val supportedKmi by produceState(initialValue = emptyList()) {
             value = getSupportedKmis()
         }
-        val options = supportedKmi.map { value ->
-            ListOption(
-                titleText = value
-            )
-        }
-
-        var selection by remember { mutableStateOf<String?>(null) }
 
         MaterialTheme(
             colorScheme = MaterialTheme.colorScheme.copy(
                 surface = MaterialTheme.colorScheme.surfaceContainerHigh
             )
         ) {
-            ListDialog(state = rememberUseCaseState(visible = true, onFinishedRequest = {
-                onSelected(selection)
-            }, onCloseRequest = {
-                dismiss()
-            }), header = Header.Default(
+            SettingsChooseDialog(
+                show = true,
                 title = stringResource(R.string.select_kmi),
-            ), selection = ListSelection.Single(
-                showRadioButtons = true,
-                options = options,
-            ) { _, option ->
-                selection = option.titleText
-            })
+                items = supportedKmi,
+                selectedIndex = -1,
+                onDismiss = dismiss,
+                onSelectedIndexChange = { index ->
+                    onSelected(supportedKmi.getOrNull(index))
+                }
+            )
         }
     }
 }

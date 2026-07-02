@@ -66,7 +66,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
-import com.resukisu.resukisu.ui.component.settings.lazySegmentedColumn
+import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Navigator
 import com.resukisu.resukisu.ui.navigation.Route
@@ -214,7 +214,7 @@ fun AppProfileTemplateScreen() {
                     Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
                 }
 
-                lazySegmentedColumn(
+                lazySegmentColumn(
                     items = uiState.templateList,
                     key = { _, app -> app.id }) { _, app ->
                     TemplateItem(app)

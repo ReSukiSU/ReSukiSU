@@ -50,7 +50,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
@@ -63,7 +62,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsTextFieldWidget(
     modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
     state: TextFieldState,
     onClick: (() -> Unit)? = null,
     title: String = "",
@@ -151,7 +149,7 @@ fun SettingsTextFieldWidget(
     SettingsBaseWidget(
         modifier = modifier,
         title = if (showTitle) title else null,
-        icon = icon,
+        icon = null,
         iconPlaceholder = false,
         leadingContent = leadingContent,
         onClick = {

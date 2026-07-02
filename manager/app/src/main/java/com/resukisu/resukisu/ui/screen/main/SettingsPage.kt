@@ -81,8 +81,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.maxkeppeker.sheets.core.models.base.IconSource
-import com.maxkeppeler.sheets.list.models.ListOption
 import com.resukisu.resukisu.BuildConfig
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
@@ -96,7 +94,7 @@ import com.resukisu.resukisu.ui.component.rememberCustomDialog
 import com.resukisu.resukisu.ui.component.rememberLoadingDialog
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
-import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
+import com.resukisu.resukisu.ui.component.settings.SettingsChooseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
@@ -213,7 +211,7 @@ fun SettingsPage(bottomPadding: Dp) {
                                     "managed" -> stringResource(id = R.string.feature_status_managed_summary)
                                     else -> stringResource(id = R.string.settings_sucompat_summary)
                                 }
-                                SettingsDropdownWidget(
+                                SettingsChooseWidget(
                                     icon = Icons.Rounded.RemoveModerator,
                                     title = stringResource(id = R.string.settings_sucompat),
                                     description = suSummary,
@@ -312,7 +310,7 @@ fun SettingsPage(bottomPadding: Dp) {
                             }
 
                             item {
-                                // 卸载模块开关
+                                // 卸载模块开�?
                                 SettingsSwitchWidget(
                                     icon = Icons.Rounded.FolderDelete,
                                     title = stringResource(id = R.string.settings_umount_modules_default),
@@ -332,7 +330,7 @@ fun SettingsPage(bottomPadding: Dp) {
                     title = stringResource(R.string.app_settings),
                     content = {
                         item {
-                            // 更新检查开关
+                            // 更新检查开�?
                             SettingsSwitchWidget(
                                 icon = Icons.Filled.Update,
                                 title = stringResource(R.string.settings_check_update),
@@ -598,14 +596,6 @@ fun rememberUninstallDialog(onSelected: (UninstallType) -> Unit): DialogHandle {
             UninstallType.PERMANENT,
             UninstallType.RESTORE_STOCK_IMAGE
         )
-        val listOptions = options.map {
-            ListOption(
-                titleText = stringResource(it.title),
-                subtitleText = if (it.message != 0) stringResource(it.message) else null,
-                icon = IconSource(it.icon)
-            )
-        }
-
         var selectedOption by remember { mutableStateOf<UninstallType?>(null) }
 
         AlertDialog(
@@ -623,7 +613,7 @@ fun rememberUninstallDialog(onSelected: (UninstallType) -> Unit): DialogHandle {
                     modifier = Modifier.padding(vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    options.forEachIndexed { index, option ->
+                    options.forEach { option ->
                         val isSelected = selectedOption == option
                         val backgroundColor = if (isSelected)
                             MaterialTheme.colorScheme.primaryContainer
@@ -657,12 +647,12 @@ fun rememberUninstallDialog(onSelected: (UninstallType) -> Unit): DialogHandle {
                                 modifier = Modifier.weight(1f)
                             ) {
                                 Text(
-                                    text = listOptions[index].titleText,
+                                    text = stringResource(option.title),
                                     style = MaterialTheme.typography.titleMedium,
                                 )
-                                listOptions[index].subtitleText?.let {
+                                if (option.message != 0) {
                                     Text(
-                                        text = it,
+                                        text = stringResource(option.message),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = if (isSelected)
                                             contentColor.copy(alpha = 0.8f)

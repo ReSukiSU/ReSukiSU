@@ -33,13 +33,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.maxkeppeker.sheets.core.models.base.Header
-import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
-import com.maxkeppeler.sheets.list.ListDialog
-import com.maxkeppeler.sheets.list.models.ListOption
-import com.maxkeppeler.sheets.list.models.ListSelection
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.data.appPreferences
+import com.resukisu.resukisu.ui.component.settings.SettingsChooseDialog
 import com.resukisu.resukisu.ui.screen.themeSettings.util.launchSystemLanguageSettings
 import com.resukisu.resukisu.ui.screen.themeSettings.util.useSystemLanguageSettings
 import com.resukisu.resukisu.ui.theme.ThemeConfig
@@ -144,40 +140,23 @@ fun LanguageSelectionDialog(
         }
 
         val currentLocale = prefs.getString("app_locale", "system") ?: "system"
-        val options = allOptions.map { (tag, displayName) ->
-            ListOption(
-                titleText = displayName,
-                selected = currentLocale == tag
-            )
-        }
-
         var selectedIndex by remember {
             mutableIntStateOf(allOptions.indexOfFirst { (tag, _) -> currentLocale == tag })
         }
 
-        ListDialog(
-            state = rememberUseCaseState(
-                visible = true,
-                onFinishedRequest = {
-                    if (selectedIndex >= 0 && selectedIndex < allOptions.size) {
-                        val newLocale = allOptions[selectedIndex].first
-                        prefs.putString("app_locale", newLocale)
-                        onLanguageSelected(newLocale)
-                    }
-                    onDismiss()
-                },
-                onCloseRequest = {
-                    onDismiss()
-                }
-            ),
-            header = Header.Default(
-                title = stringResource(R.string.settings_language),
-            ),
-            selection = ListSelection.Single(
-                showRadioButtons = true,
-                options = options
-            ) { index, _ ->
+        SettingsChooseDialog(
+            show = true,
+            title = stringResource(R.string.settings_language),
+            items = allOptions.map { (_, displayName) -> displayName },
+            selectedIndex = selectedIndex,
+            onDismiss = onDismiss,
+            onSelectedIndexChange = { index ->
                 selectedIndex = index
+                if (selectedIndex >= 0 && selectedIndex < allOptions.size) {
+                    val newLocale = allOptions[selectedIndex].first
+                    prefs.putString("app_locale", newLocale)
+                    onLanguageSelected(newLocale)
+                }
             }
         )
     }

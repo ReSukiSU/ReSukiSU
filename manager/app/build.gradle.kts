@@ -225,14 +225,11 @@ dependencies {
     implementation(libs.dev.rikka.rikkax.parcelablelist)
 
     implementation(libs.io.coil.kt.coil.compose)
+    implementation(libs.ucrop)
 
     implementation(libs.kotlinx.coroutines.core)
 
     implementation(libs.me.zhanghai.android.appiconloader.coil)
-
-    implementation(libs.sheet.compose.dialogs.core)
-    implementation(libs.sheet.compose.dialogs.list)
-    implementation(libs.sheet.compose.dialogs.input)
 
     implementation(libs.markdown)
     implementation(libs.androidx.webkit)

@@ -65,13 +65,12 @@ lz4 = "1"
 lzma-rust2 = { version = "0.15", features = ["std", "xz"] }
 ksuinit = { path = "../ksuinit" }
 adb_client = { git = "https://github.com/Kernel-SU/adb_client" }
-prop-rs-android = { git = "https://github.com/Kernel-SU/ksu_props" }
 num_enum = "0.7"
 inotify = "0.11.2"
+prop-rs-android = { git = "https://github.com/Kernel-SU/ksu_props", rev = "6f5723105d8d4cacad31d83d343defbf032c7b33" }
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
 env_logger = { version = "0.11.10", default-features = false }
-bitflags = "2.11.0"
 
 [profile.release]
 strip = true

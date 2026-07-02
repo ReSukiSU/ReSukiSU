@@ -90,6 +90,8 @@ val LocalSegmentedItemShape = compositionLocalOf<Shape> { RoundedCornerShape(16.
  * If [onClick] is not null, this also controls clickability.
  * @param isError If true, applies the error color to the description text.
  * @param selected If true, highlights the widget with a primary container background.
+ * @param renderBackgroundBlur If true, this composable will renderBackgroundBlur.
+ * @param fillMaxWidth If true, this composable will fill max width.
  * @param onClick Callback to be invoked when the widget is clicked. If null, the widget is not clickable.
  * @param onLongClick Callback to be invoked when the widget is LONG CLICKED. If null, the widget is not clickable.
  * @param clickHaptic The type of haptic feedback to perform on click. Set to null to disable.
@@ -113,6 +115,8 @@ fun SettingsBaseWidget(
     enabled: Boolean = true,
     isError: Boolean = false,
     selected: Boolean = false,
+    renderBackgroundBlur: Boolean = true,
+    fillMaxWidth: Boolean = true,
     onClick: ((Offset) -> Unit)? = null,
     onLongClick: ((Offset) -> Unit)? = null,
     clickHaptic: HapticFeedbackType? = HapticFeedbackType.ContextClick,
@@ -142,7 +146,7 @@ fun SettingsBaseWidget(
                 MaterialTheme.colorScheme.surfaceContainerHighest
             }
 
-            if (ThemeConfig.isEnableBlurExp) Color.Transparent else {
+            if (renderBackgroundBlur && ThemeConfig.isEnableBlurExp) Color.Transparent else {
                 color.copy(
                     alpha = CardConfig.cardAlpha
                 )
@@ -235,10 +239,11 @@ fun SettingsBaseWidget(
         baseShape
     }
 
-    val itemModifier = modifier
-        .fillMaxWidth()
-        .clip(clipShape)
-        .renderBackgroundBlur()
+    var itemModifier = (if (fillMaxWidth) modifier.fillMaxWidth() else modifier)
+    if (renderBackgroundBlur && ThemeConfig.isEnableBlurExp)
+        itemModifier = itemModifier
+            .clip(clipShape)
+            .renderBackgroundBlur()
 
     val finalLeadingContent: (@Composable () -> Unit)? =
         if (leadingContent == null && icon == null && !iconPlaceholder)
