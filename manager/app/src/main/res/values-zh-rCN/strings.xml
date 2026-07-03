@@ -730,4 +730,95 @@
     <string name="notification_permission_denied">下载失败，缺失通知权限</string>
     <string name="storage_permission_description">需要外部存储权限来展示下载进度</string>
     <string name="storage_permission_denied">下载失败，缺失外部存储权限</string>
+
+    <!-- SUSFS rewrite: tab titles -->
+    <string name="susfs_tab_status">状态</string>
+    <string name="susfs_tab_standard">标准功能</string>
+    <string name="susfs_tab_sus_path">SUS Path</string>
+    <string name="susfs_tab_sus_kstat">SUS Kstat</string>
+    <string name="susfs_tab_open_redirect">Open Redirect</string>
+    <string name="susfs_tab_sus_map">SUS Map</string>
+
+    <!-- SUSFS rewrite: status page -->
+    <string name="susfs_status_version">SUSFS 版本</string>
+    <string name="susfs_status_variant">变体</string>
+    <string name="susfs_status_enabled_features">启用功能</string>
+    <string name="susfs_status_no_data">无数据</string>
+    <string name="susfs_status_loading">加载中...</string>
+
+    <!-- SUSFS rewrite: standard features page -->
+    <string name="susfs_standard_logging">日志</string>
+    <string name="susfs_standard_logging_desc">启用 SUSFS 内核日志</string>
+    <string name="susfs_standard_avc_log_spoofing">AVC 日志欺骗</string>
+    <string name="susfs_standard_avc_log_spoofing_desc">欺骗 avc 日志中的 \'su\' tcontext</string>
+    <string name="susfs_standard_hide_sus_mnts">为非 SU 进程隐藏 SUS 挂载</string>
+    <string name="susfs_standard_hide_sus_mnts_desc">对非 su 进程隐藏 sus 挂载信息</string>
+    <string name="susfs_standard_uname">Uname</string>
+    <string name="susfs_standard_uname_version">Version</string>
+    <string name="susfs_standard_uname_release">Release</string>
+    <string name="susfs_standard_cmdline_or_bootconfig">Cmdline / Bootconfig</string>
+    <string name="susfs_standard_cmdline_path">伪 cmdline/bootconfig 文件路径</string>
+    <string name="susfs_standard_edit">编辑</string>
+    <string name="susfs_standard_current_value">当前值: %1$s</string>
+
+    <!-- SUSFS rewrite: entry page common -->
+    <string name="susfs_entry_import_list">导入 %1$s 列表</string>
+    <string name="susfs_entry_manual_add">手动添加条目</string>
+    <string name="susfs_entry_no_entries">无条目</string>
+    <string name="susfs_entry_detail">条目详情</string>
+    <string name="susfs_entry_delete">删除</string>
+    <string name="susfs_entry_cancel">取消</string>
+    <string name="susfs_entry_confirm">确认</string>
+    <string name="susfs_entry_add">添加</string>
+    <string name="susfs_entry_select_subtype">选择条目子类型</string>
+    <string name="susfs_entry_path_label">路径</string>
+    <string name="susfs_entry_import_hint">每行一个条目</string>
+    <string name="susfs_entry_import_success">成功导入 %1$d 项，失败 %2$d 项</string>
+    <string name="susfs_entry_import_parse_error">跳过 %1$d 行无效输入</string>
+
+    <!-- SUSFS rewrite: SUS Path page -->
+    <string name="susfs_path_subtype_path">sus_path</string>
+    <string name="susfs_path_subtype_loop">sus_path_loop</string>
+    <string name="susfs_path_is_loop">Loop</string>
+
+    <!-- SUSFS rewrite: SUS Kstat page -->
+    <string name="susfs_kstat_subtype_normal">Normal</string>
+    <string name="susfs_kstat_subtype_full_clone">FullClone</string>
+    <string name="susfs_kstat_subtype_statically">Statically</string>
+    <string name="susfs_kstat_spoof_type">Spoof Type</string>
+    <string name="susfs_kstat_statically_fields">静态字段（可选，留空使用默认值）</string>
+    <string name="susfs_kstat_field_ino">ino</string>
+    <string name="susfs_kstat_field_dev">dev</string>
+    <string name="susfs_kstat_field_nlink">nlink</string>
+    <string name="susfs_kstat_field_size">size</string>
+    <string name="susfs_kstat_field_atime">atime</string>
+    <string name="susfs_kstat_field_atime_nsec">atime_nsec</string>
+    <string name="susfs_kstat_field_mtime">mtime</string>
+    <string name="susfs_kstat_field_mtime_nsec">mtime_nsec</string>
+    <string name="susfs_kstat_field_ctime">ctime</string>
+    <string name="susfs_kstat_field_ctime_nsec">ctime_nsec</string>
+    <string name="susfs_kstat_field_blocks">blocks</string>
+    <string name="susfs_kstat_field_blksize">blksize</string>
+    <string name="susfs_kstat_import_statically_hint">每行一个路径</string>
+
+    <!-- SUSFS rewrite: Open Redirect page -->
+    <string name="susfs_redirect_target_path">目标路径</string>
+    <string name="susfs_redirect_redirected_path">重定向路径</string>
+    <string name="susfs_redirect_uid_scheme">UID Scheme</string>
+    <string name="susfs_redirect_import_hint">每行格式: target_path|redirected_path|uid_scheme_int (0-4)</string>
+    <string name="susfs_uid_scheme_non_app">NonApp</string>
+    <string name="susfs_uid_scheme_root_except_su">RootExceptSu</string>
+    <string name="susfs_uid_scheme_non_su">NonSu</string>
+    <string name="susfs_uid_scheme_unmounted_app">UnmountedApp</string>
+    <string name="susfs_uid_scheme_unmounted">Unmounted</string>
+
+    <!-- SUSFS rewrite: SUS Map page -->
+    <string name="susfs_map_subtype">sus_map</string>
+
+    <!-- SUSFS rewrite: common -->
+    <string name="susfs_refresh">刷新</string>
+    <string name="susfs_new_apply">应用</string>
+    <string name="susfs_save">保存</string>
+    <string name="susfs_operation_failed">操作失败</string>
+    <string name="susfs_operation_success">操作成功</string>
 </resources>

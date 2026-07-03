@@ -741,4 +741,95 @@ Important Note:\n
     <string name="notification_permission_denied">Download failed: Notification permission is required</string>
     <string name="storage_permission_description">Need External Storage permission to write file.</string>
     <string name="storage_permission_denied">Download failed: External Storage permission is required</string>
+
+    <!-- SUSFS rewrite: tab titles -->
+    <string name="susfs_tab_status">Status</string>
+    <string name="susfs_tab_standard">Standard</string>
+    <string name="susfs_tab_sus_path">SUS Path</string>
+    <string name="susfs_tab_sus_kstat">SUS Kstat</string>
+    <string name="susfs_tab_open_redirect">Open Redirect</string>
+    <string name="susfs_tab_sus_map">SUS Map</string>
+
+    <!-- SUSFS rewrite: status page -->
+    <string name="susfs_status_version">SUSFS Version</string>
+    <string name="susfs_status_variant">Variant</string>
+    <string name="susfs_status_enabled_features">Enabled Features</string>
+    <string name="susfs_status_no_data">No data</string>
+    <string name="susfs_status_loading">Loading...</string>
+
+    <!-- SUSFS rewrite: standard features page -->
+    <string name="susfs_standard_logging">Logging</string>
+    <string name="susfs_standard_logging_desc">Enable SUSFS kernel log</string>
+    <string name="susfs_standard_avc_log_spoofing">AVC Log Spoofing</string>
+    <string name="susfs_standard_avc_log_spoofing_desc">Spoof \'su\' tcontext in avc log</string>
+    <string name="susfs_standard_hide_sus_mnts">Hide SUS Mounts for Non-SU Procs</string>
+    <string name="susfs_standard_hide_sus_mnts_desc">Hide sus mounts from /proc/self/[mounts|mountinfo|mountstat] for non-su processes</string>
+    <string name="susfs_standard_uname">Uname</string>
+    <string name="susfs_standard_uname_version">Version</string>
+    <string name="susfs_standard_uname_release">Release</string>
+    <string name="susfs_standard_cmdline_or_bootconfig">Cmdline / Bootconfig</string>
+    <string name="susfs_standard_cmdline_path">Path to fake cmdline/bootconfig file</string>
+    <string name="susfs_standard_edit">Edit</string>
+    <string name="susfs_standard_current_value">Current: %1$s</string>
+
+    <!-- SUSFS rewrite: entry page common -->
+    <string name="susfs_entry_import_list">Import %1$s List</string>
+    <string name="susfs_entry_manual_add">Manual Add Entry</string>
+    <string name="susfs_entry_no_entries">No entries</string>
+    <string name="susfs_entry_detail">Entry Detail</string>
+    <string name="susfs_entry_delete">Delete</string>
+    <string name="susfs_entry_cancel">Cancel</string>
+    <string name="susfs_entry_confirm">Confirm</string>
+    <string name="susfs_entry_add">Add</string>
+    <string name="susfs_entry_select_subtype">Select entry subtype</string>
+    <string name="susfs_entry_path_label">Path</string>
+    <string name="susfs_entry_import_hint">One entry per line</string>
+    <string name="susfs_entry_import_success">Imported %1$d, failed %2$d</string>
+    <string name="susfs_entry_import_parse_error">Skipped %1$d invalid line(s)</string>
+
+    <!-- SUSFS rewrite: SUS Path page -->
+    <string name="susfs_path_subtype_path">sus_path</string>
+    <string name="susfs_path_subtype_loop">sus_path_loop</string>
+    <string name="susfs_path_is_loop">Loop</string>
+
+    <!-- SUSFS rewrite: SUS Kstat page -->
+    <string name="susfs_kstat_subtype_normal">Normal</string>
+    <string name="susfs_kstat_subtype_full_clone">FullClone</string>
+    <string name="susfs_kstat_subtype_statically">Statically</string>
+    <string name="susfs_kstat_spoof_type">Spoof Type</string>
+    <string name="susfs_kstat_statically_fields">Statically Fields (optional, leave blank for default)</string>
+    <string name="susfs_kstat_field_ino">ino</string>
+    <string name="susfs_kstat_field_dev">dev</string>
+    <string name="susfs_kstat_field_nlink">nlink</string>
+    <string name="susfs_kstat_field_size">size</string>
+    <string name="susfs_kstat_field_atime">atime</string>
+    <string name="susfs_kstat_field_atime_nsec">atime_nsec</string>
+    <string name="susfs_kstat_field_mtime">mtime</string>
+    <string name="susfs_kstat_field_mtime_nsec">mtime_nsec</string>
+    <string name="susfs_kstat_field_ctime">ctime</string>
+    <string name="susfs_kstat_field_ctime_nsec">ctime_nsec</string>
+    <string name="susfs_kstat_field_blocks">blocks</string>
+    <string name="susfs_kstat_field_blksize">blksize</string>
+    <string name="susfs_kstat_import_statically_hint">One path per line</string>
+
+    <!-- SUSFS rewrite: Open Redirect page -->
+    <string name="susfs_redirect_target_path">Target Path</string>
+    <string name="susfs_redirect_redirected_path">Redirected Path</string>
+    <string name="susfs_redirect_uid_scheme">UID Scheme</string>
+    <string name="susfs_redirect_import_hint">Format per line: target_path|redirected_path|uid_scheme_int (0-4)</string>
+    <string name="susfs_uid_scheme_non_app">NonApp</string>
+    <string name="susfs_uid_scheme_root_except_su">RootExceptSu</string>
+    <string name="susfs_uid_scheme_non_su">NonSu</string>
+    <string name="susfs_uid_scheme_unmounted_app">UnmountedApp</string>
+    <string name="susfs_uid_scheme_unmounted">Unmounted</string>
+
+    <!-- SUSFS rewrite: SUS Map page -->
+    <string name="susfs_map_subtype">sus_map</string>
+
+    <!-- SUSFS rewrite: common -->
+    <string name="susfs_refresh">Refresh</string>
+    <string name="susfs_new_apply">Apply</string>
+    <string name="susfs_save">Save</string>
+    <string name="susfs_operation_failed">Operation failed</string>
+    <string name="susfs_operation_success">Operation succeeded</string>
 </resources>
