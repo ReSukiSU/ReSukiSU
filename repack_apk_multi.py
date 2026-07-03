@@ -130,7 +130,7 @@ def process_single_apk(apk_path: Path, args: argparse.Namespace, out_dir: Path) 
                 str(apksigner),
                 "sign",
                 "--v1-signing-enabled",
-                "false",
+                "true",
                 "--v2-signing-enabled",
                 "true",
                 "--v3-signing-enabled",

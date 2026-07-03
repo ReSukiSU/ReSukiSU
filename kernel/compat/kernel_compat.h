@@ -104,25 +104,6 @@ static inline struct task_security_struct *selinux_cred(const struct cred *cred)
 extern void *ksu_compat_kvrealloc(const void *p, size_t oldsize, size_t newsize, gfp_t flags);
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 19, 0)
-// kernel below 4.19 maybe not have 3 helper, but impl that is very easy
-// copy from https://github.com/torvalds/linux/commit/c42b65e363ce97a828f81b59033c3558f8fa7f70
-__weak unsigned long *bitmap_alloc(unsigned int nbits, gfp_t flags)
-{
-    return kmalloc_array(BITS_TO_LONGS(nbits), sizeof(unsigned long), flags);
-}
-
-__weak unsigned long *bitmap_zalloc(unsigned int nbits, gfp_t flags)
-{
-    return bitmap_alloc(nbits, flags | __GFP_ZERO);
-}
-
-__weak void bitmap_free(const unsigned long *bitmap)
-{
-    kfree(bitmap);
-}
-#endif
-
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 15, 0)
 __weak void groups_sort(struct group_info *group_info)
 {

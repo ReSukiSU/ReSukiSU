@@ -101,7 +101,12 @@ class KernelSUApplication : Application(), ViewModelStoreOwner {
                 .build()
         )
 
-        val webroot = File(dataDir, "webroot")
+        val dataDirectory = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            dataDir
+        } else {
+            filesDir.parentFile ?: filesDir
+        }
+        val webroot = File(dataDirectory, "webroot")
         if (!webroot.exists()) {
             webroot.mkdir()
         }
