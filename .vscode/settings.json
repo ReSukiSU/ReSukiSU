@@ -1,0 +1,5 @@
+{
+    "rust-analyzer.linkedProjects": [
+        "userspace/ksud/Cargo.toml"
+    ]
+}
