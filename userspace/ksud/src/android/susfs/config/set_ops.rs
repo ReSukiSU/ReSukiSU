@@ -122,15 +122,14 @@ impl Config {
         &mut self,
         target_path: &str,
         redirected_path: &str,
-        uid_scheme: i32,
+        uid_scheme: &UidScheme,
     ) -> Result<&mut Self> {
         ensure_path_exists!(target_path);
         ensure_path_exists!(redirected_path);
-        UidScheme::try_from(uid_scheme)?;
         self.open_redirect.replace(OpenRedirectItem {
             target_path: target_path.to_string(),
             redirected_path: redirected_path.to_string(),
-            uid_scheme,
+            uid_scheme: *uid_scheme,
         });
         Ok(self)
     }

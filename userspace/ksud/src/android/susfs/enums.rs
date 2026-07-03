@@ -1,7 +1,7 @@
-use num_enum::{IntoPrimitive, TryFromPrimitive};
+use num_enum::{TryFromPrimitive};
 use serde::{Deserialize, Serialize};
 
-#[derive(PartialEq, TryFromPrimitive, IntoPrimitive)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive, Copy, Clone, Serialize, Deserialize)]
 #[repr(i32)]
 pub enum UidScheme {
     NonApp = 0,
@@ -11,10 +11,9 @@ pub enum UidScheme {
     Unmounted = 4,
 }
 
-#[derive(Serialize, Deserialize)]
-#[repr(u8)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum SusKstatType {
-    Normal = 0,
-    FullClone = 1,
-    Statically = 2,
+    Normal,
+    FullClone,
+    Statically,
 }

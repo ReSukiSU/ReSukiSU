@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
-use crate::android::susfs::{enums::SusKstatType, macros::impl_hashset_indexkey};
+use crate::android::susfs::{enums::{SusKstatType, UidScheme}, macros::impl_hashset_indexkey};
 
 pub(super) const CURRENT_VERSION: u8 = 1;
 
@@ -85,6 +85,6 @@ pub struct SusKstatStatically {
 pub struct OpenRedirectItem {
     pub target_path: String,
     pub redirected_path: String,
-    pub uid_scheme: i32,
+    pub uid_scheme: UidScheme,
 }
 impl_hashset_indexkey!(OpenRedirectItem, target_path);

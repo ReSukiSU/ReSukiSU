@@ -30,10 +30,7 @@ impl Default for SusfsOpenRedirect {
     }
 }
 
-pub fn add_open_redirect(target_path: &str, redirected_path: &str, uid_scheme: i32) -> Result<()> {
-    if UidScheme::try_from(uid_scheme).is_err() {
-        return Err(anyhow::anyhow!("uid_scheme is invalid!"));
-    }
+pub fn add_open_redirect(target_path: &str, redirected_path: &str, uid_scheme: &UidScheme) -> Result<()> {
 
     let abs_target = fs::canonicalize(target_path)?;
     let abs_redirect = fs::canonicalize(redirected_path)?;
@@ -50,7 +47,7 @@ pub fn add_open_redirect(target_path: &str, redirected_path: &str, uid_scheme: i
         &mut info.redirected_pathname,
     );
 
-    info.uid_scheme = uid_scheme;
+    info.uid_scheme = (*uid_scheme) as i32;
     info.err = ERR_CMD_NOT_SUPPORTED;
 
     communicate(CMD_SUSFS_ADD_OPEN_REDIRECT, &mut info);

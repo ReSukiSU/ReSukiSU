@@ -94,7 +94,7 @@ impl Config {
 
     pub fn apply_open_redirect(&self) -> Result<&Self> {
         apply_multiply(&self.open_redirect, |i| {
-            api::add_open_redirect(&i.target_path, &i.redirected_path, i.uid_scheme)
+            api::add_open_redirect(&i.target_path, &i.redirected_path, &i.uid_scheme)
         })
         .map(|_| self)
     }

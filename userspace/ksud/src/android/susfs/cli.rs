@@ -4,8 +4,9 @@ use std::{fmt::Display, str::FromStr};
 
 use anyhow::Result;
 use clap::{ArgAction, Args, Parser, Subcommand, error::ErrorKind};
+use num_enum::TryFromPrimitive;
 
-use crate::android::susfs::{api::prelude as api, config::model::Config, slot_info};
+use crate::android::susfs::{api::prelude as api, config::model::Config, enums::UidScheme, slot_info};
 
 #[derive(Debug, Args)]
 pub struct SusfsArgs {
@@ -426,11 +427,12 @@ pub fn run_main(args: SusfsArgs) -> Result<()> {
             redirected_path,
             uid_scheme,
         } => {
+            let uid_scheme = UidScheme::try_from_primitive(uid_scheme)?;
             if do_api {
-                api::add_open_redirect(&target_path, &redirected_path, uid_scheme)?;
+                api::add_open_redirect(&target_path, &redirected_path, &uid_scheme)?;
             }
             if do_config {
-                config.add_open_redirect(&target_path, &redirected_path, uid_scheme)?;
+                config.add_open_redirect(&target_path, &redirected_path, &uid_scheme)?;
             }
         }
         SuSFSSubCommands::DelOpenRedirect { target_path } => {
