@@ -1,6 +1,5 @@
 .idea
-CLAUDE.md
 .DS_Store
 build.sh
-AGENTS.md
 *.code-workspace
+.trae
