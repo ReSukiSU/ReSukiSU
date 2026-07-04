@@ -6,7 +6,9 @@ use anyhow::Result;
 use clap::{ArgAction, Args, Parser, Subcommand, error::ErrorKind};
 use num_enum::TryFromPrimitive;
 
-use crate::android::susfs::{api::prelude as api, config::model::Config, enums::UidScheme, slot_info};
+use crate::android::susfs::{
+    api::prelude as api, config::model::Config, enums::UidScheme, slot_info,
+};
 
 #[derive(Debug, Args)]
 pub struct SusfsArgs {

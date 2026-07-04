@@ -1,7 +1,10 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
-use crate::android::susfs::{enums::{SusKstatType, UidScheme}, macros::impl_hashset_indexkey};
+use crate::android::susfs::{
+    enums::{SusKstatType, UidScheme},
+    macros::impl_hashset_indexkey,
+};
 
 pub(super) const CURRENT_VERSION: u8 = 1;
 

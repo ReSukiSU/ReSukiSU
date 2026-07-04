@@ -30,8 +30,11 @@ impl Default for SusfsOpenRedirect {
     }
 }
 
-pub fn add_open_redirect(target_path: &str, redirected_path: &str, uid_scheme: &UidScheme) -> Result<()> {
-
+pub fn add_open_redirect(
+    target_path: &str,
+    redirected_path: &str,
+    uid_scheme: &UidScheme,
+) -> Result<()> {
     let abs_target = fs::canonicalize(target_path)?;
     let abs_redirect = fs::canonicalize(redirected_path)?;
 

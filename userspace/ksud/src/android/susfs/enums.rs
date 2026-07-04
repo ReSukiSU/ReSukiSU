@@ -1,4 +1,4 @@
-use num_enum::{TryFromPrimitive};
+use num_enum::TryFromPrimitive;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive, Copy, Clone, Serialize, Deserialize)]
