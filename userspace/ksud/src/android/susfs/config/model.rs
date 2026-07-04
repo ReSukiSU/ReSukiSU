@@ -6,7 +6,7 @@ use crate::android::susfs::{
     macros::impl_hashset_indexkey,
 };
 
-pub(super) const CURRENT_VERSION: u8 = 1;
+pub(super) const CURRENT_VERSION: u8 = 2;
 
 #[derive(Deserialize)]
 pub(super) struct VersionProbe {

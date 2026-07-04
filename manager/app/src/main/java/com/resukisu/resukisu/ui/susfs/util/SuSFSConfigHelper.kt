@@ -29,7 +29,7 @@ object SuSFSConfigHelper {
     const val SUSFS_CONFIG_PATH = "/data/adb/ksu/.susfs.json"
 
     // 当前配置版本，对应 Rust model.rs 中的 CURRENT_VERSION
-    const val CURRENT_VERSION: Int = 1
+    const val CURRENT_VERSION: Int = 2
 
     // Gson 实例，用于 JSON 序列化/反序列化
     private val gson: Gson = GsonBuilder()
