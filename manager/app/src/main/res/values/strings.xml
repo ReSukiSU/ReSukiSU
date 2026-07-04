@@ -786,6 +786,8 @@ Important Note:\n
     <string name="susfs_entry_import_hint">One entry per line</string>
     <string name="susfs_entry_import_success">Imported %1$d, failed %2$d</string>
     <string name="susfs_entry_import_parse_error">Skipped %1$d invalid line(s)</string>
+    <string name="susfs_entry_import_from_file">Import from file</string>
+    <string name="susfs_entry_import_file_failed">Failed to read file</string>
 
     <!-- SUSFS rewrite: SUS Path page -->
     <string name="susfs_path_subtype_path">sus_path</string>

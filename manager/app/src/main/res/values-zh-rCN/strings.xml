@@ -775,6 +775,8 @@
     <string name="susfs_entry_import_hint">每行一个条目</string>
     <string name="susfs_entry_import_success">成功导入 %1$d 项，失败 %2$d 项</string>
     <string name="susfs_entry_import_parse_error">跳过 %1$d 行无效输入</string>
+    <string name="susfs_entry_import_from_file">从文件导入</string>
+    <string name="susfs_entry_import_file_failed">读取文件失败</string>
 
     <!-- SUSFS rewrite: SUS Path page -->
     <string name="susfs_path_subtype_path">sus_path</string>

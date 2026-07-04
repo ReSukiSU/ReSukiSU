@@ -1,11 +1,17 @@
 package com.resukisu.resukisu.ui.susfs.component
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -16,7 +22,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -24,14 +32,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.util.LocalSnackbarHost
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * 空状态显示组件
@@ -70,6 +84,7 @@ fun EmptyStateCard(
  * 批量导入对话框
  *
  * 提供多行文本输入，确认时按行分割、trim、过滤空行后回调。
+ * 同时支持通过"从文件导入"按钮选择文本文件，将其内容填充到输入框中，便于预览/编辑后再确认。
  *
  * @param showDialog 是否显示
  * @param title 对话框标题
@@ -88,6 +103,33 @@ fun BatchImportDialog(
     isLoading: Boolean = false
 ) {
     var inputText by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val snackbarHost = LocalSnackbarHost.current
+    val scope = rememberCoroutineScope()
+
+    val fileReadFailedMsg = stringResource(R.string.susfs_entry_import_file_failed)
+    val importFromFileLabel = stringResource(R.string.susfs_entry_import_from_file)
+
+    val pickFileLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri?.let {
+            scope.launch {
+                val content = withContext(Dispatchers.IO) {
+                    runCatching {
+                        context.contentResolver.openInputStream(it)?.use { stream ->
+                            stream.bufferedReader().readText()
+                        } ?: ""
+                    }.getOrDefault("")
+                }
+                if (content.isNotEmpty()) {
+                    inputText = if (inputText.isBlank()) content else "${inputText.trim()}\n$content"
+                } else {
+                    snackbarHost.showSnackbar(fileReadFailedMsg)
+                }
+            }
+        }
+    }
 
     if (showDialog) {
         AlertDialog(
@@ -114,6 +156,23 @@ fun BatchImportDialog(
                         singleLine = false,
                         shape = RoundedCornerShape(8.dp)
                     )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        OutlinedButton(
+                            onClick = { pickFileLauncher.launch(arrayOf("text/plain", "*/*")) },
+                            enabled = !isLoading,
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.UploadFile,
+                                contentDescription = null,
+                                modifier = Modifier.padding(end = 4.dp)
+                            )
+                            Text(importFromFileLabel)
+                        }
+                    }
                 }
             },
             confirmButton = {
