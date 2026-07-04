@@ -17,7 +17,6 @@ import com.resukisu.resukisu.ui.util.downloader.checkNewVersion
 import com.resukisu.resukisu.ui.util.getMetaModuleImplement
 import com.resukisu.resukisu.ui.util.getModuleCount
 import com.resukisu.resukisu.ui.util.getSELinuxStatus
-import com.resukisu.resukisu.ui.util.getSuSFSStatus
 import com.resukisu.resukisu.ui.util.getSuperuserCount
 import com.resukisu.resukisu.ui.util.getZygiskImplement
 import com.resukisu.resukisu.ui.util.isOfficialSignature
@@ -391,9 +390,7 @@ class HomeViewModel : ViewModel() {
     private suspend fun loadSuSFSInfo(): Triple<Boolean, String, String> {
         return withContext(Dispatchers.IO) {
             val susfsVersion = runCatching { SuSFSConfigHelper.showVersion() }.getOrDefault("")
-            val susfsEnabled = susfsVersion.isNotEmpty() || runCatching {
-                getSuSFSStatus().equals("true", ignoreCase = true)
-            }.getOrDefault(false)
+            val susfsEnabled = susfsVersion.isNotEmpty()
 
             if (!susfsEnabled) {
                 return@withContext Triple(false, "", "")

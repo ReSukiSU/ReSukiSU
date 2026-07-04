@@ -523,23 +523,6 @@ fun restartApp(packageName: String) {
     launchApp(packageName)
 }
 
-fun getSuSFSStatus(): String {
-    val shell = getRootShell()
-    return ShellUtils.fastCmd(shell, "${getKsuDaemonPath()} susfs status").trim()
-}
-
-fun getSuSFSVersion(): String {
-    val shell = getRootShell()
-    val result = ShellUtils.fastCmd(shell, "${getKsuDaemonPath()} susfs version")
-    return result
-}
-
-fun getSuSFSFeatures(): String {
-    val shell = getRootShell()
-    val cmd = "${getKsuDaemonPath()} susfs features"
-    return runCmd(shell, cmd)
-}
-
 fun getMetaModuleImplement(): String {
     try {
         val metaModuleProp = SuFile.open("/data/adb/metamodule/module.prop")
