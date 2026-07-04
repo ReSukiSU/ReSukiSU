@@ -32,7 +32,9 @@ impl Config {
         let version = version.trim();
         let release = release.trim();
 
-        if !is_valid_uname_version(version) || !is_valid_uname_release(release) {
+        if !((version == "default" || is_valid_uname_version(version))
+            && (release == "default" || is_valid_uname_release(release)))
+        {
             bail!(
                 "Uname version ({}) or release ({}) is not valid!",
                 version,

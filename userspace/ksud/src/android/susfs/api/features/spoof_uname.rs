@@ -1,4 +1,4 @@
-use anyhow::{Result, anyhow};
+use anyhow::{Result, bail};
 
 use crate::android::susfs::{
     api::{
@@ -33,11 +33,11 @@ pub fn set_uname(version: &str, release: &str) -> Result<()> {
     if !((version_str == "default" || is_valid_uname_version(version_str))
         && (release_str == "default" || is_valid_uname_release(release_str)))
     {
-        return Err(anyhow!(
+        bail!(
             "Uname version ({}) or release ({}) invalid!",
             version_str,
             release_str
-        ));
+        );
     }
 
     // ksud stores spoof_version as the visible uname/release value and spoof_release
