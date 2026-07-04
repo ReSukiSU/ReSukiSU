@@ -50,7 +50,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -642,7 +641,6 @@ fun SusPathTab(
 ) {
     val snackbarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     var entries by remember { mutableStateOf<Set<SusPathItem>>(emptySet()) }
     var isLoading by remember { mutableStateOf(false) }
@@ -680,6 +678,7 @@ fun SusPathTab(
     val operationFailedMsg = stringResource(R.string.susfs_operation_failed)
     val pathImportTitle = stringResource(R.string.susfs_entry_import_list, "sus_path")
     val loopImportTitle = stringResource(R.string.susfs_entry_import_list, "sus_path_loop")
+    val importSuccessTemplate = stringResource(R.string.susfs_entry_import_success)
 
     LazyColumn(
         modifier = Modifier
@@ -745,7 +744,7 @@ fun SusPathTab(
                 SuSFSConfigHelper.refreshConfig()
                 entries = SuSFSConfigHelper.getSusPaths()
                 snackbarHost.showSnackbar(
-                    context.getString(R.string.susfs_entry_import_success, success, failed)
+                    importSuccessTemplate.format(success, failed)
                 )
                 isLoading = false
             }
@@ -770,7 +769,7 @@ fun SusPathTab(
                 SuSFSConfigHelper.refreshConfig()
                 entries = SuSFSConfigHelper.getSusPaths()
                 snackbarHost.showSnackbar(
-                    context.getString(R.string.susfs_entry_import_success, success, failed)
+                    importSuccessTemplate.format(success, failed)
                 )
                 isLoading = false
             }
@@ -864,7 +863,6 @@ fun SusKstatTab(
 ) {
     val snackbarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     var entries by remember { mutableStateOf<Set<SusKstatItem>>(emptySet()) }
     var isLoading by remember { mutableStateOf(false) }
@@ -934,6 +932,7 @@ fun SusKstatTab(
     val fieldCtimeNsecLabel = stringResource(R.string.susfs_kstat_field_ctime_nsec)
     val fieldBlocksLabel = stringResource(R.string.susfs_kstat_field_blocks)
     val fieldBlksizeLabel = stringResource(R.string.susfs_kstat_field_blksize)
+    val importSuccessTemplate = stringResource(R.string.susfs_entry_import_success)
 
     LazyColumn(
         modifier = Modifier
@@ -1009,7 +1008,7 @@ fun SusKstatTab(
                 SuSFSConfigHelper.refreshConfig()
                 entries = SuSFSConfigHelper.getSusKstats()
                 snackbarHost.showSnackbar(
-                    context.getString(R.string.susfs_entry_import_success, success, failed)
+                    importSuccessTemplate.format(success, failed)
                 )
                 isLoading = false
             }
@@ -1036,7 +1035,7 @@ fun SusKstatTab(
                 SuSFSConfigHelper.refreshConfig()
                 entries = SuSFSConfigHelper.getSusKstats()
                 snackbarHost.showSnackbar(
-                    context.getString(R.string.susfs_entry_import_success, success, failed)
+                    importSuccessTemplate.format(success, failed)
                 )
                 isLoading = false
             }
@@ -1062,7 +1061,7 @@ fun SusKstatTab(
                 SuSFSConfigHelper.refreshConfig()
                 entries = SuSFSConfigHelper.getSusKstats()
                 snackbarHost.showSnackbar(
-                    context.getString(R.string.susfs_entry_import_success, success, failed)
+                    importSuccessTemplate.format(success, failed)
                 )
                 isLoading = false
             }
@@ -1238,7 +1237,6 @@ fun OpenRedirectTab(
 ) {
     val snackbarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     var entries by remember { mutableStateOf<Set<OpenRedirectItem>>(emptySet()) }
     var isLoading by remember { mutableStateOf(false) }
@@ -1285,6 +1283,8 @@ fun OpenRedirectTab(
     val noEntriesMsg = stringResource(R.string.susfs_entry_no_entries)
     val operationFailedMsg = stringResource(R.string.susfs_operation_failed)
     val importTitle = stringResource(R.string.susfs_entry_import_list, "open_redirect")
+    val importSuccessTemplate = stringResource(R.string.susfs_entry_import_success)
+    val importParseErrorTemplate = stringResource(R.string.susfs_entry_import_parse_error)
     val selectedUidLabel = uidSchemeOptions.first { it.first == manualUidScheme }.second
 
     LazyColumn(
@@ -1359,11 +1359,11 @@ fun OpenRedirectTab(
                 SuSFSConfigHelper.refreshConfig()
                 entries = SuSFSConfigHelper.getOpenRedirects()
                 snackbarHost.showSnackbar(
-                    context.getString(R.string.susfs_entry_import_success, success, failed)
+                    importSuccessTemplate.format(success, failed)
                 )
                 if (skipped > 0) {
                     snackbarHost.showSnackbar(
-                        context.getString(R.string.susfs_entry_import_parse_error, skipped)
+                        importParseErrorTemplate.format(skipped)
                     )
                 }
                 isLoading = false
@@ -1497,7 +1497,6 @@ fun SusMapTab(
 ) {
     val snackbarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     var entries by remember { mutableStateOf<Set<String>>(emptySet()) }
     var isLoading by remember { mutableStateOf(false) }
@@ -1528,6 +1527,7 @@ fun SusMapTab(
     val noEntriesMsg = stringResource(R.string.susfs_entry_no_entries)
     val operationFailedMsg = stringResource(R.string.susfs_operation_failed)
     val importTitle = stringResource(R.string.susfs_entry_import_list, "sus_map")
+    val importSuccessTemplate = stringResource(R.string.susfs_entry_import_success)
 
     LazyColumn(
         modifier = Modifier
@@ -1585,7 +1585,7 @@ fun SusMapTab(
                 SuSFSConfigHelper.refreshConfig()
                 entries = SuSFSConfigHelper.getSusMaps()
                 snackbarHost.showSnackbar(
-                    context.getString(R.string.susfs_entry_import_success, success, failed)
+                    importSuccessTemplate.format(success, failed)
                 )
                 isLoading = false
             }
