@@ -12,14 +12,12 @@ import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.getKernelVersion
 import com.resukisu.resukisu.ksuApp
-import com.resukisu.resukisu.ui.susfs.util.SuSFSManager
+import com.resukisu.resukisu.ui.susfs.util.SuSFSConfigHelper
 import com.resukisu.resukisu.ui.util.downloader.checkNewVersion
 import com.resukisu.resukisu.ui.util.getMetaModuleImplement
 import com.resukisu.resukisu.ui.util.getModuleCount
 import com.resukisu.resukisu.ui.util.getSELinuxStatus
-import com.resukisu.resukisu.ui.util.getSuSFSFeatures
 import com.resukisu.resukisu.ui.util.getSuSFSStatus
-import com.resukisu.resukisu.ui.util.getSuSFSVersion
 import com.resukisu.resukisu.ui.util.getSuperuserCount
 import com.resukisu.resukisu.ui.util.getZygiskImplement
 import com.resukisu.resukisu.ui.util.isOfficialSignature
@@ -183,13 +181,12 @@ class HomeViewModel : ViewModel() {
 
                 if (!_uiState.value.isHideSusfsStatus) {
                     val susfsInfo = loadSuSFSInfo()
+                    val supportsSuSFSConfig = susfsInfo.first
                     _uiState.update {
                         it.copy(
                             systemInfo = it.systemInfo.copy(
                                 susfsEnabled = susfsInfo.first,
-                                susfsVersionSupported = susfsInfo.first && SuSFSManager.isBinaryAvailable(
-                                    context
-                                ),
+                                susfsVersionSupported = supportsSuSFSConfig,
                                 susfsVersion = susfsInfo.second,
                                 susfsFeatures = susfsInfo.third,
                             )
@@ -393,7 +390,8 @@ class HomeViewModel : ViewModel() {
 
     private suspend fun loadSuSFSInfo(): Triple<Boolean, String, String> {
         return withContext(Dispatchers.IO) {
-            val susfsEnabled = runCatching {
+            val susfsVersion = runCatching { SuSFSConfigHelper.showVersion() }.getOrDefault("")
+            val susfsEnabled = susfsVersion.isNotEmpty() || runCatching {
                 getSuSFSStatus().equals("true", ignoreCase = true)
             }.getOrDefault(false)
 
@@ -401,15 +399,10 @@ class HomeViewModel : ViewModel() {
                 return@withContext Triple(false, "", "")
             }
 
-            val susfsVersion = runCatching { getSuSFSVersion() }.getOrDefault("")
-            if (susfsVersion.isEmpty()) {
-                return@withContext Triple(true, "", "")
-            }
-
             Triple(
                 true,
                 susfsVersion,
-                runCatching { getSuSFSFeatures() }.getOrDefault(""),
+                runCatching { SuSFSConfigHelper.showEnabledFeatures() }.getOrDefault(""),
             )
         }
     }
