@@ -305,7 +305,7 @@
     <string name="menu_options">Tuỳ chọn Menu</string>
     <string name="sort_options">Sắp xếp theo</string>
     <string name="app_categories">Lựa chọn loại ứng dụng</string>
-    <string name="susfs_config_title">Cấu hình SuSFS</string>
+    <string name="susfs_config_title">SUSFS</string>
     <string name="susfs_config_description">Mô tả cấu hình</string>
     <string name="susfs_config_description_text">Tính năng này cho phép bạn tùy chỉnh giá trị SuSFS Uname và Giả mạo thời gian xây dựng. Nhập các giá trị bạn muốn đặt và nhấp vào \"Áp dụng\" để có hiệu lực</string>
     <string name="susfs_uname_label">Giá trị Uname</string>
@@ -317,7 +317,7 @@
     <string name="susfs_reset_to_default">Reset về Default</string>
     <string name="susfs_apply">Áp dụng</string>
     <string name="susfs_reset_confirm_title">Xác nhận Đặt lại</string>
-    <string name="susfs_config_setting_title">Cấu hình SuSFS</string>
+    <string name="susfs_config_setting_title">SUSFS</string>
     <string name="susfs_autostart_title">Tự động khởi động</string>
     <string name="susfs_autostart_description">Tự động áp dụng tất cả các cấu hình không phải mặc định khi khởi động lại</string>
     <string name="susfs_autostart_requirement">Cấu hình cần được thêm vào để kích hoạt</string>

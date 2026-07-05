@@ -416,7 +416,7 @@
     <string name="menu_options">Menu Options</string>
     <string name="sort_options">Sort by</string>
     <string name="app_categories">Application Type Selection</string>
-    <string name="susfs_config_title">SuSFS Configuration</string>
+    <string name="susfs_config_title">SUSFS</string>
     <string name="susfs_config_description">Configuration Description</string>
     <string name="susfs_config_description_text">This feature allows you to customize the SuSFS uname value and build time spoofing. Enter the values you want to set and click Apply to take effect</string>
     <string name="susfs_uname_label">Uname Value</string>
@@ -428,7 +428,7 @@
     <string name="susfs_reset_to_default">Reset to Default</string>
     <string name="susfs_apply">Apply</string>
     <string name="susfs_reset_confirm_title">Confirm Reset</string>
-    <string name="susfs_config_setting_title">SuSFS Configuration</string>
+    <string name="susfs_config_setting_title">SUSFS</string>
     <string name="susfs_autostart_title">Auto Start</string>
     <string name="susfs_autostart_description">Automatically apply all non-default configurations on reboot</string>
     <string name="susfs_autostart_requirement">Configuration needs to be added to enable</string>
@@ -798,5 +798,7 @@ Important Note:\n
     <string name="susfs_backup_selected_file">Selected: %1$s</string>
     <string name="susfs_backup_export_label">Export</string>
     <string name="susfs_backup_import_label">Import</string>
+    <string name="susfs_backup_restore_default">Restore Default</string>
+    <string name="susfs_backup_restore_default_desc">Delete .susfs.json and clear the cache</string>
     <string name="susfs_backup_default_filename">susfs_backup.json</string>
 </resources>

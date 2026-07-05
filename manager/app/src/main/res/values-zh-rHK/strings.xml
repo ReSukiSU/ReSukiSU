@@ -366,7 +366,7 @@
     <string name="menu_options">選單選項</string>
     <string name="sort_options">排序方式</string>
     <string name="app_categories">應用程式類型選擇</string>
-    <string name="susfs_config_title">SuSFS 設定</string>
+    <string name="susfs_config_title">SUSFS</string>
     <string name="susfs_config_description">設定說明</string>
     <string name="susfs_config_description_text">此功能允許您自訂 SuSFS 嘅 uname 值和構建時間偽裝。輸入您想要設定嘅值，點擊套用即可生效</string>
     <string name="susfs_uname_label">Uname 值</string>
@@ -378,7 +378,7 @@
     <string name="susfs_reset_to_default">還原為預設值</string>
     <string name="susfs_apply">套用</string>
     <string name="susfs_reset_confirm_title">確認還原</string>
-    <string name="susfs_config_setting_title">SuSFS 設定</string>
+    <string name="susfs_config_setting_title">SUSFS</string>
     <string name="susfs_autostart_title">開機自啟動</string>
     <string name="susfs_autostart_description">重新啟動時自動套用所有非預設設定</string>
     <string name="susfs_autostart_requirement">需要添加設定後才能啟用</string>

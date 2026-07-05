@@ -16,8 +16,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,8 +23,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -73,26 +69,26 @@ import kotlinx.coroutines.launch
  * 状态总览标签页
  *
  * 展示 SUSFS 的版本、变体与已启用功能。
- * 状态信息通过 SuSFSConfigHelper 缓存，刷新按钮可强制重新读取。
+ * 状态信息通过 SuSFSConfigHelper 缓存，页面级刷新会强制重新读取。
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun StatusTab(
     nestedScrollConnection: NestedScrollConnection,
-    topPadding: Dp
+    topPadding: Dp,
+    refreshToken: Int
 ) {
     var statusInfo by remember { mutableStateOf(SuSFSStatusInfo("", "", "")) }
     var isLoading by remember { mutableStateOf(true) }
-    val scope = rememberCoroutineScope()
 
     suspend fun loadStatus(forceRefresh: Boolean = false) {
         statusInfo = SuSFSConfigHelper.loadStatusInfo(forceRefresh)
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(refreshToken) {
         isLoading = true
         try {
-            loadStatus()
+            loadStatus(forceRefresh = refreshToken > 0)
         } finally {
             isLoading = false
         }
@@ -105,35 +101,6 @@ fun StatusTab(
     ) {
         item {
             Spacer(Modifier.height(topPadding))
-        }
-
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = {
-                        scope.launch {
-                            isLoading = true
-                            try {
-                                loadStatus(forceRefresh = true)
-                            } finally {
-                                isLoading = false
-                            }
-                        }
-                    },
-                    enabled = !isLoading
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = stringResource(R.string.susfs_refresh)
-                    )
-                }
-            }
         }
 
         if (isLoading) {
@@ -191,7 +158,8 @@ fun StatusTab(
 @Composable
 fun StandardFeaturesTab(
     nestedScrollConnection: NestedScrollConnection,
-    topPadding: Dp
+    topPadding: Dp,
+    refreshToken: Int
 ) {
     val snackbarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
@@ -207,7 +175,7 @@ fun StandardFeaturesTab(
 
     val operationFailedMsg = stringResource(R.string.susfs_operation_failed)
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(refreshToken) {
         isLoading = true
         try {
             config = SuSFSConfigHelper.loadConfig()
@@ -475,7 +443,8 @@ fun StandardFeaturesTab(
 @Composable
 fun SusPathTab(
     nestedScrollConnection: NestedScrollConnection,
-    topPadding: Dp
+    topPadding: Dp,
+    refreshToken: Int
 ) {
     val snackbarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
@@ -495,7 +464,7 @@ fun SusPathTab(
     val subtypeLoop = stringResource(R.string.susfs_path_subtype_loop)
     val subtypes = listOf(subtypePath, subtypeLoop)
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(refreshToken) {
         entries = SuSFSConfigHelper.loadConfig().sus_path
     }
 
@@ -709,7 +678,8 @@ fun SusPathTab(
 @Composable
 fun SusKstatTab(
     nestedScrollConnection: NestedScrollConnection,
-    topPadding: Dp
+    topPadding: Dp,
+    refreshToken: Int
 ) {
     val snackbarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
@@ -743,7 +713,7 @@ fun SusKstatTab(
     val subtypeStatically = stringResource(R.string.susfs_kstat_subtype_statically)
     val subtypes = listOf(subtypeNormal, subtypeFullClone, subtypeStatically)
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(refreshToken) {
         entries = SuSFSConfigHelper.loadConfig().sus_kstat
     }
 
@@ -1094,7 +1064,8 @@ fun SusKstatTab(
 @Composable
 fun OpenRedirectTab(
     nestedScrollConnection: NestedScrollConnection,
-    topPadding: Dp
+    topPadding: Dp,
+    refreshToken: Int
 ) {
     val snackbarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
@@ -1122,7 +1093,7 @@ fun OpenRedirectTab(
         UidScheme.Unmounted to stringResource(R.string.susfs_uid_scheme_unmounted)
     )
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(refreshToken) {
         entries = SuSFSConfigHelper.loadConfig().open_redirect
     }
 
@@ -1367,7 +1338,8 @@ fun OpenRedirectTab(
 @Composable
 fun SusMapTab(
     nestedScrollConnection: NestedScrollConnection,
-    topPadding: Dp
+    topPadding: Dp,
+    refreshToken: Int
 ) {
     val snackbarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
@@ -1384,7 +1356,7 @@ fun SusMapTab(
     val subtypeSusMap = stringResource(R.string.susfs_map_subtype)
     val subtypes = listOf(subtypeSusMap)
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(refreshToken) {
         entries = SuSFSConfigHelper.loadConfig().sus_map
     }
 
@@ -1547,6 +1519,7 @@ fun SusMapTab(
  * 提供导出/导入 .susfs.json 配置文件的功能：
  *   - 导出：通过 SAF CreateDocument 选择目标文件，直接复制当前配置文件
  *   - 导入：通过 SAF OpenDocument 选择备份文件，确认后校验版本并替换当前配置
+ *   - 恢复默认：删除 .susfs.json 并清空配置缓存
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1569,11 +1542,15 @@ fun BackupRestoreTab(
     val exportFailedMsg = stringResource(R.string.susfs_backup_export_failed)
     val importSuccessMsg = stringResource(R.string.susfs_backup_import_success)
     val importFailedMsg = stringResource(R.string.susfs_backup_import_failed)
+    val restoreDefaultTitle = stringResource(R.string.susfs_backup_restore_default)
+    val restoreDefaultDesc = stringResource(R.string.susfs_backup_restore_default_desc)
     val confirmTitle = stringResource(R.string.susfs_backup_import_confirm_title)
     val confirmMsg = stringResource(R.string.susfs_backup_import_confirm_message)
     val defaultFilename = stringResource(R.string.susfs_backup_default_filename)
     val importLabel = stringResource(R.string.susfs_backup_import_label)
     val cancelLabel = stringResource(R.string.susfs_entry_cancel)
+    val operationSuccessMsg = stringResource(R.string.susfs_operation_success)
+    val operationFailedMsg = stringResource(R.string.susfs_operation_failed)
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
@@ -1629,6 +1606,22 @@ fun BackupRestoreTab(
                         enabled = !isLoading,
                         onClick = {
                             importLauncher.launch(arrayOf("application/json", "*/*"))
+                        }
+                    )
+                }
+                item {
+                    SettingsJumpPageWidget(
+                        iconPlaceholder = false,
+                        title = restoreDefaultTitle,
+                        description = restoreDefaultDesc,
+                        enabled = !isLoading,
+                        onClick = {
+                            scope.launch {
+                                isLoading = true
+                                val ok = SuSFSConfigHelper.restoreDefaultConfig()
+                                snackbarHost.showSnackbar(if (ok) operationSuccessMsg else operationFailedMsg)
+                                isLoading = false
+                            }
                         }
                     )
                 }

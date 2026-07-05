@@ -11,9 +11,13 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LargeFlexibleTopAppBar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
@@ -23,12 +27,17 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
@@ -65,6 +74,8 @@ fun SuSFSConfigScreen() {
     val snackBarHost = LocalSnackbarHost.current
     val topAppBarState = rememberTopAppBarState()
     val coroutineScope = rememberCoroutineScope()
+    var refreshToken by remember { mutableStateOf(0) }
+    var isRefreshing by remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
 
     val tabTitles = listOf(
@@ -94,6 +105,27 @@ fun SuSFSConfigScreen() {
                                 navigator.pop()
                             }
                         )
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                coroutineScope.launch {
+                                    isRefreshing = true
+                                    try {
+                                        SuSFSConfigHelper.refreshConfig()
+                                        refreshToken += 1
+                                    } finally {
+                                        isRefreshing = false
+                                    }
+                                }
+                            },
+                            enabled = !isRefreshing
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Refresh,
+                                contentDescription = stringResource(R.string.susfs_refresh)
+                            )
+                        }
                     },
                     colors = TopAppBarDefaults.topAppBarColors().copy(
                         containerColor =
@@ -160,12 +192,12 @@ fun SuSFSConfigScreen() {
                 modifier = Modifier.fillMaxSize()
             ) { page ->
                 when (page) {
-                    0 -> StatusTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding())
-                    1 -> StandardFeaturesTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding())
-                    2 -> SusPathTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding())
-                    3 -> SusKstatTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding())
-                    4 -> OpenRedirectTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding())
-                    5 -> SusMapTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding())
+                    0 -> StatusTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
+                    1 -> StandardFeaturesTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
+                    2 -> SusPathTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
+                    3 -> SusKstatTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
+                    4 -> OpenRedirectTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
+                    5 -> SusMapTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
                     6 -> BackupRestoreTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding())
                 }
             }

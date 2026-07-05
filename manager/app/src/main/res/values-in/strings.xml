@@ -305,7 +305,7 @@
     <string name="menu_options">Opsi Menu</string>
     <string name="sort_options">Urut berdasarkan</string>
     <string name="app_categories">Pilihan Jenis Aplikasi</string>
-    <string name="susfs_config_title">Konfigurasi SuSFS</string>
+    <string name="susfs_config_title">SUSFS</string>
     <string name="susfs_config_description">Deskripsi Konfigurasi</string>
     <string name="susfs_config_description_text">Fitur ini memungkinkan Anda menyesuaikan nilai uname SuSFS dan spoofing waktu build. Masukkan nilai yang ingin Anda atur lalu klik Terapkan untuk memproses perubahan.</string>
     <string name="susfs_uname_label">Nilai Uname</string>
@@ -317,7 +317,7 @@
     <string name="susfs_reset_to_default">Setel Ulang ke Default</string>
     <string name="susfs_apply">Terapkan</string>
     <string name="susfs_reset_confirm_title">Konfirmasi Setel Ulang</string>
-    <string name="susfs_config_setting_title">Konfigurasi SUSFS</string>
+    <string name="susfs_config_setting_title">SUSFS</string>
     <string name="susfs_autostart_title">Mulai Otomatis</string>
     <string name="susfs_autostart_description">Terapkan semua konfigurasi non-default secara otomatis saat mulai ulang</string>
     <string name="susfs_autostart_requirement">Perlu tambahan konfigurasi untuk mengaktifkan</string>

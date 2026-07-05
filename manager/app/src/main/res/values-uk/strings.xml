@@ -399,7 +399,7 @@
     <string name="menu_options">Опції меню</string>
     <string name="sort_options">Сортувати за</string>
     <string name="app_categories">Вибір типу додатку</string>
-    <string name="susfs_config_title">Налаштування SuSFS</string>
+    <string name="susfs_config_title">SUSFS</string>
     <string name="susfs_config_description">Опис налаштувань</string>
     <string name="susfs_config_description_text">Ця функція дозволяє налаштовувати підміну значення uname та часу збірки SuSFS. Введіть потрібні значення та натисніть \"Застосувати\", щоб вони набули чинності.</string>
     <string name="susfs_uname_label">Значення Uname</string>
@@ -411,7 +411,7 @@
     <string name="susfs_reset_to_default">Скинути до замовчування</string>
     <string name="susfs_apply">Застосувати</string>
     <string name="susfs_reset_confirm_title">Підтвердити скидання</string>
-    <string name="susfs_config_setting_title">Налаштування SuSFS</string>
+    <string name="susfs_config_setting_title">SUSFS</string>
     <string name="susfs_autostart_title">Автозапуск</string>
     <string name="susfs_autostart_description">Автоматично застосовувати всі нестандартні конфігурації при перезавантаженні</string>
     <string name="susfs_autostart_requirement">Для ввімкнення потрібно додати конфігурацію</string>

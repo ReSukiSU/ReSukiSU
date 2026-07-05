@@ -305,7 +305,7 @@
     <string name="menu_options">メニューのオプション</string>
     <string name="sort_options">並べ替え</string>
     <string name="app_categories">アプリタイプを選択</string>
-    <string name="susfs_config_title">SuSFS の構成</string>
+    <string name="susfs_config_title">SUSFS</string>
     <string name="susfs_config_description">構成の説明</string>
     <string name="susfs_config_description_text">この機能を使用すると SuSFS の uname の値とビルド日時の偽装をカスタマイズできます。設定する値を入力後に「適用」をタップで有効になります。</string>
     <string name="susfs_uname_label">uname の値</string>
@@ -317,7 +317,7 @@
     <string name="susfs_reset_to_default">デフォルトにリセット</string>
     <string name="susfs_apply">適用</string>
     <string name="susfs_reset_confirm_title">リセットを確認</string>
-    <string name="susfs_config_setting_title">SuSFS の構成</string>
+    <string name="susfs_config_setting_title">SUSFS</string>
     <string name="susfs_autostart_title">自動起動</string>
     <string name="susfs_autostart_description">システムの起動時に自動で uname の構成を適用する</string>
     <string name="susfs_autostart_requirement">有効化するには uname を構成するかパスを追加する必要があります</string>

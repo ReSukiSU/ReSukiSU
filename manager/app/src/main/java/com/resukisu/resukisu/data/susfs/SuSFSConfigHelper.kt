@@ -106,6 +106,22 @@ object SuSFSConfigHelper {
         return loadConfig()
     }
 
+    suspend fun restoreDefaultConfig(): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val configFile = SuFile.open(SUSFS_CONFIG_PATH)
+            if (configFile.exists() && !configFile.delete()) {
+                Log.e(TAG, "Failed to delete SUSFS config file")
+                return@withContext false
+            }
+
+            cachedConfig = null
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to restore default SUSFS config", e)
+            false
+        }
+    }
+
     suspend fun loadStatusInfo(forceRefresh: Boolean = false): SuSFSStatusInfo {
         if (!forceRefresh) {
             cachedStatusInfo?.let { return it }

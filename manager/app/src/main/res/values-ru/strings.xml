@@ -391,7 +391,7 @@
     <string name="menu_options">Настройки списка</string>
     <string name="sort_options">Сортировка</string>
     <string name="app_categories">Выбор типа приложения</string>
-    <string name="susfs_config_title">Конфигурация SuSFS</string>
+    <string name="susfs_config_title">SUSFS</string>
     <string name="susfs_config_description">Описание конфигурации</string>
     <string name="susfs_config_description_text">Эта функция позволяет вам настраивать переменную uname для SuSFS. Впишите значение и нажмите \"Применить\" для изменения.</string>
     <string name="susfs_uname_label">Значение uname</string>
@@ -403,7 +403,7 @@
     <string name="susfs_reset_to_default">Значение по умолчанию</string>
     <string name="susfs_apply">Применить</string>
     <string name="susfs_reset_confirm_title">Подтвердить сброс</string>
-    <string name="susfs_config_setting_title">Конфигурация SuSFS</string>
+    <string name="susfs_config_setting_title">SUSFS</string>
     <string name="susfs_autostart_title">Автозапуск</string>
     <string name="susfs_autostart_description">Автоматически применять все конфигурации не по умолчанию при перезагрузке</string>
     <string name="susfs_autostart_requirement">Для включения необходимо добавить конфигурацию</string>

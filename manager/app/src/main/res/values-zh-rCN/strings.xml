@@ -412,7 +412,7 @@
     <string name="menu_options">菜单选项</string>
     <string name="sort_options">排序方式</string>
     <string name="app_categories">应用类型选择</string>
-    <string name="susfs_config_title">SuSFS 配置</string>
+    <string name="susfs_config_title">SUSFS</string>
     <string name="susfs_config_description">配置说明</string>
     <string name="susfs_config_description_text">此功能允许您自定义 SuSFS 的 uname 值和构建时间伪装。输入您想要设置的值，点击应用即可生效</string>
     <string name="susfs_uname_label">Uname 值</string>
@@ -424,7 +424,7 @@
     <string name="susfs_reset_to_default">重置为默认值</string>
     <string name="susfs_apply">应用</string>
     <string name="susfs_reset_confirm_title">确认重置</string>
-    <string name="susfs_config_setting_title">SuSFS 配置</string>
+    <string name="susfs_config_setting_title">SUSFS</string>
     <string name="susfs_autostart_title">开机自启动</string>
     <string name="susfs_autostart_description">重启时自动应用所有非默认配置</string>
     <string name="susfs_autostart_requirement">需要添加配置后才能启用</string>
@@ -787,5 +787,7 @@
     <string name="susfs_backup_selected_file">已选择：%1$s</string>
     <string name="susfs_backup_export_label">导出</string>
     <string name="susfs_backup_import_label">导入</string>
+    <string name="susfs_backup_restore_default">恢复默认</string>
+    <string name="susfs_backup_restore_default_desc">删除 .susfs.json 并清空缓存</string>
     <string name="susfs_backup_default_filename">susfs_backup.json</string>
 </resources>

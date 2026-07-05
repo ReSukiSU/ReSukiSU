@@ -301,7 +301,7 @@
     <string name="menu_options">메뉴 옵션</string>
     <string name="sort_options">정렬 기준</string>
     <string name="app_categories">앱 유형 선택</string>
-    <string name="susfs_config_title">SuSFS 구성</string>
+    <string name="susfs_config_title">SUSFS</string>
     <string name="susfs_config_description">구성 설명</string>
     <string name="susfs_config_description_text">이 기능을 통해 SuSFS uname 값과 빌드 날짜 스푸핑을 사용자 지정할 수 있습니다. 설정할 값을 입력하고 적용을 누르세요.</string>
     <string name="susfs_uname_label">Uname 값</string>
@@ -313,7 +313,7 @@
     <string name="susfs_reset_to_default">기본값으로 초기화</string>
     <string name="susfs_apply">적용</string>
     <string name="susfs_reset_confirm_title">초기화 확인</string>
-    <string name="susfs_config_setting_title">SuSFS 구성</string>
+    <string name="susfs_config_setting_title">SUSFS</string>
     <string name="susfs_autostart_title">자동 시작</string>
     <string name="susfs_autostart_description">다시 시작할 때 기본값이 아닌 모든 구성을 자동으로 적용합니다.</string>
     <string name="susfs_autostart_requirement">활성화하려면 구성을 추가해야 합니다.</string>

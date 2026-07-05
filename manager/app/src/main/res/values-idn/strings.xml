@@ -303,7 +303,7 @@ Tanamkan: Secara permanen memasang ke sistem</string>
     <string name="menu_options">Opsi Menu</string>
     <string name="sort_options">Urutkan Berdasarkan</string>
     <string name="app_categories">Pilih Jenis Aplikasi</string>
-    <string name="susfs_config_title">Konfigurasi SuSFS</string>
+    <string name="susfs_config_title">SUSFS</string>
     <string name="susfs_config_description">Deskripsi Konfigurasi</string>
     <string name="susfs_config_description_text">Fitur ini memungkinkan Anda untuk mengonfigurasi spoofing nilai uname dan waktu build SuSFS. Masukkan nilai yang diinginkan dan klik \"Terapkan\" agar berlaku.</string>
     <string name="susfs_uname_label">Nilai Uname</string>
@@ -315,7 +315,7 @@ Tanamkan: Secara permanen memasang ke sistem</string>
     <string name="susfs_reset_to_default">Atur Ulang ke Bawaan</string>
     <string name="susfs_apply">Terapkan</string>
     <string name="susfs_reset_confirm_title">Konfirmasi Atur Ulang</string>
-    <string name="susfs_config_setting_title">Konfigurasi SuSFS</string>
+    <string name="susfs_config_setting_title">SUSFS</string>
     <string name="susfs_autostart_title">Mulai Otomatis</string>
     <string name="susfs_autostart_description">Secara otomatis menerapkan semua konfigurasi non-bawaan saat reboot</string>
     <string name="susfs_autostart_requirement">Perlu menambahkan konfigurasi untuk mengaktifkan</string>

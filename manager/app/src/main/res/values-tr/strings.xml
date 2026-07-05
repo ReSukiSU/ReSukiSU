@@ -365,7 +365,7 @@
     <string name="menu_options">Menü Seçenekleri</string>
     <string name="sort_options">Sıralama Seçenekleri</string>
     <string name="app_categories">Uygulama Türü Seçimi</string>
-    <string name="susfs_config_title">SuSFS Yapılandırması</string>
+    <string name="susfs_config_title">SUSFS</string>
     <string name="susfs_config_description">Yapılandırma Açıklaması</string>
     <string name="susfs_config_description_text">Bu özellik, SuSFS uname değerini ve build time spoofing\'i özelleştirmenize olanak tanır. Ayarlamak istediğiniz değerleri girin ve uygulayın.</string>
     <string name="susfs_uname_label">Uname Değeri</string>
@@ -377,7 +377,7 @@
     <string name="susfs_reset_to_default">Varsayılana Sıfırla</string>
     <string name="susfs_apply">Uygula</string>
     <string name="susfs_reset_confirm_title">Sıfırlamayı Onayla</string>
-    <string name="susfs_config_setting_title">SuSFS Yapılandırması</string>
+    <string name="susfs_config_setting_title">SUSFS</string>
     <string name="susfs_autostart_title">Otomatik Başlat</string>
     <string name="susfs_autostart_description">Yeniden başlatma sırasında tüm varsayılan olmayan yapılandırmaları otomatik olarak uygula</string>
     <string name="susfs_autostart_requirement">Etkinleştirmek için yapılandırma eklenmesi gerekiyor</string>
