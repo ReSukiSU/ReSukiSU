@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.data.susfs.OpenRedirectItem
-import com.resukisu.resukisu.data.susfs.SuSFSConfig
 import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.data.susfs.SuSFSStatusInfo
 import com.resukisu.resukisu.data.susfs.SusKstatItem
@@ -164,7 +163,16 @@ fun StandardFeaturesTab(
     val snackbarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
 
-    var config by remember { mutableStateOf<SuSFSConfig?>(null) }
+    var hasLoadedConfig by remember { mutableStateOf(false) }
+    var loggingEnabled by remember { mutableStateOf(false) }
+    var avcLogSpoofingEnabled by remember { mutableStateOf(false) }
+    var hideSusMntsEnabled by remember { mutableStateOf(false) }
+    var loggingBusy by remember { mutableStateOf(false) }
+    var avcLogSpoofingBusy by remember { mutableStateOf(false) }
+    var hideSusMntsBusy by remember { mutableStateOf(false) }
+    var unameVersion by remember { mutableStateOf("default") }
+    var unameRelease by remember { mutableStateOf("default") }
+    var cmdlineOrBootconfig by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
 
     var showUnameDialog by remember { mutableStateOf(false) }
@@ -178,13 +186,110 @@ fun StandardFeaturesTab(
     LaunchedEffect(refreshToken) {
         isLoading = true
         try {
-            config = SuSFSConfigHelper.loadConfig()
+            val config = SuSFSConfigHelper.loadConfig()
+            loggingEnabled = config.logging
+            avcLogSpoofingEnabled = config.avc_log_spoofing
+            hideSusMntsEnabled = config.hide_sus_mnts_for_non_su_procs
+            unameVersion = config.uname.version
+            unameRelease = config.uname.release
+            cmdlineOrBootconfig = config.cmdline_or_bootconfig
+            hasLoadedConfig = true
         } finally {
             isLoading = false
         }
     }
 
-    val currentConfig = config
+    val handleLoggingChange: (Boolean) -> Unit = remember(scope, snackbarHost, operationFailedMsg) {
+        { newValue: Boolean ->
+            scope.launch {
+                loggingBusy = true
+                try {
+                    val ok = SuSFSConfigHelper.enableLog(newValue)
+                    if (ok) {
+                        loggingEnabled = newValue
+                    } else {
+                        snackbarHost.showSnackbar(operationFailedMsg)
+                    }
+                } finally {
+                    loggingBusy = false
+                }
+            }
+        }
+    }
+
+    val handleAvcLogSpoofingChange: (Boolean) -> Unit =
+        remember(scope, snackbarHost, operationFailedMsg) {
+            { newValue: Boolean ->
+                scope.launch {
+                    avcLogSpoofingBusy = true
+                    try {
+                        val ok = SuSFSConfigHelper.enableAvcLogSpoofing(newValue)
+                        if (ok) {
+                            avcLogSpoofingEnabled = newValue
+                        } else {
+                            snackbarHost.showSnackbar(operationFailedMsg)
+                        }
+                    } finally {
+                        avcLogSpoofingBusy = false
+                    }
+                }
+            }
+        }
+
+    val handleHideSusMntsChange: (Boolean) -> Unit =
+        remember(scope, snackbarHost, operationFailedMsg) {
+            { newValue: Boolean ->
+                scope.launch {
+                    hideSusMntsBusy = true
+                    try {
+                        val ok = SuSFSConfigHelper.hideSusMntsForNonSuProcs(newValue)
+                        if (ok) {
+                            hideSusMntsEnabled = newValue
+                        } else {
+                            snackbarHost.showSnackbar(operationFailedMsg)
+                        }
+                    } finally {
+                        hideSusMntsBusy = false
+                    }
+                }
+            }
+        }
+
+    val handleUnameSave: () -> Unit = remember(scope, snackbarHost, operationFailedMsg) {
+        {
+            val v = unameVersionInput.trim()
+            val r = unameReleaseInput.trim()
+            scope.launch {
+                isLoading = true
+                val ok = SuSFSConfigHelper.setUname(v, r)
+                if (ok) {
+                    unameVersion = v
+                    unameRelease = r
+                    showUnameDialog = false
+                } else {
+                    snackbarHost.showSnackbar(operationFailedMsg)
+                }
+                isLoading = false
+            }
+        }
+    }
+
+    val handleCmdlineSave: () -> Unit = remember(scope, snackbarHost, operationFailedMsg) {
+        {
+            val p = cmdlineInput.trim()
+            scope.launch {
+                isLoading = true
+                val ok = SuSFSConfigHelper.setCmdlineOrBootconfig(p)
+                if (ok) {
+                    cmdlineOrBootconfig = p
+                    showCmdlineDialog = false
+                } else {
+                    snackbarHost.showSnackbar(operationFailedMsg)
+                }
+                isLoading = false
+            }
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -196,7 +301,7 @@ fun StandardFeaturesTab(
                 Spacer(Modifier.height(topPadding))
             }
 
-            if (currentConfig != null) {
+            if (hasLoadedConfig) {
                 item {
                     SegmentedColumn {
                         item {
@@ -204,20 +309,9 @@ fun StandardFeaturesTab(
                                 iconPlaceholder = false,
                                 title = stringResource(R.string.susfs_standard_logging),
                                 description = stringResource(R.string.susfs_standard_logging_desc),
-                                checked = currentConfig.logging,
-                                enabled = !isLoading,
-                                onCheckedChange = { newValue ->
-                                    scope.launch {
-                                        isLoading = true
-                                        val ok = SuSFSConfigHelper.enableLog(newValue)
-                                        if (ok) {
-                                            config = config?.copy(logging = newValue)
-                                        } else {
-                                            snackbarHost.showSnackbar(operationFailedMsg)
-                                        }
-                                        isLoading = false
-                                    }
-                                }
+                                checked = loggingEnabled,
+                                enabled = !isLoading && !loggingBusy,
+                                onCheckedChange = handleLoggingChange
                             )
                         }
 
@@ -226,20 +320,9 @@ fun StandardFeaturesTab(
                                 iconPlaceholder = false,
                                 title = stringResource(R.string.susfs_standard_avc_log_spoofing),
                                 description = stringResource(R.string.susfs_standard_avc_log_spoofing_desc),
-                                checked = currentConfig.avc_log_spoofing,
-                                enabled = !isLoading,
-                                onCheckedChange = { newValue ->
-                                    scope.launch {
-                                        isLoading = true
-                                        val ok = SuSFSConfigHelper.enableAvcLogSpoofing(newValue)
-                                        if (ok) {
-                                            config = config?.copy(avc_log_spoofing = newValue)
-                                        } else {
-                                            snackbarHost.showSnackbar(operationFailedMsg)
-                                        }
-                                        isLoading = false
-                                    }
-                                }
+                                checked = avcLogSpoofingEnabled,
+                                enabled = !isLoading && !avcLogSpoofingBusy,
+                                onCheckedChange = handleAvcLogSpoofingChange
                             )
                         }
 
@@ -248,20 +331,9 @@ fun StandardFeaturesTab(
                                 iconPlaceholder = false,
                                 title = stringResource(R.string.susfs_standard_hide_sus_mnts),
                                 description = stringResource(R.string.susfs_standard_hide_sus_mnts_desc),
-                                checked = currentConfig.hide_sus_mnts_for_non_su_procs,
-                                enabled = !isLoading,
-                                onCheckedChange = { newValue ->
-                                    scope.launch {
-                                        isLoading = true
-                                        val ok = SuSFSConfigHelper.hideSusMntsForNonSuProcs(newValue)
-                                        if (ok) {
-                                            config = config?.copy(hide_sus_mnts_for_non_su_procs = newValue)
-                                        } else {
-                                            snackbarHost.showSnackbar(operationFailedMsg)
-                                        }
-                                        isLoading = false
-                                    }
-                                }
+                                checked = hideSusMntsEnabled,
+                                enabled = !isLoading && !hideSusMntsBusy,
+                                onCheckedChange = handleHideSusMntsChange
                             )
                         }
 
@@ -271,12 +343,12 @@ fun StandardFeaturesTab(
                                 title = stringResource(R.string.susfs_standard_uname),
                                 description = stringResource(
                                     R.string.susfs_standard_current_value,
-                                    "${currentConfig.uname.version} / ${currentConfig.uname.release}"
+                                    "$unameVersion / $unameRelease"
                                 ),
                                 enabled = !isLoading,
                                 onClick = {
-                                    unameVersionInput = currentConfig.uname.version
-                                    unameReleaseInput = currentConfig.uname.release
+                                    unameVersionInput = unameVersion
+                                    unameReleaseInput = unameRelease
                                     showUnameDialog = true
                                 }
                             )
@@ -288,11 +360,11 @@ fun StandardFeaturesTab(
                                 title = stringResource(R.string.susfs_standard_cmdline_or_bootconfig),
                                 description = stringResource(
                                     R.string.susfs_standard_current_value,
-                                    currentConfig.cmdline_or_bootconfig.ifBlank { "—" }
+                                    cmdlineOrBootconfig.ifBlank { "—" }
                                 ),
                                 enabled = !isLoading,
                                 onClick = {
-                                    cmdlineInput = currentConfig.cmdline_or_bootconfig
+                                    cmdlineInput = cmdlineOrBootconfig
                                     showCmdlineDialog = true
                                 }
                             )
@@ -306,7 +378,7 @@ fun StandardFeaturesTab(
             }
         }
 
-        if (isLoading && currentConfig == null) {
+        if (isLoading && !hasLoadedConfig) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -347,21 +419,7 @@ fun StandardFeaturesTab(
                 },
                 confirmButton = {
                     TextButton(
-                        onClick = {
-                            val v = unameVersionInput.trim()
-                            val r = unameReleaseInput.trim()
-                            scope.launch {
-                                isLoading = true
-                                val ok = SuSFSConfigHelper.setUname(v, r)
-                                if (ok) {
-                                    config = SuSFSConfigHelper.refreshConfig()
-                                    showUnameDialog = false
-                                } else {
-                                    snackbarHost.showSnackbar(operationFailedMsg)
-                                }
-                                isLoading = false
-                            }
-                        },
+                        onClick = handleUnameSave,
                         enabled = !isLoading
                     ) {
                         Text(stringResource(R.string.susfs_save))
@@ -398,20 +456,7 @@ fun StandardFeaturesTab(
                 },
                 confirmButton = {
                     TextButton(
-                        onClick = {
-                            val p = cmdlineInput.trim()
-                            scope.launch {
-                                isLoading = true
-                                val ok = SuSFSConfigHelper.setCmdlineOrBootconfig(p)
-                                if (ok) {
-                                    config = SuSFSConfigHelper.refreshConfig()
-                                    showCmdlineDialog = false
-                                } else {
-                                    snackbarHost.showSnackbar(operationFailedMsg)
-                                }
-                                isLoading = false
-                            }
-                        },
+                        onClick = handleCmdlineSave,
                         enabled = !isLoading
                     ) {
                         Text(stringResource(R.string.susfs_save))
