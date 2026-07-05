@@ -17,6 +17,10 @@ struct SusfsSpoofCmdlineOrBootconfig {
 }
 
 pub fn set_cmdline_or_bootconfig(path: &str) -> Result<()> {
+    if path.is_empty() {
+        return Ok(());
+    }
+
     let abs_path = fs::canonicalize(path)?;
     let content = fs::read(&abs_path)?;
     if content.len() >= SUSFS_FAKE_CMDLINE_OR_BOOTCONFIG_SIZE {

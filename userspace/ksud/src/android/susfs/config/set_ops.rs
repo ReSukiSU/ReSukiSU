@@ -8,7 +8,9 @@ use anyhow::{Result, bail};
 
 impl Config {
     pub fn set_cmdline_or_bootconfig(&mut self, path: &str) -> Result<&mut Self> {
-        ensure_path_exists!(path);
+        if !path.is_empty() {
+            ensure_path_exists!(path);
+        }
         self.cmdline_or_bootconfig = path.to_string();
         Ok(self)
     }
