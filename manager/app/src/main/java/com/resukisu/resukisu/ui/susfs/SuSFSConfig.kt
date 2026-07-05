@@ -33,6 +33,7 @@ import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
+import com.resukisu.resukisu.ui.susfs.component.BackupRestoreTab
 import com.resukisu.resukisu.ui.susfs.component.OpenRedirectTab
 import com.resukisu.resukisu.ui.susfs.component.SusKstatTab
 import com.resukisu.resukisu.ui.susfs.component.SusMapTab
@@ -72,7 +73,8 @@ fun SuSFSConfigScreen() {
         R.string.susfs_tab_sus_path,
         R.string.susfs_tab_sus_kstat,
         R.string.susfs_tab_open_redirect,
-        R.string.susfs_tab_sus_map
+        R.string.susfs_tab_sus_map,
+        R.string.susfs_tab_backup_restore
     ).map { stringResource(it) }
     val pagerState = rememberPagerState(pageCount = { tabTitles.size })
 
@@ -164,6 +166,7 @@ fun SuSFSConfigScreen() {
                     3 -> SusKstatTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding())
                     4 -> OpenRedirectTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding())
                     5 -> SusMapTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding())
+                    6 -> BackupRestoreTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding())
                 }
             }
         }

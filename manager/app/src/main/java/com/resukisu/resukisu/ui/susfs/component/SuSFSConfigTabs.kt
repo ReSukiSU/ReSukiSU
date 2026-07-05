@@ -1,6 +1,8 @@
 package com.resukisu.resukisu.ui.susfs.component
 
-import androidx.compose.foundation.clickable
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,21 +12,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -36,7 +30,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -55,72 +48,32 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.ui.susfs.util.OpenRedirectItem
-import com.resukisu.resukisu.ui.susfs.util.SuSFSConfig
-import com.resukisu.resukisu.ui.susfs.util.SuSFSConfigHelper
-import com.resukisu.resukisu.ui.susfs.util.SusKstatItem
-import com.resukisu.resukisu.ui.susfs.util.SusPathItem
-import com.resukisu.resukisu.ui.susfs.util.UidScheme
+import com.resukisu.resukisu.data.susfs.OpenRedirectItem
+import com.resukisu.resukisu.data.susfs.SuSFSConfig
+import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
+import com.resukisu.resukisu.data.susfs.SuSFSStatusInfo
+import com.resukisu.resukisu.data.susfs.SusKstatItem
+import com.resukisu.resukisu.data.susfs.SusPathItem
+import com.resukisu.resukisu.data.susfs.UidScheme
+import com.resukisu.resukisu.ui.component.BatchImportDialog
+import com.resukisu.resukisu.ui.component.EmptyStateCard
+import com.resukisu.resukisu.ui.component.EntryDetailDialog
+import com.resukisu.resukisu.ui.component.ManualAddDialog
+import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
+import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
+import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
+import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
+import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
-// ==================== 通用骨架组件与占位 Tab（Task 5 新增） ====================
-
-/**
- * 条目页通用骨架组件
- *
- * 用于 SUS Path / SUS Kstat / Open Redirect / SUS Map 等以"条目列表"为主的标签页。
- * 提供统一的滚动行为、顶部留白、固定头部区与空状态展示。
- *
- * @param nestedScrollConnection 由主框架传入的嵌套滚动连接，用于与 TopBar 联动
- * @param topPadding 顶部留白高度（通常为 innerPadding.calculateTopPadding()）
- * @param pinnedHeader 固定条目区，作为 LazyColumn 的头部内容（如说明卡片、操作按钮等）
- * @param emptyText 列表为空时显示的提示文案
- * @param items 列表项数据
- * @param key 列表项 key 计算函数，用于稳定项身份
- * @param itemContent 单个列表项的渲染逻辑
- */
-@Composable
-fun EntryListPageScaffold(
-    nestedScrollConnection: NestedScrollConnection,
-    topPadding: Dp,
-    pinnedHeader: LazyListScope.() -> Unit,
-    emptyText: String,
-    items: List<Any>,
-    key: ((Any) -> Any)? = null,
-    itemContent: @Composable (Any) -> Unit
-) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .nestedScroll(nestedScrollConnection)
-    ) {
-        item {
-            Spacer(Modifier.height(topPadding))
-        }
-        pinnedHeader()
-        if (items.isEmpty()) {
-            item {
-                EmptyStateCard(message = emptyText)
-            }
-        } else {
-            items(items, key = key) { entry ->
-                itemContent(entry)
-            }
-        }
-    }
-}
-
-// ==================== 占位 Tab 组件（后续任务填充） ====================
+// ==================== StatusTab ====================
 
 /**
  * 状态总览标签页
  *
  * 展示 SUSFS 的版本、变体与已启用功能。
- * 三个 show 接口通过 coroutineScope + async 并发调用，awaitAll 等待全部完成。
+ * 状态信息通过 SuSFSConfigHelper 缓存，刷新按钮可强制重新读取。
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -128,29 +81,18 @@ fun StatusTab(
     nestedScrollConnection: NestedScrollConnection,
     topPadding: Dp
 ) {
-    var version by remember { mutableStateOf("") }
-    var variant by remember { mutableStateOf("") }
-    var enabledFeatures by remember { mutableStateOf("") }
+    var statusInfo by remember { mutableStateOf(SuSFSStatusInfo("", "", "")) }
     var isLoading by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
 
-    suspend fun loadAll() {
-        coroutineScope {
-            val results = listOf(
-                async { SuSFSConfigHelper.showVersion() },
-                async { SuSFSConfigHelper.showVariant() },
-                async { SuSFSConfigHelper.showEnabledFeatures() }
-            ).awaitAll()
-            version = results[0]
-            variant = results[1]
-            enabledFeatures = results[2]
-        }
+    suspend fun loadStatus(forceRefresh: Boolean = false) {
+        statusInfo = SuSFSConfigHelper.loadStatusInfo(forceRefresh)
     }
 
     LaunchedEffect(Unit) {
         isLoading = true
         try {
-            loadAll()
+            loadStatus()
         } finally {
             isLoading = false
         }
@@ -159,8 +101,7 @@ fun StatusTab(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .nestedScroll(nestedScrollConnection),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .nestedScroll(nestedScrollConnection)
     ) {
         item {
             Spacer(Modifier.height(topPadding))
@@ -179,7 +120,7 @@ fun StatusTab(
                         scope.launch {
                             isLoading = true
                             try {
-                                loadAll()
+                                loadStatus(forceRefresh = true)
                             } finally {
                                 isLoading = false
                             }
@@ -208,59 +149,35 @@ fun StatusTab(
             }
         } else {
             item {
-                StatusInfoCard(
-                    title = stringResource(R.string.susfs_status_version),
-                    value = version
-                )
-            }
-            item {
-                StatusInfoCard(
-                    title = stringResource(R.string.susfs_status_variant),
-                    value = variant
-                )
-            }
-            item {
-                StatusInfoCard(
-                    title = stringResource(R.string.susfs_status_enabled_features),
-                    value = enabledFeatures
-                )
+                SegmentedColumn {
+                    item {
+                        SettingsBaseWidget(
+                            iconPlaceholder = false,
+                            title = stringResource(R.string.susfs_status_version),
+                            description = statusInfo.version.ifBlank { stringResource(R.string.susfs_status_no_data) }
+                        )
+                    }
+                    item {
+                        SettingsBaseWidget(
+                            iconPlaceholder = false,
+                            title = stringResource(R.string.susfs_status_variant),
+                            description = statusInfo.variant.ifBlank { stringResource(R.string.susfs_status_no_data) }
+                        )
+                    }
+                    item {
+                        SettingsBaseWidget(
+                            iconPlaceholder = false,
+                            title = stringResource(R.string.susfs_status_enabled_features),
+                            description = statusInfo.enabledFeatures.ifBlank { stringResource(R.string.susfs_status_no_data) }
+                        )
+                    }
+                }
             }
         }
     }
 }
 
-/**
- * 状态页信息卡片
- */
-@Composable
-private fun StatusInfoCard(
-    title: String,
-    value: String
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = value.ifBlank { stringResource(R.string.susfs_status_no_data) },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
+// ==================== StandardFeaturesTab ====================
 
 /**
  * 标准功能标签页
@@ -269,10 +186,6 @@ private fun StatusInfoCard(
  *   - logging / avc_log_spoofing / hide_sus_mnts_for_non_su_procs 三个开关
  *   - uname 编辑卡片（点击弹对话框编辑 version + release）
  *   - cmdline_or_bootconfig 编辑卡片（点击弹对话框编辑 path）
- *
- * Switch 切换立即调用对应 Helper，成功后更新本地 state；
- * 字符串字段对话框确认后调用 Helper，成功后 refreshConfig 并刷新本地展示；
- * 失败时通过 LocalSnackbarHost 弹出 snackbar。
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -309,142 +222,111 @@ fun StandardFeaturesTab(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(nestedScrollConnection),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .nestedScroll(nestedScrollConnection)
         ) {
             item {
                 Spacer(Modifier.height(topPadding))
             }
 
             if (currentConfig != null) {
-                // logging 开关
                 item {
-                    SwitchFeatureCard(
-                        title = stringResource(R.string.susfs_standard_logging),
-                        description = stringResource(R.string.susfs_standard_logging_desc),
-                        checked = currentConfig.logging,
-                        enabled = !isLoading,
-                        onCheckedChange = { newValue ->
-                            scope.launch {
-                                isLoading = true
-                                val ok = SuSFSConfigHelper.enableLog(newValue)
-                                if (ok) {
-                                    config = config?.copy(logging = newValue)
-                                } else {
-                                    snackbarHost.showSnackbar(operationFailedMsg)
+                    SegmentedColumn {
+                        item {
+                            SettingsSwitchWidget(
+                                iconPlaceholder = false,
+                                title = stringResource(R.string.susfs_standard_logging),
+                                description = stringResource(R.string.susfs_standard_logging_desc),
+                                checked = currentConfig.logging,
+                                enabled = !isLoading,
+                                onCheckedChange = { newValue ->
+                                    scope.launch {
+                                        isLoading = true
+                                        val ok = SuSFSConfigHelper.enableLog(newValue)
+                                        if (ok) {
+                                            config = config?.copy(logging = newValue)
+                                        } else {
+                                            snackbarHost.showSnackbar(operationFailedMsg)
+                                        }
+                                        isLoading = false
+                                    }
                                 }
-                                isLoading = false
-                            }
-                        }
-                    )
-                }
-
-                // avc_log_spoofing 开关
-                item {
-                    SwitchFeatureCard(
-                        title = stringResource(R.string.susfs_standard_avc_log_spoofing),
-                        description = stringResource(R.string.susfs_standard_avc_log_spoofing_desc),
-                        checked = currentConfig.avc_log_spoofing,
-                        enabled = !isLoading,
-                        onCheckedChange = { newValue ->
-                            scope.launch {
-                                isLoading = true
-                                val ok = SuSFSConfigHelper.enableAvcLogSpoofing(newValue)
-                                if (ok) {
-                                    config = config?.copy(avc_log_spoofing = newValue)
-                                } else {
-                                    snackbarHost.showSnackbar(operationFailedMsg)
-                                }
-                                isLoading = false
-                            }
-                        }
-                    )
-                }
-
-                // hide_sus_mnts_for_non_su_procs 开关
-                item {
-                    SwitchFeatureCard(
-                        title = stringResource(R.string.susfs_standard_hide_sus_mnts),
-                        description = stringResource(R.string.susfs_standard_hide_sus_mnts_desc),
-                        checked = currentConfig.hide_sus_mnts_for_non_su_procs,
-                        enabled = !isLoading,
-                        onCheckedChange = { newValue ->
-                            scope.launch {
-                                isLoading = true
-                                val ok = SuSFSConfigHelper.hideSusMntsForNonSuProcs(newValue)
-                                if (ok) {
-                                    config = config?.copy(hide_sus_mnts_for_non_su_procs = newValue)
-                                } else {
-                                    snackbarHost.showSnackbar(operationFailedMsg)
-                                }
-                                isLoading = false
-                            }
-                        }
-                    )
-                }
-
-                // uname 编辑卡片
-                item {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .clickable(enabled = !isLoading) {
-                                unameVersionInput = currentConfig.uname.version
-                                unameReleaseInput = currentConfig.uname.release
-                                showUnameDialog = true
-                            },
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.susfs_standard_uname),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium
                             )
-                            Text(
-                                text = stringResource(
+                        }
+
+                        item {
+                            SettingsSwitchWidget(
+                                iconPlaceholder = false,
+                                title = stringResource(R.string.susfs_standard_avc_log_spoofing),
+                                description = stringResource(R.string.susfs_standard_avc_log_spoofing_desc),
+                                checked = currentConfig.avc_log_spoofing,
+                                enabled = !isLoading,
+                                onCheckedChange = { newValue ->
+                                    scope.launch {
+                                        isLoading = true
+                                        val ok = SuSFSConfigHelper.enableAvcLogSpoofing(newValue)
+                                        if (ok) {
+                                            config = config?.copy(avc_log_spoofing = newValue)
+                                        } else {
+                                            snackbarHost.showSnackbar(operationFailedMsg)
+                                        }
+                                        isLoading = false
+                                    }
+                                }
+                            )
+                        }
+
+                        item {
+                            SettingsSwitchWidget(
+                                iconPlaceholder = false,
+                                title = stringResource(R.string.susfs_standard_hide_sus_mnts),
+                                description = stringResource(R.string.susfs_standard_hide_sus_mnts_desc),
+                                checked = currentConfig.hide_sus_mnts_for_non_su_procs,
+                                enabled = !isLoading,
+                                onCheckedChange = { newValue ->
+                                    scope.launch {
+                                        isLoading = true
+                                        val ok = SuSFSConfigHelper.hideSusMntsForNonSuProcs(newValue)
+                                        if (ok) {
+                                            config = config?.copy(hide_sus_mnts_for_non_su_procs = newValue)
+                                        } else {
+                                            snackbarHost.showSnackbar(operationFailedMsg)
+                                        }
+                                        isLoading = false
+                                    }
+                                }
+                            )
+                        }
+
+                        item {
+                            SettingsJumpPageWidget(
+                                iconPlaceholder = false,
+                                title = stringResource(R.string.susfs_standard_uname),
+                                description = stringResource(
                                     R.string.susfs_standard_current_value,
                                     "${currentConfig.uname.version} / ${currentConfig.uname.release}"
                                 ),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                enabled = !isLoading,
+                                onClick = {
+                                    unameVersionInput = currentConfig.uname.version
+                                    unameReleaseInput = currentConfig.uname.release
+                                    showUnameDialog = true
+                                }
                             )
                         }
-                    }
-                }
 
-                // cmdline_or_bootconfig 编辑卡片
-                item {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .clickable(enabled = !isLoading) {
-                                cmdlineInput = currentConfig.cmdline_or_bootconfig
-                                showCmdlineDialog = true
-                            },
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.susfs_standard_cmdline_or_bootconfig),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Text(
-                                text = stringResource(
+                        item {
+                            SettingsJumpPageWidget(
+                                iconPlaceholder = false,
+                                title = stringResource(R.string.susfs_standard_cmdline_or_bootconfig),
+                                description = stringResource(
                                     R.string.susfs_standard_current_value,
                                     currentConfig.cmdline_or_bootconfig.ifBlank { "—" }
                                 ),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                enabled = !isLoading,
+                                onClick = {
+                                    cmdlineInput = currentConfig.cmdline_or_bootconfig
+                                    showCmdlineDialog = true
+                                }
                             )
                         }
                     }
@@ -578,51 +460,7 @@ fun StandardFeaturesTab(
     }
 }
 
-/**
- * 标准功能页开关卡片
- */
-@Composable
-private fun SwitchFeatureCard(
-    title: String,
-    description: String,
-    checked: Boolean,
-    enabled: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange,
-                enabled = enabled
-            )
-        }
-    }
-}
+// ==================== SusPathTab ====================
 
 /**
  * SUS Path 标签页
@@ -658,7 +496,7 @@ fun SusPathTab(
     val subtypes = listOf(subtypePath, subtypeLoop)
 
     LaunchedEffect(Unit) {
-        entries = SuSFSConfigHelper.getSusPaths()
+        entries = SuSFSConfigHelper.loadConfig().sus_path
     }
 
     LaunchedEffect(showManualAdd) {
@@ -690,38 +528,52 @@ fun SusPathTab(
         }
 
         item {
-            PinnedActionCard(
-                title = pathImportTitle,
-                onClick = { showBatchImportPath = true },
-                isLoading = isLoading
-            )
-        }
-
-        item {
-            PinnedActionCard(
-                title = loopImportTitle,
-                onClick = { showBatchImportLoop = true },
-                isLoading = isLoading
-            )
-        }
-
-        item {
-            PinnedActionCard(
-                title = manualAddTitle,
-                onClick = { showManualAdd = true },
-                isLoading = isLoading
-            )
+            SegmentedColumn {
+                item {
+                    SettingsJumpPageWidget(
+                        iconPlaceholder = false,
+                        title = pathImportTitle,
+                        enabled = !isLoading,
+                        onClick = { showBatchImportPath = true }
+                    )
+                }
+                item {
+                    SettingsJumpPageWidget(
+                        iconPlaceholder = false,
+                        title = loopImportTitle,
+                        enabled = !isLoading,
+                        onClick = { showBatchImportLoop = true }
+                    )
+                }
+                item {
+                    SettingsJumpPageWidget(
+                        iconPlaceholder = false,
+                        title = manualAddTitle,
+                        enabled = !isLoading,
+                        onClick = { showManualAdd = true }
+                    )
+                }
+            }
         }
 
         if (entries.isEmpty()) {
             item {
-                EmptyStateCard(message = noEntriesMsg)
+                EmptyStateCard(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    message = noEntriesMsg
+                )
             }
         } else {
-            items(entries.toList(), key = { it.path }) { item ->
-                EntryItemCard(
+            item { Spacer(Modifier.height(8.dp)) }
+            lazySegmentColumn(
+                items = entries.toList(),
+                key = { _, it -> it.path }
+            ) { _, item ->
+                SettingsJumpPageWidget(
+                    iconPlaceholder = false,
                     title = item.path,
-                    subtitle = if (item.is_loop) isLoopLabel else null,
+                    description = if (item.is_loop) isLoopLabel else null,
+                    enabled = !isLoading,
                     onClick = { detailItem = item }
                 )
             }
@@ -741,8 +593,7 @@ fun SusPathTab(
                 lines.forEach { line ->
                     if (SuSFSConfigHelper.addSusPath(line)) success++ else failed++
                 }
-                SuSFSConfigHelper.refreshConfig()
-                entries = SuSFSConfigHelper.getSusPaths()
+                entries = SuSFSConfigHelper.refreshConfig().sus_path
                 snackbarHost.showSnackbar(
                     importSuccessTemplate.format(success, failed)
                 )
@@ -766,8 +617,7 @@ fun SusPathTab(
                 lines.forEach { line ->
                     if (SuSFSConfigHelper.addSusPathLoop(line)) success++ else failed++
                 }
-                SuSFSConfigHelper.refreshConfig()
-                entries = SuSFSConfigHelper.getSusPaths()
+                entries = SuSFSConfigHelper.refreshConfig().sus_path
                 snackbarHost.showSnackbar(
                     importSuccessTemplate.format(success, failed)
                 )
@@ -796,8 +646,7 @@ fun SusPathTab(
                     SuSFSConfigHelper.addSusPath(path)
                 }
                 if (ok) {
-                    SuSFSConfigHelper.refreshConfig()
-                    entries = SuSFSConfigHelper.getSusPaths()
+                    entries = SuSFSConfigHelper.refreshConfig().sus_path
                     showManualAdd = false
                 } else {
                     snackbarHost.showSnackbar(operationFailedMsg)
@@ -832,8 +681,7 @@ fun SusPathTab(
                     isLoading = true
                     val ok = SuSFSConfigHelper.delSusPath(item.path)
                     if (ok) {
-                        SuSFSConfigHelper.refreshConfig()
-                        entries = SuSFSConfigHelper.getSusPaths()
+                        entries = SuSFSConfigHelper.refreshConfig().sus_path
                         detailItem = null
                     } else {
                         snackbarHost.showSnackbar(operationFailedMsg)
@@ -845,6 +693,8 @@ fun SusPathTab(
         )
     }
 }
+
+// ==================== SusKstatTab ====================
 
 /**
  * SUS Kstat 标签页
@@ -894,7 +744,7 @@ fun SusKstatTab(
     val subtypes = listOf(subtypeNormal, subtypeFullClone, subtypeStatically)
 
     LaunchedEffect(Unit) {
-        entries = SuSFSConfigHelper.getSusKstats()
+        entries = SuSFSConfigHelper.loadConfig().sus_kstat
     }
 
     LaunchedEffect(showManualAdd) {
@@ -944,46 +794,60 @@ fun SusKstatTab(
         }
 
         item {
-            PinnedActionCard(
-                title = normalImportTitle,
-                onClick = { showBatchImportNormal = true },
-                isLoading = isLoading
-            )
-        }
-
-        item {
-            PinnedActionCard(
-                title = fullCloneImportTitle,
-                onClick = { showBatchImportFullClone = true },
-                isLoading = isLoading
-            )
-        }
-
-        item {
-            PinnedActionCard(
-                title = staticallyImportTitle,
-                onClick = { showBatchImportStatically = true },
-                isLoading = isLoading
-            )
-        }
-
-        item {
-            PinnedActionCard(
-                title = manualAddTitle,
-                onClick = { showManualAdd = true },
-                isLoading = isLoading
-            )
+            SegmentedColumn {
+                item {
+                    SettingsJumpPageWidget(
+                        iconPlaceholder = false,
+                        title = normalImportTitle,
+                        enabled = !isLoading,
+                        onClick = { showBatchImportNormal = true }
+                    )
+                }
+                item {
+                    SettingsJumpPageWidget(
+                        iconPlaceholder = false,
+                        title = fullCloneImportTitle,
+                        enabled = !isLoading,
+                        onClick = { showBatchImportFullClone = true }
+                    )
+                }
+                item {
+                    SettingsJumpPageWidget(
+                        iconPlaceholder = false,
+                        title = staticallyImportTitle,
+                        enabled = !isLoading,
+                        onClick = { showBatchImportStatically = true }
+                    )
+                }
+                item {
+                    SettingsJumpPageWidget(
+                        iconPlaceholder = false,
+                        title = manualAddTitle,
+                        enabled = !isLoading,
+                        onClick = { showManualAdd = true }
+                    )
+                }
+            }
         }
 
         if (entries.isEmpty()) {
             item {
-                EmptyStateCard(message = noEntriesMsg)
+                EmptyStateCard(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    message = noEntriesMsg
+                )
             }
         } else {
-            items(entries.toList(), key = { it.path }) { item ->
-                EntryItemCard(
+            item { Spacer(Modifier.height(8.dp)) }
+            lazySegmentColumn(
+                items = entries.toList(),
+                key = { _, it -> it.path }
+            ) { _, item ->
+                SettingsJumpPageWidget(
+                    iconPlaceholder = false,
                     title = item.path,
-                    subtitle = item.spoof_type.name,
+                    description = item.spoof_type.name,
+                    enabled = !isLoading,
                     onClick = { detailItem = item }
                 )
             }
@@ -1005,8 +869,7 @@ fun SusKstatTab(
                     val updated = if (added) SuSFSConfigHelper.updateSusKstat(line) else false
                     if (added && updated) success++ else failed++
                 }
-                SuSFSConfigHelper.refreshConfig()
-                entries = SuSFSConfigHelper.getSusKstats()
+                entries = SuSFSConfigHelper.refreshConfig().sus_kstat
                 snackbarHost.showSnackbar(
                     importSuccessTemplate.format(success, failed)
                 )
@@ -1032,8 +895,7 @@ fun SusKstatTab(
                     val updated = if (added) SuSFSConfigHelper.updateSusKstatFullClone(line) else false
                     if (added && updated) success++ else failed++
                 }
-                SuSFSConfigHelper.refreshConfig()
-                entries = SuSFSConfigHelper.getSusKstats()
+                entries = SuSFSConfigHelper.refreshConfig().sus_kstat
                 snackbarHost.showSnackbar(
                     importSuccessTemplate.format(success, failed)
                 )
@@ -1058,8 +920,7 @@ fun SusKstatTab(
                     val ok = SuSFSConfigHelper.addSusKstatStatically(line)
                     if (ok) success++ else failed++
                 }
-                SuSFSConfigHelper.refreshConfig()
-                entries = SuSFSConfigHelper.getSusKstats()
+                entries = SuSFSConfigHelper.refreshConfig().sus_kstat
                 snackbarHost.showSnackbar(
                     importSuccessTemplate.format(success, failed)
                 )
@@ -1110,8 +971,7 @@ fun SusKstatTab(
                     }
                 }
                 if (ok) {
-                    SuSFSConfigHelper.refreshConfig()
-                    entries = SuSFSConfigHelper.getSusKstats()
+                    entries = SuSFSConfigHelper.refreshConfig().sus_kstat
                     showManualAdd = false
                 } else {
                     snackbarHost.showSnackbar(operationFailedMsg)
@@ -1206,8 +1066,7 @@ fun SusKstatTab(
                     isLoading = true
                     val ok = SuSFSConfigHelper.delSusKstat(item.path)
                     if (ok) {
-                        SuSFSConfigHelper.refreshConfig()
-                        entries = SuSFSConfigHelper.getSusKstats()
+                        entries = SuSFSConfigHelper.refreshConfig().sus_kstat
                         detailItem = null
                     } else {
                         snackbarHost.showSnackbar(operationFailedMsg)
@@ -1219,6 +1078,8 @@ fun SusKstatTab(
         )
     }
 }
+
+// ==================== OpenRedirectTab ====================
 
 /**
  * Open Redirect 标签页
@@ -1262,7 +1123,7 @@ fun OpenRedirectTab(
     )
 
     LaunchedEffect(Unit) {
-        entries = SuSFSConfigHelper.getOpenRedirects()
+        entries = SuSFSConfigHelper.loadConfig().open_redirect
     }
 
     LaunchedEffect(showManualAdd) {
@@ -1297,30 +1158,44 @@ fun OpenRedirectTab(
         }
 
         item {
-            PinnedActionCard(
-                title = importTitle,
-                onClick = { showBatchImport = true },
-                isLoading = isLoading
-            )
-        }
-
-        item {
-            PinnedActionCard(
-                title = manualAddTitle,
-                onClick = { showManualAdd = true },
-                isLoading = isLoading
-            )
+            SegmentedColumn {
+                item {
+                    SettingsJumpPageWidget(
+                        iconPlaceholder = false,
+                        title = importTitle,
+                        enabled = !isLoading,
+                        onClick = { showBatchImport = true }
+                    )
+                }
+                item {
+                    SettingsJumpPageWidget(
+                        iconPlaceholder = false,
+                        title = manualAddTitle,
+                        enabled = !isLoading,
+                        onClick = { showManualAdd = true }
+                    )
+                }
+            }
         }
 
         if (entries.isEmpty()) {
             item {
-                EmptyStateCard(message = noEntriesMsg)
+                EmptyStateCard(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    message = noEntriesMsg
+                )
             }
         } else {
-            items(entries.toList(), key = { "${it.target_path}|${it.redirected_path}|${it.uid_scheme.value}" }) { item ->
-                EntryItemCard(
+            item { Spacer(Modifier.height(8.dp)) }
+            lazySegmentColumn(
+                items = entries.toList(),
+                key = { _, it -> "${it.target_path}|${it.redirected_path}|${it.uid_scheme.value}" }
+            ) { _, item ->
+                SettingsJumpPageWidget(
+                    iconPlaceholder = false,
                     title = item.target_path,
-                    subtitle = "${item.redirected_path} · ${item.uid_scheme.name}",
+                    description = "${item.redirected_path} · ${item.uid_scheme.name}",
+                    enabled = !isLoading,
                     onClick = { detailItem = item }
                 )
             }
@@ -1356,8 +1231,7 @@ fun OpenRedirectTab(
                         skipped++
                     }
                 }
-                SuSFSConfigHelper.refreshConfig()
-                entries = SuSFSConfigHelper.getOpenRedirects()
+                entries = SuSFSConfigHelper.refreshConfig().open_redirect
                 snackbarHost.showSnackbar(
                     importSuccessTemplate.format(success, failed)
                 )
@@ -1388,8 +1262,7 @@ fun OpenRedirectTab(
                 isLoading = true
                 val ok = SuSFSConfigHelper.addOpenRedirect(target, redirected, manualUidScheme)
                 if (ok) {
-                    SuSFSConfigHelper.refreshConfig()
-                    entries = SuSFSConfigHelper.getOpenRedirects()
+                    entries = SuSFSConfigHelper.refreshConfig().open_redirect
                     showManualAdd = false
                 } else {
                     snackbarHost.showSnackbar(operationFailedMsg)
@@ -1466,8 +1339,7 @@ fun OpenRedirectTab(
                     isLoading = true
                     val ok = SuSFSConfigHelper.delOpenRedirect(item.target_path)
                     if (ok) {
-                        SuSFSConfigHelper.refreshConfig()
-                        entries = SuSFSConfigHelper.getOpenRedirects()
+                        entries = SuSFSConfigHelper.refreshConfig().open_redirect
                         detailItem = null
                     } else {
                         snackbarHost.showSnackbar(operationFailedMsg)
@@ -1479,6 +1351,8 @@ fun OpenRedirectTab(
         )
     }
 }
+
+// ==================== SusMapTab ====================
 
 /**
  * SUS Map 标签页
@@ -1511,7 +1385,7 @@ fun SusMapTab(
     val subtypes = listOf(subtypeSusMap)
 
     LaunchedEffect(Unit) {
-        entries = SuSFSConfigHelper.getSusMaps()
+        entries = SuSFSConfigHelper.loadConfig().sus_map
     }
 
     LaunchedEffect(showManualAdd) {
@@ -1539,30 +1413,43 @@ fun SusMapTab(
         }
 
         item {
-            PinnedActionCard(
-                title = importTitle,
-                onClick = { showBatchImport = true },
-                isLoading = isLoading
-            )
-        }
-
-        item {
-            PinnedActionCard(
-                title = manualAddTitle,
-                onClick = { showManualAdd = true },
-                isLoading = isLoading
-            )
+            SegmentedColumn {
+                item {
+                    SettingsJumpPageWidget(
+                        iconPlaceholder = false,
+                        title = importTitle,
+                        enabled = !isLoading,
+                        onClick = { showBatchImport = true }
+                    )
+                }
+                item {
+                    SettingsJumpPageWidget(
+                        iconPlaceholder = false,
+                        title = manualAddTitle,
+                        enabled = !isLoading,
+                        onClick = { showManualAdd = true }
+                    )
+                }
+            }
         }
 
         if (entries.isEmpty()) {
             item {
-                EmptyStateCard(message = noEntriesMsg)
+                EmptyStateCard(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    message = noEntriesMsg
+                )
             }
         } else {
-            items(entries.toList(), key = { it }) { path ->
-                EntryItemCard(
+            item { Spacer(Modifier.height(8.dp)) }
+            lazySegmentColumn(
+                items = entries.toList(),
+                key = { _, it -> it }
+            ) { _, path ->
+                SettingsJumpPageWidget(
+                    iconPlaceholder = false,
                     title = path,
-                    subtitle = null,
+                    enabled = !isLoading,
                     onClick = { detailItem = path }
                 )
             }
@@ -1582,8 +1469,7 @@ fun SusMapTab(
                 lines.forEach { line ->
                     if (SuSFSConfigHelper.addSusMap(line)) success++ else failed++
                 }
-                SuSFSConfigHelper.refreshConfig()
-                entries = SuSFSConfigHelper.getSusMaps()
+                entries = SuSFSConfigHelper.refreshConfig().sus_map
                 snackbarHost.showSnackbar(
                     importSuccessTemplate.format(success, failed)
                 )
@@ -1608,8 +1494,7 @@ fun SusMapTab(
                 isLoading = true
                 val ok = SuSFSConfigHelper.addSusMap(path)
                 if (ok) {
-                    SuSFSConfigHelper.refreshConfig()
-                    entries = SuSFSConfigHelper.getSusMaps()
+                    entries = SuSFSConfigHelper.refreshConfig().sus_map
                     showManualAdd = false
                 } else {
                     snackbarHost.showSnackbar(operationFailedMsg)
@@ -1641,8 +1526,7 @@ fun SusMapTab(
                     isLoading = true
                     val ok = SuSFSConfigHelper.delSusMap(path)
                     if (ok) {
-                        SuSFSConfigHelper.refreshConfig()
-                        entries = SuSFSConfigHelper.getSusMaps()
+                        entries = SuSFSConfigHelper.refreshConfig().sus_map
                         detailItem = null
                     } else {
                         snackbarHost.showSnackbar(operationFailedMsg)
@@ -1655,76 +1539,156 @@ fun SusMapTab(
     }
 }
 
-/**
- * 固定条目卡片：用于"导入列表"/"手动添加"等固定操作入口
- */
-@Composable
-private fun PinnedActionCard(
-    title: String,
-    onClick: () -> Unit,
-    isLoading: Boolean = false
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
-        onClick = { if (!isLoading) onClick() },
-        enabled = !isLoading,
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium
-            )
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
-}
+// ==================== BackupRestoreTab ====================
 
 /**
- * 条目卡片：用于展示单个条目的标题与可选副标题
+ * 备份与还原标签页
+ *
+ * 提供导出/导入 .susfs.json 配置文件的功能：
+ *   - 导出：通过 SAF CreateDocument 选择目标文件，直接复制当前配置文件
+ *   - 导入：通过 SAF OpenDocument 选择备份文件，确认后校验版本并替换当前配置
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EntryItemCard(
-    title: String,
-    subtitle: String? = null,
-    onClick: () -> Unit
+fun BackupRestoreTab(
+    nestedScrollConnection: NestedScrollConnection,
+    topPadding: Dp
 ) {
-    Card(
+    val snackbarHost = LocalSnackbarHost.current
+    val scope = rememberCoroutineScope()
+
+    var isLoading by remember { mutableStateOf(false) }
+    var showImportConfirm by remember { mutableStateOf(false) }
+    var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
+
+    val exportTitle = stringResource(R.string.susfs_backup_export)
+    val exportDesc = stringResource(R.string.susfs_backup_export_desc)
+    val importTitle = stringResource(R.string.susfs_backup_import)
+    val importDesc = stringResource(R.string.susfs_backup_import_desc)
+    val exportSuccessMsg = stringResource(R.string.susfs_backup_export_success)
+    val exportFailedMsg = stringResource(R.string.susfs_backup_export_failed)
+    val importSuccessMsg = stringResource(R.string.susfs_backup_import_success)
+    val importFailedMsg = stringResource(R.string.susfs_backup_import_failed)
+    val confirmTitle = stringResource(R.string.susfs_backup_import_confirm_title)
+    val confirmMsg = stringResource(R.string.susfs_backup_import_confirm_message)
+    val defaultFilename = stringResource(R.string.susfs_backup_default_filename)
+    val importLabel = stringResource(R.string.susfs_backup_import_label)
+    val cancelLabel = stringResource(R.string.susfs_entry_cancel)
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri: Uri? ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            isLoading = true
+            val ok = SuSFSConfigHelper.exportConfigToUri(uri)
+            if (ok) {
+                snackbarHost.showSnackbar(exportSuccessMsg)
+            } else {
+                snackbarHost.showSnackbar(exportFailedMsg)
+            }
+            isLoading = false
+        }
+    }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        pendingImportUri = uri
+        showImportConfirm = true
+    }
+
+    LazyColumn(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
-        onClick = onClick,
-        shape = RoundedCornerShape(12.dp)
+            .fillMaxSize()
+            .nestedScroll(nestedScrollConnection)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium
-            )
-            subtitle?.let {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+        item {
+            Spacer(Modifier.height(topPadding))
+        }
+
+        item {
+            SegmentedColumn {
+                item {
+                    SettingsJumpPageWidget(
+                        iconPlaceholder = false,
+                        title = exportTitle,
+                        description = exportDesc,
+                        enabled = !isLoading,
+                        onClick = {
+                            exportLauncher.launch(defaultFilename)
+                        }
+                    )
+                }
+                item {
+                    SettingsJumpPageWidget(
+                        iconPlaceholder = false,
+                        title = importTitle,
+                        description = importDesc,
+                        enabled = !isLoading,
+                        onClick = {
+                            importLauncher.launch(arrayOf("application/json", "*/*"))
+                        }
+                    )
+                }
             }
         }
+
+        item {
+            Spacer(Modifier.height(16.dp))
+        }
+    }
+
+    if (showImportConfirm) {
+        AlertDialog(
+            onDismissRequest = {
+                showImportConfirm = false
+                pendingImportUri = null
+            },
+            title = {
+                Text(
+                    text = confirmTitle,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(text = confirmMsg)
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val uri = pendingImportUri
+                        showImportConfirm = false
+                        pendingImportUri = null
+                        if (uri != null) {
+                            scope.launch {
+                                isLoading = true
+                                val ok = SuSFSConfigHelper.importConfigFromUri(uri)
+                                if (ok) {
+                                    snackbarHost.showSnackbar(importSuccessMsg)
+                                } else {
+                                    snackbarHost.showSnackbar(importFailedMsg)
+                                }
+                                isLoading = false
+                            }
+                        }
+                    },
+                    enabled = !isLoading
+                ) {
+                    Text(importLabel)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showImportConfirm = false
+                    pendingImportUri = null
+                }) {
+                    Text(cancelLabel)
+                }
+            },
+            shape = RoundedCornerShape(12.dp)
+        )
     }
 }

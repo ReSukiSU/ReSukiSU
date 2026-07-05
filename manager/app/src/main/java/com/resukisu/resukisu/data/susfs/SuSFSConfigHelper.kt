@@ -1,15 +1,22 @@
-package com.resukisu.resukisu.ui.susfs.util
+package com.resukisu.resukisu.data.susfs
 
+import android.net.Uri
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.annotations.SerializedName
+import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.ui.util.execKsud
 import com.resukisu.resukisu.ui.util.getRootShell
 import com.topjohnwu.superuser.io.SuFile
+import com.topjohnwu.superuser.io.SuFileInputStream
+import com.topjohnwu.superuser.io.SuFileOutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.BufferedReader
+import java.io.File
 
 /**
  * SuSFS Config Helper
@@ -39,6 +46,12 @@ object SuSFSConfigHelper {
     // 缓存的配置
     @Volatile
     private var cachedConfig: SuSFSConfig? = null
+
+    // 缓存的状态信息
+    @Volatile
+    private var cachedStatusInfo: SuSFSStatusInfo? = null
+
+    private val statusInfoMutex = Mutex()
 
     // ==================== 配置读取和反序列化 ====================
 
@@ -93,94 +106,63 @@ object SuSFSConfigHelper {
         return loadConfig()
     }
 
-    // ==================== Get 接口 (对应 get_ops.rs) ====================
+    suspend fun loadStatusInfo(forceRefresh: Boolean = false): SuSFSStatusInfo {
+        if (!forceRefresh) {
+            cachedStatusInfo?.let { return it }
+        }
 
-    /**
-     * 获取配置版本
-     * 对应 Rust get_version()
-     */
-    suspend fun getVersion(): Int {
-        return loadConfig().version
+        return statusInfoMutex.withLock {
+            if (!forceRefresh) {
+                cachedStatusInfo?.let { return@withLock it }
+            }
+
+            val statusInfo = withContext(Dispatchers.IO) {
+                try {
+                    val shell = getRootShell()
+                    val daemonPath = getKsuDaemonPath()
+
+                    val version = shell.newJob()
+                        .add("$daemonPath susfs show version")
+                        .to(ArrayList<String>(), null)
+                        .exec()
+                        .out.firstOrNull()?.trim() ?: ""
+
+                    val enabledFeatures = shell.newJob()
+                        .add("$daemonPath susfs show enabled_features")
+                        .to(ArrayList<String>(), null)
+                        .exec()
+                        .out.joinToString("\n").trim()
+
+                    val variant = shell.newJob()
+                        .add("$daemonPath susfs show variant")
+                        .to(ArrayList<String>(), null)
+                        .exec()
+                        .out.firstOrNull()?.trim() ?: ""
+
+                    SuSFSStatusInfo(
+                        version = version,
+                        enabledFeatures = enabledFeatures,
+                        variant = variant
+                    )
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to load SUSFS status info", e)
+                    SuSFSStatusInfo("", "", "")
+                }
+            }
+
+            cachedStatusInfo = statusInfo
+            statusInfo
+        }
     }
 
-    /**
-     * 获取 cmdline 或 bootconfig
-     * 对应 Rust get_cmdline_or_bootconfig()
-     */
-    suspend fun getCmdlineOrBootconfig(): String {
-        return loadConfig().cmdline_or_bootconfig
+    suspend fun refreshStatusInfo(): SuSFSStatusInfo {
+        return loadStatusInfo(forceRefresh = true)
     }
 
-    /**
-     * 检查 AVC 日志欺骗是否启用
-     * 对应 Rust is_avc_log_spoofing()
-     */
-    suspend fun isAvcLogSpoofingEnabled(): Boolean {
-        return loadConfig().avc_log_spoofing
-    }
-
-    /**
-     * 检查日志是否启用
-     * 对应 Rust is_logging()
-     */
-    suspend fun isLoggingEnabled(): Boolean {
-        return loadConfig().logging
-    }
-
-    /**
-     * 检查是否为非 SU 进程隐藏 SUS 挂载
-     * 对应 Rust is_hiding_sus_mnts_for_non_su_procs()
-     */
-    suspend fun isHidingSusMountsForNonSuProcs(): Boolean {
-        return loadConfig().hide_sus_mnts_for_non_su_procs
-    }
-
-    /**
-     * 获取 uname version
-     * 对应 Rust get_uname_version()
-     */
-    suspend fun getUnameVersion(): String {
-        return loadConfig().uname.version
-    }
-
-    /**
-     * 获取 uname release
-     * 对应 Rust get_uname_release()
-     */
-    suspend fun getUnameRelease(): String {
-        return loadConfig().uname.release
-    }
-
-    /**
-     * 获取 SUS Paths
-     * 对应 Rust get_sus_paths()
-     */
-    suspend fun getSusPaths(): Set<SusPathItem> {
-        return loadConfig().sus_path
-    }
-
-    /**
-     * 获取 SUS Kstats
-     * 对应 Rust get_sus_kstats()
-     */
-    suspend fun getSusKstats(): Set<SusKstatItem> {
-        return loadConfig().sus_kstat
-    }
-
-    /**
-     * 获取 Open Redirects
-     * 对应 Rust get_open_redirects()
-     */
-    suspend fun getOpenRedirects(): Set<OpenRedirectItem> {
-        return loadConfig().open_redirect
-    }
-
-    /**
-     * 获取 SUS Maps
-     * 对应 Rust get_sus_maps()
-     */
-    suspend fun getSusMaps(): Set<String> {
-        return loadConfig().sus_map
+    private suspend fun clearStatusInfoCache() {
+        statusInfoMutex.withLock {
+            cachedStatusInfo = null
+        }
     }
 
     // ==================== Set 接口 (对应 cli.rs) ====================
@@ -196,6 +178,7 @@ object SuSFSConfigHelper {
             if (result) {
                 // 成功后刷新缓存
                 refreshConfig()
+                clearStatusInfoCache()
             }
             result
         } catch (e: Exception) {
@@ -398,67 +381,88 @@ object SuSFSConfigHelper {
      * 显示版本
      * 命令: ksud susfs show version
      */
-    suspend fun showVersion(): String = withContext(Dispatchers.IO) {
-        try {
-            val shell = getRootShell()
-            val cmd = "susfs show version"
-            val result = shell.newJob()
-                .add("${getKsuDaemonPath()} $cmd")
-                .to(ArrayList<String>(), null)
-                .exec()
-            result.out.firstOrNull()?.trim() ?: ""
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to show version", e)
-            ""
-        }
-    }
+    suspend fun showVersion(): String = loadStatusInfo().version
 
     /**
      * 显示启用的特性
      * 命令: ksud susfs show enabled_features
      */
-    suspend fun showEnabledFeatures(): String = withContext(Dispatchers.IO) {
-        try {
-            val shell = getRootShell()
-            val cmd = "susfs show enabled_features"
-            val result = shell.newJob()
-                .add("${getKsuDaemonPath()} $cmd")
-                .to(ArrayList<String>(), null)
-                .exec()
-            result.out.joinToString("\n").trim()
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to show enabled features", e)
-            ""
-        }
-    }
+    suspend fun showEnabledFeatures(): String = loadStatusInfo().enabledFeatures
 
     /**
      * 显示变体信息
      * 命令: ksud susfs show variant
      */
-    suspend fun showVariant(): String = withContext(Dispatchers.IO) {
+    suspend fun showVariant(): String = loadStatusInfo().variant
+
+    suspend fun exportConfigToUri(uri: Uri): Boolean = withContext(Dispatchers.IO) {
         try {
-            val shell = getRootShell()
-            val cmd = "susfs show variant"
-            val result = shell.newJob()
-                .add("${getKsuDaemonPath()} $cmd")
-                .to(ArrayList<String>(), null)
-                .exec()
-            result.out.firstOrNull()?.trim() ?: ""
+            val sourceFile = SuFile.open(SUSFS_CONFIG_PATH)
+            if (!sourceFile.exists()) {
+                Log.e(TAG, "SUSFS config file does not exist")
+                return@withContext false
+            }
+            ksuApp.contentResolver.openOutputStream(uri)?.use { output ->
+                SuFileInputStream.open(sourceFile).use { input ->
+                    input.copyTo(output)
+                }
+            } ?: run {
+                Log.e(TAG, "Failed to open output stream for URI")
+                return@withContext false
+            }
+            true
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to show variant", e)
-            ""
+            Log.e(TAG, "Failed to export config to URI", e)
+            false
         }
     }
 
-    // ==================== 辅助方法 ====================
+    suspend fun importConfigFromUri(uri: Uri): Boolean = withContext(Dispatchers.IO) {
+        val tempFile = File.createTempFile("susfs_import", ".json", ksuApp.cacheDir)
+        try {
+            ksuApp.contentResolver.openInputStream(uri)?.use { input ->
+                tempFile.outputStream().use { input.copyTo(it) }
+            } ?: run {
+                Log.e(TAG, "Failed to open input stream for URI")
+                return@withContext false
+            }
+            val config = loadConfigFromFile(tempFile)
+            if (config.version != CURRENT_VERSION) {
+                Log.e(
+                    TAG,
+                    "Incompatible SUSFS config version: ${config.version}, expected: $CURRENT_VERSION"
+                )
+                return@withContext false
+            }
+            val targetFile = SuFile.open(SUSFS_CONFIG_PATH)
+            targetFile.parentFile?.mkdirs()
+            SuFileOutputStream.open(targetFile).use { output ->
+                tempFile.inputStream().use { input ->
+                    input.copyTo(output)
+                }
+            }
+            cachedConfig = config
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to import config from URI", e)
+            false
+        } finally {
+            tempFile.delete()
+        }
+    }
+
+    private fun loadConfigFromFile(file: File): SuSFSConfig {
+        file.inputStream().reader(Charsets.UTF_8).buffered().use { reader ->
+            return gson.fromJson(reader, SuSFSConfig::class.java)
+        }
+    }
 
     /**
      * 获取 ksud 守护进程路径
      * 参考 KsuCli.kt 中的实现
      */
     private fun getKsuDaemonPath(): String {
-        return com.resukisu.resukisu.ksuApp.applicationInfo.nativeLibraryDir + java.io.File.separator + "libksud.so"
+        return ksuApp.applicationInfo.nativeLibraryDir + java.io.File.separator + "libksud.so"
     }
 }
 
@@ -535,7 +539,7 @@ enum class UidScheme(val value: Int) {
 /**
  * Uname 配置
  * 对应 Rust model.rs 中的 Uname 结构
- * 
+ *
  * Rust 定义:
  * #[derive(Serialize, Deserialize)]
  * pub struct Uname {
@@ -546,16 +550,26 @@ enum class UidScheme(val value: Int) {
 data class UnameConfig(
     @SerializedName("version")
     val version: String,
-    
+
     @SerializedName("release")
     val release: String
+)
+
+/**
+ * SUSFS 状态信息缓存
+ * 对应 ksud susfs show 的 version / enabled_features / variant
+ */
+data class SuSFSStatusInfo(
+    val version: String,
+    val enabledFeatures: String,
+    val variant: String
 )
 
 /**
  * SUS Kstat 静态配置
  * 对应 Rust model.rs 中的 SusKstatStatically 结构
  * 所有字段为 Long? (Option<i64>)
- * 
+ *
  * Rust 定义:
  * #[derive(Serialize, Deserialize)]
  * pub struct SusKstatStatically {
@@ -576,37 +590,37 @@ data class UnameConfig(
 data class SusKstatStatically(
     @SerializedName("ino")
     val ino: Long?,
-    
+
     @SerializedName("dev")
     val dev: Long?,
-    
+
     @SerializedName("nlink")
     val nlink: Long?,
-    
+
     @SerializedName("size")
     val size: Long?,
-    
+
     @SerializedName("atime")
     val atime: Long?,
-    
+
     @SerializedName("atime_nsec")
     val atime_nsec: Long?,
-    
+
     @SerializedName("mtime")
     val mtime: Long?,
-    
+
     @SerializedName("mtime_nsec")
     val mtime_nsec: Long?,
-    
+
     @SerializedName("ctime")
     val ctime: Long?,
-    
+
     @SerializedName("ctime_nsec")
     val ctime_nsec: Long?,
-    
+
     @SerializedName("blocks")
     val blocks: Long?,
-    
+
     @SerializedName("blksize")
     val blksize: Long?
 )
@@ -614,7 +628,7 @@ data class SusKstatStatically(
 /**
  * SUS Kstat 项
  * 对应 Rust model.rs 中的 SusKstatItem 结构
- * 
+ *
  * Rust 定义:
  * #[derive(Serialize, Deserialize)]
  * pub struct SusKstatItem {
@@ -626,10 +640,10 @@ data class SusKstatStatically(
 data class SusKstatItem(
     @SerializedName("path")
     val path: String,
-    
+
     @SerializedName("spoof_type")
     val spoof_type: SusKstatType,
-    
+
     @SerializedName("statically")
     val statically: SusKstatStatically?
 )
@@ -637,7 +651,7 @@ data class SusKstatItem(
 /**
  * SUS Path 项
  * 对应 Rust model.rs 中的 SusPathItem 结构
- * 
+ *
  * Rust 定义:
  * #[derive(Serialize, Deserialize)]
  * pub struct SusPathItem {
@@ -648,7 +662,7 @@ data class SusKstatItem(
 data class SusPathItem(
     @SerializedName("path")
     val path: String,
-    
+
     @SerializedName("is_loop")
     val is_loop: Boolean
 )
@@ -679,7 +693,7 @@ data class OpenRedirectItem(
 /**
  * SuSFS 配置主结构
  * 对应 Rust model.rs 中的 Config 结构
- * 
+ *
  * Rust 定义:
  * #[derive(Serialize, Deserialize)]
  * pub struct Config {
@@ -698,31 +712,31 @@ data class OpenRedirectItem(
 data class SuSFSConfig(
     @SerializedName("version")
     val version: Int,
-    
+
     @SerializedName("cmdline_or_bootconfig")
     val cmdline_or_bootconfig: String,
-    
+
     @SerializedName("avc_log_spoofing")
     val avc_log_spoofing: Boolean,
-    
+
     @SerializedName("logging")
     val logging: Boolean,
-    
+
     @SerializedName("hide_sus_mnts_for_non_su_procs")
     val hide_sus_mnts_for_non_su_procs: Boolean,
-    
+
     @SerializedName("uname")
     val uname: UnameConfig,
-    
+
     @SerializedName("sus_path")
     val sus_path: Set<SusPathItem>,
-    
+
     @SerializedName("sus_kstat")
     val sus_kstat: Set<SusKstatItem>,
-    
+
     @SerializedName("open_redirect")
     val open_redirect: Set<OpenRedirectItem>,
-    
+
     @SerializedName("sus_map")
     val sus_map: Set<String>
 ) {

@@ -696,6 +696,7 @@ Important Note:\n
     <string name="susfs_tab_sus_kstat">SUS Kstat</string>
     <string name="susfs_tab_open_redirect">Open Redirect</string>
     <string name="susfs_tab_sus_map">SUS Map</string>
+    <string name="susfs_tab_backup_restore">Backup / Restore</string>
 
     <!-- SUSFS rewrite: status page -->
     <string name="susfs_status_version">SUSFS Version</string>
@@ -781,4 +782,21 @@ Important Note:\n
     <string name="susfs_save">Save</string>
     <string name="susfs_operation_failed">Operation failed</string>
     <string name="susfs_operation_success">Operation succeeded</string>
+
+    <!-- SUSFS rewrite: Backup / Restore page -->
+    <string name="susfs_backup_export">Export Configuration</string>
+    <string name="susfs_backup_export_desc">Export current SuSFS config to a .susfs.json file</string>
+    <string name="susfs_backup_import">Import Configuration</string>
+    <string name="susfs_backup_import_desc">Restore SuSFS config from a .susfs.json file</string>
+    <string name="susfs_backup_export_success">Config exported successfully</string>
+    <string name="susfs_backup_import_success">Config imported successfully</string>
+    <string name="susfs_backup_export_failed">Failed to export config</string>
+    <string name="susfs_backup_import_failed">Failed to import config</string>
+    <string name="susfs_backup_import_confirm_title">Confirm Import</string>
+    <string name="susfs_backup_import_confirm_message">This will overwrite the current SuSFS configuration. Continue?</string>
+    <string name="susfs_backup_no_file_selected">No file selected</string>
+    <string name="susfs_backup_selected_file">Selected: %1$s</string>
+    <string name="susfs_backup_export_label">Export</string>
+    <string name="susfs_backup_import_label">Import</string>
+    <string name="susfs_backup_default_filename">susfs_backup.json</string>
 </resources>
