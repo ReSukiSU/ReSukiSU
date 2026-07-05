@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -20,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -48,6 +51,7 @@ fun SusPathTab(
     refreshToken: Int
 ) {
     val snackbarHost = LocalSnackbarHost.current
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     var entries by remember { mutableStateOf<Set<SusPathItem>>(emptySet()) }
@@ -98,6 +102,7 @@ fun SusPathTab(
                         iconPlaceholder = false,
                         title = manualAddTitle,
                         enabled = !isLoading,
+                        trailingIcon = Icons.Filled.Add,
                         onClick = { showManualAdd = true }
                     )
                 }
@@ -135,23 +140,45 @@ fun SusPathTab(
         selectedSubtype = selectedSubtype,
         onSubtypeChange = { selectedSubtype = it },
         onDismiss = { showManualAdd = false },
+        showImportFromFile = true,
+        onImportFromFile = { importedPath -> manualPath = importedPath },
         onConfirm = {
-            val path = manualPath.trim()
-            if (path.isEmpty()) return@ManualAddDialog
+            val paths = manualPath.lineSequence().map { it.trim() }.filter { it.isNotEmpty() }.toList()
+            if (paths.isEmpty()) return@ManualAddDialog
             scope.launch {
                 isLoading = true
-                val ok = if (selectedSubtype == subtypeLoop) {
-                    SuSFSConfigHelper.addSusPathLoop(path)
-                } else {
-                    SuSFSConfigHelper.addSusPath(path)
+                var snackbarMessage: String? = null
+                var successCount = 0
+                var failCount = 0
+                paths.forEach { path ->
+                    val ok = if (selectedSubtype == subtypeLoop) {
+                        SuSFSConfigHelper.addSusPathLoop(path)
+                    } else {
+                        SuSFSConfigHelper.addSusPath(path)
+                    }
+                    if (ok) {
+                        successCount++
+                    } else {
+                        failCount++
+                    }
                 }
-                if (ok) {
+                if (successCount > 0) {
                     entries = SuSFSConfigHelper.refreshConfig().sus_path
-                    showManualAdd = false
+                }
+                if (paths.size == 1) {
+                    if (successCount > 0) {
+                        showManualAdd = false
+                    } else {
+                        snackbarMessage = operationFailedMsg
+                    }
                 } else {
-                    snackbarHost.showSnackbar(operationFailedMsg)
+                    snackbarMessage = context.getString(R.string.susfs_entry_import_success, successCount, failCount)
+                    if (failCount == 0) {
+                        showManualAdd = false
+                    }
                 }
                 isLoading = false
+                snackbarMessage?.let { snackbarHost.showSnackbar(it) }
             }
         },
         isLoading = isLoading,
@@ -161,7 +188,9 @@ fun SusPathTab(
                 onValueChange = { manualPath = it },
                 label = { Text(pathLabel) },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
+                singleLine = false,
+                minLines = 4,
+                maxLines = 8,
                 shape = RoundedCornerShape(8.dp)
             )
         }
@@ -184,7 +213,10 @@ fun SusPathTab(
                         entries = SuSFSConfigHelper.refreshConfig().sus_path
                         detailItem = null
                     } else {
-                        snackbarHost.showSnackbar(operationFailedMsg)
+                        isLoading = false
+                        scope.launch {
+                            snackbarHost.showSnackbar(operationFailedMsg)
+                        }
                     }
                     isLoading = false
                 }

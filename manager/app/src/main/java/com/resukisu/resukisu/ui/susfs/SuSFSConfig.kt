@@ -149,6 +149,7 @@ fun SuSFSConfigScreen() {
                             Color.Transparent
                         else
                             MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha),
+                    edgePadding = 0.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     tabTitles.forEachIndexed { index, title ->

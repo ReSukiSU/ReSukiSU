@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -79,12 +80,10 @@ fun BackupRestoreTab(
         scope.launch {
             isLoading = true
             val ok = SuSFSConfigHelper.exportConfigToUri(uri)
-            if (ok) {
-                snackbarHost.showSnackbar(exportSuccessMsg)
-            } else {
-                snackbarHost.showSnackbar(exportFailedMsg)
-            }
             isLoading = false
+            scope.launch {
+                snackbarHost.showSnackbar(if (ok) exportSuccessMsg else exportFailedMsg)
+            }
         }
     }
 
@@ -130,19 +129,12 @@ fun BackupRestoreTab(
                     )
                 }
                 item {
-                    SettingsJumpPageWidget(
-                        iconPlaceholder = false,
+                    RestoreDefaultRow(
                         title = restoreDefaultTitle,
                         description = restoreDefaultDesc,
-                        enabled = !isLoading,
-                        onClick = {
-                            scope.launch {
-                                isLoading = true
-                                val ok = SuSFSConfigHelper.restoreDefaultConfig()
-                                snackbarHost.showSnackbar(if (ok) operationSuccessMsg else operationFailedMsg)
-                                isLoading = false
-                            }
-                        }
+                        snackbarHost = snackbarHost,
+                        operationSuccessMsg = operationSuccessMsg,
+                        operationFailedMsg = operationFailedMsg
                     )
                 }
             }
@@ -179,12 +171,10 @@ fun BackupRestoreTab(
                             scope.launch {
                                 isLoading = true
                                 val ok = SuSFSConfigHelper.importConfigFromUri(uri)
-                                if (ok) {
-                                    snackbarHost.showSnackbar(importSuccessMsg)
-                                } else {
-                                    snackbarHost.showSnackbar(importFailedMsg)
-                                }
                                 isLoading = false
+                                scope.launch {
+                                    snackbarHost.showSnackbar(if (ok) importSuccessMsg else importFailedMsg)
+                                }
                             }
                         }
                     },
@@ -204,4 +194,31 @@ fun BackupRestoreTab(
             shape = RoundedCornerShape(12.dp)
         )
     }
+}
+
+@Composable
+private fun RestoreDefaultRow(
+    title: String,
+    description: String,
+    snackbarHost: SnackbarHostState,
+    operationSuccessMsg: String,
+    operationFailedMsg: String,
+) {
+    val scope = rememberCoroutineScope()
+    var isRestoring by remember { mutableStateOf(false) }
+
+    SettingsJumpPageWidget(
+        iconPlaceholder = false,
+        title = title,
+        description = description,
+        enabled = !isRestoring,
+        onClick = {
+            scope.launch {
+                isRestoring = true
+                val ok = SuSFSConfigHelper.restoreDefaultConfig()
+                isRestoring = false
+                snackbarHost.showSnackbar(if (ok) operationSuccessMsg else operationFailedMsg)
+            }
+        }
+    )
 }

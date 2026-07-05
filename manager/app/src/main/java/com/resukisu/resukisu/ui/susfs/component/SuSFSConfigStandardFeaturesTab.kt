@@ -100,15 +100,18 @@ fun StandardFeaturesTab(
         { newValue: Boolean ->
             scope.launch {
                 loggingBusy = true
-                try {
-                    val ok = SuSFSConfigHelper.enableLog(newValue)
-                    if (ok) {
-                        loggingEnabled = newValue
-                    } else {
-                        snackbarHost.showSnackbar(operationFailedMsg)
-                    }
-                } finally {
-                    loggingBusy = false
+                    try {
+                        val ok = SuSFSConfigHelper.enableLog(newValue)
+                        if (ok) {
+                            loggingEnabled = newValue
+                        } else {
+                            loggingBusy = false
+                            scope.launch {
+                                snackbarHost.showSnackbar(operationFailedMsg)
+                            }
+                        }
+                    } finally {
+                        loggingBusy = false
                 }
             }
         }
@@ -124,7 +127,10 @@ fun StandardFeaturesTab(
                         if (ok) {
                             avcLogSpoofingEnabled = newValue
                         } else {
-                            snackbarHost.showSnackbar(operationFailedMsg)
+                            avcLogSpoofingBusy = false
+                            scope.launch {
+                                snackbarHost.showSnackbar(operationFailedMsg)
+                            }
                         }
                     } finally {
                         avcLogSpoofingBusy = false
@@ -143,7 +149,10 @@ fun StandardFeaturesTab(
                         if (ok) {
                             hideSusMntsEnabled = newValue
                         } else {
-                            snackbarHost.showSnackbar(operationFailedMsg)
+                            hideSusMntsBusy = false
+                            scope.launch {
+                                snackbarHost.showSnackbar(operationFailedMsg)
+                            }
                         }
                     } finally {
                         hideSusMntsBusy = false
@@ -156,35 +165,41 @@ fun StandardFeaturesTab(
         {
             val v = unameVersionInput.trim()
             val r = unameReleaseInput.trim()
-            scope.launch {
-                isLoading = true
-                val ok = SuSFSConfigHelper.setUname(v, r)
-                if (ok) {
-                    unameVersion = v
-                    unameRelease = r
-                    showUnameDialog = false
-                } else {
-                    snackbarHost.showSnackbar(operationFailedMsg)
+                scope.launch {
+                    isLoading = true
+                    val ok = SuSFSConfigHelper.setUname(v, r)
+                    if (ok) {
+                        unameVersion = v
+                        unameRelease = r
+                        showUnameDialog = false
+                    } else {
+                        isLoading = false
+                        scope.launch {
+                            snackbarHost.showSnackbar(operationFailedMsg)
+                        }
+                    }
+                    isLoading = false
                 }
-                isLoading = false
-            }
         }
     }
 
     val handleCmdlineSave: () -> Unit = remember(scope, snackbarHost, operationFailedMsg) {
         {
             val p = cmdlineInput.trim()
-            scope.launch {
-                isLoading = true
-                val ok = SuSFSConfigHelper.setCmdlineOrBootconfig(p)
-                if (ok) {
-                    cmdlineOrBootconfig = p
-                    showCmdlineDialog = false
-                } else {
-                    snackbarHost.showSnackbar(operationFailedMsg)
+                scope.launch {
+                    isLoading = true
+                    val ok = SuSFSConfigHelper.setCmdlineOrBootconfig(p)
+                    if (ok) {
+                        cmdlineOrBootconfig = p
+                        showCmdlineDialog = false
+                    } else {
+                        isLoading = false
+                        scope.launch {
+                            snackbarHost.showSnackbar(operationFailedMsg)
+                        }
+                    }
+                    isLoading = false
                 }
-                isLoading = false
-            }
         }
     }
 

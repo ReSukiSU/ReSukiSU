@@ -722,7 +722,7 @@ Important Note:\n
 
     <!-- SUSFS rewrite: entry page common -->
     <string name="susfs_entry_import_list">Import %1$s List</string>
-    <string name="susfs_entry_manual_add">Manual Add Entry</string>
+    <string name="susfs_entry_manual_add">Add Entry</string>
     <string name="susfs_entry_no_entries">No entries</string>
     <string name="susfs_entry_detail">Entry Detail</string>
     <string name="susfs_entry_delete">Delete</string>
@@ -736,6 +736,7 @@ Important Note:\n
     <string name="susfs_entry_import_parse_error">Skipped %1$d invalid line(s)</string>
     <string name="susfs_entry_import_from_file">Import from file</string>
     <string name="susfs_entry_import_file_failed">Failed to read file</string>
+    <string name="susfs_entry_import_file_not_text">Only text files can be imported</string>
 
     <!-- SUSFS rewrite: SUS Path page -->
     <string name="susfs_path_subtype_path">sus_path</string>

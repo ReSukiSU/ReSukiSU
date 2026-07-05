@@ -32,6 +32,7 @@ fun SettingsJumpPageWidget(
     leadingContent: (@Composable () -> Unit)? = null,
     foreContent: @Composable BoxScope.() -> Unit = {},
     descriptionColumnContent: @Composable ColumnScope.() -> Unit = {},
+    trailingIcon: ImageVector = Icons.Filled.ChevronRight,
 ) {
     SettingsBaseWidget(
         icon = icon,
@@ -50,7 +51,7 @@ fun SettingsJumpPageWidget(
         descriptionColumnContent = descriptionColumnContent
     ) {
         Icon(
-            imageVector = Icons.Filled.ChevronRight,
+            imageVector = trailingIcon,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(24.dp)

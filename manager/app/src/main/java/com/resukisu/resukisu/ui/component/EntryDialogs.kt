@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -30,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,6 +73,7 @@ fun BatchImportDialog(
     val scope = rememberCoroutineScope()
 
     val fileReadFailedMsg = stringResource(R.string.susfs_entry_import_file_failed)
+    val fileNotTextMsg = stringResource(R.string.susfs_entry_import_file_not_text)
     val importFromFileLabel = stringResource(R.string.susfs_entry_import_from_file)
 
     val pickFileLauncher = rememberLauncherForActivityResult(
@@ -78,17 +81,15 @@ fun BatchImportDialog(
     ) { uri: Uri? ->
         uri?.let {
             scope.launch {
-                val content = withContext(Dispatchers.IO) {
-                    runCatching {
-                        context.contentResolver.openInputStream(it)?.use { stream ->
-                            stream.bufferedReader().readText()
-                        } ?: ""
-                    }.getOrDefault("")
-                }
+                val content = readTextDocument(
+                    context = context,
+                    snackbarHost = snackbarHost,
+                    uri = it,
+                    fileNotTextMsg = fileNotTextMsg,
+                    fileReadFailedMsg = fileReadFailedMsg
+                )
                 if (content.isNotEmpty()) {
                     inputText = if (inputText.isBlank()) content else "${inputText.trim()}\n$content"
-                } else {
-                    snackbarHost.showSnackbar(fileReadFailedMsg)
                 }
             }
         }
@@ -117,24 +118,26 @@ fun BatchImportDialog(
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !isLoading,
                         singleLine = false,
+                        minLines = 4,
+                        maxLines = 8,
                         shape = RoundedCornerShape(8.dp)
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
                     ) {
-                        OutlinedButton(
-                            onClick = { pickFileLauncher.launch(arrayOf("text/plain", "*/*")) },
-                            enabled = !isLoading,
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.UploadFile,
-                                contentDescription = null,
-                                modifier = Modifier.padding(end = 4.dp)
-                            )
-                            Text(importFromFileLabel)
-                        }
+                            OutlinedButton(
+                                onClick = { pickFileLauncher.launch(arrayOf("text/*")) },
+                                enabled = !isLoading,
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.UploadFile,
+                                    contentDescription = null,
+                                    modifier = Modifier.padding(end = 4.dp)
+                                )
+                                Text(importFromFileLabel)
+                            }
                     }
                 }
             },
@@ -246,7 +249,7 @@ fun EntryDetailDialog(
 /**
  * 手动添加对话框通用容器
  *
- * 顶部提供子类型下拉选择，下方由调用方通过 [formContent] 提供具体表单内容。
+ * 当存在多个子类型选项时，顶部提供下拉选择；否则只展示下方由调用方提供的具体表单内容。
  *
  * @param showDialog 是否显示
  * @param title 对话框标题
@@ -269,9 +272,38 @@ fun ManualAddDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
     isLoading: Boolean = false,
+    showImportFromFile: Boolean = false,
+    onImportFromFile: (String) -> Unit = {},
     formContent: @Composable () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val snackbarHost = LocalSnackbarHost.current
+    val scope = rememberCoroutineScope()
+    val onImportFromFileState by rememberUpdatedState(onImportFromFile)
+
+    val fileReadFailedMsg = stringResource(R.string.susfs_entry_import_file_failed)
+    val fileNotTextMsg = stringResource(R.string.susfs_entry_import_file_not_text)
+    val importFromFileLabel = stringResource(R.string.susfs_entry_import_from_file)
+
+    val pickFileLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri?.let {
+            scope.launch {
+                val content = readTextDocument(
+                    context = context,
+                    snackbarHost = snackbarHost,
+                    uri = it,
+                    fileNotTextMsg = fileNotTextMsg,
+                    fileReadFailedMsg = fileReadFailedMsg
+                )
+                if (content.isNotEmpty()) {
+                    onImportFromFileState(content)
+                }
+            }
+        }
+    }
 
     if (showDialog) {
         AlertDialog(
@@ -285,37 +317,58 @@ fun ManualAddDialog(
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = { expanded = !expanded }
-                    ) {
-                        OutlinedTextField(
-                            value = selectedSubtype,
-                            onValueChange = {},
-                            readOnly = true,
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-                            enabled = !isLoading,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        ExposedDropdownMenu(
+                    if (subtypes.size > 1) {
+                        ExposedDropdownMenuBox(
                             expanded = expanded,
-                            onDismissRequest = { expanded = false }
+                            onExpandedChange = { expanded = !expanded }
                         ) {
-                            subtypes.forEach { subtype ->
-                                DropdownMenuItem(
-                                    text = { Text(subtype) },
-                                    onClick = {
-                                        onSubtypeChange(subtype)
-                                        expanded = false
-                                    }
-                                )
+                            OutlinedTextField(
+                                value = selectedSubtype,
+                                onValueChange = {},
+                                readOnly = true,
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                                enabled = !isLoading,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            ExposedDropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                subtypes.forEach { subtype ->
+                                    DropdownMenuItem(
+                                        text = { Text(subtype) },
+                                        onClick = {
+                                            onSubtypeChange(subtype)
+                                            expanded = false
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
                     formContent()
+                    if (showImportFromFile) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            OutlinedButton(
+                                onClick = { pickFileLauncher.launch(arrayOf("text/*")) },
+                                enabled = !isLoading,
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.UploadFile,
+                                    contentDescription = null,
+                                    modifier = Modifier.padding(end = 4.dp)
+                                )
+                                Text(importFromFileLabel)
+                            }
+                        }
+                    }
                 }
             },
             confirmButton = {
@@ -338,4 +391,33 @@ fun ManualAddDialog(
             shape = RoundedCornerShape(12.dp)
         )
     }
+}
+
+private suspend fun readTextDocument(
+    context: android.content.Context,
+    snackbarHost: SnackbarHostState,
+    uri: Uri,
+    fileNotTextMsg: String,
+    fileReadFailedMsg: String,
+): String {
+    val mimeType = context.contentResolver.getType(uri)
+    if (mimeType?.startsWith("text/") != true) {
+        snackbarHost.showSnackbar(fileNotTextMsg)
+        return ""
+    }
+
+    val content = withContext(Dispatchers.IO) {
+        runCatching {
+            context.contentResolver.openInputStream(uri)?.use { stream ->
+                stream.bufferedReader().readText()
+            }.orEmpty()
+        }.getOrDefault("")
+    }
+
+    if (content.isBlank()) {
+        snackbarHost.showSnackbar(fileReadFailedMsg)
+        return ""
+    }
+
+    return content
 }

@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -68,9 +70,6 @@ fun OpenRedirectTab(
     var manualUidScheme by remember { mutableStateOf(UidScheme.NonApp) }
     var uidDropdownExpanded by remember { mutableStateOf(false) }
 
-    val subtypeOpenRedirect = stringResource(R.string.susfs_redirect_target_path)
-    val subtypes = listOf(subtypeOpenRedirect)
-
     val uidSchemeOptions = listOf(
         UidScheme.NonApp to stringResource(R.string.susfs_uid_scheme_non_app),
         UidScheme.RootExceptSu to stringResource(R.string.susfs_uid_scheme_root_except_su),
@@ -117,6 +116,7 @@ fun OpenRedirectTab(
                         iconPlaceholder = false,
                         title = manualAddTitle,
                         enabled = !isLoading,
+                        trailingIcon = Icons.Filled.Add,
                         onClick = { showManualAdd = true }
                     )
                 }
@@ -150,8 +150,8 @@ fun OpenRedirectTab(
     ManualAddDialog(
         showDialog = showManualAdd,
         title = manualAddTitle,
-        subtypes = subtypes,
-        selectedSubtype = subtypeOpenRedirect,
+        subtypes = emptyList(),
+        selectedSubtype = "",
         onSubtypeChange = {},
         onDismiss = { showManualAdd = false },
         onConfirm = {
@@ -165,7 +165,10 @@ fun OpenRedirectTab(
                     entries = SuSFSConfigHelper.refreshConfig().open_redirect
                     showManualAdd = false
                 } else {
-                    snackbarHost.showSnackbar(operationFailedMsg)
+                    isLoading = false
+                    scope.launch {
+                        snackbarHost.showSnackbar(operationFailedMsg)
+                    }
                 }
                 isLoading = false
             }
@@ -242,7 +245,10 @@ fun OpenRedirectTab(
                         entries = SuSFSConfigHelper.refreshConfig().open_redirect
                         detailItem = null
                     } else {
-                        snackbarHost.showSnackbar(operationFailedMsg)
+                        isLoading = false
+                        scope.launch {
+                            snackbarHost.showSnackbar(operationFailedMsg)
+                        }
                     }
                     isLoading = false
                 }
