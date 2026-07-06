@@ -165,7 +165,7 @@ pub enum SuSFSSubCommands {
 
     /// Spoof uname for all processes.
     #[command(name = "set_uname")]
-    SetUname { version: String, release: String },
+    SetUname { release: String, version: String },
 
     /// SUSFS log in kernel.
     #[command(name = "enable_log")]
@@ -392,12 +392,12 @@ pub fn run_main(args: SusfsArgs) -> Result<()> {
                 config.del_sus_kstat(&path);
             }
         }
-        SuSFSSubCommands::SetUname { version, release } => {
+        SuSFSSubCommands::SetUname { release, version } => {
             if do_api {
-                api::set_uname(&version, &release)?;
+                api::set_uname(&release, &version)?;
             }
             if do_config {
-                config.set_uname(&version, &release)?;
+                config.set_uname(&release, &version)?;
             }
         }
         SuSFSSubCommands::HideSusMntsForNonSuProcs { enabled } => {

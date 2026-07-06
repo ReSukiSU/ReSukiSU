@@ -4,7 +4,7 @@ use crate::android::susfs::{
     macros::ensure_path_exists,
     utils::{is_valid_uname_release, is_valid_uname_version},
 };
-use anyhow::{Result, bail};
+use anyhow::Result;
 
 impl Config {
     pub fn set_cmdline_or_bootconfig(&mut self, path: &str) -> Result<&mut Self> {
@@ -30,22 +30,22 @@ impl Config {
         self
     }
 
-    pub fn set_uname(&mut self, version: &str, release: &str) -> Result<&mut Self> {
-        let version = version.trim();
-        let release = release.trim();
+    pub fn set_uname(&mut self, release: &str, version: &str) -> Result<&mut Self> {
+        let mut release = release.to_string();
+        let mut version = version.to_string();
 
-        if !((version == "default" || is_valid_uname_version(version))
-            && (release == "default" || is_valid_uname_release(release)))
-        {
-            bail!(
-                "Uname version ({}) or release ({}) is not valid!",
-                version,
-                release
+        if !(is_valid_uname_release(&release) && is_valid_uname_version(&version)) {
+            log::warn!(
+                "Uname release ({}) or version ({}) is not valid! Falling back to default...",
+                release,
+                version
             );
+            release = "default".to_string();
+            version = "default".to_string();
         }
 
-        self.uname.version = version.to_string();
-        self.uname.release = release.to_string();
+        self.uname.version = version;
+        self.uname.release = release;
 
         Ok(self)
     }

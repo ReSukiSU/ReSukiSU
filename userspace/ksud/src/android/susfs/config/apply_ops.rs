@@ -43,7 +43,7 @@ impl Config {
     }
 
     pub fn apply_uname(&self) -> Result<&Self> {
-        api::set_uname(&self.uname.version, &self.uname.release)?;
+        api::set_uname(&self.uname.release, &self.uname.version)?;
         Ok(self)
     }
 
