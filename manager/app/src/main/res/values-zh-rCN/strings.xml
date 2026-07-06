@@ -704,6 +704,8 @@
     <string name="susfs_standard_uname">Uname</string>
     <string name="susfs_standard_uname_version">Version</string>
     <string name="susfs_standard_uname_release">Release</string>
+    <string name="susfs_standard_uname_release_placeholder">例如：6.6.66-android15-xxx</string>
+    <string name="susfs_standard_uname_version_placeholder">例如：#1 SMP PREEMPT Fri Feb 14 22:29:59 UTC 2025</string>
     <string name="susfs_standard_cmdline_or_bootconfig">Cmdline / Bootconfig</string>
     <string name="susfs_standard_cmdline_path">伪 cmdline/bootconfig 文件路径</string>
     <string name="susfs_standard_edit">编辑</string>

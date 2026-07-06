@@ -715,6 +715,8 @@ Important Note:\n
     <string name="susfs_standard_uname">Uname</string>
     <string name="susfs_standard_uname_version">Version</string>
     <string name="susfs_standard_uname_release">Release</string>
+    <string name="susfs_standard_uname_release_placeholder">e.g. 6.6.66-android15-xxx</string>
+    <string name="susfs_standard_uname_version_placeholder">e.g. #1 SMP PREEMPT Fri Feb 14 22:29:59 UTC 2025</string>
     <string name="susfs_standard_cmdline_or_bootconfig">Cmdline / Bootconfig</string>
     <string name="susfs_standard_cmdline_path">Path to fake cmdline/bootconfig file</string>
     <string name="susfs_standard_edit">Edit</string>

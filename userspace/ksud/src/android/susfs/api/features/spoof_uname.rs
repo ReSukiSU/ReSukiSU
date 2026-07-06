@@ -5,7 +5,7 @@ use crate::android::susfs::{
         magic::{CMD_SUSFS_SET_UNAME, ERR_CMD_NOT_SUPPORTED, NEW_UTS_LEN},
         susfsctl::{communicate, parse_err},
     },
-    utils::{is_valid_uname_release, is_valid_uname_version, str_to_c_array},
+    utils::{ensure_valid_uname_release, ensure_valid_uname_version, str_to_c_array},
 };
 
 #[repr(C)]
@@ -27,18 +27,8 @@ impl Default for SusfsUname {
 
 pub fn set_uname(release: &str, version: &str) -> Result<()> {
     let mut info = SusfsUname::default();
-    let mut release = release.to_string();
-    let mut version = version.to_string();
-
-    if !(is_valid_uname_release(&release) && is_valid_uname_version(&version)) {
-        log::warn!(
-            "Uname release ({}) or version ({}) invalid! Falling back to default...",
-            release,
-            version
-        );
-        release = "default".to_string();
-        version = "default".to_string();
-    }
+    let release = ensure_valid_uname_release(release);
+    let version = ensure_valid_uname_version(version);
 
     // ksud stores spoof_version as the visible uname/release value and spoof_release
     // as the kernel build-time string.

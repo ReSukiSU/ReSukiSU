@@ -2,3 +2,4 @@
 .cargo/config.toml
 *.bak
 *.sh
+/scripts

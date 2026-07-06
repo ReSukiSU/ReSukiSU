@@ -47,7 +47,7 @@ import kotlinx.coroutines.launch
  *
  * 通过 SuSFSConfigHelper.loadConfig() 读取配置，渲染：
  *   - logging / avc_log_spoofing / hide_sus_mnts_for_non_su_procs 三个开关
- *   - uname 编辑卡片（点击弹对话框编辑 version + release）
+ *   - uname 编辑卡片（点击弹对话框编辑 release + version）
  *   - cmdline_or_bootconfig 编辑卡片（点击弹对话框编辑 path）
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -167,7 +167,7 @@ fun StandardFeaturesTab(
             val r = unameReleaseInput.trim()
                 scope.launch {
                     isLoading = true
-                    val ok = SuSFSConfigHelper.setUname(v, r)
+                    val ok = SuSFSConfigHelper.setUname(r, v)
                     if (ok) {
                         unameVersion = v
                         unameRelease = r
@@ -255,12 +255,12 @@ fun StandardFeaturesTab(
                                 title = stringResource(R.string.susfs_standard_uname),
                                 description = stringResource(
                                     R.string.susfs_standard_current_value,
-                                    "$unameVersion / $unameRelease"
+                                    "$unameRelease / $unameVersion"
                                 ),
                                 enabled = !isLoading,
                                 onClick = {
-                                    unameVersionInput = unameVersion
                                     unameReleaseInput = unameRelease
+                                    unameVersionInput = unameVersion
                                     showUnameDialog = true
                                 }
                             )
@@ -312,17 +312,23 @@ fun StandardFeaturesTab(
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         OutlinedTextField(
-                            value = unameVersionInput,
-                            onValueChange = { unameVersionInput = it },
-                            label = { Text(stringResource(R.string.susfs_standard_uname_version)) },
+                            value = unameReleaseInput,
+                            onValueChange = { unameReleaseInput = it },
+                            label = { Text(stringResource(R.string.susfs_standard_uname_release)) },
+                            placeholder = {
+                                Text(stringResource(R.string.susfs_standard_uname_release_placeholder))
+                            },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             shape = RoundedCornerShape(8.dp)
                         )
                         OutlinedTextField(
-                            value = unameReleaseInput,
-                            onValueChange = { unameReleaseInput = it },
-                            label = { Text(stringResource(R.string.susfs_standard_uname_release)) },
+                            value = unameVersionInput,
+                            onValueChange = { unameVersionInput = it },
+                            label = { Text(stringResource(R.string.susfs_standard_uname_version)) },
+                            placeholder = {
+                                Text(stringResource(R.string.susfs_standard_uname_version_placeholder))
+                            },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             shape = RoundedCornerShape(8.dp)

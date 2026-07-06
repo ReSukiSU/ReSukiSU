@@ -306,10 +306,10 @@ object SuSFSConfigHelper {
 
     /**
      * 设置 Uname
-     * 命令: ksud susfs set_uname <version> <release>
+     * 命令: ksud susfs set_uname <release> <version>
      */
-    suspend fun setUname(version: String, release: String): Boolean {
-        return executeSusfsCommand("set_uname '$version' '$release'")
+    suspend fun setUname(release: String, version: String): Boolean {
+        return executeSusfsCommand("set_uname '$release' '$version'")
     }
 
     // ==================== 日志和挂载隐藏相关命令 ====================
