@@ -77,7 +77,7 @@ enum Commands {
         kmi: Option<String>,
 
         /// manager package name
-        #[arg(long, default_value_t = String::from("com.resukisu.resukisu"))]
+        #[arg(long, default_value_t = String::from(defs::DEFAULT_PACKAGE_NAME))]
         package_name: String,
     },
 
@@ -224,7 +224,7 @@ enum Debug {
     /// Set the manager app, kernel CONFIG_KSU_DEBUG should be enabled.
     SetManager {
         /// manager package name
-        #[arg(default_value_t = String::from("com.resukisu.resukisu"))]
+        #[arg(default_value_t = String::from(defs::DEFAULT_PACKAGE_NAME))]
         apk: String,
     },
 
@@ -266,6 +266,9 @@ enum Debug {
 
     /// Get kernel info
     Info,
+
+    /// Print default package name
+    Package,
 }
 
 #[derive(clap::Subcommand, Debug)]
@@ -823,6 +826,10 @@ pub fn run() -> Result<()> {
                     "pr_build: {}",
                     (info.flags & uapi::KSU_GET_INFO_FLAG_PR_BUILD) != 0
                 );
+                Ok(())
+            }
+            Debug::Package => {
+                println!("{}", defs::DEFAULT_PACKAGE_NAME);
                 Ok(())
             }
         },

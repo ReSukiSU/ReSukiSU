@@ -19,6 +19,8 @@ val androidSourceCompatibility = rootProject.extra["androidSourceCompatibility"]
 val androidTargetCompatibility = rootProject.extra["androidTargetCompatibility"] as JavaVersion
 val managerVersionCode = rootProject.extra["managerVersionCode"] as Int
 val managerVersionName = rootProject.extra["managerVersionName"] as String
+val managerPackageName = rootProject.extra["managerPackageName"] as String
+val managerName = rootProject.extra["managerName"] as String
 
 apksign {
     storeFileProperty = "KEYSTORE_FILE"
@@ -80,6 +82,7 @@ android {
     buildFeatures {
         aidl = true
         buildConfig = true
+        resValues = true
         compose = true
         prefab = true
     }
@@ -123,9 +126,11 @@ android {
         targetSdk = androidTargetSdkVersion
         versionCode = managerVersionCode
         versionName = managerVersionName
+        applicationId  = managerPackageName
 
-        val isPrBuild = project.findProperty("IS_PR_BUILD")?.toString()?.toBoolean() ?: false
+        val isPrBuild = rootProject.extra["isPrBuild"] as Boolean
         buildConfigField("boolean", "IS_PR_BUILD", isPrBuild.toString())
+        resValue("string", "app_name", managerName)
 
         externalNativeBuild {
             cmake {
