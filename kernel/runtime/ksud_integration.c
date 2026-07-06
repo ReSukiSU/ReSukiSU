@@ -34,6 +34,29 @@
 #include <linux/vmalloc.h>
 #include <linux/stat.h>
 
+// clang-format off
+#ifdef CONFIG_COMPAT
+    // https://github.com/torvalds/linux/commit/7fe33e9f662c0a2f5110be4afff0a24e0c123540
+    #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 0) || defined(KSU_COMPAT_HAS_NR_COMPAT32_SYSCALLS)
+        #include <asm/unistd_compat_32.h>
+        #define __COMPAT__NR_read __NR_compat32_read
+        #define __COMPAT__NR_fstat64 __NR_compat32_fstat64
+    #else
+        // gen compat syscall
+        // e.g.
+        // _NR_execve -> __COMPAT__NR_execve
+        #define __SYSCALL(nr, sym) __COMPAT##nr = (nr),
+
+        enum ksu_compat_syscall_nr {
+        #include <asm/unistd32.h>
+        };
+
+        #undef __SYSCALL
+        #include <asm/unistd.h>
+    #endif
+#endif
+// clang-format on
+
 #include "arch.h"
 #include "klog.h" // IWYU pragma: keep
 #include "ksu.h"
@@ -86,6 +109,10 @@ static void stop_execve_hook(void);
     {
         ksu_syscall_table_unhook(__NR_read);
         ksu_syscall_table_unhook(__NR_fstat);
+        #ifdef CONFIG_COMPAT
+            ksu_compat_syscall_table_unhook(__COMPAT__NR_read);
+            ksu_compat_syscall_table_unhook(__COMPAT__NR_fstat64);
+        #endif
         pr_info("unregister init_rc syscall hook\n");
         pr_info("stop init_rc_hook!\n");
     }
@@ -992,6 +1019,9 @@ void ksu_execveat_hook_ksud(const struct pt_regs *regs)
 }
 
 static long (*orig_sys_read)(const struct pt_regs *regs);
+#ifdef CONFIG_COMPAT
+static long (*orig_compat_sys_read)(const struct pt_regs *regs);
+#endif
 static long ksu_sys_read(const struct pt_regs *regs)
 {
     unsigned int fd = PT_REGS_PARM1(regs);
@@ -999,10 +1029,23 @@ static long ksu_sys_read(const struct pt_regs *regs)
     size_t *count_ptr = (size_t *)&PT_REGS_PARM3(regs);
 
     ksu_handle_sys_read(fd, buf_ptr, count_ptr);
+
+#if defined(__aarch64__) && defined(CONFIG_COMPAT)
+    if (is_compat_task()) {
+        return orig_compat_sys_read(regs);
+    } else {
+        return orig_sys_read(regs);
+    }
+#else
     return orig_sys_read(regs);
+#endif
 }
 
 static long (*orig_sys_fstat)(const struct pt_regs *regs);
+#ifdef CONFIG_COMPAT
+// Android system use fstat64 for this usecase
+static long (*orig_sys_fstat64)(const struct pt_regs *regs);
+#endif
 static long ksu_sys_fstat(const struct pt_regs *regs)
 {
     unsigned int fd = PT_REGS_PARM1(regs);
@@ -1020,7 +1063,15 @@ static long ksu_sys_fstat(const struct pt_regs *regs)
         fput(file);
     }
 
+#if defined(__aarch64__) && defined(CONFIG_COMPAT)
+    if (is_compat_task()) {
+        ret = orig_sys_fstat64(regs);
+    } else {
+        ret = orig_sys_fstat(regs);
+    }
+#else
     ret = orig_sys_fstat(regs);
+#endif
 
     if (is_rc) {
         void __user *st_size_ptr = statbuf + offsetof(struct stat, st_size);
@@ -1079,6 +1130,11 @@ void __init ksu_ksud_init(void)
 
     ksu_syscall_table_hook(__NR_read, ksu_sys_read, &orig_sys_read);
     ksu_syscall_table_hook(__NR_fstat, ksu_sys_fstat, &orig_sys_fstat);
+
+#ifdef CONFIG_COMPAT
+    ksu_compat_syscall_table_hook(__COMPAT__NR_read, ksu_sys_read, &orig_compat_sys_read);
+    ksu_compat_syscall_table_hook(__COMPAT__NR_fstat64, ksu_sys_fstat, &orig_sys_fstat64);
+#endif
 
     ret = register_kprobe(&input_event_kp);
     pr_info("ksud: input_event_kp: %d\n", ret);

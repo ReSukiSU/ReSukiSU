@@ -15,6 +15,31 @@
 #include <linux/compat.h>
 #endif
 
+// clang-format off
+#ifdef CONFIG_COMPAT
+    // https://github.com/torvalds/linux/commit/7fe33e9f662c0a2f5110be4afff0a24e0c123540
+    #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 0) || defined(KSU_COMPAT_HAS_NR_COMPAT32_SYSCALLS)
+        #include <asm/unistd_compat_32.h>
+        #define __COMPAT__NR_setresuid __NR_compat32_setresuid
+        #define __COMPAT__NR_execve __NR_compat32_execve
+        #define __COMPAT__NR_fstatat64 __NR_compat32_fstatat64
+        #define __COMPAT__NR_faccessat __NR_compat32_faccessat
+    #else
+        // gen compat syscall
+        // e.g.
+        // _NR_execve -> __COMPAT__NR_execve
+        #define __SYSCALL(nr, sym) __COMPAT##nr = (nr),
+
+        enum ksu_compat_syscall_nr {
+        #include <asm/unistd32.h>
+        };
+
+        #undef __SYSCALL
+        #include <asm/unistd.h>
+    #endif
+#endif
+// clang-format on
+
 #include "arch.h"
 #include "klog.h" // IWYU pragma: keep
 #include "hook/syscall_hook_manager.h"
@@ -97,12 +122,16 @@ static struct kretprobe *syscall_unregfunc_rp = NULL;
 // sys_enter handler: redirect hooked syscalls to the dispatcher
 static void ksu_sys_enter_handler(void *data, struct pt_regs *regs, long id)
 {
+// we need handle arm64 kernel with arm32 userspace
 #if defined(__x86_64__)
     if (unlikely(in_compat_syscall()))
+        return;
 #elif defined(__aarch64__)
     if (unlikely(is_compat_task()))
+        goto aarch64_compat;
+#else
+#error Unsupported arch
 #endif
-        return;
 
     if (ksu_dispatcher_nr < 0)
         return;
@@ -120,6 +149,22 @@ static void ksu_sys_enter_handler(void *data, struct pt_regs *regs, long id)
         current_regs->syscallno = ksu_dispatcher_nr;
 #endif
     }
+
+    return;
+aarch64_compat:
+#ifdef CONFIG_COMPAT
+    if (ksu_compat_dispatcher_nr < 0)
+        return;
+
+    if (ksu_has_compat_syscall_hook(id)) {
+        struct pt_regs *current_regs = task_pt_regs(current);
+
+        PT_REGS_ORIG_SYSCALL(current_regs) = id;
+        current_regs->syscallno = ksu_compat_dispatcher_nr;
+    }
+#else
+    return;
+#endif
 }
 #endif
 
@@ -139,6 +184,13 @@ void __init ksu_syscall_hook_manager_init(void)
     ksu_register_syscall_hook(__NR_execveat, ksu_hook_execveat);
     ksu_register_syscall_hook(__NR_newfstatat, ksu_hook_newfstatat);
     ksu_register_syscall_hook(__NR_faccessat, ksu_hook_faccessat);
+
+#ifdef CONFIG_COMPAT
+    ksu_register_compat_syscall_hook(__COMPAT__NR_setresuid, ksu_hook_setresuid);
+    ksu_register_compat_syscall_hook(__COMPAT__NR_execve, ksu_hook_execve);
+    ksu_register_compat_syscall_hook(__COMPAT__NR_fstatat64, ksu_hook_newfstatat);
+    ksu_register_compat_syscall_hook(__COMPAT__NR_faccessat, ksu_hook_faccessat);
+#endif
 
 #ifdef CONFIG_HAVE_SYSCALL_TRACEPOINTS
     ret = register_trace_prio_sys_enter(ksu_sys_enter_handler, NULL, INT_MIN);
@@ -175,6 +227,13 @@ void __exit ksu_syscall_hook_manager_exit(void)
     ksu_unregister_syscall_hook(__NR_execveat);
     ksu_unregister_syscall_hook(__NR_newfstatat);
     ksu_unregister_syscall_hook(__NR_faccessat);
+
+#ifdef CONFIG_COMPAT
+    ksu_unregister_compat_syscall_hook(__COMPAT__NR_setresuid);
+    ksu_unregister_compat_syscall_hook(__COMPAT__NR_execve);
+    ksu_unregister_compat_syscall_hook(__COMPAT__NR_fstatat64);
+    ksu_unregister_compat_syscall_hook(__COMPAT__NR_faccessat);
+#endif
 
     ksu_syscall_hook_exit();
 
