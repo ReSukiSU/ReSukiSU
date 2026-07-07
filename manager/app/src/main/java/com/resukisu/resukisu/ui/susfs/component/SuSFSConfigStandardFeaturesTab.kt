@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -245,7 +246,15 @@ fun StandardFeaturesTab(
                                 description = stringResource(R.string.susfs_standard_hide_sus_mnts_desc),
                                 checked = hideSusMntsEnabled,
                                 enabled = !isLoading && !hideSusMntsBusy,
-                                onCheckedChange = handleHideSusMntsChange
+                                onCheckedChange = handleHideSusMntsChange,
+                                descriptionColumnContent = {
+                                    Text(
+                                        text = stringResource(R.string.susfs_hide_mounts_recommendation),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(top = 4.dp)
+                                    )
+                                }
                             )
                         }
 

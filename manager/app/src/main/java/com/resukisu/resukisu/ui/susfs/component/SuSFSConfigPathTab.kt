@@ -33,6 +33,7 @@ import com.resukisu.resukisu.ui.component.EmptyStateCard
 import com.resukisu.resukisu.ui.component.EntryDetailDialog
 import com.resukisu.resukisu.ui.component.ManualAddDialog
 import com.resukisu.resukisu.ui.component.toImportedEntryLines
+import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
@@ -98,6 +99,14 @@ fun SusPathTab(
 
         item {
             SegmentedColumn {
+                item {
+                    SettingsBaseWidget(
+                        iconPlaceholder = false,
+                        title = stringResource(R.string.sus_loop_paths_description_title),
+                        description = stringResource(R.string.sus_loop_paths_description_text)
+                    )
+                }
+
                 item {
                     SettingsJumpPageWidget(
                         iconPlaceholder = false,

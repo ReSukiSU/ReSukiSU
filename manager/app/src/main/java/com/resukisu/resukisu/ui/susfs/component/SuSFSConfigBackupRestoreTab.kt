@@ -56,9 +56,9 @@ fun BackupRestoreTab(
     var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
 
     val exportTitle = stringResource(R.string.susfs_backup_export)
-    val exportDesc = stringResource(R.string.susfs_backup_export_desc)
+    val exportDesc = stringResource(R.string.susfs_backup_description)
     val importTitle = stringResource(R.string.susfs_backup_import)
-    val importDesc = stringResource(R.string.susfs_backup_import_desc)
+    val importDesc = stringResource(R.string.susfs_restore_description)
     val exportSuccessMsg = stringResource(R.string.susfs_backup_export_success)
     val exportFailedMsg = stringResource(R.string.susfs_backup_export_failed)
     val importSuccessMsg = stringResource(R.string.susfs_backup_import_success)
