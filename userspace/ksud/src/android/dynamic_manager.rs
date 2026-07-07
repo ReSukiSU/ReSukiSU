@@ -72,6 +72,6 @@ pub fn set(size: u32, hash: [u8; 64]) -> Result<()> {
 
     fs::write(defs::DYNAMIC_MANAGER, string)?;
 
-    ksucalls::dynamic_manager_set(size, hash)?;
+    ksucalls::dynamic_manager_set_synchronous(size, hash)?;
     Ok(())
 }

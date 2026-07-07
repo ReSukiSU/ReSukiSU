@@ -288,14 +288,6 @@ private fun SuperUserContent(
             modifier = Modifier
                 .fillMaxSize()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentPadding = remember {
-                PaddingValues(
-                    start = 0.dp,
-                    top = 0.dp,
-                    end = 0.dp,
-                    bottom = 72.dp + 5.dp + 5.dp // FAB + bottom padding of FAB x2
-                )
-            },
         ) {
             item {
                 Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
@@ -313,7 +305,7 @@ private fun SuperUserContent(
             }
 
             item {
-                Spacer(modifier = Modifier.height(bottomPadding + innerPadding.calculateBottomPadding()))
+                Spacer(modifier = Modifier.height(bottomPadding + innerPadding.calculateBottomPadding() + 15.dp))
             }
         }
     }

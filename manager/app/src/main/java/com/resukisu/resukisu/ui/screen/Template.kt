@@ -23,8 +23,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ImportExport
 import androidx.compose.material.icons.filled.Sync
-import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -32,6 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -338,21 +340,35 @@ private fun TopBar(
                     contentDescription = stringResource(id = R.string.app_profile_import_export)
                 )
 
-                DropdownMenu(expanded = showDropdown, onDismissRequest = {
+                DropdownMenuPopup(expanded = showDropdown, onDismissRequest = {
                     showDropdown = false
                 }) {
-                    DropdownMenuItem(text = {
-                        Text(stringResource(id = R.string.app_profile_import_from_clipboard))
-                    }, onClick = {
-                        onImport()
-                        showDropdown = false
-                    })
-                    DropdownMenuItem(text = {
-                        Text(stringResource(id = R.string.app_profile_export_to_clipboard))
-                    }, onClick = {
-                        onExport()
-                        showDropdown = false
-                    })
+                    DropdownMenuGroup(
+                        shapes = MenuDefaults.groupShapes()
+                    ) {
+                        DropdownMenuItem(
+                            selected = false,
+                            text = {
+                                Text(stringResource(id = R.string.app_profile_import_from_clipboard))
+                            },
+                            onClick = {
+                                onImport()
+                                showDropdown = false
+                            },
+                            shapes = MenuDefaults.itemShape(index = 0, count = 2)
+                        )
+                        DropdownMenuItem(
+                            selected = false,
+                            text = {
+                                Text(stringResource(id = R.string.app_profile_export_to_clipboard))
+                            },
+                            onClick = {
+                                onExport()
+                                showDropdown = false
+                            },
+                            shapes = MenuDefaults.itemShape(index = 1, count = 2)
+                        )
+                    }
                 }
             }
         },

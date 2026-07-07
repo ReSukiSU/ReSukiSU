@@ -425,13 +425,9 @@ void track_throne(unsigned int flags)
     struct track_throne_struct *tts = kzalloc(sizeof(struct track_throne_struct), GFP_KERNEL);
     tts->flags = flags;
 
-    if (flags & TRACK_THRONE_FROM_RENAMEAT) {
-        // after renameat hook, packages.list.tmp -> packages.list
-        // don't async for it, or it will always have an race
-        // for example,
-        // we put track_throne task to init
-        // and user install an new app before task_work executed
-        // ^ race here
+    if (flags & TRACK_THRONE_FORCE_SYNCHRONOUS) {
+        // usecase:
+        // renameat & userspace call
 
         do_track_throne(tts);
     } else {
@@ -476,7 +472,13 @@ void ksu_handle_rename(struct dentry *old_dentry, struct dentry *new_dentry)
 
     pr_info("renameat: %s -> %s, new path: %s\n", old_dentry->d_iname, new_dentry->d_iname, buf);
 
-    track_throne(TRACK_THRONE_FROM_RENAMEAT);
+    // after renameat hook, packages.list.tmp -> packages.list
+    // don't async for it, or it will always have an race
+    // for example,
+    // we put track_throne task to init
+    // and user install an new app before task_work executed
+    // ^ race here
+    track_throne(TRACK_THRONE_FROM_RENAMEAT | TRACK_THRONE_FORCE_SYNCHRONOUS);
 }
 #endif
 

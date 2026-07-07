@@ -64,7 +64,7 @@ internal suspend fun prepareWebView(
         webUIState.moduleName = moduleInfo.name
         webUIState.modDir = "/data/adb/modules/${moduleId}"
 
-        if (SuperUserViewModel.getCachedApps().isEmpty()) {
+        if (SuperUserViewModel.getCachedApps(includeManager = true).isEmpty()) {
             SuperUserViewModel().fetchAppList()
         }
         val shell = createRootShell(true)

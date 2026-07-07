@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Update
@@ -310,7 +311,7 @@ fun SettingsPage(bottomPadding: Dp) {
                             }
 
                             item {
-                                // 卸载模块开�?
+                                // 卸载模块开关
                                 SettingsSwitchWidget(
                                     icon = Icons.Rounded.FolderDelete,
                                     title = stringResource(id = R.string.settings_umount_modules_default),
@@ -330,7 +331,7 @@ fun SettingsPage(bottomPadding: Dp) {
                     title = stringResource(R.string.app_settings),
                     content = {
                         item {
-                            // 更新检查开�?
+                            // 更新检查开�?
                             SettingsSwitchWidget(
                                 icon = Icons.Filled.Update,
                                 title = stringResource(R.string.settings_check_update),
@@ -373,6 +374,17 @@ fun SettingsPage(bottomPadding: Dp) {
                         }
 
                         if (ksuIsValid()) {
+                            item {
+                                SettingsJumpPageWidget(
+                                    icon = Icons.Filled.Security,
+                                    title = stringResource(R.string.dynamic_manager_title),
+                                    description = stringResource(R.string.dynamic_manager_settings_summary),
+                                    onClick = {
+                                        navigator.push(Route.DynamicManager)
+                                    }
+                                )
+                            }
+
                             item(visible = uiState.isKernelUmountEnabled) {
                                 SettingsJumpPageWidget(
                                     icon = Icons.Filled.FolderOff,

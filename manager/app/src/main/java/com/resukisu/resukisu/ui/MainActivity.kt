@@ -44,6 +44,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -68,7 +70,9 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.SceneInfo
 import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.scene.rememberSceneState
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
+import androidx.navigation3.ui.NavDisplayTransitionEffects
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.NavigationEventState
 import androidx.navigationevent.compose.rememberNavigationEventState
@@ -94,6 +98,7 @@ import com.resukisu.resukisu.ui.navigation.rememberNavigator
 import com.resukisu.resukisu.ui.screen.AppProfileScreen
 import com.resukisu.resukisu.ui.screen.AppProfileTemplateScreen
 import com.resukisu.resukisu.ui.screen.BottomBarDestination
+import com.resukisu.resukisu.ui.screen.DynamicManagerScreen
 import com.resukisu.resukisu.ui.screen.ExecuteModuleActionScreen
 import com.resukisu.resukisu.ui.screen.FlashIt
 import com.resukisu.resukisu.ui.screen.FlashScreen
@@ -141,6 +146,19 @@ import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.shader.isRenderEffectSupported
 import kotlin.coroutines.resume
+
+private fun Modifier.blockPointerInputWhen(enabled: Boolean): Modifier {
+    if (!enabled) return this
+
+    return pointerInput(Unit) {
+        awaitPointerEventScope {
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Initial)
+                event.changes.forEach { it.consume() }
+            }
+        }
+    }
+}
 
 class MainActivity : ComponentActivity() {
     private lateinit var superUserViewModel: SuperUserViewModel
@@ -491,8 +509,15 @@ class MainActivity : ComponentActivity() {
                                         }
 
                                         with(predictiveBackAnimationHandler) {
+                                            val navTransition =
+                                                LocalNavAnimatedContentScope.current.transition
+                                            val blockInputDuringNavTransition =
+                                                navTransition.isRunning ||
+                                                        navTransition.currentState != navTransition.targetState
+
                                             Box(
                                                 modifier = Modifier
+                                                    .fillMaxSize()
                                                     .predictiveBackAnimationDecorator(
                                                         gestureState?.transitionState,
                                                         content.contentKey,
@@ -502,6 +527,9 @@ class MainActivity : ComponentActivity() {
                                                         if (!ThemeConfig.backgroundImageLoaded) Modifier.background(
                                                             MaterialTheme.colorScheme.surfaceContainer
                                                         ) else Modifier
+                                                    )
+                                                    .blockPointerInputWhen(
+                                                        blockInputDuringNavTransition
                                                     )
                                             ) {
                                                 val surfaceContainer =
@@ -578,6 +606,7 @@ class MainActivity : ComponentActivity() {
                                     entry<Route.ThemeSettings> { ThemeSettingsScreen() }
                                     entry<Route.SuSFSConfig> { SuSFSConfigScreen() }
                                     entry<Route.UmountManager> { UmountManagerScreen() }
+                                    entry<Route.DynamicManager> { DynamicManagerScreen() }
                                     entry<Route.KernelFlash> { key ->
                                         KernelFlashScreen(
                                             key.kernelUri,
@@ -637,7 +666,11 @@ class MainActivity : ComponentActivity() {
                                 with(predictiveBackAnimationHandler) {
                                     onTransitionSpec()
                                 }
-                            }
+                            },
+                            transitionEffects = NavDisplayTransitionEffects(
+                                // Disables touch interception during transitions
+                                blockInputDuringTransition = true
+                            ),
                         )
                     }
                 }

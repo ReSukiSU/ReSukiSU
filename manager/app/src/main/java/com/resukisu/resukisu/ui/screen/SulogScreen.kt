@@ -30,14 +30,16 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -190,25 +192,38 @@ private fun SulogScreenContent(
                             imageVector = Icons.Filled.FilterList,
                             contentDescription = stringResource(R.string.sulog_filter_title),
                         )
-                    }
-                    DropdownMenu(
-                        expanded = showFilterMenu,
-                        onDismissRequest = { showFilterMenu = false },
-                    ) {
-                        SulogEventFilter.entries.forEach { filter ->
-                            DropdownMenuItem(
-                                text = { Text(sulogFilterLabel(filter)) },
-                                trailingIcon = {
-                                    Checkbox(
-                                        checked = filter in state.selectedFilters,
-                                        onCheckedChange = null,
+
+                        DropdownMenuPopup(
+                            expanded = showFilterMenu,
+                            onDismissRequest = { showFilterMenu = false },
+                        ) {
+                            DropdownMenuGroup(
+                                shapes = MenuDefaults.groupShapes()
+                            ) {
+                                Spacer(modifier = Modifier.height(2.dp))
+
+                                SulogEventFilter.entries.forEachIndexed { index, filter ->
+                                    DropdownMenuItem(
+                                        selected = filter in state.selectedFilters,
+                                        text = { Text(sulogFilterLabel(filter)) },
+                                        trailingIcon = {
+                                            Checkbox(
+                                                checked = filter in state.selectedFilters,
+                                                onCheckedChange = null,
+                                            )
+                                        },
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                                            actions.onToggleFilter(filter)
+                                        },
+                                        shapes = MenuDefaults.itemShape(
+                                            index = index,
+                                            count = SulogEventFilter.entries.size
+                                        )
                                     )
-                                },
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
-                                    actions.onToggleFilter(filter)
-                                },
-                            )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                }
+                            }
                         }
                     }
                 },

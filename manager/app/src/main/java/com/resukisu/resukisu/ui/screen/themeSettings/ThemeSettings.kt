@@ -2,12 +2,12 @@ package com.resukisu.resukisu.ui.screen.themeSettings
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -60,8 +60,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -92,6 +90,7 @@ import com.materialkolor.dynamiccolor.ColorSpec
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.ui.component.ConfirmResult
+import com.resukisu.resukisu.ui.component.KeyPointSlider
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
@@ -156,6 +155,9 @@ fun ThemeSettingsScreen() {
     var pendingExternalCropOutputUri by remember { mutableStateOf<Uri?>(null) }
     var showCropMethodDialog by remember { mutableStateOf(false) }
 
+    val externalCropUnavailable = stringResource(R.string.background_external_crop_unavailable)
+    val backgroundCropFailed = stringResource(R.string.background_crop_failed)
+
     val uCropLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -168,7 +170,7 @@ fun ThemeSettingsScreen() {
         } else if (result.resultCode == UCrop.RESULT_ERROR) {
             Toast.makeText(
                 context,
-                context.getString(R.string.background_crop_failed),
+                backgroundCropFailed,
                 Toast.LENGTH_SHORT
             ).show()
         }
@@ -226,16 +228,14 @@ fun ThemeSettingsScreen() {
         }
 
         try {
-            if (intent.resolveActivity(context.packageManager) == null) {
-                throw ActivityNotFoundException()
-            }
             pendingExternalCropOutputUri = uri
             externalCropLauncher.launch(intent)
-        } catch (_: ActivityNotFoundException) {
+        } catch (t: Throwable) {
+            Log.e("ThemeSettings", "External Crop failed, fallback to in-app crop", t)
             pendingExternalCropOutputUri = null
             Toast.makeText(
                 context,
-                context.getString(R.string.background_external_crop_unavailable),
+                externalCropUnavailable,
                 Toast.LENGTH_SHORT
             ).show()
             launchInAppCrop(sourceUri)
@@ -780,17 +780,14 @@ private fun DpiSliderControls(
         label = "DPI Slider Animation"
     )
 
-    Slider(
+    KeyPointSlider(
         value = sliderValue,
         onValueChange = { newValue ->
             viewModel.updateTempDpi(newValue.toInt())
         },
+        modifier = Modifier.fillMaxWidth(),
         valueRange = 160f..600f,
-        colors = SliderDefaults.colors(
-            thumbColor = MaterialTheme.colorScheme.primary,
-            activeTrackColor = MaterialTheme.colorScheme.primary,
-            inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        keyPoints = state.dpiPresets.map { (_, dpi) -> dpi.toFloat() },
     )
 
     // DPI 预设按钮行
@@ -1010,7 +1007,7 @@ private fun AlphaSlider(
                 label = "Alpha Slider Animation"
             )
 
-            Slider(
+            KeyPointSlider(
                 value = alphaSliderValue,
                 onValueChange = { newValue ->
                     viewModel.handleCardAlphaChange(context, newValue)
@@ -1021,11 +1018,7 @@ private fun AlphaSlider(
                     }
                 },
                 valueRange = 0f..1f,
-                colors = SliderDefaults.colors(
-                    thumbColor = MaterialTheme.colorScheme.primary,
-                    activeTrackColor = MaterialTheme.colorScheme.primary,
-                    inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
-                )
+                keyPoints = listOf(0.25f, 0.5f, 0.75f),
             )
         }
     ) {
@@ -1059,7 +1052,7 @@ private fun DimSlider(
                 label = "Dim Slider Animation"
             )
 
-            Slider(
+            KeyPointSlider(
                 value = dimSliderValue,
                 onValueChange = { newValue ->
                     viewModel.handleBackgroundDimChange(context, newValue)
@@ -1070,11 +1063,7 @@ private fun DimSlider(
                     }
                 },
                 valueRange = 0f..1f,
-                colors = SliderDefaults.colors(
-                    thumbColor = MaterialTheme.colorScheme.primary,
-                    activeTrackColor = MaterialTheme.colorScheme.primary,
-                    inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
-                )
+                keyPoints = listOf(0.25f, 0.5f, 0.75f),
             )
         }
     ) {
