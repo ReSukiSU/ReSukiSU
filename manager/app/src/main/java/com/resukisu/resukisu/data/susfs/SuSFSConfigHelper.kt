@@ -2,6 +2,7 @@ package com.resukisu.resukisu.data.susfs
 
 import android.net.Uri
 import android.util.Log
+import androidx.documentfile.provider.DocumentFile
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.annotations.SerializedName
@@ -436,6 +437,11 @@ object SuSFSConfigHelper {
     suspend fun importConfigFromUri(uri: Uri): Boolean = withContext(Dispatchers.IO) {
         val tempFile = File.createTempFile("susfs_import", ".json", ksuApp.cacheDir)
         try {
+            val fileName = DocumentFile.fromSingleUri(ksuApp, uri)?.name.orEmpty()
+            if (!fileName.endsWith(".json", ignoreCase = true)) {
+                Log.e(TAG, "Rejected import file with invalid extension: $fileName")
+                return@withContext false
+            }
             ksuApp.contentResolver.openInputStream(uri)?.use { input ->
                 tempFile.outputStream().use { input.copyTo(it) }
             } ?: run {

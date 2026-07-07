@@ -124,7 +124,7 @@ fun BackupRestoreTab(
                         description = importDesc,
                         enabled = !isLoading,
                         onClick = {
-                            importLauncher.launch(arrayOf("application/json", "*/*"))
+                            importLauncher.launch(arrayOf("application/json"))
                         }
                     )
                 }

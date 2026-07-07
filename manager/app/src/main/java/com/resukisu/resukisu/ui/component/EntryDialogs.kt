@@ -35,6 +35,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.documentfile.provider.DocumentFile
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -81,7 +82,7 @@ fun BatchImportDialog(
     ) { uri: Uri? ->
         uri?.let {
             scope.launch {
-                val content = readTextDocument(
+                val content = readTxtDocument(
                     context = context,
                     snackbarHost = snackbarHost,
                     uri = it,
@@ -127,7 +128,7 @@ fun BatchImportDialog(
                         horizontalArrangement = Arrangement.End
                     ) {
                             OutlinedButton(
-                                onClick = { pickFileLauncher.launch(arrayOf("text/*")) },
+                                onClick = { pickFileLauncher.launch(arrayOf("text/plain")) },
                                 enabled = !isLoading,
                                 shape = RoundedCornerShape(8.dp)
                             ) {
@@ -144,7 +145,7 @@ fun BatchImportDialog(
             confirmButton = {
                 Button(
                     onClick = {
-                        val lines = inputText.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
+                        val lines = inputText.toImportedEntryLines()
                         if (lines.isNotEmpty()) {
                             onConfirm(lines)
                             inputText = ""
@@ -291,7 +292,7 @@ fun ManualAddDialog(
     ) { uri: Uri? ->
         uri?.let {
             scope.launch {
-                val content = readTextDocument(
+                val content = readTxtDocument(
                     context = context,
                     snackbarHost = snackbarHost,
                     uri = it,
@@ -351,12 +352,17 @@ fun ManualAddDialog(
                     }
                     formContent()
                     if (showImportFromFile) {
+                        Text(
+                            text = stringResource(R.string.susfs_entry_import_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.End
                         ) {
                             OutlinedButton(
-                                onClick = { pickFileLauncher.launch(arrayOf("text/*")) },
+                                onClick = { pickFileLauncher.launch(arrayOf("text/plain")) },
                                 enabled = !isLoading,
                                 shape = RoundedCornerShape(8.dp)
                             ) {
@@ -393,15 +399,15 @@ fun ManualAddDialog(
     }
 }
 
-private suspend fun readTextDocument(
+private suspend fun readTxtDocument(
     context: android.content.Context,
     snackbarHost: SnackbarHostState,
     uri: Uri,
     fileNotTextMsg: String,
     fileReadFailedMsg: String,
 ): String {
-    val mimeType = context.contentResolver.getType(uri)
-    if (mimeType?.startsWith("text/") != true) {
+    val fileName = DocumentFile.fromSingleUri(context, uri)?.name.orEmpty()
+    if (!fileName.endsWith(".txt", ignoreCase = true)) {
         snackbarHost.showSnackbar(fileNotTextMsg)
         return ""
     }
@@ -420,4 +426,11 @@ private suspend fun readTextDocument(
     }
 
     return content
+}
+
+fun String.toImportedEntryLines(): List<String> {
+    return lineSequence()
+        .map { it.replace("\uFEFF", "").trim() }
+        .filter { it.isNotEmpty() && !it.startsWith("//") && !it.startsWith("#") }
+        .toList()
 }

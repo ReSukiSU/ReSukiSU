@@ -31,6 +31,7 @@ import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.ui.component.EmptyStateCard
 import com.resukisu.resukisu.ui.component.EntryDetailDialog
 import com.resukisu.resukisu.ui.component.ManualAddDialog
+import com.resukisu.resukisu.ui.component.toImportedEntryLines
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
@@ -136,7 +137,7 @@ fun SusMapTab(
         showImportFromFile = true,
         onImportFromFile = { importedPath -> manualPath = importedPath },
         onConfirm = {
-            val paths = manualPath.lineSequence().map { it.trim() }.filter { it.isNotEmpty() }.toList()
+            val paths = manualPath.toImportedEntryLines()
             if (paths.isEmpty()) return@ManualAddDialog
             scope.launch {
                 isLoading = true
