@@ -4,20 +4,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,7 +34,9 @@ import com.resukisu.resukisu.ui.component.EmptyStateCard
 import com.resukisu.resukisu.ui.component.EntryDetailDialog
 import com.resukisu.resukisu.ui.component.ManualAddDialog
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
+import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
+import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.launch
@@ -65,10 +62,9 @@ fun OpenRedirectTab(
     var showManualAdd by remember { mutableStateOf(false) }
     var detailItem by remember { mutableStateOf<OpenRedirectItem?>(null) }
 
-    var manualTarget by remember { mutableStateOf("") }
-    var manualRedirected by remember { mutableStateOf("") }
+    val manualTarget = remember { TextFieldState() }
+    val manualRedirected = remember { TextFieldState() }
     var manualUidScheme by remember { mutableStateOf(UidScheme.NonApp) }
-    var uidDropdownExpanded by remember { mutableStateOf(false) }
 
     val uidSchemeOptions = listOf(
         UidScheme.NonApp to stringResource(R.string.susfs_uid_scheme_non_app),
@@ -84,10 +80,9 @@ fun OpenRedirectTab(
 
     LaunchedEffect(showManualAdd) {
         if (!showManualAdd) {
-            manualTarget = ""
-            manualRedirected = ""
+            manualTarget.clearText()
+            manualRedirected.clearText()
             manualUidScheme = UidScheme.NonApp
-            uidDropdownExpanded = false
         }
     }
 
@@ -99,6 +94,10 @@ fun OpenRedirectTab(
     val noEntriesMsg = stringResource(R.string.susfs_entry_no_entries)
     val operationFailedMsg = stringResource(R.string.susfs_operation_failed)
     val selectedUidLabel = uidSchemeOptions.first { it.first == manualUidScheme }.second
+
+    fun UidScheme.localizedLabel(): String {
+        return uidSchemeOptions.first { it.first == this }.second
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -139,7 +138,7 @@ fun OpenRedirectTab(
                 SettingsJumpPageWidget(
                     iconPlaceholder = false,
                     title = item.target_path,
-                    description = "${item.redirected_path} · ${item.uid_scheme.name}",
+                    description = "${item.redirected_path} · ${item.uid_scheme.localizedLabel()}",
                     enabled = !isLoading,
                     onClick = { detailItem = item }
                 )
@@ -155,8 +154,8 @@ fun OpenRedirectTab(
         onSubtypeChange = {},
         onDismiss = { showManualAdd = false },
         onConfirm = {
-            val target = manualTarget.trim()
-            val redirected = manualRedirected.trim()
+            val target = manualTarget.text.toString().trim()
+            val redirected = manualRedirected.text.toString().trim()
             if (target.isEmpty() || redirected.isEmpty()) return@ManualAddDialog
             scope.launch {
                 isLoading = true
@@ -176,53 +175,31 @@ fun OpenRedirectTab(
         isLoading = isLoading,
         formContent = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = manualTarget,
-                    onValueChange = { manualTarget = it },
-                    label = { Text(targetPathLabel) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(8.dp)
+                SettingsTextFieldWidget(
+                    state = manualTarget,
+                    title = targetPathLabel,
+                    useLabelAsPlaceholder = true,
+                    enabled = !isLoading,
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    renderBackgroundBlur = false
                 )
-                OutlinedTextField(
-                    value = manualRedirected,
-                    onValueChange = { manualRedirected = it },
-                    label = { Text(redirectedPathLabel) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(8.dp)
+                SettingsTextFieldWidget(
+                    state = manualRedirected,
+                    title = redirectedPathLabel,
+                    useLabelAsPlaceholder = true,
+                    enabled = !isLoading,
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    renderBackgroundBlur = false
                 )
-                ExposedDropdownMenuBox(
-                    expanded = uidDropdownExpanded,
-                    onExpandedChange = { uidDropdownExpanded = !uidDropdownExpanded }
-                ) {
-                    OutlinedTextField(
-                        value = selectedUidLabel,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text(uidSchemeLabel) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = uidDropdownExpanded) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-                        enabled = !isLoading,
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    ExposedDropdownMenu(
-                        expanded = uidDropdownExpanded,
-                        onDismissRequest = { uidDropdownExpanded = false }
-                    ) {
-                        uidSchemeOptions.forEach { (scheme, label) ->
-                            DropdownMenuItem(
-                                text = { Text(label) },
-                                onClick = {
-                                    manualUidScheme = scheme
-                                    uidDropdownExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
+                SettingsDropdownWidget(
+                    title = uidSchemeLabel,
+                    description = selectedUidLabel,
+                    iconPlaceholder = false,
+                    enabled = !isLoading,
+                    choice = uidSchemeOptions.indexOfFirst { it.first == manualUidScheme }.coerceAtLeast(0),
+                    data = uidSchemeOptions.map { it.second },
+                    onChoiceChange = { index -> manualUidScheme = uidSchemeOptions[index].first }
+                )
             }
         }
     )
@@ -234,7 +211,7 @@ fun OpenRedirectTab(
             fields = listOf(
                 targetPathLabel to item.target_path,
                 redirectedPathLabel to item.redirected_path,
-                uidSchemeLabel to item.uid_scheme.name
+                uidSchemeLabel to item.uid_scheme.localizedLabel()
             ),
             onDismiss = { detailItem = null },
             onDelete = {

@@ -726,6 +726,7 @@
     <string name="susfs_standard_cmdline_path">伪 cmdline/bootconfig 文件路径</string>
     <string name="susfs_standard_edit">编辑</string>
     <string name="susfs_standard_current_value">当前值: %1$s</string>
+    <string name="susfs_standard_not_set">未设置</string>
 
     <!-- SUSFS rewrite: entry page common -->
     <string name="susfs_entry_import_list">导入 %1$s 列表</string>
@@ -749,6 +750,7 @@
     <string name="susfs_path_subtype_path">sus_path</string>
     <string name="susfs_path_subtype_loop">sus_path_loop</string>
     <string name="susfs_path_is_loop">Loop</string>
+    <string name="susfs_path_is_not_loop">非 Loop</string>
 
     <!-- SUSFS rewrite: SUS Kstat page -->
     <string name="susfs_kstat_subtype_normal">Normal</string>
@@ -790,6 +792,7 @@
     <string name="susfs_save">保存</string>
     <string name="susfs_operation_failed">操作失败</string>
     <string name="susfs_operation_success">操作成功</string>
+    <string name="susfs_value_default">默认</string>
 
     <!-- SUSFS rewrite: Backup / Restore page -->
     <string name="susfs_backup_export">导出配置</string>

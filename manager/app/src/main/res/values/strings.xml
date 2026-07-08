@@ -279,7 +279,7 @@
     <string name="horizon_kernel_summary">Flash AnyKernel3 kernel file</string>
     <string name="root_required">Requires root privileges</string>
     <string name="reboot_complete_title">Scrubbing complete</string>
-    <string name="reboot_complete_msg">Whether to reboot immediately锛?/string>
+    <string name="reboot_complete_msg">Whether to reboot immediately?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="failed_reboot">Reboot Failed</string>
@@ -314,12 +314,12 @@
     <string name="confirm_uninstall_title_with_filename">Uninstall</string>
     <string name="confirm_uninstall_content">The following KPM will be uninstalled: %s</string>
     <string name="horizon_flash_complete">Flash Complete</string>
-    <string name="horizon_preparing">Preparing鈥?/string>
-    <string name="horizon_cleaning_files">Cleaning files鈥?/string>
-    <string name="horizon_copying_files">Copying files鈥?/string>
-    <string name="horizon_extracting_tool">Extracting flash tool鈥?/string>
-    <string name="horizon_patching_script">Patching flash script鈥?/string>
-    <string name="horizon_flashing">Flashing kernel鈥?/string>
+    <string name="horizon_preparing">Preparing...</string>
+    <string name="horizon_cleaning_files">Cleaning files...</string>
+    <string name="horizon_copying_files">Copying files...</string>
+    <string name="horizon_extracting_tool">Extracting flash tool...</string>
+    <string name="horizon_patching_script">Patching flash script...</string>
+    <string name="horizon_flashing">Flashing kernel...</string>
     <string name="horizon_flash_complete_status">Flash completed</string>
     <string name="select_slot_title">Select Flash Slot</string>
     <string name="select_slot_description">Please select the target slot for flashing boot</string>
@@ -721,6 +721,7 @@ Important Note:\n
     <string name="susfs_standard_cmdline_path">Path to fake cmdline/bootconfig file</string>
     <string name="susfs_standard_edit">Edit</string>
     <string name="susfs_standard_current_value">Current: %1$s</string>
+    <string name="susfs_standard_not_set">Not set</string>
 
     <!-- SUSFS rewrite: entry page common -->
     <string name="susfs_entry_import_list">Import %1$s List</string>
@@ -744,6 +745,7 @@ Important Note:\n
     <string name="susfs_path_subtype_path">sus_path</string>
     <string name="susfs_path_subtype_loop">sus_path_loop</string>
     <string name="susfs_path_is_loop">Loop</string>
+    <string name="susfs_path_is_not_loop">Not loop</string>
 
     <!-- SUSFS rewrite: SUS Kstat page -->
     <string name="susfs_kstat_subtype_normal">Normal</string>
@@ -785,6 +787,7 @@ Important Note:\n
     <string name="susfs_save">Save</string>
     <string name="susfs_operation_failed">Operation failed</string>
     <string name="susfs_operation_success">Operation succeeded</string>
+    <string name="susfs_value_default">Default</string>
 
     <!-- SUSFS rewrite: Backup / Restore page -->
     <string name="susfs_backup_export">Export Configuration</string>

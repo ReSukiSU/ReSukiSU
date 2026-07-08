@@ -2,21 +2,19 @@ package com.resukisu.resukisu.ui.susfs.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.data.susfs.SusKstatItem
+import com.resukisu.resukisu.data.susfs.SusKstatType
 import com.resukisu.resukisu.ui.component.EmptyStateCard
 import com.resukisu.resukisu.ui.component.EntryDetailDialog
 import com.resukisu.resukisu.ui.component.ManualAddDialog
@@ -42,6 +41,7 @@ import com.resukisu.resukisu.ui.component.toImportedEntryLines
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
+import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.launch
@@ -69,19 +69,19 @@ fun SusKstatTab(
     var detailItem by remember { mutableStateOf<SusKstatItem?>(null) }
 
     var selectedSubtype by remember { mutableStateOf("") }
-    var manualPath by remember { mutableStateOf("") }
-    var statIno by remember { mutableStateOf("") }
-    var statDev by remember { mutableStateOf("") }
-    var statNlink by remember { mutableStateOf("") }
-    var statSize by remember { mutableStateOf("") }
-    var statAtime by remember { mutableStateOf("") }
-    var statAtimeNsec by remember { mutableStateOf("") }
-    var statMtime by remember { mutableStateOf("") }
-    var statMtimeNsec by remember { mutableStateOf("") }
-    var statCtime by remember { mutableStateOf("") }
-    var statCtimeNsec by remember { mutableStateOf("") }
-    var statBlocks by remember { mutableStateOf("") }
-    var statBlksize by remember { mutableStateOf("") }
+    val manualPath = remember { TextFieldState() }
+    val statIno = remember { TextFieldState() }
+    val statDev = remember { TextFieldState() }
+    val statNlink = remember { TextFieldState() }
+    val statSize = remember { TextFieldState() }
+    val statAtime = remember { TextFieldState() }
+    val statAtimeNsec = remember { TextFieldState() }
+    val statMtime = remember { TextFieldState() }
+    val statMtimeNsec = remember { TextFieldState() }
+    val statCtime = remember { TextFieldState() }
+    val statCtimeNsec = remember { TextFieldState() }
+    val statBlocks = remember { TextFieldState() }
+    val statBlksize = remember { TextFieldState() }
 
     val subtypeNormal = stringResource(R.string.susfs_kstat_subtype_normal)
     val subtypeFullClone = stringResource(R.string.susfs_kstat_subtype_full_clone)
@@ -96,10 +96,21 @@ fun SusKstatTab(
         if (showManualAdd) {
             if (selectedSubtype.isEmpty()) selectedSubtype = subtypeNormal
         } else {
-            manualPath = ""
-            statIno = ""; statDev = ""; statNlink = ""; statSize = ""
-            statAtime = ""; statAtimeNsec = ""; statMtime = ""; statMtimeNsec = ""
-            statCtime = ""; statCtimeNsec = ""; statBlocks = ""; statBlksize = ""
+            listOf(
+                manualPath,
+                statIno,
+                statDev,
+                statNlink,
+                statSize,
+                statAtime,
+                statAtimeNsec,
+                statMtime,
+                statMtimeNsec,
+                statCtime,
+                statCtimeNsec,
+                statBlocks,
+                statBlksize
+            ).forEach { it.clearText() }
         }
     }
 
@@ -122,6 +133,15 @@ fun SusKstatTab(
     val fieldCtimeNsecLabel = stringResource(R.string.susfs_kstat_field_ctime_nsec)
     val fieldBlocksLabel = stringResource(R.string.susfs_kstat_field_blocks)
     val fieldBlksizeLabel = stringResource(R.string.susfs_kstat_field_blksize)
+    val defaultValueLabel = stringResource(R.string.susfs_value_default)
+
+    fun SusKstatType.localizedLabel(): String {
+        return when (this) {
+            SusKstatType.Normal -> subtypeNormal
+            SusKstatType.FullClone -> subtypeFullClone
+            SusKstatType.Statically -> subtypeStatically
+        }
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -193,7 +213,7 @@ fun SusKstatTab(
                 SettingsJumpPageWidget(
                     iconPlaceholder = false,
                     title = item.path,
-                    description = item.spoof_type.name,
+                    description = item.spoof_type.localizedLabel(),
                     enabled = !isLoading,
                     onClick = { detailItem = item }
                 )
@@ -209,9 +229,9 @@ fun SusKstatTab(
         onSubtypeChange = { selectedSubtype = it },
         onDismiss = { showManualAdd = false },
         showImportFromFile = selectedSubtype != subtypeStatically,
-        onImportFromFile = { importedPath -> manualPath = importedPath },
+        onImportFromFile = { importedPath -> manualPath.setTextAndPlaceCursorAtEnd(importedPath) },
         onConfirm = {
-            val paths = manualPath.toImportedEntryLines()
+            val paths = manualPath.text.toString().toImportedEntryLines()
             if (paths.isEmpty()) return@ManualAddDialog
             scope.launch {
                 isLoading = true
@@ -227,18 +247,18 @@ fun SusKstatTab(
                         subtypeStatically -> {
                             SuSFSConfigHelper.addSusKstatStatically(
                                 path,
-                                statIno.trim().toLongOrNull(),
-                                statDev.trim().toLongOrNull(),
-                                statNlink.trim().toLongOrNull(),
-                                statSize.trim().toLongOrNull(),
-                                statAtime.trim().toLongOrNull(),
-                                statAtimeNsec.trim().toLongOrNull(),
-                                statMtime.trim().toLongOrNull(),
-                                statMtimeNsec.trim().toLongOrNull(),
-                                statCtime.trim().toLongOrNull(),
-                                statCtimeNsec.trim().toLongOrNull(),
-                                statBlocks.trim().toLongOrNull(),
-                                statBlksize.trim().toLongOrNull()
+                                statIno.text.toString().trim().toLongOrNull(),
+                                statDev.text.toString().trim().toLongOrNull(),
+                                statNlink.text.toString().trim().toLongOrNull(),
+                                statSize.text.toString().trim().toLongOrNull(),
+                                statAtime.text.toString().trim().toLongOrNull(),
+                                statAtimeNsec.text.toString().trim().toLongOrNull(),
+                                statMtime.text.toString().trim().toLongOrNull(),
+                                statMtimeNsec.text.toString().trim().toLongOrNull(),
+                                statCtime.text.toString().trim().toLongOrNull(),
+                                statCtimeNsec.text.toString().trim().toLongOrNull(),
+                                statBlocks.text.toString().trim().toLongOrNull(),
+                                statBlksize.text.toString().trim().toLongOrNull()
                             )
                         }
                         else -> {
@@ -274,57 +294,52 @@ fun SusKstatTab(
         isLoading = isLoading,
         formContent = {
             if (selectedSubtype == subtypeStatically) {
-                Column(
-                    modifier = Modifier.verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OutlinedTextField(
-                        value = manualPath,
-                        onValueChange = { manualPath = it },
-                        label = { Text(pathLabel) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = false,
-                        minLines = 4,
-                        shape = RoundedCornerShape(8.dp)
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    SettingsTextFieldWidget(
+                        state = manualPath,
+                        title = pathLabel,
+                        useLabelAsPlaceholder = true,
+                        enabled = !isLoading,
+                        lineLimits = TextFieldLineLimits.MultiLine(minHeightInLines = 4, maxHeightInLines = 8),
+                        renderBackgroundBlur = false
                     )
                     Text(
                         text = staticallyFieldsLabel,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(value = statIno, onValueChange = { statIno = it }, label = { Text(fieldInoLabel) }, modifier = Modifier.weight(1f), singleLine = true, shape = RoundedCornerShape(8.dp))
-                        OutlinedTextField(value = statDev, onValueChange = { statDev = it }, label = { Text(fieldDevLabel) }, modifier = Modifier.weight(1f), singleLine = true, shape = RoundedCornerShape(8.dp))
-                    }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(value = statNlink, onValueChange = { statNlink = it }, label = { Text(fieldNlinkLabel) }, modifier = Modifier.weight(1f), singleLine = true, shape = RoundedCornerShape(8.dp))
-                        OutlinedTextField(value = statSize, onValueChange = { statSize = it }, label = { Text(fieldSizeLabel) }, modifier = Modifier.weight(1f), singleLine = true, shape = RoundedCornerShape(8.dp))
-                    }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(value = statAtime, onValueChange = { statAtime = it }, label = { Text(fieldAtimeLabel) }, modifier = Modifier.weight(1f), singleLine = true, shape = RoundedCornerShape(8.dp))
-                        OutlinedTextField(value = statAtimeNsec, onValueChange = { statAtimeNsec = it }, label = { Text(fieldAtimeNsecLabel) }, modifier = Modifier.weight(1f), singleLine = true, shape = RoundedCornerShape(8.dp))
-                    }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(value = statMtime, onValueChange = { statMtime = it }, label = { Text(fieldMtimeLabel) }, modifier = Modifier.weight(1f), singleLine = true, shape = RoundedCornerShape(8.dp))
-                        OutlinedTextField(value = statMtimeNsec, onValueChange = { statMtimeNsec = it }, label = { Text(fieldMtimeNsecLabel) }, modifier = Modifier.weight(1f), singleLine = true, shape = RoundedCornerShape(8.dp))
-                    }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(value = statCtime, onValueChange = { statCtime = it }, label = { Text(fieldCtimeLabel) }, modifier = Modifier.weight(1f), singleLine = true, shape = RoundedCornerShape(8.dp))
-                        OutlinedTextField(value = statCtimeNsec, onValueChange = { statCtimeNsec = it }, label = { Text(fieldCtimeNsecLabel) }, modifier = Modifier.weight(1f), singleLine = true, shape = RoundedCornerShape(8.dp))
-                    }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(value = statBlocks, onValueChange = { statBlocks = it }, label = { Text(fieldBlocksLabel) }, modifier = Modifier.weight(1f), singleLine = true, shape = RoundedCornerShape(8.dp))
-                        OutlinedTextField(value = statBlksize, onValueChange = { statBlksize = it }, label = { Text(fieldBlksizeLabel) }, modifier = Modifier.weight(1f), singleLine = true, shape = RoundedCornerShape(8.dp))
+                    listOf(
+                        fieldInoLabel to statIno,
+                        fieldDevLabel to statDev,
+                        fieldNlinkLabel to statNlink,
+                        fieldSizeLabel to statSize,
+                        fieldAtimeLabel to statAtime,
+                        fieldAtimeNsecLabel to statAtimeNsec,
+                        fieldMtimeLabel to statMtime,
+                        fieldMtimeNsecLabel to statMtimeNsec,
+                        fieldCtimeLabel to statCtime,
+                        fieldCtimeNsecLabel to statCtimeNsec,
+                        fieldBlocksLabel to statBlocks,
+                        fieldBlksizeLabel to statBlksize
+                    ).forEach { (label, state) ->
+                        SettingsTextFieldWidget(
+                            state = state,
+                            title = label,
+                            useLabelAsPlaceholder = true,
+                            enabled = !isLoading,
+                            lineLimits = TextFieldLineLimits.SingleLine,
+                            renderBackgroundBlur = false
+                        )
                     }
                 }
             } else {
-                OutlinedTextField(
-                    value = manualPath,
-                    onValueChange = { manualPath = it },
-                    label = { Text(pathLabel) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(8.dp)
+                SettingsTextFieldWidget(
+                    state = manualPath,
+                    title = pathLabel,
+                    useLabelAsPlaceholder = true,
+                    enabled = !isLoading,
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    renderBackgroundBlur = false
                 )
             }
         }
@@ -333,21 +348,21 @@ fun SusKstatTab(
     detailItem?.let { item ->
         val fields = mutableListOf<Pair<String, String>>(
             pathLabel to item.path,
-            spoofTypeLabel to item.spoof_type.name
+            spoofTypeLabel to item.spoof_type.localizedLabel()
         )
         item.statically?.let { st ->
-            fields.add(fieldInoLabel to (st.ino?.toString() ?: "default"))
-            fields.add(fieldDevLabel to (st.dev?.toString() ?: "default"))
-            fields.add(fieldNlinkLabel to (st.nlink?.toString() ?: "default"))
-            fields.add(fieldSizeLabel to (st.size?.toString() ?: "default"))
-            fields.add(fieldAtimeLabel to (st.atime?.toString() ?: "default"))
-            fields.add(fieldAtimeNsecLabel to (st.atime_nsec?.toString() ?: "default"))
-            fields.add(fieldMtimeLabel to (st.mtime?.toString() ?: "default"))
-            fields.add(fieldMtimeNsecLabel to (st.mtime_nsec?.toString() ?: "default"))
-            fields.add(fieldCtimeLabel to (st.ctime?.toString() ?: "default"))
-            fields.add(fieldCtimeNsecLabel to (st.ctime_nsec?.toString() ?: "default"))
-            fields.add(fieldBlocksLabel to (st.blocks?.toString() ?: "default"))
-            fields.add(fieldBlksizeLabel to (st.blksize?.toString() ?: "default"))
+            fields.add(fieldInoLabel to (st.ino?.toString() ?: defaultValueLabel))
+            fields.add(fieldDevLabel to (st.dev?.toString() ?: defaultValueLabel))
+            fields.add(fieldNlinkLabel to (st.nlink?.toString() ?: defaultValueLabel))
+            fields.add(fieldSizeLabel to (st.size?.toString() ?: defaultValueLabel))
+            fields.add(fieldAtimeLabel to (st.atime?.toString() ?: defaultValueLabel))
+            fields.add(fieldAtimeNsecLabel to (st.atime_nsec?.toString() ?: defaultValueLabel))
+            fields.add(fieldMtimeLabel to (st.mtime?.toString() ?: defaultValueLabel))
+            fields.add(fieldMtimeNsecLabel to (st.mtime_nsec?.toString() ?: defaultValueLabel))
+            fields.add(fieldCtimeLabel to (st.ctime?.toString() ?: defaultValueLabel))
+            fields.add(fieldCtimeNsecLabel to (st.ctime_nsec?.toString() ?: defaultValueLabel))
+            fields.add(fieldBlocksLabel to (st.blocks?.toString() ?: defaultValueLabel))
+            fields.add(fieldBlksizeLabel to (st.blksize?.toString() ?: defaultValueLabel))
         }
         EntryDetailDialog(
             showDialog = true,

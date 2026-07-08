@@ -8,17 +8,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.UploadFile
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -38,9 +31,10 @@ import androidx.compose.ui.Modifier
 import androidx.documentfile.provider.DocumentFile
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.component.settings.SettingsDialogFrame
+import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -97,16 +91,32 @@ fun BatchImportDialog(
     }
 
     if (showDialog) {
-        AlertDialog(
+        SettingsDialogFrame(
+            title = title,
             onDismissRequest = onDismiss,
-            title = {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
+            buttons = {
+                TextButton(
+                    onClick = {
+                        onDismiss()
+                        inputText = ""
+                    }
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+                Button(
+                    onClick = {
+                        val lines = inputText.toImportedEntryLines()
+                        if (lines.isNotEmpty()) {
+                            onConfirm(lines)
+                            inputText = ""
+                        }
+                    },
+                    enabled = !isLoading && inputText.isNotBlank()
+                ) {
+                    Text(stringResource(R.string.add))
+                }
+            }
+        ) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
                         text = hint,
@@ -120,8 +130,7 @@ fun BatchImportDialog(
                         enabled = !isLoading,
                         singleLine = false,
                         minLines = 4,
-                        maxLines = 8,
-                        shape = RoundedCornerShape(8.dp)
+                        maxLines = 8
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -129,8 +138,7 @@ fun BatchImportDialog(
                     ) {
                             OutlinedButton(
                                 onClick = { pickFileLauncher.launch(arrayOf("text/plain")) },
-                                enabled = !isLoading,
-                                shape = RoundedCornerShape(8.dp)
+                                enabled = !isLoading
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.UploadFile,
@@ -141,35 +149,7 @@ fun BatchImportDialog(
                             }
                     }
                 }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val lines = inputText.toImportedEntryLines()
-                        if (lines.isNotEmpty()) {
-                            onConfirm(lines)
-                            inputText = ""
-                        }
-                    },
-                    enabled = !isLoading && inputText.isNotBlank(),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(stringResource(R.string.add))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        onDismiss()
-                        inputText = ""
-                    },
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
-            },
-            shape = RoundedCornerShape(12.dp)
-        )
+        }
     }
 }
 
@@ -195,16 +175,24 @@ fun EntryDetailDialog(
     isLoading: Boolean = false
 ) {
     if (showDialog) {
-        AlertDialog(
+        SettingsDialogFrame(
+            title = title,
             onDismissRequest = onDismiss,
-            title = {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
+            buttons = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.cancel))
+                }
+                Button(
+                    onClick = onDelete,
+                    enabled = !isLoading,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text(stringResource(R.string.delete))
+                }
+            }
+        ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     fields.forEach { (label, value) ->
                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -221,29 +209,7 @@ fun EntryDetailDialog(
                         }
                     }
                 }
-            },
-            confirmButton = {
-                Button(
-                    onClick = onDelete,
-                    enabled = !isLoading,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(stringResource(R.string.delete))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = onDismiss,
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
-            },
-            shape = RoundedCornerShape(12.dp)
-        )
+        }
     }
 }
 
@@ -262,7 +228,6 @@ fun EntryDetailDialog(
  * @param isLoading 是否加载中（加载时禁用交互）
  * @param formContent 由调用方提供的表单内容
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManualAddDialog(
     showDialog: Boolean,
@@ -277,7 +242,6 @@ fun ManualAddDialog(
     onImportFromFile: (String) -> Unit = {},
     formContent: @Composable () -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val snackbarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
@@ -307,48 +271,32 @@ fun ManualAddDialog(
     }
 
     if (showDialog) {
-        AlertDialog(
+        SettingsDialogFrame(
+            title = title,
             onDismissRequest = onDismiss,
-            title = {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
+            buttons = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.cancel))
+                }
+                Button(
+                    onClick = onConfirm,
+                    enabled = !isLoading
+                ) {
+                    Text(stringResource(R.string.add))
+                }
+            }
+        ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     if (subtypes.size > 1) {
-                        ExposedDropdownMenuBox(
-                            expanded = expanded,
-                            onExpandedChange = { expanded = !expanded }
-                        ) {
-                            OutlinedTextField(
-                                value = selectedSubtype,
-                                onValueChange = {},
-                                readOnly = true,
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-                                enabled = !isLoading,
-                                shape = RoundedCornerShape(8.dp)
-                            )
-                            ExposedDropdownMenu(
-                                expanded = expanded,
-                                onDismissRequest = { expanded = false }
-                            ) {
-                                subtypes.forEach { subtype ->
-                                    DropdownMenuItem(
-                                        text = { Text(subtype) },
-                                        onClick = {
-                                            onSubtypeChange(subtype)
-                                            expanded = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
+                        SettingsDropdownWidget(
+                            title = stringResource(R.string.susfs_entry_select_subtype),
+                            description = selectedSubtype,
+                            iconPlaceholder = false,
+                            enabled = !isLoading,
+                            choice = subtypes.indexOf(selectedSubtype).coerceAtLeast(0),
+                            data = subtypes,
+                            onChoiceChange = { index -> onSubtypeChange(subtypes[index]) }
+                        )
                     }
                     formContent()
                     if (showImportFromFile) {
@@ -363,8 +311,7 @@ fun ManualAddDialog(
                         ) {
                             OutlinedButton(
                                 onClick = { pickFileLauncher.launch(arrayOf("text/plain")) },
-                                enabled = !isLoading,
-                                shape = RoundedCornerShape(8.dp)
+                                enabled = !isLoading
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.UploadFile,
@@ -376,26 +323,7 @@ fun ManualAddDialog(
                         }
                     }
                 }
-            },
-            confirmButton = {
-                Button(
-                    onClick = onConfirm,
-                    enabled = !isLoading,
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(stringResource(R.string.add))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = onDismiss,
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
-            },
-            shape = RoundedCornerShape(12.dp)
-        )
+        }
     }
 }
 

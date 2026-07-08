@@ -2,18 +2,19 @@ package com.resukisu.resukisu.ui.susfs.component
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +39,7 @@ import com.resukisu.resukisu.ui.component.toImportedEntryLines
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
+import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.launch
@@ -64,7 +66,7 @@ fun SusMapTab(
     var showManualAdd by remember { mutableStateOf(false) }
     var detailItem by remember { mutableStateOf<String?>(null) }
 
-    var manualPath by remember { mutableStateOf("") }
+    val manualPath = remember { TextFieldState() }
 
     val subtypeSusMap = stringResource(R.string.susfs_map_subtype)
     val subtypes = listOf(subtypeSusMap)
@@ -75,7 +77,7 @@ fun SusMapTab(
 
     LaunchedEffect(showManualAdd) {
         if (!showManualAdd) {
-            manualPath = ""
+            manualPath.clearText()
         }
     }
 
@@ -164,9 +166,9 @@ fun SusMapTab(
         onSubtypeChange = {},
         onDismiss = { showManualAdd = false },
         showImportFromFile = true,
-        onImportFromFile = { importedPath -> manualPath = importedPath },
+        onImportFromFile = { importedPath -> manualPath.setTextAndPlaceCursorAtEnd(importedPath) },
         onConfirm = {
-            val paths = manualPath.toImportedEntryLines()
+            val paths = manualPath.text.toString().toImportedEntryLines()
             if (paths.isEmpty()) return@ManualAddDialog
             scope.launch {
                 isLoading = true
@@ -201,15 +203,13 @@ fun SusMapTab(
         },
         isLoading = isLoading,
         formContent = {
-            OutlinedTextField(
-                value = manualPath,
-                onValueChange = { manualPath = it },
-                label = { Text(pathLabel) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = false,
-                minLines = 4,
-                maxLines = 8,
-                shape = RoundedCornerShape(8.dp)
+            SettingsTextFieldWidget(
+                state = manualPath,
+                title = pathLabel,
+                useLabelAsPlaceholder = true,
+                enabled = !isLoading,
+                lineLimits = TextFieldLineLimits.MultiLine(minHeightInLines = 4, maxHeightInLines = 8),
+                renderBackgroundBlur = false
             )
         }
     )

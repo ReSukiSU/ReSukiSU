@@ -7,10 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -24,12 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
+import com.resukisu.resukisu.ui.component.settings.SettingsDialogFrame
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.launch
@@ -146,22 +143,19 @@ fun BackupRestoreTab(
     }
 
     if (showImportConfirm) {
-        AlertDialog(
+        SettingsDialogFrame(
+            title = confirmTitle,
             onDismissRequest = {
                 showImportConfirm = false
                 pendingImportUri = null
             },
-            title = {
-                Text(
-                    text = confirmTitle,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Text(text = confirmMsg)
-            },
-            confirmButton = {
+            buttons = {
+                TextButton(onClick = {
+                    showImportConfirm = false
+                    pendingImportUri = null
+                }) {
+                    Text(cancelLabel)
+                }
                 TextButton(
                     onClick = {
                         val uri = pendingImportUri
@@ -182,17 +176,10 @@ fun BackupRestoreTab(
                 ) {
                     Text(importLabel)
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    showImportConfirm = false
-                    pendingImportUri = null
-                }) {
-                    Text(cancelLabel)
-                }
-            },
-            shape = RoundedCornerShape(12.dp)
-        )
+            }
+        ) {
+            Text(text = confirmMsg)
+        }
     }
 }
 

@@ -1,23 +1,18 @@
 package com.resukisu.resukisu.ui.susfs.component
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -32,14 +27,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
+import com.resukisu.resukisu.ui.component.settings.SettingsDialogFrame
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
+import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.launch
 
@@ -68,16 +64,16 @@ fun StandardFeaturesTab(
     var loggingBusy by remember { mutableStateOf(false) }
     var avcLogSpoofingBusy by remember { mutableStateOf(false) }
     var hideSusMntsBusy by remember { mutableStateOf(false) }
-    var unameVersion by remember { mutableStateOf("default") }
-    var unameRelease by remember { mutableStateOf("default") }
+    var unameVersion by remember { mutableStateOf("") }
+    var unameRelease by remember { mutableStateOf("") }
     var cmdlineOrBootconfig by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
 
     var showUnameDialog by remember { mutableStateOf(false) }
     var showCmdlineDialog by remember { mutableStateOf(false) }
-    var unameVersionInput by remember { mutableStateOf("") }
-    var unameReleaseInput by remember { mutableStateOf("") }
-    var cmdlineInput by remember { mutableStateOf("") }
+    val unameVersionInput = remember { TextFieldState() }
+    val unameReleaseInput = remember { TextFieldState() }
+    val cmdlineInput = remember { TextFieldState() }
 
     val operationFailedMsg = stringResource(R.string.susfs_operation_failed)
 
@@ -164,8 +160,8 @@ fun StandardFeaturesTab(
 
     val handleUnameSave: () -> Unit = remember(scope, snackbarHost, operationFailedMsg) {
         {
-            val v = unameVersionInput.trim()
-            val r = unameReleaseInput.trim()
+            val v = unameVersionInput.text.toString().trim()
+            val r = unameReleaseInput.text.toString().trim()
                 scope.launch {
                     isLoading = true
                     val ok = SuSFSConfigHelper.setUname(r, v)
@@ -186,7 +182,7 @@ fun StandardFeaturesTab(
 
     val handleCmdlineSave: () -> Unit = remember(scope, snackbarHost, operationFailedMsg) {
         {
-            val p = cmdlineInput.trim()
+            val p = cmdlineInput.text.toString().trim()
                 scope.launch {
                     isLoading = true
                     val ok = SuSFSConfigHelper.setCmdlineOrBootconfig(p)
@@ -268,8 +264,8 @@ fun StandardFeaturesTab(
                                 ),
                                 enabled = !isLoading,
                                 onClick = {
-                                    unameReleaseInput = unameRelease
-                                    unameVersionInput = unameVersion
+                                    unameReleaseInput.setTextAndPlaceCursorAtEnd(unameRelease)
+                                    unameVersionInput.setTextAndPlaceCursorAtEnd(unameVersion)
                                     showUnameDialog = true
                                 }
                             )
@@ -281,11 +277,11 @@ fun StandardFeaturesTab(
                                 title = stringResource(R.string.susfs_standard_cmdline_or_bootconfig),
                                 description = stringResource(
                                     R.string.susfs_standard_current_value,
-                                    cmdlineOrBootconfig.ifBlank { "—" }
+                                    cmdlineOrBootconfig.ifBlank { stringResource(R.string.susfs_standard_not_set) }
                                 ),
                                 enabled = !isLoading,
                                 onClick = {
-                                    cmdlineInput = cmdlineOrBootconfig
+                                    cmdlineInput.setTextAndPlaceCursorAtEnd(cmdlineOrBootconfig)
                                     showCmdlineDialog = true
                                 }
                             )
@@ -309,42 +305,13 @@ fun StandardFeaturesTab(
         }
 
         if (showUnameDialog) {
-            AlertDialog(
+            SettingsDialogFrame(
+                title = stringResource(R.string.susfs_standard_uname),
                 onDismissRequest = { showUnameDialog = false },
-                title = {
-                    Text(
-                        text = stringResource(R.string.susfs_standard_uname),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        OutlinedTextField(
-                            value = unameReleaseInput,
-                            onValueChange = { unameReleaseInput = it },
-                            label = { Text(stringResource(R.string.susfs_standard_uname_release)) },
-                            placeholder = {
-                                Text(stringResource(R.string.susfs_standard_uname_release_placeholder))
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        OutlinedTextField(
-                            value = unameVersionInput,
-                            onValueChange = { unameVersionInput = it },
-                            label = { Text(stringResource(R.string.susfs_standard_uname_version)) },
-                            placeholder = {
-                                Text(stringResource(R.string.susfs_standard_uname_version_placeholder))
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            shape = RoundedCornerShape(8.dp)
-                        )
+                buttons = {
+                    TextButton(onClick = { showUnameDialog = false }) {
+                        Text(stringResource(R.string.susfs_entry_cancel))
                     }
-                },
-                confirmButton = {
                     TextButton(
                         onClick = handleUnameSave,
                         enabled = !isLoading
@@ -352,36 +319,34 @@ fun StandardFeaturesTab(
                         Text(stringResource(R.string.susfs_save))
                     }
                 },
-                dismissButton = {
-                    TextButton(onClick = { showUnameDialog = false }) {
-                        Text(stringResource(R.string.susfs_entry_cancel))
-                    }
-                },
-                shape = RoundedCornerShape(12.dp)
-            )
+            ) {
+                SettingsTextFieldWidget(
+                    state = unameReleaseInput,
+                    title = stringResource(R.string.susfs_standard_uname_release),
+                    useLabelAsPlaceholder = true,
+                    enabled = !isLoading,
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    renderBackgroundBlur = false
+                )
+                SettingsTextFieldWidget(
+                    state = unameVersionInput,
+                    title = stringResource(R.string.susfs_standard_uname_version),
+                    useLabelAsPlaceholder = true,
+                    enabled = !isLoading,
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    renderBackgroundBlur = false
+                )
+            }
         }
 
         if (showCmdlineDialog) {
-            AlertDialog(
+            SettingsDialogFrame(
+                title = stringResource(R.string.susfs_standard_cmdline_or_bootconfig),
                 onDismissRequest = { showCmdlineDialog = false },
-                title = {
-                    Text(
-                        text = stringResource(R.string.susfs_standard_cmdline_or_bootconfig),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                text = {
-                    OutlinedTextField(
-                        value = cmdlineInput,
-                        onValueChange = { cmdlineInput = it },
-                        label = { Text(stringResource(R.string.susfs_standard_cmdline_path)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                },
-                confirmButton = {
+                buttons = {
+                    TextButton(onClick = { showCmdlineDialog = false }) {
+                        Text(stringResource(R.string.susfs_entry_cancel))
+                    }
                     TextButton(
                         onClick = handleCmdlineSave,
                         enabled = !isLoading
@@ -389,13 +354,16 @@ fun StandardFeaturesTab(
                         Text(stringResource(R.string.susfs_save))
                     }
                 },
-                dismissButton = {
-                    TextButton(onClick = { showCmdlineDialog = false }) {
-                        Text(stringResource(R.string.susfs_entry_cancel))
-                    }
-                },
-                shape = RoundedCornerShape(12.dp)
-            )
+            ) {
+                SettingsTextFieldWidget(
+                    state = cmdlineInput,
+                    title = stringResource(R.string.susfs_standard_cmdline_path),
+                    useLabelAsPlaceholder = true,
+                    enabled = !isLoading,
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    renderBackgroundBlur = false
+                )
+            }
         }
     }
 }

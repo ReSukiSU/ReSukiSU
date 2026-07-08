@@ -59,13 +59,14 @@ import kotlinx.coroutines.launch
 /**
  * SuSFS 配置界面主框架
  *
- * 采用 LargeFlexibleTopAppBar + PrimaryScrollableTabRow + HorizontalPager 结构，包含 6 个标签页：
+ * 采用 LargeFlexibleTopAppBar + PrimaryScrollableTabRow + HorizontalPager 结构，包含 7 个标签页：
  * - Status: 状态总览
  * - Standard: 标准功能
  * - SusPath: SUS Path
  * - SusKstat: SUS Kstat
  * - OpenRedirect: Open Redirect
  * - SusMap: SUS Map
+ * - BackupRestore: Backup / Restore
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable

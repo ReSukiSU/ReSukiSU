@@ -2,16 +2,16 @@ package com.resukisu.resukisu.ui.susfs.component
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,6 +36,7 @@ import com.resukisu.resukisu.ui.component.toImportedEntryLines
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
+import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.launch
@@ -63,7 +64,7 @@ fun SusPathTab(
     var detailItem by remember { mutableStateOf<SusPathItem?>(null) }
 
     var selectedSubtype by remember { mutableStateOf("") }
-    var manualPath by remember { mutableStateOf("") }
+    val manualPath = remember { TextFieldState() }
 
     val subtypePath = stringResource(R.string.susfs_path_subtype_path)
     val subtypeLoop = stringResource(R.string.susfs_path_subtype_loop)
@@ -77,7 +78,7 @@ fun SusPathTab(
         if (showManualAdd) {
             if (selectedSubtype.isEmpty()) selectedSubtype = subtypePath
         } else {
-            manualPath = ""
+            manualPath.clearText()
         }
     }
 
@@ -85,6 +86,7 @@ fun SusPathTab(
     val detailTitle = stringResource(R.string.susfs_entry_detail)
     val pathLabel = stringResource(R.string.susfs_entry_path_label)
     val isLoopLabel = stringResource(R.string.susfs_path_is_loop)
+    val isNotLoopLabel = stringResource(R.string.susfs_path_is_not_loop)
     val noEntriesMsg = stringResource(R.string.susfs_entry_no_entries)
     val operationFailedMsg = stringResource(R.string.susfs_operation_failed)
 
@@ -151,9 +153,9 @@ fun SusPathTab(
         onSubtypeChange = { selectedSubtype = it },
         onDismiss = { showManualAdd = false },
         showImportFromFile = true,
-        onImportFromFile = { importedPath -> manualPath = importedPath },
+        onImportFromFile = { importedPath -> manualPath.setTextAndPlaceCursorAtEnd(importedPath) },
         onConfirm = {
-            val paths = manualPath.toImportedEntryLines()
+            val paths = manualPath.text.toString().toImportedEntryLines()
             if (paths.isEmpty()) return@ManualAddDialog
             scope.launch {
                 isLoading = true
@@ -193,15 +195,13 @@ fun SusPathTab(
         },
         isLoading = isLoading,
         formContent = {
-            OutlinedTextField(
-                value = manualPath,
-                onValueChange = { manualPath = it },
-                label = { Text(pathLabel) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = false,
-                minLines = 4,
-                maxLines = 8,
-                shape = RoundedCornerShape(8.dp)
+            SettingsTextFieldWidget(
+                state = manualPath,
+                title = pathLabel,
+                useLabelAsPlaceholder = true,
+                enabled = !isLoading,
+                lineLimits = TextFieldLineLimits.MultiLine(minHeightInLines = 4, maxHeightInLines = 8),
+                renderBackgroundBlur = false
             )
         }
     )
@@ -212,7 +212,7 @@ fun SusPathTab(
             title = detailTitle,
             fields = listOf(
                 pathLabel to item.path,
-                isLoopLabel to item.is_loop.toString()
+                isLoopLabel to if (item.is_loop) isLoopLabel else isNotLoopLabel
             ),
             onDismiss = { detailItem = null },
             onDelete = {
