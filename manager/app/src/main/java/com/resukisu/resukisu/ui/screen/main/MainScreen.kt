@@ -1,11 +1,14 @@
 package com.resukisu.resukisu.ui.screen.main
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -21,16 +24,27 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.resukisu.resukisu.ui.LocalMainPagerState
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.activity.component.NavigationBar
+import com.resukisu.resukisu.ui.component.bottombar.BottomBar
+import com.resukisu.resukisu.ui.component.bottombar.SideRail
+import com.resukisu.resukisu.ui.component.bottombar.rememberMainPagerState
 import com.resukisu.resukisu.ui.rememberMaterial3BlurBackdrop
 import com.resukisu.resukisu.ui.screen.BottomBarDestination
+import com.resukisu.resukisu.ui.theme.LocalEnableFloatingBottomBar
+import com.resukisu.resukisu.ui.theme.LocalEnableFloatingBottomBarBlur
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.LocalBlurState
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import com.resukisu.resukisu.ui.util.LocalHandlePageChange
 import com.resukisu.resukisu.ui.util.LocalPagerState
 import com.resukisu.resukisu.ui.util.LocalSelectedPage
@@ -110,20 +124,52 @@ fun MainScreen() {
         handlePageChange(0)
     }
 
+    val mainPagerState = rememberMainPagerState(pagerState)
+    // Keep the Miuix nav bar's selection in sync when the page changes programmatically
+    // (e.g. tapping the Superuser/Module cards on Home), not just via the bar itself.
+    LaunchedEffect(mainPagerState) {
+        snapshotFlow { pagerState.currentPage }.collect { mainPagerState.syncPage() }
+    }
+
     CompositionLocalProvider(
         LocalPagerState provides pagerState,
         LocalHandlePageChange provides handlePageChange,
-        LocalSelectedPage provides uiSelectedPage
+        LocalSelectedPage provides uiSelectedPage,
+        LocalMainPagerState provides mainPagerState,
+        // Floating bottom bar (+ liquid-glass blur) is opt-in via the Theme screen (Miuix only).
+        LocalEnableFloatingBottomBar provides ThemeConfig.enableFloatingBottomBar,
+        LocalEnableFloatingBottomBarBlur provides ThemeConfig.enableFloatingBottomBarBlur,
     ) {
         BoxWithConstraints(
             modifier = Modifier.fillMaxSize()
         ) {
             val isPortrait = maxWidth < maxHeight || (maxHeight / maxWidth > 1.4f)
+            val isMiuixUi = LocalUiMode.current == UiMode.Miuix
+            // The Miuix bars sample the pager content via a backdrop; without capturing the
+            // pager into it, the plain nav bar renders transparent and the floating liquid-glass
+            // bar renders as a solid surface colour. `miuixBlurBackdrop` frosts the plain nav bar;
+            // `miuixBackdrop` (surface base + content, like tiann) feeds the liquid-glass bar.
+            val miuixSurfaceColor = MaterialTheme.colorScheme.surface
+            val miuixBlurBackdrop = rememberMaterial3BlurBackdrop(ThemeConfig.miuixEnableBlur)
+            val miuixBackdrop = rememberLayerBackdrop {
+                drawRect(miuixSurfaceColor)
+                drawContent()
+            }
+            val floatingLiquid = ThemeConfig.enableFloatingBottomBar && ThemeConfig.enableFloatingBottomBarBlur
             val content = @Composable { paddingBottom: Dp ->
                 HorizontalPager(
                     modifier = Modifier
                         .fillMaxSize()
-                        .blurSource(),
+                        .blurSource()
+                        .then(
+                            when {
+                                !isMiuixUi -> Modifier
+                                floatingLiquid -> Modifier.layerBackdrop(miuixBackdrop)
+                                !ThemeConfig.enableFloatingBottomBar && miuixBlurBackdrop != null ->
+                                    Modifier.layerBackdrop(miuixBlurBackdrop)
+                                else -> Modifier
+                            }
+                        ),
                     state = pagerState,
                     userScrollEnabled = userScrollEnabled,
                     beyondViewportPageCount = 1,
@@ -145,10 +191,20 @@ fun MainScreen() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
-                        NavigationBar(
-                            destinations = pages,
-                            isBottomBar = true,
-                        )
+                        if (isMiuixUi) {
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                BottomBar(
+                                    blurBackdrop = miuixBlurBackdrop,
+                                    backdrop = miuixBackdrop,
+                                    modifier = Modifier.align(Alignment.BottomCenter),
+                                )
+                            }
+                        } else {
+                            NavigationBar(
+                                destinations = pages,
+                                isBottomBar = true,
+                            )
+                        }
                     },
                     containerColor = Color.Transparent,
                 ) { innerPadding ->
@@ -156,10 +212,14 @@ fun MainScreen() {
                 }
             } else {
                 Row(modifier = Modifier.fillMaxSize()) {
-                    NavigationBar(
-                        destinations = pages,
-                        isBottomBar = false,
-                    )
+                    if (isMiuixUi) {
+                        SideRail(blurBackdrop = miuixBlurBackdrop)
+                    } else {
+                        NavigationBar(
+                            destinations = pages,
+                            isBottomBar = false,
+                        )
+                    }
                     content(0.dp)
                 }
             }

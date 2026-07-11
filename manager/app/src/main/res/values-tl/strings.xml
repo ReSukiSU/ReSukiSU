@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="profile_flags_desc_no_new_privs">Pinipigilan ang karagdagang pagtaas ng pribilehiyo sa pamamagitan ng KernelSU mula sa loob ng konteksto ng root profile na ito.</string>
+	<string name="install_force_backup">I-backup bilang stock image</string>
+	<string name="install_force_backup_summary">Pakisigurado na stock image ang napili mong boot image</string>
+    <string name="settings_ui_mode">Disenyo ng interface</string>
+    <string name="settings_ui_mode_summary">Pumili sa pagitan ng ReSukiSU at Miuix.</string>
+    <string name="settings_ui_mode_resukisu">ReSukiSU</string>
+    <string name="settings_ui_mode_miuix">Miuix</string>
+    <string name="settings_floating_bottom_bar">Lumulutang na bottom bar</string>
+    <string name="settings_floating_bottom_bar_summary">Ipakita ang Miuix navigation bilang lumulutang na bar.</string>
+    <string name="settings_floating_bottom_bar_blur">Liquid glass</string>
+    <string name="settings_floating_bottom_bar_blur_summary">Maglagay ng liquid-glass na blur sa lumulutang na bar.</string>
+    <string name="profile_name">Profile name</string>
+    <string name="app_profile_affects_following_apps">Affects the following apps</string>
+    <string name="module_repos">Repos</string>
+    <string name="module_repos_sort_updated">Updated time</string>
+    <string name="module_repos_sort_created">Created time</string>
+    <string name="module_repos_sort_name">Name</string>
+    <string name="module_repos_sort_stars">Stars</string>
+    <string name="module_repos_source_code">Source code</string>
+    <string name="tab_readme">README</string>
+    <string name="tab_releases">Releases</string>
+    <string name="tab_info">Info</string>
+</resources>

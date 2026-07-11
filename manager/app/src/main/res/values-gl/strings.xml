@@ -7,4 +7,25 @@
     <string name="settings_sucompat_summary">Permite que as aplicacións con permiso de Superusuario no perfil da aplicación obteñan un shell de superusuario executando /system/bin/su; efectivo só para novos procesos.</string>
     <string name="settings_kernel_umount">Desmontar núcleo</string>
     <string name="settings_kernel_umount_summary">Comportamento de desmontaxe a nivel de núcleo controlado por KernelSU</string>
+    <string name="settings_ui_mode">Deseño da interface</string>
+    <string name="settings_ui_mode_summary">Escolle entre ReSukiSU e Miuix.</string>
+    <string name="settings_ui_mode_resukisu">ReSukiSU</string>
+    <string name="settings_ui_mode_miuix">Miuix</string>
+    <string name="settings_floating_bottom_bar">Barra inferior flotante</string>
+    <string name="settings_floating_bottom_bar_summary">Mostrar a navegación de Miuix como unha barra flotante.</string>
+    <string name="settings_floating_bottom_bar_blur">Vidro líquido</string>
+    <string name="settings_floating_bottom_bar_blur_summary">Aplica un desenfoque de vidro líquido á barra flotante.</string>
+    <string name="profile_name">Profile name</string>
+    <string name="app_profile_affects_following_apps">Affects the following apps</string>
+    <string name="module_repos">Repos</string>
+    <string name="module_repos_sort_updated">Updated time</string>
+    <string name="module_repos_sort_created">Created time</string>
+    <string name="module_repos_sort_name">Name</string>
+    <string name="module_repos_sort_stars">Stars</string>
+    <string name="module_repos_source_code">Source code</string>
+    <string name="tab_readme">README</string>
+    <string name="tab_releases">Releases</string>
+    <string name="tab_info">Info</string>
+    <string name="install_force_backup">Facer copia de seguridade como imaxe orixinal</string>
+    <string name="install_force_backup_summary">Asegúrate de que a imaxe de arranque seleccionada sexa a imaxe orixinal</string>
 </resources>

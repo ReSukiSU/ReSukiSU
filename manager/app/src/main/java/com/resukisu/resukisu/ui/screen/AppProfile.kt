@@ -73,6 +73,8 @@ import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
@@ -127,7 +129,51 @@ fun AppProfileScreen(
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
     }
-    
+
+    if (LocalUiMode.current == UiMode.Miuix) {
+        com.resukisu.resukisu.ui.screen.appprofile.AppProfileScreenMiuix(
+            state = com.resukisu.resukisu.ui.screen.appprofile.AppProfileUiState(
+                uid = appGroup.uid,
+                packageName = packageName,
+                profile = profile,
+                appGroup = appGroup.toTiannGroupedApps(),
+                sharedUserId = appGroup.mainApp.packageInfo.sharedUserId ?: "",
+            ),
+            actions = com.resukisu.resukisu.ui.screen.appprofile.AppProfileActions(
+                onBack = { navigator.pop() },
+                onLaunchApp = { pkg, _ -> launchApp(pkg) },
+                onForceStopApp = { pkg, _ -> forceStopApp(pkg) },
+                onRestartApp = { pkg, _ -> restartApp(pkg) },
+                onViewTemplate = { id ->
+                    getTemplateInfoById(id)?.let { navigator.push(Route.TemplateEditor(it, true)) }
+                },
+                onManageTemplate = { navigator.push(Route.AppProfileTemplate) },
+                onProfileChange = { newProfile ->
+                    scope.launch {
+                        if (newProfile.allowSu) {
+                            if (appGroup.uid < 2000 && appGroup.uid != 1000) {
+                                snackBarHost.showSnackbar(suNotAllowed)
+                                return@launch
+                            }
+                            if (!newProfile.rootUseDefault && newProfile.rules.isNotEmpty() &&
+                                !setSepolicy(profile.name, newProfile.rules)
+                            ) {
+                                snackBarHost.showSnackbar(failToUpdateSepolicy)
+                                return@launch
+                            }
+                        }
+                        if (!Natives.setAppProfile(newProfile)) {
+                            snackBarHost.showSnackbar(failToUpdateAppProfile.format(appGroup.uid))
+                        } else {
+                            profile = newProfile
+                        }
+                    }
+                },
+            ),
+        )
+        return
+    }
+
     Scaffold(
         topBar = {
             TopBar(
@@ -559,4 +605,28 @@ private fun AppProfilePreview() {
             },
         )
     }
+}
+
+/**
+ * Maps ReSukiSU's [SuperUserViewModel.AppGroup] to the tiann/YuKongA
+ * [com.resukisu.resukisu.ui.screen.superuser.GroupedApps] the Miuix app-profile screen consumes.
+ */
+private fun SuperUserViewModel.AppGroup.toTiannGroupedApps(): com.resukisu.resukisu.ui.screen.superuser.GroupedApps {
+    val tiannApps = apps.map {
+        com.resukisu.resukisu.data.model.AppInfo(
+            label = it.label,
+            packageInfo = it.packageInfo,
+            profile = it.profile,
+        )
+    }
+    return com.resukisu.resukisu.ui.screen.superuser.GroupedApps(
+        uid = uid,
+        apps = tiannApps,
+        primary = tiannApps.first(),
+        anyAllowSu = allowSu,
+        anyCustom = hasCustomProfile,
+        shouldUmount = profile?.umountModules == true,
+        ownerName = userName,
+        matchedPackageNames = emptySet(),
+    )
 }

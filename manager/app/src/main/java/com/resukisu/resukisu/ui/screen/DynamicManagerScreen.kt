@@ -48,6 +48,8 @@ import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.component.ConfirmResult
 import com.resukisu.resukisu.ui.component.DialogHandle
 import com.resukisu.resukisu.ui.component.SearchAppBar
@@ -68,6 +70,10 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DynamicManagerScreen() {
+    if (LocalUiMode.current == UiMode.Miuix) {
+        DynamicManagerScreenMiuix()
+        return
+    }
     val navigator = LocalNavigator.current
     val viewModel = viewModel<DynamicManagerViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -239,7 +245,7 @@ fun DynamicManagerScreen() {
 }
 
 @Composable
-private fun rememberDynamicManagerManualDialog(
+fun rememberDynamicManagerManualDialog(
     onConfirm: (Int, String) -> Unit,
 ): DialogHandle {
     return rememberCustomDialog { dismiss ->

@@ -29,6 +29,22 @@ import com.topjohnwu.superuser.io.SuFileInputStream
 object Shortcut {
 
     private const val TAG = "ModuleShortcut"
+    const val SCHEME_KSU = "ksu"
+    const val HOST_ACTION = "action"
+    const val HOST_WEBUI = "webui"
+
+    // Deep-link URI for a module shortcut (ported from tiann/KernelSU).
+    fun buildShortcutUri(moduleId: String, type: com.resukisu.resukisu.ui.screen.module.ShortcutType): Uri {
+        val host = when (type) {
+            com.resukisu.resukisu.ui.screen.module.ShortcutType.Action -> HOST_ACTION
+            com.resukisu.resukisu.ui.screen.module.ShortcutType.WebUI -> HOST_WEBUI
+        }
+        return Uri.Builder()
+            .scheme(SCHEME_KSU)
+            .authority(host)
+            .appendQueryParameter("id", moduleId)
+            .build()
+    }
 
     fun createModuleActionShortcut(
         context: Context,

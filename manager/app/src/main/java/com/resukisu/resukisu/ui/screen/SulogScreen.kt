@@ -94,6 +94,8 @@ import com.resukisu.resukisu.ui.util.toSulogDisplayName
 import com.resukisu.resukisu.ui.viewmodel.SulogActions
 import com.resukisu.resukisu.ui.viewmodel.SulogFileSelector
 import com.resukisu.resukisu.ui.viewmodel.SulogScreenState
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.viewmodel.SulogViewModel
 import kotlinx.coroutines.launch
 
@@ -130,6 +132,11 @@ fun SulogScreen() {
         onToggleFilter = viewModel::toggleFilter,
         onSelectFile = viewModel::refresh,
     )
+
+    if (LocalUiMode.current == UiMode.Miuix) {
+        com.resukisu.resukisu.ui.screen.sulog.SulogScreenMiuix(state = state, actions = actions)
+        return
+    }
 
     SulogScreenContent(
         state,

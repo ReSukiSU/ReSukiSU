@@ -12,4 +12,25 @@
     <string name="settings_sucompat_summary">Preusmeri /system/bin/su na ksud za aplikacije sa dozvolom Superkorisnika u Profilu aplikacije; efektivno samo za nove procese.</string>
     <string name="settings_kernel_umount">Kernel umount</string>
     <string name="settings_kernel_umount_summary">Ponašanje umount-a na nivou kernela kontrolisano od strane KernelSU-a</string>
+    <string name="settings_ui_mode">Дизајн интерфејса</string>
+    <string name="settings_ui_mode_summary">Изаберите између ReSukiSU и Miuix.</string>
+    <string name="settings_ui_mode_resukisu">ReSukiSU</string>
+    <string name="settings_ui_mode_miuix">Miuix</string>
+    <string name="settings_floating_bottom_bar">Плутајућа доња трака</string>
+    <string name="settings_floating_bottom_bar_summary">Прикажи Miuix навигацију као плутајућу траку.</string>
+    <string name="settings_floating_bottom_bar_blur">Течно стакло</string>
+    <string name="settings_floating_bottom_bar_blur_summary">Примени замућење течног стакла на плутајућу траку.</string>
+    <string name="profile_name">Profile name</string>
+    <string name="app_profile_affects_following_apps">Affects the following apps</string>
+    <string name="module_repos">Repos</string>
+    <string name="module_repos_sort_updated">Updated time</string>
+    <string name="module_repos_sort_created">Created time</string>
+    <string name="module_repos_sort_name">Name</string>
+    <string name="module_repos_sort_stars">Stars</string>
+    <string name="module_repos_source_code">Source code</string>
+    <string name="tab_readme">README</string>
+    <string name="tab_releases">Releases</string>
+    <string name="tab_info">Info</string>
+    <string name="install_force_backup">Napravi rezervnu kopiju kao originalnu sliku</string>
+    <string name="install_force_backup_summary">Uverite se da je izabrana boot slika originalna slika</string>
 </resources>

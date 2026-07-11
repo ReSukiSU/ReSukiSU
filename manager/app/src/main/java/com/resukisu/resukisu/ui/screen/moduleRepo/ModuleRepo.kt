@@ -104,7 +104,11 @@ import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.rememberCustomDialog
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Navigator
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
+import com.resukisu.resukisu.ui.component.SearchStatus
 import com.resukisu.resukisu.ui.navigation.Route
+import com.resukisu.resukisu.ui.screen.modulerepo.RepoSort
 import com.resukisu.resukisu.ui.screen.FlashIt
 import com.resukisu.resukisu.ui.screen.LabelText
 import com.resukisu.resukisu.ui.theme.CardConfig
@@ -157,6 +161,68 @@ fun ModuleRepoScreen() {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
 
         viewModel.setSortStargazerCountFirst(prefs.getBoolean("module_repo_sort_star_first", false))
+    }
+
+    if (LocalUiMode.current == UiMode.Miuix) {
+        // The Material path triggers the initial fetch during composition; do it here too or the
+        // Miuix repo list would spin forever with no modules.
+        LaunchedEffect(Unit) {
+            if (uiState.modules.isEmpty()) viewModel.refresh()
+        }
+        val searchLabel = stringResource(R.string.search_modules)
+        var sortOrder by remember { mutableStateOf(RepoSort.UPDATED) }
+        var repoSearchStatus by remember { mutableStateOf(SearchStatus(searchLabel)) }
+        val moduleById = remember(uiState.modules) { uiState.modules.associateBy { it.moduleId } }
+        val sorted = remember(uiState.modules, sortOrder) {
+            when (sortOrder) {
+                RepoSort.UPDATED -> uiState.modules.sortedByDescending { it.updatedAt }
+                RepoSort.CREATED -> uiState.modules.sortedByDescending { it.createdAt }
+                RepoSort.NAME -> uiState.modules.sortedBy { it.moduleName.lowercase() }
+                RepoSort.STARS -> uiState.modules.sortedByDescending { it.stargazerCount }
+            }
+        }
+        val query = repoSearchStatus.searchText.trim()
+        val searchResults = remember(sorted, query) {
+            if (query.isEmpty()) emptyList()
+            else sorted.filter {
+                it.moduleName.contains(query, true) || it.moduleId.contains(query, true) ||
+                    it.authors.contains(query, true) || it.summary.contains(query, true)
+            }
+        }
+        val effectiveSearchStatus = repoSearchStatus.copy(
+            resultStatus = when {
+                query.isEmpty() -> SearchStatus.ResultStatus.DEFAULT
+                searchResults.isEmpty() -> SearchStatus.ResultStatus.EMPTY
+                else -> SearchStatus.ResultStatus.SHOW
+            }
+        )
+        com.resukisu.resukisu.ui.screen.modulerepo.ModuleRepoScreenMiuix(
+            state = com.resukisu.resukisu.ui.screen.modulerepo.ModuleRepoUiState(
+                isRefreshing = uiState.isRefreshing,
+                sortOrder = sortOrder,
+                offline = !isNetworkAvailable(context),
+                modules = sorted.map { it.toDataModelRepoModule() },
+                searchStatus = effectiveSearchStatus,
+                searchResults = searchResults.map { it.toDataModelRepoModule() },
+                error = null,
+            ),
+            actions = com.resukisu.resukisu.ui.screen.modulerepo.ModuleRepoActions(
+                onBack = { navigator.pop() },
+                onRefresh = { viewModel.refresh() },
+                onSearchTextChange = { repoSearchStatus = repoSearchStatus.copy(searchText = it) },
+                onClearSearch = { repoSearchStatus = repoSearchStatus.copy(searchText = "") },
+                onSearchStatusChange = { repoSearchStatus = it },
+                onSetSortOrder = {
+                    sortOrder = it
+                    viewModel.setSortStargazerCountFirst(it == RepoSort.STARS)
+                    prefs.putBoolean("module_repo_sort_star_first", it == RepoSort.STARS)
+                },
+                onOpenRepoDetail = { dm ->
+                    moduleById[dm.moduleId]?.let { navigator.push(Route.ModuleRepoDetail(it)) }
+                },
+            ),
+        )
+        return
     }
 
     val isLoading = uiState.modules.isEmpty()
@@ -867,3 +933,26 @@ fun ChooseDialogPreview() {
         ChooseDialogContent(currentModuleForChooseDialog, viewModel<ModuleRepoViewModel>()) {}
     }
 }
+
+// --- ReSukiSU viewmodel RepoModule -> tiann/YuKongA data.model.RepoModule (Miuix repo list) ---
+private fun com.resukisu.resukisu.ui.viewmodel.ModuleRepoViewModel.Author.toDataModelAuthor() =
+    com.resukisu.resukisu.data.model.Author(name = name, link = link)
+
+private fun ReleaseAssetInfo.toDataModelReleaseAsset() =
+    com.resukisu.resukisu.data.model.ReleaseAsset(name = name, downloadUrl = downloadUrl, size = size)
+
+private fun RepoModule.toDataModelRepoModule() = com.resukisu.resukisu.data.model.RepoModule(
+    moduleId = moduleId,
+    moduleName = moduleName,
+    authors = authors,
+    authorList = authorList.map { it.toDataModelAuthor() },
+    summary = summary,
+    metamodule = metamodule,
+    stargazerCount = stargazerCount,
+    updatedAt = updatedAt,
+    createdAt = createdAt,
+    latestRelease = latestRelease,
+    latestReleaseTime = latestReleaseTime,
+    latestVersionCode = latestVersionCode,
+    latestAsset = latestAsset?.assets?.firstOrNull()?.toDataModelReleaseAsset(),
+)

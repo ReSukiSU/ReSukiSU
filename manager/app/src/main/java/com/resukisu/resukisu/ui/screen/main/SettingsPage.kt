@@ -43,6 +43,7 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.filled.Update
 import androidx.compose.material.icons.rounded.ElectricalServices
 import androidx.compose.material.icons.rounded.FolderDelete
@@ -85,6 +86,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.resukisu.resukisu.BuildConfig
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.ui.component.ConfirmResult
 import com.resukisu.resukisu.ui.component.DialogHandle
@@ -103,6 +105,8 @@ import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.FlashIt
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
@@ -133,6 +137,69 @@ fun SettingsPage(bottomPadding: Dp) {
 
     LaunchedEffect(Unit) {
         settingsViewModel.loadFeatureSettings(context)
+    }
+
+    if (LocalUiMode.current == UiMode.Miuix) {
+        // ReSukiSU keeps these two as plain prefs (no viewmodel field): the module-update
+        // pref gates ModuleViewModel.checkUpdate; the web-debug pref is read by WebViewHelper.
+        var checkModuleUpdate by remember {
+            mutableStateOf(context.appPreferences.getBoolean("check_module_update", true))
+        }
+        var enableWebDebugging by remember {
+            mutableStateOf(context.appPreferences.getBoolean("enable_web_debugging", false))
+        }
+        com.resukisu.resukisu.ui.screen.settings.SettingPagerMiuix(
+            uiState = com.resukisu.resukisu.ui.screen.settings.SettingsUiState(
+                uiMode = ThemeConfig.uiMode,
+                checkUpdate = uiState.checkUpdate,
+                checkModuleUpdate = checkModuleUpdate,
+                enableWebDebugging = enableWebDebugging,
+                themeMode = uiState.themeMode,
+                enableBlur = ThemeConfig.isEnableBlur,
+                suCompatStatus = uiState.suStatus,
+                suCompatMode = uiState.suCompatMode,
+                kernelUmountStatus = uiState.kernelUmountStatus,
+                isKernelUmountEnabled = uiState.isKernelUmountEnabled,
+                selinuxHideStatus = uiState.selinuxHideStatus,
+                isSelinuxHideEnabled = uiState.isSelinuxHideEnabled,
+                sulogStatus = uiState.sulogStatus,
+                isSulogEnabled = uiState.isSuLogEnabled,
+                isDefaultUmountModules = uiState.defaultUmountModules,
+                adbRootStatus = uiState.adbRootStatus,
+                isAdbRootEnabled = uiState.isAdbRootEnabled,
+                autoJailbreak = uiState.autoJailbreakEnabled,
+            ),
+            actions = com.resukisu.resukisu.ui.screen.settings.SettingsScreenActions(
+                onSetCheckUpdate = { settingsViewModel.handleCheckUpdateChange(context, it) },
+                onSetCheckModuleUpdate = {
+                    checkModuleUpdate = it
+                    context.appPreferences.putBoolean("check_module_update", it)
+                },
+                onOpenTheme = { navigator.push(Route.ThemeSettings) },
+                onSetUiModeIndex = {
+                    // tiann dropdown order = UiMode.entries = [Miuix, Material]; map index → value.
+                    com.resukisu.resukisu.ui.theme.ThemeManager.saveUiMode(context, UiMode.entries[it].value)
+                },
+                onOpenProfileTemplate = { navigator.push(Route.AppProfileTemplate) },
+                onSetSuCompatMode = { settingsViewModel.handleSuCompatModeChange(context, it) },
+                onSetKernelUmountEnabled = { settingsViewModel.handleKernelUmountChange(it) },
+                onSetSelinuxHideEnabled = { settingsViewModel.handleSelinuxHideChange(context, it) },
+                onSetSulogEnabled = { settingsViewModel.handleSuLogChange(it) },
+                onSetAdbRootEnabled = { settingsViewModel.handleAdbRootChange(it) },
+                onSetDefaultUmountModules = { settingsViewModel.handleDefaultUmountModulesChange(it) },
+                onSetEnableWebDebugging = {
+                    enableWebDebugging = it
+                    context.appPreferences.putBoolean("enable_web_debugging", it)
+                },
+                onSetAutoJailbreak = { settingsViewModel.handleAutoJailbreakChange(context, it) },
+                onOpenAbout = { navigator.push(Route.About) },
+                onSetEnableBlur = { com.resukisu.resukisu.ui.theme.BackgroundManager.saveEnableBlur(context, it) },
+                onOpenDynamicManager = { navigator.push(Route.DynamicManager) },
+                onOpenUmountManager = { navigator.push(Route.UmountManager) },
+            ),
+            bottomInnerPadding = bottomPadding,
+        )
+        return
     }
 
     Scaffold(
@@ -339,6 +406,25 @@ fun SettingsPage(bottomPadding: Dp) {
                                 checked = uiState.checkUpdate,
                                 onCheckedChange = { enabled ->
                                     settingsViewModel.handleCheckUpdateChange(context, enabled)
+                                }
+                            )
+                        }
+
+                        item {
+                            // UI 设计选择：ReSukiSU / Miuix
+                            SettingsChooseWidget(
+                                icon = Icons.Filled.Style,
+                                title = stringResource(R.string.settings_ui_mode),
+                                description = stringResource(R.string.settings_ui_mode_summary),
+                                items = listOf(
+                                    stringResource(R.string.settings_ui_mode_resukisu),
+                                    stringResource(R.string.settings_ui_mode_miuix),
+                                ),
+                                selectedIndex = if (ThemeConfig.uiMode == "miuix") 1 else 0,
+                                onSelectedIndexChange = { index ->
+                                    com.resukisu.resukisu.ui.theme.ThemeManager.saveUiMode(
+                                        context, if (index == 1) "miuix" else "material"
+                                    )
                                 }
                             )
                         }

@@ -22,4 +22,26 @@
     <string name="settings_sucompat_summary">యాప్ ప్రొఫైల్‌లో సూపర్‌యూజర్ అనుమతి ఉన్న యాప్‌ల కోసం /system/bin/su ని ksud కి మళ్ళించండి; కొత్త ప్రాసెస్‌లకు మాత్రమే పని చేస్తుంది.</string>
     <string name="settings_kernel_umount">కెర్నల్ అన్‌మౌంట్</string>
     <string name="settings_kernel_umount_summary">KernelSU ద్వారా నియంత్రించబడే కెర్నల్-స్థాయి అన్‌మౌంట్ ప్రవర్తన</string>
+    <string name="settings_ui_mode">ఇంటర్‌ఫేస్ డిజైన్</string>
+    <string name="settings_ui_mode_summary">ReSukiSU మరియు Miuix మధ్య ఎంచుకోండి.</string>
+    <string name="settings_ui_mode_resukisu">ReSukiSU</string>
+    <string name="settings_ui_mode_miuix">Miuix</string>
+    <string name="settings_floating_bottom_bar">తేలియాడే దిగువ బార్</string>
+    <string name="settings_floating_bottom_bar_summary">Miuix నావిగేషన్‌ను తేలియాడే బార్‌గా చూపించు.</string>
+    <string name="settings_floating_bottom_bar_blur">లిక్విడ్ గ్లాస్</string>
+    <string name="settings_floating_bottom_bar_blur_summary">తేలియాడే బార్‌కు లిక్విడ్-గ్లాస్ బ్లర్‌ను వర్తించు.</string>
+    <string name="profile_name">Profile name</string>
+    <string name="app_profile_affects_following_apps">Affects the following apps</string>
+    <string name="module_repos">Repos</string>
+    <string name="module_repos_sort_updated">Updated time</string>
+    <string name="module_repos_sort_created">Created time</string>
+    <string name="module_repos_sort_name">Name</string>
+    <string name="module_repos_sort_stars">Stars</string>
+    <string name="module_repos_source_code">Source code</string>
+    <string name="tab_readme">README</string>
+    <string name="tab_releases">Releases</string>
+    <string name="tab_info">Info</string>
+    <string name="install_force_backup">స్టాక్ ఇమేజ్‌గా బ్యాకప్ చేయి</string>
+    <string name="install_force_backup_summary">దయచేసి మీరు ఎంచుకున్న boot ఇమేజ్ స్టాక్ ఇమేజ్ అని నిర్ధారించుకోండి</string>
+    <string name="selinux_status_unknown">తెలియదు</string>
 </resources>

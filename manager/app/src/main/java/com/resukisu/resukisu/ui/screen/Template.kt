@@ -69,9 +69,12 @@ import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Navigator
 import com.resukisu.resukisu.ui.navigation.Route
+import com.resukisu.resukisu.ui.screen.template.AppProfileTemplateScreenMiuix
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
@@ -109,6 +112,68 @@ fun AppProfileTemplateScreen() {
                 scope.launch { viewModel.fetchTemplates() }
             }
         }
+    }
+
+    if (LocalUiMode.current == UiMode.Miuix) {
+        val context = LocalContext.current
+        val clipboardManager = context.getSystemService<ClipboardManager>()
+        val showToast = fun(msg: String) {
+            scope.launch(Dispatchers.Main) { Toast.makeText(context, msg, Toast.LENGTH_SHORT).show() }
+        }
+        val importEmpty = stringResource(R.string.app_profile_template_import_empty)
+        val importSuccess = stringResource(R.string.app_profile_template_import_success)
+        val exportEmpty = stringResource(R.string.app_profile_template_export_empty)
+        val templateById = remember(uiState.templateList) { uiState.templateList.associateBy { it.id } }
+        AppProfileTemplateScreenMiuix(
+            state = com.resukisu.resukisu.ui.screen.template.TemplateUiState(
+                isRefreshing = uiState.isRefreshing,
+                templates = uiState.templateList.map { it.toDataModelTemplate() },
+                templateList = uiState.templateList.map { it.toDataModelTemplate() },
+            ),
+            actions = com.resukisu.resukisu.ui.screen.template.TemplateActions(
+                onBack = { navigator.pop() },
+                onRefresh = { sync -> scope.launch { viewModel.fetchTemplates(sync) } },
+                onImport = {
+                    scope.launch {
+                        val clip = clipboardManager?.primaryClip?.getItemAt(0)?.text?.toString()
+                        if (clip.isNullOrEmpty()) {
+                            showToast(importEmpty)
+                            return@launch
+                        }
+                        viewModel.importTemplates(
+                            clip,
+                            {
+                                showToast(importSuccess)
+                                viewModel.fetchTemplates(false)
+                            },
+                            showToast,
+                        )
+                    }
+                },
+                onExport = {
+                    scope.launch {
+                        viewModel.exportTemplates({ showToast(exportEmpty) }) { text ->
+                            clipboardManager?.setPrimaryClip(ClipData.newPlainText("", text))
+                        }
+                    }
+                },
+                onCreateTemplate = {
+                    navigator.navigateForResult(
+                        Route.TemplateEditor(TemplateViewModel.TemplateInfo(), false),
+                        "template_edit",
+                    )
+                },
+                onOpenTemplate = { info ->
+                    templateById[info.id]?.let { t ->
+                        navigator.navigateForResult(
+                            Route.TemplateEditor(t, !t.local),
+                            "template_edit",
+                        )
+                    }
+                },
+            ),
+        )
+        return
     }
 
     Scaffold(
@@ -397,3 +462,25 @@ fun LabelText(
         )
     }
 }
+
+/**
+ * Maps ReSukiSU's [TemplateViewModel.TemplateInfo] to the [com.resukisu.resukisu.data.model.TemplateInfo]
+ * shape tiann/YuKongA's Miuix template screen consumes (identical fields). The dispatch keeps a
+ * lookup by id to resolve back to the ReSukiSU type when opening a template.
+ */
+private fun TemplateViewModel.TemplateInfo.toDataModelTemplate() =
+    com.resukisu.resukisu.data.model.TemplateInfo(
+        id = id,
+        name = name,
+        description = description,
+        author = author,
+        local = local,
+        namespace = namespace,
+        uid = uid,
+        gid = gid,
+        groups = groups,
+        capabilities = capabilities,
+        context = context,
+        rules = rules,
+        flags = flags,
+    )

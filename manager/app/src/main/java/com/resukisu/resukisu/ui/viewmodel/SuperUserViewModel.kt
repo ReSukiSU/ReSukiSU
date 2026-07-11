@@ -83,6 +83,10 @@ class SuperUserViewModel : ViewModel() {
         private var allAppsCache: List<AppInfo> = emptyList()
         private var appsCache: List<AppInfo> = emptyList()
 
+        // Exposed for the ported Miuix superuser UI (owner-name lookup).
+        val apps: List<AppInfo>
+            get() = synchronized(appsLock) { allAppsCache.ifEmpty { appsCache } }
+
         @JvmStatic
         fun getAppIconDrawable(context: Context, packageName: String): Drawable? {
             val appList = synchronized(appsLock) {

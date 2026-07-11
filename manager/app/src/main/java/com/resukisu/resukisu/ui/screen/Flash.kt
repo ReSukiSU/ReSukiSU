@@ -82,6 +82,8 @@ import com.resukisu.resukisu.ui.component.KeyEventBlocker
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.rememberCustomDialog
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.theme.CardConfig
@@ -487,6 +489,36 @@ fun FlashScreen(flashIt: FlashIt) {
 
     BackHandler(enabled = true) {
         onBack()
+    }
+
+    if (LocalUiMode.current == UiMode.Miuix) {
+        com.resukisu.resukisu.ui.screen.flash.FlashScreenMiuix(
+            state = com.resukisu.resukisu.ui.screen.flash.FlashUiState(
+                text = text,
+                showRebootAction = showFloatAction,
+                flashingStatus = currentFlashingStatus.value,
+                showJailbreakWarning = false,
+            ),
+            actions = com.resukisu.resukisu.ui.screen.flash.FlashScreenActions(
+                onBack = onBack,
+                onSaveLog = {
+                    scope.launch {
+                        val format = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault())
+                        val date = format.format(Date())
+                        val file = File(
+                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                            "KernelSU_install_log_${date}.log"
+                        )
+                        file.writeText(logContent.toString())
+                        snackBarHost.showSnackbar(logSavedString.format(file.absolutePath))
+                    }
+                },
+                onReboot = { scope.launch { withContext(Dispatchers.IO) { reboot() } } },
+                onConfirmJailbreakWarning = {},
+                onDismissJailbreakWarning = {},
+            ),
+        )
+        return
     }
 
     Scaffold(

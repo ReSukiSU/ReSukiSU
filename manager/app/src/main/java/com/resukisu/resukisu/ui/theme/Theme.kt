@@ -20,6 +20,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -121,6 +122,17 @@ object ThemeConfig {
     var isEnableBlurExp by mutableStateOf(false)
     var isUseBackgroundSeedColor by mutableStateOf(false)
 
+    // UI 设计：ReSukiSU (material) 或 Miuix。驱动 LocalUiMode。
+    var uiMode by mutableStateOf("material")
+
+    // Miuix blur is a separate flag from Material's [isEnableBlur] (which ReSukiSU gates on a
+    // custom background). Decoupled so enabling blur in Miuix doesn't leak into Material.
+    var miuixEnableBlur by mutableStateOf(false)
+
+    // Miuix floating bottom bar (+ liquid-glass blur variant). Only used by the Miuix UI.
+    var enableFloatingBottomBar by mutableStateOf(false)
+    var enableFloatingBottomBarBlur by mutableStateOf(false)
+
     // 主题变化检测
     private var lastDarkModeState: Boolean? = null
 
@@ -163,6 +175,15 @@ object ThemeConfig {
 }
 
 object ThemeManager {
+    fun saveUiMode(context: Context, mode: String) {
+        context.appPreferences.putString("ui_mode", mode)
+        ThemeConfig.uiMode = mode
+    }
+
+    fun loadUiMode(context: Context) {
+        ThemeConfig.uiMode = context.appPreferences.getString("ui_mode", "material") ?: "material"
+    }
+
     fun saveThemeMode(context: Context, forceDark: Boolean?) {
         context.appPreferences.putString(
             "theme_mode", when (forceDark) {
@@ -268,6 +289,21 @@ object BackgroundManager {
         context.appPreferences.putBoolean("enable_blur_exp", enable)
     }
 
+    fun saveMiuixEnableBlur(context: Context, enable: Boolean) {
+        ThemeConfig.miuixEnableBlur = enable
+        context.appPreferences.putBoolean("miuix_enable_blur", enable)
+    }
+
+    fun saveEnableFloatingBottomBar(context: Context, enable: Boolean) {
+        ThemeConfig.enableFloatingBottomBar = enable
+        context.appPreferences.putBoolean("enable_floating_bottom_bar", enable)
+    }
+
+    fun saveEnableFloatingBottomBarBlur(context: Context, enable: Boolean) {
+        ThemeConfig.enableFloatingBottomBarBlur = enable
+        context.appPreferences.putBoolean("enable_floating_bottom_bar_blur", enable)
+    }
+
     fun saveUseBackgroundSeedColor(context: Context, enable: Boolean) {
         ThemeConfig.isUseBackgroundSeedColor = enable
         context.appPreferences.putBoolean("use_background_seed_color", enable)
@@ -302,6 +338,9 @@ object BackgroundManager {
         CardConfig.updateBackground(false)
         clearBackgroundBlurCache(context)
         resetBackgroundState(context)
+        // Material blur only applies with a custom background; turn it off when one is removed.
+        saveEnableBlur(context, false)
+        saveEnableBlurExp(context, false)
     }
 
     fun loadCustomBackground(context: Context) {
@@ -321,8 +360,16 @@ object BackgroundManager {
         }
 
         ThemeConfig.backgroundDim = prefs.getFloat("background_dim", 0f).coerceIn(0f, 1f)
-        ThemeConfig.isEnableBlur = prefs.getBoolean("enable_blur", false)
-        ThemeConfig.isEnableBlurExp = prefs.getBoolean("enable_blur_exp", false)
+        // Material blur only applies with a custom background. Gate it on one so a stale
+        // enable_blur pref (e.g. left over from an older build's Miuix blur toggle, which used
+        // to share this flag) can't leave Material blurred with no background and no way to
+        // turn it off (the Material toggle only appears once a background is set).
+        val hasCustomBackground = uriString != null
+        ThemeConfig.isEnableBlur = hasCustomBackground && prefs.getBoolean("enable_blur", false)
+        ThemeConfig.isEnableBlurExp = hasCustomBackground && prefs.getBoolean("enable_blur_exp", false)
+        ThemeConfig.miuixEnableBlur = prefs.getBoolean("miuix_enable_blur", false)
+        ThemeConfig.enableFloatingBottomBar = prefs.getBoolean("enable_floating_bottom_bar", false)
+        ThemeConfig.enableFloatingBottomBarBlur = prefs.getBoolean("enable_floating_bottom_bar_blur", false)
         ThemeConfig.isUseBackgroundSeedColor = prefs.getBoolean("use_background_seed_color", false)
         ThemeConfig.isHighContrastMode = prefs.getBoolean("high_contrast_mode", false)
     }
@@ -414,14 +461,35 @@ fun KernelSUTheme(
             MonetColorsProvider.UpdateCss()
             Box(modifier = Modifier.fillMaxSize()) {
                 BackgroundLayer()
-                content()
+                // Only wrap in the Miuix theme when the Miuix UI is selected, seeded from the
+                // same ThemeConfig so Miuix screens follow ReSukiSU's custom colors + dark mode.
+                // In ReSukiSU (Material) mode we must NOT apply it, or Miuix's overscroll/spring
+                // behaviour leaks into the Material screens.
+                if (ThemeConfig.uiMode == "miuix") {
+                    MiuixKernelSUTheme(darkTheme = darkTheme, dynamicColor = dynamicColor) {
+                        // Root Miuix Scaffold — like tiann's `UiMode.Miuix -> Scaffold { .. }`.
+                        // It sets up the (library-internal) LocalRootPopupStates + default
+                        // MiuixPopupHost that ALL Miuix floating menus / dropdowns / overlay
+                        // dialogs render into. Per-screen Scaffolds override their popupHost, so
+                        // without this root host those popups have nowhere to draw. Transparent
+                        // container + zero insets so it doesn't alter layout or the wallpaper.
+                        top.yukonga.miuix.kmp.basic.Scaffold(
+                            containerColor = Color.Transparent,
+                            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                        ) {
+                            content()
+                        }
+                    }
+                } else {
+                    content()
+                }
             }
         }
     }
 }
 
 @Composable
-private fun ThemeInitializer(context: Context, systemIsDark: Boolean) {
+internal fun ThemeInitializer(context: Context, systemIsDark: Boolean) {
     val themeChanged = ThemeConfig.detectThemeChange(systemIsDark)
     val scope = rememberCoroutineScope()
 
@@ -446,6 +514,7 @@ private fun ThemeInitializer(context: Context, systemIsDark: Boolean) {
     // 初始加载配置
     LaunchedEffect(Unit) {
         scope.launch {
+            ThemeManager.loadUiMode(context)
             ThemeManager.loadThemeMode(context)
             ThemeManager.loadSeedColor(context)
             ThemeManager.loadDynamicColorState(context)
@@ -1439,3 +1508,8 @@ fun isInDarkTheme(themeMode: Boolean?): Boolean {
         null -> isSystemInDarkTheme() // 跟随系统
     }
 }
+
+// No-arg overload used by the ported tiann Miuix UI; follows the app's theme-mode setting.
+@Composable
+@ReadOnlyComposable
+fun isInDarkTheme(): Boolean = isInDarkTheme(ThemeConfig.forceDarkMode)

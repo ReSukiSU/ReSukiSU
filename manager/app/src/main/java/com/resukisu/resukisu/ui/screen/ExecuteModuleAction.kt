@@ -49,7 +49,12 @@ import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.KeyEventBlocker
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
+import com.resukisu.resukisu.ui.screen.executemoduleaction.ExecuteModuleActionScreenActions
+import com.resukisu.resukisu.ui.screen.executemoduleaction.ExecuteModuleActionScreenMiuix
+import com.resukisu.resukisu.ui.screen.executemoduleaction.ExecuteModuleActionUiState
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
@@ -127,6 +132,34 @@ fun ExecuteModuleActionScreen(moduleId: String) {
             }
         }
         isActionRunning = false
+    }
+
+    if (LocalUiMode.current == UiMode.Miuix) {
+        ExecuteModuleActionScreenMiuix(
+            state = ExecuteModuleActionUiState(
+                text = text,
+                isComplete = !isActionRunning,
+            ),
+            actions = ExecuteModuleActionScreenActions(
+                onBack = { navigator.pop() },
+                onSaveLog = {
+                    if (!isActionRunning) {
+                        scope.launch {
+                            val format = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault())
+                            val date = format.format(Date())
+                            val file = File(
+                                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                                "KernelSU_module_action_log_${date}.log"
+                            )
+                            file.writeText(logContent.toString())
+                            snackBarHost.showSnackbar("Log saved to ${file.absolutePath}")
+                        }
+                    }
+                },
+                onClose = { navigator.pop() },
+            ),
+        )
+        return
     }
 
     Scaffold(

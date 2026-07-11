@@ -72,6 +72,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.getKernelVersion
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.component.DialogHandle
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.rememberCustomDialog
@@ -263,6 +265,113 @@ fun InstallScreen(
 
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
+    }
+
+    if (LocalUiMode.current == UiMode.Miuix) {
+        val isOta = installMethod is InstallMethod.DirectInstallToInactiveSlot
+        val suffix = produceState(initialValue = "", isOta) {
+            value = getSlotSuffix(isOta)
+        }.value
+        val partitions = produceState(initialValue = emptyList<String>()) {
+            value = getAvailablePartitions()
+        }.value
+        val defaultPartition = produceState(initialValue = "") {
+            value = getDefaultPartition()
+        }.value
+        partitionsState = partitions
+        val displayPartitions = partitions.map { name ->
+            if (defaultPartition == name) "$name (default)" else name
+        }
+        val defaultIndex = partitions.indexOf(defaultPartition).takeIf { it >= 0 } ?: 0
+        if (!hasCustomSelected) partitionSelectionIndex = defaultIndex
+
+        val rootAvailable = rootAvailable()
+        val horizonKernelSummary = stringResource(R.string.horizon_kernel_summary)
+        val selectFileTip = stringResource(R.string.select_file_tip, defaultPartition.ifBlank { "boot" })
+        val installMethodOptions = remember(rootAvailable, isAbDevice, selectFileTip, horizonKernelSummary) {
+            mutableListOf<InstallMethod>(InstallMethod.SelectFile(summary = selectFileTip)).apply {
+                if (rootAvailable) {
+                    add(InstallMethod.DirectInstall)
+                    if (isAbDevice) add(InstallMethod.DirectInstallToInactiveSlot)
+                    add(InstallMethod.HorizonKernel(summary = horizonKernelSummary))
+                }
+            }
+        }
+
+        var currentSelectingMethod by remember { mutableStateOf<InstallMethod?>(null) }
+        val selectImageLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult()
+        ) {
+            if (it.resultCode == Activity.RESULT_OK) {
+                it.data?.data?.let { uri ->
+                    when (currentSelectingMethod) {
+                        is InstallMethod.SelectFile ->
+                            installMethod = InstallMethod.SelectFile(uri, summary = selectFileTip)
+
+                        is InstallMethod.HorizonKernel -> {
+                            if (isAbDevice) {
+                                tempKernelUri = uri
+                                showSlotSelectionDialog = true
+                            } else {
+                                installMethod = InstallMethod.HorizonKernel(uri, summary = horizonKernelSummary)
+                            }
+                        }
+
+                        else -> {}
+                    }
+                }
+            }
+        }
+
+        val inactiveSlotDialog = rememberConfirmDialog(
+            onConfirm = { installMethod = InstallMethod.DirectInstallToInactiveSlot },
+            onDismiss = null
+        )
+        val dialogTitle = stringResource(id = android.R.string.dialog_alert_title)
+        val dialogContent = stringResource(id = R.string.install_inactive_slot_warning)
+
+        val onMethodClick: (InstallMethod) -> Unit = { option ->
+            currentSelectingMethod = option
+            when (option) {
+                is InstallMethod.SelectFile, is InstallMethod.HorizonKernel -> {
+                    selectImageLauncher.launch(Intent(Intent.ACTION_GET_CONTENT).apply {
+                        type = "application/*"
+                        putExtra(
+                            Intent.EXTRA_MIME_TYPES,
+                            arrayOf("application/octet-stream", "application/zip")
+                        )
+                    })
+                }
+
+                is InstallMethod.DirectInstall -> installMethod = option
+                is InstallMethod.DirectInstallToInactiveSlot ->
+                    inactiveSlotDialog.showConfirm(dialogTitle, dialogContent)
+            }
+        }
+
+        InstallScreenMiuix(
+            isGKI = isGKI,
+            installMethod = installMethod,
+            installMethodOptions = installMethodOptions,
+            lkmSelection = lkmSelection,
+            displayPartitions = displayPartitions,
+            partitionSelectionIndex = partitionSelectionIndex,
+            slotSuffix = suffix,
+            canSelectPartition = (installMethod is InstallMethod.DirectInstall ||
+                    installMethod is InstallMethod.DirectInstallToInactiveSlot) &&
+                    displayPartitions.isNotEmpty(),
+            horizonSlot = (installMethod as? InstallMethod.HorizonKernel)?.slot,
+            onBack = { navigator.pop() },
+            onMethodClick = onMethodClick,
+            onUploadLkm = onLkmUpload,
+            onClearLkm = { lkmSelection = LkmSelection.KmiNone },
+            onSelectPartition = { index ->
+                hasCustomSelected = true
+                partitionSelectionIndex = index
+            },
+            onNext = onClickNext,
+        )
+        return
     }
 
     Scaffold(

@@ -97,6 +97,8 @@ import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.LabelText
 import com.resukisu.resukisu.ui.theme.blurSource
@@ -139,6 +141,94 @@ fun SuperUserPage(bottomPadding: Dp) {
     val restoreLauncher = ModuleModify.rememberAllowlistRestoreLauncher(context, snackBarHostState)
 
     val navigator = LocalNavigator.current
+
+    if (LocalUiMode.current == UiMode.Miuix) {
+        val groupByUid = remember(uiState.appGroupList) { uiState.appGroupList.associateBy { it.uid } }
+        val searchLabel = stringResource(R.string.search_apps)
+        // Search / sort / primary-user filter are held locally and applied here so the tiann
+        // Miuix screen (which expects a full groupedApps list + a separate search-filtered
+        // searchResults, and a richer sort model than ReSukiSU's) works end to end. showSystemApps
+        // stays on the viewModel (it re-filters appGroupList there).
+        var searchStatus by remember { mutableStateOf(com.resukisu.resukisu.ui.component.SearchStatus(searchLabel)) }
+        var sortConfig by remember { mutableStateOf(com.resukisu.resukisu.ui.viewmodel.AppSortConfig()) }
+        var showOnlyPrimary by remember { mutableStateOf(false) }
+
+        // Keep the shared viewModel's search empty; Miuix filters locally so the main list
+        // stays full while the pager shows filtered results.
+        LaunchedEffect(Unit) { viewModel.updateSearch("") }
+
+        val base = uiState.appGroupList
+        val primaryFiltered = remember(base, showOnlyPrimary) {
+            if (showOnlyPrimary) base.filter { it.uid / 100000 == 0 } else base
+        }
+        val sorted = remember(primaryFiltered, sortConfig) {
+            val cmp: Comparator<SuperUserViewModel.AppGroup> = when (sortConfig.sortType) {
+                com.resukisu.resukisu.ui.viewmodel.AppSortType.NAME ->
+                    compareBy { it.mainApp.label.lowercase() }
+                com.resukisu.resukisu.ui.viewmodel.AppSortType.PACKAGE_NAME ->
+                    compareBy { it.mainApp.packageName.lowercase() }
+                com.resukisu.resukisu.ui.viewmodel.AppSortType.INSTALL_TIME ->
+                    compareBy { it.mainApp.packageInfo.firstInstallTime }
+                com.resukisu.resukisu.ui.viewmodel.AppSortType.UPDATE_TIME ->
+                    compareBy { it.mainApp.packageInfo.lastUpdateTime }
+            }
+            primaryFiltered.sortedWith(if (sortConfig.reversed) cmp.reversed() else cmp)
+        }
+        val query = searchStatus.searchText.trim()
+        val searchResults = remember(sorted, query) {
+            if (query.isEmpty()) emptyList()
+            else sorted.mapNotNull { group ->
+                val matched = group.apps.filter {
+                    it.label.contains(query, true) || it.packageName.contains(query, true)
+                }
+                if (matched.isEmpty()) null
+                else group.toTiannGroupedApps(matched.map { it.packageName }.toSet())
+            }
+        }
+        val recentlyInstalled = remember(base) {
+            base.filter { it.isRecentlyInstalled }.map { it.toTiannGroupedApps() }
+        }
+        // The SearchPager only renders results when resultStatus == SHOW; drive it from the query.
+        // Match kernelsu's flow: empty query -> DEFAULT (recently-installed default view),
+        // a query with no matches -> EMPTY, matches -> SHOW.
+        val effectiveSearchStatus = searchStatus.copy(
+            resultStatus = when {
+                query.isEmpty() -> com.resukisu.resukisu.ui.component.SearchStatus.ResultStatus.DEFAULT
+                searchResults.isEmpty() -> com.resukisu.resukisu.ui.component.SearchStatus.ResultStatus.EMPTY
+                else -> com.resukisu.resukisu.ui.component.SearchStatus.ResultStatus.SHOW
+            }
+        )
+
+        com.resukisu.resukisu.ui.screen.superuser.SuperUserPagerMiuix(
+            uiState = com.resukisu.resukisu.ui.screen.superuser.SuperUserUiState(
+                isRefreshing = uiState.isRefreshing,
+                hasLoaded = true,
+                groupedApps = sorted.map { it.toTiannGroupedApps() },
+                recentlyInstalledResults = recentlyInstalled,
+                userIds = base.map { it.uid / 100000 }.distinct().sorted(),
+                searchStatus = effectiveSearchStatus,
+                searchResults = searchResults,
+                showSystemApps = uiState.showSystemApps,
+                showOnlyPrimaryUserApps = showOnlyPrimary,
+                sortConfig = sortConfig,
+            ),
+            actions = com.resukisu.resukisu.ui.screen.superuser.SuperUserActions(
+                onRefresh = { scope.launch { viewModel.fetchAppList() } },
+                onOpenSulog = { navigator.push(Route.Sulog) },
+                onSearchTextChange = { searchStatus = searchStatus.copy(searchText = it) },
+                onSearchStatusChange = { searchStatus = it },
+                onClearSearch = { searchStatus = searchStatus.copy(searchText = "") },
+                onToggleShowSystemApps = { viewModel.updateShowSystemApps(!uiState.showSystemApps) },
+                onToggleShowOnlyPrimaryUserApps = { showOnlyPrimary = !showOnlyPrimary },
+                onUpdateSortConfig = { sortConfig = it },
+                onOpenProfile = { grouped ->
+                    groupByUid[grouped.uid]?.let { navigator.push(Route.AppProfile(it)) }
+                },
+            ),
+            bottomInnerPadding = bottomPadding,
+        )
+        return
+    }
 
     LaunchedEffect(Unit) {
         viewModel.updateSearch("")
@@ -681,4 +771,27 @@ private fun AppGroupItem(
             modifier = Modifier.size(24.dp)
         )
     }
+}
+
+// --- ReSukiSU <-> tiann Miuix data mappers (adapt tiann's SuperUser Miuix screen) ---
+private fun SuperUserViewModel.AppGroup.toTiannGroupedApps(
+    matched: Set<String> = emptySet(),
+): com.resukisu.resukisu.ui.screen.superuser.GroupedApps {
+    val tiannApps = apps.map {
+        com.resukisu.resukisu.data.model.AppInfo(
+            label = it.label,
+            packageInfo = it.packageInfo,
+            profile = it.profile,
+        )
+    }
+    return com.resukisu.resukisu.ui.screen.superuser.GroupedApps(
+        uid = uid,
+        apps = tiannApps,
+        primary = tiannApps.first(),
+        anyAllowSu = allowSu,
+        anyCustom = hasCustomProfile,
+        shouldUmount = profile?.umountModules == true,
+        ownerName = userName,
+        matchedPackageNames = matched,
+    )
 }

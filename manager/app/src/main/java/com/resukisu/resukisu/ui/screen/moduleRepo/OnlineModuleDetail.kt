@@ -89,7 +89,10 @@ import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Navigator
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.navigation.Route
+import com.resukisu.resukisu.ui.screen.FlashIt
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
@@ -124,6 +127,29 @@ fun OnlineModuleDetailScreen(module: ModuleRepoViewModel.RepoModule) {
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset =
             scrollBehavior.state.heightOffsetLimit
+    }
+
+    if (LocalUiMode.current == UiMode.Miuix) {
+        val webUrl = "https://modules.kernelsu.org/module/${module.moduleId}"
+        com.resukisu.resukisu.ui.screen.modulerepo.ModuleRepoDetailScreenMiuix(
+            state = com.resukisu.resukisu.ui.screen.modulerepo.ModuleRepoDetailUiState(
+                module = module.toRepoModuleArg(),
+                readmeHtml = module.readme,
+                readmeLoaded = true,
+                detailReleases = module.releases.map { it.toReleaseArg() },
+                webUrl = webUrl,
+                sourceUrl = module.sourceUrl,
+            ),
+            actions = com.resukisu.resukisu.ui.screen.modulerepo.ModuleRepoDetailActions(
+                onBack = { navigator.pop() },
+                onOpenWebUrl = { uriHandler.openUri(webUrl) },
+                onOpenUrl = { uriHandler.openUri(it) },
+                onInstallModule = { uri ->
+                    navigator.push(Route.Flash(FlashIt.FlashModules(listOf(uri))))
+                },
+            ),
+        )
+        return
     }
 
     Scaffold(
@@ -607,3 +633,30 @@ fun ReleaseCardPreview() {
         ReleaseCard(fakeModule, release, rememberCoroutineScope())
     }
 }
+// --- ReSukiSU viewmodel RepoModule -> tiann/YuKongA RepoModuleArg (Miuix repo detail) ---
+private fun ModuleRepoViewModel.Author.toAuthorArg() =
+    com.resukisu.resukisu.ui.screen.modulerepo.AuthorArg(name = name, link = link)
+
+private fun ReleaseAssetInfo.toReleaseAssetArg() =
+    com.resukisu.resukisu.ui.screen.modulerepo.ReleaseAssetArg(
+        name = name, downloadUrl = downloadUrl, size = size, downloadCount = downloadCount,
+    )
+
+private fun ReleaseInfo.toReleaseArg() = com.resukisu.resukisu.ui.screen.modulerepo.ReleaseArg(
+    tagName = tagName,
+    name = name,
+    publishedAt = publishedAt,
+    assets = assets.map { it.toReleaseAssetArg() },
+    descriptionHTML = descriptionHTML,
+)
+
+private fun ModuleRepoViewModel.RepoModule.toRepoModuleArg() =
+    com.resukisu.resukisu.ui.screen.modulerepo.RepoModuleArg(
+        moduleId = moduleId,
+        moduleName = moduleName,
+        authors = authors,
+        authorsList = authorList.map { it.toAuthorArg() },
+        latestRelease = latestRelease,
+        latestReleaseTime = latestReleaseTime,
+        releases = releases.map { it.toReleaseArg() },
+    )
