@@ -16,7 +16,7 @@
 #include "asm/insn.h" // IWYU pragma: keep
 #endif
 #elif defined(__x86_64__)
-#include "asm/text-patching.h" // IWYU pragma: keep
+#include <asm/ptrace.h>
 #else
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0)
 #include "asm/insn.h" // IWYU pragma: keep

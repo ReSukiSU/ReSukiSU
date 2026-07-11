@@ -39,8 +39,8 @@
 #include "compat/apatch_conflict.h"
 #endif
 
-// if we are using the upstream hook, check x86-64 compatible
-#if defined(CONFIG_KSU_TRACEPOINT_HOOK) && defined(__x86_64__)
+// if we are in Tracepoint hook, and won't enable PATCH_SYSCALL_DISPATCHER, check x86-64 hooks
+#if defined(CONFIG_KSU_TRACEPOINT_HOOK) && defined(__x86_64__) && !defined(CONFIG_KSU_X86_PATCH_SYSCALL_DISPATCHER)
 #include <asm/cpufeature.h>
 #include <linux/version.h>
 #ifndef X86_FEATURE_INDIRECT_SAFE
@@ -163,8 +163,8 @@ int __init kernelsu_init(void)
     ksu_late_loaded = false;
 #endif
 
-    // If we are in tracepoint hook, remember to check x86-64 compatible
-#if defined(CONFIG_KSU_TRACEPOINT_HOOK) && defined(__x86_64__)
+    // If we are in tracepoint hook, and won't enable PATCH_SYSCALL_DISPATCHER, check x86-64 hooks
+#if defined(__x86_64__) && !defined(CONFIG_KSU_X86_PATCH_SYSCALL_DISPATCHER)
     // If the kernel has the hardening patch, X86_FEATURE_INDIRECT_SAFE must be set
     if (!boot_cpu_has(X86_FEATURE_INDIRECT_SAFE)) {
         pr_alert("*************************************************************");
@@ -182,11 +182,11 @@ int __init kernelsu_init(void)
 
 #ifdef CONFIG_KSU_DEBUG
     pr_alert("*************************************************************");
-    pr_alert("**	 NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE	**");
-    pr_alert("**														 **");
-    pr_alert("**		 You are running KernelSU in DEBUG mode		  **");
-    pr_alert("**														 **");
-    pr_alert("**	 NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE	**");
+    pr_alert("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **");
+    pr_alert("**                                                         **");
+    pr_alert("**          You are running KernelSU in DEBUG mode         **");
+    pr_alert("**                                                         **");
+    pr_alert("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **");
     pr_alert("*************************************************************");
 #endif
 
