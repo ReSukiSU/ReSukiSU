@@ -149,26 +149,7 @@ fun SettingsPage(bottomPadding: Dp) {
             mutableStateOf(context.appPreferences.getBoolean("enable_web_debugging", false))
         }
         com.resukisu.resukisu.ui.screen.settings.SettingPagerMiuix(
-            uiState = com.resukisu.resukisu.ui.screen.settings.SettingsUiState(
-                uiMode = ThemeConfig.uiMode,
-                checkUpdate = uiState.checkUpdate,
-                checkModuleUpdate = checkModuleUpdate,
-                enableWebDebugging = enableWebDebugging,
-                themeMode = uiState.themeMode,
-                enableBlur = ThemeConfig.isEnableBlur,
-                suCompatStatus = uiState.suStatus,
-                suCompatMode = uiState.suCompatMode,
-                kernelUmountStatus = uiState.kernelUmountStatus,
-                isKernelUmountEnabled = uiState.isKernelUmountEnabled,
-                selinuxHideStatus = uiState.selinuxHideStatus,
-                isSelinuxHideEnabled = uiState.isSelinuxHideEnabled,
-                sulogStatus = uiState.sulogStatus,
-                isSulogEnabled = uiState.isSuLogEnabled,
-                isDefaultUmountModules = uiState.defaultUmountModules,
-                adbRootStatus = uiState.adbRootStatus,
-                isAdbRootEnabled = uiState.isAdbRootEnabled,
-                autoJailbreak = uiState.autoJailbreakEnabled,
-            ),
+            uiState = uiState,
             actions = com.resukisu.resukisu.ui.screen.settings.SettingsScreenActions(
                 onSetCheckUpdate = { settingsViewModel.handleCheckUpdateChange(context, it) },
                 onSetCheckModuleUpdate = {

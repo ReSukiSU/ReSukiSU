@@ -33,7 +33,14 @@ import androidx.compose.material.icons.rounded.RemoveModerator
 import androidx.compose.material.icons.rounded.Update
 import androidx.compose.material.icons.rounded.UploadFile
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import com.resukisu.resukisu.Natives
+import com.resukisu.resukisu.data.appPreferences
+import com.resukisu.resukisu.ui.theme.ThemeConfig
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -69,10 +76,22 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
  */
 @Composable
 fun SettingPagerMiuix(
-    uiState: SettingsUiState,
+    uiState: com.resukisu.resukisu.ui.viewmodel.SettingsUiState,
     actions: SettingsScreenActions,
     bottomInnerPadding: Dp,
 ) {
+    val context = LocalContext.current
+    // Fields the ReSukiSU SettingsViewModel state doesn't carry are read from the same sources the
+    // Material settings screen uses, instead of a parallel UiState.
+    val uiModeValue = ThemeConfig.uiMode
+    val isLateLoadMode = Natives.isLateLoadMode
+    val isLkmMode = Natives.isLkmMode
+    var checkModuleUpdate by remember {
+        mutableStateOf(context.appPreferences.getBoolean("check_module_update", true))
+    }
+    var enableWebDebugging by remember {
+        mutableStateOf(context.appPreferences.getBoolean("enable_web_debugging", false))
+    }
     val scrollBehavior = MiuixScrollBehavior()
     val enableBlur = LocalEnableBlur.current
     val backdrop = rememberBlurBackdrop(enableBlur)
@@ -138,8 +157,11 @@ fun SettingPagerMiuix(
                                         tint = colorScheme.onBackground
                                     )
                                 },
-                                checked = uiState.checkModuleUpdate,
-                                onCheckedChange = actions.onSetCheckModuleUpdate
+                                checked = checkModuleUpdate,
+                                onCheckedChange = {
+                                    checkModuleUpdate = it
+                                    context.appPreferences.putBoolean("check_module_update", it)
+                                }
                             )
                         }
                     }
@@ -165,7 +187,7 @@ fun SettingPagerMiuix(
                                     tint = colorScheme.onBackground
                                 )
                             },
-                            selectedIndex = if (uiState.uiMode == UiMode.Material.value) 1 else 0,
+                            selectedIndex = if (uiModeValue == UiMode.Material.value) 1 else 0,
                             onSelectedIndexChange = actions.onSetUiModeIndex
                         )
                         ArrowPreference(
@@ -218,7 +240,7 @@ fun SettingPagerMiuix(
                                 stringResource(id = R.string.settings_mode_disable_always),
                             )
 
-                            val suSummary = when (uiState.suCompatStatus) {
+                            val suSummary = when (uiState.suStatus) {
                                 "unsupported" -> stringResource(id = R.string.feature_status_unsupported_summary)
                                 "managed" -> stringResource(id = R.string.feature_status_managed_summary)
                                 else -> stringResource(id = R.string.settings_sucompat_summary)
@@ -235,7 +257,7 @@ fun SettingPagerMiuix(
                                         tint = colorScheme.onBackground
                                     )
                                 },
-                                enabled = uiState.suCompatStatus == "supported",
+                                enabled = uiState.suStatus == "supported",
                                 selectedIndex = uiState.suCompatMode,
                                 onSelectedIndexChange = actions.onSetSuCompatMode
                             )
@@ -299,7 +321,7 @@ fun SettingPagerMiuix(
                                     )
                                 },
                                 enabled = uiState.sulogStatus == "supported",
-                                checked = uiState.isSulogEnabled,
+                                checked = uiState.isSuLogEnabled,
                                 onCheckedChange = actions.onSetSulogEnabled
                             )
 
@@ -341,7 +363,7 @@ fun SettingPagerMiuix(
                                         tint = colorScheme.onBackground
                                     )
                                 },
-                                checked = uiState.isDefaultUmountModules,
+                                checked = uiState.defaultUmountModules,
                                 onCheckedChange = actions.onSetDefaultUmountModules
                             )
 
@@ -356,10 +378,13 @@ fun SettingPagerMiuix(
                                         tint = colorScheme.onBackground
                                     )
                                 },
-                                checked = uiState.enableWebDebugging,
-                                onCheckedChange = actions.onSetEnableWebDebugging
+                                checked = enableWebDebugging,
+                                onCheckedChange = {
+                                    enableWebDebugging = it
+                                    context.appPreferences.putBoolean("enable_web_debugging", it)
+                                }
                             )
-                            if (uiState.isLateLoadMode) {
+                            if (isLateLoadMode) {
                                 SwitchPreference(
                                     title = stringResource(id = R.string.settings_auto_jailbreak),
                                     summary = stringResource(id = R.string.settings_auto_jailbreak_summary),
@@ -371,14 +396,14 @@ fun SettingPagerMiuix(
                                             tint = colorScheme.onBackground
                                         )
                                     },
-                                    checked = uiState.autoJailbreak,
+                                    checked = uiState.autoJailbreakEnabled,
                                     onCheckedChange = actions.onSetAutoJailbreak
                                 )
                             }
                         }
                     }
 
-                    if (uiState.isLkmMode) {
+                    if (isLkmMode) {
                         Card(
                             modifier = Modifier
                                 .padding(top = 12.dp)
@@ -387,7 +412,7 @@ fun SettingPagerMiuix(
                             val uninstall = stringResource(id = R.string.settings_uninstall)
                             ArrowPreference(
                                 title = uninstall,
-                                enabled = !uiState.isLateLoadMode,
+                                enabled = !isLateLoadMode,
                                 startAction = {
                                     Icon(
                                         Icons.Rounded.Delete,
