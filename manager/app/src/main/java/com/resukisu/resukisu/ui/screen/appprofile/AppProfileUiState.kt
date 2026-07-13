@@ -5,17 +5,6 @@ import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.ui.screen.superuser.GroupedApps
 
 @Immutable
-data class AppProfileUiState(
-    val uid: Int,
-    val packageName: String,
-    val profile: Natives.Profile,
-    val appGroup: GroupedApps,
-    val sharedUserId: String,
-) {
-    val isUidGroup get() = appGroup.apps.size > 1
-}
-
-@Immutable
 data class AppProfileActions(
     val onBack: () -> Unit,
     val onLaunchApp: (String, Int) -> Unit,

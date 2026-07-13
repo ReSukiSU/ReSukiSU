@@ -93,7 +93,11 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
  */
 @Composable
 fun AppProfileScreenMiuix(
-    state: AppProfileUiState,
+    uid: Int,
+    packageName: String,
+    profile: com.resukisu.resukisu.Natives.Profile,
+    appGroup: com.resukisu.resukisu.ui.screen.superuser.GroupedApps,
+    sharedUserId: String,
     actions: AppProfileActions,
 ) {
     val enableBlur = LocalEnableBlur.current
@@ -105,9 +109,9 @@ fun AppProfileScreenMiuix(
         topBar = {
             TopBar(
                 onBack = actions.onBack,
-                showActions = !state.isUidGroup,
-                packageName = state.packageName,
-                userId = state.uid / 100000,
+                showActions = !(appGroup.apps.size > 1),
+                packageName = packageName,
+                userId = uid / 100000,
                 onLaunchApp = actions.onLaunchApp,
                 onForceStopApp = actions.onForceStopApp,
                 onRestartApp = actions.onRestartApp,
@@ -132,22 +136,22 @@ fun AppProfileScreenMiuix(
             ) {
                 item {
                     AppProfileInner(
-                        packageName = if (state.isUidGroup) "" else state.appGroup.primary.packageName,
-                        appLabel = if (state.isUidGroup) ownerNameForUid(state.appGroup.primary.uid) else state.appGroup.primary.label,
+                        packageName = if ((appGroup.apps.size > 1)) "" else appGroup.primary.packageName,
+                        appLabel = if ((appGroup.apps.size > 1)) ownerNameForUid(appGroup.primary.uid) else appGroup.primary.label,
                         appIcon = {
                             AppIconImage(
-                                packageInfo = state.appGroup.primary.packageInfo,
-                                label = state.appGroup.primary.label,
+                                packageInfo = appGroup.primary.packageInfo,
+                                label = appGroup.primary.label,
                                 modifier = Modifier.size(64.dp)
                             )
                         },
-                        appUid = state.uid,
-                        sharedUserId = if (state.isUidGroup) state.sharedUserId else "",
-                        appVersionName = if (state.isUidGroup) "" else (state.appGroup.primary.packageInfo.versionName ?: ""),
-                        appVersionCode = if (state.isUidGroup) 0L else state.appGroup.primary.packageInfo.longVersionCode,
-                        profile = state.profile,
-                        isUidGroup = state.isUidGroup,
-                        affectedApps = state.appGroup.apps,
+                        appUid = uid,
+                        sharedUserId = if ((appGroup.apps.size > 1)) sharedUserId else "",
+                        appVersionName = if ((appGroup.apps.size > 1)) "" else (appGroup.primary.packageInfo.versionName ?: ""),
+                        appVersionCode = if ((appGroup.apps.size > 1)) 0L else appGroup.primary.packageInfo.longVersionCode,
+                        profile = profile,
+                        isUidGroup = (appGroup.apps.size > 1),
+                        affectedApps = appGroup.apps,
                         onViewTemplate = actions.onViewTemplate,
                         onManageTemplate = actions.onManageTemplate,
                         onProfileChange = actions.onProfileChange,

@@ -132,13 +132,11 @@ fun AppProfileScreen(
 
     if (LocalUiMode.current == UiMode.Miuix) {
         com.resukisu.resukisu.ui.screen.appprofile.AppProfileScreenMiuix(
-            state = com.resukisu.resukisu.ui.screen.appprofile.AppProfileUiState(
-                uid = appGroup.uid,
-                packageName = packageName,
-                profile = profile,
-                appGroup = appGroup.toTiannGroupedApps(),
-                sharedUserId = appGroup.mainApp.packageInfo.sharedUserId ?: "",
-            ),
+            uid = appGroup.uid,
+            packageName = packageName,
+            profile = profile,
+            appGroup = appGroup.toTiannGroupedApps(),
+            sharedUserId = appGroup.mainApp.packageInfo.sharedUserId ?: "",
             actions = com.resukisu.resukisu.ui.screen.appprofile.AppProfileActions(
                 onBack = { navigator.pop() },
                 onLaunchApp = { pkg, _ -> launchApp(pkg) },

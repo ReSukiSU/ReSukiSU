@@ -493,12 +493,9 @@ fun FlashScreen(flashIt: FlashIt) {
 
     if (LocalUiMode.current == UiMode.Miuix) {
         com.resukisu.resukisu.ui.screen.flash.FlashScreenMiuix(
-            state = com.resukisu.resukisu.ui.screen.flash.FlashUiState(
-                text = text,
-                showRebootAction = showFloatAction,
-                flashingStatus = currentFlashingStatus.value,
-                showJailbreakWarning = false,
-            ),
+            text = text,
+            showRebootAction = showFloatAction,
+            flashingStatus = currentFlashingStatus.value,
             actions = com.resukisu.resukisu.ui.screen.flash.FlashScreenActions(
                 onBack = onBack,
                 onSaveLog = {

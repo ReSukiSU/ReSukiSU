@@ -54,7 +54,6 @@ import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.screen.executemoduleaction.ExecuteModuleActionScreenActions
 import com.resukisu.resukisu.ui.screen.executemoduleaction.ExecuteModuleActionScreenMiuix
-import com.resukisu.resukisu.ui.screen.executemoduleaction.ExecuteModuleActionUiState
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
@@ -136,10 +135,8 @@ fun ExecuteModuleActionScreen(moduleId: String) {
 
     if (LocalUiMode.current == UiMode.Miuix) {
         ExecuteModuleActionScreenMiuix(
-            state = ExecuteModuleActionUiState(
-                text = text,
-                isComplete = !isActionRunning,
-            ),
+            text = text,
+            isComplete = !isActionRunning,
             actions = ExecuteModuleActionScreenActions(
                 onBack = { navigator.pop() },
                 onSaveLog = {

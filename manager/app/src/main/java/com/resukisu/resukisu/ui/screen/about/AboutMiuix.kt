@@ -90,7 +90,10 @@ import androidx.compose.ui.graphics.BlendMode as ComposeBlendMode
 
 @Composable
 fun AboutScreenMiuix(
-    state: AboutUiState,
+    title: String,
+    appName: String,
+    versionName: String,
+    links: List<LinkInfo>,
     actions: AboutScreenActions,
 ) {
     val topAppBarScrollBehavior = MiuixScrollBehavior()
@@ -122,7 +125,7 @@ fun AboutScreenMiuix(
         topBar = {
             BlurredBar(backdrop = barBlurBackdrop, blurActive = blurActive) {
                 SmallTopAppBar(
-                    title = state.title,
+                    title = title,
                     scrollBehavior = topAppBarScrollBehavior,
                     color = barColor,
                     titleColor = colorScheme.onSurface.copy(
@@ -152,7 +155,10 @@ fun AboutScreenMiuix(
     ) { innerPadding ->
         Box(modifier = if (barBlurBackdrop != null) Modifier.layerBackdrop(barBlurBackdrop) else Modifier) {
             AboutContent(
-                state = state,
+                title = title,
+                appName = appName,
+                versionName = versionName,
+                links = links,
                 actions = actions,
                 innerPadding = innerPadding,
                 topAppBarScrollBehavior = topAppBarScrollBehavior,
@@ -166,7 +172,10 @@ fun AboutScreenMiuix(
 
 @Composable
 private fun AboutContent(
-    state: AboutUiState,
+    title: String,
+    appName: String,
+    versionName: String,
+    links: List<LinkInfo>,
     actions: AboutScreenActions,
     innerPadding: PaddingValues,
     topAppBarScrollBehavior: ScrollBehavior,
@@ -342,7 +351,7 @@ private fun AboutContent(
                             )
                         } else Modifier
                     ),
-                text = state.appName,
+                text = appName,
                 color = colorScheme.onBackground,
                 fontWeight = FontWeight.Bold,
                 fontSize = 35.sp,
@@ -362,7 +371,7 @@ private fun AboutContent(
                         versionCodeY = y + size.height
                     },
                 color = colorScheme.onSurfaceVariantSummary,
-                text = state.versionName,
+                text = versionName,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center,
             )
@@ -429,7 +438,7 @@ private fun AboutContent(
                             Color.Transparent,
                         ),
                     ) {
-                        state.links.forEach {
+                        links.forEach {
                             ArrowPreference(
                                 title = it.fullText,
                                 onClick = {

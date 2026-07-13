@@ -73,14 +73,12 @@ fun AboutScreen() {
         val sourceLabel = stringResource(R.string.get_source_code)
         val telegramLabel = stringResource(R.string.join_telegram_group)
         AboutScreenMiuix(
-            state = AboutUiState(
-                title = stringResource(R.string.about),
-                appName = stringResource(R.string.app_name),
-                versionName = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
-                links = extractLinks(
-                    "<a href=\"https://github.com/ReSukiSU/ReSukiSU\">$sourceLabel</a><br/>" +
-                        "<a href=\"https://t.me/ReSukiSU\">$telegramLabel</a>"
-                ),
+            title = stringResource(R.string.about),
+            appName = stringResource(R.string.app_name),
+            versionName = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+            links = extractLinks(
+                "<a href=\"https://github.com/ReSukiSU/ReSukiSU\">$sourceLabel</a><br/>" +
+                    "<a href=\"https://t.me/ReSukiSU\">$telegramLabel</a>"
             ),
             actions = AboutScreenActions(
                 onBack = { miuixNavigator.pop() },

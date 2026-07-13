@@ -67,7 +67,8 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun ExecuteModuleActionScreenMiuix(
-    state: ExecuteModuleActionUiState,
+    text: String,
+    isComplete: Boolean,
     actions: ExecuteModuleActionScreenActions,
 ) {
     val scrollState = rememberScrollState()
@@ -103,7 +104,7 @@ fun ExecuteModuleActionScreenMiuix(
     val blurActive = backdrop != null
     val barColor = if (blurActive) Color.Transparent else colorScheme.surface
 
-    BackHandler(enabled = !state.isComplete) { }
+    BackHandler(enabled = !isComplete) { }
 
     Scaffold(
         topBar = {
@@ -116,7 +117,7 @@ fun ExecuteModuleActionScreenMiuix(
         },
         popupHost = { },
         floatingActionButton = {
-            if (state.isComplete) {
+            if (isComplete) {
                 FloatingActionButton(
                     containerColor = colorScheme.primary,
                     shadowElevation = 0.dp,
@@ -160,13 +161,13 @@ fun ExecuteModuleActionScreenMiuix(
                     )
                     .verticalScroll(scrollState),
             ) {
-                LaunchedEffect(state.text) {
+                LaunchedEffect(text) {
                     scrollState.animateScrollTo(scrollState.maxValue)
                 }
                 Spacer(Modifier.height(innerPadding.calculateTopPadding()))
                 Text(
                     modifier = Modifier.padding(8.dp),
-                    text = state.text,
+                    text = text,
                     fontSize = 12.sp,
                     fontFamily = FontFamily.Monospace,
                 )

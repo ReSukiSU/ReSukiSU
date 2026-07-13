@@ -66,7 +66,9 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 // Lets you flash modules sequentially when mutiple zipUris are selected
 @Composable
 fun FlashScreenMiuix(
-    state: FlashUiState,
+    text: String,
+    showRebootAction: Boolean,
+    flashingStatus: com.resukisu.resukisu.ui.screen.FlashingStatus,
     actions: FlashScreenActions,
 ) {
     val enableBlur = LocalEnableBlur.current
@@ -82,7 +84,7 @@ fun FlashScreenMiuix(
     Scaffold(
         topBar = {
             TopBar(
-                state.flashingStatus,
+                flashingStatus,
                 onBack = actions.onBack,
                 onSave = actions.onSaveLog,
                 backdrop = backdrop,
@@ -90,7 +92,7 @@ fun FlashScreenMiuix(
             )
         },
         floatingActionButton = {
-            if (state.showRebootAction) {
+            if (showRebootAction) {
                 val reboot = stringResource(id = R.string.reboot)
                 FloatingActionButton(
                     modifier = Modifier
@@ -132,13 +134,13 @@ fun FlashScreenMiuix(
                     )
                     .verticalScroll(scrollState),
             ) {
-                LaunchedEffect(state.text) {
+                LaunchedEffect(text) {
                     scrollState.animateScrollTo(scrollState.maxValue)
                 }
                 Spacer(Modifier.height(innerPadding.calculateTopPadding()))
                 Text(
                     modifier = Modifier.padding(8.dp),
-                    text = state.text,
+                    text = text,
                     fontSize = 12.sp,
                     fontFamily = FontFamily.Monospace,
                 )
