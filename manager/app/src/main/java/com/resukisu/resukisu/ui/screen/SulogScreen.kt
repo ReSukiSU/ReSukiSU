@@ -133,15 +133,10 @@ fun SulogScreen() {
         onSelectFile = viewModel::refresh,
     )
 
-    if (LocalUiMode.current == UiMode.Miuix) {
-        com.resukisu.resukisu.ui.screen.sulog.SulogScreenMiuix(state = state, actions = actions)
-        return
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> com.resukisu.resukisu.ui.screen.sulog.SulogScreenMiuix(state = state, actions = actions)
+        UiMode.Material -> SulogScreenContent(state, actions)
     }
-
-    SulogScreenContent(
-        state,
-        actions
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
