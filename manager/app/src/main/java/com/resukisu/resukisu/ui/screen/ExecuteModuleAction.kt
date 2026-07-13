@@ -133,7 +133,8 @@ fun ExecuteModuleActionScreen(moduleId: String) {
         isActionRunning = false
     }
 
-    if (LocalUiMode.current == UiMode.Miuix) {
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> {
         ExecuteModuleActionScreenMiuix(
             text = text,
             isComplete = !isActionRunning,
@@ -156,10 +157,8 @@ fun ExecuteModuleActionScreen(moduleId: String) {
                 onClose = { navigator.pop() },
             ),
         )
-        return
-    }
-
-    Scaffold(
+        }
+        UiMode.Material -> Scaffold(
         topBar = {
             TopBar(
                 isActionRunning = isActionRunning,
@@ -228,6 +227,7 @@ fun ExecuteModuleActionScreen(moduleId: String) {
                 Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding()))
             }
         }
+    }
     }
 }
 

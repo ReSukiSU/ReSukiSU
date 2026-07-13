@@ -491,7 +491,8 @@ fun FlashScreen(flashIt: FlashIt) {
         onBack()
     }
 
-    if (LocalUiMode.current == UiMode.Miuix) {
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> {
         com.resukisu.resukisu.ui.screen.flash.FlashScreenMiuix(
             text = text,
             showRebootAction = showFloatAction,
@@ -515,10 +516,8 @@ fun FlashScreen(flashIt: FlashIt) {
                 onDismissJailbreakWarning = {},
             ),
         )
-        return
-    }
-
-    Scaffold(
+        }
+        UiMode.Material -> Scaffold(
         topBar = {
             TopBar(
                 currentFlashingStatus.value,
@@ -609,6 +608,7 @@ fun FlashScreen(flashIt: FlashIt) {
                 )
             }
         }
+    }
     }
 }
 

@@ -267,7 +267,8 @@ fun InstallScreen(
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
     }
 
-    if (LocalUiMode.current == UiMode.Miuix) {
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> {
         val isOta = installMethod is InstallMethod.DirectInstallToInactiveSlot
         val suffix = produceState(initialValue = "", isOta) {
             value = getSlotSuffix(isOta)
@@ -374,10 +375,8 @@ fun InstallScreen(
             },
             onNext = onClickNext,
         )
-        return
-    }
-
-    Scaffold(
+        }
+        UiMode.Material -> Scaffold(
         topBar = {
             TopBar(
                 onBack = { navigator.pop() },
@@ -543,6 +542,7 @@ fun InstallScreen(
                 }
             }
         }
+    }
     }
 }
 

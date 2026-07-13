@@ -130,7 +130,8 @@ fun AppProfileScreen(
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
     }
 
-    if (LocalUiMode.current == UiMode.Miuix) {
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> {
         com.resukisu.resukisu.ui.screen.appprofile.AppProfileScreenMiuix(
             uid = appGroup.uid,
             packageName = packageName,
@@ -169,10 +170,8 @@ fun AppProfileScreen(
                 },
             ),
         )
-        return
-    }
-
-    Scaffold(
+        }
+        UiMode.Material -> Scaffold(
         topBar = {
             TopBar(
                 title = appGroup.mainApp.label,
@@ -238,6 +237,7 @@ fun AppProfileScreen(
                 }
             },
         )
+    }
     }
 }
 
