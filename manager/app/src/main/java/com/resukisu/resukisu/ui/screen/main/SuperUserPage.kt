@@ -200,18 +200,16 @@ fun SuperUserPage(bottomPadding: Dp) {
         )
 
         com.resukisu.resukisu.ui.screen.superuser.SuperUserPagerMiuix(
-            uiState = com.resukisu.resukisu.ui.screen.superuser.SuperUserUiState(
-                isRefreshing = uiState.isRefreshing,
-                hasLoaded = true,
-                groupedApps = sorted.map { it.toTiannGroupedApps() },
-                recentlyInstalledResults = recentlyInstalled,
-                userIds = base.map { it.uid / 100000 }.distinct().sorted(),
-                searchStatus = effectiveSearchStatus,
-                searchResults = searchResults,
-                showSystemApps = uiState.showSystemApps,
-                showOnlyPrimaryUserApps = showOnlyPrimary,
-                sortConfig = sortConfig,
-            ),
+            groupedApps = sorted.map { it.toTiannGroupedApps() },
+            recentlyInstalledResults = recentlyInstalled,
+            userIds = base.map { it.uid / 100000 }.distinct().sorted(),
+            searchStatus = effectiveSearchStatus,
+            searchResults = searchResults,
+            showSystemApps = uiState.showSystemApps,
+            showOnlyPrimaryUserApps = showOnlyPrimary,
+            sortConfig = sortConfig,
+            isRefreshing = uiState.isRefreshing,
+            hasLoaded = true,
             actions = com.resukisu.resukisu.ui.screen.superuser.SuperUserActions(
                 onRefresh = { scope.launch { viewModel.fetchAppList() } },
                 onOpenSulog = { navigator.push(Route.Sulog) },

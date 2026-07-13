@@ -106,11 +106,19 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun SuperUserPagerMiuix(
-    uiState: SuperUserUiState,
+    groupedApps: List<GroupedApps>,
+    recentlyInstalledResults: List<GroupedApps>,
+    userIds: List<Int>,
+    searchStatus: SearchStatus,
+    searchResults: List<GroupedApps>,
+    showSystemApps: Boolean,
+    showOnlyPrimaryUserApps: Boolean,
+    sortConfig: com.resukisu.resukisu.ui.viewmodel.AppSortConfig,
+    isRefreshing: Boolean,
+    hasLoaded: Boolean,
     actions: SuperUserActions,
     bottomInnerPadding: Dp,
 ) {
-    val searchStatus = uiState.searchStatus
     val enableBlur = LocalEnableBlur.current
     val density = LocalDensity.current
 
@@ -157,7 +165,6 @@ fun SuperUserPagerMiuix(
                                                 AppSortType.INSTALL_TIME to R.string.sort_by_install_time,
                                                 AppSortType.UPDATE_TIME to R.string.sort_by_update_time,
                                             )
-                                            val sortConfig = uiState.sortConfig
                                             val sortGroupSize = sortEntries.size + 1
 
                                             sortEntries.forEachIndexed { index, (type, resId) ->
@@ -214,12 +221,12 @@ fun SuperUserPagerMiuix(
                                         showTopPopup.value = false
                                     },
                                     content = {
-                                        val isMultiUser = uiState.userIds.size > 1
+                                        val isMultiUser = userIds.size > 1
                                         val size = if (isMultiUser) 2 else 1
                                         ListPopupColumn {
                                             DropdownImpl(
                                                 text = stringResource(R.string.show_system_apps),
-                                                isSelected = uiState.showSystemApps,
+                                                isSelected = showSystemApps,
                                                 optionSize = size,
                                                 onSelectedIndexChange = {
                                                     actions.onToggleShowSystemApps()
@@ -230,7 +237,7 @@ fun SuperUserPagerMiuix(
                                             if (isMultiUser) {
                                                 DropdownImpl(
                                                     text = stringResource(R.string.show_only_primary_user_apps),
-                                                    isSelected = uiState.showOnlyPrimaryUserApps,
+                                                    isSelected = showOnlyPrimaryUserApps,
                                                     optionSize = size,
                                                     onSelectedIndexChange = {
                                                         actions.onToggleShowOnlyPrimaryUserApps()
@@ -288,8 +295,8 @@ fun SuperUserPagerMiuix(
         },
         popupHost = {
             val expandedSearchUids = remember { mutableStateOf(setOf<Int>()) }
-            LaunchedEffect(uiState.searchResults) {
-                expandedSearchUids.value = uiState.searchResults
+            LaunchedEffect(searchResults) {
+                expandedSearchUids.value = searchResults
                     .filter { it.apps.size > 1 }
                     .map { it.uid }
                     .toSet()
@@ -298,7 +305,7 @@ fun SuperUserPagerMiuix(
                 onSearchStatusChange = actions.onSearchStatusChange,
                 defaultResult = {
                     val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
-                    if (uiState.recentlyInstalledResults.isNotEmpty()) {
+                    if (recentlyInstalledResults.isNotEmpty()) {
                         LazyColumn(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -314,7 +321,7 @@ fun SuperUserPagerMiuix(
                                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
                                 )
                             }
-                            items(uiState.recentlyInstalledResults, key = { it.uid }, contentType = { "recent-group" }) { group ->
+                            items(recentlyInstalledResults, key = { it.uid }, contentType = { "recent-group" }) { group ->
                                 Column {
                                     GroupItem(
                                         group = group,
@@ -353,10 +360,10 @@ fun SuperUserPagerMiuix(
                     item {
                         Spacer(Modifier.height(6.dp))
                     }
-                    items(uiState.searchResults, key = { it.uid }, contentType = { "group" }) { group ->
+                    items(searchResults, key = { it.uid }, contentType = { "group" }) { group ->
                         val expanded = expandedSearchUids.value.contains(group.uid)
                         AnimatedVisibility(
-                            visible = uiState.searchResults.isNotEmpty(),
+                            visible = searchResults.isNotEmpty(),
                             enter = fadeIn() + expandVertically(),
                             exit = fadeOut() + shrinkVertically()
                         ) {
@@ -402,13 +409,13 @@ fun SuperUserPagerMiuix(
         searchStatus.SearchBox {
             val lazyListState = rememberLazyListState()
             val refreshTick = remember { mutableIntStateOf(0) }
-            val latestGroupedApps = rememberUpdatedState(uiState.groupedApps)
-            val latestRefreshing = rememberUpdatedState(uiState.isRefreshing)
+            val latestGroupedApps = rememberUpdatedState(groupedApps)
+            val latestRefreshing = rememberUpdatedState(isRefreshing)
             ScrollToTopOnChange(
                 lazyListState,
-                uiState.sortConfig,
-                uiState.showSystemApps,
-                uiState.showOnlyPrimaryUserApps,
+                sortConfig,
+                showSystemApps,
+                showOnlyPrimaryUserApps,
                 refreshTick.intValue,
                 isBusy = { latestRefreshing.value },
             ) { latestGroupedApps.value }
@@ -420,7 +427,7 @@ fun SuperUserPagerMiuix(
                 stringResource(R.string.refresh_complete),
             )
 
-            if (uiState.groupedApps.isEmpty() && !uiState.hasLoaded) {
+            if (groupedApps.isEmpty() && !hasLoaded) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -437,7 +444,7 @@ fun SuperUserPagerMiuix(
             } else {
                 val expandedUids = remember { mutableStateOf(setOf<Int>()) }
                 PullToRefresh(
-                    isRefreshing = uiState.isRefreshing,
+                    isRefreshing = isRefreshing,
                     pullToRefreshState = pullToRefreshState,
                     onRefresh = {
                         actions.onRefresh()
@@ -465,7 +472,7 @@ fun SuperUserPagerMiuix(
                             ),
                             overscrollEffect = null,
                         ) {
-                            items(uiState.groupedApps, key = { it.uid }, contentType = { "group" }) { group ->
+                            items(groupedApps, key = { it.uid }, contentType = { "group" }) { group ->
                                 val expanded = expandedUids.value.contains(group.uid)
                                 Column {
                                     GroupItem(

@@ -1,11 +1,9 @@
 package com.resukisu.resukisu.ui.screen.superuser
 
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel.AppInfo
 import com.resukisu.resukisu.ui.component.SearchStatus
-import com.resukisu.resukisu.ui.viewmodel.AppSortConfig
 
 @Immutable
 data class GroupedApps(
@@ -17,21 +15,6 @@ data class GroupedApps(
     val shouldUmount: Boolean,
     val ownerName: String? = null,
     val matchedPackageNames: Set<String> = emptySet(),
-)
-
-@Stable
-data class SuperUserUiState(
-    val isRefreshing: Boolean = false,
-    val hasLoaded: Boolean = false,
-    val groupedApps: List<GroupedApps> = emptyList(),
-    val recentlyInstalledResults: List<GroupedApps> = emptyList(),
-    val userIds: List<Int> = emptyList(),
-    val searchStatus: SearchStatus = SearchStatus(""),
-    val searchResults: List<GroupedApps> = emptyList(),
-    val showSystemApps: Boolean = false,
-    val showOnlyPrimaryUserApps: Boolean = false,
-    val sortConfig: AppSortConfig = AppSortConfig(),
-    val error: Throwable? = null
 )
 
 @Immutable
