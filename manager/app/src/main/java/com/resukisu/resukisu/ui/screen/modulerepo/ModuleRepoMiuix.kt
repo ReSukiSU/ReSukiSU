@@ -81,7 +81,7 @@ import com.resukisu.resukisu.ui.component.ScrollToTopOnChange
 import com.resukisu.resukisu.ui.component.SearchStatus
 import com.resukisu.resukisu.ui.component.dialog.ConfirmDialogHandle
 import com.resukisu.resukisu.ui.component.dialog.rememberConfirmDialog
-import com.resukisu.resukisu.ui.component.markdown.GithubMarkdown
+import com.resukisu.resukisu.ui.component.GithubMarkdown
 import com.resukisu.resukisu.ui.component.miuix.SearchBarFake
 import com.resukisu.resukisu.ui.component.miuix.SearchBox
 import com.resukisu.resukisu.ui.component.miuix.SearchPager
@@ -566,7 +566,8 @@ private fun ReadmePage(
         ) {
             item {
                 if (readmeLoaded && readmeHtml != null) {
-                    var loaded by remember(readmeHtml) { mutableStateOf(false) }
+                    val loading = remember(readmeHtml) { mutableStateOf(true) }
+                    val loaded = !loading.value
                     val alpha by animateFloatAsState(
                         targetValue = if (loaded) 1f else 0f,
                         animationSpec = tween(durationMillis = 300),
@@ -583,7 +584,9 @@ private fun ReadmePage(
                                 Column {
                                     GithubMarkdown(
                                         content = readmeHtml,
-                                        onLoadingChange = { loaded = !it },
+                                        backgroundColor = androidx.compose.ui.graphics.Color.Transparent,
+                                        loading = loading,
+                                        callerProvideLoadingIndicator = true,
                                     )
                                 }
                             }
@@ -705,7 +708,8 @@ fun ReleasesPage(
                                                 color = colorScheme.outline.copy(alpha = 0.5f)
                                             )
                                             val descReady = rememberContentReady()
-                                            var descLoaded by remember(rel.descriptionHTML) { mutableStateOf(false) }
+                                            val descLoading = remember(rel.descriptionHTML) { mutableStateOf(true) }
+                                            val descLoaded = !descLoading.value
                                             val descAlpha by animateFloatAsState(
                                                 targetValue = if (descLoaded) 1f else 0f,
                                                 animationSpec = tween(durationMillis = 300),
@@ -725,7 +729,9 @@ fun ReleasesPage(
                                                     Box(modifier = Modifier.graphicsLayer { this.alpha = descAlpha }) {
                                                         GithubMarkdown(
                                                             content = rel.descriptionHTML,
-                                                            onLoadingChange = { descLoaded = !it },
+                                                            backgroundColor = androidx.compose.ui.graphics.Color.Transparent,
+                                                            loading = descLoading,
+                                                            callerProvideLoadingIndicator = true,
                                                         )
                                                     }
                                                 }

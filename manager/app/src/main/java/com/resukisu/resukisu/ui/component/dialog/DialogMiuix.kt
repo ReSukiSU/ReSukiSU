@@ -21,7 +21,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.ui.component.markdown.MarkdownContent
+import com.resukisu.resukisu.ui.component.GithubMarkdown
+import com.resukisu.resukisu.ui.component.MarkdownContent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.Text
@@ -78,8 +79,8 @@ fun ConfirmDialogMiuix(
                     val dismissState = LocalDismissState.current
                     visuals.content?.let { content ->
                         when {
-                            visuals.isMarkdown -> MarkdownContent(content = content, isMarkdown = true)
-                            visuals.isHtml -> MarkdownContent(content = content, isMarkdown = false)
+                            visuals.isMarkdown -> MarkdownContent(content = content)
+                            visuals.isHtml -> GithubMarkdown(content = content, backgroundColor = MiuixTheme.colorScheme.surface)
                             else -> Text(text = content)
                         }
                     }

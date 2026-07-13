@@ -470,7 +470,7 @@ private fun ConfirmDialog(visuals: ConfirmDialogVisuals, confirm: () -> Unit, di
 }
 
 @Composable
-private fun MarkdownContent(content: String) {
+internal fun MarkdownContent(content: String) {
     val contentColor = LocalContentColor.current
 
     Column(

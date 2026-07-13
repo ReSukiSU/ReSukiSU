@@ -62,26 +62,4 @@
     <string name="settings_kernel_umount">ಕರ್ನಲ್ ಅನ್‌ಮೌಂಟ್</string>
     <string name="settings_kernel_umount_summary">KernelSU ನಿಂದ ನಿಯಂತ್ರಿಸಲ್ಪಡುವ ಕರ್ನಲ್-ಮಟ್ಟದ ಅನ್‌ಮೌಂಟ್ ನಡವಳಿಕೆ</string>
     <string name="select">option</string>
-    <string name="settings_ui_mode">ಇಂಟರ್‌ಫೇಸ್ ವಿನ್ಯಾಸ</string>
-    <string name="settings_ui_mode_summary">ReSukiSU ಮತ್ತು Miuix ನಡುವೆ ಆಯ್ಕೆಮಾಡಿ.</string>
-    <string name="settings_ui_mode_resukisu">ReSukiSU</string>
-    <string name="settings_ui_mode_miuix">Miuix</string>
-    <string name="settings_floating_bottom_bar">ತೇಲುವ ಕೆಳಪಟ್ಟಿ</string>
-    <string name="settings_floating_bottom_bar_summary">Miuix ನ್ಯಾವಿಗೇಶನ್ ಅನ್ನು ತೇಲುವ ಪಟ್ಟಿಯಾಗಿ ತೋರಿಸಿ.</string>
-    <string name="settings_floating_bottom_bar_blur">ದ್ರವ ಗಾಜು</string>
-    <string name="settings_floating_bottom_bar_blur_summary">ತೇಲುವ ಪಟ್ಟಿಗೆ ದ್ರವ-ಗಾಜಿನ ಮಸುಕು ಅನ್ವಯಿಸಿ.</string>
-    <string name="profile_name">ಪ್ರೊಫೈಲ್ ಹೆಸರು</string>
-    <string name="app_profile_affects_following_apps">Affects the following apps</string>
-    <string name="module_repos">Repos</string>
-    <string name="module_repos_sort_updated">Updated time</string>
-    <string name="module_repos_sort_created">Created time</string>
-    <string name="module_repos_sort_name">Name</string>
-    <string name="module_repos_sort_stars">Stars</string>
-    <string name="module_repos_source_code">Source code</string>
-    <string name="tab_readme">README</string>
-    <string name="tab_releases">Releases</string>
-    <string name="tab_info">Info</string>
-    <string name="install_force_backup">ಮೂಲ ಇಮೇಜ್ ಆಗಿ ಬ್ಯಾಕಪ್ ಮಾಡಿ</string>
-    <string name="install_force_backup_summary">ದಯವಿಟ್ಟು ನೀವು ಆಯ್ಕೆ ಮಾಡಿದ boot ಇಮೇಜ್ ಮೂಲ ಇಮೇಜ್ ಆಗಿದೆ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ</string>
-    <string name="selinux_status_unknown">ತಿಳಿಯದ</string>
 </resources>
