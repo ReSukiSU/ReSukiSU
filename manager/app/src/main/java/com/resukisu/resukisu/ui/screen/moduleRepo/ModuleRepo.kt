@@ -197,15 +197,12 @@ fun ModuleRepoScreen() {
             }
         )
         com.resukisu.resukisu.ui.screen.modulerepo.ModuleRepoScreenMiuix(
-            state = com.resukisu.resukisu.ui.screen.modulerepo.ModuleRepoUiState(
-                isRefreshing = uiState.isRefreshing,
-                sortOrder = sortOrder,
-                offline = !isNetworkAvailable(context),
-                modules = sorted.map { it.toDataModelRepoModule() },
-                searchStatus = effectiveSearchStatus,
-                searchResults = searchResults.map { it.toDataModelRepoModule() },
-                error = null,
-            ),
+            modules = sorted,
+            searchResults = searchResults,
+            searchStatus = effectiveSearchStatus,
+            sortOrder = sortOrder,
+            isRefreshing = uiState.isRefreshing,
+            offline = !isNetworkAvailable(context),
             actions = com.resukisu.resukisu.ui.screen.modulerepo.ModuleRepoActions(
                 onBack = { navigator.pop() },
                 onRefresh = { viewModel.refresh() },
@@ -934,25 +931,3 @@ fun ChooseDialogPreview() {
     }
 }
 
-// --- ReSukiSU viewmodel RepoModule -> tiann/YuKongA data.model.RepoModule (Miuix repo list) ---
-private fun com.resukisu.resukisu.ui.viewmodel.ModuleRepoViewModel.Author.toDataModelAuthor() =
-    com.resukisu.resukisu.data.model.Author(name = name, link = link)
-
-private fun ReleaseAssetInfo.toDataModelReleaseAsset() =
-    com.resukisu.resukisu.data.model.ReleaseAsset(name = name, downloadUrl = downloadUrl, size = size)
-
-private fun RepoModule.toDataModelRepoModule() = com.resukisu.resukisu.data.model.RepoModule(
-    moduleId = moduleId,
-    moduleName = moduleName,
-    authors = authors,
-    authorList = authorList.map { it.toDataModelAuthor() },
-    summary = summary,
-    metamodule = metamodule,
-    stargazerCount = stargazerCount,
-    updatedAt = updatedAt,
-    createdAt = createdAt,
-    latestRelease = latestRelease,
-    latestReleaseTime = latestReleaseTime,
-    latestVersionCode = latestVersionCode,
-    latestAsset = latestAsset?.assets?.firstOrNull()?.toDataModelReleaseAsset(),
-)

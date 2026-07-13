@@ -1,7 +1,7 @@
 package com.resukisu.resukisu.ui.screen.modulerepo
 
 import androidx.compose.runtime.Immutable
-import com.resukisu.resukisu.data.model.RepoModule
+import com.resukisu.resukisu.ui.viewmodel.ModuleRepoViewModel.RepoModule
 import com.resukisu.resukisu.ui.component.SearchStatus
 
 enum class RepoSort {
@@ -10,16 +10,6 @@ enum class RepoSort {
     NAME,
     STARS,
 }
-
-data class ModuleRepoUiState(
-    val isRefreshing: Boolean = false,
-    val sortOrder: RepoSort = RepoSort.UPDATED,
-    val offline: Boolean = false,
-    val modules: List<RepoModule> = emptyList(),
-    val searchStatus: SearchStatus = SearchStatus(""),
-    val searchResults: List<RepoModule> = emptyList(),
-    val error: Throwable? = null
-)
 
 @Immutable
 data class ModuleRepoActions(

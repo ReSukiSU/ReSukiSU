@@ -130,10 +130,14 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun ModuleRepoScreenMiuix(
-    state: ModuleRepoUiState,
+    modules: List<com.resukisu.resukisu.ui.viewmodel.ModuleRepoViewModel.RepoModule>,
+    searchResults: List<com.resukisu.resukisu.ui.viewmodel.ModuleRepoViewModel.RepoModule>,
+    searchStatus: SearchStatus,
+    sortOrder: RepoSort,
+    isRefreshing: Boolean,
+    offline: Boolean,
     actions: ModuleRepoActions,
 ) {
-    val searchStatus = state.searchStatus
     val density = LocalDensity.current
     val metaBg = colorScheme.tertiaryContainer.copy(alpha = 0.6f)
     val metaTint = colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
@@ -178,7 +182,7 @@ fun ModuleRepoScreenMiuix(
                                             DropdownImpl(
                                                 text = stringResource(resId),
                                                 optionSize = sortOptions.size,
-                                                isSelected = state.sortOrder == order,
+                                                isSelected = sortOrder == order,
                                                 onSelectedIndexChange = {
                                                     actions.onSetSortOrder(order)
                                                     showSortPopup.value = false
@@ -257,7 +261,7 @@ fun ModuleRepoScreenMiuix(
                     item {
                         Spacer(Modifier.height(6.dp))
                     }
-                    items(state.searchResults, key = { it.moduleId }, contentType = { "module" }) { module ->
+                    items(searchResults, key = { it.moduleId }, contentType = { "module" }) { module ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -345,20 +349,20 @@ fun ModuleRepoScreenMiuix(
         },
     ) { innerPadding ->
         val layoutDirection = LocalLayoutDirection.current
-        val isLoading = state.modules.isEmpty()
-        val hadDataOnEntry = remember { state.modules.isNotEmpty() }
+        val isLoading = modules.isEmpty()
+        val hadDataOnEntry = remember { modules.isNotEmpty() }
         val contentReady = hadDataOnEntry || rememberContentReady()
-        val offline = state.offline
+        val offline = offline
 
         searchStatus.SearchBox {
             val pullToRefreshState = rememberPullToRefreshState()
             val lazyListState = rememberLazyListState()
             val refreshTick = remember { mutableIntStateOf(0) }
-            val latestModules = rememberUpdatedState(state.modules)
-            val latestRefreshing = rememberUpdatedState(state.isRefreshing)
+            val latestModules = rememberUpdatedState(modules)
+            val latestRefreshing = rememberUpdatedState(isRefreshing)
             ScrollToTopOnChange(
                 lazyListState,
-                state.sortOrder,
+                sortOrder,
                 refreshTick.intValue,
                 isBusy = { latestRefreshing.value },
             ) { latestModules.value }
@@ -369,7 +373,7 @@ fun ModuleRepoScreenMiuix(
                 stringResource(R.string.refresh_complete),
             )
             PullToRefresh(
-                isRefreshing = state.isRefreshing,
+                isRefreshing = isRefreshing,
                 pullToRefreshState = pullToRefreshState,
                 onRefresh = {
                     actions.onRefresh()
@@ -429,7 +433,7 @@ fun ModuleRepoScreenMiuix(
                             ),
                             overscrollEffect = null,
                         ) {
-                            items(items = state.modules, key = { it.moduleId }, contentType = { "module" }) { module ->
+                            items(items = modules, key = { it.moduleId }, contentType = { "module" }) { module ->
                                 val moduleAuthor = stringResource(id = R.string.module_author)
 
                                 Card(
