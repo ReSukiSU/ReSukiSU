@@ -125,11 +125,7 @@ fun AppProfileTemplateScreen() {
         val exportEmpty = stringResource(R.string.app_profile_template_export_empty)
         val templateById = remember(uiState.templateList) { uiState.templateList.associateBy { it.id } }
         AppProfileTemplateScreenMiuix(
-            state = com.resukisu.resukisu.ui.screen.template.TemplateUiState(
-                isRefreshing = uiState.isRefreshing,
-                templates = uiState.templateList,
-                templateList = uiState.templateList,
-            ),
+            state = uiState,
             actions = com.resukisu.resukisu.ui.screen.template.TemplateActions(
                 onBack = { navigator.pop() },
                 onRefresh = { sync -> scope.launch { viewModel.fetchTemplates(sync) } },

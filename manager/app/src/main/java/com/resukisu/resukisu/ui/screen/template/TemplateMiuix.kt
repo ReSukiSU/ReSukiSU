@@ -102,7 +102,7 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun AppProfileTemplateScreenMiuix(
-    state: TemplateUiState,
+    state: com.resukisu.resukisu.ui.viewmodel.TemplateUiState,
     actions: TemplateActions,
 ) {
     val scrollBehavior = MiuixScrollBehavior()
@@ -192,21 +192,7 @@ fun AppProfileTemplateScreenMiuix(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                if (state.offline) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = stringResource(R.string.network_offline), color = colorScheme.onSurfaceVariantSummary, fontSize = 16.sp)
-                        Spacer(Modifier.height(12.dp))
-                        TextButton(
-                            modifier = Modifier
-                                .padding(horizontal = 24.dp)
-                                .fillMaxWidth(),
-                            text = stringResource(R.string.network_retry),
-                            onClick = { actions.onRefresh(false) },
-                        )
-                    }
-                } else {
-                    InfiniteProgressIndicator()
-                }
+                InfiniteProgressIndicator()
             }
         }
         val pullToRefreshState = rememberPullToRefreshState()
