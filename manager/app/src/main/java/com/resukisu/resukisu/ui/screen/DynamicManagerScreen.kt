@@ -13,9 +13,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.twotone.Delete
+import androidx.compose.material.icons.twotone.Edit
+import androidx.compose.material.icons.twotone.Security
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -273,7 +273,7 @@ private fun DynamicManagerStatusSection(
     ) {
         item {
             SettingsBaseWidget(
-                icon = Icons.Filled.Security,
+                icon = Icons.TwoTone.Security,
                 title = stringResource(R.string.dynamic_manager_current_status),
                 description = currentStatus,
                 onClick = {}
@@ -282,7 +282,7 @@ private fun DynamicManagerStatusSection(
 
         item(visible = config?.isValid() == true) {
             SettingsBaseWidget(
-                icon = Icons.Filled.Security,
+                icon = Icons.TwoTone.Security,
                 title = stringResource(R.string.signature_hash),
                 description = config?.hash.orEmpty(),
                 onClick = {}
@@ -291,7 +291,7 @@ private fun DynamicManagerStatusSection(
 
         item {
             SettingsBaseWidget(
-                icon = Icons.Filled.Edit,
+                icon = Icons.TwoTone.Edit,
                 title = stringResource(R.string.dynamic_manager_manual_config),
                 description = stringResource(R.string.dynamic_manager_manual_config_summary),
                 enabled = enabled,
@@ -301,7 +301,7 @@ private fun DynamicManagerStatusSection(
 
         item {
             SettingsBaseWidget(
-                icon = Icons.Filled.Delete,
+                icon = Icons.TwoTone.Delete,
                 title = stringResource(R.string.dynamic_manager_clear_config),
                 description = stringResource(R.string.dynamic_manager_clear_config_summary),
                 enabled = enabled,

@@ -24,8 +24,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DeleteSweep
-import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.twotone.DeleteSweep
+import androidx.compose.material.icons.twotone.FilterList
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -183,13 +183,13 @@ private fun SulogScreenContent(
                 dropdownContent = {
                     IconButton(onClick = actions.onCleanFile) {
                         Icon(
-                            imageVector = Icons.Filled.DeleteSweep,
+                            imageVector = Icons.TwoTone.DeleteSweep,
                             contentDescription = stringResource(R.string.sulog_clean_title),
                         )
                     }
                     IconButton(onClick = { showFilterMenu = true }) {
                         Icon(
-                            imageVector = Icons.Filled.FilterList,
+                            imageVector = Icons.TwoTone.FilterList,
                             contentDescription = stringResource(R.string.sulog_filter_title),
                         )
 

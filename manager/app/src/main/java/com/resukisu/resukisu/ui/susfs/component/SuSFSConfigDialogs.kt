@@ -24,17 +24,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Update
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.twotone.CheckCircle
+import androidx.compose.material.icons.twotone.Delete
+import androidx.compose.material.icons.twotone.Edit
+import androidx.compose.material.icons.twotone.Folder
+import androidx.compose.material.icons.twotone.PlayArrow
+import androidx.compose.material.icons.twotone.RadioButtonUnchecked
+import androidx.compose.material.icons.twotone.Search
+import androidx.compose.material.icons.twotone.Settings
+import androidx.compose.material.icons.twotone.Update
+import androidx.compose.material.icons.twotone.Visibility
+import androidx.compose.material.icons.twotone.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -221,7 +221,7 @@ fun AddAppPathDialog(
                         label = { Text(stringResource(R.string.search_apps)) },
                         leadingIcon = {
                             Icon(
-                                imageVector = Icons.Default.Search,
+                                imageVector = Icons.TwoTone.Search,
                                 contentDescription = null
                             )
                         },
@@ -255,7 +255,7 @@ fun AddAppPathDialog(
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                                containerColor = MaterialTheme.colorScheme.surfaceBright.copy(alpha = 0.3f)
                             )
                         ) {
                             Text(
@@ -283,7 +283,7 @@ fun AddAppPathDialog(
                                         containerColor = if (isSelected) {
                                             MaterialTheme.colorScheme.primaryContainer
                                         } else {
-                                            MaterialTheme.colorScheme.surface
+                                            MaterialTheme.colorScheme.surfaceBright
                                         }
                                     ),
                                     onClick = {
@@ -336,14 +336,14 @@ fun AddAppPathDialog(
                                         // 选择指示器
                                         if (isSelected) {
                                             Icon(
-                                                imageVector = Icons.Default.CheckCircle,
+                                                imageVector = Icons.TwoTone.CheckCircle,
                                                 contentDescription = null,
                                                 tint = MaterialTheme.colorScheme.primary,
                                                 modifier = Modifier.size(24.dp)
                                             )
                                         } else {
                                             Icon(
-                                                imageVector = Icons.Default.RadioButtonUnchecked,
+                                                imageVector = Icons.TwoTone.RadioButtonUnchecked,
                                                 contentDescription = null,
                                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                                 modifier = Modifier.size(24.dp)
@@ -842,7 +842,7 @@ fun EmptyStateCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+            containerColor = MaterialTheme.colorScheme.surfaceBright.copy(alpha = 0.2f)
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -924,7 +924,7 @@ fun PathItemCard(
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Edit,
+                            imageVector = Icons.TwoTone.Edit,
                             contentDescription = stringResource(R.string.edit),
                             tint = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.size(16.dp)
@@ -937,7 +937,7 @@ fun PathItemCard(
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Delete,
+                        imageVector = Icons.TwoTone.Delete,
                         contentDescription = stringResource(R.string.delete),
                         tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(16.dp)
@@ -977,7 +977,7 @@ fun KstatConfigItemCard(
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Settings,
+                    imageVector = Icons.TwoTone.Settings,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(18.dp)
@@ -1017,7 +1017,7 @@ fun KstatConfigItemCard(
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Edit,
+                            imageVector = Icons.TwoTone.Edit,
                             contentDescription = stringResource(R.string.edit),
                             tint = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.size(16.dp)
@@ -1030,7 +1030,7 @@ fun KstatConfigItemCard(
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Delete,
+                        imageVector = Icons.TwoTone.Delete,
                         contentDescription = stringResource(R.string.delete),
                         tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(16.dp)
@@ -1072,7 +1072,7 @@ fun AddKstatPathItemCard(
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Folder,
+                    imageVector = Icons.TwoTone.Folder,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(18.dp)
@@ -1094,7 +1094,7 @@ fun AddKstatPathItemCard(
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Edit,
+                            imageVector = Icons.TwoTone.Edit,
                             contentDescription = stringResource(R.string.edit),
                             tint = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.size(16.dp)
@@ -1107,7 +1107,7 @@ fun AddKstatPathItemCard(
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Update,
+                        imageVector = Icons.TwoTone.Update,
                         contentDescription = stringResource(R.string.update),
                         tint = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier.size(16.dp)
@@ -1119,7 +1119,7 @@ fun AddKstatPathItemCard(
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.PlayArrow,
+                        imageVector = Icons.TwoTone.PlayArrow,
                         contentDescription = stringResource(R.string.susfs_update_full_clone),
                         tint = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.size(16.dp)
@@ -1131,7 +1131,7 @@ fun AddKstatPathItemCard(
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Delete,
+                        imageVector = Icons.TwoTone.Delete,
                         contentDescription = stringResource(R.string.delete),
                         tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(16.dp)
@@ -1309,7 +1309,7 @@ fun SusMountHidingControlCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surfaceBright
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -1322,7 +1322,7 @@ fun SusMountHidingControlCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = if (hideSusMountsForAllProcs) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                    imageVector = if (hideSusMountsForAllProcs) Icons.TwoTone.VisibilityOff else Icons.TwoTone.Visibility,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
@@ -1397,7 +1397,7 @@ fun SusMountHidingControlCard(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    containerColor = MaterialTheme.colorScheme.surfaceBright.copy(alpha = 0.3f)
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -1504,7 +1504,7 @@ fun AppPathGroupCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surfaceBright
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -1551,7 +1551,7 @@ fun AppPathGroupCard(
                             enabled = !isLoading
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Edit,
+                                imageVector = Icons.TwoTone.Edit,
                                 contentDescription = stringResource(R.string.edit),
                                 tint = MaterialTheme.colorScheme.primary
                             )
@@ -1562,7 +1562,7 @@ fun AppPathGroupCard(
                         enabled = !isLoading
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Delete,
+                            imageVector = Icons.TwoTone.Delete,
                             contentDescription = stringResource(R.string.delete),
                             tint = MaterialTheme.colorScheme.error
                         )
@@ -1581,7 +1581,7 @@ fun AppPathGroupCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                            MaterialTheme.colorScheme.surfaceBright.copy(alpha = 0.3f),
                             RoundedCornerShape(6.dp)
                         )
                         .padding(8.dp)
@@ -1608,7 +1608,7 @@ fun SectionHeader(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+            containerColor = MaterialTheme.colorScheme.surfaceBright.copy(alpha = 0.4f)
         ),
         shape = RoundedCornerShape(12.dp)
     ) {

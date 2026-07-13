@@ -32,27 +32,27 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Android
-import androidx.compose.material.icons.filled.BlurOn
-import androidx.compose.material.icons.filled.Brush
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ColorLens
-import androidx.compose.material.icons.filled.Contrast
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.DesignServices
-import androidx.compose.material.icons.filled.Draw
-import androidx.compose.material.icons.filled.FormatColorFill
-import androidx.compose.material.icons.filled.FormatSize
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.Opacity
-import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Style
-import androidx.compose.material.icons.filled.Translate
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.filled.Wallpaper
-import androidx.compose.material.icons.rounded.Animation
-import androidx.compose.material.icons.rounded.SwapHoriz
+import androidx.compose.material.icons.twotone.Android
+import androidx.compose.material.icons.twotone.Animation
+import androidx.compose.material.icons.twotone.BlurOn
+import androidx.compose.material.icons.twotone.Brush
+import androidx.compose.material.icons.twotone.Check
+import androidx.compose.material.icons.twotone.ColorLens
+import androidx.compose.material.icons.twotone.Contrast
+import androidx.compose.material.icons.twotone.DarkMode
+import androidx.compose.material.icons.twotone.DesignServices
+import androidx.compose.material.icons.twotone.Draw
+import androidx.compose.material.icons.twotone.FormatColorFill
+import androidx.compose.material.icons.twotone.FormatSize
+import androidx.compose.material.icons.twotone.Info
+import androidx.compose.material.icons.twotone.LightMode
+import androidx.compose.material.icons.twotone.Opacity
+import androidx.compose.material.icons.twotone.Palette
+import androidx.compose.material.icons.twotone.Style
+import androidx.compose.material.icons.twotone.SwapHoriz
+import androidx.compose.material.icons.twotone.Translate
+import androidx.compose.material.icons.twotone.VisibilityOff
+import androidx.compose.material.icons.twotone.Wallpaper
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -443,7 +443,7 @@ fun PredictiveBackAnimationWidget(
     onSelect: (PredictiveBackAnimation) -> Unit
 ) {
     SettingsChooseWidget(
-        icon = Icons.Rounded.Animation,
+        icon = Icons.TwoTone.Animation,
         title = stringResource(R.string.predictive_back_animation),
         items = listOf(
             stringResource(R.string.predictive_back_animation_none),
@@ -465,7 +465,7 @@ fun PredictiveBackAnimationDirectionWidget(
     onSelect: (PredictiveBackExitDirection) -> Unit
 ) {
     SettingsChooseWidget(
-        icon = Icons.Rounded.SwapHoriz,
+        icon = Icons.TwoTone.SwapHoriz,
         title = stringResource(R.string.predictive_back_exit_direction),
         items = listOf(
             stringResource(R.string.predictive_back_exit_direction_follow_gesture),
@@ -496,7 +496,7 @@ private fun AppearanceSettings(
         item {
             // 主题模式
             SettingsChooseWidget(
-                icon = Icons.Default.DarkMode,
+                icon = Icons.TwoTone.DarkMode,
                 title = stringResource(R.string.theme_mode),
                 items = state.themeOptions,
                 selectedIndex = state.themeMode,
@@ -509,7 +509,7 @@ private fun AppearanceSettings(
         item {
             // 动态颜色开关
             SettingsSwitchWidget(
-                icon = Icons.Filled.ColorLens,
+                icon = Icons.TwoTone.ColorLens,
                 title = stringResource(R.string.dynamic_color_title),
                 description = stringResource(R.string.dynamic_color_summary),
                 checked = state.useDynamicColor,
@@ -527,7 +527,7 @@ private fun AppearanceSettings(
 
         item {
             SettingsChooseWidget(
-                icon = Icons.Filled.Style,
+                icon = Icons.TwoTone.Style,
                 title = stringResource(R.string.dynamic_palette_style),
                 items = PaletteStyle.entries.map { it.displayName() },
                 selectedIndex = PaletteStyle.entries.indexOf(state.dynamicPaletteStyle),
@@ -542,7 +542,7 @@ private fun AppearanceSettings(
 
         item {
             SettingsChooseWidget(
-                icon = Icons.Filled.DesignServices,
+                icon = Icons.TwoTone.DesignServices,
                 title = stringResource(R.string.dynamic_color_spec),
                 items = ColorSpec.SpecVersion.entries.map { it.displayName() },
                 selectedIndex = ColorSpec.SpecVersion.entries.indexOf(state.dynamicColorSpec),
@@ -559,7 +559,7 @@ private fun AppearanceSettings(
 
         item {
             SettingsBaseWidget(
-                icon = Icons.Default.FormatSize,
+                icon = Icons.TwoTone.FormatSize,
                 title = stringResource(R.string.app_dpi_title),
                 description = stringResource(R.string.app_dpi_summary),
                 onClick = {},
@@ -578,8 +578,8 @@ private fun AppearanceSettings(
             Surface(
                 modifier = Modifier
                     .clip(shape)
-                    .renderBackgroundBlur(),
-                color = if (ThemeConfig.isEnableBlurExp) Color.Transparent else MaterialTheme.colorScheme.surfaceContainerHighest.copy(
+                    .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright),
+                color = if (ThemeConfig.isEnableBlurExp) Color.Transparent else MaterialTheme.colorScheme.surfaceBright.copy(
                     alpha = CardConfig.cardAlpha
                 ),
                 shape = shape
@@ -624,7 +624,7 @@ private fun CustomizationSettings(
         item {
             // 图标切换
             SettingsSwitchWidget(
-                icon = Icons.Default.Android,
+                icon = Icons.TwoTone.Android,
                 title = stringResource(R.string.icon_switch_title),
                 description = stringResource(R.string.icon_switch_summary),
                 checked = settingsUiState.useAltIcon,
@@ -635,7 +635,7 @@ private fun CustomizationSettings(
         item {
             // 显示更多模块信息
             SettingsSwitchWidget(
-                icon = Icons.Filled.Info,
+                icon = Icons.TwoTone.Info,
                 title = stringResource(R.string.show_more_module_info),
                 description = stringResource(R.string.show_more_module_info_summary),
                 checked = moduleUiState.showMoreModuleInfo,
@@ -646,7 +646,7 @@ private fun CustomizationSettings(
         item {
             // 简洁模式开关
             SettingsSwitchWidget(
-                icon = Icons.Filled.Brush,
+                icon = Icons.TwoTone.Brush,
                 title = stringResource(R.string.simple_mode),
                 description = stringResource(R.string.simple_mode_summary),
                 checked = homeUiState.isSimpleMode,
@@ -665,20 +665,9 @@ private fun SegmentedColumnScope.hideOptionsSettings(
     moduleViewModel: ModuleViewModel,
 ) {
     item {
-        // 隐藏内核版本信息
-        SettingsSwitchWidget(
-            icon = Icons.Filled.VisibilityOff,
-            title = stringResource(R.string.hide_kernel_kernelsu_version),
-            description = stringResource(R.string.hide_kernel_kernelsu_version_summary),
-            checked = homeUiState.isHideVersion,
-            onCheckedChange = homeViewModel::handleHideVersionChange
-        )
-    }
-
-    item {
         // 隐藏模块数量等信息
         SettingsSwitchWidget(
-            icon = Icons.Filled.VisibilityOff,
+            icon = Icons.TwoTone.VisibilityOff,
             title = stringResource(R.string.hide_other_info),
             description = stringResource(R.string.hide_other_info_summary),
             checked = homeUiState.isHideOtherInfo,
@@ -689,7 +678,7 @@ private fun SegmentedColumnScope.hideOptionsSettings(
     item {
         // SuSFS 状态信息
         SettingsSwitchWidget(
-            icon = Icons.Filled.VisibilityOff,
+            icon = Icons.TwoTone.VisibilityOff,
             title = stringResource(R.string.hide_susfs_status),
             description = stringResource(R.string.hide_susfs_status_summary),
             checked = homeUiState.isHideSusfsStatus,
@@ -700,7 +689,7 @@ private fun SegmentedColumnScope.hideOptionsSettings(
     item {
         // Zygisk 实现状态信息
         SettingsSwitchWidget(
-            icon = Icons.Filled.VisibilityOff,
+            icon = Icons.TwoTone.VisibilityOff,
             title = stringResource(R.string.hide_zygisk_implement),
             description = stringResource(R.string.hide_zygisk_implement_summary),
             checked = homeUiState.isHideZygiskImplement,
@@ -711,7 +700,7 @@ private fun SegmentedColumnScope.hideOptionsSettings(
     item {
         // 元模块实现状态信息
         SettingsSwitchWidget(
-            icon = Icons.Filled.VisibilityOff,
+            icon = Icons.TwoTone.VisibilityOff,
             title = stringResource(R.string.hide_meta_module_implement),
             description = stringResource(R.string.hide_meta_module_implement_summary),
             checked = homeUiState.isHideMetaModuleImplement,
@@ -722,7 +711,7 @@ private fun SegmentedColumnScope.hideOptionsSettings(
     item {
         // 隐藏链接信息
         SettingsSwitchWidget(
-            icon = Icons.Filled.VisibilityOff,
+            icon = Icons.TwoTone.VisibilityOff,
             title = stringResource(R.string.hide_link_card),
             description = stringResource(R.string.hide_link_card_summary),
             checked = homeUiState.isHideLinkCard,
@@ -733,7 +722,7 @@ private fun SegmentedColumnScope.hideOptionsSettings(
     item {
         // 隐藏标签行
         SettingsSwitchWidget(
-            icon = Icons.Filled.VisibilityOff,
+            icon = Icons.TwoTone.VisibilityOff,
             title = stringResource(R.string.hide_tag_card),
             description = stringResource(R.string.hide_tag_card_summary),
             checked = moduleUiState.isHideTagRow,
@@ -745,7 +734,7 @@ private fun SegmentedColumnScope.hideOptionsSettings(
 @Composable
 private fun ThemeColorSelection(viewModel: SettingsViewModel) {
     SettingsBaseWidget(
-        icon = Icons.Default.Palette,
+        icon = Icons.TwoTone.Palette,
         title = stringResource(R.string.theme_color),
         description = ThemeConfig.seedColor.toSeedColorHex(),
         onClick = { viewModel.setThemeColorDialogVisible(true) },
@@ -801,7 +790,7 @@ private fun DpiSliderControls(
             val buttonColor = if (isSelected)
                 MaterialTheme.colorScheme.primaryContainer
             else
-                MaterialTheme.colorScheme.surfaceVariant
+                MaterialTheme.colorScheme.surfaceBright
 
             Box(
                 modifier = Modifier
@@ -859,7 +848,7 @@ private fun DpiSliderControls(
         enabled = state.tempDpi != state.currentDpi
     ) {
         Icon(
-            Icons.Default.Check,
+            Icons.TwoTone.Check,
             contentDescription = null,
             modifier = Modifier.size(16.dp)
         )
@@ -878,7 +867,7 @@ private fun CustomBackgroundSettings(
     // TODO Portrait/Landscape wallpaper split
 
     SettingsSwitchWidget(
-        icon = Icons.Filled.Wallpaper,
+        icon = Icons.TwoTone.Wallpaper,
         title = stringResource(id = R.string.settings_custom_background),
         description = stringResource(id = R.string.settings_custom_background_summary),
         checked = state.isCustomBackgroundEnabled,
@@ -917,77 +906,77 @@ private fun SegmentedColumnScope.backgroundAdjustmentControls(
         )
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        expandableItem(
-            expanded = ThemeConfig.isEnableBlur,
-            topPadding = 1.dp,
-            topContent = {
+    expandableItem(
+        animatedVisibility = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
+        expanded = ThemeConfig.isEnableBlur,
+        topPadding = 1.dp,
+        topContent = {
+            val context = LocalContext.current
+
+            SettingsSwitchWidget(
+                icon = Icons.TwoTone.BlurOn,
+                title = stringResource(id = R.string.settings_config_enable_blur),
+                description = stringResource(id = R.string.settings_config_enable_blur_summary),
+                checked = ThemeConfig.isEnableBlur,
+                onCheckedChange = { isChecked ->
+                    BackgroundManager.saveEnableBlur(context, isChecked)
+                    if (!isChecked)
+                        BackgroundManager.saveEnableBlurExp(context, false)
+                }
+            )
+        },
+        bottomContent = {
+            item(
+                topPadding = 1.dp,
+            ) {
                 val context = LocalContext.current
 
                 SettingsSwitchWidget(
-                    icon = Icons.Filled.BlurOn,
-                    title = stringResource(id = R.string.settings_config_enable_blur),
-                    description = stringResource(id = R.string.settings_config_enable_blur_summary),
-                    checked = ThemeConfig.isEnableBlur,
+                    icon = Icons.TwoTone.Draw,
+                    title = stringResource(id = R.string.settings_exp_draw_background_to_blur),
+                    description = stringResource(id = R.string.settings_exp_draw_background_to_blur_description),
+                    isError = true,
+                    checked = ThemeConfig.isEnableBlurExp,
                     onCheckedChange = { isChecked ->
-                        BackgroundManager.saveEnableBlur(context, isChecked)
-                        if (!isChecked)
-                            BackgroundManager.saveEnableBlurExp(context, false)
+                        BackgroundManager.saveEnableBlurExp(context, isChecked)
                     }
                 )
-            },
-            bottomContent = {
-                item(
-                    topPadding = 1.dp,
-                ) {
-                    val context = LocalContext.current
+            }
+        }
+    )
 
-                    SettingsSwitchWidget(
-                        icon = Icons.Filled.Draw,
-                        title = stringResource(id = R.string.settings_exp_draw_background_to_blur),
-                        description = stringResource(id = R.string.settings_exp_draw_background_to_blur_description),
-                        isError = true,
-                        checked = ThemeConfig.isEnableBlurExp,
-                        onCheckedChange = { isChecked ->
-                            BackgroundManager.saveEnableBlurExp(context, isChecked)
-                        }
-                    )
-                }
+    item(
+        visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && state.useDynamicColor,
+        topPadding = 1.dp,
+    ) {
+        val context = LocalContext.current
+
+        SettingsSwitchWidget(
+            icon = Icons.TwoTone.FormatColorFill,
+            title = stringResource(id = R.string.settings_config_use_custom_background_seed_color),
+            description = stringResource(id = R.string.settings_config_use_custom_background_seed_color_summary),
+            checked = ThemeConfig.isUseBackgroundSeedColor,
+            onCheckedChange = { isChecked ->
+                BackgroundManager.saveUseBackgroundSeedColor(context, isChecked)
             }
         )
+    }
 
-        item(
-            visible = state.useDynamicColor,
-            topPadding = 1.dp,
-        ) {
-            val context = LocalContext.current
+    item(
+        visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
+        topPadding = 1.dp,
+    ) {
+        val context = LocalContext.current
 
-            SettingsSwitchWidget(
-                icon = Icons.Filled.FormatColorFill,
-                title = stringResource(id = R.string.settings_config_use_custom_background_seed_color),
-                description = stringResource(id = R.string.settings_config_use_custom_background_seed_color_summary),
-                checked = ThemeConfig.isUseBackgroundSeedColor,
-                onCheckedChange = { isChecked ->
-                    BackgroundManager.saveUseBackgroundSeedColor(context, isChecked)
-                }
-            )
-        }
-
-        item(
-            topPadding = 1.dp,
-        ) {
-            val context = LocalContext.current
-
-            SettingsSwitchWidget(
-                icon = Icons.Filled.Contrast,
-                title = stringResource(id = R.string.settings_custom_enable_high_contrast),
-                description = stringResource(id = R.string.settings_custom_enable_high_contrast_summary),
-                checked = ThemeConfig.isHighContrastMode,
-                onCheckedChange = { isChecked ->
-                    BackgroundManager.saveEnableHighContrastMode(context, isChecked)
-                }
-            )
-        }
+        SettingsSwitchWidget(
+            icon = Icons.TwoTone.Contrast,
+            title = stringResource(id = R.string.settings_custom_enable_high_contrast),
+            description = stringResource(id = R.string.settings_custom_enable_high_contrast_summary),
+            checked = ThemeConfig.isHighContrastMode,
+            onCheckedChange = { isChecked ->
+                BackgroundManager.saveEnableHighContrastMode(context, isChecked)
+            }
+        )
     }
 }
 
@@ -999,7 +988,7 @@ private fun AlphaSlider(
 ) {
     val context = LocalContext.current
     SettingsBaseWidget(
-        icon = Icons.Filled.Opacity,
+        icon = Icons.TwoTone.Opacity,
         title = stringResource(R.string.settings_card_alpha),
         descriptionColumnContent = {
             val alphaSliderValue by animateFloatAsState(
@@ -1044,7 +1033,7 @@ private fun DimSlider(
 ) {
     val context = LocalContext.current
     SettingsBaseWidget(
-        icon = Icons.Filled.LightMode,
+        icon = Icons.TwoTone.LightMode,
         title = stringResource(R.string.settings_background_dim),
         descriptionColumnContent = {
             val dimSliderValue by animateFloatAsState(
@@ -1099,7 +1088,7 @@ private fun LanguageSetting(state: SettingsUiState, viewModel: SettingsViewModel
     }
 
     SettingsJumpPageWidget(
-        icon = Icons.Filled.Translate,
+        icon = Icons.TwoTone.Translate,
         title = language,
         description = currentLanguageDisplay,
         onClick = { viewModel.setLanguageDialogVisible(true) }

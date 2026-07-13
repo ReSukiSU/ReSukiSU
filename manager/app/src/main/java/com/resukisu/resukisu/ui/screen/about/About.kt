@@ -15,9 +15,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Code
-import androidx.compose.material.icons.rounded.Copyright
-import androidx.compose.material.icons.rounded.Group
+import androidx.compose.material.icons.twotone.Code
+import androidx.compose.material.icons.twotone.Copyright
+import androidx.compose.material.icons.twotone.Group
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LargeFlexibleTopAppBar
@@ -127,7 +127,7 @@ fun AboutScreen() {
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
                         .padding(top = 8.dp, bottom = 12.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
+                    color = MaterialTheme.colorScheme.surfaceBright.copy(
                         alpha = CardConfig.cardAlpha
                     ),
                     message = AnnotatedString.fromHtml(
@@ -158,7 +158,7 @@ fun AboutScreen() {
                 ) {
                     item {
                         SettingsJumpPageWidget(
-                            icon = Icons.Rounded.Code,
+                            icon = Icons.TwoTone.Code,
                             title = stringResource(R.string.get_source_code),
                             description = stringResource(R.string.get_source_code_detail),
                             onClick = { uriHandler.openUri("https://github.com/ReSukiSU/ReSukiSU") }
@@ -166,7 +166,7 @@ fun AboutScreen() {
                     }
                     item {
                         SettingsJumpPageWidget(
-                            icon = Icons.Rounded.Group,
+                            icon = Icons.TwoTone.Group,
                             title = stringResource(R.string.join_telegram_group),
                             description = stringResource(R.string.join_telegram_group_detail),
                             onClick = { uriHandler.openUri("https://t.me/ReSukiSU") }
@@ -174,7 +174,7 @@ fun AboutScreen() {
                     }
                     item {
                         SettingsJumpPageWidget(
-                            icon = Icons.Rounded.Copyright,
+                            icon = Icons.TwoTone.Copyright,
                             title = stringResource(R.string.open_source_license),
                             description = stringResource(R.string.open_source_license_settings_description),
                             onClick = {
@@ -216,7 +216,7 @@ private fun StatusCard() {
             if (ThemeConfig.isEnableBlurExp)
                 Color.Transparent
             else
-                MaterialTheme.colorScheme.surfaceContainerHighest.copy(CardConfig.cardAlpha),
+                MaterialTheme.colorScheme.surfaceBright.copy(CardConfig.cardAlpha),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(

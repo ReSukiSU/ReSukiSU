@@ -622,7 +622,7 @@ fun Modifier.renderBackgroundBlur(
         mutableStateOf<LayoutCoordinates?>(null)
     }
 
-    val tintColor = (tintColor ?: MaterialTheme.colorScheme.surfaceContainerHighest).copy(
+    val tintColor = (tintColor ?: MaterialTheme.colorScheme.surfaceBright).copy(
         alpha = CardConfig.cardAlpha
     )
     val backgroundBlurAnchor = LocalBackgroundBlurAnchor.current

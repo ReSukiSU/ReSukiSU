@@ -16,12 +16,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Loop
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.twotone.Add
+import androidx.compose.material.icons.twotone.Apps
+import androidx.compose.material.icons.twotone.Folder
+import androidx.compose.material.icons.twotone.Loop
+import androidx.compose.material.icons.twotone.Security
+import androidx.compose.material.icons.twotone.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -137,7 +137,7 @@ fun SusPathsContent(
                     SectionHeader(
                         title = stringResource(R.string.app_paths_section),
                         subtitle = null,
-                        icon = Icons.Default.Apps,
+                        icon = Icons.TwoTone.Apps,
                         count = appPathGroups.size
                     )
                 }
@@ -165,7 +165,7 @@ fun SusPathsContent(
                     SectionHeader(
                         title = stringResource(R.string.other_paths_section),
                         subtitle = null,
-                        icon = Icons.Default.Folder,
+                        icon = Icons.TwoTone.Folder,
                         count = otherPaths.size
                     )
                 }
@@ -173,7 +173,7 @@ fun SusPathsContent(
                 items(otherPaths) { path ->
                     PathItemCard(
                         path = path,
-                        icon = Icons.Default.Folder,
+                        icon = Icons.TwoTone.Folder,
                         onDelete = { onRemovePath(path) },
                         onEdit = if (onEditPath != null) { { onEditPath(path) } } else null,
                         isLoading = isLoading
@@ -205,7 +205,7 @@ fun SusPathsContent(
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Add,
+                            imageVector = Icons.TwoTone.Add,
                             contentDescription = null,
                             modifier = Modifier.size(24.dp)
                         )
@@ -221,7 +221,7 @@ fun SusPathsContent(
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Apps,
+                            imageVector = Icons.TwoTone.Apps,
                             contentDescription = null,
                             modifier = Modifier.size(24.dp)
                         )
@@ -255,7 +255,7 @@ fun SusLoopPathsContent(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                        containerColor = MaterialTheme.colorScheme.surfaceBright.copy(alpha = 0.4f)
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
@@ -294,7 +294,7 @@ fun SusLoopPathsContent(
                     SectionHeader(
                         title = stringResource(R.string.loop_paths_section),
                         subtitle = null,
-                        icon = Icons.Default.Loop,
+                        icon = Icons.TwoTone.Loop,
                         count = susLoopPaths.size
                     )
                 }
@@ -302,7 +302,7 @@ fun SusLoopPathsContent(
                 items(susLoopPaths.toList()) { path ->
                     PathItemCard(
                         path = path,
-                        icon = Icons.Default.Loop,
+                        icon = Icons.TwoTone.Loop,
                         onDelete = { onRemoveLoopPath(path) },
                         onEdit = if (onEditLoopPath != null) { { onEditLoopPath(path) } } else null,
                         isLoading = isLoading
@@ -326,7 +326,7 @@ fun SusLoopPathsContent(
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Add,
+                            imageVector = Icons.TwoTone.Add,
                             contentDescription = null,
                             modifier = Modifier.size(24.dp)
                         )
@@ -360,7 +360,7 @@ fun SusMapsContent(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                        containerColor = MaterialTheme.colorScheme.surfaceBright.copy(alpha = 0.4f)
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
@@ -404,7 +404,7 @@ fun SusMapsContent(
                     SectionHeader(
                         title = stringResource(R.string.sus_maps_section),
                         subtitle = null,
-                        icon = Icons.Default.Security,
+                        icon = Icons.TwoTone.Security,
                         count = susMaps.size
                     )
                 }
@@ -412,7 +412,7 @@ fun SusMapsContent(
                 items(susMaps.toList()) { map ->
                     PathItemCard(
                         path = map,
-                        icon = Icons.Default.Security,
+                        icon = Icons.TwoTone.Security,
                         onDelete = { onRemoveSusMap(map) },
                         onEdit = if (onEditSusMap != null) { { onEditSusMap(map) } } else null,
                         isLoading = isLoading
@@ -436,7 +436,7 @@ fun SusMapsContent(
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Add,
+                            imageVector = Icons.TwoTone.Add,
                             contentDescription = null,
                             modifier = Modifier.size(24.dp)
                         )
@@ -475,7 +475,7 @@ fun KstatConfigContent(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                        containerColor = MaterialTheme.colorScheme.surfaceBright.copy(alpha = 0.4f)
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
@@ -575,7 +575,7 @@ fun KstatConfigContent(
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Add,
+                            imageVector = Icons.TwoTone.Add,
                             contentDescription = null,
                             modifier = Modifier.size(24.dp)
                         )
@@ -591,7 +591,7 @@ fun KstatConfigContent(
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Settings,
+                            imageVector = Icons.TwoTone.Settings,
                             contentDescription = null,
                             modifier = Modifier.size(24.dp)
                         )
@@ -708,7 +708,7 @@ fun EnabledFeaturesContent(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                    containerColor = MaterialTheme.colorScheme.surfaceBright.copy(alpha = 0.4f)
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -719,7 +719,7 @@ fun EnabledFeaturesContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Settings,
+                            imageVector = Icons.TwoTone.Settings,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(18.dp)

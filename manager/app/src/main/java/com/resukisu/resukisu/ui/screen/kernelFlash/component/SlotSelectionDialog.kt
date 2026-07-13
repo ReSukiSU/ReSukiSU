@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SdStorage
+import androidx.compose.material.icons.twotone.SdStorage
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -67,7 +67,7 @@ fun SlotSelectionDialog(
     }
 
     if (show) {
-        val cardColor = MaterialTheme.colorScheme.surfaceContainerHighest
+        val cardColor = MaterialTheme.colorScheme.surfaceBright
 
         AlertDialog(
             onDismissRequest = onDismiss,
@@ -124,12 +124,12 @@ fun SlotSelectionDialog(
                             ListOption(
                                 titleText = stringResource(id = R.string.slot_a),
                                 subtitleText = null,
-                                icon = Icons.Filled.SdStorage
+                                icon = Icons.TwoTone.SdStorage
                             ),
                             ListOption(
                                 titleText = stringResource(id = R.string.slot_b),
                                 subtitleText = null,
-                                icon = Icons.Filled.SdStorage
+                                icon = Icons.TwoTone.SdStorage
                             )
                         )
 

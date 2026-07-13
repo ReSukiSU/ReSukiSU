@@ -41,7 +41,6 @@ data class HomeUiState(
     val systemInfo: HomeViewModel.SystemInfo = HomeViewModel.SystemInfo(),
     val latestVersionInfo: LatestVersionInfo = LatestVersionInfo(),
     val isSimpleMode: Boolean = false,
-    val isHideVersion: Boolean = false,
     val isHideOtherInfo: Boolean = false,
     val isHideSusfsStatus: Boolean = false,
     val isHideZygiskImplement: Boolean = false,
@@ -153,7 +152,7 @@ class HomeViewModel : ViewModel() {
         val job = viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 val (kernelRelease, androidVersion, deviceModel, managerVersion, selinuxStatus, seccompStatus) =
-                    loadBasicSystemInfo(context)
+                    loadBasicSystemInfo()
                 _uiState.update {
                     it.copy(
                         systemInfo = it.systemInfo.copy(
@@ -271,18 +270,6 @@ class HomeViewModel : ViewModel() {
         updateBooleanPref(context, "is_simple_mode", newValue) { it.copy(isSimpleMode = newValue) }
     }
 
-    fun handleHideVersionChange(newValue: Boolean) {
-        handleHideVersionChange(ksuApp, newValue)
-    }
-
-    fun handleHideVersionChange(context: Context, newValue: Boolean) {
-        updateBooleanPref(
-            context,
-            "is_hide_version",
-            newValue
-        ) { it.copy(isHideVersion = newValue) }
-    }
-
     fun handleHideOtherInfoChange(newValue: Boolean) {
         handleHideOtherInfoChange(ksuApp, newValue)
     }
@@ -353,7 +340,6 @@ class HomeViewModel : ViewModel() {
         _uiState.update {
             it.copy(
                 isSimpleMode = settingsPrefs.getBoolean("is_simple_mode", false),
-                isHideVersion = settingsPrefs.getBoolean("is_hide_version", false),
                 isHideOtherInfo = settingsPrefs.getBoolean("is_hide_other_info", false),
                 isHideSusfsStatus = settingsPrefs.getBoolean("is_hide_susfs_status", false),
                 isHideLinkCard = settingsPrefs.getBoolean("is_hide_link_card", false),
@@ -366,7 +352,7 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    private suspend fun loadBasicSystemInfo(context: Context): Tuple6<String, String, String, Triple<String, Int, Int>, String, Int> {
+    private suspend fun loadBasicSystemInfo(): Tuple6<String, String, String, Triple<String, Int, Int>, String, Int> {
         return withContext(Dispatchers.IO) {
             val uname = runCatching { Os.uname() }.getOrNull()
             Tuple6(

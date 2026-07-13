@@ -29,13 +29,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.SignalWifiOff
-import androidx.compose.material.icons.outlined.Download
-import androidx.compose.material.icons.outlined.WebAsset
-import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.twotone.Check
+import androidx.compose.material.icons.twotone.Close
+import androidx.compose.material.icons.twotone.Download
+import androidx.compose.material.icons.twotone.MoreVert
+import androidx.compose.material.icons.twotone.SignalWifiOff
+import androidx.compose.material.icons.twotone.Star
+import androidx.compose.material.icons.twotone.WebAsset
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedCard
@@ -175,7 +175,7 @@ fun ModuleRepoScreen() {
                         onClick = { showBottomSheet = true },
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.MoreVert,
+                            imageVector = Icons.TwoTone.MoreVert,
                             contentDescription = stringResource(id = R.string.settings),
                         )
                     }
@@ -213,7 +213,7 @@ fun ModuleRepoScreen() {
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Default.SignalWifiOff,
+                                imageVector = Icons.TwoTone.SignalWifiOff,
                                 contentDescription = null,
                                 modifier = Modifier.size(32.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -391,16 +391,16 @@ private fun ModuleRepoBottomSheetContent(
                     thumbContent = {
                         if (uiState.sortStargazerCountFirst) {
                             Icon(
-                                imageVector = Icons.Filled.Check,
+                                imageVector = Icons.TwoTone.Check,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(SwitchDefaults.IconSize),
                             )
                         } else {
                             Icon(
-                                imageVector = Icons.Filled.Close,
+                                imageVector = Icons.TwoTone.Close,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                tint = MaterialTheme.colorScheme.surfaceBright,
                                 modifier = Modifier.size(SwitchDefaults.IconSize),
                             )
                         }
@@ -428,7 +428,7 @@ fun OnlineModuleItem(
             if (ThemeConfig.isEnableBlurExp)
                 Color.Transparent
             else
-                MaterialTheme.colorScheme.surfaceContainerHighest.copy(CardConfig.cardAlpha),
+                MaterialTheme.colorScheme.surfaceBright.copy(CardConfig.cardAlpha),
         modifier = Modifier
             .clip(RoundedCornerShape(16.dp))
             .clickable {
@@ -473,7 +473,7 @@ fun OnlineModuleItem(
                                 horizontalArrangement = Arrangement.End
                             ) {
                                 Icon(
-                                    imageVector = Icons.Rounded.Star,
+                                    imageVector = Icons.TwoTone.Star,
                                     contentDescription = "stars",
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(16.dp)
@@ -556,7 +556,7 @@ fun OnlineModuleItem(
                     ) {
                         Icon(
                             modifier = Modifier.size(20.dp),
-                            imageVector = Icons.Outlined.WebAsset,
+                            imageVector = Icons.TwoTone.WebAsset,
                             contentDescription = null
                         )
                     }
@@ -599,7 +599,7 @@ fun OnlineModuleItem(
                         ) {
                             Icon(
                                 modifier = Modifier.size(20.dp),
-                                imageVector = Icons.Outlined.Download,
+                                imageVector = Icons.TwoTone.Download,
                                 contentDescription = null
                             )
                         }

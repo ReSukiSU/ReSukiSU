@@ -23,17 +23,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoMode
-import androidx.compose.material.icons.filled.Backup
-import androidx.compose.material.icons.filled.CleaningServices
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Restore
-import androidx.compose.material.icons.filled.RestoreFromTrash
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Storage
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.twotone.AutoMode
+import androidx.compose.material.icons.twotone.Backup
+import androidx.compose.material.icons.twotone.CleaningServices
+import androidx.compose.material.icons.twotone.Info
+import androidx.compose.material.icons.twotone.Refresh
+import androidx.compose.material.icons.twotone.Restore
+import androidx.compose.material.icons.twotone.RestoreFromTrash
+import androidx.compose.material.icons.twotone.Security
+import androidx.compose.material.icons.twotone.Settings
+import androidx.compose.material.icons.twotone.Storage
+import androidx.compose.material.icons.twotone.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -480,7 +480,7 @@ fun SuSFSConfigScreen() {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                            containerColor = MaterialTheme.colorScheme.surfaceBright.copy(alpha = 0.3f)
                         ),
                         shape = RoundedCornerShape(8.dp)
                     ) {
@@ -883,7 +883,7 @@ fun SuSFSConfigScreen() {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Settings,
+                            imageVector = Icons.TwoTone.Settings,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp)
@@ -970,7 +970,7 @@ fun SuSFSConfigScreen() {
                                     .height(40.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.RestoreFromTrash,
+                                    imageVector = Icons.TwoTone.RestoreFromTrash,
                                     contentDescription = null,
                                     modifier = Modifier.size(16.dp)
                                 )
@@ -992,7 +992,7 @@ fun SuSFSConfigScreen() {
                                     .height(40.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.RestoreFromTrash,
+                                    imageVector = Icons.TwoTone.RestoreFromTrash,
                                     contentDescription = null,
                                     modifier = Modifier.size(16.dp)
                                 )
@@ -1014,7 +1014,7 @@ fun SuSFSConfigScreen() {
                                     .height(40.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.RestoreFromTrash,
+                                    imageVector = Icons.TwoTone.RestoreFromTrash,
                                     contentDescription = null,
                                     modifier = Modifier.size(16.dp)
                                 )
@@ -1036,7 +1036,7 @@ fun SuSFSConfigScreen() {
                                     .height(40.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.RestoreFromTrash,
+                                    imageVector = Icons.TwoTone.RestoreFromTrash,
                                     contentDescription = null,
                                     modifier = Modifier.size(16.dp)
                                 )
@@ -1058,7 +1058,7 @@ fun SuSFSConfigScreen() {
                                     .height(40.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.RestoreFromTrash,
+                                    imageVector = Icons.TwoTone.RestoreFromTrash,
                                     contentDescription = null,
                                     modifier = Modifier.size(16.dp)
                                 )
@@ -1089,7 +1089,7 @@ fun SuSFSConfigScreen() {
                                     .height(40.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.RestoreFromTrash,
+                                    imageVector = Icons.TwoTone.RestoreFromTrash,
                                     contentDescription = null,
                                     modifier = Modifier.size(16.dp)
                                 )
@@ -1111,7 +1111,7 @@ fun SuSFSConfigScreen() {
                                     .height(40.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Refresh,
+                                    imageVector = Icons.TwoTone.Refresh,
                                     contentDescription = null,
                                     modifier = Modifier.size(16.dp)
                                 )
@@ -1432,7 +1432,7 @@ private fun BasicSettingsContent(
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                containerColor = MaterialTheme.colorScheme.surfaceBright.copy(alpha = 0.4f)
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
@@ -1564,9 +1564,9 @@ private fun BasicSettingsContent(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
                 containerColor = if (canEnableAutoStart) {
-                    MaterialTheme.colorScheme.surface
+                    MaterialTheme.colorScheme.surfaceBright
                 } else {
-                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    MaterialTheme.colorScheme.surfaceBright.copy(alpha = 0.3f)
                 }
             ),
             shape = RoundedCornerShape(12.dp)
@@ -1585,7 +1585,7 @@ private fun BasicSettingsContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.AutoMode,
+                            imageVector = Icons.TwoTone.AutoMode,
                             contentDescription = null,
                             tint = if (canEnableAutoStart) {
                                 MaterialTheme.colorScheme.primary
@@ -1632,7 +1632,7 @@ private fun BasicSettingsContent(
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = MaterialTheme.colorScheme.surfaceBright
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
@@ -1650,7 +1650,7 @@ private fun BasicSettingsContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Security,
+                            imageVector = Icons.TwoTone.Security,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(18.dp)
@@ -1683,7 +1683,7 @@ private fun BasicSettingsContent(
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = MaterialTheme.colorScheme.surfaceBright
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
@@ -1701,7 +1701,7 @@ private fun BasicSettingsContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.CleaningServices,
+                            imageVector = Icons.TwoTone.CleaningServices,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(18.dp)
@@ -1735,7 +1735,7 @@ private fun BasicSettingsContent(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.surfaceBright
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -1753,7 +1753,7 @@ private fun BasicSettingsContent(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = Icons.Default.VisibilityOff,
+                                imageVector = Icons.TwoTone.VisibilityOff,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(18.dp)
@@ -1805,7 +1805,7 @@ private fun BasicSettingsContent(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.surfaceBright
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -1817,7 +1817,7 @@ private fun BasicSettingsContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Info,
+                            imageVector = Icons.TwoTone.Info,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(18.dp)
@@ -1844,7 +1844,7 @@ private fun BasicSettingsContent(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Storage,
+                            imageVector = Icons.TwoTone.Storage,
                             contentDescription = null,
                             modifier = Modifier.size(16.dp)
                         )
@@ -1871,7 +1871,7 @@ private fun BasicSettingsContent(
                     .height(40.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Backup,
+                    imageVector = Icons.TwoTone.Backup,
                     contentDescription = null,
                     modifier = Modifier.size(16.dp)
                 )
@@ -1891,7 +1891,7 @@ private fun BasicSettingsContent(
                     .height(40.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Restore,
+                    imageVector = Icons.TwoTone.Restore,
                     contentDescription = null,
                     modifier = Modifier.size(16.dp)
                 )
@@ -1952,7 +1952,7 @@ private fun SlotInfoDialog(
                                     containerColor = if (slotInfo.slotName == currentActiveSlot) {
                                         MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
                                     } else {
-                                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                                        MaterialTheme.colorScheme.surfaceBright.copy(alpha = 0.3f)
                                     }
                                 ),
                                 shape = RoundedCornerShape(8.dp)
@@ -1965,7 +1965,7 @@ private fun SlotInfoDialog(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Default.Storage,
+                                            imageVector = Icons.TwoTone.Storage,
                                             contentDescription = null,
                                             tint = if (slotInfo.slotName == currentActiveSlot) {
                                                 MaterialTheme.colorScheme.primary

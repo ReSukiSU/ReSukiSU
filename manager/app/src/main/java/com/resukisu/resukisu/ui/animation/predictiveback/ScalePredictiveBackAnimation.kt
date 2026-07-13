@@ -32,7 +32,6 @@ import androidx.navigationevent.NavigationEventTransitionState.InProgress
 import com.resukisu.resukisu.ui.util.rememberDeviceCornerRadius
 import com.resukisu.resukisu.ui.viewmodel.PredictiveBackExitDirection
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 class ScalePredictiveBackAnimation(
     private val exitDirection: PredictiveBackExitDirection = PredictiveBackExitDirection.ALWAYS_RIGHT
@@ -45,10 +44,8 @@ class ScalePredictiveBackAnimation(
         transitionState: NavigationEventTransitionState?,
         currentPageKey: NavKey?,
     ) {
-        val pageKey = currentPageKey?.toString() ?: return
-
-        if (inPredictiveBackAnimation || transitionState !is InProgress) {
-            exitingPageKey = pageKey
+        if (inPredictiveBackAnimation && transitionState is InProgress) {
+            exitingPageKey = currentPageKey.toString()
             exitAnimatable.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(
@@ -61,11 +58,8 @@ class ScalePredictiveBackAnimation(
     }
 
     override fun onPagePop(contentPageKey: Any, animationScope: CoroutineScope) {
-        if (exitingPageKey == contentPageKey.toString()) {
+        if (exitingPageKey == contentPageKey) {
             exitingPageKey = null
-            animationScope.launch {
-                exitAnimatable.snapTo(0f)
-            }
         }
     }
 

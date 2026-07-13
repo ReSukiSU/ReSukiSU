@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -193,7 +193,7 @@ fun ThemeColorDialog(
         confirmButton = {
             Button(onClick = { onColorSelected(selectedColor) }) {
                 Icon(
-                    Icons.Default.Check,
+                    Icons.TwoTone.Check,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )

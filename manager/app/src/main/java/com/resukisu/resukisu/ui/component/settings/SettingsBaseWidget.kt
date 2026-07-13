@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -58,6 +60,7 @@ import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.ui.component.settings.material3internal.rememberAnimatedShape
 import com.resukisu.resukisu.ui.theme.CardConfig
@@ -79,6 +82,7 @@ val LocalSegmentedItemShape = compositionLocalOf<Shape> { RoundedCornerShape(16.
  * @param icon The [ImageVector] to be displayed at the start of the widget.
  * @param iconColor The color applied to the [icon].
  * @param iconPlaceholder If true, maintains a consistent leading space even when [icon] is null.
+ * @param iconSize The size applied to the [icon].
  * @param title The primary headline text of the widget.
  * @param titleStyle The [TextStyle] applied to the [title].
  * @param description Optional supporting text displayed below the title.
@@ -107,10 +111,11 @@ fun SettingsBaseWidget(
     icon: ImageVector? = null,
     iconColor: Color? = null,
     iconPlaceholder: Boolean = true,
+    iconSize: Dp = 24.dp,
     title: String?,
     titleStyle: TextStyle = MaterialTheme.typography.titleMedium,
     description: String? = null,
-    descriptionColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    descriptionColor: Color? = null,
     descriptionStyle: TextStyle = MaterialTheme.typography.bodyMedium,
     enabled: Boolean = true,
     isError: Boolean = false,
@@ -121,7 +126,7 @@ fun SettingsBaseWidget(
     onLongClick: ((Offset) -> Unit)? = null,
     clickHaptic: HapticFeedbackType? = HapticFeedbackType.ContextClick,
     leadingContent: (@Composable () -> Unit)? = null,
-    foreContent: @Composable BoxScope.() -> Unit = {},
+    foreContent: @Composable RowScope.() -> Unit = {},
     descriptionColumnContent: (@Composable ColumnScope.() -> Unit)? = null,
     containerColor: Color? = null,
     trailingContent: (@Composable BoxScope.(interactionSource: MutableInteractionSource) -> Unit)? = null,
@@ -136,40 +141,36 @@ fun SettingsBaseWidget(
 
     val baseShape = LocalSegmentedItemShape.current
 
-    val backgroundColor = run {
-        if (containerColor != null)
-            containerColor
-        else {
-            val color = if (selected) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerHighest
-            }
+    val finalContainerColor = containerColor
+        ?: if (selected) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceBright
+        }.copy(
+            alpha = CardConfig.cardAlpha
+        )
 
-            if (renderBackgroundBlur && ThemeConfig.isEnableBlurExp) Color.Transparent else {
-                color.copy(
-                    alpha = CardConfig.cardAlpha
-                )
-            }
-        }
+    val backgroundColor = run {
+        if (renderBackgroundBlur && ThemeConfig.isEnableBlurExp)
+            Color.Transparent
+        else finalContainerColor
     }
 
-    val baseContentColor = if (selected) {
+    val baseContentColor = if (containerColor != null)
+        MaterialTheme.colorScheme.contentColorFor(containerColor)
+    else if (selected) {
         MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.primaryContainer)
     } else {
         MaterialTheme.colorScheme.onSurface
     }
 
     val resolvedIconColor = iconColor
-        ?: if (selected) {
-            baseContentColor
-        } else {
-            MaterialTheme.colorScheme.onSurface
-        }
+        ?: baseContentColor
 
     val finalDescriptionColor = when {
         isError -> MaterialTheme.colorScheme.error
-        else -> descriptionColor
+        descriptionColor != null -> descriptionColor
+        else -> baseContentColor
     }
 
     /*
@@ -243,7 +244,7 @@ fun SettingsBaseWidget(
     if (renderBackgroundBlur && ThemeConfig.isEnableBlurExp)
         itemModifier = itemModifier
             .clip(clipShape)
-            .renderBackgroundBlur()
+            .renderBackgroundBlur(finalContainerColor)
 
     val finalLeadingContent: (@Composable () -> Unit)? =
         if (leadingContent == null && icon == null && !iconPlaceholder)
@@ -262,6 +263,7 @@ fun SettingsBaseWidget(
                         if (icon != null) {
                             Icon(
                                 imageVector = icon,
+                                modifier = Modifier.size(iconSize),
                                 contentDescription = null,
                                 tint = resolvedIconColor
                             )
@@ -312,14 +314,18 @@ fun SettingsBaseWidget(
                     bottom = if (description == null && descriptionColumnContent == null) dynamicInternalPadding else 0.dp
                 )
         ) {
-            title?.let {
-                Text(
-                    text = it,
-                    style = titleStyle
-                )
-            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                title?.let {
+                    Text(
+                        text = it,
+                        style = titleStyle,
+                    )
+                }
 
-            foreContent()
+                foreContent()
+            }
         }
     }
 
