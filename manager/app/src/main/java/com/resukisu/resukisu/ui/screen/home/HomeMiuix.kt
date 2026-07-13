@@ -1,5 +1,6 @@
 package com.resukisu.resukisu.ui.screen.home
 
+import com.resukisu.resukisu.ui.viewmodel.HomeUiState
 import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
 import com.resukisu.resukisu.ui.component.ksuIsValid
 

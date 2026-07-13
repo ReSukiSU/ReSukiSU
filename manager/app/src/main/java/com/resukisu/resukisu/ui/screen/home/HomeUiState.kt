@@ -4,46 +4,31 @@
 package com.resukisu.resukisu.ui.screen.home
 
 import androidx.compose.runtime.Immutable
-import com.resukisu.resukisu.KernelVersion
-import com.resukisu.resukisu.ui.util.module.LatestVersionInfo
-import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
+import com.resukisu.resukisu.ui.viewmodel.HomeUiState
 
-@Immutable
-data class HomeUiState(
-    val systemStatus: HomeViewModel.SystemStatus,
-    val systemInfo: HomeViewModel.SystemInfo,
-    val latestVersionInfo: LatestVersionInfo,
-    val checkUpdateEnabled: Boolean,
-    val isSimpleMode: Boolean,
-    val isHideVersion: Boolean,
-    val isHideSusfsStatus: Boolean,
-    val isHideZygiskImplement: Boolean,
-    val isHideMetaModuleImplement: Boolean,
-    val isHideLinkCard: Boolean,
-) {
-    val kernelVersion: KernelVersion get() = systemStatus.kernelVersion
-    val ksuVersion: Int? get() = systemStatus.ksuVersion
-    val managerUAPIVersion: Int get() = systemStatus.managerUAPIVersion
-    val kernelUAPIVersion: Int? get() = systemStatus.kernelUAPIVersion
-    val lkmMode: Boolean? get() = systemStatus.lkmMode
-    val superuserCount: Int get() = systemInfo.superuserCount
-    val moduleCount: Int get() = systemInfo.moduleCount
-    val currentManagerVersionCode: Long get() = systemInfo.managerVersion.third.toLong()
-
-    val isSELinuxPermissive: Boolean get() = systemStatus.isSELinuxPermissive
-    val isLateLoadMode: Boolean get() = false
-
-    val showRequireKernelWarning: Boolean
-        get() = systemStatus.isManager && systemStatus.requireNewKernel
-    val showUAPIMisMatchWarning: Boolean
-        get() = showRequireKernelWarning && systemStatus.uapiMismatch
-    val showRootWarning: Boolean
-        get() = systemStatus.ksuVersion != null && !systemStatus.isRootAvailable
-    val showUnofficialWarning: Boolean
-        get() = !systemStatus.isOfficialSignature
-    val hasUpdate: Boolean
-        get() = latestVersionInfo.versionCode > currentManagerVersionCode
-}
+// Values the Miuix home screen derives from the shared HomeViewModel state, kept as extensions
+// (instead of a parallel UiState) so the screen reads them off ReSukiSU's own uiState.
+val HomeUiState.kernelVersion get() = systemStatus.kernelVersion
+val HomeUiState.ksuVersion: Int? get() = systemStatus.ksuVersion
+val HomeUiState.managerUAPIVersion: Int get() = systemStatus.managerUAPIVersion
+val HomeUiState.kernelUAPIVersion: Int? get() = systemStatus.kernelUAPIVersion
+val HomeUiState.lkmMode: Boolean? get() = systemStatus.lkmMode
+val HomeUiState.isSELinuxPermissive: Boolean get() = systemStatus.isSELinuxPermissive
+val HomeUiState.checkUpdateEnabled: Boolean get() = true
+val HomeUiState.superuserCount: Int get() = systemInfo.superuserCount
+val HomeUiState.moduleCount: Int get() = systemInfo.moduleCount
+val HomeUiState.currentManagerVersionCode: Long get() = systemInfo.managerVersion.third.toLong()
+val HomeUiState.isLateLoadMode: Boolean get() = false
+val HomeUiState.showRequireKernelWarning: Boolean
+    get() = systemStatus.isManager && systemStatus.requireNewKernel
+val HomeUiState.showUAPIMisMatchWarning: Boolean
+    get() = showRequireKernelWarning && systemStatus.uapiMismatch
+val HomeUiState.showRootWarning: Boolean
+    get() = systemStatus.ksuVersion != null && !systemStatus.isRootAvailable
+val HomeUiState.showUnofficialWarning: Boolean
+    get() = !systemStatus.isOfficialSignature
+val HomeUiState.hasUpdate: Boolean
+    get() = latestVersionInfo.versionCode > currentManagerVersionCode
 
 @Immutable
 data class HomeActions(
