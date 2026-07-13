@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel.AppInfo
 import com.resukisu.resukisu.ui.component.SearchStatus
+import com.resukisu.resukisu.ui.viewmodel.AppSortConfig
 
 @Immutable
 data class GroupedApps(

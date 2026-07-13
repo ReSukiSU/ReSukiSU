@@ -364,21 +364,16 @@ fun ModulePage(bottomPadding: Dp) {
         )
 
         ModulePagerMiuix(
-            uiState = com.resukisu.resukisu.ui.screen.module.ModuleUiState(
-                isRefreshing = uiState.isRefreshing,
-                hasLoaded = !uiState.isRefreshing,
-                modules = tiannModules,
-                moduleList = tiannModules,
-                updateInfo = updateInfoMap,
-                searchStatus = effectiveModuleSearchStatus,
-                searchResults = moduleSearchResults,
-                sortEnabledFirst = uiState.sortEnabledFirst,
-                sortActionFirst = uiState.sortActionFirst,
-                checkModuleUpdate = true,
-                isSafeMode = isSafeMode,
-                magiskInstalled = hasMagisk,
-                confirmDialogState = confirmDialogState,
-            ),
+            moduleList = tiannModules,
+            updateInfo = updateInfoMap,
+            searchStatus = effectiveModuleSearchStatus,
+            searchResults = moduleSearchResults,
+            sortEnabledFirst = uiState.sortEnabledFirst,
+            sortActionFirst = uiState.sortActionFirst,
+            isRefreshing = uiState.isRefreshing,
+            hasLoaded = !uiState.isRefreshing,
+            magiskInstalled = hasMagisk,
+            installButtonVisible = !(isSafeMode || hasMagisk),
             confirmDialogState = confirmDialogState,
             moduleEvent = moduleEventFlow,
             actions = ModuleActions(

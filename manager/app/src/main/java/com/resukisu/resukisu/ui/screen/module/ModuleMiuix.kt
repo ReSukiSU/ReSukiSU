@@ -167,14 +167,22 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 @SuppressLint("StringFormatInvalid", "LocalContextGetResourceValueCall")
 @Composable
 fun ModulePagerMiuix(
-    uiState: ModuleUiState,
+    moduleList: List<Module>,
+    updateInfo: Map<String, ModuleUpdateInfo>,
+    searchStatus: SearchStatus,
+    searchResults: List<Module>,
+    sortEnabledFirst: Boolean,
+    sortActionFirst: Boolean,
+    isRefreshing: Boolean,
+    hasLoaded: Boolean,
+    magiskInstalled: Boolean,
+    installButtonVisible: Boolean,
     confirmDialogState: ModuleConfirmDialogState?,
     moduleEvent: Flow<ModuleEffect>,
     actions: ModuleActions,
     bottomInnerPadding: Dp,
 ) {
-    val modules = uiState.moduleList
-    val searchStatus = uiState.searchStatus
+    val modules = moduleList
 
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -261,7 +269,7 @@ fun ModulePagerMiuix(
 
     val listState = rememberLazyListState()
     val refreshTick = remember { mutableIntStateOf(0) }
-    val nestedScrollConnection = remember(uiState.installButtonVisible) {
+    val nestedScrollConnection = remember(installButtonVisible) {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 val isScrolledToEnd =
@@ -324,7 +332,7 @@ fun ModulePagerMiuix(
                                             DropdownImpl(
                                                 text = stringResource(R.string.module_sort_action_first),
                                                 optionSize = 2,
-                                                isSelected = uiState.sortActionFirst,
+                                                isSelected = sortActionFirst,
                                                 onSelectedIndexChange = {
                                                     actions.onToggleSortActionFirst()
                                                     showTopPopup.value = false
@@ -334,7 +342,7 @@ fun ModulePagerMiuix(
                                             DropdownImpl(
                                                 text = stringResource(R.string.module_sort_enabled_first),
                                                 optionSize = 2,
-                                                isSelected = uiState.sortEnabledFirst,
+                                                isSelected = sortEnabledFirst,
                                                 onSelectedIndexChange = {
                                                     actions.onToggleSortEnabledFirst()
                                                     showTopPopup.value = false
@@ -391,7 +399,7 @@ fun ModulePagerMiuix(
             }
         },
         floatingActionButton = {
-            if (uiState.installButtonVisible) {
+            if (installButtonVisible) {
                 val moduleInstall = stringResource(id = R.string.module_install)
                 val confirmTitle = stringResource(R.string.module)
                 var zipUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
@@ -469,8 +477,8 @@ fun ModulePagerMiuix(
                     modifier = Modifier
                         .fillMaxSize()
                         .overScrollVertical(),
-                    modules = uiState.searchResults,
-                    updateInfoMap = uiState.updateInfo,
+                    modules = searchResults,
+                    updateInfoMap = updateInfo,
                     actions = actions,
                     onModuleAddShortcut = ::onModuleAddShortcut,
                     contentPadding = PaddingValues(
@@ -487,7 +495,7 @@ fun ModulePagerMiuix(
         },
         contentWindowInsets = WindowInsets.systemBars.add(WindowInsets.displayCutout).only(WindowInsetsSides.Horizontal)
     ) { innerPadding ->
-        if (uiState.magiskInstalled) {
+        if (magiskInstalled) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -516,7 +524,7 @@ fun ModulePagerMiuix(
                 end = innerPadding.calculateEndPadding(layoutDirection),
                 bottom = bottomInnerPadding,
             )
-            if (modules.isEmpty() && !uiState.hasLoaded) {
+            if (modules.isEmpty() && !hasLoaded) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -532,7 +540,7 @@ fun ModulePagerMiuix(
                 }
             } else {
                 PullToRefresh(
-                    isRefreshing = uiState.isRefreshing,
+                    isRefreshing = isRefreshing,
                     pullToRefreshState = pullToRefreshState,
                     onRefresh = {
                         actions.onRefresh()
@@ -561,11 +569,11 @@ fun ModulePagerMiuix(
                         }
                     } else {
                         val latestModules = rememberUpdatedState(modules)
-                        val latestRefreshing = rememberUpdatedState(uiState.isRefreshing)
+                        val latestRefreshing = rememberUpdatedState(isRefreshing)
                         ScrollToTopOnChange(
                             listState,
-                            uiState.sortEnabledFirst,
-                            uiState.sortActionFirst,
+                            sortEnabledFirst,
+                            sortActionFirst,
                             refreshTick.intValue,
                             isBusy = { latestRefreshing.value },
                         ) { latestModules.value }
@@ -578,7 +586,7 @@ fun ModulePagerMiuix(
                                     .nestedScroll(scrollBehavior.nestedScrollConnection)
                                     .nestedScroll(nestedScrollConnection),
                                 modules = modules,
-                                updateInfoMap = uiState.updateInfo,
+                                updateInfoMap = updateInfo,
                                 actions = actions,
                                 onModuleAddShortcut = { module, type ->
                                     onModuleAddShortcut(module, type)

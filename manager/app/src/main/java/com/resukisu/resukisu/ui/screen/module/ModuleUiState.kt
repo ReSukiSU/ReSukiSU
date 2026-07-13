@@ -40,26 +40,6 @@ sealed interface ModuleEffect {
 }
 
 @Immutable
-data class ModuleUiState(
-    val isRefreshing: Boolean = false,
-    val hasLoaded: Boolean = false,
-    val modules: List<Module> = emptyList(),
-    val moduleList: List<Module> = emptyList(),
-    val updateInfo: Map<String, ModuleUpdateInfo> = emptyMap(),
-    val searchStatus: SearchStatus = SearchStatus(""),
-    val searchResults: List<Module> = emptyList(),
-    val sortEnabledFirst: Boolean = false,
-    val sortActionFirst: Boolean = false,
-    val checkModuleUpdate: Boolean = true,
-    val isSafeMode: Boolean = false,
-    val magiskInstalled: Boolean = false,
-    val confirmDialogState: ModuleConfirmDialogState? = null,
-) {
-    val installButtonVisible: Boolean
-        get() = !(isSafeMode || magiskInstalled)
-}
-
-@Immutable
 data class ModuleActions(
     val onRefresh: () -> Unit,
     val onSearchStatusChange: (SearchStatus) -> Unit,
