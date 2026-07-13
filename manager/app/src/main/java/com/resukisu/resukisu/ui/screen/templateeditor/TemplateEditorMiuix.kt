@@ -58,7 +58,10 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
  */
 @Composable
 fun TemplateEditorScreenMiuix(
-    state: TemplateEditorUiState,
+    template: com.resukisu.resukisu.ui.viewmodel.TemplateViewModel.TemplateInfo,
+    readOnly: Boolean,
+    isCreation: Boolean,
+    idErrorHint: String,
     actions: TemplateEditorActions,
 ) {
     val scrollBehavior = MiuixScrollBehavior()
@@ -70,15 +73,15 @@ fun TemplateEditorScreenMiuix(
     Scaffold(
         topBar = {
             TopBar(
-                title = if (state.isCreation) {
+                title = if (isCreation) {
                     stringResource(R.string.app_profile_template_create)
-                } else if (state.readOnly) {
+                } else if (readOnly) {
                     stringResource(R.string.app_profile_template_view)
                 } else {
                     stringResource(R.string.app_profile_template_edit)
                 },
-                readOnly = state.readOnly,
-                isCreation = state.isCreation,
+                readOnly = readOnly,
+                isCreation = isCreation,
                 onBack = actions.onBack,
                 onDelete = actions.onDelete,
                 onSave = actions.onSave,
@@ -108,34 +111,34 @@ fun TemplateEditorScreenMiuix(
                     ) {
                         TextEdit(
                             label = stringResource(id = R.string.app_profile_template_name),
-                            text = state.template.name,
-                            enabled = !state.readOnly,
+                            text = template.name,
+                            enabled = !readOnly,
                             onValueChange = actions.onNameChange,
                         )
 
                         TextEdit(
                             label = stringResource(id = R.string.app_profile_template_id),
-                            text = state.template.id,
-                            isError = state.idErrorHint.isNotEmpty(),
-                            enabled = !state.readOnly,
+                            text = template.id,
+                            isError = idErrorHint.isNotEmpty(),
+                            enabled = !readOnly,
                             onValueChange = actions.onIdChange,
                         )
                         TextEdit(
                             label = stringResource(R.string.module_author),
-                            text = state.template.author,
-                            enabled = !state.readOnly,
+                            text = template.author,
+                            enabled = !readOnly,
                             onValueChange = actions.onAuthorChange,
                         )
 
                         TextEdit(
                             label = stringResource(id = R.string.app_profile_template_description),
-                            text = state.template.description,
-                            enabled = !state.readOnly,
+                            text = template.description,
+                            enabled = !readOnly,
                             onValueChange = actions.onDescriptionChange,
                         )
 
                         RootProfileConfig(
-                            profile = toNativeProfile(state.template),
+                            profile = toNativeProfile(template),
                             onProfileChange = actions.onProfileChange,
                         )
                     }

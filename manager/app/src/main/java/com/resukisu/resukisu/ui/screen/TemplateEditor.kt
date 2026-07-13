@@ -97,13 +97,10 @@ fun TemplateEditorScreen(
         val idInvalidError = stringResource(id = R.string.app_profile_template_id_invalid)
         var idErrorHint by remember { mutableStateOf("") }
         com.resukisu.resukisu.ui.screen.templateeditor.TemplateEditorScreenMiuix(
-            state = com.resukisu.resukisu.ui.screen.templateeditor.TemplateEditorUiState(
-                template = template,
-                initialTemplate = initialTemplate,
-                readOnly = readOnly,
-                isCreation = isCreation,
-                idErrorHint = idErrorHint,
-            ),
+            template = template,
+            readOnly = readOnly,
+            isCreation = isCreation,
+            idErrorHint = idErrorHint,
             actions = com.resukisu.resukisu.ui.screen.templateeditor.TemplateEditorActions(
                 onBack = {
                     if (readOnly) navigator.pop() else navigator.setResult("template_edit", true)

@@ -1038,14 +1038,18 @@ fun InfoPage(
 @SuppressLint("StringFormatInvalid", "DefaultLocale")
 @Composable
 fun ModuleRepoDetailScreenMiuix(
-    state: ModuleRepoDetailUiState,
+    module: RepoModuleArg,
+    readmeHtml: String?,
+    readmeLoaded: Boolean,
+    detailReleases: List<ReleaseArg>,
+    webUrl: String,
+    sourceUrl: String,
     actions: ModuleRepoDetailActions,
 ) {
     val context = LocalContext.current
     val enableBlur = LocalEnableBlur.current
     val actionIconTint = colorScheme.onSurface.copy(alpha = if (isInDarkTheme()) 0.7f else 0.9f)
     val secondaryContainer = colorScheme.secondaryContainer.copy(alpha = 0.8f)
-    val module = state.module
     val scope = rememberCoroutineScope()
     val confirmTitle = stringResource(R.string.module_install)
     var pendingDownload by remember { mutableStateOf<(() -> Unit)?>(null) }
@@ -1082,7 +1086,7 @@ fun ModuleRepoDetailScreenMiuix(
                         )
                     }
                 }, actions = {
-                    if (state.webUrl.isNotEmpty()) {
+                    if (webUrl.isNotEmpty()) {
                         IconButton(
                             onClick = actions.onOpenWebUrl
                         ) {
@@ -1131,15 +1135,15 @@ fun ModuleRepoDetailScreenMiuix(
 
             when (page) {
                 0 -> ReadmePage(
-                    readmeHtml = state.readmeHtml,
-                    readmeLoaded = state.readmeLoaded,
+                    readmeHtml = readmeHtml,
+                    readmeLoaded = readmeLoaded,
                     innerPadding = innerPadding,
                     scrollBehavior = scrollBehavior,
                     backdrop = backdrop
                 )
 
                 1 -> ReleasesPage(
-                    detailReleases = state.detailReleases,
+                    detailReleases = detailReleases,
                     innerPadding = innerPadding,
                     scrollBehavior = scrollBehavior,
                     backdrop = backdrop,
@@ -1166,7 +1170,7 @@ fun ModuleRepoDetailScreenMiuix(
                         actionIconTint = actionIconTint,
                         secondaryContainer = secondaryContainer,
                         uriHandler = uriHandler,
-                        sourceUrl = state.sourceUrl,
+                        sourceUrl = sourceUrl,
                     )
                 }
             }

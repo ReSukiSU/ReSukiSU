@@ -2,19 +2,6 @@ package com.resukisu.resukisu.ui.screen.templateeditor
 
 import androidx.compose.runtime.Immutable
 import com.resukisu.resukisu.Natives
-import com.resukisu.resukisu.ui.viewmodel.TemplateViewModel.TemplateInfo
-
-@Immutable
-data class TemplateEditorUiState(
-    val template: TemplateInfo,
-    val initialTemplate: TemplateInfo,
-    val readOnly: Boolean,
-    val isCreation: Boolean,
-    val idErrorHint: String = "",
-) {
-    val titleSummary: String
-        get() = initialTemplate.id + if (initialTemplate.author.isNotEmpty()) "@${initialTemplate.author}" else ""
-}
 
 @Immutable
 data class TemplateEditorActions(

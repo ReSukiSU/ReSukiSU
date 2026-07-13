@@ -132,14 +132,12 @@ fun OnlineModuleDetailScreen(module: ModuleRepoViewModel.RepoModule) {
     if (LocalUiMode.current == UiMode.Miuix) {
         val webUrl = "https://modules.kernelsu.org/module/${module.moduleId}"
         com.resukisu.resukisu.ui.screen.modulerepo.ModuleRepoDetailScreenMiuix(
-            state = com.resukisu.resukisu.ui.screen.modulerepo.ModuleRepoDetailUiState(
-                module = module.toRepoModuleArg(),
-                readmeHtml = module.readme,
-                readmeLoaded = true,
-                detailReleases = module.releases.map { it.toReleaseArg() },
-                webUrl = webUrl,
-                sourceUrl = module.sourceUrl,
-            ),
+            module = module.toRepoModuleArg(),
+            readmeHtml = module.readme,
+            readmeLoaded = true,
+            detailReleases = module.releases.map { it.toReleaseArg() },
+            webUrl = webUrl,
+            sourceUrl = module.sourceUrl,
             actions = com.resukisu.resukisu.ui.screen.modulerepo.ModuleRepoDetailActions(
                 onBack = { navigator.pop() },
                 onOpenWebUrl = { uriHandler.openUri(webUrl) },
