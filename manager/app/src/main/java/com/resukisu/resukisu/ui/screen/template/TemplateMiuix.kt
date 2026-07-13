@@ -61,7 +61,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.data.model.TemplateInfo
+import com.resukisu.resukisu.ui.viewmodel.TemplateViewModel.TemplateInfo
 import com.resukisu.resukisu.ui.component.ListPopupDefaults
 import com.resukisu.resukisu.ui.component.miuix.DropdownItem
 import com.resukisu.resukisu.ui.theme.LocalEnableBlur

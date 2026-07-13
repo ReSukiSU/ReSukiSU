@@ -1,7 +1,7 @@
 package com.resukisu.resukisu.ui.screen.template
 
 import androidx.compose.runtime.Immutable
-import com.resukisu.resukisu.data.model.TemplateInfo
+import com.resukisu.resukisu.ui.viewmodel.TemplateViewModel.TemplateInfo
 
 @Immutable
 data class TemplateUiState(

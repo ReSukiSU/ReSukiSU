@@ -3,7 +3,7 @@ package com.resukisu.resukisu.ui.screen.superuser
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
-import com.resukisu.resukisu.data.model.AppInfo
+import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel.AppInfo
 import com.resukisu.resukisu.ui.component.SearchStatus
 import com.resukisu.resukisu.ui.viewmodel.AppSortConfig
 

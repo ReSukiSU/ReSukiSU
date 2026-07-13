@@ -612,17 +612,10 @@ private fun AppProfilePreview() {
  * [com.resukisu.resukisu.ui.screen.superuser.GroupedApps] the Miuix app-profile screen consumes.
  */
 private fun SuperUserViewModel.AppGroup.toTiannGroupedApps(): com.resukisu.resukisu.ui.screen.superuser.GroupedApps {
-    val tiannApps = apps.map {
-        com.resukisu.resukisu.data.model.AppInfo(
-            label = it.label,
-            packageInfo = it.packageInfo,
-            profile = it.profile,
-        )
-    }
     return com.resukisu.resukisu.ui.screen.superuser.GroupedApps(
         uid = uid,
-        apps = tiannApps,
-        primary = tiannApps.first(),
+        apps = apps,
+        primary = apps.first(),
         anyAllowSu = allowSu,
         anyCustom = hasCustomProfile,
         shouldUmount = profile?.umountModules == true,

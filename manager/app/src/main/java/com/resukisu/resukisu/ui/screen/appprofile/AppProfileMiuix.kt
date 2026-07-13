@@ -176,7 +176,7 @@ private fun AppProfileInner(
     appVersionCode: Long,
     profile: Natives.Profile,
     isUidGroup: Boolean = false,
-    affectedApps: List<com.resukisu.resukisu.data.model.AppInfo> = emptyList(),
+    affectedApps: List<com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel.AppInfo> = emptyList(),
     onViewTemplate: (id: String) -> Unit = {},
     onManageTemplate: () -> Unit = {},
     onProfileChange: (Natives.Profile) -> Unit,

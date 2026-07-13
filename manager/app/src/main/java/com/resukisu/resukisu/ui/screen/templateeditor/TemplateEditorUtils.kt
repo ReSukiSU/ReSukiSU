@@ -1,7 +1,8 @@
 package com.resukisu.resukisu.ui.screen.templateeditor
 
 import com.resukisu.resukisu.Natives
-import com.resukisu.resukisu.data.model.TemplateInfo
+import com.resukisu.resukisu.ui.viewmodel.TemplateViewModel.TemplateInfo
+import com.resukisu.resukisu.ui.viewmodel.toJSON
 import com.resukisu.resukisu.toRawFlags
 import com.resukisu.resukisu.ui.util.getAppProfileTemplate
 import com.resukisu.resukisu.ui.util.setAppProfileTemplate

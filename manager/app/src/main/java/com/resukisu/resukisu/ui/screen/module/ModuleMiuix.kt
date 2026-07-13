@@ -110,8 +110,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.data.appPreferences
-import com.resukisu.resukisu.data.model.Module
-import com.resukisu.resukisu.data.model.ModuleUpdateInfo
+import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel.ModuleInfo as Module
+import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel.ModuleUpdateInfo
 import com.resukisu.resukisu.ui.component.ListPopupDefaults
 import com.resukisu.resukisu.ui.component.ObserveAsEvents
 import com.resukisu.resukisu.ui.component.ScrollToTopOnChange
@@ -754,11 +754,11 @@ private fun ModuleList(
             contentType = { "module" }
         ) { module ->
             val currentModuleState = rememberUpdatedState(module)
-            val moduleUpdateInfo = updateInfoMap[module.id] ?: ModuleUpdateInfo.Empty
+            val moduleUpdateInfo = updateInfoMap[module.id] ?: ModuleUpdateInfo("", "", "")
             val content: @Composable () -> Unit = {
                 ModuleItem(
                     module = module,
-                    updateUrl = moduleUpdateInfo.downloadUrl,
+                    updateUrl = moduleUpdateInfo.zipUrl,
                     onUninstall = {
                         actions.onRequestUninstallConfirmation(currentModuleState.value)
                     },

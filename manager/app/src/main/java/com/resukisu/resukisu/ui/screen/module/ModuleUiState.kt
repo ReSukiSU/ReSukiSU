@@ -2,8 +2,8 @@ package com.resukisu.resukisu.ui.screen.module
 
 import android.net.Uri
 import androidx.compose.runtime.Immutable
-import com.resukisu.resukisu.data.model.Module
-import com.resukisu.resukisu.data.model.ModuleUpdateInfo
+import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel.ModuleInfo as Module
+import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel.ModuleUpdateInfo
 import com.resukisu.resukisu.ui.component.SearchStatus
 
 sealed interface ModuleConfirmRequest {

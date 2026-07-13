@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import com.resukisu.resukisu.data.model.Module
+import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel.ModuleInfo as Module
 import com.resukisu.resukisu.ui.util.module.Shortcut
 
 @Stable

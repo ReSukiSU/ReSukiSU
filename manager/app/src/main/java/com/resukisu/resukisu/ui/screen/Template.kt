@@ -127,8 +127,8 @@ fun AppProfileTemplateScreen() {
         AppProfileTemplateScreenMiuix(
             state = com.resukisu.resukisu.ui.screen.template.TemplateUiState(
                 isRefreshing = uiState.isRefreshing,
-                templates = uiState.templateList.map { it.toDataModelTemplate() },
-                templateList = uiState.templateList.map { it.toDataModelTemplate() },
+                templates = uiState.templateList,
+                templateList = uiState.templateList,
             ),
             actions = com.resukisu.resukisu.ui.screen.template.TemplateActions(
                 onBack = { navigator.pop() },
@@ -463,24 +463,3 @@ fun LabelText(
     }
 }
 
-/**
- * Maps ReSukiSU's [TemplateViewModel.TemplateInfo] to the [com.resukisu.resukisu.data.model.TemplateInfo]
- * shape tiann/YuKongA's Miuix template screen consumes (identical fields). The dispatch keeps a
- * lookup by id to resolve back to the ReSukiSU type when opening a template.
- */
-private fun TemplateViewModel.TemplateInfo.toDataModelTemplate() =
-    com.resukisu.resukisu.data.model.TemplateInfo(
-        id = id,
-        name = name,
-        description = description,
-        author = author,
-        local = local,
-        namespace = namespace,
-        uid = uid,
-        gid = gid,
-        groups = groups,
-        capabilities = capabilities,
-        context = context,
-        rules = rules,
-        flags = flags,
-    )

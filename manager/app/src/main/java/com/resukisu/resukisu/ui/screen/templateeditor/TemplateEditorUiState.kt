@@ -2,7 +2,7 @@ package com.resukisu.resukisu.ui.screen.templateeditor
 
 import androidx.compose.runtime.Immutable
 import com.resukisu.resukisu.Natives
-import com.resukisu.resukisu.data.model.TemplateInfo
+import com.resukisu.resukisu.ui.viewmodel.TemplateViewModel.TemplateInfo
 
 @Immutable
 data class TemplateEditorUiState(

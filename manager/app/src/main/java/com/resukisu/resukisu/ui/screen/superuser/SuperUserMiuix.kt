@@ -63,7 +63,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.data.model.AppInfo
+import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel.AppInfo
 import com.resukisu.resukisu.ui.component.AppIconImage
 import com.resukisu.resukisu.ui.component.ListPopupDefaults
 import com.resukisu.resukisu.ui.component.ScrollToTopOnChange

@@ -98,8 +98,8 @@ fun TemplateEditorScreen(
         var idErrorHint by remember { mutableStateOf("") }
         com.resukisu.resukisu.ui.screen.templateeditor.TemplateEditorScreenMiuix(
             state = com.resukisu.resukisu.ui.screen.templateeditor.TemplateEditorUiState(
-                template = template.toDataModelTemplate(),
-                initialTemplate = initialTemplate.toDataModelTemplate(),
+                template = template,
+                initialTemplate = initialTemplate,
                 readOnly = readOnly,
                 isCreation = isCreation,
                 idErrorHint = idErrorHint,
@@ -426,23 +426,3 @@ private fun isTemplateExist(id: String): Boolean {
     return getAppProfileTemplate(id).isNotBlank()
 }
 
-/**
- * Maps ReSukiSU's [TemplateViewModel.TemplateInfo] to the [com.resukisu.resukisu.data.model.TemplateInfo]
- * shape tiann/YuKongA's Miuix template editor consumes (identical fields).
- */
-private fun TemplateViewModel.TemplateInfo.toDataModelTemplate() =
-    com.resukisu.resukisu.data.model.TemplateInfo(
-        id = id,
-        name = name,
-        description = description,
-        author = author,
-        local = local,
-        namespace = namespace,
-        uid = uid,
-        gid = gid,
-        groups = groups,
-        capabilities = capabilities,
-        context = context,
-        rules = rules,
-        flags = flags,
-    )

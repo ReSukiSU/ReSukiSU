@@ -315,21 +315,13 @@ fun ModulePage(bottomPadding: Dp) {
 
     if (LocalUiMode.current == UiMode.Miuix) {
         val permissionRequestInterface = LocalPermissionRequestInterface.current
-        val tiannModules = remember(uiState.moduleList) {
-            uiState.moduleList.map { it.toTiannModule() }
-        }
+        val tiannModules = uiState.moduleList
         val moduleInfoById = remember(uiState.moduleList) {
             uiState.moduleList.associateBy { it.id }
         }
         val updateInfoMap = remember(uiState.moduleList) {
             uiState.moduleList.mapNotNull { info ->
-                info.moduleUpdate?.let { up ->
-                    info.id to com.resukisu.resukisu.data.model.ModuleUpdateInfo(
-                        downloadUrl = up.zipUrl,
-                        version = up.version,
-                        changelog = up.changelog,
-                    )
-                }
+                info.moduleUpdate?.let { up -> info.id to up }
             }.toMap()
         }
         var confirmDialogState by remember { mutableStateOf<ModuleConfirmDialogState?>(null) }
@@ -406,7 +398,7 @@ fun ModulePage(bottomPadding: Dp) {
                         confirmDialogState = ModuleConfirmDialogState(
                             request = ModuleConfirmRequest.Update(
                                 module = module,
-                                downloadUrl = info.downloadUrl,
+                                downloadUrl = info.zipUrl,
                                 fileName = "${module.name}-${info.version}.zip",
                             ),
                             title = changelogText,
@@ -1821,27 +1813,3 @@ fun ModuleItemPreview() {
         {},
         {})
 }
-
-/**
- * Adapts ReSukiSU's [ModuleViewModel.ModuleInfo] into the [com.resukisu.resukisu.data.model.Module]
- * shape that tiann/YuKongA's Miuix module screen consumes. `dirId`/`moduleUpdate` are dropped here
- * (the Miuix screen keys everything by `id`); the dispatch resolves the original ModuleInfo by id
- * when an action needs `dirId`.
- */
-private fun ModuleViewModel.ModuleInfo.toTiannModule() = com.resukisu.resukisu.data.model.Module(
-    id = id,
-    name = name,
-    author = author,
-    version = version,
-    versionCode = versionCode,
-    description = description,
-    enabled = enabled,
-    update = update,
-    remove = remove,
-    updateJson = updateJson,
-    hasWebUi = hasWebUi,
-    hasActionScript = hasActionScript,
-    metamodule = metamodule,
-    actionIconPath = actionIconPath,
-    webUiIconPath = webUiIconPath,
-)
