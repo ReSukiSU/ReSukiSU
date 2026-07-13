@@ -288,11 +288,14 @@ fun InstallScreen(
         val rootAvailable = rootAvailable()
         val horizonKernelSummary = stringResource(R.string.horizon_kernel_summary)
         val selectFileTip = stringResource(R.string.select_file_tip, defaultPartition.ifBlank { "boot" })
-        val installMethodOptions = remember(rootAvailable, isAbDevice, selectFileTip, horizonKernelSummary) {
+        val installMethodOptions = remember(rootAvailable, isGKI, isAbDevice, selectFileTip, horizonKernelSummary) {
             mutableListOf<InstallMethod>(InstallMethod.SelectFile(summary = selectFileTip)).apply {
                 if (rootAvailable) {
-                    add(InstallMethod.DirectInstall)
-                    if (isAbDevice) add(InstallMethod.DirectInstallToInactiveSlot)
+                    // Direct boot-image patching is GKI-only; non-GKI kernels use HorizonKernel.
+                    if (isGKI) {
+                        add(InstallMethod.DirectInstall)
+                        if (isAbDevice) add(InstallMethod.DirectInstallToInactiveSlot)
+                    }
                     add(InstallMethod.HorizonKernel(summary = horizonKernelSummary))
                 }
             }

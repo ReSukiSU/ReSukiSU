@@ -38,8 +38,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
@@ -459,6 +461,12 @@ fun KernelSUTheme(
             typography = generateTypography()
         ) {
             MonetColorsProvider.UpdateCss()
+            // Wrap the app content in a movable so switching UI mode MOVES the same subtree
+            // between the Miuix-themed branch and the Material branch instead of disposing and
+            // recreating it. That preserves MainScreen's remembered state (e.g. the selected
+            // page) so toggling the UI keeps you on the current screen instead of jumping home.
+            val latestContent by rememberUpdatedState(content)
+            val appContent = remember { movableContentOf { latestContent() } }
             Box(modifier = Modifier.fillMaxSize()) {
                 BackgroundLayer()
                 // Only wrap in the Miuix theme when the Miuix UI is selected, seeded from the
@@ -477,11 +485,11 @@ fun KernelSUTheme(
                             containerColor = Color.Transparent,
                             contentWindowInsets = WindowInsets(0, 0, 0, 0),
                         ) {
-                            content()
+                            appContent()
                         }
                     }
                 } else {
-                    content()
+                    appContent()
                 }
             }
         }

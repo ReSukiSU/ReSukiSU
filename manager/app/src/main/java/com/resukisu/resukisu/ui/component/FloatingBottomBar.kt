@@ -83,6 +83,21 @@ import kotlin.math.sqrt
 
 val LocalFloatingBottomBarTabScale = staticCompositionLocalOf { { 1f } }
 
+/**
+ * True while the bar is rendering the accent-tinted copy of its items that gets sampled inside the
+ * moving pill (its whole content is drawn through a `ColorFilter.tint(accentColor)`). Item content
+ * that must keep its own colours — e.g. a count badge — should skip drawing itself in this pass so
+ * it doesn't turn into a solid accent blob under the pill.
+ */
+val LocalFloatingBottomBarAccentPass = staticCompositionLocalOf { false }
+
+/**
+ * True while the bar is drawing the badge-only overlay that sits on top of the moving pill. In this
+ * pass an item should draw its badge with real colours but keep its icon/label invisible (they are
+ * already drawn by the base pass), so a badge on the selected tab stays visible above the pill.
+ */
+val LocalFloatingBottomBarBadgeOnlyPass = staticCompositionLocalOf { false }
+
 private val iosIndicatorSpecular: Highlight = Highlight(
     width = 1.dp,
     alpha = 1f,
@@ -152,14 +167,20 @@ fun RowScope.FloatingBottomBarItem(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val scale = LocalFloatingBottomBarTabScale.current
+    // The badge-only overlay pass sits on top of the pill purely to draw badges; it must not take
+    // any pointer input, or it would steal the pill's drag-to-switch gesture and the tab taps.
+    val badgeOnlyPass = LocalFloatingBottomBarBadgeOnlyPass.current
     Column(
         modifier
             .clip(CircleShape)
-            .clickable(
-                interactionSource = null,
-                indication = null,
-                role = Role.Tab,
-                onClick = onClick
+            .then(
+                if (badgeOnlyPass) Modifier
+                else Modifier.clickable(
+                    interactionSource = null,
+                    indication = null,
+                    role = Role.Tab,
+                    onClick = onClick
+                )
             )
             .fillMaxHeight()
             .weight(1f)
@@ -354,7 +375,8 @@ fun FloatingBottomBar(
             CompositionLocalProvider(
                 LocalFloatingBottomBarTabScale provides {
                     lerp(1f, 1.2f, dampedDragAnimation.pressProgress)
-                }
+                },
+                LocalFloatingBottomBarAccentPass provides true,
             ) {
                 Row(
                     Modifier
@@ -449,6 +471,21 @@ fun FloatingBottomBar(
                         .background(accentColor.copy(alpha = 0.15f), pillShape)
                         .height(56.dp)
                         .width(tabWidthDp)
+                )
+            }
+        }
+
+        // Badge overlay drawn last (on top of the pill) so a badge on the selected tab stays
+        // visible with its real colours instead of being hidden by / tinted into the pill.
+        if (isBlurEnabled) {
+            CompositionLocalProvider(LocalFloatingBottomBarBadgeOnlyPass provides true) {
+                Row(
+                    Modifier
+                        .matchParentSize()
+                        .graphicsLayer { translationX = panelOffset }
+                        .padding(4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    content = content
                 )
             }
         }

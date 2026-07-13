@@ -100,8 +100,8 @@ fun OpenSourceLicenseScreenMiuix() {
                 modifier = Modifier
                     .fillMaxSize()
                     .scrollEndHaptic()
-                    .nestedScroll(scrollBehavior.nestedScrollConnection)
                     .overScrollVertical()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
                     .padding(horizontal = 16.dp),
                 contentPadding = innerPadding,
                 overscrollEffect = null,

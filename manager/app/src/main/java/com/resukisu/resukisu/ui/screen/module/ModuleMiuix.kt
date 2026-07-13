@@ -109,6 +109,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.data.model.Module
 import com.resukisu.resukisu.data.model.ModuleUpdateInfo
 import com.resukisu.resukisu.ui.component.ListPopupDefaults
@@ -812,6 +813,10 @@ fun ModuleItem(
     onAddActionShortcut: (ShortcutType) -> Unit,
     onOpenWebUi: () -> Unit
 ) {
+    val context = LocalContext.current
+    // Read the pref directly like the Material list does; it re-reads on recomposition
+    // (e.g. when returning from the Theme screen after toggling it).
+    val showMoreModuleInfo = context.appPreferences.getBoolean("show_more_module_info", false)
     val secondaryContainer = colorScheme.secondaryContainer.copy(alpha = 0.8f)
     val actionIconTint = colorScheme.onSurface.copy(alpha = if (isInDarkTheme()) 0.7f else 0.9f)
     val updateBg = colorScheme.tertiaryContainer.copy(alpha = 0.6f)
@@ -903,6 +908,35 @@ fun ModuleItem(
                     color = colorScheme.onSurfaceVariantSummary,
                     textDecoration = textDecoration
                 )
+
+                // Show More Module Info: surface the module's updateJson, long-press to copy.
+                if (showMoreModuleInfo && module.updateJson.isNotEmpty()) {
+                    val updateJsonLabel = stringResource(id = R.string.module_update_json)
+                    Text(
+                        text = "$updateJsonLabel: ${module.updateJson}",
+                        fontSize = 12.sp,
+                        color = colorScheme.primary,
+                        maxLines = 5,
+                        overflow = TextOverflow.Ellipsis,
+                        textDecoration = textDecoration,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .combinedClickable(
+                                onClick = { },
+                                onLongClick = {
+                                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                    clipboard.setPrimaryClip(
+                                        ClipData.newPlainText("Update JSON URL", module.updateJson)
+                                    )
+                                    Toast.makeText(
+                                        context,
+                                        context.getString(R.string.module_update_json_copied),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            ),
+                    )
+                }
             }
             Switch(
                 enabled = !module.update,

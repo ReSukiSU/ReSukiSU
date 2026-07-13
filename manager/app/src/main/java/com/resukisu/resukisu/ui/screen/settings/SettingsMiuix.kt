@@ -359,21 +359,22 @@ fun SettingPagerMiuix(
                                 checked = uiState.enableWebDebugging,
                                 onCheckedChange = actions.onSetEnableWebDebugging
                             )
-                            SwitchPreference(
-                                title = stringResource(id = R.string.settings_auto_jailbreak),
-                                summary = stringResource(id = R.string.settings_auto_jailbreak_summary),
-                                startAction = {
-                                    Icon(
-                                        Icons.Rounded.ElectricalServices,
-                                        modifier = Modifier.padding(end = 6.dp),
-                                        contentDescription = stringResource(id = R.string.settings_auto_jailbreak),
-                                        tint = if (uiState.isLateLoadMode) colorScheme.onBackground else colorScheme.disabledOnSecondaryVariant
-                                    )
-                                },
-                                enabled = uiState.isLateLoadMode,
-                                checked = uiState.autoJailbreak,
-                                onCheckedChange = actions.onSetAutoJailbreak
-                            )
+                            if (uiState.isLateLoadMode) {
+                                SwitchPreference(
+                                    title = stringResource(id = R.string.settings_auto_jailbreak),
+                                    summary = stringResource(id = R.string.settings_auto_jailbreak_summary),
+                                    startAction = {
+                                        Icon(
+                                            Icons.Rounded.ElectricalServices,
+                                            modifier = Modifier.padding(end = 6.dp),
+                                            contentDescription = stringResource(id = R.string.settings_auto_jailbreak),
+                                            tint = colorScheme.onBackground
+                                        )
+                                    },
+                                    checked = uiState.autoJailbreak,
+                                    onCheckedChange = actions.onSetAutoJailbreak
+                                )
+                            }
                         }
                     }
 

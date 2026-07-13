@@ -541,13 +541,7 @@ private fun InfoCard(
             if (!isSimpleMode && ksuIsValid()) {
                 InfoText(title = stringResource(R.string.home_hook_type), content = com.resukisu.resukisu.Natives.getHookType())
             }
-            val selinuxDisplay = when (systemInfo.selinuxStatus) {
-                "Enforcing" -> stringResource(R.string.selinux_status_enforcing)
-                "Permissive" -> stringResource(R.string.selinux_status_permissive)
-                "Disabled" -> stringResource(R.string.selinux_status_disabled)
-                else -> stringResource(R.string.selinux_status_unknown)
-            }
-            InfoText(title = stringResource(R.string.home_selinux_status), content = selinuxDisplay)
+            InfoText(title = stringResource(R.string.home_selinux_status), content = systemInfo.selinuxStatus)
             val seccompDisplay = when (systemInfo.seccompStatus) {
                 -1 -> stringResource(R.string.seccomp_status_not_supported)
                 0 -> stringResource(R.string.seccomp_status_disabled)

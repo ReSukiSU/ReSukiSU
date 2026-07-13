@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.Spacer
@@ -16,10 +17,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -44,16 +47,17 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.ui.component.ConfirmResult
+import com.resukisu.resukisu.ui.component.dialog.ConfirmResult
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.miuix.WarningCard
-import com.resukisu.resukisu.ui.component.rememberConfirmDialog
+import com.resukisu.resukisu.ui.component.dialog.rememberConfirmDialog
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.theme.LocalEnableBlur
 import com.resukisu.resukisu.ui.util.BlurredBar
@@ -64,11 +68,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.basic.BasicComponent
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -79,6 +87,7 @@ import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
+import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -200,9 +209,9 @@ fun UmountManagerScreenMiuix() {
                         modifier = Modifier
                             .fillMaxSize()
                             .scrollEndHaptic()
-                            .nestedScroll(scrollBehavior.nestedScrollConnection)
+                            .overScrollVertical()
                             .nestedScroll(fabNestedScroll)
-                            .overScrollVertical(),
+                            .nestedScroll(scrollBehavior.nestedScrollConnection),
                         contentPadding = PaddingValues(
                             top = innerPadding.calculateTopPadding() + 6.dp,
                             bottom = innerPadding.calculateBottomPadding() + 88.dp,
@@ -287,7 +296,7 @@ fun UmountManagerScreenMiuix() {
     }
 
     if (showAddDialog) {
-        AddUmountPathDialog(
+        AddUmountPathDialogMiuix(
             onDismiss = { showAddDialog = false },
             onConfirm = { path, flags ->
                 showAddDialog = false
@@ -333,4 +342,53 @@ private fun TopBar(
             scrollBehavior = scrollBehavior
         )
     }
+}
+
+@Composable
+private fun AddUmountPathDialogMiuix(
+    onDismiss: () -> Unit,
+    onConfirm: (String, Int) -> Unit,
+) {
+    var path by remember { mutableStateOf("") }
+    var flags by remember { mutableStateOf("0") }
+    OverlayDialog(
+        show = true,
+        title = stringResource(R.string.add_umount_path),
+        onDismissRequest = onDismiss,
+        content = {
+            TextField(
+                value = path,
+                onValueChange = { path = it },
+                label = stringResource(R.string.mount_path),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+            )
+            TextField(
+                value = flags,
+                onValueChange = { v -> flags = v.filter(Char::isDigit) },
+                label = stringResource(R.string.umount_flags),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
+            )
+            Text(
+                text = stringResource(R.string.umount_flags_hint),
+                color = colorScheme.onSurfaceVariantSummary,
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
+            Row(modifier = Modifier.fillMaxWidth()) {
+                TextButton(
+                    text = stringResource(android.R.string.cancel),
+                    onClick = onDismiss,
+                    modifier = Modifier.weight(1f),
+                )
+                Spacer(modifier = Modifier.size(12.dp))
+                TextButton(
+                    text = stringResource(android.R.string.ok),
+                    onClick = { onConfirm(path, flags.toIntOrNull() ?: 0) },
+                    enabled = path.isNotBlank(),
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
+                )
+            }
+        }
+    )
 }

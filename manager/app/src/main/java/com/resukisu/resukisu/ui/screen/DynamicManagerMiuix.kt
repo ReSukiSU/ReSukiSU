@@ -2,6 +2,7 @@ package com.resukisu.resukisu.ui.screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
@@ -24,7 +26,10 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,6 +38,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,9 +47,9 @@ import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.ui.component.ConfirmResult
+import com.resukisu.resukisu.ui.component.dialog.ConfirmResult
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
-import com.resukisu.resukisu.ui.component.rememberConfirmDialog
+import com.resukisu.resukisu.ui.component.dialog.rememberConfirmDialog
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.theme.LocalEnableBlur
 import com.resukisu.resukisu.ui.util.BlurredBar
@@ -61,6 +67,9 @@ import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
@@ -68,6 +77,7 @@ import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
+import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -130,9 +140,15 @@ fun DynamicManagerScreenMiuix() {
         }
     }
 
-    val manualDialog = rememberDynamicManagerManualDialog { size, hash ->
-        runGrantOperation { viewModel.setManualConfig(size, hash) }
-    }
+    var showManualDialog by remember { mutableStateOf(false) }
+    DynamicManualConfigDialogMiuix(
+        show = showManualDialog,
+        onDismiss = { showManualDialog = false },
+        onConfirm = { size, hash ->
+            showManualDialog = false
+            runGrantOperation { viewModel.setManualConfig(size, hash) }
+        }
+    )
 
     LaunchedEffect(Unit) {
         viewModel.refresh()
@@ -185,8 +201,8 @@ fun DynamicManagerScreenMiuix() {
                         modifier = Modifier
                             .fillMaxSize()
                             .scrollEndHaptic()
-                            .nestedScroll(scrollBehavior.nestedScrollConnection)
-                            .overScrollVertical(),
+                            .overScrollVertical()
+                            .nestedScroll(scrollBehavior.nestedScrollConnection),
                         contentPadding = PaddingValues(
                             top = innerPadding.calculateTopPadding() + 6.dp,
                             bottom = innerPadding.calculateBottomPadding() + 24.dp,
@@ -197,7 +213,7 @@ fun DynamicManagerScreenMiuix() {
                             DynamicManagerStatusCard(
                                 config = uiState.config,
                                 enabled = !uiState.isSubmitting,
-                                onManualConfig = { manualDialog.show() },
+                                onManualConfig = { showManualDialog = true },
                                 onClearConfig = { runClearOperation() },
                             )
                             Spacer(modifier = Modifier.height(12.dp))
@@ -390,4 +406,60 @@ private fun TopBar(
             scrollBehavior = scrollBehavior
         )
     }
+}
+
+@Composable
+private fun DynamicManualConfigDialogMiuix(
+    show: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: (Int, String) -> Unit,
+) {
+    var sizeText by remember(show) { mutableStateOf("") }
+    var hashText by remember(show) { mutableStateOf("") }
+    val sizeValue = sizeText.toIntOrNull()
+    val hashValid = hashText.length == 64
+    val isValid = sizeValue != null && sizeValue > 0 && hashValid
+
+    OverlayDialog(
+        show = show,
+        title = stringResource(R.string.dynamic_manager_manual_config),
+        onDismissRequest = onDismiss,
+        content = {
+            TextField(
+                value = sizeText,
+                onValueChange = { v -> sizeText = v.filter(Char::isDigit) },
+                label = stringResource(R.string.signature_size),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+            )
+            TextField(
+                value = hashText,
+                onValueChange = { v -> hashText = v.trim() },
+                label = stringResource(R.string.signature_hash),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+            )
+            if (hashText.isNotEmpty() && !hashValid) {
+                Text(
+                    text = stringResource(R.string.hash_must_be_64_chars),
+                    color = colorScheme.onErrorContainer,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                )
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                TextButton(
+                    text = stringResource(android.R.string.cancel),
+                    onClick = onDismiss,
+                    modifier = Modifier.weight(1f),
+                )
+                Spacer(modifier = Modifier.size(12.dp))
+                TextButton(
+                    text = stringResource(android.R.string.ok),
+                    onClick = { if (isValid) onConfirm(sizeValue!!, hashText) },
+                    enabled = isValid,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
+                )
+            }
+        }
+    )
 }

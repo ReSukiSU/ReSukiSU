@@ -1,6 +1,5 @@
 package com.resukisu.resukisu.ui.component.bottombar
 
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -14,6 +13,7 @@ import com.resukisu.resukisu.ui.util.BlurredBar
 import com.resukisu.resukisu.ui.util.rootAvailable
 import top.yukonga.miuix.kmp.basic.NavigationRail
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
+import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -27,6 +27,7 @@ fun NavigationRailMiuix(
     if (!fullFeatured) return
 
     val mainState = LocalMainPagerState.current
+    val badgeCounts = rememberNavBadgeCounts()
 
     val items = BottomBarDestination.entries.map { destination ->
         Pair(stringResource(destination.label), destination.icon)
@@ -36,9 +37,9 @@ fun NavigationRailMiuix(
         NavigationRail(
             modifier = modifier
                 .fillMaxHeight(),
+            state = rememberNavigationRailState(),
             color = if (blurBackdrop != null) Color.Transparent else MiuixTheme.colorScheme.surface,
         ) {
-            Spacer(modifier = Modifier.weight(1f))
             items.forEachIndexed { index, (label, icon) ->
                 NavigationRailItem(
                     icon = icon,
@@ -47,10 +48,10 @@ fun NavigationRailMiuix(
                     onClick = {
                         mainState.animateToPage(index)
                     },
+                    badge = navDestinationBadge(index, badgeCounts),
                     modifier = Modifier.padding(vertical = 4.dp)
                 )
             }
-            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
