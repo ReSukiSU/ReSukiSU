@@ -131,20 +131,47 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 @Composable
 fun ModuleRepoScreenMiuix(
     modules: List<com.resukisu.resukisu.ui.viewmodel.ModuleRepoViewModel.RepoModule>,
-    searchResults: List<com.resukisu.resukisu.ui.viewmodel.ModuleRepoViewModel.RepoModule>,
-    searchStatus: SearchStatus,
-    sortOrder: RepoSort,
     isRefreshing: Boolean,
     offline: Boolean,
-    actions: ModuleRepoActions,
+    onBack: () -> Unit,
+    onRefresh: () -> Unit,
+    onSetSortStarFirst: (Boolean) -> Unit,
+    onOpenRepoDetail: (com.resukisu.resukisu.ui.viewmodel.ModuleRepoViewModel.RepoModule) -> Unit,
 ) {
     val density = LocalDensity.current
     val metaBg = colorScheme.tertiaryContainer.copy(alpha = 0.6f)
     val metaTint = colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
 
-    LaunchedEffect(searchStatus.searchText) {
-        actions.onSearchTextChange(searchStatus.searchText)
+    // Sort order and search live in the Miuix screen; the raw module list comes from the VM.
+    // The Material path kicks off the initial fetch during composition, so do it here too or the
+    // Miuix list would spin forever with no modules.
+    LaunchedEffect(Unit) { if (modules.isEmpty()) onRefresh() }
+    val searchLabel = stringResource(R.string.search_modules)
+    var sortOrder by remember { mutableStateOf(RepoSort.UPDATED) }
+    var repoSearchStatus by remember { mutableStateOf(SearchStatus(searchLabel)) }
+    val sorted = remember(modules, sortOrder) {
+        when (sortOrder) {
+            RepoSort.UPDATED -> modules.sortedByDescending { it.updatedAt }
+            RepoSort.CREATED -> modules.sortedByDescending { it.createdAt }
+            RepoSort.NAME -> modules.sortedBy { it.moduleName.lowercase() }
+            RepoSort.STARS -> modules.sortedByDescending { it.stargazerCount }
+        }
     }
+    val query = repoSearchStatus.searchText.trim()
+    val searchResults = remember(sorted, query) {
+        if (query.isEmpty()) emptyList()
+        else sorted.filter {
+            it.moduleName.contains(query, true) || it.moduleId.contains(query, true) ||
+                it.authors.contains(query, true) || it.summary.contains(query, true)
+        }
+    }
+    val searchStatus = repoSearchStatus.copy(
+        resultStatus = when {
+            query.isEmpty() -> SearchStatus.ResultStatus.DEFAULT
+            searchResults.isEmpty() -> SearchStatus.ResultStatus.EMPTY
+            else -> SearchStatus.ResultStatus.SHOW
+        }
+    )
 
     val scrollBehavior = MiuixScrollBehavior()
     val dynamicTopPadding by remember {
@@ -184,7 +211,8 @@ fun ModuleRepoScreenMiuix(
                                                 optionSize = sortOptions.size,
                                                 isSelected = sortOrder == order,
                                                 onSelectedIndexChange = {
-                                                    actions.onSetSortOrder(order)
+                                                    sortOrder = order
+                                                    onSetSortStarFirst(order == RepoSort.STARS)
                                                     showSortPopup.value = false
                                                 },
                                                 index = index,
@@ -205,7 +233,7 @@ fun ModuleRepoScreenMiuix(
                         },
                         navigationIcon = {
                             IconButton(
-                                onClick = actions.onBack
+                                onClick = onBack
                             ) {
                                 val layoutDirection = LocalLayoutDirection.current
                                 Icon(
@@ -226,7 +254,7 @@ fun ModuleRepoScreenMiuix(
                                         with(density) {
                                             val newOffsetY = coordinates.positionInWindow().y.toDp()
                                             if (searchStatus.offsetY != newOffsetY) {
-                                                actions.onSearchStatusChange(searchStatus.copy(offsetY = newOffsetY))
+                                                repoSearchStatus = searchStatus.copy(offsetY = newOffsetY)
                                             }
                                         }
                                     }
@@ -234,7 +262,7 @@ fun ModuleRepoScreenMiuix(
                                         if (searchStatus.isCollapsed()) {
                                             Modifier.pointerInput(Unit) {
                                                 detectTapGestures {
-                                                    actions.onSearchStatusChange(searchStatus.copy(current = SearchStatus.Status.EXPANDING))
+                                                    repoSearchStatus = searchStatus.copy(current = SearchStatus.Status.EXPANDING)
                                                 }
                                             }
                                         } else Modifier,
@@ -249,7 +277,7 @@ fun ModuleRepoScreenMiuix(
         },
         popupHost = {
             searchStatus.SearchPager(
-                onSearchStatusChange = actions.onSearchStatusChange,
+                onSearchStatusChange = { repoSearchStatus = it },
                 defaultResult = {},
                 searchBarTopPadding = dynamicTopPadding,
             ) {
@@ -271,7 +299,7 @@ fun ModuleRepoScreenMiuix(
                             showIndication = true,
                             pressFeedbackType = PressFeedbackType.Sink,
                             onClick = {
-                                actions.onOpenRepoDetail(module)
+                                onOpenRepoDetail(module)
                             }
                         ) {
                             Column {
@@ -358,7 +386,7 @@ fun ModuleRepoScreenMiuix(
             val pullToRefreshState = rememberPullToRefreshState()
             val lazyListState = rememberLazyListState()
             val refreshTick = remember { mutableIntStateOf(0) }
-            val latestModules = rememberUpdatedState(modules)
+            val latestModules = rememberUpdatedState(sorted)
             val latestRefreshing = rememberUpdatedState(isRefreshing)
             ScrollToTopOnChange(
                 lazyListState,
@@ -376,7 +404,7 @@ fun ModuleRepoScreenMiuix(
                 isRefreshing = isRefreshing,
                 pullToRefreshState = pullToRefreshState,
                 onRefresh = {
-                    actions.onRefresh()
+                    onRefresh()
                     refreshTick.intValue++
                 },
                 refreshTexts = refreshTexts,
@@ -410,7 +438,7 @@ fun ModuleRepoScreenMiuix(
                                         .padding(horizontal = 24.dp)
                                         .fillMaxWidth(),
                                     text = stringResource(R.string.network_retry),
-                                    onClick = actions.onRefresh,
+                                    onClick = onRefresh,
                                 )
                             }
                         } else {
@@ -433,7 +461,7 @@ fun ModuleRepoScreenMiuix(
                             ),
                             overscrollEffect = null,
                         ) {
-                            items(items = modules, key = { it.moduleId }, contentType = { "module" }) { module ->
+                            items(items = sorted, key = { it.moduleId }, contentType = { "module" }) { module ->
                                 val moduleAuthor = stringResource(id = R.string.module_author)
 
                                 Card(
@@ -443,7 +471,7 @@ fun ModuleRepoScreenMiuix(
                                         .padding(bottom = 12.dp),
                                     insideMargin = PaddingValues(16.dp),
                                     showIndication = true,
-                                    onClick = { actions.onOpenRepoDetail(module) }) {
+                                    onClick = { onOpenRepoDetail(module) }) {
                                     Column {
                                         if (module.moduleName.isNotEmpty()) {
                                             Row(verticalAlignment = Alignment.CenterVertically) {
