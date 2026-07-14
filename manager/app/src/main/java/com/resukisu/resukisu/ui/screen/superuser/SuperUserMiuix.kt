@@ -43,6 +43,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -63,6 +64,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel.AppGroup
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel.AppInfo
 import com.resukisu.resukisu.ui.component.AppIconImage
 import com.resukisu.resukisu.ui.component.ListPopupDefaults
@@ -106,19 +108,63 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun SuperUserPagerMiuix(
-    groupedApps: List<GroupedApps>,
-    recentlyInstalledResults: List<GroupedApps>,
-    userIds: List<Int>,
-    searchStatus: SearchStatus,
-    searchResults: List<GroupedApps>,
-    showSystemApps: Boolean,
-    showOnlyPrimaryUserApps: Boolean,
-    sortConfig: com.resukisu.resukisu.ui.viewmodel.AppSortConfig,
-    isRefreshing: Boolean,
-    hasLoaded: Boolean,
-    actions: SuperUserActions,
+    uiState: com.resukisu.resukisu.ui.viewmodel.SuperUserUiState,
+    onRefresh: () -> Unit,
+    onOpenSulog: () -> Unit,
+    onOpenProfile: (com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel.AppGroup) -> Unit,
+    onToggleShowSystemApps: () -> Unit,
+    onClearVmSearch: () -> Unit,
     bottomInnerPadding: Dp,
 ) {
+    // Search / sort / primary-user filter live in the Miuix screen; showSystemApps stays on the
+    // shared ViewModel (it re-filters appGroupList there). The ViewModel search is kept empty so
+    // the main list stays full while the pager shows the locally-filtered results.
+    val searchLabel = stringResource(R.string.search_apps)
+    val groupByUid = remember(uiState.appGroupList) { uiState.appGroupList.associateBy { it.uid } }
+    var rawSearchStatus by remember { mutableStateOf(SearchStatus(searchLabel)) }
+    var sortConfig by remember { mutableStateOf(com.resukisu.resukisu.ui.viewmodel.AppSortConfig()) }
+    var showOnlyPrimaryUserApps by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { onClearVmSearch() }
+
+    val base = uiState.appGroupList
+    val primaryFiltered = remember(base, showOnlyPrimaryUserApps) {
+        if (showOnlyPrimaryUserApps) base.filter { it.uid / 100000 == 0 } else base
+    }
+    val sorted = remember(primaryFiltered, sortConfig) {
+        val cmp: Comparator<com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel.AppGroup> = when (sortConfig.sortType) {
+            com.resukisu.resukisu.ui.viewmodel.AppSortType.NAME -> compareBy { it.mainApp.label.lowercase() }
+            com.resukisu.resukisu.ui.viewmodel.AppSortType.PACKAGE_NAME -> compareBy { it.mainApp.packageName.lowercase() }
+            com.resukisu.resukisu.ui.viewmodel.AppSortType.INSTALL_TIME -> compareBy { it.mainApp.packageInfo.firstInstallTime }
+            com.resukisu.resukisu.ui.viewmodel.AppSortType.UPDATE_TIME -> compareBy { it.mainApp.packageInfo.lastUpdateTime }
+        }
+        primaryFiltered.sortedWith(if (sortConfig.reversed) cmp.reversed() else cmp)
+    }
+    val groupedApps = remember(sorted) { sorted.map { it.toTiannGroupedApps() } }
+    val query = rawSearchStatus.searchText.trim()
+    val searchResults = remember(sorted, query) {
+        if (query.isEmpty()) emptyList()
+        else sorted.mapNotNull { group ->
+            val matched = group.apps.filter {
+                it.label.contains(query, true) || it.packageName.contains(query, true)
+            }
+            if (matched.isEmpty()) null else group.toTiannGroupedApps(matched.map { it.packageName }.toSet())
+        }
+    }
+    val recentlyInstalledResults = remember(base) {
+        base.filter { it.isRecentlyInstalled }.map { it.toTiannGroupedApps() }
+    }
+    val userIds = remember(base) { base.map { it.uid / 100000 }.distinct().sorted() }
+    val showSystemApps = uiState.showSystemApps
+    val isRefreshing = uiState.isRefreshing
+    val hasLoaded = true
+    val searchStatus = rawSearchStatus.copy(
+        resultStatus = when {
+            query.isEmpty() -> SearchStatus.ResultStatus.DEFAULT
+            searchResults.isEmpty() -> SearchStatus.ResultStatus.EMPTY
+            else -> SearchStatus.ResultStatus.SHOW
+        }
+    )
+
     val enableBlur = LocalEnableBlur.current
     val density = LocalDensity.current
 
@@ -140,7 +186,7 @@ fun SuperUserPagerMiuix(
                         title = stringResource(R.string.superuser),
                         navigationIcon = {
                             IconButton(
-                                onClick = actions.onOpenSulog,
+                                onClick = onOpenSulog,
                             ) {
                                 Icon(
                                     imageVector = MiuixIcons.Notes,
@@ -174,7 +220,7 @@ fun SuperUserPagerMiuix(
                                                     isSelected = sortConfig.sortType == type,
                                                     index = index,
                                                     onSelectedIndexChange = {
-                                                        actions.onUpdateSortConfig(sortConfig.withType(type))
+                                                        sortConfig = sortConfig.withType(type)
                                                         showSortPopup.value = false
                                                     }
                                                 )
@@ -191,7 +237,7 @@ fun SuperUserPagerMiuix(
                                                 isSelected = sortConfig.reversed,
                                                 index = sortEntries.size,
                                                 onSelectedIndexChange = {
-                                                    actions.onUpdateSortConfig(sortConfig.toggleReversed())
+                                                    sortConfig = sortConfig.toggleReversed()
                                                     showSortPopup.value = false
                                                 }
                                             )
@@ -229,7 +275,7 @@ fun SuperUserPagerMiuix(
                                                 isSelected = showSystemApps,
                                                 optionSize = size,
                                                 onSelectedIndexChange = {
-                                                    actions.onToggleShowSystemApps()
+                                                    onToggleShowSystemApps()
                                                     showTopPopup.value = false
                                                 },
                                                 index = 0
@@ -240,7 +286,7 @@ fun SuperUserPagerMiuix(
                                                     isSelected = showOnlyPrimaryUserApps,
                                                     optionSize = size,
                                                     onSelectedIndexChange = {
-                                                        actions.onToggleShowOnlyPrimaryUserApps()
+                                                        showOnlyPrimaryUserApps = !showOnlyPrimaryUserApps
                                                         showTopPopup.value = false
                                                     },
                                                     index = 1
@@ -272,7 +318,7 @@ fun SuperUserPagerMiuix(
                                         with(density) {
                                             val newOffsetY = coordinates.positionInWindow().y.toDp()
                                             if (searchStatus.offsetY != newOffsetY) {
-                                                actions.onSearchStatusChange(searchStatus.copy(offsetY = newOffsetY))
+                                                rawSearchStatus = searchStatus.copy(offsetY = newOffsetY)
                                             }
                                         }
                                     }
@@ -280,7 +326,7 @@ fun SuperUserPagerMiuix(
                                         if (searchStatus.isCollapsed()) {
                                             Modifier.pointerInput(Unit) {
                                                 detectTapGestures {
-                                                    actions.onSearchStatusChange(searchStatus.copy(current = SearchStatus.Status.EXPANDING))
+                                                    rawSearchStatus = searchStatus.copy(current = SearchStatus.Status.EXPANDING)
                                                 }
                                             }
                                         } else Modifier,
@@ -302,7 +348,7 @@ fun SuperUserPagerMiuix(
                     .toSet()
             }
             searchStatus.SearchPager(
-                onSearchStatusChange = actions.onSearchStatusChange,
+                onSearchStatusChange = { rawSearchStatus = it },
                 defaultResult = {
                     val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
                     if (recentlyInstalledResults.isNotEmpty()) {
@@ -327,7 +373,7 @@ fun SuperUserPagerMiuix(
                                         group = group,
                                         onToggleExpand = {},
                                     ) {
-                                        actions.onOpenProfile(group)
+                                        groupByUid[group.uid]?.let(onOpenProfile)
                                     }
                                     AnimatedVisibility(
                                         visible = group.apps.size > 1,
@@ -377,7 +423,7 @@ fun SuperUserPagerMiuix(
                                         }
                                     },
                                 ) {
-                                    actions.onOpenProfile(group)
+                                    groupByUid[group.uid]?.let(onOpenProfile)
                                 }
                                 AnimatedVisibility(
                                     visible = expanded && group.apps.size > 1,
@@ -447,7 +493,7 @@ fun SuperUserPagerMiuix(
                     isRefreshing = isRefreshing,
                     pullToRefreshState = pullToRefreshState,
                     onRefresh = {
-                        actions.onRefresh()
+                        onRefresh()
                         refreshTick.intValue++
                     },
                     refreshTexts = refreshTexts,
@@ -484,7 +530,7 @@ fun SuperUserPagerMiuix(
                                             }
                                         }
                                     ) {
-                                        actions.onOpenProfile(group)
+                                        groupByUid[group.uid]?.let(onOpenProfile)
                                     }
                                     AnimatedVisibility(
                                         visible = expanded && group.apps.size > 1,
@@ -647,3 +693,16 @@ private fun GroupItem(
         }
     }
 }
+
+// Adapts ReSukiSU's AppGroup into the GroupedApps shape the Miuix superuser screen renders.
+private fun AppGroup.toTiannGroupedApps(matched: Set<String> = emptySet()): GroupedApps =
+    GroupedApps(
+        uid = uid,
+        apps = apps,
+        primary = apps.first(),
+        anyAllowSu = allowSu,
+        anyCustom = hasCustomProfile,
+        shouldUmount = profile?.umountModules == true,
+        ownerName = userName,
+        matchedPackageNames = matched,
+    )

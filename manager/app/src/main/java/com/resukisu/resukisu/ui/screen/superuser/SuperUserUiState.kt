@@ -3,8 +3,6 @@ package com.resukisu.resukisu.ui.screen.superuser
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel.AppInfo
-import com.resukisu.resukisu.ui.component.SearchStatus
-import com.resukisu.resukisu.ui.viewmodel.AppSortConfig
 
 @Immutable
 data class GroupedApps(
@@ -16,19 +14,6 @@ data class GroupedApps(
     val shouldUmount: Boolean,
     val ownerName: String? = null,
     val matchedPackageNames: Set<String> = emptySet(),
-)
-
-@Immutable
-data class SuperUserActions(
-    val onRefresh: () -> Unit,
-    val onOpenSulog: () -> Unit,
-    val onSearchTextChange: (String) -> Unit,
-    val onSearchStatusChange: (SearchStatus) -> Unit,
-    val onClearSearch: () -> Unit,
-    val onToggleShowSystemApps: () -> Unit,
-    val onToggleShowOnlyPrimaryUserApps: () -> Unit,
-    val onUpdateSortConfig: (AppSortConfig) -> Unit,
-    val onOpenProfile: (GroupedApps) -> Unit,
 )
 
 @Immutable
