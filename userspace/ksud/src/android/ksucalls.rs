@@ -331,6 +331,16 @@ pub fn dynamic_manager_set(size: u32, hash: [u8; 64]) -> anyhow::Result<()> {
     Ok(())
 }
 
+pub fn dynamic_manager_set_synchronous(size: u32, hash: [u8; 64]) -> anyhow::Result<()> {
+    let mut cmd = uapi::ksu_dynamic_manager_cmd {
+        operation: uapi::DYNAMIC_MANAGER_OP_SET_SYNCHRONOUS_RUST,
+        size,
+        hash,
+    };
+    ksuctl(uapi::KSU_IOCTL_DYNAMIC_MANAGER_RUST, &raw mut cmd)?;
+    Ok(())
+}
+
 pub fn dynamic_manager_get() -> anyhow::Result<(u32, [u8; 64])> {
     let mut cmd = uapi::ksu_dynamic_manager_cmd {
         operation: uapi::DYNAMIC_MANAGER_OP_GET_RUST,

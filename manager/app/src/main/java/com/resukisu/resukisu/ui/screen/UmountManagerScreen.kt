@@ -16,9 +16,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.twotone.Add
+import androidx.compose.material.icons.twotone.Delete
+import androidx.compose.material.icons.twotone.Folder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -129,7 +129,7 @@ fun UmountManagerScreen() {
             FloatingActionButton(
                 onClick = { showAddDialog = true }
             ) {
-                Icon(Icons.Filled.Add, contentDescription = null)
+                Icon(Icons.TwoTone.Add, contentDescription = null)
             }
         },
         snackbarHost = { SwipeableSnackbarHost(hostState = snackBarHost) },
@@ -204,7 +204,7 @@ fun UmountManagerScreen() {
                         uiState.umountPaths,
                         key = { _, it -> it.path }) { _, entry ->
                         SettingsBaseWidget(
-                            icon = Icons.Filled.Folder,
+                            icon = Icons.TwoTone.Folder,
                             title = entry.path,
                             descriptionColumnContent = {
                                 Row(
@@ -248,7 +248,7 @@ fun UmountManagerScreen() {
                                 }
                             ) {
                                 Icon(
-                                    imageVector = Icons.Filled.Delete,
+                                    imageVector = Icons.TwoTone.Delete,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.error
                                 )

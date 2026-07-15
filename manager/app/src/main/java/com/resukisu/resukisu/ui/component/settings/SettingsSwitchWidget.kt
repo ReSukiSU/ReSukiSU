@@ -3,8 +3,8 @@ package com.resukisu.resukisu.ui.component.settings
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.twotone.Check
+import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -90,11 +90,11 @@ fun SettingsSwitchWidget(
             interactionSource = interactionSource,
             colors = SwitchDefaults.colors(
                 checkedIconColor = MaterialTheme.colorScheme.primary,
-                uncheckedIconColor = MaterialTheme.colorScheme.surfaceContainerHighest
+                uncheckedIconColor = MaterialTheme.colorScheme.surfaceBright
             ),
             thumbContent = {
                 Icon(
-                    imageVector = if (checked) Icons.Filled.Check else Icons.Filled.Close,
+                    imageVector = if (checked) Icons.TwoTone.Check else Icons.TwoTone.Close,
                     contentDescription = null,
                     modifier = Modifier.size(SwitchDefaults.IconSize)
                 )

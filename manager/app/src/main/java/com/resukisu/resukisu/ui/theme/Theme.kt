@@ -81,8 +81,6 @@ import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.quantize.QuantizerCelebi
 import com.materialkolor.score.Score
 import com.resukisu.resukisu.data.appPreferences
-import com.resukisu.resukisu.ui.theme.util.BackgroundTransformation
-import com.resukisu.resukisu.ui.theme.util.saveTransformedBackground
 import com.resukisu.resukisu.ui.util.LocalBackgroundBlurAnchor
 import com.resukisu.resukisu.ui.util.LocalBlurState
 import com.resukisu.resukisu.ui.webui.MonetColorsProvider
@@ -97,7 +95,6 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
 import java.io.File
 import java.io.FileOutputStream
-import java.security.MessageDigest
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -283,15 +280,10 @@ object BackgroundManager {
 
     fun saveAndApplyCustomBackground(
         context: Context,
-        uri: Uri,
-        transformation: BackgroundTransformation? = null
+        uri: Uri
     ) {
         try {
-            val finalUri = if (transformation != null) {
-                context.saveTransformedBackground(uri, transformation)
-            } else {
-                copyImageToInternalStorage(context, uri)
-            }
+            val finalUri = copyImageToInternalStorage(context, uri)
 
             saveBackgroundUri(context, finalUri)
             ThemeConfig.customBackgroundUri = finalUri
@@ -349,7 +341,8 @@ object BackgroundManager {
 
     fun clearBackgroundBlurCache(context: Context) {
         runCatching {
-            backgroundBlurCacheDir(context).deleteRecursively()
+            backgroundBlurCacheFile(context).delete()
+            legacyBackgroundBlurCacheDir(context).deleteRecursively()
         }.onFailure {
             Log.w(TAG, "Failed to clear background blur cache: ${it.message}")
         }
@@ -577,7 +570,6 @@ private var backgroundBlurFrameTick by mutableIntStateOf(0)
 var backgroundSeedColor by mutableIntStateOf(0)
 
 private const val BACKGROUND_BLUR_RADIUS = 25f
-private const val BACKGROUND_BLUR_CACHE_VERSION = 1
 
 /**
  * Captures background content for blurEffect child nodes,
@@ -630,7 +622,7 @@ fun Modifier.renderBackgroundBlur(
         mutableStateOf<LayoutCoordinates?>(null)
     }
 
-    val tintColor = (tintColor ?: MaterialTheme.colorScheme.surfaceContainerHighest).copy(
+    val tintColor = (tintColor ?: MaterialTheme.colorScheme.surfaceBright).copy(
         alpha = CardConfig.cardAlpha
     )
     val backgroundBlurAnchor = LocalBackgroundBlurAnchor.current
@@ -1119,19 +1111,20 @@ private fun Bitmap.blurBitmap(blurRadius: Float): Bitmap {
 @RequiresApi(Build.VERSION_CODES.S)
 private suspend fun Bitmap.createBackgroundBlurImage(
     context: Context,
-    sourceUri: Uri,
     viewportSize: IntSize,
     blurRadius: Float,
 ): ImageBitmap = withContext(Dispatchers.Default) {
-    val cacheFile = backgroundBlurCacheFile(
-        context = context,
-        sourceUri = sourceUri,
-        viewportSize = viewportSize,
-        blurRadius = blurRadius,
-    )
+    val cacheFile = backgroundBlurCacheFile(context)
 
     BitmapFactory.decodeFile(cacheFile.absolutePath)?.let { cachedBitmap ->
-        return@withContext cachedBitmap.asImageBitmap()
+        if (
+            cachedBitmap.width == viewportSize.width &&
+            cachedBitmap.height == viewportSize.height
+        ) {
+            return@withContext cachedBitmap.asImageBitmap()
+        }
+
+        cachedBitmap.recycle()
     }
 
     val blurSource = createBackgroundBlurSource(viewportSize)
@@ -1179,43 +1172,18 @@ private fun Bitmap.createBackgroundBlurSource(viewportSize: IntSize): Bitmap {
     }
 }
 
-private fun backgroundBlurCacheDir(context: Context): File =
+private fun backgroundBlurCacheFile(context: Context): File =
+    File(context.filesDir, "blured_custom_background.jpg")
+
+private fun legacyBackgroundBlurCacheDir(context: Context): File =
     File(context.filesDir, "background_blur_cache")
-
-private fun backgroundBlurCacheFile(
-    context: Context,
-    sourceUri: Uri,
-    viewportSize: IntSize,
-    blurRadius: Float,
-): File {
-    val sourceSignature = buildBackgroundSourceSignature(sourceUri)
-    val key = listOf(
-        "v$BACKGROUND_BLUR_CACHE_VERSION",
-        sourceSignature,
-        "${viewportSize.width}x${viewportSize.height}",
-        blurRadius.toString(),
-        Build.VERSION.SDK_INT.toString(),
-    ).joinToString("|").sha256()
-
-    return File(backgroundBlurCacheDir(context), "$key.png")
-}
-
-private fun buildBackgroundSourceSignature(sourceUri: Uri): String {
-    val path = sourceUri.path
-    val file = if (sourceUri.scheme == "file" && path != null) File(path) else null
-    return if (file != null && file.exists()) {
-        "${sourceUri}|${file.length()}|${file.lastModified()}"
-    } else {
-        sourceUri.toString()
-    }
-}
 
 private fun saveBackgroundBlurCache(cacheFile: File, bitmap: Bitmap) {
     runCatching {
         cacheFile.parentFile?.mkdirs()
         val tempFile = File(cacheFile.parentFile, "${cacheFile.name}.tmp")
         FileOutputStream(tempFile).use { output ->
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, output)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 95, output)
         }
         if (!tempFile.renameTo(cacheFile)) {
             tempFile.copyTo(cacheFile, overwrite = true)
@@ -1224,11 +1192,6 @@ private fun saveBackgroundBlurCache(cacheFile: File, bitmap: Bitmap) {
     }.onFailure {
         Log.w("ThemeSystem", "Failed to save background blur cache: ${it.message}")
     }
-}
-
-private fun String.sha256(): String {
-    val digest = MessageDigest.getInstance("SHA-256").digest(toByteArray())
-    return digest.joinToString("") { "%02x".format(it) }
 }
 
 @Composable
@@ -1257,7 +1220,6 @@ private fun BackgroundInitializer(uri: Uri) {
                 val bitmap = (it.state as AsyncImagePainter.State.Success).result.drawable.toBitmap()
                 blurBackgroundImageBitmap = bitmap.createBackgroundBlurImage(
                     context = context,
-                    sourceUri = uri,
                     viewportSize = backgroundBlurViewportSize,
                     blurRadius = BACKGROUND_BLUR_RADIUS,
                 )
@@ -1292,7 +1254,6 @@ private fun BackgroundInitializer(uri: Uri) {
                 coroutineScope.launch {
                     blurBackgroundImageBitmap = bitmap.createBackgroundBlurImage(
                         context = context,
-                        sourceUri = uri,
                         viewportSize = backgroundBlurViewportSize,
                         blurRadius = BACKGROUND_BLUR_RADIUS,
                     )
@@ -1429,14 +1390,12 @@ private fun SystemBarController(darkMode: Boolean) {
 // 向后兼容
 @OptIn(DelicateCoroutinesApi::class)
 fun Context.saveAndApplyCustomBackground(
-    uri: Uri,
-    transformation: BackgroundTransformation? = null
+    uri: Uri
 ) {
     GlobalScope.launch {
         BackgroundManager.saveAndApplyCustomBackground(
             this@saveAndApplyCustomBackground,
-            uri,
-            transformation
+            uri
         )
     }
 }

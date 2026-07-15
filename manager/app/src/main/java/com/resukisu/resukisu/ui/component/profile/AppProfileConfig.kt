@@ -1,7 +1,7 @@
 package com.resukisu.resukisu.ui.component.profile
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.FolderDelete
+import androidx.compose.material.icons.twotone.FolderDelete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,7 +20,7 @@ fun AppProfileConfig(
     onProfileChange: (Natives.Profile) -> Unit,
 ) {
     SettingsSwitchWidget(
-        icon = Icons.Rounded.FolderDelete,
+        icon = Icons.TwoTone.FolderDelete,
         title = stringResource(R.string.profile_umount_modules),
         description = stringResource(R.string.profile_umount_modules_summary),
         checked = if (enabled) {

@@ -32,16 +32,16 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Article
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.RestoreFromTrash
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.automirrored.twotone.Article
 import androidx.compose.material.icons.twotone.Archive
+import androidx.compose.material.icons.twotone.ChevronRight
+import androidx.compose.material.icons.twotone.MoreVert
+import androidx.compose.material.icons.twotone.Refresh
+import androidx.compose.material.icons.twotone.RestoreFromTrash
+import androidx.compose.material.icons.twotone.Save
 import androidx.compose.material.icons.twotone.SearchOff
+import androidx.compose.material.icons.twotone.Visibility
+import androidx.compose.material.icons.twotone.VisibilityOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
@@ -53,6 +53,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -60,7 +61,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -128,7 +129,10 @@ fun SuperUserPage(bottomPadding: Dp) {
     val listState = rememberLazyListState()
     val snackBarHostState = LocalSnackbarHost.current
 
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val bottomSheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+    )
     var showBottomSheet by remember { mutableStateOf(false) }
 
     val backupLauncher = ModuleModify.rememberAllowlistBackupLauncher(context, snackBarHostState)
@@ -158,7 +162,7 @@ fun SuperUserPage(bottomPadding: Dp) {
                 dropdownContent = {
                     IconButton(onClick = { showBottomSheet = true }) {
                         Icon(
-                            imageVector = Icons.Filled.MoreVert,
+                            imageVector = Icons.TwoTone.MoreVert,
                             contentDescription = stringResource(id = R.string.settings),
                         )
                     }
@@ -168,7 +172,7 @@ fun SuperUserPage(bottomPadding: Dp) {
                         navigator.push(Route.Sulog)
                     }) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.Article,
+                            imageVector = Icons.AutoMirrored.TwoTone.Article,
                             contentDescription = stringResource(R.string.sulog)
                         )
                     }
@@ -288,14 +292,6 @@ private fun SuperUserContent(
             modifier = Modifier
                 .fillMaxSize()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentPadding = remember {
-                PaddingValues(
-                    start = 0.dp,
-                    top = 0.dp,
-                    end = 0.dp,
-                    bottom = 72.dp + 5.dp + 5.dp // FAB + bottom padding of FAB x2
-                )
-            },
         ) {
             item {
                 Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
@@ -313,7 +309,7 @@ private fun SuperUserContent(
             }
 
             item {
-                Spacer(modifier = Modifier.height(bottomPadding + innerPadding.calculateBottomPadding()))
+                Spacer(modifier = Modifier.height(bottomPadding + innerPadding.calculateBottomPadding() + 15.dp))
             }
         }
     }
@@ -333,28 +329,28 @@ private fun SuperUserBottomSheet(
     val bottomSheetMenuItems = remember(uiState.showSystemApps) {
         listOf(
             BottomSheetMenuItem(
-                icon = Icons.Filled.Refresh,
+                icon = Icons.TwoTone.Refresh,
                 titleRes = R.string.refresh,
                 onClick = {
                     viewModel.viewModelScope.launch { viewModel.fetchAppList() }
                 }
             ),
             BottomSheetMenuItem(
-                icon = if (uiState.showSystemApps) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                icon = if (uiState.showSystemApps) Icons.TwoTone.VisibilityOff else Icons.TwoTone.Visibility,
                 titleRes = if (uiState.showSystemApps) R.string.hide_system_apps else R.string.show_system_apps,
                 onClick = {
                     viewModel.updateShowSystemApps(!uiState.showSystemApps)
                 }
             ),
             BottomSheetMenuItem(
-                icon = Icons.Filled.Save,
+                icon = Icons.TwoTone.Save,
                 titleRes = R.string.backup_allowlist,
                 onClick = {
                     backupLauncher.launch(ModuleModify.createAllowlistBackupIntent())
                 }
             ),
             BottomSheetMenuItem(
-                icon = Icons.Filled.RestoreFromTrash,
+                icon = Icons.TwoTone.RestoreFromTrash,
                 titleRes = R.string.restore_allowlist,
                 onClick = {
                     restoreLauncher.launch(ModuleModify.createAllowlistRestoreIntent())
@@ -506,7 +502,7 @@ private fun CategoryChip(
         color = if (isSelected) {
             MaterialTheme.colorScheme.primaryContainer
         } else {
-            MaterialTheme.colorScheme.surfaceVariant
+            MaterialTheme.colorScheme.surfaceBright
         },
         tonalElevation = if (isSelected) 4.dp else 0.dp
     ) {
@@ -658,7 +654,7 @@ private fun AppGroupItem(
                 if (appGroup.isRecentlyInstalled) {
                     LabelText(
                         label = stringResource(R.string.recently_installed),
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        containerColor = MaterialTheme.colorScheme.surfaceBright
                     )
                 }
             }
@@ -679,7 +675,7 @@ private fun AppGroupItem(
         iconPlaceholder = false,
     ) {
         Icon(
-            imageVector = Icons.Filled.ChevronRight,
+            imageVector = Icons.TwoTone.ChevronRight,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(24.dp)

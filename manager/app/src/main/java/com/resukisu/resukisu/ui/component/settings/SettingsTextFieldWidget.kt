@@ -70,6 +70,7 @@ fun SettingsTextFieldWidget(
     useLabelAsPlaceholder: Boolean = false,
     enabled: Boolean = true,
     readOnly: Boolean = false,
+    renderBackgroundBlur: Boolean = true,
     inputTransformation: InputTransformation? = null,
     textStyle: TextStyle = MaterialTheme.typography.bodyMediumEmphasized.copy(
         color = MaterialTheme.colorScheme.onSurface,
@@ -151,6 +152,7 @@ fun SettingsTextFieldWidget(
         title = if (showTitle) title else null,
         icon = null,
         iconPlaceholder = false,
+        renderBackgroundBlur = renderBackgroundBlur,
         leadingContent = leadingContent,
         onClick = {
             onClickInternal()

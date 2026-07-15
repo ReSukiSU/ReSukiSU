@@ -209,6 +209,7 @@ class ModuleRepoViewModel : ViewModel() {
             )
             latestReleaseTime = latestReleaseObject.optString("time", "")
             latestVersionCode = when (val value = latestReleaseObject.opt("versionCode")) {
+                null -> 0
                 is Number -> value.toInt()
                 is String -> value.toIntOrNull() ?: 0
                 else -> 0
