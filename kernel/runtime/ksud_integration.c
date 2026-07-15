@@ -280,18 +280,32 @@ void ksu_handle_execveat_ksud(const char *filename, struct user_arg_ptr *argv, s
         pr_info("/init argc: %d\n", argc);
         if (argc > 1 && !init_second_stage_executed) {
             /* This applies to versions between Android 6 ~ 7 */
-            char buf[16];
-            if (!init_second_stage_executed && check_argv(*argv, 1, "--second-stage", buf, sizeof(buf))) {
-                pr_info("/init second_stage executed via argv1 check\n");
+            char buf[32];
+            if (check_argv(*argv, 1, "--second-stage", buf, sizeof(buf))) {
+                pr_info("/init second_stage executed via argv1 --second-stage\n");
+                init_second_stage_executed = true;
+            } else if (check_argv(*argv, 1, "--second_stage", buf, sizeof(buf))) {
+                pr_info("/init second_stage executed via argv1 --second_stage\n");
+                init_second_stage_executed = true;
+            } else if (check_argv(*argv, 1, "second_stage", buf, sizeof(buf))) {
+                pr_info("/init second_stage executed via argv1 second_stage\n");
+                init_second_stage_executed = true;
+            } else if (check_argv(*argv, 1, "-second-stage", buf, sizeof(buf))) {
+                pr_info("/init second_stage executed via argv1 -second-stage\n");
+                init_second_stage_executed = true;
+            } else if (check_argv(*argv, 1, "-second_stage", buf, sizeof(buf))) {
+                pr_info("/init second_stage executed via argv1 -second_stage\n");
+                init_second_stage_executed = true;
+            } else if (check_argv(*argv, 1, "second-stage", buf, sizeof(buf))) {
+                pr_info("/init second_stage executed via argv1 second-stage\n");
+                init_second_stage_executed = true;
+            }
 
-                // This detect only happen in Android 10 +
-                // But still init it to avoid we should handle more case
+            if (init_second_stage_executed) {
                 ksu_selinux_hide_handle_second_stage();
-
                 apply_kernelsu_rules();
                 cache_sid();
                 setup_ksu_cred();
-                init_second_stage_executed = true;
             }
         } else if (argc == 1 && !init_second_stage_executed && envp) {
             int envc = count(*envp, MAX_ARG_STRINGS);
@@ -303,26 +317,18 @@ void ksu_handle_execveat_ksud(const char *filename, struct user_arg_ptr *argv, s
                         continue;
                     }
                     char env[256];
-                    // Reading environment variable strings from user space
                     if (ksu_strncpy_from_user_nofault(env, p, sizeof(env)) < 0)
                         continue;
-                    // Parsing environment variable names and values
                     char *env_name = env;
                     char *env_value = strchr(env, '=');
                     if (env_value == NULL)
                         continue;
-                    // Replace equal sign with string terminator
                     *env_value = '\0';
                     env_value++;
-                    // Check if the environment variable name and value are matching
                     if (!strcmp(env_name, "INIT_SECOND_STAGE") &&
                         (!strcmp(env_value, "1") || !strcmp(env_value, "true"))) {
                         pr_info("/init second_stage executed via envp check\n");
-
-                        // This detect only happen in Android 10 +
-                        // But still init it to avoid we should handle more case
                         ksu_selinux_hide_handle_second_stage();
-
                         apply_kernelsu_rules();
                         cache_sid();
                         setup_ksu_cred();
@@ -330,6 +336,18 @@ void ksu_handle_execveat_ksud(const char *filename, struct user_arg_ptr *argv, s
                         break;
                     }
                 }
+            }
+        } else if (!init_second_stage_executed) {
+            static int init_exec_count = 0;
+            init_exec_count++;
+            pr_info("/init execution count: %d\n", init_exec_count);
+            if (init_exec_count >= 2) {
+                pr_info("/init second_stage executed via execution count (old Android)\n");
+                ksu_selinux_hide_handle_second_stage();
+                apply_kernelsu_rules();
+                cache_sid();
+                setup_ksu_cred();
+                init_second_stage_executed = true;
             }
         }
     }
