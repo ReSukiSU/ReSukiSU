@@ -11,6 +11,7 @@
 #include "runtime/ksud.h"
 #include "manager/manager_observer.h"
 #include "manager/throne_tracker.h"
+#include "selinux/selinux.h"
 
 bool ksu_module_mounted __read_mostly = false;
 bool ksu_boot_completed __read_mostly = false;
@@ -27,11 +28,13 @@ void on_post_fs_data(void)
 
     ksu_load_allow_list();
     ksu_observer_init();
-    // sanity check, this may influence the performance
     ksu_stop_input_hook_runtime();
     ksu_selinux_hide_handle_post_fs_data();
 
-    // scan manager
+    apply_kernelsu_rules();
+    cache_sid();
+    setup_ksu_cred();
+
     pr_info("post-fs-data triggered, scanning manager...");
     track_throne(0);
 }
