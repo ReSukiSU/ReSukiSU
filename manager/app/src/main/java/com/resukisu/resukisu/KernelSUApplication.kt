@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.os.Build
 import android.system.Os
+import java.io.File
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
@@ -38,12 +39,10 @@ class KernelSUApplication : Application(), ViewModelStoreOwner {
         super.onCreate()
         ksuApp = this
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val processName = getProcessName()
-            if (processName.endsWith("MagicaService")) {
-                // avoid loading unnecessary thing when starting MagicaService
-                return
-            }
+        val processName = getProcessNameCompat()
+        if (processName.endsWith("MagicaService")) {
+            // avoid loading unnecessary thing when starting MagicaService
+            return
         }
 
         MainShell.setBuilder(generateMainShellBuilder())
@@ -96,6 +95,21 @@ class KernelSUApplication : Application(), ViewModelStoreOwner {
                 .writeTimeout(5, TimeUnit.SECONDS)
                 .build()
     }
+
+    private fun getProcessNameCompat(): String {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            return getProcessName()
+        }
+        try {
+            val file = File("/proc/" + android.os.Process.myPid() + "/cmdline")
+            val cmdline = file.readText().trim()
+            val lastSlash = cmdline.lastIndexOf('/')
+            return if (lastSlash >= 0) cmdline.substring(lastSlash + 1) else cmdline
+        } catch (e: Exception) {
+            return packageName
+        }
+    }
+
     override val viewModelStore: ViewModelStore
         get() = appViewModelStore
 }

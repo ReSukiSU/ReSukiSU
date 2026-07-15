@@ -6,7 +6,9 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.IBinder
 import android.os.Parcelable
 import android.util.Log
@@ -316,41 +318,45 @@ class SuperUserViewModel : ViewModel() {
     }
 
     suspend fun fetchAppList() {
-        // prevent multiple concurrent refreshes
         if (isRefreshing) return
 
         isRefreshing = true
         loadingProgress = 0f
 
         try {
-            val binder = connectKsuService() ?: run { isRefreshing = false; return }
+            val binder = connectKsuService()
 
             withContext(Dispatchers.IO) {
                 val pm = ksuApp.packageManager
-                val allPackages = IKsuInterface.Stub.asInterface(binder)
-                val total = allPackages.packageCount
-                val pageSize = 100
                 val result = mutableListOf<AppInfo>()
 
-                var start = 0
-                while (start < total) {
-                    val page = allPackages.getPackages(start, pageSize)
-                    if (page.isEmpty()) break
+                if (binder != null) {
+                    val allPackages = IKsuInterface.Stub.asInterface(binder)
+                    val total = allPackages.packageCount
+                    val pageSize = 100
 
-                    result += page.mapNotNull { packageInfo ->
-                        packageInfo.applicationInfo?.let { appInfo ->
-                            AppInfo(
-                                label = appInfo.loadLabel(pm).toString(),
-                                packageInfo = packageInfo,
-                                profile = Natives.getAppProfile(
-                                    packageInfo.packageName,
-                                    appInfo.uid
+                    var start = 0
+                    while (start < total) {
+                        val page = allPackages.getPackages(start, pageSize)
+                        if (page.isEmpty()) break
+
+                        result += page.mapNotNull { packageInfo ->
+                            packageInfo.applicationInfo?.let { appInfo ->
+                                AppInfo(
+                                    label = appInfo.loadLabel(pm).toString(),
+                                    packageInfo = packageInfo,
+                                    profile = Natives.getAppProfile(
+                                        packageInfo.packageName,
+                                        appInfo.uid
+                                    )
                                 )
-                            )
+                            }
                         }
+                        start += page.size
+                        loadingProgress = start.toFloat() / total
                     }
-                    start += page.size
-                    loadingProgress = start.toFloat() / total
+                } else {
+                    fetchAppListFallback(pm, result)
                 }
 
                 appListMutex.withLock {
@@ -362,9 +368,55 @@ class SuperUserViewModel : ViewModel() {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error refresh app list", e)
+            try {
+                withContext(Dispatchers.IO) {
+                    val pm = ksuApp.packageManager
+                    val result = mutableListOf<AppInfo>()
+                    fetchAppListFallback(pm, result)
+
+                    appListMutex.withLock {
+                        val filteredApps = result.filter { it.packageName != ksuApp.packageName }
+                        apps = filteredApps
+                        appGroups = groupAppsByUid(filteredApps)
+                    }
+                }
+            } catch (fallbackE: Exception) {
+                Log.e(TAG, "Error refresh app list (fallback)", fallbackE)
+            }
         } finally {
             isRefreshing = false
             stopKsuService()
+        }
+    }
+
+    private suspend fun fetchAppListFallback(pm: PackageManager, result: MutableList<AppInfo>) {
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            PackageManager.GET_META_DATA
+        } else {
+            @Suppress("DEPRECATION")
+            PackageManager.GET_META_DATA or PackageManager.GET_UNINSTALLED_PACKAGES
+        }
+
+        val packages = pm.getInstalledPackages(flags)
+        packages.forEachIndexed { index, packageInfo ->
+            packageInfo.applicationInfo?.let { appInfo ->
+                val label = try {
+                    appInfo.loadLabel(pm).toString()
+                } catch (_: Exception) {
+                    packageInfo.packageName
+                }
+                result.add(
+                    AppInfo(
+                        label = label,
+                        packageInfo = packageInfo,
+                        profile = Natives.getAppProfile(
+                            packageInfo.packageName,
+                            appInfo.uid
+                        )
+                    )
+                )
+            }
+            loadingProgress = (index + 1).toFloat() / packages.size
         }
     }
 

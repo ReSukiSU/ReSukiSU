@@ -28,16 +28,30 @@ class KsuService : RootService() {
 
     private fun loadAllPackages(): List<PackageInfo> {
         val tmp = arrayListOf<PackageInfo>()
-        val userManager = getSystemService(USER_SERVICE) as UserManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            for (user in userManager.userProfiles) {
-                val userId = user.getUserIdCompat()
-                tmp += getInstalledPackagesAsUser(userId)
+            try {
+                val userManager = getSystemService(USER_SERVICE) as UserManager
+                for (user in userManager.userProfiles) {
+                    val userId = user.getUserIdCompat()
+                    tmp += getInstalledPackagesAsUser(userId)
+                }
+            } catch (e: Throwable) {
+                Log.e(TAG, "loadAllPackages with UserManager failed", e)
+                tmp += getInstalledPackagesFallback()
             }
         } else {
-            tmp += getInstalledPackagesAsUser(0)
+            tmp += getInstalledPackagesFallback()
         }
         return tmp
+    }
+
+    private fun getInstalledPackagesFallback(): List<PackageInfo> {
+        return try {
+            packageManager.getInstalledPackages(0)
+        } catch (e: Throwable) {
+            Log.e(TAG, "getInstalledPackages fallback failed", e)
+            emptyList()
+        }
     }
 
     internal inner class Stub : IKsuInterface.Stub() {
@@ -55,16 +69,6 @@ class KsuService : RootService() {
 
     @SuppressLint("PrivateApi")
     private fun getInstalledPackagesAsUser(userId: Int): List<PackageInfo> {
-        // Android 6 (API 23) 及以下版本不支持 getInstalledPackagesAsUser
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            return try {
-                packageManager.getInstalledPackages(0)
-            } catch (e: Throwable) {
-                Log.e(TAG, "getInstalledPackages on Android 6", e)
-                emptyList()
-            }
-        }
-
         return try {
             val pm = packageManager
             val m = pm.javaClass.getDeclaredMethod(
@@ -75,8 +79,8 @@ class KsuService : RootService() {
             @Suppress("UNCHECKED_CAST")
             m.invoke(pm, 0, userId) as List<PackageInfo>
         } catch (e: Throwable) {
-            Log.e(TAG, "getInstalledPackagesAsUser", e)
-            emptyList()
+            Log.e(TAG, "getInstalledPackagesAsUser for userId $userId failed", e)
+            getInstalledPackagesFallback()
         }
     }
 

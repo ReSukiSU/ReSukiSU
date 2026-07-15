@@ -659,20 +659,24 @@ private fun SystemBarController(darkMode: Boolean) {
     val activity = context as ComponentActivity
 
     SideEffect {
-        activity.enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.auto(
-                Color.Transparent.toArgb(),
-                Color.Transparent.toArgb(),
-            ) { darkMode },
-            navigationBarStyle = if (darkMode) {
-                SystemBarStyle.dark(Color.Transparent.toArgb())
-            } else {
-                SystemBarStyle.light(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            activity.enableEdgeToEdge(
+                statusBarStyle = SystemBarStyle.auto(
                     Color.Transparent.toArgb(),
-                    Color.Transparent.toArgb()
-                )
-            }
-        )
+                    Color.Transparent.toArgb(),
+                ) { darkMode },
+                navigationBarStyle = if (darkMode) {
+                    SystemBarStyle.dark(Color.Transparent.toArgb())
+                } else {
+                    SystemBarStyle.light(
+                        Color.Transparent.toArgb(),
+                        Color.Transparent.toArgb()
+                    )
+                }
+            )
+        } else {
+            activity.enableEdgeToEdge()
+        }
     }
 }
 
