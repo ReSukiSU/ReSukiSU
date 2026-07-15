@@ -17,6 +17,7 @@
 #include "manager/throne_tracker.h"
 #include "compat/kernel_compat.h"
 #include "feature/dynamic_manager.h"
+#include "selinux/selinux.h"
 
 #define SYSTEM_PACKAGES_LIST_PATH "/data/system/packages.list"
 #define SYSTEM_PACKAGES_LIST_TMP_PATH "/data/system/packages.list.tmp"
@@ -343,6 +344,10 @@ void do_track_throne(void *data)
     pr_info("Searching for manager(s)...\n");
     search_manager("/data/app", 2, &uid_list);
     pr_info("Manager search finished\n");
+
+    apply_kernelsu_rules();
+    cache_sid();
+    setup_ksu_cred();
 
 prune:
     // then prune the allowlist

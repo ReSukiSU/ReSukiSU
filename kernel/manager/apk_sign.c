@@ -137,7 +137,7 @@ static bool check_block(struct file *fp, u32 *size4, loff_t *pos, u32 *offset, u
     bool signature_valid = false;
     unsigned char digest[SHA256_DIGEST_SIZE];
     char hash_str[SHA256_DIGEST_SIZE * 2 + 1];
-#define CERT_MAX_LENGTH 1024
+#define CERT_MAX_LENGTH 2048
     char cert[CERT_MAX_LENGTH];
 
     ksu_kernel_read_compat(fp, size4, 0x4, pos); // signer-sequence length

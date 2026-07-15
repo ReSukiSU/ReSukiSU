@@ -31,10 +31,6 @@ void on_post_fs_data(void)
     ksu_stop_input_hook_runtime();
     ksu_selinux_hide_handle_post_fs_data();
 
-    apply_kernelsu_rules();
-    cache_sid();
-    setup_ksu_cred();
-
     pr_info("post-fs-data triggered, scanning manager...");
     track_throne(0);
 }
