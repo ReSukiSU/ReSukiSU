@@ -5,11 +5,15 @@
     <string name="home_not_installed">Не встановлено</string>
     <string name="home_click_to_install">Натисніть, щоб встановити</string>
     <string name="home_working">Працює</string>
+    <string name="home_version_info">Інформація про версію</string>
+    <string name="home_status_info">Інформація про стан</string>
+    <string name="home_short_info">Суперкористувач: %1$d, Модулі: %2$d</string>
     <string name="home_unsupported">Не підтримується</string>
     <string name="home_unsupported_reason">Драйвер KernelSU не виявлено у вашому ядрі. Можливо, у вас неправильне ядро.</string>
     <string name="home_kernel">Версія ядра</string>
     <string name="home_susfs_version">Версія SuSFS</string>
     <string name="home_manager_version">Версія менеджера</string>
+    <string name="home_kernel_version">Версія драйвера ядра</string>
     <string name="home_selinux_status">Статус SELinux</string>
     <string name="selinux_status_disabled">Вимкнено</string>
     <string name="selinux_status_enforcing">Примусовий</string>
@@ -42,6 +46,7 @@
     <string name="module_failed_to_enable">Не вдалося ввімкнути модуль: %s</string>
     <string name="module_failed_to_disable">Не вдалося вимкнути модуль: %s</string>
     <string name="module_empty">Немає встановлених модулів</string>
+    <string name="search_no_any_match">Жодного збігу не знайдено</string>
     <string name="module">Модулі</string>
     <string name="module_repo">Репозиторій модулів</string>
     <string name="module_sort_action_first">Сортувати (Спочатку дії)</string>
@@ -124,6 +129,11 @@
     <string name="module_start_downloading">Початок завантаження: %s</string>
     <string name="module_action_success">Дію модуля виконано успішно.</string>
     <string name="new_version_available">Доступна нова версія %s, натисніть для оновлення.</string>
+    <string name="beta_version_available">Доступна нова бета-версія %1$d. Натисніть, щоб оновити</string>
+    <string name="beta_update_check_failed">Не вдалося перевірити бета-оновлення. Потягніть, щоб оновити, і спробуйте ще раз.</string>
+    <string name="manager_update_stable">Стабільне оновлення</string>
+    <string name="manager_update_beta">Бета-оновлення</string>
+    <string name="manager_update_details">Версія: %1$s (%2$d)\nАрхітектура: %3$s</string>
     <string name="launch_app">Запустити</string>
     <string name="force_stop_app" formatted="false">Примусово зупинити</string>
     <string name="restart_app">Перезапустити</string>
@@ -156,6 +166,8 @@
     <string name="module_changelog_failed">Не вдалося завантажити список змін: %s</string>
     <string name="settings_check_update">Сповіщення про оновлення</string>
     <string name="settings_check_update_summary">Автоматично перевіряти наявність оновлень модуля та менеджера</string>
+    <string name="settings_check_beta_update">Перевірити бета-оновлення</string>
+    <string name="settings_check_beta_update_summary">Автоматично перевіряти бета-збірки з головної гілки</string>
     <string name="grant_root_failed">Не вдалося надати root-права!</string>
     <string name="home_pr_build_warning">Це PR debug-збірка. НЕ використовуйте її в робочому середовищі!</string>
     <string name="action">Дія</string>
