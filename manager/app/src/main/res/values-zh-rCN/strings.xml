@@ -615,34 +615,34 @@
 
     <!-- SUSFS rewrite: tab titles -->
     <string name="susfs_tab_status">状态</string>
-    <string name="susfs_tab_standard">标准功能</string>
-    <string name="susfs_tab_sus_path">SUS Path</string>
-    <string name="susfs_tab_sus_kstat">SUS Kstat</string>
-    <string name="susfs_tab_open_redirect">Open Redirect</string>
-    <string name="susfs_tab_sus_map">SUS Map</string>
-    <string name="susfs_tab_backup_restore">备份/还原</string>
+    <string name="susfs_tab_standard">一般</string>
+    <string name="susfs_tab_sus_path">隐藏路径</string>
+    <string name="susfs_tab_sus_kstat">欺骗元数据</string>
+    <string name="susfs_tab_open_redirect">文件重定向</string>
+    <string name="susfs_tab_sus_map">隐藏映射</string>
+    <string name="susfs_tab_backup_restore">备份 / 还原</string>
 
     <!-- SUSFS rewrite: status page -->
     <string name="susfs_status_version">SUSFS 版本</string>
-    <string name="susfs_status_variant">变体</string>
-    <string name="susfs_status_enabled_features">启用功能</string>
+    <string name="susfs_status_variant">SUSFS 变体</string>
+    <string name="susfs_status_enabled_features">支持功能</string>
     <string name="susfs_status_no_data">无数据</string>
     <string name="susfs_status_loading">加载中...</string>
 
     <!-- SUSFS rewrite: standard features page -->
     <string name="susfs_standard_logging">日志</string>
-    <string name="susfs_standard_logging_desc">启用 SUSFS 内核日志</string>
+    <string name="susfs_standard_logging_desc">启用 SUSFS 内核日志。在反馈 SUSFS 问题前请启用该开关并复现问题，然后携带日志提问。</string>
     <string name="susfs_standard_avc_log_spoofing">AVC 日志欺骗</string>
-    <string name="susfs_standard_avc_log_spoofing_desc">欺骗 avc 日志中的 \'su\' tcontext</string>
+    <string name="susfs_standard_avc_log_spoofing_desc">欺骗 avc 日志中的 su tcontext，防止应用利用老版本安卓漏洞检测 Root。</string>
     <string name="susfs_standard_hide_sus_mnts">为非 SU 进程隐藏 SUS 挂载</string>
-    <string name="susfs_standard_hide_sus_mnts_desc">对非 su 进程隐藏 sus 挂载信息</string>
+    <string name="susfs_standard_hide_sus_mnts_desc">对非 su 进程隐藏 sus 挂载信息。启用后将忽视管理器的卸载设置；默认只为管理器中设置了卸载模块的应用隐藏。</string>
     <string name="susfs_standard_uname">Uname</string>
-    <string name="susfs_standard_uname_version">Version</string>
-    <string name="susfs_standard_uname_release">Release</string>
+    <string name="susfs_standard_uname_version">发布日期</string>
+    <string name="susfs_standard_uname_release">版本号</string>
     <string name="susfs_standard_uname_release_placeholder">例如：6.6.66-android15-xxx</string>
     <string name="susfs_standard_uname_version_placeholder">例如：#1 SMP PREEMPT Fri Feb 14 22:29:59 UTC 2025</string>
     <string name="susfs_standard_cmdline_or_bootconfig">Cmdline / Bootconfig</string>
-    <string name="susfs_standard_cmdline_path">伪 cmdline/bootconfig 文件路径</string>
+    <string name="susfs_standard_cmdline_path">要伪装成的 cmdline/bootconfig 文件路径</string>
     <string name="susfs_standard_edit">编辑</string>
     <string name="susfs_standard_current_value">当前值: %1$s</string>
     <string name="susfs_standard_not_set">未设置</string>
@@ -666,16 +666,16 @@
     <string name="susfs_entry_import_file_not_text">只能导入 .txt 文件</string>
 
     <!-- SUSFS rewrite: SUS Path page -->
-    <string name="susfs_path_subtype_path">sus_path</string>
-    <string name="susfs_path_subtype_loop">sus_path_loop</string>
-    <string name="susfs_path_is_loop">Loop</string>
-    <string name="susfs_path_is_not_loop">非 Loop</string>
+    <string name="susfs_path_subtype_path">普通 SUS 路径</string>
+    <string name="susfs_path_subtype_loop">循环 SUS 路径</string>
+    <string name="susfs_path_is_loop">循环</string>
+    <string name="susfs_path_is_not_loop">普通</string>
 
     <!-- SUSFS rewrite: SUS Kstat page -->
-    <string name="susfs_kstat_subtype_normal">Normal</string>
-    <string name="susfs_kstat_subtype_full_clone">FullClone</string>
-    <string name="susfs_kstat_subtype_statically">Statically</string>
-    <string name="susfs_kstat_spoof_type">Spoof Type</string>
+    <string name="susfs_kstat_subtype_normal">普通</string>
+    <string name="susfs_kstat_subtype_full_clone">完整克隆</string>
+    <string name="susfs_kstat_subtype_statically">静态</string>
+    <string name="susfs_kstat_spoof_type">伪装类型</string>
     <string name="susfs_kstat_statically_fields">静态字段（可选，留空使用默认值）</string>
     <string name="susfs_kstat_field_ino">ino</string>
     <string name="susfs_kstat_field_dev">dev</string>
@@ -692,18 +692,18 @@
     <string name="susfs_kstat_import_statically_hint">每行一个路径</string>
 
     <!-- SUSFS rewrite: Open Redirect page -->
-    <string name="susfs_redirect_target_path">目标路径</string>
-    <string name="susfs_redirect_redirected_path">重定向路径</string>
-    <string name="susfs_redirect_uid_scheme">UID Scheme</string>
+    <string name="susfs_redirect_target_path">起点路径</string>
+    <string name="susfs_redirect_redirected_path">终点路径</string>
+    <string name="susfs_redirect_uid_scheme">应用于</string>
     <string name="susfs_redirect_import_hint">每行格式: target_path|redirected_path|uid_scheme_int (0-4)</string>
-    <string name="susfs_uid_scheme_non_app">NonApp</string>
-    <string name="susfs_uid_scheme_root_except_su">RootExceptSu</string>
-    <string name="susfs_uid_scheme_non_su">NonSu</string>
-    <string name="susfs_uid_scheme_unmounted_app">UnmountedApp</string>
-    <string name="susfs_uid_scheme_unmounted">Unmounted</string>
+    <string name="susfs_uid_scheme_non_app">非 Android 应用</string>
+    <string name="susfs_uid_scheme_root_except_su">非 SU 的 Root 进程</string>
+    <string name="susfs_uid_scheme_non_su">非 SU</string>
+    <string name="susfs_uid_scheme_unmounted_app">卸载列表内的 Android 应用</string>
+    <string name="susfs_uid_scheme_unmounted">卸载列表</string>
 
     <!-- SUSFS rewrite: SUS Map page -->
-    <string name="susfs_map_subtype">sus_map</string>
+    <string name="susfs_map_subtype">SUS 映射</string>
 
     <!-- SUSFS rewrite: common -->
     <string name="susfs_refresh">刷新</string>
@@ -715,9 +715,9 @@
 
     <!-- SUSFS rewrite: Backup / Restore page -->
     <string name="susfs_backup_export">导出配置</string>
-    <string name="susfs_backup_export_desc">将当前 SuSFS 配置导出为 .susfs.json 文件</string>
+    <string name="susfs_backup_export_desc">导出当前 SuSFS 配置</string>
     <string name="susfs_backup_import">导入配置</string>
-    <string name="susfs_backup_import_desc">从 .susfs.json 文件恢复 SuSFS 配置</string>
+    <string name="susfs_backup_import_desc">恢复 SuSFS 配置</string>
     <string name="susfs_backup_export_success">配置导出成功</string>
     <string name="susfs_backup_import_success">配置导入成功</string>
     <string name="susfs_backup_export_failed">配置导出失败</string>
@@ -729,6 +729,6 @@
     <string name="susfs_backup_export_label">导出</string>
     <string name="susfs_backup_import_label">导入</string>
     <string name="susfs_backup_restore_default">恢复默认</string>
-    <string name="susfs_backup_restore_default_desc">删除 .susfs.json 并清空缓存</string>
+    <string name="susfs_backup_restore_default_desc">删除当前配置</string>
     <string name="susfs_backup_default_filename">susfs_backup.json</string>
 </resources>

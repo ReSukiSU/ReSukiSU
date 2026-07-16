@@ -242,15 +242,7 @@ fun StandardFeaturesTab(
                                 description = stringResource(R.string.susfs_standard_hide_sus_mnts_desc),
                                 checked = hideSusMntsEnabled,
                                 enabled = !isLoading && !hideSusMntsBusy,
-                                onCheckedChange = handleHideSusMntsChange,
-                                descriptionColumnContent = {
-                                    Text(
-                                        text = stringResource(R.string.susfs_hide_mounts_recommendation),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.padding(top = 4.dp)
-                                    )
-                                }
+                                onCheckedChange = handleHideSusMntsChange
                             )
                         }
 

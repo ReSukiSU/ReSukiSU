@@ -172,10 +172,6 @@ object SuSFSConfigHelper {
         }
     }
 
-    suspend fun refreshStatusInfo(): SuSFSStatusInfo {
-        return loadStatusInfo(forceRefresh = true)
-    }
-
     private suspend fun clearStatusInfoCache() {
         statusInfoMutex.withLock {
             cachedStatusInfo = null
