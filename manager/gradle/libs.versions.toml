@@ -1,6 +1,6 @@
 [versions]
 accompanist-drawablepainter = "0.37.3"
-agp = "9.2.1"
+agp = "9.3.0"
 gson = "2.14.0"
 kotlin = "2.4.0"
 materialKolor = "4.1.1"
