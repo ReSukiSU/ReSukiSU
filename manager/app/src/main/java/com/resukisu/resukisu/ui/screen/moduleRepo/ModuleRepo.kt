@@ -29,13 +29,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.SignalWifiOff
-import androidx.compose.material.icons.outlined.Download
-import androidx.compose.material.icons.outlined.WebAsset
-import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.twotone.Check
+import androidx.compose.material.icons.twotone.Close
+import androidx.compose.material.icons.twotone.Download
+import androidx.compose.material.icons.twotone.Extension
+import androidx.compose.material.icons.twotone.MoreVert
+import androidx.compose.material.icons.twotone.SignalWifiOff
+import androidx.compose.material.icons.twotone.Star
+import androidx.compose.material.icons.twotone.WebAsset
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedCard
@@ -51,6 +52,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -60,7 +62,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -144,8 +146,9 @@ fun ModuleRepoScreen() {
         ChooseDialogContent(currentModuleForChooseDialog, viewModel, dismiss)
     })
     val confirmDialog = rememberConfirmDialog()
-    val bottomSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
+    val bottomSheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
     )
     var showBottomSheet by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -157,7 +160,7 @@ fun ModuleRepoScreen() {
         viewModel.setSortStargazerCountFirst(prefs.getBoolean("module_repo_sort_star_first", false))
     }
 
-    val isLoading = uiState.modules.isEmpty()
+    val isLoading = uiState.modules.isEmpty() && uiState.search.isEmpty()
 
     Scaffold(
         topBar = {
@@ -173,7 +176,7 @@ fun ModuleRepoScreen() {
                         onClick = { showBottomSheet = true },
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.MoreVert,
+                            imageVector = Icons.TwoTone.MoreVert,
                             contentDescription = stringResource(id = R.string.settings),
                         )
                     }
@@ -211,7 +214,7 @@ fun ModuleRepoScreen() {
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Default.SignalWifiOff,
+                                imageVector = Icons.TwoTone.SignalWifiOff,
                                 contentDescription = null,
                                 modifier = Modifier.size(32.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -244,6 +247,31 @@ fun ModuleRepoScreen() {
                     viewModel.refresh(onFailure = {
                         offline = true
                     })
+                }
+            }
+        } else if (uiState.modules.isEmpty() && uiState.search.isNotEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.TwoTone.Extension,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(96.dp)
+                            .padding(bottom = 16.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.search_no_any_match),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
                 }
             }
         } else {
@@ -389,16 +417,16 @@ private fun ModuleRepoBottomSheetContent(
                     thumbContent = {
                         if (uiState.sortStargazerCountFirst) {
                             Icon(
-                                imageVector = Icons.Filled.Check,
+                                imageVector = Icons.TwoTone.Check,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(SwitchDefaults.IconSize),
                             )
                         } else {
                             Icon(
-                                imageVector = Icons.Filled.Close,
+                                imageVector = Icons.TwoTone.Close,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                tint = MaterialTheme.colorScheme.surfaceBright,
                                 modifier = Modifier.size(SwitchDefaults.IconSize),
                             )
                         }
@@ -426,7 +454,7 @@ fun OnlineModuleItem(
             if (ThemeConfig.isEnableBlurExp)
                 Color.Transparent
             else
-                MaterialTheme.colorScheme.surfaceContainerHighest.copy(CardConfig.cardAlpha),
+                MaterialTheme.colorScheme.surfaceBright.copy(CardConfig.cardAlpha),
         modifier = Modifier
             .clip(RoundedCornerShape(16.dp))
             .clickable {
@@ -471,7 +499,7 @@ fun OnlineModuleItem(
                                 horizontalArrangement = Arrangement.End
                             ) {
                                 Icon(
-                                    imageVector = Icons.Rounded.Star,
+                                    imageVector = Icons.TwoTone.Star,
                                     contentDescription = "stars",
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(16.dp)
@@ -554,7 +582,7 @@ fun OnlineModuleItem(
                     ) {
                         Icon(
                             modifier = Modifier.size(20.dp),
-                            imageVector = Icons.Outlined.WebAsset,
+                            imageVector = Icons.TwoTone.WebAsset,
                             contentDescription = null
                         )
                     }
@@ -597,7 +625,7 @@ fun OnlineModuleItem(
                         ) {
                             Icon(
                                 modifier = Modifier.size(20.dp),
-                                imageVector = Icons.Outlined.Download,
+                                imageVector = Icons.TwoTone.Download,
                                 contentDescription = null
                             )
                         }

@@ -28,10 +28,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Input
-import androidx.compose.material.icons.filled.AutoFixHigh
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.automirrored.twotone.Input
+import androidx.compose.material.icons.twotone.AutoFixHigh
+import androidx.compose.material.icons.twotone.Edit
+import androidx.compose.material.icons.twotone.FileUpload
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -313,12 +313,12 @@ fun InstallScreen(
                         .padding(16.dp)
                 ) {
                     ElevatedCard(
-                        colors = getCardColors(MaterialTheme.colorScheme.surfaceVariant),
+                        colors = getCardColors(MaterialTheme.colorScheme.surfaceBright),
                         elevation = getCardElevation(),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 12.dp)
-                            .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceVariant),
+                            .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright),
                     ) {
                         val isOta = installMethod is InstallMethod.DirectInstallToInactiveSlot
                         val suffix = produceState(initialValue = "", isOta) {
@@ -343,7 +343,7 @@ fun InstallScreen(
 
                         if (displayPartitions.isNotEmpty()) {
                             SettingsChooseWidget(
-                                icon = Icons.Default.Edit,
+                                icon = Icons.TwoTone.Edit,
                                 items = displayPartitions,
                                 selectedIndex = partitionSelectionIndex,
                                 title = "${stringResource(R.string.install_select_partition)} (${suffix})",
@@ -365,12 +365,12 @@ fun InstallScreen(
                 if (isGKI) {
                     // 使用本地的LKM文件
                     ElevatedCard(
-                        colors = getCardColors(MaterialTheme.colorScheme.surfaceVariant),
+                        colors = getCardColors(MaterialTheme.colorScheme.surfaceBright),
                         elevation = getCardElevation(),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 12.dp)
-                            .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceVariant),
+                            .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright),
                     ) {
                         SettingsBaseWidget(
                             title = stringResource(id = R.string.install_upload_lkm_file),
@@ -383,7 +383,7 @@ fun InstallScreen(
                                     it.uri.lastPathSegment ?: "(file)"
                                 )
                             },
-                            icon = Icons.AutoMirrored.Filled.Input,
+                            icon = Icons.AutoMirrored.TwoTone.Input,
                         ) { }
                     }
                 }
@@ -391,12 +391,12 @@ fun InstallScreen(
                 (installMethod as? InstallMethod.HorizonKernel)?.let { method ->
                     if (method.slot != null) {
                         ElevatedCard(
-                            colors = getCardColors(MaterialTheme.colorScheme.surfaceVariant),
+                            colors = getCardColors(MaterialTheme.colorScheme.surfaceBright),
                             elevation = getCardElevation(),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 12.dp)
-                                .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceVariant)
+                                .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright)
                         ) {
                             Text(
                                 text = stringResource(
@@ -420,7 +420,7 @@ fun InstallScreen(
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary,
-                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceBright.copy(alpha = 0.6f),
                         disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                     )
                 ) {
@@ -594,22 +594,22 @@ private fun SelectInstallMethod(
         // LKM 安装/修补
         if (isGKI) {
             ElevatedCard(
-                colors = getCardColors(MaterialTheme.colorScheme.surfaceVariant),
+                colors = getCardColors(MaterialTheme.colorScheme.surfaceBright),
                 elevation = getCardElevation(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
-                    .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceVariant)
+                    .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright)
             ) {
                 MaterialTheme(
                     colorScheme = MaterialTheme.colorScheme.copy(
-                        surface = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant
+                        surface = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceBright
                     )
                 ) {
                     ListItem(
                         leadingContent = {
                             Icon(
-                                Icons.Filled.AutoFixHigh,
+                                Icons.TwoTone.AutoFixHigh,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary
                             )
@@ -644,7 +644,7 @@ private fun SelectInstallMethod(
                                 color = if (option.javaClass == selectedOption?.javaClass)
                                     MaterialTheme.colorScheme.secondaryContainer.copy(alpha = cardAlpha)
                                 else
-                                    MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = cardAlpha),
+                                    MaterialTheme.colorScheme.surfaceBright.copy(alpha = cardAlpha),
                                 shape = MaterialTheme.shapes.medium,
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -701,22 +701,22 @@ private fun SelectInstallMethod(
         // anykernel3 刷写
         if (rootAvailable) {
             ElevatedCard(
-                colors = getCardColors(MaterialTheme.colorScheme.surfaceVariant),
+                colors = getCardColors(MaterialTheme.colorScheme.surfaceBright),
                 elevation = getCardElevation(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 12.dp)
-                    .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceVariant)
+                    .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright)
             ) {
                 MaterialTheme(
                     colorScheme = MaterialTheme.colorScheme.copy(
-                        surface = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant
+                        surface = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceBright
                     )
                 ) {
                     ListItem(
                         leadingContent = {
                             Icon(
-                                Icons.Filled.FileUpload,
+                                Icons.TwoTone.FileUpload,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary
                             )
@@ -751,7 +751,7 @@ private fun SelectInstallMethod(
                                 color = if (option.javaClass == selectedOption?.javaClass)
                                     MaterialTheme.colorScheme.secondaryContainer.copy(alpha = cardAlpha)
                                 else
-                                    MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = cardAlpha),
+                                    MaterialTheme.colorScheme.surfaceBright.copy(alpha = cardAlpha),
                                 shape = MaterialTheme.shapes.medium,
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -818,7 +818,7 @@ fun rememberSelectKmiDialog(onSelected: (String?) -> Unit): DialogHandle {
 
         MaterialTheme(
             colorScheme = MaterialTheme.colorScheme.copy(
-                surface = MaterialTheme.colorScheme.surfaceContainerHigh
+                surface = MaterialTheme.colorScheme.surfaceBright
             )
         ) {
             SettingsChooseDialog(

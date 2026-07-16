@@ -6,6 +6,8 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import androidx.core.content.ContextCompat
+import com.resukisu.resukisu.data.update.ManagerApkSource
+import com.resukisu.resukisu.data.update.ManagerUpdateInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -58,6 +60,51 @@ object DownloadManager {
             putExtra(DownloadService.EXTRA_DOWNLOAD_ID, id)
             putExtra(DownloadService.EXTRA_URL, url)
             putExtra(DownloadService.EXTRA_FILE_NAME, fileName)
+        }
+        ContextCompat.startForegroundService(context, intent)
+
+        return id
+    }
+
+    fun enqueueManagerUpdate(
+        context: Context,
+        update: ManagerUpdateInfo,
+    ): Int {
+        val url = update.source.url
+        val existing = _downloads.value.values.find {
+            it.url == url && (it.status == Status.PENDING || it.status == Status.DOWNLOADING)
+        }
+        if (existing != null) return existing.id
+
+        val id = idCounter.incrementAndGet()
+        val state = DownloadState(id = id, fileName = update.fileName, url = url)
+        _downloads.update { it + (id to state) }
+
+        val intent = Intent(context, DownloadService::class.java).apply {
+            action = DownloadService.ACTION_DOWNLOAD_MANAGER_APK
+            putExtra(DownloadService.EXTRA_DOWNLOAD_ID, id)
+            putExtra(DownloadService.EXTRA_URL, url)
+            putExtra(DownloadService.EXTRA_FILE_NAME, update.fileName)
+            when (val source = update.source) {
+                is ManagerApkSource.DirectApk -> {
+                    putExtra(
+                        DownloadService.EXTRA_MANAGER_SOURCE,
+                        DownloadService.SOURCE_DIRECT_APK
+                    )
+                }
+
+                is ManagerApkSource.NightlyArtifact -> {
+                    putExtra(
+                        DownloadService.EXTRA_MANAGER_SOURCE,
+                        DownloadService.SOURCE_NIGHTLY_ARTIFACT
+                    )
+                    putExtra(DownloadService.EXTRA_MANAGER_ABI, source.preferredAbi)
+                    putExtra(
+                        DownloadService.EXTRA_MANAGER_EXPECTED_VERSION_CODE,
+                        source.expectedVersionCode,
+                    )
+                }
+            }
         }
         ContextCompat.startForegroundService(context, intent)
 

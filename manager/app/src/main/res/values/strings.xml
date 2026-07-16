@@ -877,4 +877,16 @@ Important Note:\n
     <string name="susfs_sus_map_added_success">SUS map added successfully: %1$s</string>
     <string name="susfs_sus_map_removed">SUS map removed: %1$s</string>
     <string name="susfs_sus_map_updated">SUS map updated: %1$s -> %2$s</string>
+    <string name="home_version_info">Version Info</string>
+    <string name="home_status_info">Status Info</string>
+    <string name="home_short_info">SuperUser: %1$d, Modules: %2$d</string>
+    <string name="home_kernel_version">Kernel driver version</string>
+    <string name="search_no_any_match">No content was matched</string>
+    <string name="beta_version_available">New beta version %1$d is available, click to upgrade</string>
+    <string name="beta_update_check_failed">Couldn\'t check beta updates. Pull to refresh and try again.</string>
+    <string name="manager_update_stable">Stable update</string>
+    <string name="manager_update_beta">Beta update</string>
+    <string name="manager_update_details">Version: %1$s (%2$d)\nArchitecture: %3$s</string>
+    <string name="settings_check_beta_update">Check beta updates</string>
+    <string name="settings_check_beta_update_summary">Auto-check beta builds from the main branch</string>
 </resources>

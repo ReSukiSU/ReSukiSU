@@ -15,10 +15,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Help
-import androidx.compose.material.icons.filled.Extension
-import androidx.compose.material.icons.filled.GetApp
-import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.automirrored.twotone.Help
+import androidx.compose.material.icons.twotone.Extension
+import androidx.compose.material.icons.twotone.GetApp
+import androidx.compose.material.icons.twotone.Memory
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -325,7 +325,7 @@ fun InstallConfirmationDialog(
                 ) {
                     Icon(
                         imageVector = if (zipFiles.any { it.type == ZipType.KERNEL })
-                            Icons.Default.Memory else Icons.Default.Extension,
+                            Icons.TwoTone.Memory else Icons.TwoTone.Extension,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(24.dp)
@@ -362,7 +362,7 @@ fun InstallConfirmationDialog(
                     )
                 ) {
                     Icon(
-                        imageVector = Icons.Default.GetApp,
+                        imageVector = Icons.TwoTone.GetApp,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp)
                     )
@@ -393,7 +393,7 @@ fun InstallItemCard(zipFile: ZipFileInfo) {
             containerColor = when (zipFile.type) {
                 ZipType.MODULE -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
                 ZipType.KERNEL -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f)
-                else -> MaterialTheme.colorScheme.surfaceVariant
+                else -> MaterialTheme.colorScheme.surfaceBright
             }
         ),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
@@ -409,9 +409,9 @@ fun InstallItemCard(zipFile: ZipFileInfo) {
             ) {
                 Icon(
                     imageVector = when (zipFile.type) {
-                        ZipType.MODULE -> Icons.Default.Extension
-                        ZipType.KERNEL -> Icons.Default.Memory
-                        else -> Icons.AutoMirrored.Filled.Help
+                        ZipType.MODULE -> Icons.TwoTone.Extension
+                        ZipType.KERNEL -> Icons.TwoTone.Memory
+                        else -> Icons.AutoMirrored.TwoTone.Help
                     },
                     contentDescription = null,
                     tint = when (zipFile.type) {

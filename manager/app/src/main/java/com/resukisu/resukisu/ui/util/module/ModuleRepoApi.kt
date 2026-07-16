@@ -93,6 +93,7 @@ fun fetchModuleDetail(moduleId: String): ModuleDetail? {
                         adl = stripTicks(adl)
                         val asz = a.optLong("size", 0L)
                         val dcnt = when (val dcAny = a.opt("downloadCount")) {
+                            null -> 0
                             is Number -> dcAny.toInt()
                             is String -> dcAny.toIntOrNull() ?: 0
                             else -> 0

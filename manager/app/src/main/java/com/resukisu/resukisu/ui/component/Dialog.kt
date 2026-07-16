@@ -448,7 +448,7 @@ private fun ConfirmDialog(visuals: ConfirmDialogVisuals, confirm: () -> Unit, di
                     } else if (visuals.isHtml) {
                         GithubMarkdown(
                             content = visuals.content,
-                            backgroundColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                            backgroundColor = MaterialTheme.colorScheme.surfaceBright
                         )
                     } else {
                         Text(text = visuals.content)

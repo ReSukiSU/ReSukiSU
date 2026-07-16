@@ -4,16 +4,18 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.system.Os
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.resukisu.resukisu.BuildConfig
 import com.resukisu.resukisu.KernelVersion
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.data.appPreferences
+import com.resukisu.resukisu.data.update.ManagerUpdateInfo
+import com.resukisu.resukisu.data.update.ManagerUpdateRepository
 import com.resukisu.resukisu.getKernelVersion
 import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
-import com.resukisu.resukisu.ui.util.downloader.checkNewVersion
 import com.resukisu.resukisu.ui.util.getMetaModuleImplement
 import com.resukisu.resukisu.ui.util.getModuleCount
 import com.resukisu.resukisu.ui.util.getSELinuxStatus
@@ -21,8 +23,8 @@ import com.resukisu.resukisu.ui.util.getSuperuserCount
 import com.resukisu.resukisu.ui.util.getZygiskImplement
 import com.resukisu.resukisu.ui.util.isOfficialSignature
 import com.resukisu.resukisu.ui.util.isSELinuxPermissive
-import com.resukisu.resukisu.ui.util.module.LatestVersionInfo
 import com.resukisu.resukisu.ui.util.rootAvailable
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -36,9 +38,10 @@ import kotlinx.coroutines.withContext
 data class HomeUiState(
     val systemStatus: HomeViewModel.SystemStatus = HomeViewModel.SystemStatus(),
     val systemInfo: HomeViewModel.SystemInfo = HomeViewModel.SystemInfo(),
-    val latestVersionInfo: LatestVersionInfo = LatestVersionInfo(),
+    val stableManagerUpdate: ManagerUpdateInfo? = null,
+    val betaManagerUpdate: ManagerUpdateInfo? = null,
+    val isBetaManagerUpdateCheckFailed: Boolean = false,
     val isSimpleMode: Boolean = false,
-    val isHideVersion: Boolean = false,
     val isHideOtherInfo: Boolean = false,
     val isHideSusfsStatus: Boolean = false,
     val isHideZygiskImplement: Boolean = false,
@@ -51,6 +54,15 @@ data class HomeUiState(
 )
 
 class HomeViewModel : ViewModel() {
+
+    private companion object {
+        const val TAG = "HomeViewModel"
+    }
+
+    private data class BetaUpdateCheckResult(
+        val update: ManagerUpdateInfo?,
+        val failed: Boolean,
+    )
 
     data class SystemStatus(
         val isManager: Boolean = false,
@@ -92,8 +104,71 @@ class HomeViewModel : ViewModel() {
 
     private val loadingJobs = mutableListOf<Job>()
     private var dataLoadJob: Job? = null
+    private var managerUpdateCheckJob: Job? = null
 
     private fun completedJob(): Job = Job().apply { complete() }
+
+    private fun refreshManagerUpdates(context: Context, force: Boolean) {
+        val checkStableUpdate = context.appPreferences.getBoolean("check_update", true)
+        val checkBetaUpdate = context.appPreferences.getBoolean("check_beta_update", true)
+
+        if (!checkStableUpdate && !checkBetaUpdate) {
+            _uiState.update {
+                it.copy(
+                    stableManagerUpdate = null,
+                    betaManagerUpdate = null,
+                    isBetaManagerUpdateCheckFailed = false,
+                )
+            }
+            return
+        }
+        if (!force && managerUpdateCheckJob?.isActive == true) return
+
+        managerUpdateCheckJob?.cancel()
+        _uiState.update {
+            it.copy(
+                stableManagerUpdate = if (checkStableUpdate) it.stableManagerUpdate else null,
+                betaManagerUpdate = if (checkBetaUpdate) it.betaManagerUpdate else null,
+                isBetaManagerUpdateCheckFailed = false,
+            )
+        }
+        managerUpdateCheckJob = viewModelScope.launch(Dispatchers.IO) {
+            if (checkStableUpdate) {
+                launch {
+                    val update = try {
+                        ManagerUpdateRepository.checkStableUpdate()
+                    } catch (error: CancellationException) {
+                        throw error
+                    } catch (error: Exception) {
+                        Log.w(TAG, "Stable manager update check failed", error)
+                        null
+                    }
+                    _uiState.update { it.copy(stableManagerUpdate = update) }
+                }
+            }
+            if (checkBetaUpdate) {
+                launch {
+                    val result = try {
+                        BetaUpdateCheckResult(
+                            update = ManagerUpdateRepository.checkBetaUpdate(),
+                            failed = false,
+                        )
+                    } catch (error: CancellationException) {
+                        throw error
+                    } catch (error: Exception) {
+                        Log.w(TAG, "Beta manager update check failed", error)
+                        BetaUpdateCheckResult(update = null, failed = true)
+                    }
+                    _uiState.update {
+                        it.copy(
+                            betaManagerUpdate = result.update,
+                            isBetaManagerUpdateCheckFailed = result.failed,
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     suspend fun awaitInitialData(context: Context) {
         refreshData(context, refreshUI = false).join()
@@ -150,7 +225,7 @@ class HomeViewModel : ViewModel() {
         val job = viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 val (kernelRelease, androidVersion, deviceModel, managerVersion, selinuxStatus, seccompStatus) =
-                    loadBasicSystemInfo(context)
+                    loadBasicSystemInfo()
                 _uiState.update {
                     it.copy(
                         systemInfo = it.systemInfo.copy(
@@ -164,18 +239,16 @@ class HomeViewModel : ViewModel() {
                     )
                 }
 
-                if (!_uiState.value.isSimpleMode) {
-                    val moduleInfo = loadModuleInfo()
-                    _uiState.update {
-                        it.copy(
-                            systemInfo = it.systemInfo.copy(
-                                superuserCount = moduleInfo.first,
-                                moduleCount = moduleInfo.second,
-                                zygiskImplement = moduleInfo.third,
-                                metaModuleImplement = moduleInfo.fourth,
-                            )
+                val moduleInfo = loadModuleInfo()
+                _uiState.update {
+                    it.copy(
+                        systemInfo = it.systemInfo.copy(
+                            superuserCount = moduleInfo.first,
+                            moduleCount = moduleInfo.second,
+                            zygiskImplement = moduleInfo.third,
+                            metaModuleImplement = moduleInfo.fourth,
                         )
-                    }
+                    )
                 }
 
                 if (!_uiState.value.isHideSusfsStatus) {
@@ -267,18 +340,6 @@ class HomeViewModel : ViewModel() {
         updateBooleanPref(context, "is_simple_mode", newValue) { it.copy(isSimpleMode = newValue) }
     }
 
-    fun handleHideVersionChange(newValue: Boolean) {
-        handleHideVersionChange(ksuApp, newValue)
-    }
-
-    fun handleHideVersionChange(context: Context, newValue: Boolean) {
-        updateBooleanPref(
-            context,
-            "is_hide_version",
-            newValue
-        ) { it.copy(isHideVersion = newValue) }
-    }
-
     fun handleHideOtherInfoChange(newValue: Boolean) {
         handleHideOtherInfoChange(ksuApp, newValue)
     }
@@ -292,22 +353,11 @@ class HomeViewModel : ViewModel() {
         context: Context,
         refreshUI: Boolean = false
     ): Job {
+        refreshManagerUpdates(context, force = refreshUI)
+
         if (!refreshUI) {
             dataLoadJob?.takeIf { it.isActive }?.let { return it }
             if (_uiState.value.isInitialDataLoaded) return completedJob()
-        }
-
-        if (context.appPreferences.getBoolean("check_update", true)) {
-            viewModelScope.launch(Dispatchers.IO) {
-                try {
-                    val versionInfo = checkNewVersion()
-                    _uiState.update {
-                        it.copy(latestVersionInfo = versionInfo)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
         }
 
         val job = viewModelScope.launch(Dispatchers.IO) {
@@ -349,7 +399,6 @@ class HomeViewModel : ViewModel() {
         _uiState.update {
             it.copy(
                 isSimpleMode = settingsPrefs.getBoolean("is_simple_mode", false),
-                isHideVersion = settingsPrefs.getBoolean("is_hide_version", false),
                 isHideOtherInfo = settingsPrefs.getBoolean("is_hide_other_info", false),
                 isHideSusfsStatus = settingsPrefs.getBoolean("is_hide_susfs_status", false),
                 isHideLinkCard = settingsPrefs.getBoolean("is_hide_link_card", false),
@@ -362,7 +411,7 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    private suspend fun loadBasicSystemInfo(context: Context): Tuple6<String, String, String, Triple<String, Int, Int>, String, Int> {
+    private suspend fun loadBasicSystemInfo(): Tuple6<String, String, String, Triple<String, Int, Int>, String, Int> {
         return withContext(Dispatchers.IO) {
             val uname = runCatching { Os.uname() }.getOrNull()
             Tuple6(

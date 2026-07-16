@@ -78,6 +78,20 @@ class KernelSUApplication : Application(), ViewModelStoreOwner {
 
         ensurePreferencesRepository()
 
+        okhttpClient =
+            OkHttpClient.Builder().cache(Cache(File(cacheDir, "okhttp"), 10 * 1024 * 1024))
+                .addInterceptor { block ->
+                    block.proceed(
+                        block.request().newBuilder()
+                            .header("User-Agent", UserAgent)
+                            .header("Accept-Language", Locale.getDefault().toLanguageTag()).build()
+                    )
+                }
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS)
+                .build()
+
         // For faster response when first entering superuser or webui activity
         val superUserViewModel = ViewModelProvider(this)[SuperUserViewModel::class.java]
         val homeViewModel = ViewModelProvider(this)[HomeViewModel::class.java]
@@ -109,19 +123,6 @@ class KernelSUApplication : Application(), ViewModelStoreOwner {
         // Provide working env for rust's temp_dir()
         Os.setenv("TMPDIR", cacheDir.absolutePath, true)
 
-        okhttpClient =
-            OkHttpClient.Builder().cache(Cache(File(cacheDir, "okhttp"), 10 * 1024 * 1024))
-                .addInterceptor { block ->
-                    block.proceed(
-                        block.request().newBuilder()
-                            .header("User-Agent", UserAgent)
-                            .header("Accept-Language", Locale.getDefault().toLanguageTag()).build()
-                    )
-                }
-                .connectTimeout(5, TimeUnit.SECONDS)
-                .readTimeout(5, TimeUnit.SECONDS)
-                .writeTimeout(5, TimeUnit.SECONDS)
-                .build()
     }
     override val viewModelStore: ViewModelStore
         get() = appViewModelStore

@@ -179,6 +179,8 @@ aboutLibraries {
 }
 
 dependencies {
+    lintChecks(project(":lint-rules"))
+
     implementation(libs.gson)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.splashscreen)

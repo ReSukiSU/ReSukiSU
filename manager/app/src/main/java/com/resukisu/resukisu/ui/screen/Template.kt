@@ -20,9 +20,9 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ImportExport
-import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.twotone.Add
+import androidx.compose.material.icons.twotone.ImportExport
+import androidx.compose.material.icons.twotone.Sync
 import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
@@ -174,7 +174,7 @@ fun AppProfileTemplateScreen() {
                         "template_edit"
                     )
                 },
-                icon = { Icon(Icons.Filled.Add, null) },
+                icon = { Icon(Icons.TwoTone.Add, null) },
                 text = { Text(stringResource(id = R.string.app_profile_template_create)) },
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer
             )
@@ -326,7 +326,7 @@ private fun TopBar(
         actions = {
             IconButton(onClick = onSync) {
                 Icon(
-                    Icons.Filled.Sync,
+                    Icons.TwoTone.Sync,
                     contentDescription = stringResource(id = R.string.app_profile_template_sync)
                 )
             }
@@ -336,7 +336,7 @@ private fun TopBar(
                 showDropdown = true
             }) {
                 Icon(
-                    imageVector = Icons.Filled.ImportExport,
+                    imageVector = Icons.TwoTone.ImportExport,
                     contentDescription = stringResource(id = R.string.app_profile_import_export)
                 )
 

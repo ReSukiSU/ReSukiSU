@@ -24,10 +24,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Android
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.twotone.AccountCircle
+import androidx.compose.material.icons.twotone.Android
+import androidx.compose.material.icons.twotone.Edit
+import androidx.compose.material.icons.twotone.Security
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
@@ -247,14 +247,14 @@ private fun AppProfileInner(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
+                color = MaterialTheme.colorScheme.surfaceBright.copy(
                     alpha = CardConfig.cardAlpha
                 ),
                 contentColor = MaterialTheme.colorScheme.onSurface,
             )
             {
                 SettingsSwitchWidget(
-                    icon = Icons.Filled.Security,
+                    icon = Icons.TwoTone.Security,
                     title = stringResource(id = R.string.superuser),
                     checked = isRootGranted,
                     onCheckedChange = { onProfileChange(profile.copy(allowSu = it)) },
@@ -287,7 +287,7 @@ private fun AppProfileInner(
                                 .padding(horizontal = 16.dp)
                                 .padding(top = 8.dp),
                             shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
+                            color = MaterialTheme.colorScheme.surfaceBright.copy(
                                 alpha = CardConfig.cardAlpha
                             ),
                             contentColor = MaterialTheme.colorScheme.onSurface,
@@ -328,7 +328,7 @@ private fun AppProfileInner(
 
                                             item {
                                                 SettingsJumpPageWidget(
-                                                    icon = Icons.Filled.Edit,
+                                                    icon = Icons.TwoTone.Edit,
                                                     title = stringResource(R.string.manage_app_profile),
                                                     description = stringResource(R.string.settings_profile_template_summary),
                                                     onClick = {
@@ -359,7 +359,7 @@ private fun AppProfileInner(
                                 .padding(horizontal = 16.dp)
                                 .padding(top = 8.dp),
                             shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
+                            color = MaterialTheme.colorScheme.surfaceBright.copy(
                                 alpha = CardConfig.cardAlpha
                             ),
                             contentColor = MaterialTheme.colorScheme.onSurface,
@@ -380,7 +380,7 @@ private fun AppProfileInner(
                                     .padding(horizontal = 16.dp)
                                     .padding(top = 8.dp),
                                 shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
+                                color = MaterialTheme.colorScheme.surfaceBright.copy(
                                     alpha = CardConfig.cardAlpha
                                 ),
                                 contentColor = MaterialTheme.colorScheme.onSurface,
@@ -484,7 +484,7 @@ private fun ProfileBox(
 ) {
     Column {
         SettingsBaseWidget(
-            icon = Icons.Filled.AccountCircle,
+            icon = Icons.TwoTone.AccountCircle,
             title = stringResource(R.string.profile),
             description = mode.text,
         )
@@ -542,13 +542,13 @@ private fun AppProfilePreview() {
     var profile by remember { mutableStateOf(Natives.Profile("")) }
 
     Surface(
-        color = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceContainerHigh
+        color = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceBright
     ) {
         AppProfileInner(
             appGroup = SuperUserViewModel.AppGroup(0, emptyList(), null),
             appIcon = {
                 Icon(
-                    imageVector = Icons.Filled.Android,
+                    imageVector = Icons.TwoTone.Android,
                     contentDescription = null,
                 )
             },

@@ -4,7 +4,6 @@
     <string name="home_not_installed">Nincs telepítve</string>
     <string name="home_click_to_install">Kattintson a telepítéshez</string>
     <string name="home_working">Működik</string>
-    <string name="home_working_version">Verzió: %s</string>
     <string name="home_unsupported">Nem támogatott</string>
     <string name="home_unsupported_reason">A KernelSU jelenleg csak GKI kerneleket támogat</string>
     <string name="home_kernel">Kernel</string>

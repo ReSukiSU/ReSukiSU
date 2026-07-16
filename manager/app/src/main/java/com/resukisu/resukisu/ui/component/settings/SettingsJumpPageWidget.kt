@@ -1,7 +1,7 @@
 package com.resukisu.resukisu.ui.component.settings
 
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
@@ -22,21 +22,23 @@ fun SettingsJumpPageWidget(
     iconPlaceholder: Boolean = true,
     title: String,
     description: String? = null,
-    descriptionColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    descriptionColor: Color? = null,
     descriptionStyle: TextStyle = MaterialTheme.typography.bodyMedium,
     enabled: Boolean = true,
+    renderBackgroundBlur: Boolean = true,
     isError: Boolean = false,
     onClick: ((Offset) -> Unit)? = null,
     onLongClick: ((Offset) -> Unit)? = null,
     hapticFeedbackType: HapticFeedbackType = HapticFeedbackType.ContextClick,
     leadingContent: (@Composable () -> Unit)? = null,
-    foreContent: @Composable BoxScope.() -> Unit = {},
+    foreContent: @Composable RowScope.() -> Unit = {},
     descriptionColumnContent: @Composable ColumnScope.() -> Unit = {},
     trailingIcon: ImageVector = Icons.Filled.ChevronRight,
 ) {
     SettingsBaseWidget(
         icon = icon,
         iconPlaceholder = iconPlaceholder,
+        renderBackgroundBlur = renderBackgroundBlur,
         title = title,
         description = description,
         descriptionColor = descriptionColor,
