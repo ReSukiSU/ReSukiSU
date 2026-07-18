@@ -48,6 +48,16 @@ class ModuleViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ModuleUiState())
     val uiState: StateFlow<ModuleUiState> = _uiState.asStateFlow()
 
+    private fun applyUserSettings() {
+        val prefs = ksuApp.appPreferences
+        _uiState.update {
+            it.copy(
+                showMoreModuleInfo = prefs.getBoolean("show_more_module_info", false),
+                isHideTagRow = prefs.getBoolean("is_hide_tag_row", false),
+            )
+        }
+    }
+
     fun loadSize(dirId: String) = viewModelScope.launch(Dispatchers.IO) {
         val size = formatFileSize(
             try {
@@ -185,7 +195,9 @@ class ModuleViewModel : ViewModel() {
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isRefreshing = true) }
-
+         
+            applyUserSettings()
+            
             val oldModuleList = modules
             val start = SystemClock.elapsedRealtime()
 
