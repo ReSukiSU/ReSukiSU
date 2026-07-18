@@ -60,13 +60,13 @@ import kotlinx.coroutines.launch
  * SuSFS 配置界面主框架
  *
  * 采用 LargeFlexibleTopAppBar + PrimaryScrollableTabRow + HorizontalPager 结构，包含 7 个标签页：
- * - Status: 状态总览
- * - Standard: 标准功能
+ * - Standard: 标准功能（基本设置，起始页）
  * - SusPath: SUS Path
  * - SusKstat: SUS Kstat
  * - OpenRedirect: Open Redirect
  * - SusMap: SUS Map
  * - BackupRestore: Backup / Restore
+ * - Status: 状态总览
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -80,13 +80,13 @@ fun SuSFSConfigScreen() {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
 
     val tabTitles = listOf(
-        R.string.susfs_tab_status,
         R.string.susfs_tab_standard,
         R.string.susfs_tab_sus_path,
         R.string.susfs_tab_sus_kstat,
         R.string.susfs_tab_open_redirect,
         R.string.susfs_tab_sus_map,
-        R.string.susfs_tab_backup_restore
+        R.string.susfs_tab_backup_restore,
+        R.string.susfs_tab_status
     ).map { stringResource(it) }
     val pagerState = rememberPagerState(pageCount = { tabTitles.size })
 
@@ -194,13 +194,13 @@ fun SuSFSConfigScreen() {
                 modifier = Modifier.fillMaxSize()
             ) { page ->
                 when (page) {
-                    0 -> StatusTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
-                    1 -> StandardFeaturesTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
-                    2 -> SusPathTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
-                    3 -> SusKstatTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
-                    4 -> OpenRedirectTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
-                    5 -> SusMapTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
-                    6 -> BackupRestoreTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding())
+                    0 -> StandardFeaturesTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
+                    1 -> SusPathTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
+                    2 -> SusKstatTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
+                    3 -> OpenRedirectTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
+                    4 -> SusMapTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
+                    5 -> BackupRestoreTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding())
+                    6 -> StatusTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
                 }
             }
         }
