@@ -30,6 +30,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.screen.toNativeProfile
 import com.resukisu.resukisu.ui.component.miuix.EditText
 import com.resukisu.resukisu.ui.component.profile.RootProfileConfig
 import com.resukisu.resukisu.ui.theme.LocalEnableBlur
@@ -242,3 +243,14 @@ private fun TextEdit(
     )
 }
 
+
+data class TemplateEditorActions(
+    val onBack: () -> Unit,
+    val onDelete: () -> Unit,
+    val onSave: () -> Unit,
+    val onNameChange: (String) -> Unit,
+    val onIdChange: (String) -> Unit,
+    val onAuthorChange: (String) -> Unit,
+    val onDescriptionChange: (String) -> Unit,
+    val onProfileChange: (com.resukisu.resukisu.Natives.Profile) -> Unit,
+)

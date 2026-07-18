@@ -222,3 +222,9 @@ private fun TopBar(
         )
     }
 }
+
+data class ExecuteModuleActionScreenActions(
+    val onBack: () -> Unit,
+    val onSaveLog: () -> Unit,
+    val onClose: () -> Unit = {},
+)

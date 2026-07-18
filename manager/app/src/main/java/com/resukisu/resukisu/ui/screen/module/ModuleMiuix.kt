@@ -1144,3 +1144,50 @@ fun ModuleItem(
         }
     }
 }
+
+sealed interface ModuleConfirmRequest {
+    data class Update(
+        val module: com.resukisu.resukisu.ui.viewmodel.ModuleViewModel.ModuleInfo,
+        val downloadUrl: String,
+        val fileName: String,
+    ) : ModuleConfirmRequest
+
+    data class Uninstall(
+        val module: com.resukisu.resukisu.ui.viewmodel.ModuleViewModel.ModuleInfo,
+    ) : ModuleConfirmRequest
+}
+
+data class ModuleConfirmDialogState(
+    val request: ModuleConfirmRequest,
+    val title: String,
+    val content: String? = null,
+    val markdown: Boolean = false,
+    val html: Boolean = false,
+    val confirm: String? = null,
+    val dismiss: String? = null,
+)
+
+sealed interface ModuleEffect {
+    data class Toast(val message: String) : ModuleEffect
+    data class SnackBar(val message: String) : ModuleEffect
+}
+
+data class ModuleActions(
+    val onRefresh: () -> Unit,
+    val onSearchStatusChange: (com.resukisu.resukisu.ui.component.SearchStatus) -> Unit,
+    val onSearchTextChange: (String) -> Unit,
+    val onClearSearch: () -> Unit,
+    val onRequestUpdateConfirmation: (com.resukisu.resukisu.ui.viewmodel.ModuleViewModel.ModuleInfo, com.resukisu.resukisu.ui.viewmodel.ModuleViewModel.ModuleUpdateInfo) -> Unit,
+    val onRequestUninstallConfirmation: (com.resukisu.resukisu.ui.viewmodel.ModuleViewModel.ModuleInfo) -> Unit,
+    val onDismissConfirmRequest: () -> Unit,
+    val onConfirmUpdate: (ModuleConfirmRequest.Update) -> Unit,
+    val onOpenRepo: () -> Unit,
+    val onToggleSortActionFirst: () -> Unit,
+    val onToggleSortEnabledFirst: () -> Unit,
+    val onOpenWebUi: (com.resukisu.resukisu.ui.viewmodel.ModuleViewModel.ModuleInfo) -> Unit,
+    val onToggleModule: (com.resukisu.resukisu.ui.viewmodel.ModuleViewModel.ModuleInfo) -> Unit,
+    val onUninstallModule: (com.resukisu.resukisu.ui.viewmodel.ModuleViewModel.ModuleInfo) -> Unit,
+    val onUndoUninstallModule: (com.resukisu.resukisu.ui.viewmodel.ModuleViewModel.ModuleInfo) -> Unit,
+    val onOpenFlash: (List<android.net.Uri>) -> Unit,
+    val onExecuteModuleAction: (com.resukisu.resukisu.ui.viewmodel.ModuleViewModel.ModuleInfo) -> Unit,
+)

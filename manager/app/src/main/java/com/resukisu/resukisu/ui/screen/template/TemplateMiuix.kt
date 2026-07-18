@@ -429,3 +429,12 @@ private fun TopBar(
         )
     }
 }
+
+data class TemplateActions(
+    val onBack: () -> Unit,
+    val onRefresh: (Boolean) -> Unit,
+    val onImport: () -> Unit,
+    val onExport: () -> Unit,
+    val onCreateTemplate: () -> Unit,
+    val onOpenTemplate: (com.resukisu.resukisu.ui.viewmodel.TemplateViewModel.TemplateInfo) -> Unit,
+)

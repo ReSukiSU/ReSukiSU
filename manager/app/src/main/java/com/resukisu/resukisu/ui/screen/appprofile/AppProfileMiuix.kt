@@ -600,3 +600,13 @@ private fun ProfileBox(
         }
     }
 }
+
+data class AppProfileActions(
+    val onBack: () -> Unit,
+    val onLaunchApp: (String, Int) -> Unit,
+    val onForceStopApp: (String, Int) -> Unit,
+    val onRestartApp: (String, Int) -> Unit,
+    val onViewTemplate: (String) -> Unit,
+    val onManageTemplate: () -> Unit,
+    val onProfileChange: (com.resukisu.resukisu.Natives.Profile) -> Unit,
+)

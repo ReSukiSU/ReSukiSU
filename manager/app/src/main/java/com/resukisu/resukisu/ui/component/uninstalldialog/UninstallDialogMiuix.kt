@@ -19,11 +19,11 @@ import com.resukisu.resukisu.ui.component.dialog.rememberConfirmDialog
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.FlashIt
-import com.resukisu.resukisu.ui.screen.flash.UninstallType
-import com.resukisu.resukisu.ui.screen.flash.UninstallType.NONE
-import com.resukisu.resukisu.ui.screen.flash.UninstallType.PERMANENT
-import com.resukisu.resukisu.ui.screen.flash.UninstallType.RESTORE_STOCK_IMAGE
-import com.resukisu.resukisu.ui.screen.flash.UninstallType.TEMPORARY
+import com.resukisu.resukisu.ui.screen.main.UninstallType
+import com.resukisu.resukisu.ui.screen.main.UninstallType.NONE
+import com.resukisu.resukisu.ui.screen.main.UninstallType.PERMANENT
+import com.resukisu.resukisu.ui.screen.main.UninstallType.RESTORE_STOCK_IMAGE
+import com.resukisu.resukisu.ui.screen.main.UninstallType.TEMPORARY
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton

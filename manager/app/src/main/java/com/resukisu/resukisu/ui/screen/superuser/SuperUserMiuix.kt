@@ -706,3 +706,20 @@ private fun AppGroup.toTiannGroupedApps(matched: Set<String> = emptySet()): Grou
         ownerName = userName,
         matchedPackageNames = matched,
     )
+
+data class GroupedApps(
+    val uid: Int,
+    val apps: List<com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel.AppInfo>,
+    val primary: com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel.AppInfo,
+    val anyAllowSu: Boolean,
+    val anyCustom: Boolean,
+    val shouldUmount: Boolean,
+    val ownerName: String? = null,
+    val matchedPackageNames: Set<String> = emptySet(),
+)
+
+data class StatusMeta(
+    val label: String,
+    val bg: androidx.compose.ui.graphics.Color,
+    val fg: androidx.compose.ui.graphics.Color,
+)
