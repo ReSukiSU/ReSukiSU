@@ -610,3 +610,12 @@ data class AppProfileActions(
     val onManageTemplate: () -> Unit,
     val onProfileChange: (com.resukisu.resukisu.Natives.Profile) -> Unit,
 )
+
+enum class Mode(@field:androidx.annotation.StringRes private val res: Int) {
+    Default(R.string.profile_default),
+    Template(R.string.profile_template),
+    Custom(R.string.profile_custom);
+
+    val text: String
+        @androidx.compose.runtime.Composable get() = stringResource(res)
+}
