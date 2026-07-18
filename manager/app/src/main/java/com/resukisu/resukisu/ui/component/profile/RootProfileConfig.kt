@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.profile.Capabilities
 import com.resukisu.resukisu.profile.Groups
 import com.resukisu.resukisu.toRawFlags
@@ -348,7 +350,23 @@ private fun SELinuxPanel(
         var rules by remember(profile.rules) { mutableStateOf(profile.rules) }
         val canConfirm = isSELinuxDomainValid(domain) && isSepolicyValid(rules)
 
-        AlertDialog(
+        when (LocalUiMode.current) {
+        UiMode.Miuix -> SELinuxContextDialogMiuix(
+            show = true,
+            domain = domain,
+            rules = rules,
+            onDomainChange = { domain = it },
+            onRulesChange = { rules = it },
+            domainError = domain.isNotEmpty() && !isSELinuxDomainValid(domain),
+            rulesError = !isSepolicyValid(rules),
+            canConfirm = canConfirm,
+            onConfirm = {
+                onSELinuxChange(domain, rules)
+                showDialog = false
+            },
+            onDismiss = { showDialog = false },
+        )
+        UiMode.Material -> AlertDialog(
             onDismissRequest = { showDialog = false },
             title = {
                 Text(text = stringResource(R.string.profile_selinux_context))
@@ -400,6 +418,7 @@ private fun SELinuxPanel(
                 }
             }
         )
+        }
     }
 }
 

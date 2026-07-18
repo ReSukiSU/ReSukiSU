@@ -34,6 +34,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 
 /**
  * 槽位选择对话框组件
@@ -67,6 +69,20 @@ fun SlotSelectionDialog(
     }
 
     if (show) {
+        when (LocalUiMode.current) {
+        UiMode.Miuix -> SlotSelectionDialogMiuix(
+            show = true,
+            currentSlot = currentSlot,
+            errorMessage = errorMessage,
+            selectedSlot = selectedSlot,
+            onSelectSlot = { selectedSlot = it },
+            onConfirm = {
+                selectedSlot?.let { onSlotSelected(it) }
+                onDismiss()
+            },
+            onDismiss = onDismiss,
+        )
+        UiMode.Material -> {
         val cardColor = MaterialTheme.colorScheme.surfaceContainerHighest
 
         AlertDialog(
@@ -244,6 +260,8 @@ fun SlotSelectionDialog(
             shape = MaterialTheme.shapes.extraLarge,
             tonalElevation = 4.dp
         )
+        }
+        }
     }
 }
 
