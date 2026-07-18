@@ -36,6 +36,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
@@ -313,7 +315,9 @@ fun InstallConfirmationDialog(
     onConfirm: (List<ZipFileInfo>) -> Unit,
     onDismiss: () -> Unit
 ) {
-    if (show && zipFiles.isNotEmpty()) {
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> InstallConfirmationDialogMiuix(show, zipFiles, onConfirm, onDismiss)
+        UiMode.Material -> if (show && zipFiles.isNotEmpty()) {
         val context = LocalContext.current
 
         AlertDialog(
@@ -380,6 +384,7 @@ fun InstallConfirmationDialog(
             },
             modifier = Modifier.widthIn(min = 320.dp, max = 560.dp)
         )
+        }
     }
 }
 
