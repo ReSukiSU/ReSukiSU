@@ -51,11 +51,14 @@ fun RootProfileConfig(
     profile: Natives.Profile,
     onProfileChange: (Natives.Profile) -> Unit,
 ) {
-    SegmentedColumn {
-        rootProfileConfig(
-            profile,
-            onProfileChange
-        )
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> RootProfileConfigMiuix(profile, onProfileChange)
+        UiMode.Material -> SegmentedColumn {
+            rootProfileConfig(
+                profile,
+                onProfileChange
+            )
+        }
     }
 }
 
@@ -350,23 +353,7 @@ private fun SELinuxPanel(
         var rules by remember(profile.rules) { mutableStateOf(profile.rules) }
         val canConfirm = isSELinuxDomainValid(domain) && isSepolicyValid(rules)
 
-        when (LocalUiMode.current) {
-        UiMode.Miuix -> SELinuxContextDialogMiuix(
-            show = true,
-            domain = domain,
-            rules = rules,
-            onDomainChange = { domain = it },
-            onRulesChange = { rules = it },
-            domainError = domain.isNotEmpty() && !isSELinuxDomainValid(domain),
-            rulesError = !isSepolicyValid(rules),
-            canConfirm = canConfirm,
-            onConfirm = {
-                onSELinuxChange(domain, rules)
-                showDialog = false
-            },
-            onDismiss = { showDialog = false },
-        )
-        UiMode.Material -> AlertDialog(
+        AlertDialog(
             onDismissRequest = { showDialog = false },
             title = {
                 Text(text = stringResource(R.string.profile_selinux_context))
@@ -418,7 +405,6 @@ private fun SELinuxPanel(
                 }
             }
         )
-        }
     }
 }
 
@@ -439,6 +425,6 @@ private fun isTextValidUid(text: String): Boolean {
     }
 }
 
-private fun isSELinuxDomainValid(value: String): Boolean {
+internal fun isSELinuxDomainValid(value: String): Boolean {
     return value.matches(Regex("^[a-z_]+:[a-z0-9_]+:[a-z0-9_]+(:[a-z0-9_]+)?$"))
 }
