@@ -761,14 +761,13 @@ private fun ModuleList(
             key = { it.id },
             contentType = { "module" }
         ) { module ->
-            val currentModuleState = rememberUpdatedState(module)
             val moduleUpdateInfo = updateInfoMap[module.id] ?: ModuleUpdateInfo("", "", "")
             val content: @Composable () -> Unit = {
                 ModuleItem(
                     module = module,
                     updateUrl = moduleUpdateInfo.zipUrl,
                     onUninstall = {
-                        actions.onRequestUninstallConfirmation(currentModuleState.value)
+                        actions.onRequestUninstallConfirmation(module)
                     },
                     onUndoUninstall = {
                         scope.launch {
@@ -785,15 +784,15 @@ private fun ModuleList(
                     onUpdate = {
                         scope.launch {
                             loadingDialog.withLoading {
-                                actions.onRequestUpdateConfirmation(currentModuleState.value, moduleUpdateInfo)
+                                actions.onRequestUpdateConfirmation(module, moduleUpdateInfo)
                             }
                         }
                     },
                     onExecuteAction = {
-                        actions.onExecuteModuleAction(currentModuleState.value)
+                        actions.onExecuteModuleAction(module)
                     },
                     onAddActionShortcut = { type: ShortcutType ->
-                        onModuleAddShortcut(currentModuleState.value, type)
+                        onModuleAddShortcut(module, type)
                     },
                     onOpenWebUi = {
                         if (module.hasWebUi) {
