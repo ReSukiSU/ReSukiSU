@@ -54,10 +54,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.ui.component.dialog.ConfirmResult
+import com.resukisu.resukisu.ui.component.ConfirmResult
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.miuix.WarningCard
-import com.resukisu.resukisu.ui.component.dialog.rememberConfirmDialog
+import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.theme.LocalEnableBlur
 import com.resukisu.resukisu.ui.util.BlurredBar

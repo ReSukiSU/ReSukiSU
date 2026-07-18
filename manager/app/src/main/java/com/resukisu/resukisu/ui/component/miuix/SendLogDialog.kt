@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.resukisu.resukisu.BuildConfig
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.ui.component.dialog.LoadingDialogHandle
+import com.resukisu.resukisu.ui.component.LoadingDialogHandle
 import com.resukisu.resukisu.ui.util.getBugreportFile
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text

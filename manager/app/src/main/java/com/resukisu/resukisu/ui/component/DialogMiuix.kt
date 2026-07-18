@@ -1,4 +1,4 @@
-package com.resukisu.resukisu.ui.component.dialog
+package com.resukisu.resukisu.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,8 +21,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.ui.component.GithubMarkdown
-import com.resukisu.resukisu.ui.component.MarkdownContent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.Text

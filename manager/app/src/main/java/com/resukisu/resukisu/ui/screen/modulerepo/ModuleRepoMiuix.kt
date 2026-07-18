@@ -79,8 +79,8 @@ import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.ListPopupDefaults
 import com.resukisu.resukisu.ui.component.ScrollToTopOnChange
 import com.resukisu.resukisu.ui.component.SearchStatus
-import com.resukisu.resukisu.ui.component.dialog.ConfirmDialogHandle
-import com.resukisu.resukisu.ui.component.dialog.rememberConfirmDialog
+import com.resukisu.resukisu.ui.component.ConfirmDialogHandle
+import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.GithubMarkdown
 import com.resukisu.resukisu.ui.component.miuix.SearchBarFake
 import com.resukisu.resukisu.ui.component.miuix.SearchBox

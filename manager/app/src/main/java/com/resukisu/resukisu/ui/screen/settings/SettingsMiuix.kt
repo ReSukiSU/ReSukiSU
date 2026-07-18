@@ -51,7 +51,7 @@ import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.component.KsuIsValid
-import com.resukisu.resukisu.ui.component.dialog.rememberLoadingDialog
+import com.resukisu.resukisu.ui.component.rememberLoadingDialog
 import com.resukisu.resukisu.ui.component.miuix.SendLogDialog
 import com.resukisu.resukisu.ui.component.uninstalldialog.UninstallDialog
 import com.resukisu.resukisu.ui.theme.LocalEnableBlur
