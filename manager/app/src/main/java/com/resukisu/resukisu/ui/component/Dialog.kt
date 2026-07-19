@@ -200,9 +200,14 @@ private class ConfirmDialogHandleImpl(
     visible: MutableState<Boolean>,
     coroutineScope: CoroutineScope,
     callback: ConfirmCallback,
-    override var visuals: ConfirmDialogVisuals = ConfirmDialogVisualsImpl.Empty,
+    initialVisuals: ConfirmDialogVisuals = ConfirmDialogVisualsImpl.Empty,
     private val resultFlow: ReceiveChannel<ConfirmResult>
 ) : ConfirmDialogHandle, DialogHandleBase(visible, coroutineScope) {
+    // visuals must be an observable snapshot state, not a plain var: the Miuix dialog reads
+    // handle.visuals while always composed (gated only by `visible`), so a plain var would leave
+    // it showing stale content (the previously-targeted item) when visuals updates. (tiann parity)
+    private val visualsState = mutableStateOf(initialVisuals)
+    override val visuals: ConfirmDialogVisuals get() = visualsState.value
     private class ResultCollector(
         private val callback: ConfirmCallback
     ) : FlowCollector<ConfirmResult> {
@@ -263,7 +268,7 @@ private class ConfirmDialogHandleImpl(
     }
 
     fun updateVisuals(visuals: ConfirmDialogVisuals) {
-        this.visuals = visuals
+        this.visualsState.value = visuals
     }
 
     override fun show() {
