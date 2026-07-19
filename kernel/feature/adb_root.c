@@ -29,6 +29,22 @@ bool ksu_adb_root __read_mostly = false;
 static const char kAdbd[] = "/adbd";
 static const size_t kAdbdLen = sizeof(kAdbd) - 1;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0)
+/*
+ * Match adb-root related SELinux contexts used by user-space tooling.
+ * The goal is to prevent adb_root from being surfaced through SELinux
+ * context checks and access queries while keeping the logic centralized.
+ */
+bool ksu_adb_root_should_hide_context(const char *context)
+{
+    if (!context) {
+        return false;
+    }
+
+    return strstr(context, "adbroot") != NULL || strstr(context, "adbd") != NULL;
+}
+#endif
+
 static inline long is_exec_adbd(const char *filename)
 {
     size_t len = strlen(filename);

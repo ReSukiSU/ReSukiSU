@@ -38,6 +38,7 @@
 #include "selinux/sepolicy.h"
 #include "selinux_hide.h"
 #include "compat/kernel_compat.h"
+#include "feature/adb_root.h"
 
 #ifdef KSU_COMPAT_HAS_SUSFS_FEATURE_SELINUX_HIDE
 #define __maybe_static
@@ -141,6 +142,11 @@ static ssize_t my_write_context(struct file *file, char *buf, size_t size)
     if (likely(ksu_get_uid_t(current_uid()) < 10000)) {
         return orig_context_write(file, buf, size);
     }
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0)
+    if (ksu_adb_root_should_hide_context(buf)) {
+        return -EINVAL;
+    }
+#endif
     char *canon = NULL;
     u32 sid, len;
     ssize_t length;
@@ -206,6 +212,28 @@ out:
     return length;
 }
 
+static void ksu_apply_selinux_hide_spoof(struct av_decision *avd, const char *scon, const char *tcon)
+{
+    static const struct {
+        const char *src_substr;
+        const char *dst_substr;
+        u32 mask;
+    } rules[] = {
+        { "fsck_untrusted", "fsck_untrusted", 0x00200000 },
+        { "adbd", "adbroot", 0x00000002 },
+    };
+
+    if (!avd || !scon || !tcon)
+        return;
+
+    size_t i;
+    for (i = 0; i < sizeof(rules) / sizeof(rules[0]); i++) {
+        if (strstr(scon, rules[i].src_substr) && strstr(tcon, rules[i].dst_substr)) {
+            avd->allowed &= ~rules[i].mask;
+        }
+    }
+}
+
 static ssize_t my_write_access(struct file *file, char *buf, size_t size)
 {
     // apply to all app uids
@@ -243,6 +271,13 @@ static ssize_t my_write_access(struct file *file, char *buf, size_t size)
     if (sscanf(buf, "%s %s %hu", scon, tcon, &tclass) != 3)
         goto out;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0)
+    if (ksu_adb_root_should_hide_context(scon) || ksu_adb_root_should_hide_context(tcon)) {
+        length = -EINVAL;
+        goto out;
+    }
+#endif
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 6, 0)
     length = security_context_to_sid_with_policy(backup_sepolicy, scon, strlen(scon), &ssid, SECSID_NULL, GFP_KERNEL);
     if (length)
@@ -274,6 +309,9 @@ static ssize_t my_write_access(struct file *file, char *buf, size_t size)
 
     ksu_security_compute_av_user(ssid, tsid, tclass, &avd);
 #endif
+
+    /* apply configured spoof rules (fsck_untrusted, adbd->adbroot) */
+    ksu_apply_selinux_hide_spoof(&avd, scon, tcon);
 
     length = scnprintf(buf, SIMPLE_TRANSACTION_LIMIT, "%x %x %x %x %u %x", avd.allowed, 0xffffffff, avd.auditallow,
                        avd.auditdeny, avd.seqno, avd.flags);
@@ -312,6 +350,11 @@ int __nocfi ksu_handle_selinux_setprocattr(struct task_struct *p, char *name, vo
     if (strcmp(name, "current")) {
         goto call_orig;
     }
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0)
+    if (ksu_adb_root_should_hide_context(str)) {
+        return -EINVAL;
+    }
+#endif
     mysid = current_sid();
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 6, 0)
