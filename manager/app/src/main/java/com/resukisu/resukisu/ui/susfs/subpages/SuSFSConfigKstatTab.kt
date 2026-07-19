@@ -1,4 +1,4 @@
-package com.resukisu.resukisu.ui.susfs.component
+package com.resukisu.resukisu.ui.susfs.subpages
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +12,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,20 +37,15 @@ import com.resukisu.resukisu.data.susfs.SusKstatType
 import com.resukisu.resukisu.ui.component.EmptyStateCard
 import com.resukisu.resukisu.ui.component.EntryDetailDialog
 import com.resukisu.resukisu.ui.component.ManualAddDialog
-import com.resukisu.resukisu.ui.component.toImportedEntryLines
-import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
+import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
+import com.resukisu.resukisu.ui.component.toImportedEntryLines
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.launch
 
-/**
- * SUS Kstat 标签页
- *
- * 渲染 sus_kstat 条目，支持三种 spoof_type 的手动添加、列表展示和详情删除。
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SusKstatTab(
@@ -190,7 +185,7 @@ fun SusKstatTab(
                         iconPlaceholder = false,
                         title = manualAddTitle,
                         enabled = !isLoading,
-                        trailingIcon = Icons.Filled.Add,
+                        trailingIcon = Icons.TwoTone.Add,
                         onClick = { showManualAdd = true }
                     )
                 }

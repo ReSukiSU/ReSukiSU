@@ -1,4 +1,4 @@
-package com.resukisu.resukisu.ui.susfs.component
+package com.resukisu.resukisu.ui.susfs.subpages
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -31,14 +31,6 @@ import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.launch
 
-/**
- * 备份与还原标签页
- *
- * 提供导出/导入 .susfs.json 配置文件的功能：
- *   - 导出：通过 SAF CreateDocument 选择目标文件，直接复制当前配置文件
- *   - 导入：通过 SAF OpenDocument 选择备份文件，确认后校验版本并替换当前配置
- *   - 恢复默认：删除 .susfs.json 并清空配置缓存
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackupRestoreTab(

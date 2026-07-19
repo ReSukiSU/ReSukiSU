@@ -1,5 +1,7 @@
-package com.resukisu.resukisu.ui.susfs.component
+package com.resukisu.resukisu.ui.susfs.subpages
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -8,9 +10,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
-import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,73 +23,76 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.data.susfs.OpenRedirectItem
 import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
-import com.resukisu.resukisu.data.susfs.SusPathItem
+import com.resukisu.resukisu.data.susfs.UidScheme
 import com.resukisu.resukisu.ui.component.EmptyStateCard
 import com.resukisu.resukisu.ui.component.EntryDetailDialog
 import com.resukisu.resukisu.ui.component.ManualAddDialog
-import com.resukisu.resukisu.ui.component.toImportedEntryLines
-import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
+import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.launch
 
-/**
- * SUS Path 标签页
- *
- * 渲染 sus_path / sus_path_loop 两类条目：手动添加、列表展示和详情删除。
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SusPathTab(
+fun OpenRedirectTab(
     nestedScrollConnection: NestedScrollConnection,
     topPadding: Dp,
     refreshToken: Int
 ) {
     val snackbarHost = LocalSnackbarHost.current
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var entries by remember { mutableStateOf<Set<SusPathItem>>(emptySet()) }
+    var entries by remember { mutableStateOf<Set<OpenRedirectItem>>(emptySet()) }
     var isLoading by remember { mutableStateOf(false) }
 
     var showManualAdd by remember { mutableStateOf(false) }
-    var detailItem by remember { mutableStateOf<SusPathItem?>(null) }
+    var detailItem by remember { mutableStateOf<OpenRedirectItem?>(null) }
 
-    var selectedSubtype by remember { mutableStateOf("") }
-    val manualPath = remember { TextFieldState() }
+    val manualTarget = remember { TextFieldState() }
+    val manualRedirected = remember { TextFieldState() }
+    var manualUidScheme by remember { mutableStateOf(UidScheme.NonApp) }
 
-    val subtypePath = stringResource(R.string.susfs_path_subtype_path)
-    val subtypeLoop = stringResource(R.string.susfs_path_subtype_loop)
-    val subtypes = listOf(subtypePath, subtypeLoop)
+    val uidSchemeOptions = listOf(
+        UidScheme.NonApp to stringResource(R.string.susfs_uid_scheme_non_app),
+        UidScheme.RootExceptSu to stringResource(R.string.susfs_uid_scheme_root_except_su),
+        UidScheme.NonSu to stringResource(R.string.susfs_uid_scheme_non_su),
+        UidScheme.UnmountedApp to stringResource(R.string.susfs_uid_scheme_unmounted_app),
+        UidScheme.Unmounted to stringResource(R.string.susfs_uid_scheme_unmounted)
+    )
 
     LaunchedEffect(refreshToken) {
-        entries = SuSFSConfigHelper.loadConfig().sus_path
+        entries = SuSFSConfigHelper.loadConfig().open_redirect
     }
 
     LaunchedEffect(showManualAdd) {
-        if (showManualAdd) {
-            if (selectedSubtype.isEmpty()) selectedSubtype = subtypePath
-        } else {
-            manualPath.clearText()
+        if (!showManualAdd) {
+            manualTarget.clearText()
+            manualRedirected.clearText()
+            manualUidScheme = UidScheme.NonApp
         }
     }
 
     val manualAddTitle = stringResource(R.string.susfs_entry_manual_add)
     val detailTitle = stringResource(R.string.susfs_entry_detail)
-    val pathLabel = stringResource(R.string.susfs_entry_path_label)
-    val isLoopLabel = stringResource(R.string.susfs_path_is_loop)
-    val isNotLoopLabel = stringResource(R.string.susfs_path_is_not_loop)
+    val targetPathLabel = stringResource(R.string.susfs_redirect_target_path)
+    val redirectedPathLabel = stringResource(R.string.susfs_redirect_redirected_path)
+    val uidSchemeLabel = stringResource(R.string.susfs_redirect_uid_scheme)
     val noEntriesMsg = stringResource(R.string.susfs_entry_no_entries)
     val operationFailedMsg = stringResource(R.string.susfs_operation_failed)
+    val selectedUidLabel = uidSchemeOptions.first { it.first == manualUidScheme }.second
+
+    fun UidScheme.localizedLabel(): String {
+        return uidSchemeOptions.first { it.first == this }.second
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -102,19 +106,11 @@ fun SusPathTab(
         item {
             SegmentedColumn {
                 item {
-                    SettingsBaseWidget(
-                        iconPlaceholder = false,
-                        title = stringResource(R.string.sus_loop_paths_description_title),
-                        description = stringResource(R.string.sus_loop_paths_description_text)
-                    )
-                }
-
-                item {
                     SettingsJumpPageWidget(
                         iconPlaceholder = false,
                         title = manualAddTitle,
                         enabled = !isLoading,
-                        trailingIcon = Icons.Filled.Add,
+                        trailingIcon = Icons.TwoTone.Add,
                         onClick = { showManualAdd = true }
                     )
                 }
@@ -132,12 +128,12 @@ fun SusPathTab(
             item { Spacer(Modifier.height(8.dp)) }
             lazySegmentColumn(
                 items = entries.toList(),
-                key = { _, it -> it.path }
+                key = { _, it -> "${it.target_path}|${it.redirected_path}|${it.uid_scheme.value}" }
             ) { _, item ->
                 SettingsJumpPageWidget(
                     iconPlaceholder = false,
-                    title = item.path,
-                    description = if (item.is_loop) isLoopLabel else null,
+                    title = item.target_path,
+                    description = "${item.redirected_path} · ${item.uid_scheme.localizedLabel()}",
                     enabled = !isLoading,
                     onClick = { detailItem = item }
                 )
@@ -148,61 +144,58 @@ fun SusPathTab(
     ManualAddDialog(
         showDialog = showManualAdd,
         title = manualAddTitle,
-        subtypes = subtypes,
-        selectedSubtype = selectedSubtype,
-        onSubtypeChange = { selectedSubtype = it },
+        subtypes = emptyList(),
+        selectedSubtype = "",
+        onSubtypeChange = {},
         onDismiss = { showManualAdd = false },
-        showImportFromFile = true,
-        onImportFromFile = { importedPath -> manualPath.setTextAndPlaceCursorAtEnd(importedPath) },
         onConfirm = {
-            val paths = manualPath.text.toString().toImportedEntryLines()
-            if (paths.isEmpty()) return@ManualAddDialog
+            val target = manualTarget.text.toString().trim()
+            val redirected = manualRedirected.text.toString().trim()
+            if (target.isEmpty() || redirected.isEmpty()) return@ManualAddDialog
             scope.launch {
                 isLoading = true
-                var snackbarMessage: String? = null
-                var successCount = 0
-                var failCount = 0
-                paths.forEach { path ->
-                    val ok = if (selectedSubtype == subtypeLoop) {
-                        SuSFSConfigHelper.addSusPathLoop(path)
-                    } else {
-                        SuSFSConfigHelper.addSusPath(path)
-                    }
-                    if (ok) {
-                        successCount++
-                    } else {
-                        failCount++
-                    }
-                }
-                if (successCount > 0) {
-                    entries = SuSFSConfigHelper.refreshConfig().sus_path
-                }
-                if (paths.size == 1) {
-                    if (successCount > 0) {
-                        showManualAdd = false
-                    } else {
-                        snackbarMessage = operationFailedMsg
-                    }
+                val ok = SuSFSConfigHelper.addOpenRedirect(target, redirected, manualUidScheme)
+                if (ok) {
+                    entries = SuSFSConfigHelper.refreshConfig().open_redirect
+                    showManualAdd = false
                 } else {
-                    snackbarMessage = context.getString(R.string.susfs_entry_import_success, successCount, failCount)
-                    if (failCount == 0) {
-                        showManualAdd = false
+                    isLoading = false
+                    scope.launch {
+                        snackbarHost.showSnackbar(operationFailedMsg)
                     }
                 }
                 isLoading = false
-                snackbarMessage?.let { snackbarHost.showSnackbar(it) }
             }
         },
         isLoading = isLoading,
         formContent = {
-            SettingsTextFieldWidget(
-                state = manualPath,
-                title = pathLabel,
-                useLabelAsPlaceholder = true,
-                enabled = !isLoading,
-                lineLimits = TextFieldLineLimits.MultiLine(minHeightInLines = 4, maxHeightInLines = 8),
-                renderBackgroundBlur = false
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                SettingsTextFieldWidget(
+                    state = manualTarget,
+                    title = targetPathLabel,
+                    useLabelAsPlaceholder = true,
+                    enabled = !isLoading,
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    renderBackgroundBlur = false
+                )
+                SettingsTextFieldWidget(
+                    state = manualRedirected,
+                    title = redirectedPathLabel,
+                    useLabelAsPlaceholder = true,
+                    enabled = !isLoading,
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    renderBackgroundBlur = false
+                )
+                SettingsDropdownWidget(
+                    title = uidSchemeLabel,
+                    description = selectedUidLabel,
+                    iconPlaceholder = false,
+                    enabled = !isLoading,
+                    choice = uidSchemeOptions.indexOfFirst { it.first == manualUidScheme }.coerceAtLeast(0),
+                    data = uidSchemeOptions.map { it.second },
+                    onChoiceChange = { index -> manualUidScheme = uidSchemeOptions[index].first }
+                )
+            }
         }
     )
 
@@ -211,16 +204,17 @@ fun SusPathTab(
             showDialog = true,
             title = detailTitle,
             fields = listOf(
-                pathLabel to item.path,
-                isLoopLabel to if (item.is_loop) isLoopLabel else isNotLoopLabel
+                targetPathLabel to item.target_path,
+                redirectedPathLabel to item.redirected_path,
+                uidSchemeLabel to item.uid_scheme.localizedLabel()
             ),
             onDismiss = { detailItem = null },
             onDelete = {
                 scope.launch {
                     isLoading = true
-                    val ok = SuSFSConfigHelper.delSusPath(item.path)
+                    val ok = SuSFSConfigHelper.delOpenRedirect(item.target_path)
                     if (ok) {
-                        entries = SuSFSConfigHelper.refreshConfig().sus_path
+                        entries = SuSFSConfigHelper.refreshConfig().open_redirect
                         detailItem = null
                     } else {
                         isLoading = false

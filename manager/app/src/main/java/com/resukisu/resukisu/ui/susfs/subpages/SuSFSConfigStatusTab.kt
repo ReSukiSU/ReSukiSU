@@ -1,4 +1,4 @@
-package com.resukisu.resukisu.ui.susfs.component
+package com.resukisu.resukisu.ui.susfs.subpages
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -28,12 +28,6 @@ import com.resukisu.resukisu.data.susfs.SuSFSStatusInfo
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 
-/**
- * 状态总览标签页
- *
- * 展示 SUSFS 的版本、变体与已启用功能。
- * 状态信息通过 SuSFSConfigHelper 缓存，页面级刷新会强制重新读取。
- */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun StatusTab(

@@ -12,12 +12,12 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.twotone.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
@@ -29,26 +29,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
-import com.resukisu.resukisu.ui.susfs.component.BackupRestoreTab
-import com.resukisu.resukisu.ui.susfs.component.OpenRedirectTab
-import com.resukisu.resukisu.ui.susfs.component.SusKstatTab
-import com.resukisu.resukisu.ui.susfs.component.SusMapTab
-import com.resukisu.resukisu.ui.susfs.component.SusPathTab
-import com.resukisu.resukisu.ui.susfs.component.StandardFeaturesTab
-import com.resukisu.resukisu.ui.susfs.component.StatusTab
+import com.resukisu.resukisu.ui.susfs.subpages.BackupRestoreTab
+import com.resukisu.resukisu.ui.susfs.subpages.OpenRedirectTab
+import com.resukisu.resukisu.ui.susfs.subpages.StandardFeaturesTab
+import com.resukisu.resukisu.ui.susfs.subpages.StatusTab
+import com.resukisu.resukisu.ui.susfs.subpages.SusKstatTab
+import com.resukisu.resukisu.ui.susfs.subpages.SusMapTab
+import com.resukisu.resukisu.ui.susfs.subpages.SusPathTab
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
@@ -123,7 +123,7 @@ fun SuSFSConfigScreen() {
                             enabled = !isRefreshing
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.Refresh,
+                                imageVector = Icons.TwoTone.Refresh,
                                 contentDescription = stringResource(R.string.susfs_refresh)
                             )
                         }
