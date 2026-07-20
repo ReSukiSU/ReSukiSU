@@ -62,7 +62,6 @@ import com.resukisu.resukisu.ui.component.rebootlistpopup.RebootListPopupMiuix
 import com.resukisu.resukisu.ui.theme.LocalEnableBlur
 import com.resukisu.resukisu.ui.theme.isInDarkTheme
 import com.resukisu.resukisu.ui.util.BlurredBar
-import com.resukisu.resukisu.ui.util.module.LatestVersionInfo
 import com.resukisu.resukisu.ui.util.rememberBlurBackdrop
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults

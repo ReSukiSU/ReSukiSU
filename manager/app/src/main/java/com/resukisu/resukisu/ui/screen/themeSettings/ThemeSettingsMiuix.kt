@@ -709,7 +709,6 @@ private fun CustomizationSettingsMiuix(
     }
 
     Card(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
-        HideSwitch(R.string.hide_kernel_kernelsu_version, R.string.hide_kernel_kernelsu_version_summary, homeUiState.isHideVersion, homeViewModel::handleHideVersionChange)
         HideSwitch(R.string.hide_other_info, R.string.hide_other_info_summary, homeUiState.isHideOtherInfo, homeViewModel::handleHideOtherInfoChange)
         HideSwitch(R.string.hide_susfs_status, R.string.hide_susfs_status_summary, homeUiState.isHideSusfsStatus, homeViewModel::handleHideSusfsStatusChange)
         HideSwitch(R.string.hide_zygisk_implement, R.string.hide_zygisk_implement_summary, homeUiState.isHideZygiskImplement, homeViewModel::handleHideZygiskImplementChange)
