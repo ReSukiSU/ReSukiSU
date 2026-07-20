@@ -25,13 +25,13 @@ import androidx.compose.ui.unit.Dp
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.data.susfs.SusPathItem
-import com.resukisu.resukisu.ui.component.EntryDetailDialog
-import com.resukisu.resukisu.ui.component.ManualAddDialog
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
-import com.resukisu.resukisu.ui.component.susfs.SuSFSDescriptionCard
-import com.resukisu.resukisu.ui.component.susfs.susfsEntryList
-import com.resukisu.resukisu.ui.component.toImportedEntryLines
+import com.resukisu.resukisu.ui.screen.susfs.component.EntryDetailDialog
+import com.resukisu.resukisu.ui.screen.susfs.component.ManualAddDialog
+import com.resukisu.resukisu.ui.screen.susfs.component.SuSFSDescriptionCard
+import com.resukisu.resukisu.ui.screen.susfs.component.susfsEntryList
+import com.resukisu.resukisu.ui.screen.susfs.component.toImportedEntryLines
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.launch
 
@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
 fun SusPathTab(
     nestedScrollConnection: NestedScrollConnection,
     topPadding: Dp,
-    refreshToken: Int
+    dirtyGeneration: Int
 ) {
     val snackbarHost = LocalSnackbarHost.current
     val context = LocalContext.current
@@ -59,7 +59,7 @@ fun SusPathTab(
     val subtypeLoop = stringResource(R.string.susfs_path_subtype_loop)
     val subtypes = listOf(subtypePath, subtypeLoop)
 
-    LaunchedEffect(refreshToken) {
+    LaunchedEffect(dirtyGeneration) {
         entries = SuSFSConfigHelper.loadConfig().sus_path
     }
 

@@ -1,7 +1,13 @@
 package com.resukisu.resukisu.ui.screen.susfs
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
@@ -9,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -22,18 +29,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -56,18 +67,12 @@ import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.launch
 
-/**
- * SuSFS 配置界面主框架
- *
- * 采用 LargeFlexibleTopAppBar + PrimaryScrollableTabRow + HorizontalPager 结构，包含 7 个标签页：
- * - Standard: 标准功能（基本设置，起始页）
- * - SusPath: SUS Path
- * - SusKstat: SUS Kstat
- * - OpenRedirect: Open Redirect
- * - SusMap: SUS Map
- * - BackupRestore: Backup / Restore
- * - Status: 状态总览
- */
+private class SuSFSConfigSubpage(
+    val requirePersist: Boolean,
+    val title: String,
+    val content: @Composable (PaddingValues, NestedScrollConnection) -> Unit,
+)
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SuSFSConfigScreen() {
@@ -75,22 +80,11 @@ fun SuSFSConfigScreen() {
     val snackBarHost = LocalSnackbarHost.current
     val topAppBarState = rememberTopAppBarState()
     val coroutineScope = rememberCoroutineScope()
-    var refreshToken by remember { mutableStateOf(0) }
+    var dirtyGeneration by remember { mutableIntStateOf(0) }
+    val markDirty = { dirtyGeneration += 1 }
     var configEnabled by remember { mutableStateOf<Boolean?>(null) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     val operationFailedMsg = stringResource(R.string.susfs_operation_failed)
-    val isManagementEnabled = configEnabled == true
-
-    val tabTitles = listOf(
-        R.string.susfs_tab_status,
-        R.string.susfs_tab_standard,
-        R.string.susfs_tab_backup_restore,
-        R.string.susfs_tab_sus_path,
-        R.string.susfs_tab_sus_kstat,
-        R.string.susfs_tab_open_redirect,
-        R.string.susfs_tab_sus_map
-    ).map { stringResource(it) }
-    val pagerState = rememberPagerState(pageCount = { tabTitles.size })
 
     val handleConfigEnabledChange: (Boolean) -> Unit = { newValue ->
         coroutineScope.launch {
@@ -102,17 +96,104 @@ fun SuSFSConfigScreen() {
         }
     }
 
+    val subpages = listOf(
+        SuSFSConfigSubpage(
+            requirePersist = false,
+            title = stringResource(R.string.susfs_tab_status),
+        ) { contentPadding, nestedScrollConnection ->
+            StatusTab(
+                nestedScrollConnection = nestedScrollConnection,
+                topPadding = contentPadding.calculateTopPadding(),
+                dirtyGeneration = dirtyGeneration,
+                configEnabled = configEnabled ?: false,
+                configEnabledLoaded = configEnabled != null,
+                onConfigEnabledChange = handleConfigEnabledChange,
+            )
+        },
+        SuSFSConfigSubpage(
+            requirePersist = true,
+            title = stringResource(R.string.susfs_tab_standard),
+        ) { contentPadding, nestedScrollConnection ->
+            StandardFeaturesTab(
+                nestedScrollConnection = nestedScrollConnection,
+                topPadding = contentPadding.calculateTopPadding(),
+                dirtyGeneration = dirtyGeneration,
+            )
+        },
+        SuSFSConfigSubpage(
+            requirePersist = true,
+            title = stringResource(R.string.susfs_tab_backup_restore),
+        ) { contentPadding, nestedScrollConnection ->
+            BackupRestoreTab(
+                nestedScrollConnection = nestedScrollConnection,
+                topPadding = contentPadding.calculateTopPadding(),
+                onConfigRestored = markDirty,
+            )
+        },
+        SuSFSConfigSubpage(
+            requirePersist = true,
+            title = stringResource(R.string.susfs_tab_sus_path),
+        ) { contentPadding, nestedScrollConnection ->
+            SusPathTab(
+                nestedScrollConnection = nestedScrollConnection,
+                topPadding = contentPadding.calculateTopPadding(),
+                dirtyGeneration = dirtyGeneration,
+            )
+        },
+        SuSFSConfigSubpage(
+            requirePersist = true,
+            title = stringResource(R.string.susfs_tab_sus_kstat),
+        ) { contentPadding, nestedScrollConnection ->
+            SusKstatTab(
+                nestedScrollConnection = nestedScrollConnection,
+                topPadding = contentPadding.calculateTopPadding(),
+                dirtyGeneration = dirtyGeneration,
+            )
+        },
+        SuSFSConfigSubpage(
+            requirePersist = true,
+            title = stringResource(R.string.susfs_tab_open_redirect),
+        ) { contentPadding, nestedScrollConnection ->
+            OpenRedirectTab(
+                nestedScrollConnection = nestedScrollConnection,
+                topPadding = contentPadding.calculateTopPadding(),
+                dirtyGeneration = dirtyGeneration,
+            )
+        },
+        SuSFSConfigSubpage(
+            requirePersist = true,
+            title = stringResource(R.string.susfs_tab_sus_map),
+        ) { contentPadding, nestedScrollConnection ->
+            SusMapTab(
+                nestedScrollConnection = nestedScrollConnection,
+                topPadding = contentPadding.calculateTopPadding(),
+                dirtyGeneration = dirtyGeneration,
+            )
+        },
+    )
+    val defaultPage = subpages.indexOfFirst { !it.requirePersist }.coerceAtLeast(0)
+    val pagerState = rememberPagerState(
+        initialPage = defaultPage,
+        pageCount = { subpages.size },
+    )
+    val visibleSubpages = subpages.withIndex().filter { (_, subpage) ->
+        !subpage.requirePersist || configEnabled == true
+    }
+    val selectedTabIndex = visibleSubpages
+        .indexOfFirst { it.index == pagerState.currentPage }
+        .coerceAtLeast(0)
+
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
     }
 
-    LaunchedEffect(refreshToken) {
+    LaunchedEffect(dirtyGeneration) {
         configEnabled = SuSFSConfigHelper.loadConfig().enabled
     }
 
-    LaunchedEffect(configEnabled) {
-        if (configEnabled == false && pagerState.currentPage != 0) {
-            pagerState.scrollToPage(0)
+    LaunchedEffect(configEnabled, defaultPage) {
+        if (configEnabled == false && subpages[pagerState.currentPage].requirePersist) {
+            pagerState.scrollToPage(defaultPage)
         }
     }
 
@@ -134,7 +215,7 @@ fun SuSFSConfigScreen() {
                             onClick = {
                                 coroutineScope.launch {
                                     SuSFSConfigHelper.refreshConfig()
-                                    refreshToken += 1
+                                    markDirty()
                                 }
                             }
                         ) {
@@ -160,38 +241,45 @@ fun SuSFSConfigScreen() {
                 )
 
                 PrimaryScrollableTabRow(
-                    selectedTabIndex = pagerState.currentPage,
+                    selectedTabIndex = selectedTabIndex,
                     containerColor =
                         if (ThemeConfig.isEnableBlur)
                             Color.Transparent
                         else
                             MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha),
                     edgePadding = 0.dp,
+                    minTabWidth = 0.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    tabTitles.forEachIndexed { index, title ->
-                        val tabEnabled = index == 0 || isManagementEnabled
-                        Tab(
-                            selected = pagerState.currentPage == index,
-                            enabled = tabEnabled,
-                            onClick = {
-                                if (tabEnabled) {
+                    subpages.forEachIndexed { index, subpage ->
+                        val tabVisible = !subpage.requirePersist || configEnabled == true
+                        AnimatedVisibility(
+                            visible = tabVisible,
+                            enter = fadeIn() + expandHorizontally(expandFrom = Alignment.Start),
+                            exit = fadeOut() + shrinkHorizontally(shrinkTowards = Alignment.Start),
+                        ) {
+                            Tab(
+                                selected = tabVisible && pagerState.currentPage == index,
+                                onClick = {
                                     coroutineScope.launch {
                                         pagerState.animateScrollToPage(index)
                                     }
-                                }
-                            },
-                            unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            text = { Text(title) }
-                        )
+                                },
+                                modifier = Modifier.widthIn(
+                                    min = TabRowDefaults.ScrollableTabRowMinTabWidth
+                                ),
+                                unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                text = { Text(subpage.title) }
+                            )
+                        }
                     }
                 }
 
                 BackHandler(
-                    enabled = pagerState.currentPage != 0
+                    enabled = pagerState.currentPage != defaultPage
                 ) {
                     coroutineScope.launch {
-                        pagerState.animateScrollToPage(0)
+                        pagerState.animateScrollToPage(defaultPage)
                     }
                 }
             }
@@ -212,54 +300,9 @@ fun SuSFSConfigScreen() {
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
-                userScrollEnabled = isManagementEnabled,
+                userScrollEnabled = configEnabled == true,
             ) { page ->
-                when (page) {
-                    0 -> StatusTab(
-                        nestedScrollConnection = scrollBehavior.nestedScrollConnection,
-                        topPadding = innerPadding.calculateTopPadding(),
-                        refreshToken = refreshToken,
-                        configEnabled = configEnabled ?: false,
-                        configEnabledLoaded = configEnabled != null,
-                        onConfigEnabledChange = handleConfigEnabledChange,
-                    )
-
-                    1 -> StandardFeaturesTab(
-                        scrollBehavior.nestedScrollConnection,
-                        innerPadding.calculateTopPadding(),
-                        refreshToken
-                    )
-
-                    2 -> BackupRestoreTab(
-                        nestedScrollConnection = scrollBehavior.nestedScrollConnection,
-                        topPadding = innerPadding.calculateTopPadding(),
-                        onConfigRestored = { refreshToken += 1 },
-                    )
-
-                    3 -> SusPathTab(
-                        scrollBehavior.nestedScrollConnection,
-                        innerPadding.calculateTopPadding(),
-                        refreshToken
-                    )
-
-                    4 -> SusKstatTab(
-                        scrollBehavior.nestedScrollConnection,
-                        innerPadding.calculateTopPadding(),
-                        refreshToken
-                    )
-
-                    5 -> OpenRedirectTab(
-                        scrollBehavior.nestedScrollConnection,
-                        innerPadding.calculateTopPadding(),
-                        refreshToken
-                    )
-
-                    6 -> SusMapTab(
-                        scrollBehavior.nestedScrollConnection,
-                        innerPadding.calculateTopPadding(),
-                        refreshToken
-                    )
-                }
+                subpages[page].content(innerPadding, scrollBehavior.nestedScrollConnection)
             }
         }
     }

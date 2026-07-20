@@ -28,14 +28,14 @@ import com.resukisu.resukisu.R
 import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.data.susfs.SusKstatItem
 import com.resukisu.resukisu.data.susfs.SusKstatType
-import com.resukisu.resukisu.ui.component.EntryDetailDialog
-import com.resukisu.resukisu.ui.component.ManualAddDialog
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
-import com.resukisu.resukisu.ui.component.susfs.SuSFSDescriptionCard
-import com.resukisu.resukisu.ui.component.susfs.susfsEntryList
-import com.resukisu.resukisu.ui.component.toImportedEntryLines
+import com.resukisu.resukisu.ui.screen.susfs.component.EntryDetailDialog
+import com.resukisu.resukisu.ui.screen.susfs.component.ManualAddDialog
+import com.resukisu.resukisu.ui.screen.susfs.component.SuSFSDescriptionCard
+import com.resukisu.resukisu.ui.screen.susfs.component.susfsEntryList
+import com.resukisu.resukisu.ui.screen.susfs.component.toImportedEntryLines
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.launch
 
@@ -44,7 +44,7 @@ import kotlinx.coroutines.launch
 fun SusKstatTab(
     nestedScrollConnection: NestedScrollConnection,
     topPadding: Dp,
-    refreshToken: Int
+    dirtyGeneration: Int
 ) {
     val snackbarHost = LocalSnackbarHost.current
     val context = LocalContext.current
@@ -76,7 +76,7 @@ fun SusKstatTab(
     val subtypeStatically = stringResource(R.string.susfs_kstat_subtype_statically)
     val subtypes = listOf(subtypeNormal, subtypeFullClone, subtypeStatically)
 
-    LaunchedEffect(refreshToken) {
+    LaunchedEffect(dirtyGeneration) {
         entries = SuSFSConfigHelper.loadConfig().sus_kstat
     }
 

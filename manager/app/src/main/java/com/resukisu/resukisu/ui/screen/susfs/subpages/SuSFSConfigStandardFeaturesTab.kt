@@ -15,6 +15,7 @@ import androidx.compose.material.icons.twotone.Code
 import androidx.compose.material.icons.twotone.Computer
 import androidx.compose.material.icons.twotone.Security
 import androidx.compose.material.icons.twotone.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
@@ -37,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
-import com.resukisu.resukisu.ui.component.settings.SettingsDialogFrame
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
@@ -49,7 +49,7 @@ import kotlinx.coroutines.launch
 fun StandardFeaturesTab(
     nestedScrollConnection: NestedScrollConnection,
     topPadding: Dp,
-    refreshToken: Int
+    dirtyGeneration: Int
 ) {
     val snackbarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
@@ -71,7 +71,7 @@ fun StandardFeaturesTab(
 
     val operationFailedMsg = stringResource(R.string.susfs_operation_failed)
 
-    LaunchedEffect(refreshToken) {
+    LaunchedEffect(dirtyGeneration) {
         isLoading = true
         try {
             val config = SuSFSConfigHelper.loadConfig()
@@ -262,73 +262,81 @@ fun StandardFeaturesTab(
         }
 
         if (showUnameDialog) {
-            SettingsDialogFrame(
-                title = stringResource(R.string.susfs_standard_uname),
+            AlertDialog(
                 onDismissRequest = { showUnameDialog = false },
-                buttons = {
-                    TextButton(onClick = { showUnameDialog = false }) {
-                        Text(stringResource(R.string.susfs_entry_cancel))
+                title = { Text(stringResource(R.string.susfs_standard_uname)) },
+                text = {
+                    SegmentedColumn(contentPadding = PaddingValues(0.dp)) {
+                        item {
+                            SettingsTextFieldWidget(
+                                state = unameReleaseInput,
+                                title = stringResource(R.string.susfs_standard_uname_release),
+                                useLabelAsPlaceholder = true,
+                                enabled = !isLoading,
+                                lineLimits = TextFieldLineLimits.SingleLine,
+                                renderBackgroundBlur = false
+                            )
+                        }
+                        item {
+                            SettingsTextFieldWidget(
+                                state = unameVersionInput,
+                                title = stringResource(R.string.susfs_standard_uname_version),
+                                useLabelAsPlaceholder = true,
+                                enabled = !isLoading,
+                                lineLimits = TextFieldLineLimits.SingleLine,
+                                renderBackgroundBlur = false
+                            )
+                        }
                     }
+                },
+                confirmButton = {
                     TextButton(
                         onClick = handleUnameSave
                     ) {
                         Text(stringResource(R.string.susfs_save))
                     }
                 },
-            ) {
-                SegmentedColumn(contentPadding = PaddingValues(0.dp)) {
-                    item {
-                        SettingsTextFieldWidget(
-                            state = unameReleaseInput,
-                            title = stringResource(R.string.susfs_standard_uname_release),
-                            useLabelAsPlaceholder = true,
-                            enabled = !isLoading,
-                            lineLimits = TextFieldLineLimits.SingleLine,
-                            renderBackgroundBlur = false
-                        )
+                dismissButton = {
+                    TextButton(onClick = { showUnameDialog = false }) {
+                        Text(stringResource(R.string.susfs_entry_cancel))
                     }
-                    item {
-                        SettingsTextFieldWidget(
-                            state = unameVersionInput,
-                            title = stringResource(R.string.susfs_standard_uname_version),
-                            useLabelAsPlaceholder = true,
-                            enabled = !isLoading,
-                            lineLimits = TextFieldLineLimits.SingleLine,
-                            renderBackgroundBlur = false
-                        )
-                    }
-                }
-            }
+                },
+            )
         }
 
         if (showCmdlineDialog) {
-            SettingsDialogFrame(
-                title = stringResource(R.string.susfs_standard_cmdline_or_bootconfig),
+            AlertDialog(
                 onDismissRequest = { showCmdlineDialog = false },
-                buttons = {
-                    TextButton(onClick = { showCmdlineDialog = false }) {
-                        Text(stringResource(R.string.susfs_entry_cancel))
+                title = {
+                    Text(stringResource(R.string.susfs_standard_cmdline_or_bootconfig))
+                },
+                text = {
+                    SegmentedColumn(contentPadding = PaddingValues(0.dp)) {
+                        item {
+                            SettingsTextFieldWidget(
+                                state = cmdlineInput,
+                                title = stringResource(R.string.susfs_standard_cmdline_path),
+                                useLabelAsPlaceholder = true,
+                                enabled = !isLoading,
+                                lineLimits = TextFieldLineLimits.SingleLine,
+                                renderBackgroundBlur = false
+                            )
+                        }
                     }
+                },
+                confirmButton = {
                     TextButton(
                         onClick = handleCmdlineSave
                     ) {
                         Text(stringResource(R.string.susfs_save))
                     }
                 },
-            ) {
-                SegmentedColumn(contentPadding = PaddingValues(0.dp)) {
-                    item {
-                        SettingsTextFieldWidget(
-                            state = cmdlineInput,
-                            title = stringResource(R.string.susfs_standard_cmdline_path),
-                            useLabelAsPlaceholder = true,
-                            enabled = !isLoading,
-                            lineLimits = TextFieldLineLimits.SingleLine,
-                            renderBackgroundBlur = false
-                        )
+                dismissButton = {
+                    TextButton(onClick = { showCmdlineDialog = false }) {
+                        Text(stringResource(R.string.susfs_entry_cancel))
                     }
-                }
-            }
+                },
+            )
         }
     }
 }

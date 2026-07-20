@@ -1,4 +1,4 @@
-package com.resukisu.resukisu.ui.component.susfs
+package com.resukisu.resukisu.ui.screen.susfs.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

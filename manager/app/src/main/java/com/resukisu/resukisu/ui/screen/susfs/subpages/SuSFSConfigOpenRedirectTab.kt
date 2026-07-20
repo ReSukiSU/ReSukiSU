@@ -26,13 +26,13 @@ import com.resukisu.resukisu.R
 import com.resukisu.resukisu.data.susfs.OpenRedirectItem
 import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.data.susfs.UidScheme
-import com.resukisu.resukisu.ui.component.EntryDetailDialog
-import com.resukisu.resukisu.ui.component.ManualAddDialog
 import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
-import com.resukisu.resukisu.ui.component.susfs.SuSFSDescriptionCard
-import com.resukisu.resukisu.ui.component.susfs.susfsEntryList
+import com.resukisu.resukisu.ui.screen.susfs.component.EntryDetailDialog
+import com.resukisu.resukisu.ui.screen.susfs.component.ManualAddDialog
+import com.resukisu.resukisu.ui.screen.susfs.component.SuSFSDescriptionCard
+import com.resukisu.resukisu.ui.screen.susfs.component.susfsEntryList
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.launch
 
@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
 fun OpenRedirectTab(
     nestedScrollConnection: NestedScrollConnection,
     topPadding: Dp,
-    refreshToken: Int,
+    dirtyGeneration: Int,
 ) {
     val snackbarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
@@ -63,7 +63,7 @@ fun OpenRedirectTab(
         UidScheme.Unmounted to stringResource(R.string.susfs_uid_scheme_unmounted),
     )
 
-    LaunchedEffect(refreshToken) {
+    LaunchedEffect(dirtyGeneration) {
         entries = SuSFSConfigHelper.loadConfig().open_redirect
     }
 

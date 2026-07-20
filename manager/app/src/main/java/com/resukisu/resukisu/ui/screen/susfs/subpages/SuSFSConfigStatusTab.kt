@@ -40,7 +40,7 @@ import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
 fun StatusTab(
     nestedScrollConnection: NestedScrollConnection,
     topPadding: Dp,
-    refreshToken: Int,
+    dirtyGeneration: Int,
     configEnabled: Boolean,
     configEnabledLoaded: Boolean,
     onConfigEnabledChange: (Boolean) -> Unit,
@@ -52,10 +52,10 @@ fun StatusTab(
         statusInfo = SuSFSConfigHelper.loadStatusInfo(forceRefresh)
     }
 
-    LaunchedEffect(refreshToken) {
+    LaunchedEffect(dirtyGeneration) {
         isLoading = true
         try {
-            loadStatus(forceRefresh = refreshToken > 0)
+            loadStatus(forceRefresh = dirtyGeneration > 0)
         } finally {
             isLoading = false
         }

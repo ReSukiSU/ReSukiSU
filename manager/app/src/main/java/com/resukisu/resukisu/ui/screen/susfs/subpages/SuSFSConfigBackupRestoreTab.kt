@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.RestartAlt
 import androidx.compose.material.icons.twotone.Restore
 import androidx.compose.material.icons.twotone.Save
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -30,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
-import com.resukisu.resukisu.ui.component.settings.SettingsDialogFrame
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.launch
@@ -136,19 +136,14 @@ fun BackupRestoreTab(
     }
 
     if (showImportConfirm) {
-        SettingsDialogFrame(
-            title = confirmTitle,
+        AlertDialog(
             onDismissRequest = {
                 showImportConfirm = false
                 pendingImportUri = null
             },
-            buttons = {
-                TextButton(onClick = {
-                    showImportConfirm = false
-                    pendingImportUri = null
-                }) {
-                    Text(cancelLabel)
-                }
+            title = { Text(confirmTitle) },
+            text = { Text(confirmMsg) },
+            confirmButton = {
                 TextButton(
                     onClick = {
                         val uri = pendingImportUri
@@ -169,10 +164,16 @@ fun BackupRestoreTab(
                 ) {
                     Text(importLabel)
                 }
-            }
-        ) {
-            Text(text = confirmMsg)
-        }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showImportConfirm = false
+                    pendingImportUri = null
+                }) {
+                    Text(cancelLabel)
+                }
+            },
+        )
     }
 }
 
