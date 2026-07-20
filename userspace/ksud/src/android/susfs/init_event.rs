@@ -67,6 +67,10 @@ pub fn on_boot_completed() {
     log::info!("Processing SUSFS.");
 
     let config = Config::read_or_default();
+    if !config.is_enabled() {
+        log::info!("SUSFS persisted configuration is disabled; skipping boot-completed apply");
+        return;
+    }
 
     handle_result(config.apply_cmdline_or_bootconfig(), "sus_cmdline");
     handle_result(config.final_sus_kstat(), "finalize sus_kstat");
@@ -81,6 +85,11 @@ pub fn on_post_fs_data() {
     let config = Config::read_or_default();
 
     log::info!("on_post_fs_data triggered!");
+
+    if !config.is_enabled() {
+        log::info!("SUSFS persisted configuration is disabled; skipping post-fs-data apply");
+        return;
+    }
 
     handle_result(config.apply_avc_log_spoofing(), "avc_config");
     handle_result(config.init_sus_kstat(), "initialize sus_kstat");

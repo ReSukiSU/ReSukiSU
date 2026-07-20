@@ -7,33 +7,27 @@ use clap::{ArgAction, Args, Parser, Subcommand, error::ErrorKind};
 use num_enum::TryFromPrimitive;
 
 use crate::android::susfs::{
-    api::prelude as api, config::model::Config, enums::UidScheme, slot_info,
+    api::prelude as api,
+    config::cli::{ConfigCommand, run as run_config},
+    enums::UidScheme,
+    slot_info,
 };
 
 #[derive(Debug, Args)]
 pub struct SusfsArgs {
     #[command(subcommand)]
     pub command: SuSFSSubCommands,
-
-    #[command(flatten)]
-    pub behaviour: Behaviours,
-}
-
-#[derive(Args, Debug)]
-#[group(multiple = false)]
-pub struct Behaviours {
-    /// Apply until next boot.
-    #[arg(long)]
-    pub api_only: bool,
-
-    /// Apply after next boot.
-    #[arg(long)]
-    pub config_only: bool,
 }
 
 #[derive(Debug, Subcommand)]
 #[allow(clippy::large_enum_variant)]
 pub enum SuSFSSubCommands {
+    /// Manage the persisted SUSFS configuration.
+    Config {
+        #[command(subcommand)]
+        command: ConfigCommand,
+    },
+
     /// Added path and all its sub-paths will be hidden for umounted app process from several syscalls.
     ///
     /// Please be reminded that if the target path has upper mounts then make sure the proper layer is added,
@@ -60,13 +54,6 @@ pub enum SuSFSSubCommands {
     #[command(name = "add_sus_path_loop")]
     AddSusPathLoop {
         /// Path of file or directory
-        path: String,
-    },
-
-    /// Remove sus_path or sus_path_loop previously added from auto-startup.
-    #[command(name = "del_sus_path")]
-    DelSusPath {
-        // Path of file or directory
         path: String,
     },
 
@@ -156,13 +143,6 @@ pub enum SuSFSSubCommands {
         blksize: std::option::Option<i64>,
     },
 
-    /// Remove sus_kstat or sus_kstat_statically previously added to be auto-applied when boot-up.
-    #[command(name = "del_sus_kstat")]
-    DelSusKstat {
-        /// Path of file or directory
-        path: String,
-    },
-
     /// Spoof uname for all processes.
     #[command(name = "set_uname")]
     SetUname { release: String, version: String },
@@ -201,10 +181,6 @@ pub enum SuSFSSubCommands {
         uid_scheme: i32,
     },
 
-    /// Remove a previously added open redirect entry.
-    #[command(name = "del_open_redirect")]
-    DelOpenRedirect { target_path: String },
-
     /// Added real file path which gets mmapped will be hidden from /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap].
     ///
     /// * Important Notes *
@@ -214,13 +190,6 @@ pub enum SuSFSSubCommands {
     /// - Only effective for umounted process with uid >= 10000.
     #[command(name = "add_sus_map")]
     AddSusMap {
-        /// Path to actual library
-        path: String,
-    },
-
-    /// Remove a previously added sus_map entry.
-    #[command(name = "del_sus_map")]
-    DelSusMap {
         /// Path to actual library
         path: String,
     },
@@ -312,52 +281,22 @@ pub fn run_from_args(args: &[String]) -> Result<()> {
 }
 
 pub fn run_main(args: SusfsArgs) -> Result<()> {
-    let mut config = Config::read_or_default();
-    let do_config = !args.behaviour.api_only;
-    let do_api = !args.behaviour.config_only;
-
     match args.command {
+        SuSFSSubCommands::Config { command } => run_config(command)?,
         SuSFSSubCommands::AddSusPath { path } => {
-            if do_api {
-                api::add_sus_path(&path, false)?;
-            }
-            if do_config {
-                config.add_sus_path(&path, false)?;
-            }
+            api::add_sus_path(&path, false)?;
         }
         SuSFSSubCommands::AddSusPathLoop { path } => {
-            if do_api {
-                api::add_sus_path(&path, true)?;
-            }
-            if do_config {
-                config.add_sus_path(&path, true)?;
-            }
-        }
-        SuSFSSubCommands::DelSusPath { path } => {
-            if do_config {
-                config.del_sus_path(&path);
-            }
+            api::add_sus_path(&path, true)?;
         }
         SuSFSSubCommands::AddSusKstat { path } => {
-            if do_api {
-                api::add_sus_kstat(&path)?;
-            }
+            api::add_sus_kstat(&path)?;
         }
         SuSFSSubCommands::UpdateSusKstat { path } => {
-            if do_api {
-                api::update_sus_kstat(&path, false)?;
-            }
-            if do_config {
-                config.add_sus_kstat(&path, false)?;
-            }
+            api::update_sus_kstat(&path, false)?;
         }
         SuSFSSubCommands::UpdateSusKstatFullClone { path } => {
-            if do_api {
-                api::update_sus_kstat(&path, true)?;
-            }
-            if do_config {
-                config.add_sus_kstat(&path, true)?;
-            }
+            api::update_sus_kstat(&path, true)?;
         }
         SuSFSSubCommands::AddSusKstatStatically {
             path,
@@ -374,55 +313,22 @@ pub fn run_main(args: SusfsArgs) -> Result<()> {
             blocks,
             blksize,
         } => {
-            if do_api {
-                api::add_sus_kstat_statically(
-                    &path, ino, dev, nlink, size, atime, atime_nsec, mtime, mtime_nsec, ctime,
-                    ctime_nsec, blocks, blksize,
-                )?;
-            }
-            if do_config {
-                config.add_sus_kstat_statically(
-                    &path, ino, dev, nlink, size, atime, atime_nsec, mtime, mtime_nsec, ctime,
-                    ctime_nsec, blocks, blksize,
-                )?;
-            }
-        }
-        SuSFSSubCommands::DelSusKstat { path } => {
-            if do_config {
-                config.del_sus_kstat(&path);
-            }
+            api::add_sus_kstat_statically(
+                &path, ino, dev, nlink, size, atime, atime_nsec, mtime, mtime_nsec, ctime,
+                ctime_nsec, blocks, blksize,
+            )?;
         }
         SuSFSSubCommands::SetUname { release, version } => {
-            if do_api {
-                api::set_uname(&release, &version)?;
-            }
-            if do_config {
-                config.set_uname(&release, &version)?;
-            }
+            api::set_uname(&release, &version)?;
         }
         SuSFSSubCommands::HideSusMntsForNonSuProcs { enabled } => {
-            if do_api {
-                api::hide_sus_mnts_for_non_su_procs(enabled)?;
-            }
-            if do_config {
-                config.set_hide_sus_mnts_for_non_su_procs(enabled);
-            }
+            api::hide_sus_mnts_for_non_su_procs(enabled)?;
         }
         SuSFSSubCommands::EnableLog { enabled } => {
-            if do_api {
-                api::enable_log(enabled)?;
-            }
-            if do_config {
-                config.set_logging(enabled);
-            }
+            api::enable_log(enabled)?;
         }
         SuSFSSubCommands::SetCmdlineOrBootconfig { path } => {
-            if do_api {
-                api::set_cmdline_or_bootconfig(&path)?;
-            }
-            if do_config {
-                config.set_cmdline_or_bootconfig(&path)?;
-            }
+            api::set_cmdline_or_bootconfig(&path)?;
         }
         SuSFSSubCommands::AddOpenRedirect {
             target_path,
@@ -430,38 +336,13 @@ pub fn run_main(args: SusfsArgs) -> Result<()> {
             uid_scheme,
         } => {
             let uid_scheme = UidScheme::try_from_primitive(uid_scheme)?;
-            if do_api {
-                api::add_open_redirect(&target_path, &redirected_path, &uid_scheme)?;
-            }
-            if do_config {
-                config.add_open_redirect(&target_path, &redirected_path, &uid_scheme)?;
-            }
-        }
-        SuSFSSubCommands::DelOpenRedirect { target_path } => {
-            if do_config {
-                config.del_open_redirect(&target_path);
-            }
+            api::add_open_redirect(&target_path, &redirected_path, &uid_scheme)?;
         }
         SuSFSSubCommands::AddSusMap { path } => {
-            if do_api {
-                api::add_sus_map(&path)?;
-            }
-            if do_config {
-                config.add_sus_map(&path)?;
-            }
-        }
-        SuSFSSubCommands::DelSusMap { path } => {
-            if do_config {
-                config.del_sus_map(&path);
-            }
+            api::add_sus_map(&path)?;
         }
         SuSFSSubCommands::EnableAvcLogSpoofing { enabled } => {
-            if do_api {
-                api::enable_avc_log_spoofing(enabled)?;
-            }
-            if do_config {
-                config.set_avc_log_spoofing(enabled);
-            }
+            api::enable_avc_log_spoofing(enabled)?;
         }
         SuSFSSubCommands::Show { info_type } => match info_type {
             ShowType::Version => {

@@ -1,17 +1,16 @@
-package com.resukisu.resukisu.ui.susfs.subpages
+package com.resukisu.resukisu.ui.screen.susfs.subpages
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,25 +24,21 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
-import com.resukisu.resukisu.data.susfs.SusPathItem
-import com.resukisu.resukisu.ui.component.EmptyStateCard
 import com.resukisu.resukisu.ui.component.EntryDetailDialog
 import com.resukisu.resukisu.ui.component.ManualAddDialog
-import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
-import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
-import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
+import com.resukisu.resukisu.ui.component.susfs.SuSFSDescriptionCard
+import com.resukisu.resukisu.ui.component.susfs.susfsEntryList
 import com.resukisu.resukisu.ui.component.toImportedEntryLines
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SusPathTab(
+fun SusMapTab(
     nestedScrollConnection: NestedScrollConnection,
     topPadding: Dp,
     refreshToken: Int
@@ -52,27 +47,23 @@ fun SusPathTab(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var entries by remember { mutableStateOf<Set<SusPathItem>>(emptySet()) }
+    var entries by remember { mutableStateOf<Set<String>>(emptySet()) }
     var isLoading by remember { mutableStateOf(false) }
 
     var showManualAdd by remember { mutableStateOf(false) }
-    var detailItem by remember { mutableStateOf<SusPathItem?>(null) }
+    var detailItem by remember { mutableStateOf<String?>(null) }
 
-    var selectedSubtype by remember { mutableStateOf("") }
     val manualPath = remember { TextFieldState() }
 
-    val subtypePath = stringResource(R.string.susfs_path_subtype_path)
-    val subtypeLoop = stringResource(R.string.susfs_path_subtype_loop)
-    val subtypes = listOf(subtypePath, subtypeLoop)
+    val subtypeSusMap = stringResource(R.string.susfs_map_subtype)
+    val subtypes = listOf(subtypeSusMap)
 
     LaunchedEffect(refreshToken) {
-        entries = SuSFSConfigHelper.loadConfig().sus_path
+        entries = SuSFSConfigHelper.loadConfig().sus_map
     }
 
     LaunchedEffect(showManualAdd) {
-        if (showManualAdd) {
-            if (selectedSubtype.isEmpty()) selectedSubtype = subtypePath
-        } else {
+        if (!showManualAdd) {
             manualPath.clearText()
         }
     }
@@ -80,9 +71,8 @@ fun SusPathTab(
     val manualAddTitle = stringResource(R.string.susfs_entry_manual_add)
     val detailTitle = stringResource(R.string.susfs_entry_detail)
     val pathLabel = stringResource(R.string.susfs_entry_path_label)
-    val isLoopLabel = stringResource(R.string.susfs_path_is_loop)
-    val isNotLoopLabel = stringResource(R.string.susfs_path_is_not_loop)
     val noEntriesMsg = stringResource(R.string.susfs_entry_no_entries)
+    val noEntriesHint = stringResource(R.string.susfs_entry_no_entries_hint)
     val operationFailedMsg = stringResource(R.string.susfs_operation_failed)
 
     LazyColumn(
@@ -95,48 +85,34 @@ fun SusPathTab(
         }
 
         item {
-            SegmentedColumn {
-                item {
-                    SettingsBaseWidget(
-                        iconPlaceholder = false,
-                        title = stringResource(R.string.sus_loop_paths_description_title),
-                        description = stringResource(R.string.sus_loop_paths_description_text)
-                    )
-                }
-
-                item {
-                    SettingsJumpPageWidget(
-                        iconPlaceholder = false,
-                        title = manualAddTitle,
-                        enabled = !isLoading,
-                        trailingIcon = Icons.TwoTone.Add,
-                        onClick = { showManualAdd = true }
-                    )
-                }
+            SuSFSDescriptionCard(
+                title = stringResource(R.string.sus_maps_description_title),
+                description = stringResource(R.string.sus_maps_description_text),
+            ) {
+                Text(
+                    text = stringResource(R.string.sus_maps_warning),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Text(
+                    text = stringResource(R.string.sus_maps_debug_info),
+                    style = MaterialTheme.typography.bodySmall,
+                )
             }
         }
 
-        if (entries.isEmpty()) {
-            item {
-                EmptyStateCard(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    message = noEntriesMsg
-                )
-            }
-        } else {
-            item { Spacer(Modifier.height(8.dp)) }
-            lazySegmentColumn(
-                items = entries.toList(),
-                key = { _, it -> it.path }
-            ) { _, item ->
-                SettingsJumpPageWidget(
-                    iconPlaceholder = false,
-                    title = item.path,
-                    description = if (item.is_loop) isLoopLabel else null,
-                    enabled = !isLoading,
-                    onClick = { detailItem = item }
-                )
-            }
+        susfsEntryList(
+            entries = entries.toList(),
+            addEntryTitle = manualAddTitle,
+            emptyTitle = noEntriesMsg,
+            emptyDescription = noEntriesHint,
+            entryKey = { it },
+            onAddEntry = { showManualAdd = true },
+        ) { path ->
+            SettingsJumpPageWidget(
+                iconPlaceholder = false,
+                title = path,
+                onClick = { detailItem = path },
+            )
         }
     }
 
@@ -144,8 +120,8 @@ fun SusPathTab(
         showDialog = showManualAdd,
         title = manualAddTitle,
         subtypes = subtypes,
-        selectedSubtype = selectedSubtype,
-        onSubtypeChange = { selectedSubtype = it },
+        selectedSubtype = subtypeSusMap,
+        onSubtypeChange = {},
         onDismiss = { showManualAdd = false },
         showImportFromFile = true,
         onImportFromFile = { importedPath -> manualPath.setTextAndPlaceCursorAtEnd(importedPath) },
@@ -158,19 +134,14 @@ fun SusPathTab(
                 var successCount = 0
                 var failCount = 0
                 paths.forEach { path ->
-                    val ok = if (selectedSubtype == subtypeLoop) {
-                        SuSFSConfigHelper.addSusPathLoop(path)
-                    } else {
-                        SuSFSConfigHelper.addSusPath(path)
-                    }
-                    if (ok) {
+                    if (SuSFSConfigHelper.addSusMap(path)) {
                         successCount++
                     } else {
                         failCount++
                     }
                 }
                 if (successCount > 0) {
-                    entries = SuSFSConfigHelper.refreshConfig().sus_path
+                    entries = SuSFSConfigHelper.refreshConfig().sus_map
                 }
                 if (paths.size == 1) {
                     if (successCount > 0) {
@@ -188,34 +159,35 @@ fun SusPathTab(
                 snackbarMessage?.let { snackbarHost.showSnackbar(it) }
             }
         },
-        isLoading = isLoading,
         formContent = {
-            SettingsTextFieldWidget(
-                state = manualPath,
-                title = pathLabel,
-                useLabelAsPlaceholder = true,
-                enabled = !isLoading,
-                lineLimits = TextFieldLineLimits.MultiLine(minHeightInLines = 4, maxHeightInLines = 8),
-                renderBackgroundBlur = false
-            )
+            item {
+                SettingsTextFieldWidget(
+                    state = manualPath,
+                    title = pathLabel,
+                    useLabelAsPlaceholder = true,
+                    enabled = !isLoading,
+                    lineLimits = TextFieldLineLimits.MultiLine(
+                        minHeightInLines = 4,
+                        maxHeightInLines = 8
+                    ),
+                    renderBackgroundBlur = false
+                )
+            }
         }
     )
 
-    detailItem?.let { item ->
+    detailItem?.let { path ->
         EntryDetailDialog(
             showDialog = true,
             title = detailTitle,
-            fields = listOf(
-                pathLabel to item.path,
-                isLoopLabel to if (item.is_loop) isLoopLabel else isNotLoopLabel
-            ),
+            fields = listOf(pathLabel to path),
             onDismiss = { detailItem = null },
             onDelete = {
                 scope.launch {
                     isLoading = true
-                    val ok = SuSFSConfigHelper.delSusPath(item.path)
+                    val ok = SuSFSConfigHelper.removeSusMap(path)
                     if (ok) {
-                        entries = SuSFSConfigHelper.refreshConfig().sus_path
+                        entries = SuSFSConfigHelper.refreshConfig().sus_map
                         detailItem = null
                     } else {
                         isLoading = false
@@ -226,7 +198,6 @@ fun SusPathTab(
                     isLoading = false
                 }
             },
-            isLoading = isLoading
         )
     }
 }

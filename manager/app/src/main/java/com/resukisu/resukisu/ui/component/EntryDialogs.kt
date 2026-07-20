@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,15 +27,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.documentfile.provider.DocumentFile
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.documentfile.provider.DocumentFile
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
+import com.resukisu.resukisu.ui.component.settings.SegmentedColumnScope
 import com.resukisu.resukisu.ui.component.settings.SettingsDialogFrame
 import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
+import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -51,7 +54,7 @@ import kotlinx.coroutines.withContext
  * @param hint 输入提示文案
  * @param onDismiss 关闭回调
  * @param onConfirm 确认回调，返回非空行列表
- * @param isLoading 是否加载中（加载时禁用交互）
+ * @param isLoading 是否加载中（仅禁用输入区域，不禁用操作按钮）
  */
 @Composable
 fun BatchImportDialog(
@@ -111,7 +114,7 @@ fun BatchImportDialog(
                             inputText = ""
                         }
                     },
-                    enabled = !isLoading && inputText.isNotBlank()
+                    enabled = inputText.isNotBlank()
                 ) {
                     Text(stringResource(R.string.add))
                 }
@@ -137,8 +140,7 @@ fun BatchImportDialog(
                         horizontalArrangement = Arrangement.End
                     ) {
                             OutlinedButton(
-                                onClick = { pickFileLauncher.launch(arrayOf("text/plain")) },
-                                enabled = !isLoading
+                                onClick = { pickFileLauncher.launch(arrayOf("text/plain")) }
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.UploadFile,
@@ -163,7 +165,6 @@ fun BatchImportDialog(
  * @param fields 只读字段列表，每项为 (label, value)
  * @param onDismiss 关闭回调
  * @param onDelete 删除回调
- * @param isLoading 是否加载中（加载时禁用交互）
  */
 @Composable
 fun EntryDetailDialog(
@@ -172,7 +173,6 @@ fun EntryDetailDialog(
     fields: List<Pair<String, String>>,
     onDismiss: () -> Unit,
     onDelete: () -> Unit,
-    isLoading: Boolean = false
 ) {
     if (showDialog) {
         SettingsDialogFrame(
@@ -184,7 +184,6 @@ fun EntryDetailDialog(
                 }
                 Button(
                     onClick = onDelete,
-                    enabled = !isLoading,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.error
                     )
@@ -225,7 +224,6 @@ fun EntryDetailDialog(
  * @param onSubtypeChange 子类型变更回调
  * @param onDismiss 关闭回调
  * @param onConfirm 确认添加回调
- * @param isLoading 是否加载中（加载时禁用交互）
  * @param formContent 由调用方提供的表单内容
  */
 @Composable
@@ -237,10 +235,9 @@ fun ManualAddDialog(
     onSubtypeChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
-    isLoading: Boolean = false,
     showImportFromFile: Boolean = false,
     onImportFromFile: (String) -> Unit = {},
-    formContent: @Composable () -> Unit
+    formContent: SegmentedColumnScope.() -> Unit
 ) {
     val context = LocalContext.current
     val snackbarHost = LocalSnackbarHost.current
@@ -279,50 +276,37 @@ fun ManualAddDialog(
                     Text(stringResource(R.string.cancel))
                 }
                 Button(
-                    onClick = onConfirm,
-                    enabled = !isLoading
+                    onClick = onConfirm
                 ) {
                     Text(stringResource(R.string.add))
                 }
             }
         ) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    if (subtypes.size > 1) {
+            SegmentedColumn(contentPadding = PaddingValues(0.dp)) {
+                if (subtypes.size > 1) {
+                    item {
                         SettingsDropdownWidget(
                             title = stringResource(R.string.susfs_entry_select_subtype),
                             description = selectedSubtype,
                             iconPlaceholder = false,
-                            enabled = !isLoading,
                             choice = subtypes.indexOf(selectedSubtype).coerceAtLeast(0),
                             data = subtypes,
                             onChoiceChange = { index -> onSubtypeChange(subtypes[index]) }
                         )
                     }
-                    formContent()
-                    if (showImportFromFile) {
-                        Text(
-                            text = stringResource(R.string.susfs_entry_import_hint),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                }
+                formContent()
+                if (showImportFromFile) {
+                    item {
+                        SettingsJumpPageWidget(
+                            icon = Icons.Default.UploadFile,
+                            title = importFromFileLabel,
+                            description = stringResource(R.string.susfs_entry_import_hint),
+                            onClick = { pickFileLauncher.launch(arrayOf("text/plain")) },
                         )
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            OutlinedButton(
-                                onClick = { pickFileLauncher.launch(arrayOf("text/plain")) },
-                                enabled = !isLoading
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.UploadFile,
-                                    contentDescription = null,
-                                    modifier = Modifier.padding(end = 4.dp)
-                                )
-                                Text(importFromFileLabel)
-                            }
-                        }
                     }
                 }
+            }
         }
     }
 }

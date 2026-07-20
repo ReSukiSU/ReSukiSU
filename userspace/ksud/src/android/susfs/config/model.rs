@@ -16,6 +16,8 @@ pub(super) struct VersionProbe {
 #[derive(Serialize, Deserialize)]
 pub struct Config {
     pub(super) version: u8,
+    #[serde(default = "default_enabled")]
+    pub(super) enabled: bool,
     pub(super) cmdline_or_bootconfig: String,
     pub(super) avc_log_spoofing: bool,
     pub(super) logging: bool,
@@ -31,6 +33,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             version: CURRENT_VERSION,
+            enabled: true,
             cmdline_or_bootconfig: "".to_string(),
             avc_log_spoofing: false,
             logging: false,
@@ -45,6 +48,16 @@ impl Default for Config {
             sus_map: HashSet::new(),
         }
     }
+}
+
+impl Config {
+    pub fn is_enabled(&self) -> bool {
+        self.enabled
+    }
+}
+
+const fn default_enabled() -> bool {
+    true
 }
 
 #[derive(Serialize, Deserialize)]

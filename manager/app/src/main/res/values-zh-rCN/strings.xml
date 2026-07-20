@@ -617,7 +617,7 @@
     <string name="susfs_tab_status">状态</string>
     <string name="susfs_tab_standard">一般</string>
     <string name="susfs_tab_sus_path">隐藏路径</string>
-    <string name="susfs_tab_sus_kstat">欺骗元数据</string>
+    <string name="susfs_tab_sus_kstat">伪造元数据</string>
     <string name="susfs_tab_open_redirect">文件重定向</string>
     <string name="susfs_tab_sus_map">隐藏映射</string>
     <string name="susfs_tab_backup_restore">备份 / 还原</string>
@@ -630,6 +630,9 @@
     <string name="susfs_status_loading">加载中...</string>
 
     <!-- SUSFS rewrite: standard features page -->
+    <string name="susfs_standard_config_enabled">启用持久化配置</string>
+    <string name="susfs_standard_config_enabled_desc">开机时自动应用已保存的 SUSFS 配置。</string>
+    <string name="susfs_management_disabled_warning">管理器内置 SUSFS 管理已被禁用</string>
     <string name="susfs_standard_logging">日志</string>
     <string name="susfs_standard_logging_desc">启用 SUSFS 内核日志。在反馈 SUSFS 问题前请启用该开关并复现问题，然后携带日志提问。</string>
     <string name="susfs_standard_avc_log_spoofing">AVC 日志欺骗</string>
@@ -651,6 +654,7 @@
     <string name="susfs_entry_import_list">导入 %1$s 列表</string>
     <string name="susfs_entry_manual_add">添加条目</string>
     <string name="susfs_entry_no_entries">无条目</string>
+    <string name="susfs_entry_no_entries_hint">点击“添加条目”以添加一个</string>
     <string name="susfs_entry_detail">条目详情</string>
     <string name="susfs_entry_delete">删除</string>
     <string name="susfs_entry_cancel">取消</string>
@@ -695,6 +699,10 @@
     <string name="susfs_redirect_target_path">起点路径</string>
     <string name="susfs_redirect_redirected_path">终点路径</string>
     <string name="susfs_redirect_uid_scheme">应用于</string>
+    <string name="susfs_redirect_description">将目标路径的打开操作重定向至用户指定路径，并按所选 UID 范围决定生效进程。</string>
+    <string name="susfs_redirect_uid_schemes_description">UID 范围：\n0：非应用进程（UID &lt; 10000）\n1：UID 为 0 且不属于 SU 域的 Root 进程\n2：所有非 SU 进程（请谨慎使用）\n3：UID ≥ 10000 且被标记为已卸载的应用进程（请谨慎使用）\n4：所有被标记为已卸载的进程，包括大多数由 init 启动的进程（请谨慎使用）</string>
+    <string name="susfs_redirect_important_notes">注意：\n• 添加前，起点路径和终点路径必须存在。\n• 请自行配置两个路径的 SELinux 权限。\n• 仅对符合所选 UID 范围的进程生效。</string>
+    <string name="susfs_redirect_entry_description">%1$s · %2$s</string>
     <string name="susfs_redirect_import_hint">每行格式: target_path|redirected_path|uid_scheme_int (0-4)</string>
     <string name="susfs_uid_scheme_non_app">非 Android 应用</string>
     <string name="susfs_uid_scheme_root_except_su">非 SU 的 Root 进程</string>

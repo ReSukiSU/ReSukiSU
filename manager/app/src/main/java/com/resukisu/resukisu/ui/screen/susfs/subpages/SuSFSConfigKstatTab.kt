@@ -1,18 +1,13 @@
-package com.resukisu.resukisu.ui.susfs.subpages
+package com.resukisu.resukisu.ui.screen.susfs.subpages
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,19 +24,17 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.data.susfs.SusKstatItem
 import com.resukisu.resukisu.data.susfs.SusKstatType
-import com.resukisu.resukisu.ui.component.EmptyStateCard
 import com.resukisu.resukisu.ui.component.EntryDetailDialog
 import com.resukisu.resukisu.ui.component.ManualAddDialog
-import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
-import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
+import com.resukisu.resukisu.ui.component.susfs.SuSFSDescriptionCard
+import com.resukisu.resukisu.ui.component.susfs.susfsEntryList
 import com.resukisu.resukisu.ui.component.toImportedEntryLines
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.launch
@@ -115,6 +108,7 @@ fun SusKstatTab(
     val spoofTypeLabel = stringResource(R.string.susfs_kstat_spoof_type)
     val staticallyFieldsLabel = stringResource(R.string.susfs_kstat_statically_fields)
     val noEntriesMsg = stringResource(R.string.susfs_entry_no_entries)
+    val noEntriesHint = stringResource(R.string.susfs_entry_no_entries_hint)
     val operationFailedMsg = stringResource(R.string.susfs_operation_failed)
     val fieldInoLabel = stringResource(R.string.susfs_kstat_field_ino)
     val fieldDevLabel = stringResource(R.string.susfs_kstat_field_dev)
@@ -148,71 +142,42 @@ fun SusKstatTab(
         }
 
         item {
-            SegmentedColumn {
-                item {
-                    SettingsBaseWidget(
-                        iconPlaceholder = false,
-                        title = stringResource(R.string.kstat_config_description_title),
-                        descriptionColumnContent = {
-                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                Text(
-                                    text = stringResource(R.string.kstat_config_description_add),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    text = stringResource(R.string.kstat_config_description_update),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    text = stringResource(R.string.kstat_config_description_update_full_clone),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    text = stringResource(R.string.kstat_config_description_add_statically),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    )
-                }
-
-                item {
-                    SettingsJumpPageWidget(
-                        iconPlaceholder = false,
-                        title = manualAddTitle,
-                        enabled = !isLoading,
-                        trailingIcon = Icons.TwoTone.Add,
-                        onClick = { showManualAdd = true }
-                    )
-                }
+            SuSFSDescriptionCard(
+                title = stringResource(R.string.kstat_config_description_title),
+            ) {
+                Text(
+                    text = stringResource(R.string.kstat_config_description_add),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Text(
+                    text = stringResource(R.string.kstat_config_description_update),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Text(
+                    text = stringResource(R.string.kstat_config_description_update_full_clone),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Text(
+                    text = stringResource(R.string.kstat_config_description_add_statically),
+                    style = MaterialTheme.typography.bodySmall,
+                )
             }
         }
 
-        if (entries.isEmpty()) {
-            item {
-                EmptyStateCard(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    message = noEntriesMsg
-                )
-            }
-        } else {
-            item { Spacer(Modifier.height(8.dp)) }
-            lazySegmentColumn(
-                items = entries.toList(),
-                key = { _, it -> it.path }
-            ) { _, item ->
-                SettingsJumpPageWidget(
-                    iconPlaceholder = false,
-                    title = item.path,
-                    description = item.spoof_type.localizedLabel(),
-                    enabled = !isLoading,
-                    onClick = { detailItem = item }
-                )
-            }
+        susfsEntryList(
+            entries = entries.toList(),
+            addEntryTitle = manualAddTitle,
+            emptyTitle = noEntriesMsg,
+            emptyDescription = noEntriesHint,
+            entryKey = { it.path },
+            onAddEntry = { showManualAdd = true },
+        ) { item ->
+            SettingsJumpPageWidget(
+                iconPlaceholder = false,
+                title = item.path,
+                description = item.spoof_type.localizedLabel(),
+                onClick = { detailItem = item },
+            )
         }
     }
 
@@ -235,10 +200,7 @@ fun SusKstatTab(
                 var failCount = 0
                 paths.forEach { path ->
                     val ok = when (selectedSubtype) {
-                        subtypeFullClone -> {
-                            val added = SuSFSConfigHelper.addSusKstat(path)
-                            if (added) SuSFSConfigHelper.updateSusKstatFullClone(path) else false
-                        }
+                        subtypeFullClone -> SuSFSConfigHelper.addSusKstatFullClone(path)
                         subtypeStatically -> {
                             SuSFSConfigHelper.addSusKstatStatically(
                                 path,
@@ -256,10 +218,7 @@ fun SusKstatTab(
                                 statBlksize.text.toString().trim().toLongOrNull()
                             )
                         }
-                        else -> {
-                            val added = SuSFSConfigHelper.addSusKstat(path)
-                            if (added) SuSFSConfigHelper.updateSusKstat(path) else false
-                        }
+                        else -> SuSFSConfigHelper.addSusKstat(path)
                     }
                     if (ok) {
                         successCount++
@@ -286,37 +245,44 @@ fun SusKstatTab(
                 snackbarMessage?.let { snackbarHost.showSnackbar(it) }
             }
         },
-        isLoading = isLoading,
         formContent = {
+            item(key = "susfs_kstat_path") {
+                SettingsTextFieldWidget(
+                    state = manualPath,
+                    title = pathLabel,
+                    useLabelAsPlaceholder = true,
+                    enabled = !isLoading,
+                    lineLimits = if (selectedSubtype == subtypeStatically) {
+                        TextFieldLineLimits.MultiLine(minHeightInLines = 4, maxHeightInLines = 8)
+                    } else {
+                        TextFieldLineLimits.SingleLine
+                    },
+                    renderBackgroundBlur = false
+                )
+            }
             if (selectedSubtype == subtypeStatically) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SettingsTextFieldWidget(
-                        state = manualPath,
-                        title = pathLabel,
-                        useLabelAsPlaceholder = true,
-                        enabled = !isLoading,
-                        lineLimits = TextFieldLineLimits.MultiLine(minHeightInLines = 4, maxHeightInLines = 8),
-                        renderBackgroundBlur = false
+                item(key = "susfs_kstat_static_fields") {
+                    SettingsBaseWidget(
+                        iconPlaceholder = false,
+                        title = staticallyFieldsLabel,
+                        renderBackgroundBlur = false,
                     )
-                    Text(
-                        text = staticallyFieldsLabel,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    listOf(
-                        fieldInoLabel to statIno,
-                        fieldDevLabel to statDev,
-                        fieldNlinkLabel to statNlink,
-                        fieldSizeLabel to statSize,
-                        fieldAtimeLabel to statAtime,
-                        fieldAtimeNsecLabel to statAtimeNsec,
-                        fieldMtimeLabel to statMtime,
-                        fieldMtimeNsecLabel to statMtimeNsec,
-                        fieldCtimeLabel to statCtime,
-                        fieldCtimeNsecLabel to statCtimeNsec,
-                        fieldBlocksLabel to statBlocks,
-                        fieldBlksizeLabel to statBlksize
-                    ).forEach { (label, state) ->
+                }
+                listOf(
+                    fieldInoLabel to statIno,
+                    fieldDevLabel to statDev,
+                    fieldNlinkLabel to statNlink,
+                    fieldSizeLabel to statSize,
+                    fieldAtimeLabel to statAtime,
+                    fieldAtimeNsecLabel to statAtimeNsec,
+                    fieldMtimeLabel to statMtime,
+                    fieldMtimeNsecLabel to statMtimeNsec,
+                    fieldCtimeLabel to statCtime,
+                    fieldCtimeNsecLabel to statCtimeNsec,
+                    fieldBlocksLabel to statBlocks,
+                    fieldBlksizeLabel to statBlksize
+                ).forEachIndexed { index, (label, state) ->
+                    item(key = "susfs_kstat_static_$index") {
                         SettingsTextFieldWidget(
                             state = state,
                             title = label,
@@ -327,15 +293,6 @@ fun SusKstatTab(
                         )
                     }
                 }
-            } else {
-                SettingsTextFieldWidget(
-                    state = manualPath,
-                    title = pathLabel,
-                    useLabelAsPlaceholder = true,
-                    enabled = !isLoading,
-                    lineLimits = TextFieldLineLimits.SingleLine,
-                    renderBackgroundBlur = false
-                )
             }
         }
     )
@@ -367,7 +324,7 @@ fun SusKstatTab(
             onDelete = {
                 scope.launch {
                     isLoading = true
-                    val ok = SuSFSConfigHelper.delSusKstat(item.path)
+                    val ok = SuSFSConfigHelper.removeSusKstat(item.path)
                     if (ok) {
                         entries = SuSFSConfigHelper.refreshConfig().sus_kstat
                         detailItem = null
@@ -380,7 +337,6 @@ fun SusKstatTab(
                     isLoading = false
                 }
             },
-            isLoading = isLoading
         )
     }
 }

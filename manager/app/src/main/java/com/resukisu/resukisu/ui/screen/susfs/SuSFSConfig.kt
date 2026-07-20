@@ -1,4 +1,4 @@
-package com.resukisu.resukisu.ui.susfs
+package com.resukisu.resukisu.ui.screen.susfs
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
@@ -42,13 +42,13 @@ import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
-import com.resukisu.resukisu.ui.susfs.subpages.BackupRestoreTab
-import com.resukisu.resukisu.ui.susfs.subpages.OpenRedirectTab
-import com.resukisu.resukisu.ui.susfs.subpages.StandardFeaturesTab
-import com.resukisu.resukisu.ui.susfs.subpages.StatusTab
-import com.resukisu.resukisu.ui.susfs.subpages.SusKstatTab
-import com.resukisu.resukisu.ui.susfs.subpages.SusMapTab
-import com.resukisu.resukisu.ui.susfs.subpages.SusPathTab
+import com.resukisu.resukisu.ui.screen.susfs.subpages.BackupRestoreTab
+import com.resukisu.resukisu.ui.screen.susfs.subpages.OpenRedirectTab
+import com.resukisu.resukisu.ui.screen.susfs.subpages.StandardFeaturesTab
+import com.resukisu.resukisu.ui.screen.susfs.subpages.StatusTab
+import com.resukisu.resukisu.ui.screen.susfs.subpages.SusKstatTab
+import com.resukisu.resukisu.ui.screen.susfs.subpages.SusMapTab
+import com.resukisu.resukisu.ui.screen.susfs.subpages.SusPathTab
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
@@ -76,22 +76,44 @@ fun SuSFSConfigScreen() {
     val topAppBarState = rememberTopAppBarState()
     val coroutineScope = rememberCoroutineScope()
     var refreshToken by remember { mutableStateOf(0) }
-    var isRefreshing by remember { mutableStateOf(false) }
+    var configEnabled by remember { mutableStateOf<Boolean?>(null) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
+    val operationFailedMsg = stringResource(R.string.susfs_operation_failed)
+    val isManagementEnabled = configEnabled == true
 
     val tabTitles = listOf(
+        R.string.susfs_tab_status,
         R.string.susfs_tab_standard,
+        R.string.susfs_tab_backup_restore,
         R.string.susfs_tab_sus_path,
         R.string.susfs_tab_sus_kstat,
         R.string.susfs_tab_open_redirect,
-        R.string.susfs_tab_sus_map,
-        R.string.susfs_tab_backup_restore,
-        R.string.susfs_tab_status
+        R.string.susfs_tab_sus_map
     ).map { stringResource(it) }
     val pagerState = rememberPagerState(pageCount = { tabTitles.size })
 
+    val handleConfigEnabledChange: (Boolean) -> Unit = { newValue ->
+        coroutineScope.launch {
+            if (SuSFSConfigHelper.setConfigEnabled(newValue)) {
+                configEnabled = newValue
+            } else {
+                snackBarHost.showSnackbar(operationFailedMsg)
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
+    }
+
+    LaunchedEffect(refreshToken) {
+        configEnabled = SuSFSConfigHelper.loadConfig().enabled
+    }
+
+    LaunchedEffect(configEnabled) {
+        if (configEnabled == false && pagerState.currentPage != 0) {
+            pagerState.scrollToPage(0)
+        }
     }
 
     Scaffold(
@@ -111,16 +133,10 @@ fun SuSFSConfigScreen() {
                         IconButton(
                             onClick = {
                                 coroutineScope.launch {
-                                    isRefreshing = true
-                                    try {
-                                        SuSFSConfigHelper.refreshConfig()
-                                        refreshToken += 1
-                                    } finally {
-                                        isRefreshing = false
-                                    }
+                                    SuSFSConfigHelper.refreshConfig()
+                                    refreshToken += 1
                                 }
-                            },
-                            enabled = !isRefreshing
+                            }
                         ) {
                             Icon(
                                 imageVector = Icons.TwoTone.Refresh,
@@ -154,11 +170,15 @@ fun SuSFSConfigScreen() {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     tabTitles.forEachIndexed { index, title ->
+                        val tabEnabled = index == 0 || isManagementEnabled
                         Tab(
                             selected = pagerState.currentPage == index,
+                            enabled = tabEnabled,
                             onClick = {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(index)
+                                if (tabEnabled) {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
                                 }
                             },
                             unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -191,16 +211,54 @@ fun SuSFSConfigScreen() {
         ) {
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                userScrollEnabled = isManagementEnabled,
             ) { page ->
                 when (page) {
-                    0 -> StandardFeaturesTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
-                    1 -> SusPathTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
-                    2 -> SusKstatTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
-                    3 -> OpenRedirectTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
-                    4 -> SusMapTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
-                    5 -> BackupRestoreTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding())
-                    6 -> StatusTab(scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding(), refreshToken)
+                    0 -> StatusTab(
+                        nestedScrollConnection = scrollBehavior.nestedScrollConnection,
+                        topPadding = innerPadding.calculateTopPadding(),
+                        refreshToken = refreshToken,
+                        configEnabled = configEnabled ?: false,
+                        configEnabledLoaded = configEnabled != null,
+                        onConfigEnabledChange = handleConfigEnabledChange,
+                    )
+
+                    1 -> StandardFeaturesTab(
+                        scrollBehavior.nestedScrollConnection,
+                        innerPadding.calculateTopPadding(),
+                        refreshToken
+                    )
+
+                    2 -> BackupRestoreTab(
+                        nestedScrollConnection = scrollBehavior.nestedScrollConnection,
+                        topPadding = innerPadding.calculateTopPadding(),
+                        onConfigRestored = { refreshToken += 1 },
+                    )
+
+                    3 -> SusPathTab(
+                        scrollBehavior.nestedScrollConnection,
+                        innerPadding.calculateTopPadding(),
+                        refreshToken
+                    )
+
+                    4 -> SusKstatTab(
+                        scrollBehavior.nestedScrollConnection,
+                        innerPadding.calculateTopPadding(),
+                        refreshToken
+                    )
+
+                    5 -> OpenRedirectTab(
+                        scrollBehavior.nestedScrollConnection,
+                        innerPadding.calculateTopPadding(),
+                        refreshToken
+                    )
+
+                    6 -> SusMapTab(
+                        scrollBehavior.nestedScrollConnection,
+                        innerPadding.calculateTopPadding(),
+                        refreshToken
+                    )
                 }
             }
         }

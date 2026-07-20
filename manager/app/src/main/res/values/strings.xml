@@ -487,6 +487,9 @@
     <string name="susfs_status_no_data">No data</string>
 
     <!-- SUSFS rewrite: standard features page -->
+    <string name="susfs_standard_config_enabled">Persisted configuration</string>
+    <string name="susfs_standard_config_enabled_desc">Automatically apply the saved SUSFS configuration during boot.</string>
+    <string name="susfs_management_disabled_warning">Built-in SUSFS management in Manager is disabled.</string>
     <string name="susfs_standard_logging">Logging</string>
     <string name="susfs_standard_logging_desc">Enable SUSFS kernel log. Enable before report bug related to SUSFS.</string>
     <string name="susfs_standard_avc_log_spoofing">AVC Log Spoofing</string>
@@ -504,6 +507,7 @@
     <!-- SUSFS rewrite: entry page common -->
     <string name="susfs_entry_manual_add">Add Entry</string>
     <string name="susfs_entry_no_entries">No entries</string>
+    <string name="susfs_entry_no_entries_hint">Click \"Add Entry\" to add one</string>
     <string name="susfs_entry_detail">Entry Detail</string>
     <string name="susfs_entry_cancel">Cancel</string>
     <string name="susfs_entry_select_subtype">Select entry subtype</string>
@@ -543,6 +547,10 @@
     <string name="susfs_redirect_target_path">Target Path</string>
     <string name="susfs_redirect_redirected_path">Redirected Path</string>
     <string name="susfs_redirect_uid_scheme">UID Scheme</string>
+    <string name="susfs_redirect_description">Redirect opening the target path to a user-defined path for processes matching the selected UID scheme.</string>
+    <string name="susfs_redirect_uid_schemes_description">UID schemes:\n0: Non-app processes (UID &lt; 10000)\n1: UID 0 root processes outside the SU domain\n2: All non-SU processes (use with care)\n3: Unmounted app processes with UID ≥ 10000 (use with care)\n4: All unmounted processes, including most init-spawned processes (use with care)</string>
+    <string name="susfs_redirect_important_notes">Important notes:\n• Both the target and redirected paths must exist before adding an entry.\n• You must configure the SELinux permissions for both paths.\n• The redirect only affects processes matching the selected UID scheme.</string>
+    <string name="susfs_redirect_entry_description">%1$s · %2$s</string>
     <string name="susfs_uid_scheme_non_app">Non App</string>
     <string name="susfs_uid_scheme_root_except_su">Root except SU</string>
     <string name="susfs_uid_scheme_non_su">Non SU</string>

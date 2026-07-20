@@ -13,7 +13,11 @@ use tempfile::NamedTempFile;
 
 impl Config {
     pub fn read() -> Result<Self> {
-        let file = File::open(SUSFS_CONFIG)?;
+        Self::read_from(SUSFS_CONFIG)
+    }
+
+    pub fn read_from(path: impl AsRef<Path>) -> Result<Self> {
+        let file = File::open(path)?;
         let mut reader = BufReader::new(file);
 
         // 1. Parse the version
@@ -65,13 +69,5 @@ impl Config {
         temp_file.persist(target_path)?;
 
         Ok(())
-    }
-}
-
-impl Drop for Config {
-    fn drop(&mut self) {
-        log::info!("Saving SUSFS config...");
-        self.save()
-            .unwrap_or_else(|e| log::error!("Failed to save SUSFS config: {e}"));
     }
 }

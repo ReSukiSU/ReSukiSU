@@ -1,4 +1,4 @@
-package com.resukisu.resukisu.ui.susfs.subpages
+package com.resukisu.resukisu.ui.screen.susfs.subpages
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -7,6 +7,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.twotone.RestartAlt
+import androidx.compose.material.icons.twotone.Restore
+import androidx.compose.material.icons.twotone.Save
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -35,12 +39,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun BackupRestoreTab(
     nestedScrollConnection: NestedScrollConnection,
-    topPadding: Dp
+    topPadding: Dp,
+    onConfigRestored: () -> Unit,
 ) {
     val snackbarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
 
-    var isLoading by remember { mutableStateOf(false) }
     var showImportConfirm by remember { mutableStateOf(false) }
     var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -67,9 +71,7 @@ fun BackupRestoreTab(
     ) { uri: Uri? ->
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
-            isLoading = true
             val ok = SuSFSConfigHelper.exportConfigToUri(uri)
-            isLoading = false
             scope.launch {
                 snackbarHost.showSnackbar(if (ok) exportSuccessMsg else exportFailedMsg)
             }
@@ -97,10 +99,9 @@ fun BackupRestoreTab(
             SegmentedColumn {
                 item {
                     SettingsJumpPageWidget(
-                        iconPlaceholder = false,
+                        icon = Icons.TwoTone.Save,
                         title = exportTitle,
                         description = exportDesc,
-                        enabled = !isLoading,
                         onClick = {
                             exportLauncher.launch(defaultFilename)
                         }
@@ -108,10 +109,9 @@ fun BackupRestoreTab(
                 }
                 item {
                     SettingsJumpPageWidget(
-                        iconPlaceholder = false,
+                        icon = Icons.TwoTone.Restore,
                         title = importTitle,
                         description = importDesc,
-                        enabled = !isLoading,
                         onClick = {
                             importLauncher.launch(arrayOf("application/json"))
                         }
@@ -123,7 +123,8 @@ fun BackupRestoreTab(
                         description = restoreDefaultDesc,
                         snackbarHost = snackbarHost,
                         operationSuccessMsg = operationSuccessMsg,
-                        operationFailedMsg = operationFailedMsg
+                        operationFailedMsg = operationFailedMsg,
+                        onConfigRestored = onConfigRestored,
                     )
                 }
             }
@@ -155,16 +156,16 @@ fun BackupRestoreTab(
                         pendingImportUri = null
                         if (uri != null) {
                             scope.launch {
-                                isLoading = true
                                 val ok = SuSFSConfigHelper.importConfigFromUri(uri)
-                                isLoading = false
+                                if (ok) {
+                                    onConfigRestored()
+                                }
                                 scope.launch {
                                     snackbarHost.showSnackbar(if (ok) importSuccessMsg else importFailedMsg)
                                 }
                             }
                         }
-                    },
-                    enabled = !isLoading
+                    }
                 ) {
                     Text(importLabel)
                 }
@@ -182,20 +183,19 @@ private fun RestoreDefaultRow(
     snackbarHost: SnackbarHostState,
     operationSuccessMsg: String,
     operationFailedMsg: String,
+    onConfigRestored: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    var isRestoring by remember { mutableStateOf(false) }
-
     SettingsJumpPageWidget(
-        iconPlaceholder = false,
+        icon = Icons.TwoTone.RestartAlt,
         title = title,
         description = description,
-        enabled = !isRestoring,
         onClick = {
             scope.launch {
-                isRestoring = true
                 val ok = SuSFSConfigHelper.restoreDefaultConfig()
-                isRestoring = false
+                if (ok) {
+                    onConfigRestored()
+                }
                 snackbarHost.showSnackbar(if (ok) operationSuccessMsg else operationFailedMsg)
             }
         }

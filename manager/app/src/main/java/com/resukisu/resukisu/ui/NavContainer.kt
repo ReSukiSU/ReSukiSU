@@ -81,8 +81,8 @@ import com.resukisu.resukisu.ui.screen.kernelFlash.KernelFlashScreen
 import com.resukisu.resukisu.ui.screen.main.MainScreen
 import com.resukisu.resukisu.ui.screen.moduleRepo.ModuleRepoScreen
 import com.resukisu.resukisu.ui.screen.moduleRepo.OnlineModuleDetailScreen
+import com.resukisu.resukisu.ui.screen.susfs.SuSFSConfigScreen
 import com.resukisu.resukisu.ui.screen.themeSettings.ThemeSettingsScreen
-import com.resukisu.resukisu.ui.susfs.SuSFSConfigScreen
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.backgroundImagePainter
 import com.resukisu.resukisu.ui.util.LocalBackgroundBlurAnchor

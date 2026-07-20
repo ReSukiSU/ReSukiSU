@@ -1,6 +1,7 @@
-package com.resukisu.resukisu.ui.susfs.subpages
+package com.resukisu.resukisu.ui.screen.susfs.subpages
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -8,6 +9,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.twotone.BugReport
+import androidx.compose.material.icons.twotone.Code
+import androidx.compose.material.icons.twotone.Computer
+import androidx.compose.material.icons.twotone.Security
+import androidx.compose.material.icons.twotone.VisibilityOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
@@ -51,9 +58,6 @@ fun StandardFeaturesTab(
     var loggingEnabled by remember { mutableStateOf(false) }
     var avcLogSpoofingEnabled by remember { mutableStateOf(false) }
     var hideSusMntsEnabled by remember { mutableStateOf(false) }
-    var loggingBusy by remember { mutableStateOf(false) }
-    var avcLogSpoofingBusy by remember { mutableStateOf(false) }
-    var hideSusMntsBusy by remember { mutableStateOf(false) }
     var unameVersion by remember { mutableStateOf("") }
     var unameRelease by remember { mutableStateOf("") }
     var cmdlineOrBootconfig by remember { mutableStateOf("") }
@@ -86,19 +90,11 @@ fun StandardFeaturesTab(
     val handleLoggingChange: (Boolean) -> Unit = remember(scope, snackbarHost, operationFailedMsg) {
         { newValue: Boolean ->
             scope.launch {
-                loggingBusy = true
-                    try {
-                        val ok = SuSFSConfigHelper.enableLog(newValue)
-                        if (ok) {
-                            loggingEnabled = newValue
-                        } else {
-                            loggingBusy = false
-                            scope.launch {
-                                snackbarHost.showSnackbar(operationFailedMsg)
-                            }
-                        }
-                    } finally {
-                        loggingBusy = false
+                val ok = SuSFSConfigHelper.enableLog(newValue)
+                if (ok) {
+                    loggingEnabled = newValue
+                } else {
+                    snackbarHost.showSnackbar(operationFailedMsg)
                 }
             }
         }
@@ -108,19 +104,11 @@ fun StandardFeaturesTab(
         remember(scope, snackbarHost, operationFailedMsg) {
             { newValue: Boolean ->
                 scope.launch {
-                    avcLogSpoofingBusy = true
-                    try {
-                        val ok = SuSFSConfigHelper.enableAvcLogSpoofing(newValue)
-                        if (ok) {
-                            avcLogSpoofingEnabled = newValue
-                        } else {
-                            avcLogSpoofingBusy = false
-                            scope.launch {
-                                snackbarHost.showSnackbar(operationFailedMsg)
-                            }
-                        }
-                    } finally {
-                        avcLogSpoofingBusy = false
+                    val ok = SuSFSConfigHelper.enableAvcLogSpoofing(newValue)
+                    if (ok) {
+                        avcLogSpoofingEnabled = newValue
+                    } else {
+                        snackbarHost.showSnackbar(operationFailedMsg)
                     }
                 }
             }
@@ -130,19 +118,11 @@ fun StandardFeaturesTab(
         remember(scope, snackbarHost, operationFailedMsg) {
             { newValue: Boolean ->
                 scope.launch {
-                    hideSusMntsBusy = true
-                    try {
-                        val ok = SuSFSConfigHelper.hideSusMntsForNonSuProcs(newValue)
-                        if (ok) {
-                            hideSusMntsEnabled = newValue
-                        } else {
-                            hideSusMntsBusy = false
-                            scope.launch {
-                                snackbarHost.showSnackbar(operationFailedMsg)
-                            }
-                        }
-                    } finally {
-                        hideSusMntsBusy = false
+                    val ok = SuSFSConfigHelper.hideSusMntsForNonSuProcs(newValue)
+                    if (ok) {
+                        hideSusMntsEnabled = newValue
+                    } else {
+                        snackbarHost.showSnackbar(operationFailedMsg)
                     }
                 }
             }
@@ -205,46 +185,42 @@ fun StandardFeaturesTab(
                     SegmentedColumn {
                         item {
                             SettingsSwitchWidget(
-                                iconPlaceholder = false,
+                                icon = Icons.TwoTone.BugReport,
                                 title = stringResource(R.string.susfs_standard_logging),
                                 description = stringResource(R.string.susfs_standard_logging_desc),
                                 checked = loggingEnabled,
-                                enabled = !isLoading && !loggingBusy,
                                 onCheckedChange = handleLoggingChange
                             )
                         }
 
                         item {
                             SettingsSwitchWidget(
-                                iconPlaceholder = false,
+                                icon = Icons.TwoTone.Security,
                                 title = stringResource(R.string.susfs_standard_avc_log_spoofing),
                                 description = stringResource(R.string.susfs_standard_avc_log_spoofing_desc),
                                 checked = avcLogSpoofingEnabled,
-                                enabled = !isLoading && !avcLogSpoofingBusy,
                                 onCheckedChange = handleAvcLogSpoofingChange
                             )
                         }
 
                         item {
                             SettingsSwitchWidget(
-                                iconPlaceholder = false,
+                                icon = Icons.TwoTone.VisibilityOff,
                                 title = stringResource(R.string.susfs_standard_hide_sus_mnts),
                                 description = stringResource(R.string.susfs_standard_hide_sus_mnts_desc),
                                 checked = hideSusMntsEnabled,
-                                enabled = !isLoading && !hideSusMntsBusy,
                                 onCheckedChange = handleHideSusMntsChange
                             )
                         }
 
                         item {
                             SettingsJumpPageWidget(
-                                iconPlaceholder = false,
+                                icon = Icons.TwoTone.Computer,
                                 title = stringResource(R.string.susfs_standard_uname),
                                 description = stringResource(
                                     R.string.susfs_standard_current_value,
                                     "$unameRelease / $unameVersion"
                                 ),
-                                enabled = !isLoading,
                                 onClick = {
                                     unameReleaseInput.setTextAndPlaceCursorAtEnd(unameRelease)
                                     unameVersionInput.setTextAndPlaceCursorAtEnd(unameVersion)
@@ -255,13 +231,12 @@ fun StandardFeaturesTab(
 
                         item {
                             SettingsJumpPageWidget(
-                                iconPlaceholder = false,
+                                icon = Icons.TwoTone.Code,
                                 title = stringResource(R.string.susfs_standard_cmdline_or_bootconfig),
                                 description = stringResource(
                                     R.string.susfs_standard_current_value,
                                     cmdlineOrBootconfig.ifBlank { stringResource(R.string.susfs_standard_not_set) }
                                 ),
-                                enabled = !isLoading,
                                 onClick = {
                                     cmdlineInput.setTextAndPlaceCursorAtEnd(cmdlineOrBootconfig)
                                     showCmdlineDialog = true
@@ -295,29 +270,34 @@ fun StandardFeaturesTab(
                         Text(stringResource(R.string.susfs_entry_cancel))
                     }
                     TextButton(
-                        onClick = handleUnameSave,
-                        enabled = !isLoading
+                        onClick = handleUnameSave
                     ) {
                         Text(stringResource(R.string.susfs_save))
                     }
                 },
             ) {
-                SettingsTextFieldWidget(
-                    state = unameReleaseInput,
-                    title = stringResource(R.string.susfs_standard_uname_release),
-                    useLabelAsPlaceholder = true,
-                    enabled = !isLoading,
-                    lineLimits = TextFieldLineLimits.SingleLine,
-                    renderBackgroundBlur = false
-                )
-                SettingsTextFieldWidget(
-                    state = unameVersionInput,
-                    title = stringResource(R.string.susfs_standard_uname_version),
-                    useLabelAsPlaceholder = true,
-                    enabled = !isLoading,
-                    lineLimits = TextFieldLineLimits.SingleLine,
-                    renderBackgroundBlur = false
-                )
+                SegmentedColumn(contentPadding = PaddingValues(0.dp)) {
+                    item {
+                        SettingsTextFieldWidget(
+                            state = unameReleaseInput,
+                            title = stringResource(R.string.susfs_standard_uname_release),
+                            useLabelAsPlaceholder = true,
+                            enabled = !isLoading,
+                            lineLimits = TextFieldLineLimits.SingleLine,
+                            renderBackgroundBlur = false
+                        )
+                    }
+                    item {
+                        SettingsTextFieldWidget(
+                            state = unameVersionInput,
+                            title = stringResource(R.string.susfs_standard_uname_version),
+                            useLabelAsPlaceholder = true,
+                            enabled = !isLoading,
+                            lineLimits = TextFieldLineLimits.SingleLine,
+                            renderBackgroundBlur = false
+                        )
+                    }
+                }
             }
         }
 
@@ -330,21 +310,24 @@ fun StandardFeaturesTab(
                         Text(stringResource(R.string.susfs_entry_cancel))
                     }
                     TextButton(
-                        onClick = handleCmdlineSave,
-                        enabled = !isLoading
+                        onClick = handleCmdlineSave
                     ) {
                         Text(stringResource(R.string.susfs_save))
                     }
                 },
             ) {
-                SettingsTextFieldWidget(
-                    state = cmdlineInput,
-                    title = stringResource(R.string.susfs_standard_cmdline_path),
-                    useLabelAsPlaceholder = true,
-                    enabled = !isLoading,
-                    lineLimits = TextFieldLineLimits.SingleLine,
-                    renderBackgroundBlur = false
-                )
+                SegmentedColumn(contentPadding = PaddingValues(0.dp)) {
+                    item {
+                        SettingsTextFieldWidget(
+                            state = cmdlineInput,
+                            title = stringResource(R.string.susfs_standard_cmdline_path),
+                            useLabelAsPlaceholder = true,
+                            enabled = !isLoading,
+                            lineLimits = TextFieldLineLimits.SingleLine,
+                            renderBackgroundBlur = false
+                        )
+                    }
+                }
             }
         }
     }

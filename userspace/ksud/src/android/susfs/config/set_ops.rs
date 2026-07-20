@@ -7,6 +7,11 @@ use crate::android::susfs::{
 use anyhow::Result;
 
 impl Config {
+    pub fn set_enabled(&mut self, enabled: bool) -> &mut Self {
+        self.enabled = enabled;
+        self
+    }
+
     pub fn set_cmdline_or_bootconfig(&mut self, path: &str) -> Result<&mut Self> {
         if !path.is_empty() {
             ensure_path_exists!(path);
@@ -49,7 +54,7 @@ impl Config {
         Ok(self)
     }
 
-    pub fn del_sus_path(&mut self, path: &str) -> &mut Self {
+    pub fn remove_sus_path(&mut self, path: &str) -> &mut Self {
         self.sus_path.remove(path);
         self
     }
@@ -107,7 +112,7 @@ impl Config {
         Ok(self)
     }
 
-    pub fn del_sus_kstat(&mut self, path: &str) -> &mut Self {
+    pub fn remove_sus_kstat(&mut self, path: &str) -> &mut Self {
         self.sus_kstat.remove(path);
         self
     }
@@ -128,7 +133,7 @@ impl Config {
         Ok(self)
     }
 
-    pub fn del_open_redirect(&mut self, target_path: &str) -> &mut Self {
+    pub fn remove_open_redirect(&mut self, target_path: &str) -> &mut Self {
         self.open_redirect.remove(target_path);
         self
     }
@@ -139,7 +144,7 @@ impl Config {
         Ok(self)
     }
 
-    pub fn del_sus_map(&mut self, path: &str) -> &mut Self {
+    pub fn remove_sus_map(&mut self, path: &str) -> &mut Self {
         self.sus_map.remove(path);
         self
     }
