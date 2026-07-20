@@ -638,7 +638,7 @@ internal fun AppearanceSettings(
         item(visible = isMiuix, topPadding = 1.dp) {
             val context = LocalContext.current
             SettingsSwitchWidget(
-                icon = Icons.Filled.BlurOn,
+                icon = Icons.TwoTone.BlurOn,
                 title = stringResource(id = R.string.settings_config_enable_blur),
                 description = stringResource(id = R.string.settings_config_enable_blur_summary),
                 checked = ThemeConfig.miuixEnableBlur,
@@ -652,7 +652,7 @@ internal fun AppearanceSettings(
         item(visible = isMiuix, topPadding = 1.dp) {
             val context = LocalContext.current
             SettingsSwitchWidget(
-                icon = Icons.Filled.Style,
+                icon = Icons.TwoTone.Style,
                 title = stringResource(id = R.string.settings_floating_bottom_bar),
                 description = stringResource(id = R.string.settings_floating_bottom_bar_summary),
                 checked = ThemeConfig.enableFloatingBottomBar,
@@ -665,7 +665,7 @@ internal fun AppearanceSettings(
         item(visible = isMiuix && ThemeConfig.enableFloatingBottomBar, topPadding = 1.dp) {
             val context = LocalContext.current
             SettingsSwitchWidget(
-                icon = Icons.Filled.Opacity,
+                icon = Icons.TwoTone.Opacity,
                 title = stringResource(id = R.string.settings_floating_bottom_bar_blur),
                 description = stringResource(id = R.string.settings_floating_bottom_bar_blur_summary),
                 checked = ThemeConfig.enableFloatingBottomBarBlur,
