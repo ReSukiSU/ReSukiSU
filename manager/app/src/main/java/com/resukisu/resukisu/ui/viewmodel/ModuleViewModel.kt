@@ -47,6 +47,17 @@ class ModuleViewModel : ViewModel() {
     private var modules: List<ModuleInfo> = emptyList()
     private val _uiState = MutableStateFlow(ModuleUiState())
     val uiState: StateFlow<ModuleUiState> = _uiState.asStateFlow()
+    
+    // 添加模块相关设置持久化方法applyUserSettings
+    private fun applyUserSettings() {
+        val prefs = ksuApp.appPreferences
+        _uiState.update {
+            it.copy(
+                showMoreModuleInfo = prefs.getBoolean("show_more_module_info", false),
+                isHideTagRow = prefs.getBoolean("is_hide_tag_row", false),
+            )
+        }
+    }
 
     fun loadSize(dirId: String) = viewModelScope.launch(Dispatchers.IO) {
         val size = formatFileSize(
@@ -181,11 +192,17 @@ class ModuleViewModel : ViewModel() {
 
     fun fetchModuleList(
         manualRefresh: Boolean = false,
+        silent: Boolean = false,    // 添加控制参数
         callBack: () -> Unit = {},
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            _uiState.update { it.copy(isRefreshing = true) }
-
+            // 添加判断，静默时跳过动画
+            if (!silent) {
+                _uiState.update { it.copy(isRefreshing = true) }
+            }
+         
+            applyUserSettings()  // 添加读取用户设置数据
+            
             val oldModuleList = modules
             val start = SystemClock.elapsedRealtime()
 

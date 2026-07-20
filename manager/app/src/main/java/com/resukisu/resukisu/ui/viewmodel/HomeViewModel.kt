@@ -398,6 +398,44 @@ class HomeViewModel : ViewModel() {
         return job
     }
 
+/**
+ * 静默刷新主页数据
+ * 与 refreshData(refreshUI = true) 逻辑完全一致，仅移除动画
+ * 用于从后台返回或数据变更时的自动刷新场景
+ */
+    fun refreshDataSilently(context: Context) {
+        // 1. 检查更新（强制检查，与下拉刷新一致）
+        refreshManagerUpdates(context, force = true)
+
+        // 2. 直接执行刷新（不检查 isInitialDataLoaded，与下拉刷新一致）
+        val job = viewModelScope.launch(Dispatchers.IO) {
+            try {
+                loadingJobs.forEach { it.cancel() }
+                loadingJobs.clear()
+
+                // 3. 刷新用户设置（与下拉刷新一致）
+                val userSettings = async { applyUserSettings(context) }
+
+                // 4. 强制刷新核心数据和扩展数据（与下拉刷新一致）
+                val coreJob = loadCoreData(force = true)
+                val extendedJob = loadExtendedData(context, force = true)
+
+                coreJob?.join()
+                extendedJob?.join()
+                userSettings.join()
+            } finally {
+                _uiState.update {
+                    it.copy(
+                        isInitialDataLoaded = true,
+                        // 注意：不设置 isRefreshing，保持 false（无动画）
+                    )
+                }
+            }
+        }
+
+        dataLoadJob = job
+    }
+
     private fun applyUserSettings(context: Context) {
         val settingsPrefs = context.appPreferences
         _uiState.update {

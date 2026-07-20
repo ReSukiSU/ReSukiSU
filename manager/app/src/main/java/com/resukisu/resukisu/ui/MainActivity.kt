@@ -160,11 +160,31 @@ class MainActivity : ComponentActivity() {
         // Initialize theme settings.
         ThemeUtils.initializeThemeSettings(this, settingsViewModel)
     }
-
+    
+    // 新增刷新方法代码开始
+    private fun refreshDataOnResume() {
+        // 1. 主页：静默刷新（与下拉刷新逻辑一致，仅无动画）
+        if (::homeViewModel.isInitialized) {
+            homeViewModel.refreshDataSilently(applicationContext)
+        }
+        // 2. 模块页面：静默刷新（manualRefresh = true 完整检查更新，silent = true 无动画）
+        if (::moduleViewModel.isInitialized) {
+            moduleViewModel.fetchModuleList(manualRefresh = true, silent = true)
+        }
+        // 3. 超级用户页面：静默刷新
+        if (::superUserViewModel.isInitialized) {
+            lifecycleScope.launch {
+                superUserViewModel.fetchAppList(silent = true)
+            }
+        }
+    }
+    // 新增刷新方法代码结束
+    
     override fun onResume() {
         try {
             super.onResume()
             ThemeUtils.onActivityResume()
+            refreshDataOnResume()  //新增刷新方法调用
         } catch (e: Exception) {
             e.printStackTrace()
         }

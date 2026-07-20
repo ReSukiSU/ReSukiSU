@@ -86,7 +86,9 @@ import com.resukisu.resukisu.ui.util.setSepolicy
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
 import com.resukisu.resukisu.ui.viewmodel.getTemplateInfoById
 import kotlinx.coroutines.launch
-
+import androidx.lifecycle.ViewModelProvider
+import com.resukisu.resukisu.ksuApp
+import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
 /**
  * @author weishu
  * @date 2023/5/16.
@@ -190,6 +192,17 @@ fun AppProfileScreen(
                         snackBarHost.showSnackbar(failToUpdateAppProfile.format(appGroup.uid))
                     } else {
                         profile = it
+                        // ✅ 新增：刷新超级用户列表和主页数据
+                        try {
+                            // 刷新超级用户列表（静默）
+                            ViewModelProvider(ksuApp)[SuperUserViewModel::class.java]
+                                .fetchAppList(silent = true)
+                            // 刷新主页数据（静默）
+                            ViewModelProvider(ksuApp)[HomeViewModel::class.java]
+                                .refreshDataSilently(ksuApp)
+                        } catch (e: Exception) {
+                            // 忽略
+                        }
                     }
                 }
             },
