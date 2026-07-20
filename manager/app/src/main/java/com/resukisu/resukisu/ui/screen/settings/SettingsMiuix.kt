@@ -145,6 +145,22 @@ fun SettingPagerMiuix(
                             checked = uiState.checkUpdate,
                             onCheckedChange = actions.onSetCheckUpdate
                         )
+                        if (uiState.checkUpdate) {
+                            SwitchPreference(
+                                title = stringResource(id = R.string.settings_check_beta_update),
+                                summary = stringResource(id = R.string.settings_check_beta_update_summary),
+                                startAction = {
+                                    Icon(
+                                        Icons.Rounded.Update,
+                                        modifier = Modifier.padding(end = 6.dp),
+                                        contentDescription = stringResource(id = R.string.settings_check_beta_update),
+                                        tint = colorScheme.onBackground
+                                    )
+                                },
+                                checked = uiState.checkBetaUpdate,
+                                onCheckedChange = actions.onSetCheckBetaUpdate
+                            )
+                        }
                         KsuIsValid {
                             SwitchPreference(
                                 title = stringResource(id = R.string.settings_module_check_update),
@@ -516,6 +532,7 @@ fun SettingPagerMiuix(
 
 data class SettingsScreenActions(
     val onSetCheckUpdate: (Boolean) -> Unit,
+    val onSetCheckBetaUpdate: (Boolean) -> Unit = {},
     val onSetCheckModuleUpdate: (Boolean) -> Unit,
     val onOpenTheme: () -> Unit,
     val onSetUiModeIndex: (Int) -> Unit,

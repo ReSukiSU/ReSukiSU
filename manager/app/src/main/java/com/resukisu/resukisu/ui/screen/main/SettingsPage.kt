@@ -152,6 +152,7 @@ fun SettingsPage(bottomPadding: Dp) {
             uiState = uiState,
             actions = com.resukisu.resukisu.ui.screen.settings.SettingsScreenActions(
                 onSetCheckUpdate = { settingsViewModel.handleCheckUpdateChange(context, it) },
+                onSetCheckBetaUpdate = { settingsViewModel.handleCheckBetaUpdateChange(context, it) },
                 onSetCheckModuleUpdate = {
                     checkModuleUpdate = it
                     context.appPreferences.putBoolean("check_module_update", it)
