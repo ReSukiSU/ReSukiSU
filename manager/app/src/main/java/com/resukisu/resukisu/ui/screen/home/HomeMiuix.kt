@@ -36,6 +36,12 @@ import androidx.compose.material.icons.rounded.CheckCircleOutline
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -123,7 +129,8 @@ fun HomePagerMiuix(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         if (state.checkUpdateEnabled) {
-                            UpdateCard(state = state, actions = actions)
+                            UpdateCard(state.stableManagerUpdate)
+                            UpdateCard(state.betaManagerUpdate)
                         }
                         if (state.showUAPIMisMatchWarning) {
                             WarningCard(
@@ -186,36 +193,56 @@ fun HomePagerMiuix(
 }
 
 @Composable
-private fun UpdateCard(
-    state: HomeUiState,
-    actions: HomeActions,
-) {
-    val newVersion = state.latestVersionInfo
-    val title = stringResource(id = R.string.module_changelog)
+private fun UpdateCard(update: com.resukisu.resukisu.data.update.ManagerUpdateInfo?) {
+    val context = LocalContext.current
+    val permissionRequestInterface = com.resukisu.resukisu.ui.util.LocalPermissionRequestInterface.current
     val updateText = stringResource(id = R.string.module_update)
-    val updateDialog = rememberConfirmDialog(onConfirm = { actions.onOpenUrl(newVersion.downloadUrl) })
+    // Keep the last non-null update so the exit animation can still render it while `update` is null.
+    var displayed by remember { mutableStateOf<com.resukisu.resukisu.data.update.ManagerUpdateInfo?>(null) }
+    LaunchedEffect(update) { if (update != null) displayed = update }
 
     AnimatedVisibility(
-        visible = state.hasUpdate,
+        visible = update != null,
         enter = fadeIn() + expandVertically(),
         exit = shrinkVertically() + fadeOut()
     ) {
-        WarningCard(
-            message = stringResource(id = R.string.new_version_available, newVersion.versionCode),
-            color = colorScheme.outline,
-            onClick = {
-                if (newVersion.changelog.isEmpty()) {
-                    actions.onOpenUrl(newVersion.downloadUrl)
-                } else {
-                    updateDialog.showConfirm(
-                        title = title,
-                        content = newVersion.changelog,
-                        markdown = true,
-                        confirm = updateText
+        displayed?.let { updateInfo ->
+            val isStable = updateInfo.channel == com.resukisu.resukisu.data.update.ManagerUpdateChannel.STABLE
+            val message = if (isStable) {
+                stringResource(R.string.new_version_available, updateInfo.versionCode)
+            } else {
+                stringResource(R.string.beta_version_available, updateInfo.versionCode)
+            }
+            val channelTitle = stringResource(
+                if (isStable) R.string.manager_update_stable else R.string.manager_update_beta
+            )
+            val details = stringResource(
+                R.string.manager_update_details,
+                updateInfo.versionName,
+                updateInfo.versionCode,
+                updateInfo.abi,
+            )
+            val dialogContent = if (updateInfo.changelog.isBlank()) details else "$details\n\n${updateInfo.changelog}"
+            val updateDialog = rememberConfirmDialog(
+                onConfirm = {
+                    com.resukisu.resukisu.ui.util.downloader.downloadManagerUpdate(
+                        context, permissionRequestInterface, updateInfo
                     )
                 }
-            }
-        )
+            )
+            WarningCard(
+                message = message,
+                color = colorScheme.outline,
+                onClick = {
+                    updateDialog.showConfirm(
+                        title = channelTitle,
+                        content = dialogContent,
+                        markdown = updateInfo.changelog.isNotBlank(),
+                        confirm = updateText,
+                    )
+                }
+            )
+        }
     }
 }
 
@@ -587,8 +614,6 @@ val HomeUiState.showRootWarning: Boolean
     get() = systemStatus.ksuVersion != null && !systemStatus.isRootAvailable
 val HomeUiState.showUnofficialWarning: Boolean
     get() = !systemStatus.isOfficialSignature
-val HomeUiState.hasUpdate: Boolean
-    get() = latestVersionInfo.versionCode > currentManagerVersionCode
 
 data class HomeActions(
     val onInstallClick: () -> Unit,
