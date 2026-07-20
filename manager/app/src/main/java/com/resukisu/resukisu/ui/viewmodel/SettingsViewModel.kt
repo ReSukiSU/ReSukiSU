@@ -10,6 +10,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
@@ -94,6 +95,7 @@ data class SettingsUiState(
     val dpiPresets: Map<String, Int> = emptyMap(),
 
     val checkUpdate: Boolean = true,
+    val checkBetaUpdate: Boolean = true,
     val suCompatMode: Int = 0,
     val suStatus: String = "",
     val kernelUmountStatus: String = "",
@@ -152,6 +154,7 @@ class SettingsViewModel : ViewModel() {
                 isDpiCustom = !dpiPresetValues().contains(currentDpi),
                 dpiPresets = dpiPresets(context),
                 checkUpdate = prefs.getBoolean("check_update", true),
+                checkBetaUpdate = prefs.getBoolean("check_beta_update", true),
                 autoJailbreakEnabled = prefs.getBoolean("auto_jailbreak", false),
             )
         }
@@ -202,6 +205,7 @@ class SettingsViewModel : ViewModel() {
             _uiState.update {
                 it.copy(
                     checkUpdate = prefs.getBoolean("check_update", true),
+                    checkBetaUpdate = prefs.getBoolean("check_beta_update", true),
                     suCompatMode = suCompatMode,
                     suStatus = runCatching { getFeatureStatus("su_compat") }.getOrDefault(""),
                     kernelUmountStatus = runCatching { getFeatureStatus("kernel_umount") }.getOrDefault(
@@ -434,6 +438,26 @@ class SettingsViewModel : ViewModel() {
 
     fun handleCheckUpdateChange(context: Context, enabled: Boolean) {
         updateBooleanPref(context, "check_update", enabled) { it.copy(checkUpdate = enabled) }
+        if (!enabled) {
+            updateBooleanPref(context, "check_beta_update", false) {
+                it.copy(checkBetaUpdate = false)
+            }
+        }
+        refreshHomeData(context)
+    }
+
+    fun handleCheckBetaUpdateChange(context: Context, enabled: Boolean) {
+        updateBooleanPref(
+            context,
+            "check_beta_update",
+            enabled
+        ) { it.copy(checkBetaUpdate = enabled) }
+        refreshHomeData(context)
+    }
+
+    private fun refreshHomeData(context: Context) {
+        ViewModelProvider(ksuApp)[HomeViewModel::class.java]
+            .refreshData(context, refreshUI = true)
     }
 
     fun handleSuCompatModeChange(context: Context, index: Int) {

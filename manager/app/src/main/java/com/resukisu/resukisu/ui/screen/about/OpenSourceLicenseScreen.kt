@@ -16,7 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
-import androidx.compose.material.icons.rounded.LocalPolice
+import androidx.compose.material.icons.twotone.LocalPolice
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
@@ -135,7 +135,7 @@ fun OpenSourceLicenseScreen() {
                 .blurSource(),
             contentPadding = paddingValues,// PaddingValues(horizontal = 16.dp),
             colors = LibraryDefaults.libraryColors(
-                libraryBackgroundColor = if (ThemeConfig.isEnableBlurExp) Color.Transparent else MaterialTheme.colorScheme.surfaceContainerHighest.copy(
+                libraryBackgroundColor = if (ThemeConfig.isEnableBlurExp) Color.Transparent else MaterialTheme.colorScheme.surfaceBright.copy(
                     alpha = CardConfig.cardAlpha
                 ),
                 libraryContentColor = MaterialTheme.colorScheme.onSurface,
@@ -193,7 +193,7 @@ fun OpenSourceLicenseScreen() {
                                 renderBackground = false,
                                 icon = {
                                     Icon(
-                                        imageVector = Icons.Rounded.LocalPolice,
+                                        imageVector = Icons.TwoTone.LocalPolice,
                                         contentDescription = null,
                                     )
                                 },
@@ -209,7 +209,7 @@ fun OpenSourceLicenseScreen() {
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.outlinedCardColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+                                    containerColor = MaterialTheme.colorScheme.surfaceBright
                                 )
                             ) {
                                 Column(

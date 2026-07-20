@@ -44,22 +44,21 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Wysiwyg
-import androidx.compose.material.icons.automirrored.rounded.Undo
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.Cloud
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Download
-import androidx.compose.material.icons.outlined.Extension
-import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material.icons.outlined.Warning
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Photo
-import androidx.compose.material.icons.rounded.Restore
+import androidx.compose.material.icons.automirrored.twotone.Undo
+import androidx.compose.material.icons.automirrored.twotone.Wysiwyg
+import androidx.compose.material.icons.twotone.Check
+import androidx.compose.material.icons.twotone.ChevronRight
+import androidx.compose.material.icons.twotone.Close
+import androidx.compose.material.icons.twotone.Cloud
+import androidx.compose.material.icons.twotone.Delete
+import androidx.compose.material.icons.twotone.Download
+import androidx.compose.material.icons.twotone.Extension
+import androidx.compose.material.icons.twotone.MoreVert
+import androidx.compose.material.icons.twotone.Photo
+import androidx.compose.material.icons.twotone.PlayArrow
+import androidx.compose.material.icons.twotone.Refresh
+import androidx.compose.material.icons.twotone.Restore
+import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
@@ -537,7 +536,7 @@ fun ModulePage(bottomPadding: Dp) {
                         onClick = { showBottomSheet = true },
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.MoreVert,
+                            imageVector = Icons.TwoTone.MoreVert,
                             contentDescription = stringResource(id = R.string.settings),
                         )
                     }
@@ -549,7 +548,7 @@ fun ModulePage(bottomPadding: Dp) {
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Cloud,
+                            imageVector = Icons.TwoTone.Cloud,
                             contentDescription = stringResource(id = R.string.module_repo),
                         )
                     }
@@ -605,7 +604,7 @@ fun ModulePage(bottomPadding: Dp) {
                         verticalArrangement = Arrangement.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Warning,
+                            imageVector = Icons.TwoTone.Warning,
                             contentDescription = null,
                             modifier = Modifier
                                 .size(64.dp)
@@ -631,14 +630,18 @@ fun ModulePage(bottomPadding: Dp) {
                         verticalArrangement = Arrangement.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Extension,
+                            imageVector = Icons.TwoTone.Extension,
                             contentDescription = null,
                             modifier = Modifier
                                 .size(96.dp)
                                 .padding(bottom = 16.dp)
                         )
                         Text(
-                            text = stringResource(R.string.module_empty),
+                            text =
+                                if (uiState.search.isNotEmpty())
+                                    stringResource(R.string.search_no_any_match)
+                                else
+                                    stringResource(R.string.module_empty),
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.bodyLarge,
                         )
@@ -772,7 +775,7 @@ private fun ModuleBottomSheetContent(
                     thumbContent = {
                         if (uiState.sortActionFirst) {
                             Icon(
-                                imageVector = Icons.Filled.Check,
+                                imageVector = Icons.TwoTone.Check,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(SwitchDefaults.IconSize),
@@ -780,9 +783,9 @@ private fun ModuleBottomSheetContent(
                         } else
                         {
                             Icon(
-                                imageVector = Icons.Filled.Close,
+                                imageVector = Icons.TwoTone.Close,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                tint = MaterialTheme.colorScheme.surfaceBright,
                                 modifier = Modifier.size(SwitchDefaults.IconSize),
                             )
                         }
@@ -809,7 +812,7 @@ private fun ModuleBottomSheetContent(
                     thumbContent = {
                         if (uiState.sortEnabledFirst) {
                             Icon(
-                                imageVector = Icons.Filled.Check,
+                                imageVector = Icons.TwoTone.Check,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(SwitchDefaults.IconSize),
@@ -817,9 +820,9 @@ private fun ModuleBottomSheetContent(
                         } else
                         {
                             Icon(
-                                imageVector = Icons.Filled.Close,
+                                imageVector = Icons.TwoTone.Close,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                tint = MaterialTheme.colorScheme.surfaceBright,
                                 modifier = Modifier.size(SwitchDefaults.IconSize),
                             )
                         }
@@ -1361,14 +1364,15 @@ private fun ModuleList(
                     if (shortcutIconUri == defaultShortcutIconUri) {
                         item {
                             SettingsBaseWidget(
-                                icon = Icons.Rounded.Photo,
+                                icon = Icons.TwoTone.Photo,
+                                renderBackgroundBlur = false,
                                 title = stringResource(id = R.string.module_shortcut_icon_pick),
                                 onClick = {
                                     pickShortcutIconLauncher.launch("image/*")
                                 }
                             ) {
                                 Icon(
-                                    imageVector = Icons.Filled.ChevronRight,
+                                    imageVector = Icons.TwoTone.ChevronRight,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(24.dp)
@@ -1378,14 +1382,15 @@ private fun ModuleList(
                     } else {
                         item {
                             SettingsBaseWidget(
-                                icon = Icons.Rounded.Restore,
+                                icon = Icons.TwoTone.Restore,
+                                renderBackgroundBlur = false,
                                 title = stringResource(id = R.string.restore),
                                 onClick = {
                                     shortcutIconUri = defaultShortcutIconUri
                                 }
                             ) {
                                 Icon(
-                                    imageVector = Icons.AutoMirrored.Rounded.Undo,
+                                    imageVector = Icons.AutoMirrored.TwoTone.Undo,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(24.dp)
@@ -1413,7 +1418,8 @@ private fun ModuleList(
                     if (hasExistingShortcut) {
                         item {
                             SettingsJumpPageWidget(
-                                icon = Icons.Rounded.Delete,
+                                icon = Icons.TwoTone.Delete,
+                                renderBackgroundBlur = false,
                                 title = stringResource(id = R.string.module_shortcut_delete),
                                 onClick = {
                                     val moduleId = shortcutModuleId
@@ -1507,7 +1513,7 @@ fun ModuleItem(
             if (ThemeConfig.isEnableBlurExp)
                 Color.Transparent
             else
-                MaterialTheme.colorScheme.surfaceContainerHighest.copy(CardConfig.cardAlpha),
+                MaterialTheme.colorScheme.surfaceBright.copy(CardConfig.cardAlpha),
         shape = RoundedCornerShape(16.dp)
     ) {
         val textDecoration = if (!module.remove) null else TextDecoration.LineThrough
@@ -1630,7 +1636,7 @@ fun ModuleItem(
                         thumbContent = {
                             if (module.enabled) {
                                 Icon(
-                                    imageVector = Icons.Filled.Check,
+                                    imageVector = Icons.TwoTone.Check,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(SwitchDefaults.IconSize),
@@ -1638,9 +1644,9 @@ fun ModuleItem(
                             } else
                             {
                                 Icon(
-                                    imageVector = Icons.Filled.Close,
+                                    imageVector = Icons.TwoTone.Close,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                    tint = MaterialTheme.colorScheme.surfaceBright,
                                     modifier = Modifier.size(SwitchDefaults.IconSize),
                                 )
                             }
@@ -1709,7 +1715,7 @@ fun ModuleItem(
                     ) {
                         Icon(
                             modifier = Modifier.size(20.dp),
-                            imageVector = Icons.Outlined.PlayArrow,
+                            imageVector = Icons.TwoTone.PlayArrow,
                             contentDescription = null
                         )
                     }
@@ -1725,7 +1731,7 @@ fun ModuleItem(
                     ) {
                         Icon(
                             modifier = Modifier.size(20.dp),
-                            imageVector = Icons.AutoMirrored.Outlined.Wysiwyg,
+                            imageVector = Icons.AutoMirrored.TwoTone.Wysiwyg,
                             contentDescription = null
                         )
                     }
@@ -1743,7 +1749,7 @@ fun ModuleItem(
                     ) {
                         Icon(
                             modifier = Modifier.size(20.dp),
-                            imageVector = Icons.Outlined.Download,
+                            imageVector = Icons.TwoTone.Download,
                             contentDescription = null
                         )
                     }
@@ -1757,7 +1763,7 @@ fun ModuleItem(
                     if (!module.remove) {
                         Icon(
                             modifier = Modifier.size(20.dp),
-                            imageVector = Icons.Outlined.Delete,
+                            imageVector = Icons.TwoTone.Delete,
                             contentDescription = null,
                         )
                     } else {
@@ -1765,7 +1771,7 @@ fun ModuleItem(
                             modifier = Modifier
                                 .size(20.dp)
                                 .rotate(180f),
-                            imageVector = Icons.Outlined.Refresh,
+                            imageVector = Icons.TwoTone.Refresh,
                             contentDescription = null
                         )
                     }

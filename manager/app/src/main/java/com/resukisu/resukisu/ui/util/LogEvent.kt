@@ -3,14 +3,20 @@ package com.resukisu.resukisu.ui.util
 import android.content.Context
 import android.os.Build
 import android.system.Os
-import com.topjohnwu.superuser.ShellUtils
+import androidx.core.content.pm.PackageInfoCompat
 import com.resukisu.resukisu.Natives
-import com.resukisu.resukisu.ui.screen.main.getManagerVersion
+import com.topjohnwu.superuser.ShellUtils
 import java.io.File
 import java.io.FileWriter
 import java.io.PrintWriter
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+
+fun getManagerVersion(context: Context): Pair<String, Long> {
+    val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)!!
+    val versionCode = PackageInfoCompat.getLongVersionCode(packageInfo)
+    return Pair(packageInfo.versionName!!, versionCode)
+}
 
 fun getBugreportFile(context: Context): File {
 

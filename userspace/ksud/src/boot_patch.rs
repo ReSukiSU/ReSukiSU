@@ -2,7 +2,7 @@
 use std::os::unix::fs::PermissionsExt;
 use std::{
     fs::File,
-    io::{BufReader, Cursor, Read, Seek, SeekFrom},
+    io::{Cursor, Seek, SeekFrom},
     path::PathBuf,
 };
 
@@ -293,14 +293,29 @@ rm -f /data/adb/post-fs-data.d/post_ota.sh
 #[cfg(target_os = "android")]
 pub use android::*;
 
+fn map_file(file: &PathBuf) -> Result<Mmap> {
+    let mut f = File::open(file).with_context(|| format!("open {}", file.display()))?;
+    let len = f
+        .seek(SeekFrom::End(0))
+        .with_context(|| format!("seek end of {}", file.display()))? as usize;
+    let mmap = unsafe { MmapOptions::new().len(len).map(&f)? };
+    Ok(mmap)
+}
+
 #[allow(clippy::needless_pass_by_value)]
 fn parse_kmi(buffer: Vec<u8>) -> Result<String> {
     let re = Regex::new(r"(\d+\.\d+)(?:\S+)?(android\d+)").context("Failed to compile regex")?;
     buffer
-        .windows(3)
+        .windows(4)
         .enumerate()
         .filter(|(_, x)| {
-            x[1] == b'.' && (x[0] == b'5' || x[0] == b'6') && (x[2] >= b'0' && x[2] <= b'9')
+            x[1] == b'.'
+                && x[2].is_ascii_digit()
+                && match x[0] {
+                    b'5' => x[3].is_ascii_digit(),
+                    b'6'..=b'9' => true,
+                    _ => false,
+                }
         })
         .find_map(|(i, _)| {
             let a = &buffer[i..buffer.len().min(i + 100)];
@@ -325,19 +340,13 @@ fn parse_kmi(buffer: Vec<u8>) -> Result<String> {
 }
 
 fn parse_kmi_from_kernel(kernel: &PathBuf) -> Result<String> {
-    let file = File::open(kernel).context("Failed to open kernel file")?;
-    let mut reader = BufReader::new(file);
-    let mut buffer = Vec::new();
-    reader
-        .read_to_end(&mut buffer)
-        .context("Failed to read kernel file")?;
+    let data = std::fs::read(kernel).context("Failed to read kernel file")?;
 
-    parse_kmi(buffer)
+    parse_kmi(data)
 }
 
 fn parse_kmi_from_boot(image: &PathBuf) -> Result<String> {
-    let image = unsafe { Mmap::map(&File::open(image)?)? };
-
+    let image = map_file(image)?;
     let bootimage = BootImage::parse(&image)?;
     if let Some(kernel) = bootimage.get_blocks().get_kernel() {
         let mut output = Vec::<u8>::new();
@@ -909,12 +918,4 @@ fn rebuild_without_ksu(
     let mut buf = Cursor::new(Vec::<u8>::new());
     patcher.patch(&mut buf)?;
     Ok(buf.into_inner())
-}
-fn map_file(file: &PathBuf) -> Result<Mmap> {
-    unsafe {
-        let mut file = File::open(file)?;
-        Ok(MmapOptions::new()
-            .len(file.seek(SeekFrom::End(0))? as usize)
-            .map(&file)?)
-    }
 }

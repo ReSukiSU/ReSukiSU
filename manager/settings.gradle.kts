@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "ReSukiSU"
 include(":app")
+include(":lint-rules")

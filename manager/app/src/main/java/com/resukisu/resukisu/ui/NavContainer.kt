@@ -27,8 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.paint
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -49,7 +47,6 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.SceneInfo
 import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.scene.rememberSceneState
-import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.NavigationEventState
@@ -383,12 +380,6 @@ fun NavContainer(
                         }
 
                         with(predictiveBackAnimationHandler) {
-                            val navTransition =
-                                LocalNavAnimatedContentScope.current.transition
-                            val blockInputDuringNavTransition =
-                                navTransition.isRunning ||
-                                        navTransition.currentState != navTransition.targetState
-
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -401,9 +392,6 @@ fun NavContainer(
                                         if (!ThemeConfig.backgroundImageLoaded) Modifier.background(
                                             MaterialTheme.colorScheme.surfaceContainer
                                         ) else Modifier
-                                    )
-                                    .blockPointerInputWhen(
-                                        blockInputDuringNavTransition
                                     )
                             ) {
                                 val surfaceContainer =
@@ -575,19 +563,6 @@ fun rememberMaterial3BlurBackdrop(enableBlur: Boolean): LayerBackdrop? {
         )
 
         drawContent()
-    }
-}
-
-private fun Modifier.blockPointerInputWhen(enabled: Boolean): Modifier {
-    if (!enabled) return this
-
-    return pointerInput(Unit) {
-        awaitPointerEventScope {
-            while (true) {
-                val event = awaitPointerEvent(PointerEventPass.Initial)
-                event.changes.forEach { it.consume() }
-            }
-        }
     }
 }
 

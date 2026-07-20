@@ -14,8 +14,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.twotone.DeleteForever
+import androidx.compose.material.icons.twotone.Save
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -367,13 +367,13 @@ private fun TopBar(
             }
             IconButton(onClick = onDelete) {
                 Icon(
-                    Icons.Filled.DeleteForever,
+                    Icons.TwoTone.DeleteForever,
                     contentDescription = stringResource(id = R.string.app_profile_template_delete)
                 )
             }
             IconButton(onClick = onSave) {
                 Icon(
-                    imageVector = Icons.Filled.Save,
+                    imageVector = Icons.TwoTone.Save,
                     contentDescription = stringResource(id = R.string.app_profile_template_save)
                 )
             }

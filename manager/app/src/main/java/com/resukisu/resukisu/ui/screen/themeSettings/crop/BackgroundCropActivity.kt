@@ -29,9 +29,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.RestartAlt
+import androidx.compose.material.icons.twotone.Check
+import androidx.compose.material.icons.twotone.Close
+import androidx.compose.material.icons.twotone.RestartAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -261,7 +261,10 @@ private fun BackgroundCropScreen(
                         enabled = !isCropping,
                         onClick = onCancel
                     ) {
-                        Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.cancel))
+                        Icon(
+                            Icons.TwoTone.Close,
+                            contentDescription = stringResource(R.string.cancel)
+                        )
                     }
                 },
                 actions = {
@@ -276,7 +279,10 @@ private fun BackgroundCropScreen(
                         },
                         enabled = !isLoading && !isCropping && !loadFailed
                     ) {
-                        Icon(Icons.Rounded.RestartAlt, contentDescription = stringResource(R.string.background_crop_reset))
+                        Icon(
+                            Icons.TwoTone.RestartAlt,
+                            contentDescription = stringResource(R.string.background_crop_reset)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -345,7 +351,7 @@ private fun BackgroundCropScreen(
                             enabled = !isLoading && !isCropping && !loadFailed
                         ) {
                             Icon(
-                                imageVector = Icons.Rounded.Check,
+                                imageVector = Icons.TwoTone.Check,
                                 contentDescription = null
                             )
                             Text(

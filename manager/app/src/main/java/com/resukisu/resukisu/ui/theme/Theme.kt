@@ -699,7 +699,7 @@ fun Modifier.renderBackgroundBlur(
         mutableStateOf<LayoutCoordinates?>(null)
     }
 
-    val tintColor = (tintColor ?: MaterialTheme.colorScheme.surfaceContainerHighest).copy(
+    val tintColor = (tintColor ?: MaterialTheme.colorScheme.surfaceBright).copy(
         alpha = CardConfig.cardAlpha
     )
     val backgroundBlurAnchor = LocalBackgroundBlurAnchor.current
@@ -1432,12 +1432,6 @@ private fun createColorScheme(
         isDark = darkTheme,
         style = ThemeConfig.dynamicPaletteStyle,
         specVersion = ThemeConfig.dynamicColorSpec,
-        modifyColorScheme = { scheme ->
-            scheme.copy(
-                background = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else scheme.background,
-                surface = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else scheme.surface,
-            )
-        }
     )
 }
 

@@ -97,14 +97,16 @@ class HorizonKernelWorker(
         state.startFlashing()
         state.updateStep(context.getString(R.string.horizon_preparing))
 
-        filePath = "${context.filesDir.absolutePath}/${DocumentFile.fromSingleUri(context, uri!!)?.name}"
-        binaryPath = "${context.filesDir.absolutePath}/META-INF/com/google/android/update-binary"
-        workDir = "${context.filesDir.absolutePath}/work"
+        val akDir = "${context.cacheDir.absolutePath}/anykernel3"
+        filePath = "$akDir/${DocumentFile.fromSingleUri(context, uri!!)?.name}"
+        binaryPath = "$akDir/META-INF/com/google/android/update-binary"
+        workDir = "$akDir/work"
 
         try {
             state.updateStep(context.getString(R.string.horizon_cleaning_files))
             state.updateProgress(0.1f)
             cleanup()
+            File("${context.cacheDir.absolutePath}/anykernel3").mkdirs()
 
             if (!rootAvailable()) {
                 state.setError(context.getString(R.string.root_required))
@@ -185,8 +187,7 @@ class HorizonKernelWorker(
     }
 
     private fun cleanup() {
-        runCommand(false, "find ${context.filesDir.absolutePath} -type f ! -name '*.jpg' ! -name '*.png' -delete")
-        runCommand(false, "rm -rf $workDir")
+        runCommand(false, "rm -rf ${context.cacheDir.absolutePath}/anykernel3")
     }
 
     private fun copy() {
@@ -200,7 +201,7 @@ class HorizonKernelWorker(
     }
 
     private fun getBinary() {
-        runCommand(false, "unzip \"$filePath\" \"*/update-binary\" -d ${context.filesDir.absolutePath}")
+        runCommand(false, "unzip \"$filePath\" \"*/update-binary\" -d ${context.cacheDir.absolutePath}/anykernel3")
         if (!File(binaryPath).exists()) {
             throw IOException("Failed to extract update-binary")
         }
@@ -223,7 +224,7 @@ class HorizonKernelWorker(
         } else {
             "5_15+"
         }
-        val toolPath = "${context.filesDir.absolutePath}/mkbootfs"
+        val toolPath = "${context.cacheDir.absolutePath}/anykernel3/mkbootfs"
         AssetsUtil.exportFiles(context, "$toolName-mkbootfs", toolPath)
         state.addLog("${context.getString(R.string.kernel_version_log, version)} ${context.getString(R.string.tool_version_log, toolName)}")
         runCommand(false, "sed -i '/chmod -R 755 tools bin;/i cp -f $toolPath \$AKHOME/tools;' $binaryPath")
@@ -236,20 +237,18 @@ class HorizonKernelWorker(
 
         try {
             process.outputStream.bufferedWriter().use { writer ->
-                writer.write("export POSTINSTALL=${context.filesDir.absolutePath}\n")
+                writer.write("export POSTINSTALL=${context.cacheDir.absolutePath}/anykernel3\n")
 
-                // 写入槽位信息到临时文件
                 slot?.let { selectedSlot ->
-                    writer.write("echo \"$selectedSlot\" > ${context.filesDir.absolutePath}/bootslot\n")
+                    writer.write("echo \"$selectedSlot\" > ${context.cacheDir.absolutePath}/anykernel3/bootslot\n")
                 }
 
-                // 构建刷写命令
                 val flashCommand = buildString {
                     append("sh $binaryPath 3 1 \"$filePath\"")
                     if (slot != null) {
-                        append(" \"$(cat ${context.filesDir.absolutePath}/bootslot)\"")
+                        append(" \"$(cat ${context.cacheDir.absolutePath}/anykernel3/bootslot)\"")
                     }
-                    append(" && touch ${context.filesDir.absolutePath}/done\n")
+                    append(" && touch ${context.cacheDir.absolutePath}/anykernel3/done\n")
                 }
 
                 writer.write(flashCommand)
@@ -281,7 +280,7 @@ class HorizonKernelWorker(
             process.destroy()
         }
 
-        if (!File("${context.filesDir.absolutePath}/done").exists()) {
+        if (!File("${context.cacheDir.absolutePath}/anykernel3/done").exists()) {
             throw IOException(context.getString(R.string.flash_failed_message))
         }
     }

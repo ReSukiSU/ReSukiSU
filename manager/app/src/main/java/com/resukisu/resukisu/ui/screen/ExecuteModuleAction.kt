@@ -15,8 +15,8 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.twotone.Close
+import androidx.compose.material.icons.twotone.Save
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -187,7 +187,7 @@ fun ExecuteModuleActionScreen(moduleId: String) {
                 val navigator = LocalNavigator.current
                 ExtendedFloatingActionButton(
                     text = { Text(text = stringResource(R.string.close)) },
-                    icon = { Icon(Icons.Filled.Close, contentDescription = null) },
+                    icon = { Icon(Icons.TwoTone.Close, contentDescription = null) },
                     onClick = {
                         navigator.pop()
                     }
@@ -255,7 +255,7 @@ private fun TopBar(
                 enabled = !isActionRunning
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Save,
+                    imageVector = Icons.TwoTone.Save,
                     contentDescription = stringResource(id = R.string.save_log),
                 )
             }

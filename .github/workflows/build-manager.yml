@@ -3,7 +3,6 @@ name: Build Manager
 on:
   workflow_dispatch:
   push:
-    branches: [ "main", "dev", "ci", "sync-upstream" ]
     paths:
       - '.github/workflows/build-manager.yml'
       - '.github/workflows/build-lkm.yml'
