@@ -51,7 +51,6 @@ import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
-import com.resukisu.resukisu.ui.screen.susfs.subpages.BackupRestoreTab
 import com.resukisu.resukisu.ui.screen.susfs.subpages.OpenRedirectTab
 import com.resukisu.resukisu.ui.screen.susfs.subpages.StandardFeaturesTab
 import com.resukisu.resukisu.ui.screen.susfs.subpages.StatusTab
@@ -118,73 +117,64 @@ fun SuSFSConfigScreen() {
         SuSFSConfigSubpage(
             requirePersist = false,
             title = stringResource(R.string.susfs_tab_status),
-        ) { contentPadding, nestedScrollConnection ->
+        ) { innerPadding, nestedScrollConnection ->
             StatusTab(
                 nestedScrollConnection = nestedScrollConnection,
-                topPadding = contentPadding.calculateTopPadding(),
+                innerPadding = innerPadding,
                 onRegisterRefresh = onRegisterRefresh,
                 configEnabled = configEnabled ?: false,
                 configEnabledLoaded = configEnabled != null,
                 onConfigEnabledChange = handleConfigEnabledChange,
-            )
-        },
-        SuSFSConfigSubpage(
-            requirePersist = true,
-            title = stringResource(R.string.susfs_tab_standard),
-        ) { contentPadding, nestedScrollConnection ->
-            StandardFeaturesTab(
-                nestedScrollConnection = nestedScrollConnection,
-                topPadding = contentPadding.calculateTopPadding(),
-                onRegisterRefresh = onRegisterRefresh,
-            )
-        },
-        SuSFSConfigSubpage(
-            requirePersist = true,
-            title = stringResource(R.string.susfs_tab_backup_restore),
-        ) { contentPadding, nestedScrollConnection ->
-            BackupRestoreTab(
-                nestedScrollConnection = nestedScrollConnection,
-                topPadding = contentPadding.calculateTopPadding(),
                 onConfigRestored = ::requestRefresh,
             )
         },
         SuSFSConfigSubpage(
             requirePersist = true,
+            title = stringResource(R.string.susfs_tab_standard),
+        ) { innerPadding, nestedScrollConnection ->
+            StandardFeaturesTab(
+                nestedScrollConnection = nestedScrollConnection,
+                innerPadding = innerPadding,
+                onRegisterRefresh = onRegisterRefresh,
+            )
+        },
+        SuSFSConfigSubpage(
+            requirePersist = true,
             title = stringResource(R.string.susfs_tab_sus_path),
-        ) { contentPadding, nestedScrollConnection ->
+        ) { innerPadding, nestedScrollConnection ->
             SusPathTab(
                 nestedScrollConnection = nestedScrollConnection,
-                topPadding = contentPadding.calculateTopPadding(),
+                innerPadding = innerPadding,
                 onRegisterRefresh = onRegisterRefresh,
             )
         },
         SuSFSConfigSubpage(
             requirePersist = true,
             title = stringResource(R.string.susfs_tab_sus_kstat),
-        ) { contentPadding, nestedScrollConnection ->
+        ) { innerPadding, nestedScrollConnection ->
             SusKstatTab(
                 nestedScrollConnection = nestedScrollConnection,
-                topPadding = contentPadding.calculateTopPadding(),
+                innerPadding = innerPadding,
                 onRegisterRefresh = onRegisterRefresh,
             )
         },
         SuSFSConfigSubpage(
             requirePersist = true,
             title = stringResource(R.string.susfs_tab_open_redirect),
-        ) { contentPadding, nestedScrollConnection ->
+        ) { innerPadding, nestedScrollConnection ->
             OpenRedirectTab(
                 nestedScrollConnection = nestedScrollConnection,
-                topPadding = contentPadding.calculateTopPadding(),
+                innerPadding = innerPadding,
                 onRegisterRefresh = onRegisterRefresh,
             )
         },
         SuSFSConfigSubpage(
             requirePersist = true,
             title = stringResource(R.string.susfs_tab_sus_map),
-        ) { contentPadding, nestedScrollConnection ->
+        ) { innerPadding, nestedScrollConnection ->
             SusMapTab(
                 nestedScrollConnection = nestedScrollConnection,
-                topPadding = contentPadding.calculateTopPadding(),
+                innerPadding = innerPadding,
                 onRegisterRefresh = onRegisterRefresh,
             )
         },

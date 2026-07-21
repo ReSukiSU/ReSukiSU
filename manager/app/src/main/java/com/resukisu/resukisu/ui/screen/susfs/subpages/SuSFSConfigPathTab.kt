@@ -1,5 +1,6 @@
 package com.resukisu.resukisu.ui.screen.susfs.subpages
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -21,7 +22,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.data.susfs.SusPathItem
@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SusPathTab(
     nestedScrollConnection: NestedScrollConnection,
-    topPadding: Dp,
+    innerPadding: PaddingValues,
     onRegisterRefresh: SuSFSRefreshRegistrar,
 ) {
     val snackbarHost = LocalSnackbarHost.current
@@ -85,10 +85,10 @@ fun SusPathTab(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .nestedScroll(nestedScrollConnection)
+            .nestedScroll(nestedScrollConnection),
     ) {
         item {
-            Spacer(Modifier.height(topPadding))
+            Spacer(Modifier.height(innerPadding.calculateTopPadding()))
         }
 
         item {
@@ -112,6 +112,10 @@ fun SusPathTab(
                 description = if (item.is_loop) isLoopLabel else null,
                 onClick = { detailItem = item },
             )
+        }
+
+        item {
+            Spacer(Modifier.height(innerPadding.calculateBottomPadding()))
         }
     }
 

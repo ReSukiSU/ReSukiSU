@@ -32,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
@@ -49,7 +48,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun StandardFeaturesTab(
     nestedScrollConnection: NestedScrollConnection,
-    topPadding: Dp,
+    innerPadding: PaddingValues,
     onRegisterRefresh: SuSFSRefreshRegistrar,
 ) {
     val snackbarHost = LocalSnackbarHost.current
@@ -174,10 +173,10 @@ fun StandardFeaturesTab(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(nestedScrollConnection)
+                .nestedScroll(nestedScrollConnection),
         ) {
             item {
-                Spacer(Modifier.height(topPadding))
+                Spacer(Modifier.height(innerPadding.calculateTopPadding()))
             }
 
             if (hasLoadedConfig) {
@@ -248,7 +247,7 @@ fun StandardFeaturesTab(
             }
 
             item {
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(innerPadding.calculateBottomPadding()))
             }
         }
 
