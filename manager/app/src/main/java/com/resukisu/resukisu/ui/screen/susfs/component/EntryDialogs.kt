@@ -15,7 +15,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -26,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.documentfile.provider.DocumentFile
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumnScope
@@ -143,15 +141,24 @@ fun ManualAddDialog(
     ) { uri: Uri? ->
         uri?.let {
             scope.launch {
-                val content = readTxtDocument(
-                    context = context,
-                    snackbarHost = snackbarHost,
-                    uri = it,
-                    fileNotTextMsg = fileNotTextMsg,
-                    fileReadFailedMsg = fileReadFailedMsg
-                )
-                if (content.isNotEmpty()) {
-                    onImportFromFileState(content)
+                val decodedContent = withContext(Dispatchers.IO) {
+                    runCatching {
+                        checkNotNull(context.contentResolver.openInputStream(it)).use { stream ->
+                            stream.readBytes().decodeToString(throwOnInvalidSequence = true)
+                        }
+                    }
+                }
+
+                val error = decodedContent.exceptionOrNull()
+                if (error != null) {
+                    snackbarHost.showSnackbar(
+                        if (error is CharacterCodingException) fileNotTextMsg else fileReadFailedMsg
+                    )
+                    return@launch
+                }
+
+                decodedContent.getOrThrow().takeIf { content -> content.isNotEmpty() }?.let {
+                    onImportFromFileState(it)
                 }
             }
         }
@@ -187,7 +194,7 @@ fun ManualAddDialog(
                                     icon = Icons.Default.UploadFile,
                                     title = importFromFileLabel,
                                     description = stringResource(R.string.susfs_entry_import_hint),
-                                    onClick = { pickFileLauncher.launch(arrayOf("text/plain")) },
+                                    onClick = { pickFileLauncher.launch(arrayOf("*/*")) },
                                 )
                             }
                         }
@@ -208,35 +215,6 @@ fun ManualAddDialog(
             },
         )
     }
-}
-
-private suspend fun readTxtDocument(
-    context: android.content.Context,
-    snackbarHost: SnackbarHostState,
-    uri: Uri,
-    fileNotTextMsg: String,
-    fileReadFailedMsg: String,
-): String {
-    val fileName = DocumentFile.fromSingleUri(context, uri)?.name.orEmpty()
-    if (!fileName.endsWith(".txt", ignoreCase = true)) {
-        snackbarHost.showSnackbar(fileNotTextMsg)
-        return ""
-    }
-
-    val content = withContext(Dispatchers.IO) {
-        runCatching {
-            context.contentResolver.openInputStream(uri)?.use { stream ->
-                stream.bufferedReader().readText()
-            }.orEmpty()
-        }.getOrDefault("")
-    }
-
-    if (content.isBlank()) {
-        snackbarHost.showSnackbar(fileReadFailedMsg)
-        return ""
-    }
-
-    return content
 }
 
 fun String.toImportedEntryLines(): List<String> {

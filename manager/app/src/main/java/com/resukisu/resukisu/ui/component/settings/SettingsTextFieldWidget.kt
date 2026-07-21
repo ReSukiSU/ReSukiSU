@@ -158,8 +158,10 @@ fun SettingsTextFieldWidget(
         iconPlaceholder = false,
         renderBackgroundBlur = renderBackgroundBlur,
         leadingContent = leadingContent,
-        onClick = {
-            onClickInternal()
+        onClick = if (isClickableMode) {
+            { onClickInternal() }
+        } else {
+            null
         },
         foreContent = {
             if (useLabelAsPlaceholder) {
@@ -221,10 +223,12 @@ fun SettingsTextFieldWidget(
                     Column {
                         val placeholderAnimationScope = this
                         Box(
-                            modifier = Modifier.clickable(
-                                enabled = onClick != null || !focused
-                            ) {
-                                onClickInternal()
+                            modifier = if (isClickableMode) {
+                                Modifier.clickable {
+                                    onClickInternal()
+                                }
+                            } else {
+                                Modifier
                             }
                         ) {
                             placeholderAnimationScope.AnimatedVisibility(

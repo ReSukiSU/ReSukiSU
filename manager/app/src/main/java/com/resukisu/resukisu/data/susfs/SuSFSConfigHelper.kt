@@ -101,11 +101,17 @@ object SuSFSConfigHelper {
     }
 
     suspend fun addSusPath(path: String): Boolean {
-        return executeConfigMutation("sus_path add ${shellQuote(path)}")
+        return executeConfigMutation(
+            command = "sus_path add ${shellQuote(path)}",
+            currentKernelCommands = listOf("add_sus_path ${shellQuote(path)}"),
+        )
     }
 
     suspend fun addSusPathLoop(path: String): Boolean {
-        return executeConfigMutation("sus_path add ${shellQuote(path)} --loop")
+        return executeConfigMutation(
+            command = "sus_path add ${shellQuote(path)} --loop",
+            currentKernelCommands = listOf("add_sus_path_loop ${shellQuote(path)}"),
+        )
     }
 
     suspend fun removeSusPath(path: String): Boolean {
@@ -113,11 +119,25 @@ object SuSFSConfigHelper {
     }
 
     suspend fun addSusKstat(path: String): Boolean {
-        return executeConfigMutation("sus_kstat add ${shellQuote(path)} normal")
+        val quotedPath = shellQuote(path)
+        return executeConfigMutation(
+            command = "sus_kstat add $quotedPath normal",
+            currentKernelCommands = listOf(
+                "add_sus_kstat $quotedPath",
+                "update_sus_kstat $quotedPath",
+            ),
+        )
     }
 
     suspend fun addSusKstatFullClone(path: String): Boolean {
-        return executeConfigMutation("sus_kstat add ${shellQuote(path)} full_clone")
+        val quotedPath = shellQuote(path)
+        return executeConfigMutation(
+            command = "sus_kstat add $quotedPath full_clone",
+            currentKernelCommands = listOf(
+                "add_sus_kstat $quotedPath",
+                "update_sus_kstat_full_clone $quotedPath",
+            ),
+        )
     }
 
     suspend fun addSusKstatStatically(
@@ -150,8 +170,10 @@ object SuSFSConfigHelper {
             blksize,
         ).joinToString(" ") { it?.toString() ?: "default" }
 
+        val quotedPath = shellQuote(path)
         return executeConfigMutation(
-            "sus_kstat add ${shellQuote(path)} statically $values"
+            command = "sus_kstat add $quotedPath statically $values",
+            currentKernelCommands = listOf("add_sus_kstat_statically $quotedPath $values"),
         )
     }
 
@@ -160,22 +182,35 @@ object SuSFSConfigHelper {
     }
 
     suspend fun setUname(release: String, version: String): Boolean {
-        return executeConfigMutation("uname add ${shellQuote(release)} ${shellQuote(version)}")
+        val arguments = "${shellQuote(release)} ${shellQuote(version)}"
+        return executeConfigMutation(
+            command = "uname add $arguments",
+            currentKernelCommands = listOf("set_uname $arguments"),
+        )
     }
 
     suspend fun enableLog(enabled: Boolean): Boolean {
-        return executeConfigMutation("logging ${if (enabled) "add" else "remove"}")
+        return executeConfigMutation(
+            command = "logging ${if (enabled) "add" else "remove"}",
+            currentKernelCommands = listOf("enable_log ${if (enabled) 1 else 0}"),
+        )
     }
 
     suspend fun hideSusMntsForNonSuProcs(enabled: Boolean): Boolean {
         return executeConfigMutation(
-            "hide_sus_mnts_for_non_su_procs ${if (enabled) "add" else "remove"}"
+            command = "hide_sus_mnts_for_non_su_procs ${if (enabled) "add" else "remove"}",
+            currentKernelCommands = listOf(
+                "hide_sus_mnts_for_non_su_procs ${if (enabled) 1 else 0}"
+            ),
         )
     }
 
     suspend fun enableAvcLogSpoofing(enabled: Boolean): Boolean {
         return executeConfigMutation(
-            "avc_log_spoofing ${if (enabled) "add" else "remove"}"
+            command = "avc_log_spoofing ${if (enabled) "add" else "remove"}",
+            currentKernelCommands = listOf(
+                "enable_avc_log_spoofing ${if (enabled) 1 else 0}"
+            ),
         )
     }
 
@@ -185,7 +220,16 @@ object SuSFSConfigHelper {
         } else {
             "cmdline_or_bootconfig add ${shellQuote(path)}"
         }
-        return executeConfigMutation(command)
+        return if (path.isBlank()) {
+            executeConfigMutation(command)
+        } else {
+            executeConfigMutation(
+                command = command,
+                currentKernelCommands = listOf(
+                    "set_cmdline_or_bootconfig ${shellQuote(path)}"
+                ),
+            )
+        }
     }
 
     suspend fun addOpenRedirect(
@@ -193,8 +237,11 @@ object SuSFSConfigHelper {
         redirectedPath: String,
         uidScheme: UidScheme,
     ): Boolean {
+        val arguments =
+            "${shellQuote(targetPath)} ${shellQuote(redirectedPath)} ${uidScheme.value}"
         return executeConfigMutation(
-            "open_redirect add ${shellQuote(targetPath)} ${shellQuote(redirectedPath)} ${uidScheme.value}"
+            command = "open_redirect add $arguments",
+            currentKernelCommands = listOf("add_open_redirect $arguments"),
         )
     }
 
@@ -203,7 +250,10 @@ object SuSFSConfigHelper {
     }
 
     suspend fun addSusMap(path: String): Boolean {
-        return executeConfigMutation("sus_map add ${shellQuote(path)}")
+        return executeConfigMutation(
+            command = "sus_map add ${shellQuote(path)}",
+            currentKernelCommands = listOf("add_sus_map ${shellQuote(path)}"),
+        )
     }
 
     suspend fun removeSusMap(path: String): Boolean {
@@ -258,7 +308,21 @@ object SuSFSConfigHelper {
         }
     }
 
-    private suspend fun executeConfigMutation(command: String): Boolean {
+    private suspend fun executeConfigMutation(
+        command: String,
+        currentKernelCommands: List<String> = emptyList(),
+    ): Boolean {
+        currentKernelCommands.forEach { currentKernelCommand ->
+            val result = executeSusfsCommand(currentKernelCommand)
+            if (!result.success) {
+                Log.e(
+                    TAG,
+                    "SUSFS kernel command failed: $currentKernelCommand: ${result.stderr}"
+                )
+                return false
+            }
+        }
+
         val result = executeSusfsCommand("config $command")
         if (result.success) {
             cachedConfig = null

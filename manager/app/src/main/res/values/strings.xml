@@ -470,8 +470,6 @@
     <string name="notification_permission_denied">Download failed: Notification permission is required</string>
     <string name="storage_permission_description">Need External Storage permission to write file.</string>
     <string name="storage_permission_denied">Download failed: External Storage permission is required</string>
-
-    <!-- SUSFS rewrite: tab titles -->
     <string name="susfs_tab_status">Status</string>
     <string name="susfs_tab_standard">Standard</string>
     <string name="susfs_tab_sus_path">SUS Path</string>
@@ -479,14 +477,10 @@
     <string name="susfs_tab_open_redirect">Open Redirect</string>
     <string name="susfs_tab_sus_map">SUS Map</string>
     <string name="susfs_tab_backup_restore">Backup / Restore</string>
-
-    <!-- SUSFS rewrite: status page -->
     <string name="susfs_status_version">SUSFS Version</string>
     <string name="susfs_status_variant">Variant</string>
     <string name="susfs_status_enabled_features">Enabled Features</string>
     <string name="susfs_status_no_data">No data</string>
-
-    <!-- SUSFS rewrite: standard features page -->
     <string name="susfs_standard_config_enabled">Persisted configuration</string>
     <string name="susfs_standard_config_enabled_desc">Automatically apply the saved SUSFS configuration during boot.</string>
     <string name="susfs_management_disabled_warning">Built-in SUSFS management in Manager is disabled.</string>
@@ -503,8 +497,6 @@
     <string name="susfs_standard_cmdline_path">Path to fake cmdline/bootconfig file</string>
     <string name="susfs_standard_current_value">Current: %1$s</string>
     <string name="susfs_standard_not_set">Not set</string>
-
-    <!-- SUSFS rewrite: entry page common -->
     <string name="susfs_entry_manual_add">Add Entry</string>
     <string name="susfs_entry_no_entries">No entries</string>
     <string name="susfs_entry_no_entries_hint">Click \"Add Entry\" to add one</string>
@@ -516,15 +508,11 @@
     <string name="susfs_entry_import_success">Imported %1$d, failed %2$d</string>
     <string name="susfs_entry_import_from_file">Import from file</string>
     <string name="susfs_entry_import_file_failed">Failed to read file</string>
-    <string name="susfs_entry_import_file_not_text">Only .txt files can be imported</string>
-
-    <!-- SUSFS rewrite: SUS Path page -->
+    <string name="susfs_entry_import_file_not_text">File is not valid UTF-8 text</string>
     <string name="susfs_path_subtype_path">Normal SUS Path</string>
     <string name="susfs_path_subtype_loop">Loop SUS Path</string>
     <string name="susfs_path_is_loop">Loop</string>
     <string name="susfs_path_is_not_loop">Normal</string>
-
-    <!-- SUSFS rewrite: SUS Kstat page -->
     <string name="susfs_kstat_subtype_normal">Normal</string>
     <string name="susfs_kstat_subtype_full_clone">Full Clone</string>
     <string name="susfs_kstat_subtype_statically">Statically</string>
@@ -542,10 +530,8 @@
     <string name="susfs_kstat_field_ctime_nsec">ctime_nsec</string>
     <string name="susfs_kstat_field_blocks">blocks</string>
     <string name="susfs_kstat_field_blksize">blksize</string>
-
-    <!-- SUSFS rewrite: Open Redirect page -->
-    <string name="susfs_redirect_target_path">Target Path</string>
-    <string name="susfs_redirect_redirected_path">Redirected Path</string>
+    <string name="susfs_redirect_target_path">Path</string>
+    <string name="susfs_redirect_redirected_path">Target Path</string>
     <string name="susfs_redirect_uid_scheme">UID Scheme</string>
     <string name="susfs_redirect_description">Redirect opening the target path to a user-defined path for processes matching the selected UID scheme.</string>
     <string name="susfs_redirect_uid_schemes_description">UID schemes:\n0: Non-app processes (UID &lt; 10000)\n1: UID 0 root processes outside the SU domain\n2: All non-SU processes (use with care)\n3: Unmounted app processes with UID ≥ 10000 (use with care)\n4: All unmounted processes, including most init-spawned processes (use with care)</string>
@@ -556,18 +542,12 @@
     <string name="susfs_uid_scheme_non_su">Non SU</string>
     <string name="susfs_uid_scheme_unmounted_app">Unmounted App</string>
     <string name="susfs_uid_scheme_unmounted">Unmounted</string>
-
-    <!-- SUSFS rewrite: SUS Map page -->
     <string name="susfs_map_subtype">SUS Map</string>
-
-    <!-- SUSFS rewrite: common -->
     <string name="susfs_refresh">Refresh</string>
     <string name="susfs_save">Save</string>
     <string name="susfs_operation_failed">Operation failed</string>
     <string name="susfs_operation_success">Operation succeeded</string>
     <string name="susfs_value_default">Default</string>
-
-    <!-- SUSFS rewrite: Backup / Restore page -->
     <string name="susfs_backup_export">Export Configuration</string>
     <string name="susfs_backup_import">Import Configuration</string>
     <string name="susfs_backup_export_success">Config exported successfully</string>

@@ -364,122 +364,23 @@
     <string name="sort_options">排序方式</string>
     <string name="app_categories">应用类型选择</string>
     <string name="susfs_config_title">SUSFS</string>
-    <string name="susfs_config_description">配置说明</string>
-    <string name="susfs_config_description_text">此功能允许您自定义 SuSFS 的 uname 值和构建时间伪装。输入您想要设置的值，点击应用即可生效</string>
-    <string name="susfs_uname_label">Uname 值</string>
-    <string name="susfs_uname_placeholder">请输入自定义 uname 值</string>
-    <string name="susfs_build_time_label">构建时间伪装</string>
-    <string name="susfs_build_time_placeholder">请输入构建时间伪装值</string>
-    <string name="susfs_current_value">当前值: %s</string>
-    <string name="susfs_current_build_time">当前构建时间: %s</string>
-    <string name="susfs_reset_to_default">重置为默认值</string>
-    <string name="susfs_apply">应用</string>
-    <string name="susfs_reset_confirm_title">确认重置</string>
     <string name="susfs_config_setting_title">SUSFS</string>
-    <string name="susfs_autostart_title">开机自启动</string>
-    <string name="susfs_autostart_description">重启时自动应用所有非默认配置</string>
-    <string name="susfs_autostart_requirement">需要添加配置后才能启用</string>
-    <string name="susfs_tab_basic_settings">基本设置</string>
-    <string name="susfs_tab_sus_paths">SuS 路径</string>
-    <string name="susfs_tab_path_settings">路径设置</string>
-    <string name="susfs_tab_enabled_features">启用功能状态</string>
-    <string name="susfs_add_sus_path">添加 SuS 路径</string>
-    <string name="susfs_path_label">路径</string>
-    <string name="susfs_path_placeholder">例如: /system/addon.d</string>
-    <string name="susfs_no_paths_configured">暂无 SuS 路径配置</string>
-    <string name="susfs_reset_paths_title">重置 SuS 路径</string>
-    <string name="susfs_reset_paths_message">这将清除所有 SuS 路径配置，确定要继续吗？</string>
-    <string name="susfs_reset_path_title">重置路径设置</string>
-    <string name="susfs_android_data_path_label">Android Data 路径</string>
-    <string name="susfs_sdcard_path_label">SDCard 路径</string>
-    <string name="susfs_set_android_data_path">设置 Android Data 路径</string>
-    <string name="susfs_set_sdcard_path">设置 SDCard 路径</string>
-    <string name="susfs_enabled_features_description">显示当前 SuSFS 启用的功能状态</string>
-    <string name="susfs_no_features_found">未找到功能状态信息</string>
-    <string name="susfs_feature_configurable">可配置的 SuSFS 功能</string>
-    <string name="susfs_enable_log_label">SuSFS 启用日志</string>
-    <string name="susfs_log_config_description">启用或者关闭 SuSFS 的日志</string>
-    <string name="susfs_log_config_title">SuSFS 日志配置</string>
     <string name="module_update_json">更新配置</string>
     <string name="module_update_json_copied">更新配置地址已复制到剪贴板</string>
     <string name="show_more_module_info">显示更多模块信息</string>
     <string name="show_more_module_info_summary">显示额外的模块信息，如更新配置 URL 等</string>
-    <string name="susfs_execution_location_label">执行位置</string>
-    <string name="susfs_current_execution_location">当前执行位置：%s</string>
-    <string name="susfs_execution_location_service">Service</string>
-    <string name="susfs_execution_location_post_fs_data">Post-FS-Data</string>
-    <string name="susfs_execution_location_service_description">在系统服务启动后执行</string>
-    <string name="susfs_execution_location_post_fs_data_description">在文件系统挂载后但系统完全启动前执行,可能会导致循环重启</string>
-    <string name="susfs_slot_info_title">槽位信息</string>
-    <string name="susfs_slot_info_description">查看当前启动槽位信息并复制数值</string>
-    <string name="susfs_current_active_slot">当前活动槽位：%s</string>
-    <string name="susfs_slot_uname">Uname：%s</string>
-    <string name="susfs_slot_build_time">构建时间：%s</string>
-    <string name="susfs_slot_current_badge">当前</string>
-    <string name="susfs_slot_use_uname">使用 Uname</string>
-    <string name="susfs_slot_use_build_time">使用构建时间</string>
-    <string name="susfs_slot_info_unavailable">无法获取槽位信息</string>
-    <string name="susfs_tab_kstat_config">Kstat 配置</string>
-    <string name="add_kstat_statically_title">添加 Kstat 静态配置</string>
-    <string name="file_or_directory_path_label">文件/目录路径</string>
-    <string name="hint_use_default_value">提示：可以使用 “default” 来使用原始值</string>
-    <string name="add_kstat_path_title">添加 Kstat 路径</string>
     <string name="add">添加</string>
-    <string name="reset_kstat_config_title">重置 Kstat 配置</string>
-    <string name="reset_kstat_config_message">确定要清除所有 Kstat 配置吗？此操作不可撤销</string>
     <string name="kstat_config_description_title">Kstat 配置说明</string>
     <string name="kstat_config_description_add_statically">• add_sus_kstat_statically: 静态配置文件/目录的 stat 信息</string>
     <string name="kstat_config_description_add">• add_sus_kstat: 在绑定挂载前添加路径，存储原始 stat 信息</string>
     <string name="kstat_config_description_update">• update_sus_kstat: 更新目标 ino，保持 size 和 blocks 不变</string>
     <string name="kstat_config_description_update_full_clone">• update_sus_kstat_full_clone: 仅更新 ino，其他保持原始值</string>
-    <string name="static_kstat_config">静态 Kstat 配置</string>
-    <string name="kstat_path_management">Kstat 路径管理</string>
-    <string name="no_kstat_config_message">暂无 Kstat 配置，点击下方按钮添加配置</string>
-    <string name="susfs_hide_mounts_control_title">SuS 挂载隐藏控制</string>
-    <string name="susfs_hide_mounts_control_description">控制 SuS 挂载对进程的隐藏行为</string>
-    <string name="susfs_hide_mounts_for_all_procs_label">对所有进程隐藏 SuS 挂载</string>
-    <string name="susfs_hide_mounts_for_all_procs_enabled_description">启用后，SuS 挂载将对所有进程隐藏，包括 KSU 进程</string>
-    <string name="susfs_hide_mounts_for_all_procs_disabled_description">禁用后，SuS 挂载仅对非 KSU 进程隐藏，KSU 进程可以看到挂载</string>
-    <string name="susfs_hide_mounts_recommendation">建议在屏幕解锁后或在 service.sh 或 boot-completed.sh 阶段设置为禁用，这可以修复一些依赖 KSU 进程挂载的 root 应用的问题</string>
-    <string name="susfs_hide_mounts_current_setting">当前设置: %s</string>
-    <string name="susfs_hide_mounts_setting_all">对所有进程隐藏</string>
-    <string name="susfs_hide_mounts_setting_non_ksu">仅对非 KSU 进程隐藏</string>
-    <string name="susfs_backup_title">备份</string>
     <string name="susfs_backup_description">创建所有 SuSFS 配置的备份。备份文件将包含所有设置、路径和配置信息。</string>
-    <string name="susfs_backup_create">创建备份</string>
     <string name="restore">还原</string>
     <string name="susfs_restore_description">从备份文件还原 SuSFS 配置。这将覆盖所有当前设置。</string>
-    <string name="susfs_restore_select_file">选择备份文件</string>
-    <string name="susfs_restore_confirm_title">确认还原</string>
-    <string name="susfs_restore_confirm_description">这将覆盖所有当前的 SuSFS 配置。您确定要继续吗？</string>
-    <string name="susfs_restore_confirm">还原</string>
-    <string name="susfs_backup_info_date">备份日期：%s</string>
-    <string name="susfs_backup_info_device">设备：%s</string>
-    <string name="susfs_backup_info_version">版本：%s</string>
-    <string name="hide_bl_script">上锁状态</string>
-    <string name="hide_bl_script_description">覆盖引导锁状态属性于 late_start 服务模式</string>
-    <string name="cleanup_residue">清理工具残留</string>
-    <string name="cleanup_residue_description">清理各种模块以及工具的残留文件和目录（可能会误删导致丢失以及无法启动，谨慎使用）</string>
-    <string name="susfs_edit_sus_path">编辑 SuS 路径</string>
-    <string name="edit_kstat_statically_title">编辑 Kstat 静态配置</string>
-    <string name="edit_kstat_path_title">编辑 Kstat 路径</string>
-    <string name="save">保存</string>
-    <string name="edit">编辑</string>
     <string name="delete">删除</string>
-    <string name="update">更新</string>
-    <string name="susfs_update_full_clone">Susfs 完整克隆更新</string>
-    <string name="app_paths_section">应用路径</string>
-    <string name="other_paths_section">其他路径</string>
-    <string name="add_custom_path">其他</string>
-    <string name="add_app_path">应用</string>
-    <string name="susfs_add_app_path">添加应用路径</string>
-    <string name="susfs_version_mismatch">SuSFS 库版本不匹配，内核：%1$s vs 管理器：%2$s，建议更新内核或管理器</string>
-    <string name="warning">警告</string>
     <string name="search_apps">搜索应用</string>
     <string name="search_modules">搜索模块</string>
-    <string name="selected_apps_count">%1$d 个已选应用</string>
-    <string name="already_added_apps_count">%1$d 个已添加应用</string>
-    <string name="all_apps_already_added">所有应用均已添加</string>
     <string name="dynamic_manager_title">动态管理器配置</string>
     <string name="dynamic_manager_settings_summary">管理动态管理器签名</string>
     <string name="dynamic_manager_enabled_summary">已启用（大小: %s）</string>
@@ -509,24 +410,8 @@
     <string name="no_active_manager">无活跃管理器</string>
     <string name="home_zygisk_implement">Zygisk 实现</string>
     <string name="home_meta_module_implement">元模块实现</string>
-    <string name="susfs_tab_sus_loop_paths">SuS 循环路径</string>
-    <string name="susfs_add_sus_loop_path">添加 SuS 循环路径</string>
-    <string name="susfs_edit_sus_loop_path">编辑 SuS 循环路径</string>
-    <string name="susfs_no_loop_paths_configured">未配置 SuS 循环路径</string>
-    <string name="susfs_reset_loop_paths_title">重置循环路径</string>
-    <string name="susfs_reset_loop_paths_message">确定要清空所有 SuS 循环路径吗？此操作无法撤销。</string>
-    <string name="susfs_loop_path_label">循环路径</string>
-    <string name="susfs_loop_path_restriction_warning">注意：只有不在 /storage/ 和 /sdcard/ 内的路径才能通过循环路径添加。</string>
-    <string name="loop_paths_section">循环路径</string>
-    <string name="add_loop_path">添加循环路径</string>
     <string name="sus_loop_paths_description_title">循环路径配置</string>
     <string name="sus_loop_paths_description_text">循环路径会在每次非 root 用户应用或隔离服务启动时重新标记为 SUS_PATH。这有助于解决添加的路径可能因 inode 状态重置或内核中 inode 重新创建而失效的问题</string>
-    <string name="avc_log_spoofing">AVC 日志欺骗</string>
-    <string name="avc_log_spoofing_description">禁用: 禁用在内核 AVC 日志中欺骗 \'su\' 的 sus tcontext。\n
-启用: 启用在内核 AVC 日志中将 \'su\' 的 sus tcontext 欺骗为 \'u:r:priv_app:s0:c512,c768\'</string>
-    <string name="avc_log_spoofing_warning">重要提示：\n
-- 内核中默认设置为 \'0\'\n
-- 启用此功能有时会使开发人员在调试权限或 SELinux 问题时难以识别原因，因此建议用户在调试时禁用此功能。</string>
     <string name="home_hook_type">钩子类型</string>
     <string name="confirm_installation">确认安装</string>
     <string name="confirm_multiple_installation">确认安装（%d 个文件）</string>
@@ -540,14 +425,6 @@
     <string name="author">作者</string>
     <string name="description">描述</string>
     <string name="supported_devices">支持设备</string>
-    <string name="susfs_tab_sus_maps">SUS映射</string>
-    <string name="susfs_sus_map_label">库文件路径</string>
-    <string name="susfs_add_sus_map">添加SUS映射</string>
-    <string name="susfs_edit_sus_map">编辑SUS映射</string>
-    <string name="susfs_no_sus_maps_configured">未配置SUS映射</string>
-    <string name="susfs_reset_sus_maps_title">重置SUS映射</string>
-    <string name="susfs_reset_sus_maps_message">这将移除所有已配置的SUS映射。此操作无法撤销。</string>
-    <string name="sus_maps_section">内存映射隐藏</string>
     <string name="sus_maps_description_title">隐藏/proc/self/中各种映射中的mmap真实文件</string>
     <string name="sus_maps_description_text">从 /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap] 中隐藏内存映射的真实文件路径。请注意：此功能不支持隐藏匿名内存映射，也无法隐藏由注入库本身产生的内联钩子或 PLT 钩子。</string>
     <string name="sus_maps_warning">重要提示：对于具备完善注入检测机制的应用，此功能可能无法有效绕过检测。</string>
@@ -612,8 +489,6 @@
     <string name="notification_permission_denied">下载失败，缺失通知权限</string>
     <string name="storage_permission_description">需要外部存储权限来展示下载进度</string>
     <string name="storage_permission_denied">下载失败，缺失外部存储权限</string>
-
-    <!-- SUSFS rewrite: tab titles -->
     <string name="susfs_tab_status">状态</string>
     <string name="susfs_tab_standard">一般</string>
     <string name="susfs_tab_sus_path">隐藏路径</string>
@@ -621,15 +496,10 @@
     <string name="susfs_tab_open_redirect">文件重定向</string>
     <string name="susfs_tab_sus_map">隐藏映射</string>
     <string name="susfs_tab_backup_restore">备份 / 还原</string>
-
-    <!-- SUSFS rewrite: status page -->
     <string name="susfs_status_version">SUSFS 版本</string>
     <string name="susfs_status_variant">SUSFS 变体</string>
     <string name="susfs_status_enabled_features">支持功能</string>
     <string name="susfs_status_no_data">无数据</string>
-    <string name="susfs_status_loading">加载中...</string>
-
-    <!-- SUSFS rewrite: standard features page -->
     <string name="susfs_standard_config_enabled">启用持久化配置</string>
     <string name="susfs_standard_config_enabled_desc">开机时自动应用已保存的 SUSFS 配置。</string>
     <string name="susfs_management_disabled_warning">管理器内置 SUSFS 管理已被禁用</string>
@@ -642,40 +512,26 @@
     <string name="susfs_standard_uname">Uname</string>
     <string name="susfs_standard_uname_version">发布日期</string>
     <string name="susfs_standard_uname_release">版本号</string>
-    <string name="susfs_standard_uname_release_placeholder">例如：6.6.66-android15-xxx</string>
-    <string name="susfs_standard_uname_version_placeholder">例如：#1 SMP PREEMPT Fri Feb 14 22:29:59 UTC 2025</string>
     <string name="susfs_standard_cmdline_or_bootconfig">Cmdline / Bootconfig</string>
     <string name="susfs_standard_cmdline_path">要伪装成的 cmdline/bootconfig 文件路径</string>
-    <string name="susfs_standard_edit">编辑</string>
     <string name="susfs_standard_current_value">当前值: %1$s</string>
     <string name="susfs_standard_not_set">未设置</string>
-
-    <!-- SUSFS rewrite: entry page common -->
-    <string name="susfs_entry_import_list">导入 %1$s 列表</string>
     <string name="susfs_entry_manual_add">添加条目</string>
     <string name="susfs_entry_no_entries">无条目</string>
     <string name="susfs_entry_no_entries_hint">点击“添加条目”以添加一个</string>
     <string name="susfs_entry_detail">条目详情</string>
-    <string name="susfs_entry_delete">删除</string>
     <string name="susfs_entry_cancel">取消</string>
-    <string name="susfs_entry_confirm">确认</string>
-    <string name="susfs_entry_add">添加</string>
     <string name="susfs_entry_select_subtype">选择条目子类型</string>
     <string name="susfs_entry_path_label">路径</string>
     <string name="susfs_entry_import_hint">每行一个条目，添加时会忽略 // 或 # 开头的注释行</string>
     <string name="susfs_entry_import_success">成功导入 %1$d 项，失败 %2$d 项</string>
-    <string name="susfs_entry_import_parse_error">跳过 %1$d 行无效输入</string>
     <string name="susfs_entry_import_from_file">从文件导入</string>
     <string name="susfs_entry_import_file_failed">读取文件失败</string>
-    <string name="susfs_entry_import_file_not_text">只能导入 .txt 文件</string>
-
-    <!-- SUSFS rewrite: SUS Path page -->
+    <string name="susfs_entry_import_file_not_text">文件不是有效的 UTF-8 文本</string>
     <string name="susfs_path_subtype_path">普通 SUS 路径</string>
     <string name="susfs_path_subtype_loop">循环 SUS 路径</string>
     <string name="susfs_path_is_loop">循环</string>
     <string name="susfs_path_is_not_loop">普通</string>
-
-    <!-- SUSFS rewrite: SUS Kstat page -->
     <string name="susfs_kstat_subtype_normal">普通</string>
     <string name="susfs_kstat_subtype_full_clone">完整克隆</string>
     <string name="susfs_kstat_subtype_statically">静态</string>
@@ -693,48 +549,32 @@
     <string name="susfs_kstat_field_ctime_nsec">ctime_nsec</string>
     <string name="susfs_kstat_field_blocks">blocks</string>
     <string name="susfs_kstat_field_blksize">blksize</string>
-    <string name="susfs_kstat_import_statically_hint">每行一个路径</string>
-
-    <!-- SUSFS rewrite: Open Redirect page -->
-    <string name="susfs_redirect_target_path">起点路径</string>
-    <string name="susfs_redirect_redirected_path">终点路径</string>
+    <string name="susfs_redirect_target_path">路径</string>
+    <string name="susfs_redirect_redirected_path">目标路径</string>
     <string name="susfs_redirect_uid_scheme">应用于</string>
     <string name="susfs_redirect_description">将目标路径的打开操作重定向至用户指定路径，并按所选 UID 范围决定生效进程。</string>
     <string name="susfs_redirect_uid_schemes_description">UID 范围：\n0：非应用进程（UID &lt; 10000）\n1：UID 为 0 且不属于 SU 域的 Root 进程\n2：所有非 SU 进程（请谨慎使用）\n3：UID ≥ 10000 且被标记为已卸载的应用进程（请谨慎使用）\n4：所有被标记为已卸载的进程，包括大多数由 init 启动的进程（请谨慎使用）</string>
     <string name="susfs_redirect_important_notes">注意：\n• 添加前，起点路径和终点路径必须存在。\n• 请自行配置两个路径的 SELinux 权限。\n• 仅对符合所选 UID 范围的进程生效。</string>
     <string name="susfs_redirect_entry_description">%1$s · %2$s</string>
-    <string name="susfs_redirect_import_hint">每行格式: target_path|redirected_path|uid_scheme_int (0-4)</string>
     <string name="susfs_uid_scheme_non_app">非 Android 应用</string>
     <string name="susfs_uid_scheme_root_except_su">非 SU 的 Root 进程</string>
     <string name="susfs_uid_scheme_non_su">非 SU</string>
     <string name="susfs_uid_scheme_unmounted_app">卸载列表内的 Android 应用</string>
     <string name="susfs_uid_scheme_unmounted">卸载列表</string>
-
-    <!-- SUSFS rewrite: SUS Map page -->
     <string name="susfs_map_subtype">SUS 映射</string>
-
-    <!-- SUSFS rewrite: common -->
     <string name="susfs_refresh">刷新</string>
-    <string name="susfs_new_apply">应用</string>
     <string name="susfs_save">保存</string>
     <string name="susfs_operation_failed">操作失败</string>
     <string name="susfs_operation_success">操作成功</string>
     <string name="susfs_value_default">默认</string>
-
-    <!-- SUSFS rewrite: Backup / Restore page -->
     <string name="susfs_backup_export">导出配置</string>
-    <string name="susfs_backup_export_desc">导出当前 SuSFS 配置</string>
     <string name="susfs_backup_import">导入配置</string>
-    <string name="susfs_backup_import_desc">恢复 SuSFS 配置</string>
     <string name="susfs_backup_export_success">配置导出成功</string>
     <string name="susfs_backup_import_success">配置导入成功</string>
     <string name="susfs_backup_export_failed">配置导出失败</string>
     <string name="susfs_backup_import_failed">配置导入失败</string>
     <string name="susfs_backup_import_confirm_title">确认导入</string>
     <string name="susfs_backup_import_confirm_message">此操作将覆盖当前的 SuSFS 配置。是否继续？</string>
-    <string name="susfs_backup_no_file_selected">未选择文件</string>
-    <string name="susfs_backup_selected_file">已选择：%1$s</string>
-    <string name="susfs_backup_export_label">导出</string>
     <string name="susfs_backup_import_label">导入</string>
     <string name="susfs_backup_restore_default">恢复默认</string>
     <string name="susfs_backup_restore_default_desc">删除当前配置</string>
