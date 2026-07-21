@@ -24,6 +24,7 @@ jobs:
       - uses: actions/checkout@v7
       - run: |
           rustup update nightly
+          rustup default nightly
           rustup target install aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
       - uses: Swatinem/rust-cache@v2
         if: github.event_name != 'pull_request'
