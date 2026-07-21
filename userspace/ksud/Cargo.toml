@@ -62,7 +62,7 @@ serde = { version = "1.0", features = ["derive"] }
 bzip2 = "0.6"
 flate2 = "1"
 lz4 = "1"
-lzma-rust2 = { version = "0.15", features = ["std", "xz"] }
+lzma-rust2 = { version = "0.16", features = ["std", "xz"] }
 ksuinit = { path = "../ksuinit" }
 adb_client = { git = "https://github.com/Kernel-SU/adb_client" }
 num_enum = "0.7"
