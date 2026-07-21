@@ -92,6 +92,8 @@ import com.resukisu.resukisu.ui.component.rememberLoadingDialog
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.LabelText
 import com.resukisu.resukisu.ui.theme.CardConfig
@@ -129,6 +131,24 @@ fun HomePage(
     }
 
     if (!uiState.isInitialDataLoaded) return
+
+    if (LocalUiMode.current == UiMode.Miuix) {
+        val miuixNavigator = LocalNavigator.current
+        val handlePageChange = com.resukisu.resukisu.ui.util.LocalHandlePageChange.current
+        val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+        com.resukisu.resukisu.ui.screen.home.HomePagerMiuix(
+            state = uiState,
+            actions = com.resukisu.resukisu.ui.screen.home.HomeActions(
+                onInstallClick = { miuixNavigator.push(Route.Install(preselectedKernelUri = null)) },
+                onSuperuserClick = { handlePageChange(1) },
+                onModuleClick = { handlePageChange(2) },
+                onOpenUrl = { url -> uriHandler.openUri(url) },
+                onOpenSusfs = { miuixNavigator.push(Route.SuSFSConfig) },
+            ),
+            bottomInnerPadding = bottomPadding,
+        )
+        return
+    }
 
     val pullRefreshState = rememberPullToRefreshState()
     val topAppBarState = rememberTopAppBarState()

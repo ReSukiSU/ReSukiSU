@@ -100,6 +100,8 @@ import com.resukisu.resukisu.ui.component.settings.SettingsChooseDialog
 import com.resukisu.resukisu.ui.component.settings.SettingsChooseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.screen.themeSettings.component.LanguageSelectionDialog
 import com.resukisu.resukisu.ui.screen.themeSettings.component.ThemeSettingsDialogs
@@ -278,16 +280,33 @@ fun ThemeSettingsScreen() {
         settingsViewModel.initialize(context, systemIsDark)
     }
 
-    // 各种设置对话框
-    ThemeSettingsDialogs(
-        state = settingsState,
-        viewModel = settingsViewModel
-    )
+    // 各种设置对话框 (Material only — Miuix renders its own miuix dialogs)
+    if (LocalUiMode.current != UiMode.Miuix) {
+        ThemeSettingsDialogs(
+            state = settingsState,
+            viewModel = settingsViewModel
+        )
+    }
 
     val navigator = LocalNavigator.current
 
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
+    }
+
+    if (LocalUiMode.current == UiMode.Miuix) {
+        ThemeSettingsScreenMiuix(
+            settingsState = settingsState,
+            settingsViewModel = settingsViewModel,
+            homeUiState = homeUiState,
+            homeViewModel = homeViewModel,
+            moduleUiState = moduleUiState,
+            moduleViewModel = moduleViewModel,
+            pickImageLauncher = pickImageLauncher,
+            coroutineScope = coroutineScope,
+            onBack = { navigator.pop() },
+        )
+        return
     }
 
     Scaffold(
@@ -400,7 +419,7 @@ fun ThemeSettingsScreen() {
     }
 }
 
-private fun PaletteStyle.displayName(): String = when (this) {
+internal fun PaletteStyle.displayName(): String = when (this) {
     PaletteStyle.TonalSpot -> "Tonal Spot"
     PaletteStyle.Neutral -> "Neutral"
     PaletteStyle.Vibrant -> "Vibrant"
@@ -412,7 +431,7 @@ private fun PaletteStyle.displayName(): String = when (this) {
     PaletteStyle.Content -> "Content"
 }
 
-private fun ColorSpec.SpecVersion.displayName(): String = when (this) {
+internal fun ColorSpec.SpecVersion.displayName(): String = when (this) {
     ColorSpec.SpecVersion.SPEC_2021 -> "Spec 2021"
     ColorSpec.SpecVersion.SPEC_2025 -> "Spec 2025"
 }
@@ -480,13 +499,15 @@ fun PredictiveBackAnimationDirectionWidget(
 }
 
 @Composable
-private fun AppearanceSettings(
+internal fun AppearanceSettings(
     state: SettingsUiState,
     viewModel: SettingsViewModel,
     pickImageLauncher: ManagedActivityResultLauncher<String, Uri?>,
     coroutineScope: CoroutineScope
 ) {
     val context = LocalContext.current
+    // The custom-background feature only works in the Material (ReSukiSU) UI; hide it in Miuix.
+    val isMiuix = LocalUiMode.current == UiMode.Miuix
     SegmentedColumn(title = stringResource(R.string.appearance_settings)) {
         item {
             // 语言设置
@@ -594,8 +615,11 @@ private fun AppearanceSettings(
             }
         }
 
+        // Custom background (+ its blur controls) is a Material-only feature; ReSukiSU limits
+        // blur to when a custom background is enabled. Hidden entirely in the Miuix UI.
         expandableItem(
-            expanded = ThemeConfig.customBackgroundUri != null,
+            animatedVisibility = !isMiuix,
+            expanded = !isMiuix && ThemeConfig.customBackgroundUri != null,
             topContent = {
                 CustomBackgroundSettings(
                     state = state,
@@ -607,11 +631,54 @@ private fun AppearanceSettings(
                 backgroundAdjustmentControls(state, viewModel, coroutineScope)
             }
         )
+
+        // The Material blur toggle lives inside the (custom-background) controls above, which
+        // are hidden in Miuix. Miuix uses blur for its frosted bars independently of a custom
+        // background, so surface a standalone blur toggle there.
+        item(visible = isMiuix, topPadding = 1.dp) {
+            val context = LocalContext.current
+            SettingsSwitchWidget(
+                icon = Icons.TwoTone.BlurOn,
+                title = stringResource(id = R.string.settings_config_enable_blur),
+                description = stringResource(id = R.string.settings_config_enable_blur_summary),
+                checked = ThemeConfig.miuixEnableBlur,
+                onCheckedChange = { isChecked ->
+                    BackgroundManager.saveMiuixEnableBlur(context, isChecked)
+                }
+            )
+        }
+
+        // Miuix floating bottom bar + its liquid-glass (blur) variant.
+        item(visible = isMiuix, topPadding = 1.dp) {
+            val context = LocalContext.current
+            SettingsSwitchWidget(
+                icon = Icons.TwoTone.Style,
+                title = stringResource(id = R.string.settings_floating_bottom_bar),
+                description = stringResource(id = R.string.settings_floating_bottom_bar_summary),
+                checked = ThemeConfig.enableFloatingBottomBar,
+                onCheckedChange = { isChecked ->
+                    BackgroundManager.saveEnableFloatingBottomBar(context, isChecked)
+                    if (!isChecked) BackgroundManager.saveEnableFloatingBottomBarBlur(context, false)
+                }
+            )
+        }
+        item(visible = isMiuix && ThemeConfig.enableFloatingBottomBar, topPadding = 1.dp) {
+            val context = LocalContext.current
+            SettingsSwitchWidget(
+                icon = Icons.TwoTone.Opacity,
+                title = stringResource(id = R.string.settings_floating_bottom_bar_blur),
+                description = stringResource(id = R.string.settings_floating_bottom_bar_blur_summary),
+                checked = ThemeConfig.enableFloatingBottomBarBlur,
+                onCheckedChange = { isChecked ->
+                    BackgroundManager.saveEnableFloatingBottomBarBlur(context, isChecked)
+                }
+            )
+        }
     }
 }
 
 @Composable
-private fun CustomizationSettings(
+internal fun CustomizationSettings(
     homeUiState: HomeUiState,
     moduleUiState: ModuleUiState,
     settingsUiState: SettingsUiState,
@@ -732,7 +799,7 @@ private fun SegmentedColumnScope.hideOptionsSettings(
 }
 
 @Composable
-private fun ThemeColorSelection(viewModel: SettingsViewModel) {
+internal fun ThemeColorSelection(viewModel: SettingsViewModel) {
     SettingsBaseWidget(
         icon = Icons.TwoTone.Palette,
         title = stringResource(R.string.theme_color),
@@ -751,7 +818,7 @@ private fun ThemeColorSelection(viewModel: SettingsViewModel) {
 private fun Int.toSeedColorHex(): String = "#%06X".format(this and 0x00FFFFFF)
 
 @Composable
-private fun DpiSliderControls(
+internal fun DpiSliderControls(
     state: SettingsUiState,
     viewModel: SettingsViewModel,
     coroutineScope: CoroutineScope
@@ -1072,7 +1139,7 @@ private fun DimSlider(
 }
 
 @Composable
-private fun LanguageSetting(state: SettingsUiState, viewModel: SettingsViewModel) {
+internal fun LanguageSetting(state: SettingsUiState, viewModel: SettingsViewModel) {
     val context = LocalContext.current
     val language = stringResource(id = R.string.settings_language)
     val languageSystemDefault = stringResource(R.string.language_system_default)

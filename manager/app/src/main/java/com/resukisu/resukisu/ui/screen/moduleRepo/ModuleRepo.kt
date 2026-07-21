@@ -105,6 +105,8 @@ import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.rememberCustomDialog
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Navigator
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.FlashIt
 import com.resukisu.resukisu.ui.screen.LabelText
@@ -160,6 +162,22 @@ fun ModuleRepoScreen() {
         viewModel.setSortStargazerCountFirst(prefs.getBoolean("module_repo_sort_star_first", false))
     }
 
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> {
+            com.resukisu.resukisu.ui.screen.modulerepo.ModuleRepoScreenMiuix(
+                modules = uiState.modules,
+                isRefreshing = uiState.isRefreshing,
+                offline = !isNetworkAvailable(context),
+                onBack = { navigator.pop() },
+                onRefresh = { viewModel.refresh() },
+                onSetSortStarFirst = { starFirst ->
+                    viewModel.setSortStargazerCountFirst(starFirst)
+                    prefs.putBoolean("module_repo_sort_star_first", starFirst)
+                },
+                onOpenRepoDetail = { navigator.push(Route.ModuleRepoDetail(it)) },
+            )
+        }
+        UiMode.Material -> {
     val isLoading = uiState.modules.isEmpty() && uiState.search.isEmpty()
 
     Scaffold(
@@ -354,6 +372,8 @@ fun ModuleRepoScreen() {
                     onDismiss = { showBottomSheet = false }
                 )
             }
+        }
+    }
         }
     }
 }
@@ -893,3 +913,4 @@ fun ChooseDialogPreview() {
         ChooseDialogContent(currentModuleForChooseDialog, viewModel<ModuleRepoViewModel>()) {}
     }
 }
+

@@ -164,8 +164,18 @@ import com.resukisu.resukisu.ui.util.uninstallModule
 import com.resukisu.resukisu.ui.viewmodel.ModuleUiState
 import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel
 import com.resukisu.resukisu.ui.webui.WebUIActivity
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
+import com.resukisu.resukisu.ui.component.SearchStatus
+import com.resukisu.resukisu.ui.screen.module.ModuleActions
+import com.resukisu.resukisu.ui.screen.module.ModuleConfirmDialogState
+import com.resukisu.resukisu.ui.screen.module.ModuleConfirmRequest
+import com.resukisu.resukisu.ui.screen.module.ModuleEffect
+import com.resukisu.resukisu.ui.screen.module.ModulePagerMiuix
 import com.topjohnwu.superuser.io.SuFile
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -301,6 +311,216 @@ fun ModulePage(bottomPadding: Dp) {
     val isSafeMode = Natives.isSafeMode
     val hasMagisk = hasMagisk()
     val hideInstallButton = isSafeMode || hasMagisk
+
+    if (LocalUiMode.current == UiMode.Miuix) {
+        val permissionRequestInterface = LocalPermissionRequestInterface.current
+        val tiannModules = uiState.moduleList
+        val moduleInfoById = remember(uiState.moduleList) {
+            uiState.moduleList.associateBy { it.id }
+        }
+        val updateInfoMap = remember(uiState.moduleList) {
+            uiState.moduleList.mapNotNull { info ->
+                info.moduleUpdate?.let { up -> info.id to up }
+            }.toMap()
+        }
+        var confirmDialogState by remember { mutableStateOf<ModuleConfirmDialogState?>(null) }
+        val moduleEventChannel = remember { Channel<ModuleEffect>(Channel.BUFFERED) }
+        val moduleEventFlow = remember { moduleEventChannel.receiveAsFlow() }
+
+        val changelogText = stringResource(R.string.module_changelog)
+        val updateText = stringResource(R.string.module_update)
+        val moduleStr = stringResource(R.string.module)
+        val uninstallText = stringResource(R.string.uninstall)
+        val cancelText = stringResource(android.R.string.cancel)
+        val moduleUninstallConfirm = stringResource(R.string.module_uninstall_confirm)
+        val metaModuleUninstallConfirm = stringResource(R.string.metamodule_uninstall_confirm)
+        val successUninstall = stringResource(R.string.module_uninstall_success)
+        val failedUninstall = stringResource(R.string.module_uninstall_failed)
+        val failedEnable = stringResource(R.string.module_failed_to_enable)
+        val failedDisable = stringResource(R.string.module_failed_to_disable)
+        val rebootToApply = stringResource(R.string.reboot_to_apply)
+        val startDownloading = stringResource(R.string.module_start_downloading)
+        val searchModulesLabel = stringResource(R.string.search_modules)
+        // Hold the search state locally (like SuperUser) so the search bar can expand and the
+        // pager shows query-filtered results while the main list stays full.
+        var moduleSearchStatus by remember { mutableStateOf(SearchStatus(searchModulesLabel)) }
+        val moduleQuery = moduleSearchStatus.searchText.trim()
+        val moduleSearchResults = remember(tiannModules, moduleQuery) {
+            if (moduleQuery.isEmpty()) emptyList()
+            else tiannModules.filter {
+                it.name.contains(moduleQuery, true) ||
+                    it.id.contains(moduleQuery, true) ||
+                    it.author.contains(moduleQuery, true)
+            }
+        }
+        // Match kernelsu's flow: empty query -> DEFAULT, no matches -> EMPTY, matches -> SHOW.
+        val effectiveModuleSearchStatus = moduleSearchStatus.copy(
+            resultStatus = when {
+                moduleQuery.isEmpty() -> SearchStatus.ResultStatus.DEFAULT
+                moduleSearchResults.isEmpty() -> SearchStatus.ResultStatus.EMPTY
+                else -> SearchStatus.ResultStatus.SHOW
+            }
+        )
+
+        ModulePagerMiuix(
+            moduleList = tiannModules,
+            updateInfo = updateInfoMap,
+            searchStatus = effectiveModuleSearchStatus,
+            searchResults = moduleSearchResults,
+            sortEnabledFirst = uiState.sortEnabledFirst,
+            sortActionFirst = uiState.sortActionFirst,
+            isRefreshing = uiState.isRefreshing,
+            hasLoaded = !uiState.isRefreshing,
+            magiskInstalled = hasMagisk,
+            installButtonVisible = !(isSafeMode || hasMagisk),
+            confirmDialogState = confirmDialogState,
+            moduleEvent = moduleEventFlow,
+            actions = ModuleActions(
+                onRefresh = { viewModel.fetchModuleList(true) },
+                onSearchStatusChange = { moduleSearchStatus = it },
+                onSearchTextChange = { moduleSearchStatus = moduleSearchStatus.copy(searchText = it) },
+                onClearSearch = { moduleSearchStatus = moduleSearchStatus.copy(searchText = "") },
+                onRequestUpdateConfirmation = { module, info ->
+                    scope.launch {
+                        val changelog = withContext(Dispatchers.IO) {
+                            runCatching {
+                                ksuApp.okhttpClient.newCall(
+                                    okhttp3.Request.Builder().url(info.changelog).build()
+                                ).execute().body!!.string()
+                            }.getOrNull()
+                        }
+                        confirmDialogState = ModuleConfirmDialogState(
+                            request = ModuleConfirmRequest.Update(
+                                module = module,
+                                downloadUrl = info.zipUrl,
+                                fileName = "${module.name}-${info.version}.zip",
+                            ),
+                            title = changelogText,
+                            content = changelog,
+                            markdown = true,
+                            confirm = updateText,
+                        )
+                    }
+                },
+                onRequestUninstallConfirmation = { module ->
+                    val formatter = if (module.metamodule) metaModuleUninstallConfirm else moduleUninstallConfirm
+                    confirmDialogState = ModuleConfirmDialogState(
+                        request = ModuleConfirmRequest.Uninstall(module),
+                        title = moduleStr,
+                        content = formatter.format(module.name),
+                        confirm = uninstallText,
+                        dismiss = cancelText,
+                    )
+                },
+                onDismissConfirmRequest = { confirmDialogState = null },
+                onConfirmUpdate = { request ->
+                    confirmDialogState = null
+                    scope.launch(Dispatchers.IO) {
+                        download(
+                            context,
+                            permissionRequestInterface,
+                            request.downloadUrl,
+                            request.fileName,
+                            onDownloaded = { uri ->
+                                navigator.push(Route.Flash(FlashIt.FlashModuleUpdate(uri)))
+                                viewModel.markNeedRefresh()
+                            },
+                            onDownloading = {
+                                scope.launch {
+                                    moduleEventChannel.send(
+                                        ModuleEffect.Toast(startDownloading.format(request.module.name))
+                                    )
+                                }
+                            },
+                        )
+                    }
+                },
+                onOpenRepo = { navigator.push(Route.ModuleRepo) },
+                onToggleSortActionFirst = {
+                    val newValue = !uiState.sortActionFirst
+                    viewModel.setSortActionFirst(newValue)
+                    prefs.putBoolean("module_sort_action_first", newValue)
+                },
+                onToggleSortEnabledFirst = {
+                    val newValue = !uiState.sortEnabledFirst
+                    viewModel.setSortEnabledFirst(newValue)
+                    prefs.putBoolean("module_sort_enabled_first", newValue)
+                },
+                onOpenWebUi = { module ->
+                    moduleInfoById[module.id]?.let { info ->
+                        try {
+                            context.startActivity(
+                                Intent(context, WebUIActivity::class.java)
+                                    .setData("kernelsu://webui/${info.dirId}".toUri())
+                                    .putExtra("id", info.dirId)
+                                    .putExtra("name", info.name)
+                            )
+                        } catch (e: Exception) {
+                            scope.launch {
+                                moduleEventChannel.send(
+                                    ModuleEffect.Toast("Error launching WebUI: ${e.message}")
+                                )
+                            }
+                        }
+                    }
+                },
+                onToggleModule = { module ->
+                    moduleInfoById[module.id]?.let { info ->
+                        scope.launch(Dispatchers.IO) {
+                            val success = toggleModule(info.dirId, !info.enabled)
+                            if (success) {
+                                viewModel.fetchModuleList()
+                                moduleEventChannel.send(ModuleEffect.SnackBar(rebootToApply))
+                            } else {
+                                val message = if (info.enabled) failedDisable else failedEnable
+                                moduleEventChannel.send(ModuleEffect.Toast(message.format(info.name)))
+                            }
+                        }
+                    }
+                },
+                onUninstallModule = { module ->
+                    confirmDialogState = null
+                    moduleInfoById[module.id]?.let { info ->
+                        scope.launch(Dispatchers.IO) {
+                            Shortcut.deleteModuleActionShortcut(context, info.id)
+                            Shortcut.deleteModuleWebUiShortcut(context, info.id)
+                            val success = uninstallModule(info.dirId)
+                            if (success) {
+                                viewModel.fetchModuleList()
+                                viewModel.markNeedRefresh()
+                                moduleEventChannel.send(ModuleEffect.SnackBar(successUninstall.format(info.name)))
+                            } else {
+                                moduleEventChannel.send(ModuleEffect.Toast(failedUninstall.format(info.name)))
+                            }
+                        }
+                    }
+                },
+                onUndoUninstallModule = { module ->
+                    moduleInfoById[module.id]?.let { info ->
+                        scope.launch(Dispatchers.IO) {
+                            val success = undoUninstallModule(info.dirId)
+                            if (success) {
+                                viewModel.fetchModuleList()
+                                viewModel.markNeedRefresh()
+                            }
+                        }
+                    }
+                },
+                onOpenFlash = { uris ->
+                    navigator.push(Route.Flash(FlashIt.FlashModules(uris)))
+                    viewModel.markNeedRefresh()
+                },
+                onExecuteModuleAction = { module ->
+                    moduleInfoById[module.id]?.let { info ->
+                        navigator.push(Route.ExecuteModuleAction(info.dirId))
+                        viewModel.markNeedRefresh()
+                    }
+                },
+            ),
+            bottomInnerPadding = bottomPadding,
+        )
+        return
+    }
 
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)

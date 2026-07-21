@@ -97,6 +97,8 @@ import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.LabelText
 import com.resukisu.resukisu.ui.theme.blurSource
@@ -140,6 +142,19 @@ fun SuperUserPage(bottomPadding: Dp) {
 
     val navigator = LocalNavigator.current
 
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> {
+            com.resukisu.resukisu.ui.screen.superuser.SuperUserPagerMiuix(
+                uiState = uiState,
+                onRefresh = { scope.launch { viewModel.fetchAppList() } },
+                onOpenSulog = { navigator.push(Route.Sulog) },
+                onOpenProfile = { navigator.push(Route.AppProfile(it)) },
+                onToggleShowSystemApps = { viewModel.updateShowSystemApps(!uiState.showSystemApps) },
+                onClearVmSearch = { viewModel.updateSearch("") },
+                bottomInnerPadding = bottomPadding,
+            )
+        }
+        UiMode.Material -> {
     LaunchedEffect(Unit) {
         viewModel.updateSearch("")
     }
@@ -208,6 +223,8 @@ fun SuperUserPage(bottomPadding: Dp) {
                 backupLauncher = backupLauncher,
                 restoreLauncher = restoreLauncher
             )
+        }
+    }
         }
     }
 }

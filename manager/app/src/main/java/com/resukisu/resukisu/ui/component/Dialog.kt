@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import io.noties.markwon.Markwon
 import io.noties.markwon.utils.NoCopySpannableFactory
 import kotlinx.coroutines.CancellableContinuation
@@ -60,7 +62,7 @@ private const val TAG = "DialogComponent"
 
 interface ConfirmDialogVisuals : Parcelable {
     val title: String
-    val content: String
+    val content: String?
     val isMarkdown: Boolean
     val isHtml: Boolean
     val confirm: String?
@@ -70,7 +72,7 @@ interface ConfirmDialogVisuals : Parcelable {
 @Parcelize
 private data class ConfirmDialogVisualsImpl(
     override val title: String,
-    override val content: String,
+    override val content: String?,
     override val isMarkdown: Boolean,
     override val isHtml: Boolean,
     override val confirm: String?,
@@ -108,7 +110,7 @@ interface ConfirmDialogHandle : DialogHandle {
 
     fun showConfirm(
         title: String,
-        content: String,
+        content: String? = null,
         markdown: Boolean = false,
         html: Boolean = false,
         confirm: String? = null,
@@ -118,7 +120,7 @@ interface ConfirmDialogHandle : DialogHandle {
     suspend fun awaitConfirm(
 
         title: String,
-        content: String,
+        content: String? = null,
         markdown: Boolean = false,
         html: Boolean = false,
         confirm: String? = null,
@@ -198,9 +200,14 @@ private class ConfirmDialogHandleImpl(
     visible: MutableState<Boolean>,
     coroutineScope: CoroutineScope,
     callback: ConfirmCallback,
-    override var visuals: ConfirmDialogVisuals = ConfirmDialogVisualsImpl.Empty,
+    initialVisuals: ConfirmDialogVisuals = ConfirmDialogVisualsImpl.Empty,
     private val resultFlow: ReceiveChannel<ConfirmResult>
 ) : ConfirmDialogHandle, DialogHandleBase(visible, coroutineScope) {
+    // visuals must be an observable snapshot state, not a plain var: the Miuix dialog reads
+    // handle.visuals while always composed (gated only by `visible`), so a plain var would leave
+    // it showing stale content (the previously-targeted item) when visuals updates. (tiann parity)
+    private val visualsState = mutableStateOf(initialVisuals)
+    override val visuals: ConfirmDialogVisuals get() = visualsState.value
     private class ResultCollector(
         private val callback: ConfirmCallback
     ) : FlowCollector<ConfirmResult> {
@@ -261,7 +268,7 @@ private class ConfirmDialogHandleImpl(
     }
 
     fun updateVisuals(visuals: ConfirmDialogVisuals) {
-        this.visuals = visuals
+        this.visualsState.value = visuals
     }
 
     override fun show() {
@@ -274,7 +281,7 @@ private class ConfirmDialogHandleImpl(
 
     override fun showConfirm(
         title: String,
-        content: String,
+        content: String?,
         markdown: Boolean,
         html: Boolean,
         confirm: String?,
@@ -288,7 +295,7 @@ private class ConfirmDialogHandleImpl(
 
     override suspend fun awaitConfirm(
         title: String,
-        content: String,
+        content: String?,
         markdown: Boolean,
         html: Boolean,
         confirm: String?,
@@ -339,8 +346,9 @@ fun rememberLoadingDialog(): LoadingDialogHandle {
     }
     val coroutineScope = rememberCoroutineScope()
 
-    if (visible.value) {
-        LoadingDialog()
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> LoadingDialogMiuix(visible)
+        UiMode.Material -> if (visible.value) LoadingDialog()
     }
 
     return remember {
@@ -365,12 +373,20 @@ private fun rememberConfirmDialog(visuals: ConfirmDialogVisuals, callback: Confi
         }
     )
 
-    if (visible.value) {
-        ConfirmDialog(
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> ConfirmDialogMiuix(
             handle.visuals,
             confirm = { coroutineScope.launch { resultChannel.send(ConfirmResult.Confirmed) } },
-            dismiss = { coroutineScope.launch { resultChannel.send(ConfirmResult.Canceled) } }
+            dismiss = { coroutineScope.launch { resultChannel.send(ConfirmResult.Canceled) } },
+            showDialog = visible
         )
+        UiMode.Material -> if (visible.value) {
+            ConfirmDialog(
+                handle.visuals,
+                confirm = { coroutineScope.launch { resultChannel.send(ConfirmResult.Confirmed) } },
+                dismiss = { coroutineScope.launch { resultChannel.send(ConfirmResult.Canceled) } }
+            )
+        }
     }
 
     return handle
@@ -443,15 +459,17 @@ private fun ConfirmDialog(visuals: ConfirmDialogVisuals, confirm: () -> Unit, di
                     .heightIn(max = 325.dp)
             ) {
                 item {
-                    if (visuals.isMarkdown) {
-                        MarkdownContent(content = visuals.content)
-                    } else if (visuals.isHtml) {
-                        GithubMarkdown(
-                            content = visuals.content,
-                            backgroundColor = MaterialTheme.colorScheme.surfaceBright
-                        )
-                    } else {
-                        Text(text = visuals.content)
+                    visuals.content?.let { content ->
+                        if (visuals.isMarkdown) {
+                            MarkdownContent(content = content)
+                        } else if (visuals.isHtml) {
+                            GithubMarkdown(
+                                content = content,
+                                backgroundColor = MaterialTheme.colorScheme.surfaceBright
+                            )
+                        } else {
+                            Text(text = content)
+                        }
                     }
                 }
             }
@@ -470,7 +488,7 @@ private fun ConfirmDialog(visuals: ConfirmDialogVisuals, confirm: () -> Unit, di
 }
 
 @Composable
-private fun MarkdownContent(content: String) {
+internal fun MarkdownContent(content: String) {
     val contentColor = LocalContentColor.current
 
     Column(

@@ -56,6 +56,8 @@ import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.navigation.Navigator
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.theme.CardConfig
@@ -67,6 +69,27 @@ import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AboutScreen() {
+    if (LocalUiMode.current == UiMode.Miuix) {
+        val miuixNavigator = LocalNavigator.current
+        val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+        val sourceLabel = stringResource(R.string.get_source_code)
+        val telegramLabel = stringResource(R.string.join_telegram_group)
+        AboutScreenMiuix(
+            title = stringResource(R.string.about),
+            appName = stringResource(R.string.app_name),
+            versionName = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+            links = extractLinks(
+                "<a href=\"https://github.com/ReSukiSU/ReSukiSU\">$sourceLabel</a><br/>" +
+                    "<a href=\"https://t.me/ReSukiSU\">$telegramLabel</a>"
+            ),
+            actions = AboutScreenActions(
+                onBack = { miuixNavigator.pop() },
+                onOpenLink = { url -> uriHandler.openUri(url) },
+                onOpenLicense = { miuixNavigator.push(Route.OpenSourceLicense) },
+            ),
+        )
+        return
+    }
     val navigator = LocalNavigator.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 

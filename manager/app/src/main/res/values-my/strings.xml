@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_sucompat">su binary လမ်းကြောင်းပြောင်းမည်</string>
+    <string name="settings_sucompat_summary">အက်ပ်ပရိုဖိုင်တွင် Superuser ခွင့်ပြုချက် ပေးထားသော အက်ပ်များအတွက် /system/bin/su ကို ksud သို့ လမ်းကြောင်းပြောင်းမည်; လုပ်ငန်းစဉ်အသစ်များအတွက်သာ ထိရောက်မှုရှိသည်။</string>
+    <string name="settings_kernel_umount">Kernel ဖြုတ်မည်</string>
+    <string name="settings_kernel_umount_summary">KernelSU မှ ထိန်းချုပ်ထားသော Kernel အဆင့် ဖြုတ်မည့် အပြုအမူ</string>
+    <string name="profile_flags_desc_no_new_privs">ဤ root profile ၏ context အတွင်း KernelSU မှတစ်ဆင့် privilege များကို ထပ်မံမြှင့်တင်ခြင်းကို တားဆီးသည်။</string>
+    <string name="install_force_backup">မူရင်း image အဖြစ် အရန်သိမ်းပါ</string>
+    <string name="install_force_backup_summary">ကျေးဇူးပြု၍ သင်ရွေးထားသော boot image သည် မူရင်း image ဖြစ်ကြောင်း သေချာပါစေ</string>
+    <string name="settings_ui_mode">အင်တာဖေ့စ် ဒီဇိုင်း</string>
+    <string name="settings_ui_mode_summary">ReSukiSU နှင့် Miuix အကြား ရွေးချယ်ပါ။</string>
+    <string name="settings_ui_mode_resukisu">ReSukiSU</string>
+    <string name="settings_ui_mode_miuix">Miuix</string>
+    <string name="settings_floating_bottom_bar">မျောနေသော အောက်ခြေဘား</string>
+    <string name="settings_floating_bottom_bar_summary">Miuix လမ်းညွှန်ကို မျောနေသောဘားအဖြစ် ပြပါ။</string>
+    <string name="settings_floating_bottom_bar_blur">အရည်ဖန်</string>
+    <string name="settings_floating_bottom_bar_blur_summary">မျောနေသောဘားတွင် အရည်ဖန် ဝါးခြင်း သုံးပါ။</string>
+    <string name="profile_name">Profile name</string>
+    <string name="app_profile_affects_following_apps">Affects the following apps</string>
+    <string name="module_repos">Repos</string>
+    <string name="module_repos_sort_updated">Updated time</string>
+    <string name="module_repos_sort_created">Created time</string>
+    <string name="module_repos_sort_name">Name</string>
+    <string name="module_repos_sort_stars">Stars</string>
+    <string name="module_repos_source_code">Source code</string>
+    <string name="tab_readme">README</string>
+    <string name="tab_releases">Releases</string>
+    <string name="tab_info">Info</string>
+</resources>

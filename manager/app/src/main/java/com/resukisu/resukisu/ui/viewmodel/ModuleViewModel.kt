@@ -327,8 +327,12 @@ class ModuleViewModel : ViewModel() {
     }
 
     fun checkUpdate(updateUrl: String, versionCode: Int): ModuleUpdateInfo? {
+        val prefs = ksuApp.ensurePreferencesRepository()
+        // Gated on the shared app-update pref AND a dedicated module-update pref (default
+        // true, so Material behaviour is unchanged); the latter backs the Miuix
+        // "check for module updates" toggle.
         val isCheckUpdateEnabled =
-            ksuApp.ensurePreferencesRepository().getBoolean("check_update", true)
+            prefs.getBoolean("check_update", true) && prefs.getBoolean("check_module_update", true)
         if (!isCheckUpdateEnabled) {
             return null
         }

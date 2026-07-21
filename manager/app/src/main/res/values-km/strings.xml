@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home">ទំព័រដើម</string>
+    <string name="home_not_installed">មិនទាន់បានដំឡើង</string>
+    <string name="home_click_to_install">ចុចដើម្បីដំឡើង</string>
+    <string name="settings_sucompat">កែផ្លូវ su binary</string>
+    <string name="settings_sucompat_summary">បញ្ជូន /system/bin/su ទៅកាន់ ksud សម្រាប់កម្មវិធីដែលបានទទួលសិទ្ធិ Superuser នៅក្នុងទម្រង់កម្មវិធី; មានប្រសិទ្ធភាពសម្រាប់ដំណើរការថ្មីប៉ុណ្ណោះ។</string>
+    <string name="settings_kernel_umount">Kernel umount</string>
+    <string name="settings_kernel_umount_summary">ឥរិយាបថ umount កម្រិតខឺណែលគ្រប់គ្រងដោយ KernelSU</string>
+    <string name="profile_flags_desc_no_new_privs">ទប់ស្កាត់ការបង្កើនសិទ្ធិបន្ថែមតាមរយៈ KernelSU នៅក្នុងបរិបទនៃប្រវត្តិរូប root នេះ។</string>
+    <string name="install_force_backup">បម្រុងទុកជារូបភាពដើម</string>
+    <string name="install_force_backup_summary">សូមប្រាកដថា boot image ដែលអ្នកបានជ្រើសរើសគឺជារូបភាពដើម</string>
+    <string name="settings_ui_mode">រចនាប័ទ្មចំណុចប្រទាក់</string>
+    <string name="settings_ui_mode_summary">ជ្រើសរើសរវាង ReSukiSU និង Miuix។</string>
+    <string name="settings_ui_mode_resukisu">ReSukiSU</string>
+    <string name="settings_ui_mode_miuix">Miuix</string>
+    <string name="settings_floating_bottom_bar">របារខាងក្រោមអណ្ដែត</string>
+    <string name="settings_floating_bottom_bar_summary">បង្ហាញការរុករក Miuix ជារបារអណ្ដែត។</string>
+    <string name="settings_floating_bottom_bar_blur">កញ្ចក់រាវ</string>
+    <string name="settings_floating_bottom_bar_blur_summary">អនុវត្តភាពព្រិលកញ្ចក់រាវទៅរបារអណ្ដែត។</string>
+    <string name="profile_name">Profile name</string>
+    <string name="app_profile_affects_following_apps">Affects the following apps</string>
+    <string name="module_repos">Repos</string>
+    <string name="module_repos_sort_updated">Updated time</string>
+    <string name="module_repos_sort_created">Created time</string>
+    <string name="module_repos_sort_name">Name</string>
+    <string name="module_repos_sort_stars">Stars</string>
+    <string name="module_repos_source_code">Source code</string>
+    <string name="tab_readme">README</string>
+    <string name="tab_releases">Releases</string>
+    <string name="tab_info">Info</string>
+</resources>

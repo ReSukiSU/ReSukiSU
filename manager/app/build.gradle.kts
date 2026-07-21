@@ -167,6 +167,9 @@ base {
 
 configurations.all {
     exclude(group = "androidx.navigationevent", module = "navigationevent-compose")
+    // markwon pulls the legacy com.atlassian.commonmark (same org.commonmark package)
+    // which collides with the modern org.commonmark used by the ported Miuix markdown.
+    exclude(group = "com.atlassian.commonmark", module = "commonmark")
 }
 
 aboutLibraries {
@@ -207,6 +210,9 @@ dependencies {
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.miuix.blur)
     implementation(libs.miuix.navigation)
+    implementation(libs.miuix.ui)
+    implementation(libs.miuix.icons)
+    implementation(libs.miuix.preference)
     implementation(libs.androidx.navigationevent) {
         exclude(group = "androidx.navigation", module = "navigationevent-compose")
     }
@@ -232,6 +238,13 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
 
     implementation(libs.me.zhanghai.android.appiconloader.coil)
+    implementation(libs.appiconloader)
+    implementation(libs.hiddenapibypass)
+    implementation(libs.commonmark)
+    implementation(libs.commonmark.ext.gfm.tables)
+    implementation(libs.commonmark.ext.gfm.strikethrough)
+    implementation(libs.commonmark.ext.autolink)
+    implementation(libs.commonmark.ext.task.list.items)
 
     implementation(libs.markdown)
     implementation(libs.androidx.webkit)

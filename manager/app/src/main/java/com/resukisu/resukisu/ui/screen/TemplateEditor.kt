@@ -60,6 +60,8 @@ import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.deleteAppProfileTemplate
 import com.resukisu.resukisu.ui.util.getAppProfileTemplate
 import com.resukisu.resukisu.ui.util.setAppProfileTemplate
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.viewmodel.TemplateViewModel
 import com.resukisu.resukisu.ui.viewmodel.toJSON
 
@@ -86,6 +88,59 @@ fun TemplateEditorScreen(
 
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
+    }
+
+    if (LocalUiMode.current == UiMode.Miuix) {
+        val context = LocalContext.current
+        val saveTemplateFailed = stringResource(id = R.string.app_profile_template_save_failed)
+        val idConflictError = stringResource(id = R.string.app_profile_template_id_exist)
+        val idInvalidError = stringResource(id = R.string.app_profile_template_id_invalid)
+        var idErrorHint by remember { mutableStateOf("") }
+        com.resukisu.resukisu.ui.screen.templateeditor.TemplateEditorScreenMiuix(
+            template = template,
+            readOnly = readOnly,
+            isCreation = isCreation,
+            idErrorHint = idErrorHint,
+            actions = com.resukisu.resukisu.ui.screen.templateeditor.TemplateEditorActions(
+                onBack = {
+                    if (readOnly) navigator.pop() else navigator.setResult("template_edit", true)
+                },
+                onDelete = {
+                    if (deleteAppProfileTemplate(template.id)) navigator.setResult("template_edit", true)
+                },
+                onSave = {
+                    if (saveTemplate(template, isCreation)) navigator.setResult("template_edit", true)
+                    else Toast.makeText(context, saveTemplateFailed, Toast.LENGTH_SHORT).show()
+                },
+                onNameChange = { value ->
+                    template.copy(name = value).let { if (!autoSave || saveTemplate(it)) template = it }
+                },
+                onIdChange = { value ->
+                    idErrorHint = if (isTemplateExist(value)) idConflictError
+                    else if (!isValidTemplateId(value)) idInvalidError else ""
+                    template = template.copy(id = value)
+                },
+                onAuthorChange = { value ->
+                    template.copy(author = value).let { if (!autoSave || saveTemplate(it)) template = it }
+                },
+                onDescriptionChange = { value ->
+                    template.copy(description = value).let { if (!autoSave || saveTemplate(it)) template = it }
+                },
+                onProfileChange = { p ->
+                    template.copy(
+                        uid = p.uid,
+                        gid = p.gid,
+                        groups = p.groups,
+                        capabilities = p.capabilities,
+                        context = p.context,
+                        namespace = p.namespace,
+                        rules = p.rules.split("\n"),
+                        flags = p.flags.toRootProfileFlags().toOrdinalList(),
+                    ).let { if (!autoSave || saveTemplate(it)) template = it }
+                },
+            ),
+        )
+        return
     }
 
     Scaffold(
@@ -367,3 +422,4 @@ private fun isValidTemplateId(id: String): Boolean {
 private fun isTemplateExist(id: String): Boolean {
     return getAppProfileTemplate(id).isNotBlank()
 }
+

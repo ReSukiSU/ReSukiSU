@@ -1,0 +1,624 @@
+package com.resukisu.resukisu.ui.screen.home
+
+import com.resukisu.resukisu.ui.viewmodel.HomeUiState
+import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
+import com.resukisu.resukisu.ui.component.ksuIsValid
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.rounded.CheckCircleOutline
+import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.resukisu.resukisu.KernelVersion
+import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.component.rememberConfirmDialog
+import com.resukisu.resukisu.ui.component.miuix.WarningCard
+import com.resukisu.resukisu.ui.component.rebootlistpopup.RebootListPopupMiuix
+import com.resukisu.resukisu.ui.theme.LocalEnableBlur
+import com.resukisu.resukisu.ui.theme.isInDarkTheme
+import com.resukisu.resukisu.ui.util.BlurredBar
+import com.resukisu.resukisu.ui.util.rememberBlurBackdrop
+import top.yukonga.miuix.kmp.basic.BasicComponent
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.ScrollBehavior
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Link
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.isDynamicColor
+import top.yukonga.miuix.kmp.utils.PressFeedbackType
+import top.yukonga.miuix.kmp.utils.overScrollVertical
+import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+
+@Composable
+fun HomePagerMiuix(
+    state: HomeUiState,
+    actions: HomeActions,
+    bottomInnerPadding: Dp,
+) {
+    val scrollBehavior = MiuixScrollBehavior()
+    val enableBlur = LocalEnableBlur.current
+    val backdrop = rememberBlurBackdrop(enableBlur)
+    val blurActive = backdrop != null
+    val barColor = if (blurActive) Color.Transparent else colorScheme.surface
+    Scaffold(
+        topBar = {
+            TopBar(
+                scrollBehavior = scrollBehavior,
+                backdrop = backdrop,
+                barColor = barColor,
+                showSusfs = state.systemInfo.susfsVersionSupported,
+                onOpenSusfs = actions.onOpenSusfs,
+            )
+        },
+        popupHost = { },
+        contentWindowInsets = WindowInsets.systemBars.add(WindowInsets.displayCutout).only(WindowInsetsSides.Horizontal)
+    ) { innerPadding ->
+        Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .scrollEndHaptic()
+                    .overScrollVertical()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .padding(horizontal = 12.dp),
+                contentPadding = innerPadding,
+                overscrollEffect = null,
+            ) {
+                item {
+                    Column(
+                        modifier = Modifier.padding(vertical = 12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        if (state.checkUpdateEnabled) {
+                            UpdateCard(state.stableManagerUpdate)
+                            UpdateCard(state.betaManagerUpdate)
+                        }
+                        if (state.showUAPIMisMatchWarning) {
+                            WarningCard(
+                                stringResource(
+                                    id = R.string.uapi_mismatch,
+                                    state.managerUAPIVersion,
+                                    state.kernelUAPIVersion ?: 0,
+                                )
+                            )
+                        }
+                        if (state.showRequireKernelWarning) {
+                            if (state.currentManagerVersionCode < (state.ksuVersion ?: 0)) {
+                                WarningCard(
+                                    stringResource(
+                                        id = R.string.require_manager_version,
+                                        state.currentManagerVersionCode,
+                                        state.ksuVersion ?: 0,
+                                    )
+                                )
+                            } else {
+                                WarningCard(
+                                    stringResource(
+                                        id = R.string.require_kernel_version,
+                                        state.ksuVersion ?: 0,
+                                        com.resukisu.resukisu.Natives.MINIMAL_SUPPORTED_KERNEL
+                                    )
+                                )
+                            }
+                        }
+                        if (state.showRootWarning) {
+                            WarningCard(stringResource(id = R.string.grant_root_failed))
+                        }
+                        if (state.showUnofficialWarning) {
+                            WarningCard(
+                                stringResource(
+                                    id = R.string.unofficial_version_notice,
+                                    stringResource(id = R.string.app_name),
+                                )
+                            )
+                        }
+                        StatusCard(
+                            state = state,
+                            actions = actions,
+                        )
+                        InfoCard(
+                            systemInfo = state.systemInfo,
+                            isSimpleMode = state.isSimpleMode,
+                            isHideSusfsStatus = state.isHideSusfsStatus,
+                            isHideZygiskImplement = state.isHideZygiskImplement,
+                            isHideMetaModuleImplement = state.isHideMetaModuleImplement,
+                        )
+                        DonateCard(onOpenUrl = actions.onOpenUrl)
+                        LearnMoreCard(onOpenUrl = actions.onOpenUrl)
+                    }
+                    Spacer(Modifier.height(bottomInnerPadding))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun UpdateCard(update: com.resukisu.resukisu.data.update.ManagerUpdateInfo?) {
+    val context = LocalContext.current
+    val permissionRequestInterface = com.resukisu.resukisu.ui.util.LocalPermissionRequestInterface.current
+    val updateText = stringResource(id = R.string.module_update)
+    // Keep the last non-null update so the exit animation can still render it while `update` is null.
+    var displayed by remember { mutableStateOf<com.resukisu.resukisu.data.update.ManagerUpdateInfo?>(null) }
+    LaunchedEffect(update) { if (update != null) displayed = update }
+
+    AnimatedVisibility(
+        visible = update != null,
+        enter = fadeIn() + expandVertically(),
+        exit = shrinkVertically() + fadeOut()
+    ) {
+        displayed?.let { updateInfo ->
+            val isStable = updateInfo.channel == com.resukisu.resukisu.data.update.ManagerUpdateChannel.STABLE
+            val message = if (isStable) {
+                stringResource(R.string.new_version_available, updateInfo.versionCode)
+            } else {
+                stringResource(R.string.beta_version_available, updateInfo.versionCode)
+            }
+            val channelTitle = stringResource(
+                if (isStable) R.string.manager_update_stable else R.string.manager_update_beta
+            )
+            val details = stringResource(
+                R.string.manager_update_details,
+                updateInfo.versionName,
+                updateInfo.versionCode,
+                updateInfo.abi,
+            )
+            val dialogContent = if (updateInfo.changelog.isBlank()) details else "$details\n\n${updateInfo.changelog}"
+            val updateDialog = rememberConfirmDialog(
+                onConfirm = {
+                    com.resukisu.resukisu.ui.util.downloader.downloadManagerUpdate(
+                        context, permissionRequestInterface, updateInfo
+                    )
+                }
+            )
+            WarningCard(
+                message = message,
+                color = colorScheme.outline,
+                onClick = {
+                    updateDialog.showConfirm(
+                        title = channelTitle,
+                        content = dialogContent,
+                        markdown = updateInfo.changelog.isNotBlank(),
+                        confirm = updateText,
+                    )
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun TopBar(
+    scrollBehavior: ScrollBehavior,
+    backdrop: LayerBackdrop?,
+    barColor: Color,
+    showSusfs: Boolean = false,
+    onOpenSusfs: () -> Unit = {},
+) {
+    BlurredBar(backdrop) {
+        TopAppBar(
+            color = barColor,
+            title = stringResource(R.string.app_name),
+            actions = {
+                if (showSusfs) {
+                    IconButton(onClick = onOpenSusfs) {
+                        Icon(
+                            imageVector = Icons.Filled.Tune,
+                            tint = colorScheme.onSurface,
+                            contentDescription = stringResource(R.string.susfs_config_setting_title),
+                        )
+                    }
+                }
+                RebootListPopupMiuix()
+            },
+            scrollBehavior = scrollBehavior
+        )
+    }
+}
+
+@Composable
+private fun StatusCard(
+    state: HomeUiState,
+    actions: HomeActions,
+) {
+    Column {
+        when {
+            state.ksuVersion != null -> {
+                val workingState = ""
+                val workingMode = when (state.lkmMode) {
+                    null -> ""
+                    true -> " <LKM>"
+                    else -> " <GKI>"
+                }
+                val workingText = "${stringResource(id = R.string.home_working)}$workingMode$workingState"
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                        colors = CardDefaults.defaultColors(
+                            color = when {
+                                isDynamicColor -> colorScheme.secondaryContainer
+                                isInDarkTheme() -> Color(0xFF1A3825)
+                                else -> Color(0xFFDFFAE4)
+                            }
+                        ),
+                        onClick = {
+                            if (!state.isLateLoadMode) {
+                                actions.onInstallClick()
+                            }
+                        },
+                        showIndication = !state.isLateLoadMode,
+                        pressFeedbackType = PressFeedbackType.Tilt
+                    ) {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .offset(38.dp, 45.dp),
+                                contentAlignment = Alignment.BottomEnd
+                            ) {
+                                Icon(
+                                    modifier = Modifier.size(170.dp),
+                                    imageVector = Icons.Rounded.CheckCircleOutline,
+                                    tint = if (isDynamicColor) {
+                                        colorScheme.primary.copy(alpha = 0.8f)
+                                    } else {
+                                        Color(0xFF36D167)
+                                    },
+                                    contentDescription = null
+                                )
+                            }
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(all = 16.dp)
+                            ) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = workingText,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                                Spacer(Modifier.height(2.dp))
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = stringResource(R.string.home_working_version, "${state.ksuVersion}-${state.kernelUAPIVersion}"),
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                )
+                            }
+                        }
+                    }
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                    ) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            insideMargin = PaddingValues(16.dp),
+                            onClick = { actions.onSuperuserClick() },
+                            showIndication = true,
+                            pressFeedbackType = PressFeedbackType.Tilt
+                        ) {
+                            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = stringResource(R.string.superuser),
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 15.sp,
+                                    color = colorScheme.onSurfaceVariantSummary,
+                                )
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = state.superuserCount.toString(),
+                                    fontSize = 26.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = colorScheme.onSurface,
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(12.dp))
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            insideMargin = PaddingValues(16.dp),
+                            onClick = { actions.onModuleClick() },
+                            showIndication = true,
+                            pressFeedbackType = PressFeedbackType.Tilt
+                        ) {
+                            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = stringResource(R.string.module),
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 15.sp,
+                                    color = colorScheme.onSurfaceVariantSummary,
+                                )
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = state.moduleCount.toString(),
+                                    fontSize = 26.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = colorScheme.onSurface,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            state.kernelVersion.isGKI() -> {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Card(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            if (!state.isLateLoadMode) {
+                                actions.onInstallClick()
+                            }
+                        },
+                        showIndication = !state.isLateLoadMode,
+                        pressFeedbackType = PressFeedbackType.Sink
+                    ) {
+                        BasicComponent(
+                            title = stringResource(R.string.home_not_installed),
+                            summary = stringResource(R.string.home_click_to_install),
+                            startAction = {
+                                Icon(
+                                    Icons.Rounded.ErrorOutline,
+                                    stringResource(R.string.home_not_installed),
+                                    modifier = Modifier.padding(end = 6.dp),
+                                    tint = colorScheme.onBackground,
+                                )
+                            },
+                            endActions = {
+                                if (state.isSELinuxPermissive) {
+                                    TextButton(
+                                        text = stringResource(R.string.home_jailbreak),
+                                        onClick = actions.onJailbreakClick,
+                                        colors = ButtonDefaults.textButtonColorsPrimary()
+                                    )
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
+            else -> {
+                Card(
+                    onClick = {
+                        if (!state.isLateLoadMode) {
+                            actions.onInstallClick()
+                        }
+                    },
+                    showIndication = !state.isLateLoadMode,
+                    pressFeedbackType = PressFeedbackType.Sink
+                ) {
+                    BasicComponent(
+                        title = stringResource(R.string.home_unsupported),
+                        summary = stringResource(R.string.home_unsupported_reason),
+                        startAction = {
+                            Icon(
+                                Icons.Rounded.ErrorOutline,
+                                stringResource(R.string.home_unsupported),
+                                modifier = Modifier.padding(end = 16.dp),
+                                tint = colorScheme.onBackground,
+                            )
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LearnMoreCard(
+    onOpenUrl: (String) -> Unit,
+) {
+    val url = stringResource(R.string.home_learn_kernelsu_url)
+    Card(modifier = Modifier.fillMaxWidth()) {
+        BasicComponent(
+            title = stringResource(R.string.home_learn_kernelsu),
+            summary = stringResource(R.string.home_click_to_learn_kernelsu),
+            endActions = {
+                Icon(
+                    imageVector = MiuixIcons.Link,
+                    tint = colorScheme.onSurface,
+                    contentDescription = null
+                )
+            },
+            onClick = { onOpenUrl(url) }
+        )
+    }
+}
+
+@Composable
+private fun DonateCard(onOpenUrl: (String) -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        BasicComponent(
+            title = stringResource(R.string.home_support_title),
+            summary = stringResource(R.string.home_support_content),
+            endActions = {
+                Icon(
+                    imageVector = MiuixIcons.Link,
+                    tint = colorScheme.onSurface,
+                    contentDescription = null
+                )
+            },
+            onClick = { onOpenUrl("https://patreon.com/weishu") },
+            insideMargin = PaddingValues(18.dp)
+        )
+    }
+}
+
+@Composable
+private fun InfoCard(
+    systemInfo: HomeViewModel.SystemInfo,
+    isSimpleMode: Boolean,
+    isHideSusfsStatus: Boolean,
+    isHideZygiskImplement: Boolean,
+    isHideMetaModuleImplement: Boolean,
+) {
+    @Composable
+    fun InfoText(
+        title: String,
+        content: String,
+        bottomPadding: Dp = 24.dp
+    ) {
+        Text(
+            text = title,
+            fontSize = MiuixTheme.textStyles.headline1.fontSize,
+            fontWeight = FontWeight.Medium,
+            color = colorScheme.onSurface
+        )
+        Text(
+            text = content,
+            fontSize = MiuixTheme.textStyles.body2.fontSize,
+            color = colorScheme.onSurfaceVariantSummary,
+            modifier = Modifier.padding(top = 2.dp, bottom = bottomPadding)
+        )
+    }
+
+    Card {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            InfoText(
+                title = stringResource(R.string.home_manager_version),
+                content = "${systemInfo.managerVersion.first} (${systemInfo.managerVersion.second}/${systemInfo.managerVersion.third})"
+            )
+            InfoText(title = stringResource(R.string.home_kernel), content = systemInfo.kernelRelease)
+            if (!isSimpleMode) {
+                InfoText(title = stringResource(R.string.home_android_version), content = systemInfo.androidVersion)
+            }
+            InfoText(title = stringResource(R.string.home_device_model), content = systemInfo.deviceModel)
+            if (!isSimpleMode && ksuIsValid()) {
+                InfoText(title = stringResource(R.string.home_hook_type), content = com.resukisu.resukisu.Natives.getHookType())
+            }
+            InfoText(title = stringResource(R.string.home_selinux_status), content = systemInfo.selinuxStatus)
+            val seccompDisplay = when (systemInfo.seccompStatus) {
+                -1 -> stringResource(R.string.seccomp_status_not_supported)
+                0 -> stringResource(R.string.seccomp_status_disabled)
+                1 -> stringResource(R.string.seccomp_status_strict)
+                2 -> stringResource(R.string.seccomp_status_filter)
+                else -> stringResource(R.string.seccomp_status_unknown)
+            }
+            InfoText(title = stringResource(R.string.home_seccomp_status), content = seccompDisplay)
+            if (!isHideZygiskImplement && !isSimpleMode &&
+                systemInfo.zygiskImplement.isNotEmpty() && systemInfo.zygiskImplement != "None") {
+                InfoText(title = stringResource(R.string.home_zygisk_implement), content = systemInfo.zygiskImplement)
+            }
+            if (!isHideMetaModuleImplement && !isSimpleMode &&
+                systemInfo.metaModuleImplement.isNotEmpty() && systemInfo.metaModuleImplement != "None") {
+                InfoText(title = stringResource(R.string.home_meta_module_implement), content = systemInfo.metaModuleImplement)
+            }
+            if (!isSimpleMode && !isHideSusfsStatus && systemInfo.susfsEnabled && systemInfo.susfsVersion.isNotEmpty()) {
+                InfoText(title = stringResource(R.string.home_susfs_version), content = systemInfo.susfsVersion, bottomPadding = 0.dp)
+            }
+        }
+    }
+}
+
+// Values the Miuix home screen derives from the shared HomeViewModel state, kept as extensions
+// (instead of a parallel UiState) so the screen reads them off ReSukiSU's own uiState.
+val HomeUiState.kernelVersion get() = systemStatus.kernelVersion
+val HomeUiState.ksuVersion: Int? get() = systemStatus.ksuVersion
+val HomeUiState.managerUAPIVersion: Int get() = systemStatus.managerUAPIVersion
+val HomeUiState.kernelUAPIVersion: Int? get() = systemStatus.kernelUAPIVersion
+val HomeUiState.lkmMode: Boolean? get() = systemStatus.lkmMode
+val HomeUiState.isSELinuxPermissive: Boolean get() = systemStatus.isSELinuxPermissive
+val HomeUiState.checkUpdateEnabled: Boolean get() = true
+val HomeUiState.superuserCount: Int get() = systemInfo.superuserCount
+val HomeUiState.moduleCount: Int get() = systemInfo.moduleCount
+val HomeUiState.currentManagerVersionCode: Long get() = systemInfo.managerVersion.third.toLong()
+val HomeUiState.isLateLoadMode: Boolean get() = false
+val HomeUiState.showRequireKernelWarning: Boolean
+    get() = systemStatus.isManager && systemStatus.requireNewKernel
+val HomeUiState.showUAPIMisMatchWarning: Boolean
+    get() = showRequireKernelWarning && systemStatus.uapiMismatch
+val HomeUiState.showRootWarning: Boolean
+    get() = systemStatus.ksuVersion != null && !systemStatus.isRootAvailable
+val HomeUiState.showUnofficialWarning: Boolean
+    get() = !systemStatus.isOfficialSignature
+
+data class HomeActions(
+    val onInstallClick: () -> Unit,
+    val onSuperuserClick: () -> Unit,
+    val onModuleClick: () -> Unit,
+    val onOpenUrl: (String) -> Unit,
+    val onJailbreakClick: () -> Unit = {},
+    val onOpenSusfs: () -> Unit = {},
+)

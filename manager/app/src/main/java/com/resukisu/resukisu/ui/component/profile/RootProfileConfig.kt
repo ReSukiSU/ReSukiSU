@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.profile.Capabilities
 import com.resukisu.resukisu.profile.Groups
 import com.resukisu.resukisu.toRawFlags
@@ -49,11 +51,14 @@ fun RootProfileConfig(
     profile: Natives.Profile,
     onProfileChange: (Natives.Profile) -> Unit,
 ) {
-    SegmentedColumn {
-        rootProfileConfig(
-            profile,
-            onProfileChange
-        )
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> RootProfileConfigMiuix(profile, onProfileChange)
+        UiMode.Material -> SegmentedColumn {
+            rootProfileConfig(
+                profile,
+                onProfileChange
+            )
+        }
     }
 }
 
@@ -420,6 +425,6 @@ private fun isTextValidUid(text: String): Boolean {
     }
 }
 
-private fun isSELinuxDomainValid(value: String): Boolean {
+internal fun isSELinuxDomainValid(value: String): Boolean {
     return value.matches(Regex("^[a-z_]+:[a-z0-9_]+:[a-z0-9_]+(:[a-z0-9_]+)?$"))
 }

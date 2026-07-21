@@ -94,6 +94,8 @@ import com.resukisu.resukisu.ui.util.toSulogDisplayName
 import com.resukisu.resukisu.ui.viewmodel.SulogActions
 import com.resukisu.resukisu.ui.viewmodel.SulogFileSelector
 import com.resukisu.resukisu.ui.viewmodel.SulogScreenState
+import com.resukisu.resukisu.ui.LocalUiMode
+import com.resukisu.resukisu.ui.UiMode
 import com.resukisu.resukisu.ui.viewmodel.SulogViewModel
 import kotlinx.coroutines.launch
 
@@ -131,10 +133,10 @@ fun SulogScreen() {
         onSelectFile = viewModel::refresh,
     )
 
-    SulogScreenContent(
-        state,
-        actions
-    )
+    when (LocalUiMode.current) {
+        UiMode.Miuix -> com.resukisu.resukisu.ui.screen.sulog.SulogScreenMiuix(state = state, actions = actions)
+        UiMode.Material -> SulogScreenContent(state, actions)
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
