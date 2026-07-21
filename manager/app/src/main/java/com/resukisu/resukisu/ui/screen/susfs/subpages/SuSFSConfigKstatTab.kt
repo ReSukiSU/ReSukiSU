@@ -31,6 +31,8 @@ import com.resukisu.resukisu.data.susfs.SusKstatType
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
+import com.resukisu.resukisu.ui.screen.susfs.RegisterSuSFSRefresh
+import com.resukisu.resukisu.ui.screen.susfs.SuSFSRefreshRegistrar
 import com.resukisu.resukisu.ui.screen.susfs.component.EntryDetailDialog
 import com.resukisu.resukisu.ui.screen.susfs.component.ManualAddDialog
 import com.resukisu.resukisu.ui.screen.susfs.component.SuSFSDescriptionCard
@@ -44,7 +46,7 @@ import kotlinx.coroutines.launch
 fun SusKstatTab(
     nestedScrollConnection: NestedScrollConnection,
     topPadding: Dp,
-    dirtyGeneration: Int
+    onRegisterRefresh: SuSFSRefreshRegistrar,
 ) {
     val snackbarHost = LocalSnackbarHost.current
     val context = LocalContext.current
@@ -76,8 +78,8 @@ fun SusKstatTab(
     val subtypeStatically = stringResource(R.string.susfs_kstat_subtype_statically)
     val subtypes = listOf(subtypeNormal, subtypeFullClone, subtypeStatically)
 
-    LaunchedEffect(dirtyGeneration) {
-        entries = SuSFSConfigHelper.loadConfig().sus_kstat
+    RegisterSuSFSRefresh(onRegisterRefresh) { config, _ ->
+        entries = config.sus_kstat
     }
 
     LaunchedEffect(showManualAdd) {

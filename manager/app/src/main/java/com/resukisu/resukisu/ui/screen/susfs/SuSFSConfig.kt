@@ -14,16 +14,13 @@ import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
@@ -32,11 +29,13 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -45,7 +44,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
@@ -80,11 +78,31 @@ fun SuSFSConfigScreen() {
     val snackBarHost = LocalSnackbarHost.current
     val topAppBarState = rememberTopAppBarState()
     val coroutineScope = rememberCoroutineScope()
-    var dirtyGeneration by remember { mutableIntStateOf(0) }
-    val markDirty = { dirtyGeneration += 1 }
+    var isRefreshing by remember { mutableStateOf(false) }
     var configEnabled by remember { mutableStateOf<Boolean?>(null) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     val operationFailedMsg = stringResource(R.string.susfs_operation_failed)
+    val pullRefreshState = rememberPullToRefreshState()
+    val refreshCoordinator = remember(coroutineScope) {
+        SuSFSRefreshCoordinator(coroutineScope)
+    }
+    val onRegisterRefresh: SuSFSRefreshRegistrar = remember(refreshCoordinator) {
+        refreshCoordinator::register
+    }
+
+    fun requestRefresh() {
+        if (isRefreshing) return
+        isRefreshing = true
+        coroutineScope.launch {
+            try {
+                refreshCoordinator.refresh(forceRefresh = true) { config ->
+                    configEnabled = config.enabled
+                }
+            } finally {
+                isRefreshing = false
+            }
+        }
+    }
 
     val handleConfigEnabledChange: (Boolean) -> Unit = { newValue ->
         coroutineScope.launch {
@@ -104,7 +122,7 @@ fun SuSFSConfigScreen() {
             StatusTab(
                 nestedScrollConnection = nestedScrollConnection,
                 topPadding = contentPadding.calculateTopPadding(),
-                dirtyGeneration = dirtyGeneration,
+                onRegisterRefresh = onRegisterRefresh,
                 configEnabled = configEnabled ?: false,
                 configEnabledLoaded = configEnabled != null,
                 onConfigEnabledChange = handleConfigEnabledChange,
@@ -117,7 +135,7 @@ fun SuSFSConfigScreen() {
             StandardFeaturesTab(
                 nestedScrollConnection = nestedScrollConnection,
                 topPadding = contentPadding.calculateTopPadding(),
-                dirtyGeneration = dirtyGeneration,
+                onRegisterRefresh = onRegisterRefresh,
             )
         },
         SuSFSConfigSubpage(
@@ -127,7 +145,7 @@ fun SuSFSConfigScreen() {
             BackupRestoreTab(
                 nestedScrollConnection = nestedScrollConnection,
                 topPadding = contentPadding.calculateTopPadding(),
-                onConfigRestored = markDirty,
+                onConfigRestored = ::requestRefresh,
             )
         },
         SuSFSConfigSubpage(
@@ -137,7 +155,7 @@ fun SuSFSConfigScreen() {
             SusPathTab(
                 nestedScrollConnection = nestedScrollConnection,
                 topPadding = contentPadding.calculateTopPadding(),
-                dirtyGeneration = dirtyGeneration,
+                onRegisterRefresh = onRegisterRefresh,
             )
         },
         SuSFSConfigSubpage(
@@ -147,7 +165,7 @@ fun SuSFSConfigScreen() {
             SusKstatTab(
                 nestedScrollConnection = nestedScrollConnection,
                 topPadding = contentPadding.calculateTopPadding(),
-                dirtyGeneration = dirtyGeneration,
+                onRegisterRefresh = onRegisterRefresh,
             )
         },
         SuSFSConfigSubpage(
@@ -157,7 +175,7 @@ fun SuSFSConfigScreen() {
             OpenRedirectTab(
                 nestedScrollConnection = nestedScrollConnection,
                 topPadding = contentPadding.calculateTopPadding(),
-                dirtyGeneration = dirtyGeneration,
+                onRegisterRefresh = onRegisterRefresh,
             )
         },
         SuSFSConfigSubpage(
@@ -167,7 +185,7 @@ fun SuSFSConfigScreen() {
             SusMapTab(
                 nestedScrollConnection = nestedScrollConnection,
                 topPadding = contentPadding.calculateTopPadding(),
-                dirtyGeneration = dirtyGeneration,
+                onRegisterRefresh = onRegisterRefresh,
             )
         },
     )
@@ -187,8 +205,10 @@ fun SuSFSConfigScreen() {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
     }
 
-    LaunchedEffect(dirtyGeneration) {
-        configEnabled = SuSFSConfigHelper.loadConfig().enabled
+    LaunchedEffect(refreshCoordinator) {
+        refreshCoordinator.refresh(forceRefresh = false) { config ->
+            configEnabled = config.enabled
+        }
     }
 
     LaunchedEffect(configEnabled, defaultPage) {
@@ -209,21 +229,6 @@ fun SuSFSConfigScreen() {
                                 navigator.pop()
                             }
                         )
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = {
-                                coroutineScope.launch {
-                                    SuSFSConfigHelper.refreshConfig()
-                                    markDirty()
-                                }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.TwoTone.Refresh,
-                                contentDescription = stringResource(R.string.susfs_refresh)
-                            )
-                        }
                     },
                     colors = TopAppBarDefaults.topAppBarColors().copy(
                         containerColor =
@@ -291,18 +296,35 @@ fun SuSFSConfigScreen() {
         ),
         snackbarHost = { SwipeableSnackbarHost(hostState = snackBarHost) }
     ) { innerPadding ->
-        Column(
+        PullToRefreshBox(
+            state = pullRefreshState,
+            isRefreshing = isRefreshing,
+            onRefresh = ::requestRefresh,
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .blurSource()
+                .blurSource(),
+            indicator = {
+                PullToRefreshDefaults.LoadingIndicator(
+                    modifier = Modifier
+                        .padding(top = innerPadding.calculateTopPadding())
+                        .align(Alignment.TopCenter),
+                    state = pullRefreshState,
+                    isRefreshing = isRefreshing,
+                )
+            },
         ) {
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.fillMaxSize(),
-                userScrollEnabled = configEnabled == true,
-            ) { page ->
-                subpages[page].content(innerPadding, scrollBehavior.nestedScrollConnection)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .blurSource()
+            ) {
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize(),
+                    userScrollEnabled = configEnabled == true,
+                ) { page ->
+                    subpages[page].content(innerPadding, scrollBehavior.nestedScrollConnection)
+                }
             }
         }
     }

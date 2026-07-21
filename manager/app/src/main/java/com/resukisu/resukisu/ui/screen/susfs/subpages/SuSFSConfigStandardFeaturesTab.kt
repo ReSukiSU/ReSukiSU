@@ -22,7 +22,6 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +40,8 @@ import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
+import com.resukisu.resukisu.ui.screen.susfs.RegisterSuSFSRefresh
+import com.resukisu.resukisu.ui.screen.susfs.SuSFSRefreshRegistrar
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import kotlinx.coroutines.launch
 
@@ -49,7 +50,7 @@ import kotlinx.coroutines.launch
 fun StandardFeaturesTab(
     nestedScrollConnection: NestedScrollConnection,
     topPadding: Dp,
-    dirtyGeneration: Int
+    onRegisterRefresh: SuSFSRefreshRegistrar,
 ) {
     val snackbarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
@@ -71,10 +72,9 @@ fun StandardFeaturesTab(
 
     val operationFailedMsg = stringResource(R.string.susfs_operation_failed)
 
-    LaunchedEffect(dirtyGeneration) {
+    RegisterSuSFSRefresh(onRegisterRefresh) { config, _ ->
         isLoading = true
         try {
-            val config = SuSFSConfigHelper.loadConfig()
             loggingEnabled = config.logging
             avcLogSpoofingEnabled = config.avc_log_spoofing
             hideSusMntsEnabled = config.hide_sus_mnts_for_non_su_procs

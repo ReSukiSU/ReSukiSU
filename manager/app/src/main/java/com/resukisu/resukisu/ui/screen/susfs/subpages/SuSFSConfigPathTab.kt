@@ -27,6 +27,8 @@ import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.data.susfs.SusPathItem
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
+import com.resukisu.resukisu.ui.screen.susfs.RegisterSuSFSRefresh
+import com.resukisu.resukisu.ui.screen.susfs.SuSFSRefreshRegistrar
 import com.resukisu.resukisu.ui.screen.susfs.component.EntryDetailDialog
 import com.resukisu.resukisu.ui.screen.susfs.component.ManualAddDialog
 import com.resukisu.resukisu.ui.screen.susfs.component.SuSFSDescriptionCard
@@ -40,7 +42,7 @@ import kotlinx.coroutines.launch
 fun SusPathTab(
     nestedScrollConnection: NestedScrollConnection,
     topPadding: Dp,
-    dirtyGeneration: Int
+    onRegisterRefresh: SuSFSRefreshRegistrar,
 ) {
     val snackbarHost = LocalSnackbarHost.current
     val context = LocalContext.current
@@ -59,8 +61,8 @@ fun SusPathTab(
     val subtypeLoop = stringResource(R.string.susfs_path_subtype_loop)
     val subtypes = listOf(subtypePath, subtypeLoop)
 
-    LaunchedEffect(dirtyGeneration) {
-        entries = SuSFSConfigHelper.loadConfig().sus_path
+    RegisterSuSFSRefresh(onRegisterRefresh) { config, _ ->
+        entries = config.sus_path
     }
 
     LaunchedEffect(showManualAdd) {

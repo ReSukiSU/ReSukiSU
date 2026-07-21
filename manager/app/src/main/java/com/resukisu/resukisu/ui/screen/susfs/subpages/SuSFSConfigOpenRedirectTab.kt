@@ -29,6 +29,8 @@ import com.resukisu.resukisu.data.susfs.UidScheme
 import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
+import com.resukisu.resukisu.ui.screen.susfs.RegisterSuSFSRefresh
+import com.resukisu.resukisu.ui.screen.susfs.SuSFSRefreshRegistrar
 import com.resukisu.resukisu.ui.screen.susfs.component.EntryDetailDialog
 import com.resukisu.resukisu.ui.screen.susfs.component.ManualAddDialog
 import com.resukisu.resukisu.ui.screen.susfs.component.SuSFSDescriptionCard
@@ -41,7 +43,7 @@ import kotlinx.coroutines.launch
 fun OpenRedirectTab(
     nestedScrollConnection: NestedScrollConnection,
     topPadding: Dp,
-    dirtyGeneration: Int,
+    onRegisterRefresh: SuSFSRefreshRegistrar,
 ) {
     val snackbarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
@@ -63,8 +65,8 @@ fun OpenRedirectTab(
         UidScheme.Unmounted to stringResource(R.string.susfs_uid_scheme_unmounted),
     )
 
-    LaunchedEffect(dirtyGeneration) {
-        entries = SuSFSConfigHelper.loadConfig().open_redirect
+    RegisterSuSFSRefresh(onRegisterRefresh) { config, _ ->
+        entries = config.open_redirect
     }
 
     LaunchedEffect(showManualAdd) {
