@@ -1,1 +1,2 @@
 *.bat eol=crlf
+manager/app/src/main/res/values/strings.xml -text
