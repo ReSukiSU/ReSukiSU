@@ -276,3 +276,44 @@ ifeq ($(shell grep -q "security_add_hooks" $(srctree)/include/linux/lsm_hooks.h;
 $(info -- $(REPO_NAME)/compat: found security_add_hooks)
 ccflags-y += -DKSU_COMPAT_HAS_LIST_OF_LSM_HOOKS
 endif
+
+# https://github.com/torvalds/linux/commit/c4ad8f98bef77c7356aa6a9ad9188a6acc6b849d
+ifeq ($(shell grep -q "int do_execve.struct filename .filename" $(srctree)/fs/exec.c; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: found 'struct filename *' for executable name passing)
+ccflags-y += -DKSU_COMPAT_DO_EXECVE_STRUCT_FILENAME
+endif
+
+# https://github.com/torvalds/linux/commit/223b5e57d0d50b0c07b933350dbcde92018d3080
+ifneq ($(wildcard $(srctree)/include/linux/execmem.h),)
+$(info -- $(REPO_NAME)/compat: found execmem api)
+ccflags-y += -DKSU_COMPAT_HAVE_EXECMEM_API
+endif
+
+# https://github.com/torvalds/linux/commit/e46b7103aef39c3f421f0bff7a10ae5a29cd5cee
+ifneq ($(shell grep -q "module_alloc_base" $(srctree)/arch/arm64/include/asm/module.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: found module_alloc_base removed)
+ccflags-y += -DKSU_COMPAT_MODULE_ALLOC_BASE_IN_MODULE_C
+endif
+
+# https://github.com/torvalds/linux/commit/299878bac326c890699c696ebba26f56fe93fc75
+ifneq ($(wildcard $(srctree)/include/asm-generic/set_memory.h),)
+$(info -- $(REPO_NAME)/compat: found set_memory header)
+ccflags-y += -DKSU_COMPAT_HAVE_SET_MEMORY_HEADER
+endif
+
+# https://github.com/torvalds/linux/commit/cb9e3c292d0115499c660028ad35ac5501d722b5
+ifeq ($(shell grep -q "vm_flags" $(srctree)/include/linux/vmalloc.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: found vmflags in __vmalloc_node_range)
+ccflags-y += -DKSU_COMPAT_HAVE_VMFLAGS_IN_VMALLOC_NODE_RANGE
+endif
+
+ifeq ($(shell grep -q "kasan_alloc_module_shadow" $(srctree)/include/linux/kasan.h 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: found kasan_alloc_module_shadow)
+ccflags-y += -DKSU_COMPAT_HAVE_KASAN_ALLOC_MODULE_SHADOW
+endif
+
+# https://github.com/torvalds/linux/commit/51f39a1f0cea1cacf8c787f652f26dfee9611874
+ifeq ($(shell grep -q "do_execveat_common" $(srctree)/fs/exec.c; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: found do_execveat_common)
+ccflags-y += -DKSU_COMPAT_HAVE_DO_EXECVEAT_COMMON
+endif

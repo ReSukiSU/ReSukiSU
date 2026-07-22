@@ -117,7 +117,7 @@ static void stop_execve_hook(void);
     }
 
 #elif defined(CONFIG_KSU_MANUAL_HOOK)
-    #if defined(CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK) && defined(KSU_COMPAT_USE_STATIC_KEY)
+    #if defined(KSU_HOOK_AUTO_INITRC_HOOK) && defined(KSU_COMPAT_USE_STATIC_KEY)
         DEFINE_STATIC_KEY_TRUE(ksu_init_rc_hook);
         #define ksu_init_rc_hook_inactive() (!static_branch_likely(&ksu_init_rc_hook))
         static void stop_init_rc_hook(void)
@@ -136,7 +136,7 @@ static void stop_execve_hook(void);
         }
     #endif
 
-    #if defined(CONFIG_KSU_MANUAL_HOOK_AUTO_INPUT_HOOK) && defined(KSU_COMPAT_USE_STATIC_KEY)
+    #if defined(KSU_HOOK_AUTO_INPUT_HOOK) && defined(KSU_COMPAT_USE_STATIC_KEY)
         DEFINE_STATIC_KEY_TRUE(ksu_input_hook);
         #define ksu_input_hook_inactive() (!static_branch_likely(!ksu_input_hook))
         static void vol_detector_exit();
@@ -151,7 +151,7 @@ static void stop_execve_hook(void);
         bool ksu_input_hook __read_mostly = true;
         #define ksu_input_hook_inactive() (likely(!ksu_input_hook))
 
-        #ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_INPUT_HOOK
+        #ifdef KSU_HOOK_AUTO_INPUT_HOOK
             static void vol_detector_exit();
             static inline void stop_input_hook(void)
             {
@@ -754,7 +754,7 @@ void ksu_handle_initrc(struct file *file)
     file->f_op = &fops_proxy;
 }
 
-#ifndef CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK
+#ifndef KSU_HOOK_AUTO_INITRC_HOOK
 static void ksu_handle_sys_read_fd(unsigned int fd)
 {
     struct file *file = fget(fd);
@@ -770,7 +770,7 @@ static void ksu_handle_sys_read_fd(unsigned int fd)
 
 int ksu_handle_sys_read(unsigned int fd, char __user **buf_ptr, size_t *count_ptr)
 {
-#ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK
+#ifdef KSU_HOOK_AUTO_INITRC_HOOK
     return 0; // dummy hook here
 #else
 
@@ -789,7 +789,7 @@ static bool is_volumedown_enough(unsigned int count)
 
 int ksu_handle_input_handle_event(unsigned int *type, unsigned int *code, int *value)
 {
-#ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_INPUT_HOOK
+#ifdef KSU_HOOK_AUTO_INPUT_HOOK
     return 0; // dummy manual hook
 #else
     if (ksu_input_hook_inactive())
@@ -811,7 +811,7 @@ int ksu_handle_input_handle_event(unsigned int *type, unsigned int *code, int *v
 #endif
 }
 
-#ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_INPUT_HOOK
+#ifdef KSU_HOOK_AUTO_INPUT_HOOK
 static void vol_detector_event(struct input_handle *handle, unsigned int type, unsigned int code, int value)
 {
     if (!value)
@@ -1069,7 +1069,7 @@ void __init ksu_ksud_init(void)
 
     INIT_WORK(&stop_input_hook_work, do_stop_input_hook);
 #endif
-#ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_INPUT_HOOK
+#ifdef KSU_HOOK_AUTO_INPUT_HOOK
     vol_detector_init();
 #endif
 }
@@ -1083,7 +1083,7 @@ void __exit ksu_ksud_exit(void)
     unregister_kprobe(&input_event_kp);
 #endif
 
-#ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_INPUT_HOOK
+#ifdef KSU_HOOK_AUTO_INPUT_HOOK
     vol_detector_exit();
 #endif
     volumedown_pressed_count = 0;
