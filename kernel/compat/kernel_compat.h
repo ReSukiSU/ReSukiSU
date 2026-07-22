@@ -341,4 +341,22 @@ __weak long copy_from_kernel_nofault(void *dst, const void *src, size_t size)
     } while (0) /* fallthrough */
 #endif
 
+#ifdef KSU_COMPAT_SYM_NAME_NOT_FOUND
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 1, 0) && !defined(KSU_COMPAT_HAS_MODERN_POLICYDB)
+#include <linux/flex_array.h>
+#endif
+
+static inline char *sym_name(struct policydb *p, unsigned int sym_num, unsigned int element_nr)
+{
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 1, 0) || defined(KSU_COMPAT_HAS_MODERN_POLICYDB)
+    return p->sym_val_to_name[sym_num][element_nr];
+#else
+    struct flex_array *fa = p->sym_val_to_name[sym_num];
+
+    return flex_array_get_ptr(fa, element_nr);
+#endif
+}
+#endif
+
 #endif

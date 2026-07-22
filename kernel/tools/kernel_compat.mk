@@ -210,6 +210,7 @@ $(info -- $(REPO_NAME)/compat: android spec POLICYDB_CONFIG_ANDROID_NETLINK_GETN
 ccflags-y += -DKSU_COMPAT_HAS_POLICYDB_CONFIG_ANDROID_NETLINK_GETNEIGH
 endif
 
+# https://github.com/torvalds/linux/commit/acdf52d97f824019888422842757013b37441dd1
 ifneq ($(shell grep -q "flex_array" $(srctree)/security/selinux/ss/policydb.h; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: found modern selinux policydb)
 ccflags-y += -DKSU_COMPAT_HAS_MODERN_POLICYDB
@@ -275,4 +276,20 @@ endif
 ifeq ($(shell grep -q "security_add_hooks" $(srctree)/include/linux/lsm_hooks.h; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: found security_add_hooks)
 ccflags-y += -DKSU_COMPAT_HAS_LIST_OF_LSM_HOOKS
+endif
+
+# for HUAWEI kernel
+# huawei rename type_attr_map_arry -> type_attr_map
+# https://github.com/xixiaobei-bei/Huawei_MHA_EMUI9.0_ReSukiSU/blob/master/security/selinux/ss/policydb.h#L293
+ifneq ($(shell grep -q "type_attr_map_array" $(srctree)/security/selinux/ss/policydb.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: type_attr_map_array not found)
+ccflags-y += -DKSU_COMPAT_TYPE_ATTR_MAP_ARRAY_NOT_FOUND
+endif
+
+# for HUAWEI kernel
+# huawei removed sym_name func
+# https://github.com/xixiaobei-bei/Huawei_MHA_EMUI9.0_ReSukiSU/blob/master/security/selinux/ss/policydb.h
+ifneq ($(shell grep -q "sym_name" $(srctree)/security/selinux/ss/policydb.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: sym_name not found)
+ccflags-y += -DKSU_COMPAT_SYM_NAME_NOT_FOUND
 endif

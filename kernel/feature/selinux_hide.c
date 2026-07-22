@@ -1717,6 +1717,17 @@ static void type_attribute_bounds_av(struct context *scontext, struct context *t
     struct type_datum *target;
     u32 masked = 0;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 1, 0) || defined(KSU_COMPAT_HAS_MODERN_POLICYDB)
+    // mostly never happen, except Huawei
+    source = backup_policydb->type_val_to_struct[scontext->type - 1];
+    BUG_ON(!source);
+
+    if (!source->bounds)
+        return;
+
+    target = backup_policydb->type_val_to_struct[tcontext->type - 1];
+    BUG_ON(!target);
+#else
     source = flex_array_get_ptr(backup_policydb->type_val_to_struct_array, scontext->type - 1);
     BUG_ON(!source);
 
@@ -1725,6 +1736,8 @@ static void type_attribute_bounds_av(struct context *scontext, struct context *t
 
     target = flex_array_get_ptr(backup_policydb->type_val_to_struct_array, tcontext->type - 1);
     BUG_ON(!target);
+
+#endif
 
     memset(&lo_avd, 0, sizeof(lo_avd));
 
@@ -1815,10 +1828,21 @@ static void context_struct_compute_av(struct context *scontext, struct context *
 	 */
     avkey.target_class = tclass;
     avkey.specified = AVTAB_AV | AVTAB_XPERMS;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 1, 0) ||                                                                   \
+    (defined(KSU_COMPAT_HAS_MODERN_POLICYDB) && !defined(KSU_COMPAT_TYPE_ATTR_MAP_ARRAY_NOT_FOUND))
+    // mostly never happen
+    sattr = &backup_policydb->type_attr_map_array[scontext->type - 1];
+    tattr = &backup_policydb->type_attr_map_array[tcontext->type - 1];
+#elif defined(KSU_COMPAT_TYPE_ATTR_MAP_ARRAY_NOT_FOUND)
+    // huawei! why rename??!
+    sattr = &backup_policydb->type_attr_map[scontext->type - 1];
+    tattr = &backup_policydb->type_attr_map[tcontext->type - 1];
+#else
     sattr = flex_array_get(backup_policydb->type_attr_map_array, scontext->type - 1);
     BUG_ON(!sattr);
     tattr = flex_array_get(backup_policydb->type_attr_map_array, tcontext->type - 1);
     BUG_ON(!tattr);
+#endif
     ebitmap_for_each_positive_bit(sattr, snode, i)
     {
         ebitmap_for_each_positive_bit(tattr, tnode, j)
