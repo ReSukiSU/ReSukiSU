@@ -74,6 +74,9 @@ object ModuleModify {
                 }
 
                 val error = BufferedReader(InputStreamReader(process.errorStream)).readText()
+
+                process.waitFor()
+
                 if (process.exitValue() != 0) {
                     throw IOException(context.getString(R.string.command_execution_failed, error))
                 }
