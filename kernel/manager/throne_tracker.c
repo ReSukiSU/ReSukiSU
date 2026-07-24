@@ -344,11 +344,13 @@ void do_track_throne(void *data)
         uid = strsep(&tmp, delim);
         if (!uid || !package) {
             pr_err("update_uid: package or uid is NULL!\n");
+            kfree(data);
             break;
         }
 
         if (kstrtou32(uid, 10, &res)) {
             pr_err("update_uid: uid parse err\n");
+            kfree(data);
             break;
         }
         data->uid = res;
