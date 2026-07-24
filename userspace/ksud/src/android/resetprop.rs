@@ -162,7 +162,11 @@ fn execute(cli: &Args) -> Result<()> {
     // -w: wait mode
     if cli.wait {
         let name = cli.name().context("--wait requires a property name")?;
-        let timeout = cli.timeout.map(Duration::from_secs_f64);
+        let timeout = cli
+            .timeout
+            .map(Duration::try_from_secs_f64)
+            .transpose()
+            .map_err(|_| anyhow::anyhow!("invalid --timeout value"))?;
         let ok = rp
             .wait(name, cli.value().map(std::string::String::as_str), timeout)
             .context("wait failed")?;
