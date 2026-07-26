@@ -14,13 +14,14 @@
 #endif
 
 #include "arch.h"
-#include "klog.h" // IWYU pragma: keep
-#include "hook/syscall_hook_manager.h"
-#include "hook/tp_marker.h"
+#include "feature/module_load_filter.h"
 #include "feature/sucompat.h"
+#include "klog.h" // IWYU pragma: keep
 #include "hook/setuid_hook.h"
 #include "hook/syscall_hook.h"
 #include "hook/syscall_event_bridge.h"
+#include "hook/syscall_hook_manager.h"
+#include "hook/tp_marker.h"
 
 #ifdef CONFIG_KRETPROBES
 
@@ -121,6 +122,59 @@ static void ksu_sys_enter_handler(void *data, struct pt_regs *regs, long id)
 }
 #endif
 
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
+// init_module(2): sys_init_module(void __user *umod, unsigned long len,
+//                                 const char __user *uargs)
+static long (*orig_sys_init_module)(const struct pt_regs *regs);
+static long ksu_sys_init_module(const struct pt_regs *regs)
+{
+    int ret = ksu_handle_init_module((const void __user *)PT_REGS_PARM1(regs),
+                                     (unsigned long)PT_REGS_PARM2(regs));
+
+    if (ret != KSU_MODULE_LOAD_CONTINUE)
+        return ret;
+
+    return orig_sys_init_module(regs);
+}
+
+// finit_module(2): sys_finit_module(int fd, const char __user *uargs, int flags)
+static long (*orig_sys_finit_module)(const struct pt_regs *regs);
+static long ksu_sys_finit_module(const struct pt_regs *regs)
+{
+    int ret = ksu_handle_finit_module((int)PT_REGS_PARM1(regs), (int)PT_REGS_PARM3(regs));
+
+    if (ret != KSU_MODULE_LOAD_CONTINUE)
+        return ret;
+
+    return orig_sys_finit_module(regs);
+}
+
+static void __init ksu_module_load_filter_hook_init(void)
+{
+    if (!ksu_blocked_preset_modules[0]) {
+        pr_info("module_load_filter: disabled by module parameter\n");
+        return;
+    }
+
+    // Preinstalled modules are commonly loaded by vendor init, which is not
+    // guaranteed to be tracepoint-marked. Direct table hooks cover every
+    // caller while preserving the original loader for non-matches.
+    ksu_syscall_table_hook(__NR_init_module, ksu_sys_init_module, &orig_sys_init_module);
+    ksu_syscall_table_hook(__NR_finit_module, ksu_sys_finit_module, &orig_sys_finit_module);
+    pr_info("module_load_filter: enabled for %s\n", ksu_blocked_preset_modules);
+}
+
+static void __exit ksu_module_load_filter_hook_exit(void)
+{
+    if (!ksu_blocked_preset_modules[0])
+        return;
+
+    ksu_syscall_table_unhook(__NR_init_module);
+    ksu_syscall_table_unhook(__NR_finit_module);
+    pr_info("module_load_filter: unhooked\n");
+}
+#endif
+
 void __init ksu_syscall_hook_manager_init(void)
 {
     int ret;
@@ -136,6 +190,10 @@ void __init ksu_syscall_hook_manager_init(void)
     ksu_register_syscall_hook(__NR_execve, ksu_hook_execve);
     ksu_register_syscall_hook(__NR_newfstatat, ksu_hook_newfstatat);
     ksu_register_syscall_hook(__NR_faccessat, ksu_hook_faccessat);
+
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
+    ksu_module_load_filter_hook_init();
+#endif
 
 #ifdef CONFIG_HAVE_SYSCALL_TRACEPOINTS
     ret = register_trace_prio_sys_enter(ksu_sys_enter_handler, NULL, INT_MIN);
@@ -156,6 +214,11 @@ void __init ksu_syscall_hook_manager_init(void)
 void __exit ksu_syscall_hook_manager_exit(void)
 {
     pr_info("hook_manager: ksu_hook_manager_exit called\n");
+
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
+    ksu_module_load_filter_hook_exit();
+#endif
+
 #ifdef CONFIG_HAVE_SYSCALL_TRACEPOINTS
     unregister_trace_sys_enter(ksu_sys_enter_handler, NULL);
     tracepoint_synchronize_unregister();
