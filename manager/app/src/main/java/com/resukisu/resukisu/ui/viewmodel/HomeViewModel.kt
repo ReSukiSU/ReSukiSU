@@ -11,11 +11,11 @@ import com.resukisu.resukisu.BuildConfig
 import com.resukisu.resukisu.KernelVersion
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.data.appPreferences
+import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.data.update.ManagerUpdateInfo
 import com.resukisu.resukisu.data.update.ManagerUpdateRepository
 import com.resukisu.resukisu.getKernelVersion
 import com.resukisu.resukisu.ksuApp
-import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
 import com.resukisu.resukisu.ui.util.getMetaModuleImplement
 import com.resukisu.resukisu.ui.util.getModuleCount
 import com.resukisu.resukisu.ui.util.getSELinuxStatus
@@ -33,6 +33,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 data class HomeUiState(
@@ -105,6 +107,7 @@ class HomeViewModel : ViewModel() {
     private val loadingJobs = mutableListOf<Job>()
     private var dataLoadJob: Job? = null
     private var managerUpdateCheckJob: Job? = null
+    private val statusInfoMutex = Mutex()
 
     private fun completedJob(): Job = Job().apply { complete() }
 
@@ -239,17 +242,7 @@ class HomeViewModel : ViewModel() {
                     )
                 }
 
-                val moduleInfo = loadModuleInfo()
-                _uiState.update {
-                    it.copy(
-                        systemInfo = it.systemInfo.copy(
-                            superuserCount = moduleInfo.first,
-                            moduleCount = moduleInfo.second,
-                            zygiskImplement = moduleInfo.third,
-                            metaModuleImplement = moduleInfo.fourth,
-                        )
-                    )
-                }
+                updateModuleAndSuperuserInfo()
 
                 if (!_uiState.value.isHideSusfsStatus) {
                     val susfsInfo = loadSuSFSInfo()
@@ -425,14 +418,68 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    private suspend fun loadModuleInfo(): Tuple4<Int, Int, String, String> {
+    private suspend fun loadSuperuserCount(): Int {
         return withContext(Dispatchers.IO) {
-            Tuple4(
-                runCatching { getSuperuserCount() }.getOrDefault(0),
+            runCatching { getSuperuserCount() }.getOrDefault(0)
+        }
+    }
+
+    private suspend fun loadModuleInfo(): Triple<Int, String, String> {
+        return withContext(Dispatchers.IO) {
+            Triple(
                 runCatching { getModuleCount() }.getOrDefault(0),
                 runCatching { getZygiskImplement() }.getOrDefault("None"),
                 runCatching { getMetaModuleImplement() }.getOrDefault("None"),
             )
+        }
+    }
+
+    private suspend fun updateModuleAndSuperuserInfo() {
+        statusInfoMutex.withLock {
+            val superuserCount = loadSuperuserCount()
+            val moduleInfo = loadModuleInfo()
+            _uiState.update {
+                it.copy(
+                    systemInfo = it.systemInfo.copy(
+                        superuserCount = superuserCount,
+                        moduleCount = moduleInfo.first,
+                        zygiskImplement = moduleInfo.second,
+                        metaModuleImplement = moduleInfo.third,
+                    )
+                )
+            }
+        }
+    }
+
+    fun refreshModuleInfo(): Job {
+        return viewModelScope.launch(Dispatchers.IO) {
+            statusInfoMutex.withLock {
+                val moduleInfo = loadModuleInfo()
+                _uiState.update {
+                    it.copy(
+                        systemInfo = it.systemInfo.copy(
+                            moduleCount = moduleInfo.first,
+                            zygiskImplement = moduleInfo.second,
+                            metaModuleImplement = moduleInfo.third,
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    fun refreshSuperuserInfo(): Job {
+        return viewModelScope.launch(Dispatchers.IO) {
+            statusInfoMutex.withLock {
+                val superuserCount = loadSuperuserCount()
+                _uiState.update {
+                    it.copy(
+                        systemInfo = it.systemInfo.copy(
+                            superuserCount = superuserCount,
+                        )
+                    )
+                }
+            }
         }
     }
 
@@ -519,13 +566,6 @@ class HomeViewModel : ViewModel() {
         val fourth: T4,
         val fifth: T5,
         val sixth: T6
-    )
-
-    data class Tuple4<T1, T2, T3, T4>(
-        val first: T1,
-        val second: T2,
-        val third: T3,
-        val fourth: T4
     )
 
     override fun onCleared() {

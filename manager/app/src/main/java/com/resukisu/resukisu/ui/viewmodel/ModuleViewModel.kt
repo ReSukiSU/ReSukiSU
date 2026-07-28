@@ -5,6 +5,7 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.ksuApp
@@ -256,6 +257,10 @@ class ModuleViewModel : ViewModel() {
                         isNeedRefresh = false,
                         isRefreshing = false,
                     )
+                }
+                ksuApp.applicationScope.launch {
+                    ViewModelProvider(ksuApp)[HomeViewModel::class.java]
+                        .refreshModuleInfo()
                 }
 
                 checkModuleUpdatesInBackground(modules, moduleVersionKeys)

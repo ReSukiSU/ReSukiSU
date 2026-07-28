@@ -25,13 +25,10 @@ import androidx.compose.material3.WideNavigationRailDefaults
 import androidx.compose.material3.WideNavigationRailItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.resukisu.resukisu.ksuApp
@@ -41,11 +38,7 @@ import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.util.LocalHandlePageChange
 import com.resukisu.resukisu.ui.util.LocalSelectedPage
-import com.resukisu.resukisu.ui.util.getModuleCount
-import com.resukisu.resukisu.ui.util.getSuperuserCount
 import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 // TODO Add FloatingBottomBar as an choice to user
 @SuppressLint("ContextCastToActivity")
@@ -59,27 +52,12 @@ fun NavigationBar(
     val homeViewModel = viewModel<HomeViewModel>(viewModelStoreOwner = ksuApp)
     val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
     val isHideOtherInfo = uiState.isHideOtherInfo
+    val superuserCount = uiState.systemInfo.superuserCount
+    val moduleCount = uiState.systemInfo.moduleCount
 
     // 翻页处理
     val page = LocalSelectedPage.current
     val handlePageChange = LocalHandlePageChange.current
-
-    // 收集计数数据
-    var superuserCountSaved by rememberSaveable { mutableIntStateOf(0) }
-    var moduleCountSaved by rememberSaveable { mutableIntStateOf(0) }
-
-    val superuserCount by produceState(initialValue = superuserCountSaved) {
-        withContext(Dispatchers.IO) {
-            value = getSuperuserCount()
-            superuserCountSaved = value
-        }
-    }
-    val moduleCount by produceState(initialValue = moduleCountSaved) {
-        withContext(Dispatchers.IO) {
-            value = getModuleCount()
-            moduleCountSaved = value
-        }
-    }
 
     if (isBottomBar) {
         FlexibleBottomAppBar(
@@ -178,7 +156,9 @@ private fun NavigationRailItem(
             Text(
                 stringResource(destination.label),
                 style = MaterialTheme.typography.labelMedium,
-                maxLines = 1
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Visible
             )
         },
     )
@@ -218,7 +198,9 @@ private fun RowScope.BottomBarNavigationItem(
             Text(
                 stringResource(destination.label),
                 style = MaterialTheme.typography.labelMedium,
-                maxLines = 1
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Visible
             )
         },
         alwaysShowLabel = false

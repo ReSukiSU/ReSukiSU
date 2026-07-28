@@ -1,5 +1,8 @@
 package com.resukisu.resukisu.ui.screen.main
 
+import android.content.Context
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -54,6 +57,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -92,8 +96,10 @@ import coil.request.ImageRequest
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ksuApp
+import com.resukisu.resukisu.ui.component.ConfirmResult
 import com.resukisu.resukisu.ui.component.SearchAppBar
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
+import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
@@ -101,13 +107,15 @@ import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.LabelText
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
-import com.resukisu.resukisu.ui.util.module.ModuleModify
 import com.resukisu.resukisu.ui.viewmodel.AppCategory
 import com.resukisu.resukisu.ui.viewmodel.SortType
 import com.resukisu.resukisu.ui.viewmodel.SuperUserUiState
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 data class BottomSheetMenuItem(
     val icon: ImageVector,
@@ -134,9 +142,57 @@ fun SuperUserPage(bottomPadding: Dp) {
         enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
     )
     var showBottomSheet by remember { mutableStateOf(false) }
+    val restoreConfirmDialog = rememberConfirmDialog()
+    val restoreConfirmTitle = stringResource(R.string.allowlist_restore_confirm_title)
+    val restoreConfirmMessage = stringResource(R.string.allowlist_restore_confirm_message)
+    val confirmText = stringResource(R.string.confirm)
+    val cancelText = stringResource(R.string.cancel)
 
-    val backupLauncher = ModuleModify.rememberAllowlistBackupLauncher(context, snackBarHostState)
-    val restoreLauncher = ModuleModify.rememberAllowlistRestoreLauncher(context, snackBarHostState)
+    val backupLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/octet-stream")
+    ) { uri ->
+        if (uri != null) {
+            scope.launch {
+                val result = viewModel.backupAllowlist(uri)
+                snackBarHostState.showSnackbar(
+                    message = context.allowlistOperationMessage(
+                        result = result,
+                        successMessage = R.string.allowlist_backup_success,
+                        failureMessage = R.string.allowlist_backup_failed,
+                    ),
+                    duration = SnackbarDuration.Long,
+                )
+            }
+        }
+    }
+    val restoreLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            scope.launch {
+                val confirmed = restoreConfirmDialog.awaitConfirm(
+                    title = restoreConfirmTitle,
+                    content = restoreConfirmMessage,
+                    confirm = confirmText,
+                    dismiss = cancelText,
+                )
+                if (confirmed != ConfirmResult.Confirmed) return@launch
+
+                val result = viewModel.restoreAllowlist(uri)
+                if (result == SuperUserViewModel.AllowlistOperationResult.Success) {
+                    viewModel.notifySuperuserStatusChanged()
+                }
+                snackBarHostState.showSnackbar(
+                    message = context.allowlistOperationMessage(
+                        result = result,
+                        successMessage = R.string.allowlist_restore_success,
+                        failureMessage = R.string.allowlist_restore_failed,
+                    ),
+                    duration = SnackbarDuration.Long,
+                )
+            }
+        }
+    }
 
     val navigator = LocalNavigator.current
 
@@ -205,11 +261,49 @@ fun SuperUserPage(bottomPadding: Dp) {
                 viewModel = viewModel,
                 uiState = uiState,
                 appCounts = appCounts,
-                backupLauncher = backupLauncher,
-                restoreLauncher = restoreLauncher
+                onBackupAllowlist = {
+                    backupLauncher.launch(createAllowlistBackupFileName())
+                },
+                onRestoreAllowlist = {
+                    restoreLauncher.launch(arrayOf("application/octet-stream"))
+                },
             )
         }
     }
+}
+
+private fun Context.allowlistOperationMessage(
+    result: SuperUserViewModel.AllowlistOperationResult,
+    successMessage: Int,
+    failureMessage: Int,
+): String {
+    return when (result) {
+        SuperUserViewModel.AllowlistOperationResult.Success ->
+            getString(successMessage)
+
+        SuperUserViewModel.AllowlistOperationResult.InvalidFile ->
+            getString(failureMessage, getString(R.string.unknown_file))
+
+        SuperUserViewModel.AllowlistOperationResult.UnsupportedVersion ->
+            getString(failureMessage, getString(R.string.home_unsupported))
+
+        is SuperUserViewModel.AllowlistOperationResult.ProfileUpdateFailed ->
+            getString(
+                failureMessage,
+                getString(R.string.failed_to_update_app_profile, result.uid),
+            )
+
+        is SuperUserViewModel.AllowlistOperationResult.Failed ->
+            getString(
+                failureMessage,
+                result.cause?.localizedMessage ?: getString(R.string.unknown),
+            )
+    }
+}
+
+private fun createAllowlistBackupFileName(): String {
+    val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+    return "ksu_allowlist_backup_$timestamp.dat"
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -323,10 +417,14 @@ private fun SuperUserBottomSheet(
     viewModel: SuperUserViewModel,
     uiState: SuperUserUiState,
     appCounts: Map<AppCategory, Int>,
-    backupLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>,
-    restoreLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>
+    onBackupAllowlist: () -> Unit,
+    onRestoreAllowlist: () -> Unit,
 ) {
-    val bottomSheetMenuItems = remember(uiState.showSystemApps) {
+    val bottomSheetMenuItems = remember(
+        uiState.showSystemApps,
+        onBackupAllowlist,
+        onRestoreAllowlist,
+    ) {
         listOf(
             BottomSheetMenuItem(
                 icon = Icons.TwoTone.Refresh,
@@ -345,16 +443,12 @@ private fun SuperUserBottomSheet(
             BottomSheetMenuItem(
                 icon = Icons.TwoTone.Save,
                 titleRes = R.string.backup_allowlist,
-                onClick = {
-                    backupLauncher.launch(ModuleModify.createAllowlistBackupIntent())
-                }
+                onClick = onBackupAllowlist,
             ),
             BottomSheetMenuItem(
                 icon = Icons.TwoTone.RestoreFromTrash,
                 titleRes = R.string.restore_allowlist,
-                onClick = {
-                    restoreLauncher.launch(ModuleModify.createAllowlistRestoreIntent())
-                }
+                onClick = onRestoreAllowlist,
             )
         )
     }

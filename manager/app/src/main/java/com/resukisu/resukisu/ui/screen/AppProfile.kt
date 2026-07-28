@@ -58,10 +58,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.profile.AppProfileConfig
 import com.resukisu.resukisu.ui.component.profile.RootProfileConfig
@@ -101,6 +103,9 @@ fun AppProfileScreen(
     val snackBarHost = LocalSnackbarHost.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val scope = rememberCoroutineScope()
+    val superUserViewModel = viewModel<SuperUserViewModel>(
+        viewModelStoreOwner = ksuApp
+    )
     val failToUpdateAppProfile = stringResource(R.string.failed_to_update_app_profile).format(
         appGroup.mainApp.label
     )
@@ -190,6 +195,7 @@ fun AppProfileScreen(
                         snackBarHost.showSnackbar(failToUpdateAppProfile.format(appGroup.uid))
                     } else {
                         profile = it
+                        superUserViewModel.notifySuperuserStatusChanged()
                     }
                 }
             },

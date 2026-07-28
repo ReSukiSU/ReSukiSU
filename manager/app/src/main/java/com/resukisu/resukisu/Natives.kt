@@ -36,6 +36,12 @@ object Natives {
     const val ROOT_UID = 0
     const val ROOT_GID = 0
 
+    const val ALLOWLIST_RESTORE_SUCCESS = 0
+    const val ALLOWLIST_RESTORE_INVALID_FILE = 1
+    const val ALLOWLIST_RESTORE_UNSUPPORTED_VERSION = 2
+    const val ALLOWLIST_RESTORE_IO_ERROR = 3
+    const val ALLOWLIST_RESTORE_PROFILE_ERROR = 4
+
     external fun getFullVersion(): String
 
     init {
@@ -110,6 +116,12 @@ object Natives {
      */
     external fun getAppProfile(key: String?, uid: Int): Profile
     external fun setAppProfile(profile: Profile?): Boolean
+
+    /**
+     * Parse an allowlist backup from [fd] and submit every profile to the kernel.
+     * [failedUid] receives the UID whose profile could not be submitted.
+     */
+    external fun restoreAllowlistFromFd(fd: Int, failedUid: IntArray): Int
 
     /**
      * `su` compat mode can be disabled temporarily.

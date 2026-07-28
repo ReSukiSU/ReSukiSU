@@ -49,6 +49,13 @@ Do not create parallel reusable-component packages inside individual pages, feat
 models. Screen-specific composables may remain close to their screen when they are truly local, but
 components intended for reuse must live in `ui.component`.
 
+### Dialog
+
+Every custom dialog should manage by
+`com.resukisu.resukisu.ui.component.Dialog#rememberCustomDialog`,
+if you need confirmDialog, use `com.resukisu.resukisu.ui.component.Dialog#rememberConfirmDialog`,
+if you need loadingDialog, use `com.resukisu.resukisu.ui.component.Dialog#rememberLoadingDialog`
+
 ### Settings UI
 
 Use the settings component system under:

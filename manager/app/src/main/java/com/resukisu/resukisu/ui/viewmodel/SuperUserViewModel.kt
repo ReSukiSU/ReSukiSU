@@ -7,11 +7,13 @@ import android.content.ServiceConnection
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.IBinder
 import android.os.Parcelable
 import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.ksuApp
@@ -19,11 +21,15 @@ import com.resukisu.resukisu.ui.KsuService
 import com.resukisu.resukisu.ui.util.HanziToPinyin
 import com.resukisu.zako.IKsuInterface
 import com.topjohnwu.superuser.Shell
+import com.topjohnwu.superuser.io.SuFile
+import com.topjohnwu.superuser.io.SuFileInputStream
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -79,6 +85,8 @@ data class SuperUserUiState(
 class SuperUserViewModel : ViewModel() {
     companion object {
         private const val TAG = "SuperUserViewModel"
+        private const val ALLOWLIST_PATH = "/data/adb/ksu/.allowlist"
+
         private val appsLock = Any()
         private var allAppsCache: List<AppInfo> = emptyList()
         private var appsCache: List<AppInfo> = emptyList()
@@ -145,6 +153,14 @@ class SuperUserViewModel : ViewModel() {
         }
     }
 
+    sealed interface AllowlistOperationResult {
+        data object Success : AllowlistOperationResult
+        data object InvalidFile : AllowlistOperationResult
+        data object UnsupportedVersion : AllowlistOperationResult
+        data class ProfileUpdateFailed(val uid: Int) : AllowlistOperationResult
+        data class Failed(val cause: Throwable? = null) : AllowlistOperationResult
+    }
+
     private val appProcessingThreadPool = ThreadPoolExecutor(
         CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
         LinkedBlockingQueue()
@@ -168,6 +184,21 @@ class SuperUserViewModel : ViewModel() {
         )
     )
     val uiState: StateFlow<SuperUserUiState> = _uiState.asStateFlow()
+
+    private fun refreshHomeStatus() {
+        ksuApp.applicationScope.launch {
+            ViewModelProvider(ksuApp)[HomeViewModel::class.java]
+                .refreshSuperuserInfo()
+        }
+    }
+
+    fun notifySuperuserStatusChanged() {
+        refreshHomeStatus()
+        viewModelScope.launch {
+            uiState.first { !it.isRefreshing }
+            fetchAppList()
+        }
+    }
 
     private fun loadSelectedCategory(): AppCategory {
         val categoryKey = prefs.getString(KEY_SELECTED_CATEGORY, AppCategory.ALL.persistKey)
@@ -237,6 +268,55 @@ class SuperUserViewModel : ViewModel() {
                     currentSortType = newSortType,
                 )
             )
+        }
+    }
+
+    suspend fun backupAllowlist(uri: Uri): AllowlistOperationResult = withContext(Dispatchers.IO) {
+        try {
+            SuFileInputStream.open(SuFile(ALLOWLIST_PATH)).use { input ->
+                val output = ksuApp.contentResolver.openOutputStream(uri)
+                    ?: return@withContext AllowlistOperationResult.Failed()
+                output.use(input::copyTo)
+            }
+            AllowlistOperationResult.Success
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to back up allowlist", e)
+            AllowlistOperationResult.Failed(e)
+        }
+    }
+
+    suspend fun restoreAllowlist(uri: Uri): AllowlistOperationResult = withContext(Dispatchers.IO) {
+        try {
+            val failedUid = IntArray(1)
+            val status = ksuApp.contentResolver.openFileDescriptor(uri, "r")?.use { descriptor ->
+                Natives.restoreAllowlistFromFd(descriptor.fd, failedUid)
+            } ?: return@withContext AllowlistOperationResult.InvalidFile
+
+            when (status) {
+                Natives.ALLOWLIST_RESTORE_SUCCESS ->
+                    AllowlistOperationResult.Success
+
+                Natives.ALLOWLIST_RESTORE_INVALID_FILE ->
+                    AllowlistOperationResult.InvalidFile
+
+                Natives.ALLOWLIST_RESTORE_UNSUPPORTED_VERSION ->
+                    AllowlistOperationResult.UnsupportedVersion
+
+                Natives.ALLOWLIST_RESTORE_PROFILE_ERROR ->
+                    AllowlistOperationResult.ProfileUpdateFailed(failedUid[0])
+
+                Natives.ALLOWLIST_RESTORE_IO_ERROR ->
+                    AllowlistOperationResult.Failed()
+
+                else -> AllowlistOperationResult.Failed()
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to restore allowlist", e)
+            AllowlistOperationResult.Failed(e)
         }
     }
 
@@ -332,6 +412,7 @@ class SuperUserViewModel : ViewModel() {
                         loadingProgress = 1f,
                     )
                 }
+                refreshHomeStatus()
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error refresh app list", e)
