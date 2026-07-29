@@ -73,7 +73,6 @@ import com.resukisu.resukisu.ui.screen.kernelFlash.state.HorizonKernelState
 import com.resukisu.resukisu.ui.screen.kernelFlash.state.HorizonKernelWorker
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
-import com.resukisu.resukisu.ui.util.install
 import com.resukisu.resukisu.ui.util.reboot
 import com.resukisu.resukisu.ui.util.showReplacingSnackbar
 import kotlinx.coroutines.Dispatchers
@@ -84,6 +83,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * @author ShirkNeko
@@ -140,12 +140,9 @@ fun KernelFlashScreen(
         showFloatAction = true
         KernelFlashStateHolder.isFlashing = false
 
-        install()
-
-        // 如果需要自动退出，延迟1.5秒后退出
         if (shouldAutoExit) {
             scope.launch {
-                delay(1500)
+                delay(1500.milliseconds)
                 context.appPreferences.remove("auto_exit_after_flash")
                 (context as? ComponentActivity)?.finish()
             }
@@ -157,42 +154,49 @@ fun KernelFlashScreen(
     // 开始刷写
     LaunchedEffect(Unit) {
         if (!KernelFlashStateHolder.isFlashing && !flashState.isCompleted && flashState.error.isEmpty()) {
-            withContext(Dispatchers.IO) {
-                KernelFlashStateHolder.isFlashing = true
-                val worker = HorizonKernelWorker(
-                    context = context,
-                    state = horizonKernelState,
-                    slot = selectedSlot
-                )
-                worker.uri = kernelUri
-                worker.setOnFlashCompleteListener(onFlashComplete)
-                worker.start()
+            KernelFlashStateHolder.isFlashing = true
+            val worker = HorizonKernelWorker(
+                context = context,
+                state = horizonKernelState,
+                slot = selectedSlot
+            )
+            worker.uri = kernelUri
+            worker.setOnFlashCompleteListener(onFlashComplete)
+            worker.start()
 
-                // 监听日志更新
-                while (flashState.error.isEmpty()) {
-                    if (flashState.logs.isNotEmpty()) {
-                        logText = flashState.logs.joinToString("\n")
-                        logContent.clear()
-                        logContent.append(logText)
-                    }
-                    delay(100)
+            // 监听日志更新
+            while (true) {
+                val currentState = horizonKernelState.state.value
+                if (currentState.logs.isNotEmpty()) {
+                    logText = currentState.logs.joinToString("\n")
                 }
+                val fullLog = horizonKernelState.getFullLog()
+                if (fullLog.isNotEmpty()) {
+                    logContent.clear()
+                    logContent.append(fullLog)
+                }
+                if (currentState.isCompleted || currentState.error.isNotEmpty()) {
+                    break
+                }
+                delay(100.milliseconds)
+            }
 
-                if (flashState.error.isNotEmpty()) {
-                    logText += "\n${flashState.error}\n"
-                    logContent.append("\n${flashState.error}\n")
-                    KernelFlashStateHolder.isFlashing = false
-                }
+            val finalState = horizonKernelState.state.value
+            if (finalState.error.isNotEmpty()) {
+                logText += "\n${finalState.error}\n"
+                logContent.append("\n${finalState.error}\n")
+                KernelFlashStateHolder.isFlashing = false
             }
         } else {
             logText = flashState.logs.joinToString("\n")
+            logContent.clear()
+            logContent.append(horizonKernelState.getFullLog())
             if (flashState.error.isNotEmpty()) {
                 logText += "\n${flashState.error}\n"
+                logContent.append("\n${flashState.error}\n")
             } else if (flashState.isCompleted) {
                 logText += "\n${horizonFlashComplete}\n\n\n"
                 showFloatAction = true
-
-                install()
             }
         }
     }

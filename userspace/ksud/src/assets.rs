@@ -11,6 +11,7 @@ mod android {
     pub const KSU_SUSFS: &str = concatcp!(BINARY_DIR, "ksu_susfs");
     pub const BUSYBOX_PATH: &str = concatcp!(BINARY_DIR, "busybox");
     pub const BOOTCTL_PATH: &str = concatcp!(BINARY_DIR, "bootctl");
+    pub const MKBOOTFS_PATH: &str = concatcp!(BINARY_DIR, "mkbootfs");
 
     pub fn ensure_binaries(ignore_if_exist: bool) -> anyhow::Result<()> {
         for file in Asset::iter() {

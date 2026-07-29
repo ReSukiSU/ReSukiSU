@@ -34,6 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.util.getSlotSuffix
 
 /**
  * 槽位选择对话框组件
@@ -52,7 +53,9 @@ fun SlotSelectionDialog(
 
     LaunchedEffect(Unit) {
         try {
-            currentSlot = getCurrentSlot()
+            currentSlot = getSlotSuffix(ota = false)
+                .removePrefix("_")
+                .takeIf { it == "a" || it == "b" }
             // 设置默认选择为当前槽位
             selectedSlot = when (currentSlot) {
                 "a" -> "a"
@@ -253,26 +256,3 @@ data class ListOption(
     val subtitleText: String?,
     val icon: ImageVector
 )
-
-// Utility function to get current slot
-private fun getCurrentSlot(): String? {
-    return runCommandGetOutput(true, "getprop ro.boot.slot_suffix")?.let {
-        if (it.startsWith("_")) it.substring(1) else it
-    }
-}
-
-private fun runCommandGetOutput(su: Boolean, cmd: String): String? {
-    return try {
-        val process = ProcessBuilder(if (su) "su" else "sh").start()
-        process.outputStream.bufferedWriter().use { writer ->
-            writer.write("$cmd\n")
-            writer.write("exit\n")
-            writer.flush()
-        }
-        process.inputStream.bufferedReader().use { reader ->
-            reader.readText().trim()
-        }
-    } catch (_: Exception) {
-        null
-    }
-}

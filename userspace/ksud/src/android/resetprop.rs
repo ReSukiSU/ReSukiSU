@@ -252,6 +252,29 @@ fn execute(cli: &Args) -> Result<()> {
     Ok(())
 }
 
+fn direct_resetprop() -> ResetProp {
+    ResetProp {
+        skip_svc: true,
+        persistent: false,
+        persist_only: false,
+        verbose: false,
+        show_context: false,
+        rebuild: false,
+    }
+}
+
+pub(crate) fn get_property_direct(name: &str) -> Result<Option<String>> {
+    sys_prop::init().context("Failed to initialize system property API")?;
+    Ok(direct_resetprop().get(name))
+}
+
+pub(crate) fn set_property_direct(name: &str, value: &str) -> Result<()> {
+    sys_prop::init().context("Failed to initialize system property API")?;
+    direct_resetprop()
+        .set(name, value)
+        .with_context(|| format!("Failed to set {name}"))
+}
+
 /// Load system.prop file using internal resetprop API.
 ///
 /// Equivalent to `resetprop -n --file <path>`.

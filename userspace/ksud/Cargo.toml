@@ -76,3 +76,4 @@ codegen-units = 1
 
 [build-dependencies]
 bindgen = "0.72.1"
+cc = "1"

@@ -1067,6 +1067,7 @@ dependencies = [
  "base16ct",
  "bindgen",
  "bitflags 2.11.1",
+ "cc",
  "chrono",
  "clap",
  "const_format",
