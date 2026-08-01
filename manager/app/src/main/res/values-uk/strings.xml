@@ -490,6 +490,10 @@
     <string name="susfs_standard_uname">Uname</string>
     <string name="susfs_standard_uname_version">Версія</string>
     <string name="susfs_standard_uname_release">Випуск</string>
+    <string name="susfs_standard_uname_tab_manual">Вручну</string>
+    <string name="susfs_standard_uname_tab_slot_info">Інформація про слот</string>
+    <string name="susfs_standard_uname_slot_info_load_failed">Не вдалося завантажити інформацію про завантажувальний слот</string>
+    <string name="susfs_standard_uname_slot_info_empty">Інформацію про завантажуваний слот не знайдено</string>
     <string name="susfs_standard_cmdline_or_bootconfig">Командний рядок / Конфігурація завантаження</string>
     <string name="susfs_standard_cmdline_path">Шлях до фальшивого файлу командного рядка/конфігурації завантаження</string>
     <string name="susfs_standard_current_value">Поточний: %1$s</string>
