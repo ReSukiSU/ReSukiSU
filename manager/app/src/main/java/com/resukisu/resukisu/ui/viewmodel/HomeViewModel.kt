@@ -16,6 +16,7 @@ import com.resukisu.resukisu.data.update.ManagerUpdateInfo
 import com.resukisu.resukisu.data.update.ManagerUpdateRepository
 import com.resukisu.resukisu.getKernelVersion
 import com.resukisu.resukisu.ksuApp
+import com.resukisu.resukisu.ui.activity.util.isNetworkAvailable
 import com.resukisu.resukisu.ui.util.getMetaModuleImplement
 import com.resukisu.resukisu.ui.util.getModuleCount
 import com.resukisu.resukisu.ui.util.getSELinuxStatus
@@ -122,6 +123,14 @@ class HomeViewModel : ViewModel() {
                     betaManagerUpdate = null,
                     isBetaManagerUpdateCheckFailed = false,
                 )
+            }
+            return
+        }
+        if (!isNetworkAvailable(context)) {
+            managerUpdateCheckJob?.cancel()
+            managerUpdateCheckJob = null
+            _uiState.update {
+                it.copy(isBetaManagerUpdateCheckFailed = false)
             }
             return
         }

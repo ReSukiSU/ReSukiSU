@@ -156,7 +156,7 @@ fun SettingsTextFieldWidget(
         title = if (useLabelAsPlaceholder) null else title,
         icon = null,
         iconPlaceholder = false,
-        renderBackgroundBlur = renderBackgroundBlur,
+        isOnBackground = renderBackgroundBlur,
         leadingContent = leadingContent,
         onClick = if (isClickableMode) {
             { onClickInternal() }

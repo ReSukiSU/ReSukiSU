@@ -210,7 +210,7 @@ fun SearchAppBar(
     navigationContent: @Composable (() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     searchBarPlaceHolderText: String,
-    haze: Boolean = true,
+    blur: Boolean = true,
 ) {
     val textFieldState = rememberTextFieldState(initialText = searchText)
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -219,78 +219,81 @@ fun SearchAppBar(
         onSearchTextChange(textFieldState.text.toString())
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                if (ThemeConfig.isEnableBlur)
-                    Color.Transparent
-                else
-                    MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha)
-            )
-            .then(
-                if (haze) {
-                    Modifier.blurEffect(
-                    )
-                } else Modifier
-            )
-    ) {
-        LargeFlexibleTopAppBar(
-            scrollBehavior = scrollBehavior,
-            title = {
-                Text(
-                    text = title
-                )
-            },
-            navigationIcon = {
-                if (onBackClick != null) {
-                    AppBackButton(
-                        onClick = {
-                            onBackClick.invoke()
-                        }
-                    )
-                } else {
-                    navigationContent?.invoke()
-                }
-            },
-            actions = {
-                dropdownContent?.invoke()
-            },
-            windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor =
-                    if (ThemeConfig.backgroundImageLoaded) Color.Transparent
-                    else MaterialTheme.colorScheme.surfaceContainer,
-                scrolledContainerColor =
-                    if (ThemeConfig.backgroundImageLoaded) Color.Transparent
-                    else MaterialTheme.colorScheme.surfaceContainer,
-            ),
-        )
-
-        CompactSearchBar(
-            modifier = Modifier
+    Column {
+        Column(
+            modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 0.dp),
-            textFieldState = textFieldState,
-            onSearch = {
-                keyboardController?.hide()
-            },
-            placeholder = {
-                Text(
-                    text = searchBarPlaceHolderText,
-                    style = MaterialTheme.typography.bodyLarge
+                .then(
+                    if (blur) {
+                        Modifier.blurEffect()
+                    } else Modifier
                 )
-            },
-            leadingIcon = {
-                Icon(
-                    Icons.TwoTone.Search,
-                    contentDescription = null,
-                    modifier = Modifier.padding(start = 8.dp)
+                .background(
+                    if (ThemeConfig.isEnableBlur)
+                        Color.Transparent
+                    else
+                        MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha)
                 )
-            },
-        )
+        ) {
+            LargeFlexibleTopAppBar(
+                scrollBehavior = scrollBehavior,
+                title = {
+                    Text(
+                        text = title
+                    )
+                },
+                navigationIcon = {
+                    if (onBackClick != null) {
+                        AppBackButton(
+                            onClick = {
+                                onBackClick.invoke()
+                            }
+                        )
+                    } else {
+                        navigationContent?.invoke()
+                    }
+                },
+                actions = {
+                    dropdownContent?.invoke()
+                },
+                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor =
+                        if (ThemeConfig.backgroundImageLoaded) Color.Transparent
+                        else MaterialTheme.colorScheme.surfaceContainer,
+                    scrolledContainerColor =
+                        if (ThemeConfig.backgroundImageLoaded) Color.Transparent
+                        else MaterialTheme.colorScheme.surfaceContainer,
+                ),
+            )
 
-        Spacer(modifier = Modifier.height(8.dp))
+            CompactSearchBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 0.dp),
+                textFieldState = textFieldState,
+                onSearch = {
+                    keyboardController?.hide()
+                },
+                placeholder = {
+                    Text(
+                        text = searchBarPlaceHolderText,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        Icons.TwoTone.Search,
+                        contentDescription = null,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                },
+            )
+
+            Spacer(modifier = Modifier.height(5.dp))
+        }
+        if (ThemeConfig.backgroundImageLoaded)
+            Spacer(modifier = Modifier.height(5.dp))
     }
 }
 

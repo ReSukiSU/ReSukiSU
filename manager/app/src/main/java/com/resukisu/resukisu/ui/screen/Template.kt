@@ -66,6 +66,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.component.NetworkRefreshContent
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
@@ -76,6 +77,7 @@ import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
+import com.resukisu.resukisu.ui.util.ActivityResumeEffect
 import com.resukisu.resukisu.ui.viewmodel.TemplateViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -99,16 +101,16 @@ fun AppProfileTemplateScreen() {
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
 
-        if (uiState.templateList.isEmpty()) {
-            viewModel.fetchTemplates()
-        }
-
         navigator.observeResult<Boolean>("template_edit").collect { success ->
             if (success) {
                 navigator.clearResult("template_edit")
                 scope.launch { viewModel.fetchTemplates() }
             }
         }
+    }
+
+    ActivityResumeEffect {
+        viewModel.fetchTemplates()
     }
 
     Scaffold(
@@ -183,47 +185,72 @@ fun AppProfileTemplateScreen() {
         contentColor = MaterialTheme.colorScheme.onSurface,
         contentWindowInsets = WindowInsets.safeDrawing,
     ) { innerPadding ->
-        PullToRefreshBox(
-            state = pullRefreshState,
-            modifier = Modifier
-                .nestedScroll(
-                    scrollBehavior.nestedScrollConnection
-                )
-                .blurSource(),
-            isRefreshing = uiState.isRefreshing,
-            onRefresh = {
-                scope.launch { viewModel.fetchTemplates() }
-            },
-            indicator = {
-                PullToRefreshDefaults.LoadingIndicator(
-                    state = pullRefreshState,
-                    isRefreshing = uiState.isRefreshing,
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(top = innerPadding.calculateTopPadding()),
-                )
-            },
-        ) {
+        if (uiState.templateList.isEmpty()) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .nestedScroll(scrollBehavior.nestedScrollConnection),
-                contentPadding = remember {
-                    PaddingValues(bottom = 16.dp + 56.dp + 16.dp /* Scaffold Fab Spacing + Fab container height */)
-                }
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .blurSource()
             ) {
                 item {
                     Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
                 }
-
-                lazySegmentColumn(
-                    items = uiState.templateList,
-                    key = { _, app -> app.id }) { _, app ->
-                    TemplateItem(app)
+                item {
+                    NetworkRefreshContent(
+                        modifier = Modifier.fillParentMaxSize(),
+                        offline = uiState.isOffline,
+                        onRetry = {
+                            scope.launch { viewModel.fetchTemplates(sync = true) }
+                        },
+                    )
                 }
-
                 item {
                     Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding()))
+                }
+            }
+        } else {
+            PullToRefreshBox(
+                state = pullRefreshState,
+                modifier = Modifier
+                    .nestedScroll(
+                        scrollBehavior.nestedScrollConnection
+                    )
+                    .blurSource(),
+                isRefreshing = uiState.isRefreshing,
+                onRefresh = {
+                    scope.launch { viewModel.fetchTemplates() }
+                },
+                indicator = {
+                    PullToRefreshDefaults.LoadingIndicator(
+                        state = pullRefreshState,
+                        isRefreshing = uiState.isRefreshing,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = innerPadding.calculateTopPadding()),
+                    )
+                },
+            ) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .nestedScroll(scrollBehavior.nestedScrollConnection),
+                    contentPadding = remember {
+                        PaddingValues(bottom = 16.dp + 56.dp + 16.dp /* Scaffold Fab Spacing + Fab container height */)
+                    }
+                ) {
+                    item {
+                        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+                    }
+
+                    lazySegmentColumn(
+                        items = uiState.templateList,
+                        key = { _, app -> app.id }) { _, app ->
+                        TemplateItem(app)
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding()))
+                    }
                 }
             }
         }

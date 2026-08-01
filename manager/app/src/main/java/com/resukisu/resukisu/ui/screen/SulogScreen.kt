@@ -85,6 +85,7 @@ import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.blurSource
+import com.resukisu.resukisu.ui.util.ActivityResumeEffect
 import com.resukisu.resukisu.ui.util.LocalBlurState
 import com.resukisu.resukisu.ui.util.SulogEntry
 import com.resukisu.resukisu.ui.util.SulogEventFilter
@@ -104,7 +105,7 @@ fun SulogScreen() {
     val viewModel = viewModel<SulogViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
+    ActivityResumeEffect {
         viewModel.refreshLatest()
     }
 

@@ -8,9 +8,11 @@ import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -27,12 +29,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.zIndex
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
@@ -65,6 +70,8 @@ import com.resukisu.resukisu.ui.navigation.HandleDeepLink
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.navigation.rememberNavigator
+import com.resukisu.resukisu.ui.overscroll.StretchOverscrollCompensationState
+import com.resukisu.resukisu.ui.overscroll.rememberCustomOverscrollFactory
 import com.resukisu.resukisu.ui.screen.AppProfileScreen
 import com.resukisu.resukisu.ui.screen.AppProfileTemplateScreen
 import com.resukisu.resukisu.ui.screen.DynamicManagerScreen
@@ -89,6 +96,7 @@ import com.resukisu.resukisu.ui.util.LocalBackgroundBlurAnchor
 import com.resukisu.resukisu.ui.util.LocalBlurState
 import com.resukisu.resukisu.ui.util.LocalPermissionRequestInterface
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
+import com.resukisu.resukisu.ui.util.LocalStretchOverscrollCompensationState
 import com.resukisu.resukisu.ui.util.rootAvailable
 import com.resukisu.resukisu.ui.viewmodel.PredictiveBackAnimation
 import com.resukisu.resukisu.ui.viewmodel.SettingsViewModel
@@ -137,6 +145,12 @@ fun NavContainer(
 
     val settings by settingsViewModel.uiState.collectAsStateWithLifecycle()
     val systemDensity = LocalDensity.current
+    val stretchOverscrollCompensationState = remember {
+        StretchOverscrollCompensationState()
+    }
+    val overscrollFactory = rememberCustomOverscrollFactory(
+        compensationState = stretchOverscrollCompensationState,
+    )
 
     val density = remember(systemDensity, settings.dpi) {
         if (settings.dpi <= 0f) {
@@ -250,6 +264,8 @@ fun NavContainer(
     )
 
     CompositionLocalProvider(
+        LocalOverscrollFactory provides overscrollFactory,
+        LocalStretchOverscrollCompensationState provides stretchOverscrollCompensationState,
         LocalPermissionRequestInterface provides permissionRequestInterface,
         LocalNavigator provides navigator,
         LocalDensity provides density
@@ -536,17 +552,36 @@ fun NavContainer(
  * @return A LayerBackdrop instance if supported and enabled, null otherwise.
  */
 @Composable
-fun rememberMaterial3BlurBackdrop(enableBlur: Boolean): LayerBackdrop? {
+fun rememberMaterial3BlurBackdrop(
+    enableBlur: Boolean,
+    pagerState: PagerState? = null,
+    pagerPage: Int? = null,
+): LayerBackdrop? {
     if (!enableBlur || !isRenderEffectSupported()) return null
 
     val backgroundColor =
         MaterialTheme.colorScheme.surfaceContainer
+    val layoutDirection = LocalLayoutDirection.current
 
     return rememberLayerBackdrop {
         if (ThemeConfig.isEnableBlurExp) {
             backgroundImagePainter?.let { painter ->
-                with(painter) {
-                    draw(size = drawContext.size)
+                val pageOffset = if (
+                    pagerState != null &&
+                    pagerPage != null &&
+                    pagerPage in 0 until pagerState.pageCount
+                ) {
+                    pagerState.getOffsetDistanceInPages(pagerPage)
+                } else {
+                    0f
+                }
+                val physicalPageOffset = pageOffset * size.width *
+                        if (layoutDirection == LayoutDirection.Ltr) 1f else -1f
+
+                translate(left = -physicalPageOffset) {
+                    with(painter) {
+                        draw(size = drawContext.size)
+                    }
                 }
             }
         } else {

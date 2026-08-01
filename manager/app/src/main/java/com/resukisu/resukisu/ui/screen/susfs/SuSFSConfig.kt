@@ -61,7 +61,9 @@ import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
+import com.resukisu.resukisu.ui.util.ActivityResumeEffect
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
+import com.resukisu.resukisu.ui.util.showReplacingSnackbar
 import kotlinx.coroutines.launch
 
 private class SuSFSConfigSubpage(
@@ -108,7 +110,7 @@ fun SuSFSConfigScreen() {
             if (SuSFSConfigHelper.setConfigEnabled(newValue)) {
                 configEnabled = newValue
             } else {
-                snackBarHost.showSnackbar(operationFailedMsg)
+                snackBarHost.showReplacingSnackbar(operationFailedMsg)
             }
         }
     }
@@ -195,8 +197,8 @@ fun SuSFSConfigScreen() {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
     }
 
-    LaunchedEffect(refreshCoordinator) {
-        refreshCoordinator.refresh(forceRefresh = false) { config ->
+    ActivityResumeEffect(refreshCoordinator) {
+        refreshCoordinator.refresh(forceRefresh = true) { config ->
             configEnabled = config.enabled
         }
     }

@@ -50,6 +50,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -79,15 +80,20 @@ import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
+import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
+import com.resukisu.resukisu.ui.util.ActivityResumeEffect
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.forceStopApp
 import com.resukisu.resukisu.ui.util.getSepolicy
 import com.resukisu.resukisu.ui.util.launchApp
 import com.resukisu.resukisu.ui.util.restartApp
 import com.resukisu.resukisu.ui.util.setSepolicy
+import com.resukisu.resukisu.ui.util.showReplacingSnackbar
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
 import com.resukisu.resukisu.ui.viewmodel.getTemplateInfoById
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * @author weishu
@@ -114,12 +120,22 @@ fun AppProfileScreen(
     val suNotAllowed = stringResource(R.string.su_not_allowed).format(appGroup.mainApp.label)
 
     val packageName = appGroup.mainApp.packageName
-    val initialProfile = Natives.getAppProfile(packageName, appGroup.uid)
-    if (initialProfile.allowSu) {
-        initialProfile.rules = getSepolicy(packageName)
+    fun loadProfile(): Natives.Profile {
+        return Natives.getAppProfile(packageName, appGroup.uid).apply {
+            if (allowSu) {
+                rules = getSepolicy(packageName)
+            }
+        }
     }
-    var profile by rememberSaveable {
-        mutableStateOf(initialProfile)
+
+    var profile by rememberSaveable(packageName, appGroup.uid) {
+        mutableStateOf(loadProfile())
+    }
+
+    ActivityResumeEffect(packageName, appGroup.uid) {
+        profile = withContext(Dispatchers.IO) {
+            loadProfile()
+        }
     }
 
     val colorScheme = MaterialTheme.colorScheme
@@ -183,16 +199,16 @@ fun AppProfileScreen(
                     if (it.allowSu) {
                         // sync with allowlist.c - forbid_system_uid
                         if (appGroup.uid < 2000 && appGroup.uid != 1000) {
-                            snackBarHost.showSnackbar(suNotAllowed)
+                            snackBarHost.showReplacingSnackbar(suNotAllowed)
                             return@launch
                         }
                         if (!it.rootUseDefault && it.rules.isNotEmpty() && !setSepolicy(profile.name, it.rules)) {
-                            snackBarHost.showSnackbar(failToUpdateSepolicy)
+                            snackBarHost.showReplacingSnackbar(failToUpdateSepolicy)
                             return@launch
                         }
                     }
                     if (!Natives.setAppProfile(it)) {
-                        snackBarHost.showSnackbar(failToUpdateAppProfile.format(appGroup.uid))
+                        snackBarHost.showReplacingSnackbar(failToUpdateAppProfile.format(appGroup.uid))
                     } else {
                         profile = it
                         superUserViewModel.notifySuperuserStatusChanged()
@@ -291,7 +307,9 @@ private fun AppProfileInner(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
-                                .padding(top = 8.dp),
+                                .padding(top = 8.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright),
                             shape = RoundedCornerShape(16.dp),
                             color = MaterialTheme.colorScheme.surfaceBright.copy(
                                 alpha = CardConfig.cardAlpha
@@ -363,7 +381,9 @@ private fun AppProfileInner(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
-                                .padding(top = 8.dp),
+                                .padding(top = 8.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright),
                             shape = RoundedCornerShape(16.dp),
                             color = MaterialTheme.colorScheme.surfaceBright.copy(
                                 alpha = CardConfig.cardAlpha
@@ -493,6 +513,8 @@ private fun ProfileBox(
             icon = Icons.TwoTone.AccountCircle,
             title = stringResource(R.string.profile),
             description = mode.text,
+            isOnBackground = false,
+            containerAlpha = 0f
         )
 
         Row(

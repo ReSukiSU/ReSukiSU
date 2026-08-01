@@ -47,17 +47,6 @@ import kotlin.coroutines.resume
 
 internal const val RECENTLY_INSTALLED_WINDOW_MILLIS = 60 * 60 * 1000L
 
-enum class AppCategory(val displayNameRes: Int, val persistKey: String) {
-    ALL(com.resukisu.resukisu.R.string.category_all_apps, "ALL"),
-    ROOT(com.resukisu.resukisu.R.string.category_root_apps, "ROOT"),
-    CUSTOM(com.resukisu.resukisu.R.string.category_custom_apps, "CUSTOM"),
-    DEFAULT(com.resukisu.resukisu.R.string.category_default_apps, "DEFAULT");
-
-    companion object {
-        fun fromPersistKey(key: String): AppCategory = entries.find { it.persistKey == key } ?: ALL
-    }
-}
-
 enum class SortType(val displayNameRes: Int, val persistKey: String) {
     NAME_ASC(com.resukisu.resukisu.R.string.sort_name_asc, "NAME_ASC"),
     NAME_DESC(com.resukisu.resukisu.R.string.sort_name_desc, "NAME_DESC"),
@@ -76,7 +65,6 @@ data class SuperUserUiState(
     val appGroupList: List<SuperUserViewModel.AppGroup> = emptyList(),
     val search: String = "",
     val showSystemApps: Boolean = false,
-    val selectedCategory: AppCategory = AppCategory.ALL,
     val currentSortType: SortType = SortType.NAME_ASC,
     val isRefreshing: Boolean = false,
     val loadingProgress: Float = 0f,
@@ -179,7 +167,6 @@ class SuperUserViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(
         SuperUserUiState(
             showSystemApps = prefs.getBoolean(KEY_SHOW_SYSTEM_APPS, false),
-            selectedCategory = loadSelectedCategory(),
             currentSortType = loadCurrentSortType(),
         )
     )
@@ -200,12 +187,6 @@ class SuperUserViewModel : ViewModel() {
         }
     }
 
-    private fun loadSelectedCategory(): AppCategory {
-        val categoryKey = prefs.getString(KEY_SELECTED_CATEGORY, AppCategory.ALL.persistKey)
-            ?: AppCategory.ALL.persistKey
-        return AppCategory.fromPersistKey(categoryKey)
-    }
-
     private fun loadCurrentSortType(): SortType {
         val sortKey = prefs.getString(KEY_CURRENT_SORT_TYPE, SortType.NAME_ASC.persistKey)
             ?: SortType.NAME_ASC.persistKey
@@ -219,7 +200,6 @@ class SuperUserViewModel : ViewModel() {
                 appGroupList = buildAppGroupList(
                     search = search,
                     showSystemApps = state.showSystemApps,
-                    selectedCategory = state.selectedCategory,
                     currentSortType = state.currentSortType,
                 )
             )
@@ -234,22 +214,6 @@ class SuperUserViewModel : ViewModel() {
                 appGroupList = buildAppGroupList(
                     search = state.search,
                     showSystemApps = newValue,
-                    selectedCategory = state.selectedCategory,
-                    currentSortType = state.currentSortType,
-                )
-            )
-        }
-    }
-
-    fun updateSelectedCategory(newCategory: AppCategory) {
-        prefs.putString(KEY_SELECTED_CATEGORY, newCategory.persistKey)
-        _uiState.update { state ->
-            state.copy(
-                selectedCategory = newCategory,
-                appGroupList = buildAppGroupList(
-                    search = state.search,
-                    showSystemApps = state.showSystemApps,
-                    selectedCategory = newCategory,
                     currentSortType = state.currentSortType,
                 )
             )
@@ -264,7 +228,6 @@ class SuperUserViewModel : ViewModel() {
                 appGroupList = buildAppGroupList(
                     search = state.search,
                     showSystemApps = state.showSystemApps,
-                    selectedCategory = state.selectedCategory,
                     currentSortType = newSortType,
                 )
             )
@@ -406,7 +369,6 @@ class SuperUserViewModel : ViewModel() {
                         appGroupList = buildAppGroupList(
                             search = state.search,
                             showSystemApps = state.showSystemApps,
-                            selectedCategory = state.selectedCategory,
                             currentSortType = state.currentSortType,
                         ),
                         loadingProgress = 1f,
@@ -425,7 +387,6 @@ class SuperUserViewModel : ViewModel() {
     private fun buildAppGroupList(
         search: String,
         showSystemApps: Boolean,
-        selectedCategory: AppCategory,
         currentSortType: SortType,
     ): List<AppGroup> {
         return appGroupsCache.filter { group ->
@@ -437,13 +398,6 @@ class SuperUserViewModel : ViewModel() {
         }.filter { group ->
             group.uid == 2000 || showSystemApps ||
                     group.apps.any { it.packageInfo.applicationInfo!!.flags.and(ApplicationInfo.FLAG_SYSTEM) == 0 }
-        }.run {
-            when (selectedCategory) {
-                AppCategory.ALL -> this
-                AppCategory.ROOT -> this.filter { it.allowSu }
-                AppCategory.CUSTOM -> this.filter { !it.allowSu && it.hasCustomProfile }
-                AppCategory.DEFAULT -> this.filter { !it.allowSu && !it.hasCustomProfile }
-            }
         }.sortedWith { group1, group2 ->
             val priority1 = when {
                 group1.allowSu -> 0

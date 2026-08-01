@@ -4,11 +4,13 @@ import android.R
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.BitmapShader
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.RenderEffect
 import android.graphics.RenderNode
+import android.graphics.RuntimeShader
 import android.graphics.Shader
 import android.net.Uri
 import android.os.Build
@@ -52,19 +54,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.zIndex
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
@@ -81,8 +87,12 @@ import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.quantize.QuantizerCelebi
 import com.materialkolor.score.Score
 import com.resukisu.resukisu.data.appPreferences
+import com.resukisu.resukisu.ui.overscroll.StretchOverscrollCompensationState
 import com.resukisu.resukisu.ui.util.LocalBackgroundBlurAnchor
 import com.resukisu.resukisu.ui.util.LocalBlurState
+import com.resukisu.resukisu.ui.util.LocalPagerPage
+import com.resukisu.resukisu.ui.util.LocalPagerState
+import com.resukisu.resukisu.ui.util.LocalStretchOverscrollCompensationState
 import com.resukisu.resukisu.ui.webui.MonetColorsProvider
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -514,6 +524,7 @@ private fun BackgroundLayer() {
 
     LaunchedEffect(ThemeConfig.customBackgroundUri) {
         backgroundUri.value = ThemeConfig.customBackgroundUri
+        backgroundImageBitmap = null
         if (backgroundUri.value == null) {
             backgroundImagePainter = null
             blurBackgroundImageBitmap = null
@@ -564,12 +575,13 @@ private fun BackgroundLayer() {
 }
 
 var backgroundImagePainter: AsyncImagePainter? by mutableStateOf(null)
+private var backgroundImageBitmap: ImageBitmap? by mutableStateOf(null)
 var blurBackgroundImageBitmap: ImageBitmap? by mutableStateOf(null)
 private var backgroundBlurViewportSize by mutableStateOf(IntSize(0, 0))
 private var backgroundBlurFrameTick by mutableIntStateOf(0)
 var backgroundSeedColor by mutableIntStateOf(0)
 
-private const val BACKGROUND_BLUR_RADIUS = 25f
+private const val BACKGROUND_BLUR_RADIUS = 45f
 
 /**
  * Captures background content for blurEffect child nodes,
@@ -587,11 +599,15 @@ fun Modifier.blurSource(): Modifier {
 
 /**
  * Render blur when backdrop available
+ * Falls back to redrawing the app background below the content so translucent bars do not show
+ * scrolling content through them when blur is disabled or unavailable.
  * @return modified modifier
  */
 @Composable
 fun Modifier.blurEffect(): Modifier {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return this
+    if (!ThemeConfig.isEnableBlur || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+        return renderBackgroundFallback()
+    }
 
     return LocalBlurState.current?.let { backdrop ->
         val blendColor =
@@ -609,7 +625,121 @@ fun Modifier.blurEffect(): Modifier {
                 )
             )
         )
-    } ?: this
+    } ?: renderBackgroundFallback()
+}
+
+private fun Modifier.renderBackgroundFallback(): Modifier = composed {
+    var coordinates by remember {
+        mutableStateOf<LayoutCoordinates?>(null)
+    }
+
+    val backgroundColor = MaterialTheme.colorScheme.surfaceContainer
+    val dimColor = backgroundColor.copy(alpha = ThemeConfig.backgroundDim)
+    val backgroundBitmap = backgroundImageBitmap
+    val backgroundAnchor = LocalBackgroundBlurAnchor.current
+    val pagerPage = LocalPagerPage.current
+    val pagerState = if (pagerPage != null) LocalPagerState.current else null
+    val layoutDirection = LocalLayoutDirection.current
+
+    this
+        .onGloballyPositioned { newCoordinates ->
+            coordinates = newCoordinates.takeIf { it.isAttached }
+        }
+        .drawWithContent {
+            val boundsInBackground = coordinates?.boundsInBackgroundNow(backgroundAnchor)
+            val viewportSize = backgroundAnchor
+                ?.takeIf { it.isAttached && it.size.width > 0 && it.size.height > 0 }
+                ?.size
+                ?: backgroundBlurViewportSize
+            val currentPagerPage = pagerPage
+            val currentPagerState = pagerState?.takeIf { state ->
+                currentPagerPage != null && currentPagerPage in 0 until state.pageCount
+            }
+            val hasPagerPage = currentPagerState != null && currentPagerPage != null
+            val pagerViewportSize = if (currentPagerState != null) {
+                currentPagerState.layoutInfo.viewportSize.takeIf {
+                    it.width > 0 && it.height > 0
+                }
+            } else {
+                null
+            }
+            val renderViewportSize = pagerViewportSize ?: viewportSize
+            val pageOffset = if (currentPagerState != null && currentPagerPage != null) {
+                currentPagerState.getOffsetDistanceInPages(currentPagerPage)
+            } else {
+                0f
+            }
+            val physicalPageOffset = pageOffset * renderViewportSize.width *
+                    if (layoutDirection == LayoutDirection.Ltr) 1f else -1f
+            val offsetBoundsInBackground = boundsInBackground?.let { bounds ->
+                if (hasPagerPage) {
+                    // Equivalent to translating the backdrop painter by -physicalPageOffset:
+                    // crop from the page offset so the background remains fixed while the page moves.
+                    Rect(
+                        left = physicalPageOffset,
+                        top = bounds.top,
+                        right = physicalPageOffset + bounds.width,
+                        bottom = bounds.bottom,
+                    )
+                } else {
+                    bounds
+                }
+            }
+            val bitmapBounds = if (
+                ThemeConfig.backgroundImageLoaded &&
+                backgroundBitmap != null &&
+                offsetBoundsInBackground != null
+            ) {
+                offsetBoundsInBackground.mapToBitmapBounds(
+                    bitmap = backgroundBitmap,
+                    viewportSize = renderViewportSize,
+                )
+            } else {
+                null
+            }
+
+            if (backgroundBitmap != null && bitmapBounds != null) {
+                drawBitmapIntersection(
+                    bitmap = backgroundBitmap,
+                    boundsInBackground = bitmapBounds,
+                )
+                drawRect(color = dimColor)
+            } else {
+                drawRect(color = backgroundColor)
+            }
+
+            drawContent()
+        }
+}
+
+private fun Rect.mapToBitmapBounds(
+    bitmap: ImageBitmap,
+    viewportSize: IntSize,
+): Rect? {
+    if (
+        bitmap.width <= 0 ||
+        bitmap.height <= 0 ||
+        viewportSize.width <= 0 ||
+        viewportSize.height <= 0
+    ) {
+        return null
+    }
+
+    val scale = maxOf(
+        viewportSize.width / bitmap.width.toFloat(),
+        viewportSize.height / bitmap.height.toFloat(),
+    )
+    val renderedWidth = bitmap.width * scale
+    val renderedHeight = bitmap.height * scale
+    val renderedLeft = (viewportSize.width - renderedWidth) / 2f
+    val renderedTop = (viewportSize.height - renderedHeight) / 2f
+
+    return Rect(
+        left = (left - renderedLeft) / scale,
+        top = (top - renderedTop) / scale,
+        right = (right - renderedLeft) / scale,
+        bottom = (bottom - renderedTop) / scale,
+    )
 }
 
 
@@ -626,6 +756,7 @@ fun Modifier.renderBackgroundBlur(
         alpha = CardConfig.cardAlpha
     )
     val backgroundBlurAnchor = LocalBackgroundBlurAnchor.current
+    val stretchOverscrollState = LocalStretchOverscrollCompensationState.current
 
     this
         .onGloballyPositioned { newCoordinates ->
@@ -636,6 +767,8 @@ fun Modifier.renderBackgroundBlur(
 
             val currentBitmap = blurBackgroundImageBitmap
             val currentBoundsInBackground = coordinates?.boundsInBackgroundNow(backgroundBlurAnchor)
+            val stretchCompensation = stretchOverscrollState
+                ?.resolveBitmapCompensation(backgroundBlurAnchor)
 
             if (
                 currentBitmap != null &&
@@ -643,10 +776,27 @@ fun Modifier.renderBackgroundBlur(
                 currentBoundsInBackground.width > 0f &&
                 currentBoundsInBackground.height > 0f
             ) {
-                drawBitmapIntersection(
-                    bitmap = currentBitmap,
-                    boundsInBackground = currentBoundsInBackground,
-                )
+                if (stretchCompensation != null) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        StretchBackgroundRenderer.shared.draw(
+                            scope = this,
+                            bitmap = currentBitmap,
+                            boundsInBackground = currentBoundsInBackground,
+                            compensation = stretchCompensation,
+                        )
+                    } else {
+                        drawStretchCompensatedBitmap(
+                            bitmap = currentBitmap,
+                            boundsInBackground = currentBoundsInBackground,
+                            compensation = stretchCompensation,
+                        )
+                    }
+                } else {
+                    drawBitmapIntersection(
+                        bitmap = currentBitmap,
+                        boundsInBackground = currentBoundsInBackground,
+                    )
+                }
 
                 drawRect(
                     color = tintColor,
@@ -722,6 +872,41 @@ private fun boundsFromCorners(
         top = minOf(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y),
         right = maxOf(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x),
         bottom = maxOf(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y),
+    )
+}
+
+private data class StretchBitmapCompensation(
+    val horizontalAmount: Float,
+    val horizontalOrigin: Float,
+    val horizontalSize: Float,
+    val verticalAmount: Float,
+    val verticalOrigin: Float,
+    val verticalSize: Float,
+)
+
+private fun StretchOverscrollCompensationState.resolveBitmapCompensation(
+    backgroundCoordinates: LayoutCoordinates?,
+): StretchBitmapCompensation? {
+    val horizontalBounds = horizontal
+        ?.takeIf { it.amount != 0f }
+        ?.coordinates
+        ?.boundsInBackgroundNow(backgroundCoordinates)
+        ?.takeIf { it.width > 0f }
+    val verticalBounds = vertical
+        ?.takeIf { it.amount != 0f }
+        ?.coordinates
+        ?.boundsInBackgroundNow(backgroundCoordinates)
+        ?.takeIf { it.height > 0f }
+
+    if (horizontalBounds == null && verticalBounds == null) return null
+
+    return StretchBitmapCompensation(
+        horizontalAmount = if (horizontalBounds != null) horizontal?.amount ?: 0f else 0f,
+        horizontalOrigin = horizontalBounds?.left ?: 0f,
+        horizontalSize = horizontalBounds?.width ?: 1f,
+        verticalAmount = if (verticalBounds != null) vertical?.amount ?: 0f else 0f,
+        verticalOrigin = verticalBounds?.top ?: 0f,
+        verticalSize = verticalBounds?.height ?: 1f,
     )
 }
 
@@ -869,6 +1054,311 @@ private fun ContentDrawScope.drawBitmapIntersection(
                 dstOffset = IntOffset(xSegment.dstStart, ySegment.dstStart),
                 dstSize = IntSize(dstWidth, dstHeight),
                 blendMode = BlendMode.SrcOver,
+            )
+        }
+    }
+}
+
+private const val STRETCH_BACKGROUND_SHADER = """
+    uniform shader background;
+    uniform float2 cardOrigin;
+    uniform float2 cardScale;
+    uniform float2 stretchAmount;
+    uniform float2 stretchOrigin;
+    uniform float2 stretchSize;
+
+    float reverseMapStart(float overscroll, float sourcePosition) {
+        float numerator =
+            (-sourcePosition * overscroll * overscroll) -
+            (2.0 * sourcePosition * overscroll) -
+            sourcePosition;
+        float denominator =
+            1.0 +
+            (0.3 * overscroll) +
+            (0.7 * sourcePosition * overscroll * overscroll) +
+            (0.7 * sourcePosition * overscroll);
+        return -(numerator / denominator);
+    }
+
+    float reverseMapEnd(float overscroll, float sourcePosition) {
+        float numerator =
+            (0.3 * overscroll * overscroll) -
+            (0.3 * sourcePosition * overscroll * overscroll) +
+            (1.3 * sourcePosition * overscroll) -
+            overscroll -
+            sourcePosition;
+        float denominator =
+            (0.7 * sourcePosition * overscroll * overscroll) -
+            (0.7 * sourcePosition * overscroll) -
+            (0.7 * overscroll * overscroll) +
+            overscroll -
+            1.0;
+        return numerator / denominator;
+    }
+
+    float reverseStretch(float overscroll, float sourcePosition) {
+        float distanceStretched = 1.0 / (1.0 + abs(overscroll));
+        float distanceDiff = distanceStretched - 1.0;
+
+        if (overscroll > 0.0) {
+            float mappedPosition = reverseMapStart(overscroll, sourcePosition);
+            if (mappedPosition <= 1.0) {
+                return mappedPosition;
+            } else if (mappedPosition >= distanceStretched) {
+                return mappedPosition - distanceDiff;
+            }
+        }
+
+        if (overscroll < 0.0) {
+            float mappedPosition = reverseMapEnd(overscroll, sourcePosition);
+            if (mappedPosition >= 0.0) {
+                return mappedPosition;
+            } else {
+                return mappedPosition + distanceDiff;
+            }
+        }
+
+        return sourcePosition;
+    }
+
+    float compensateAxis(float position, float amount, float origin, float extent) {
+        if (amount == 0.0 || extent <= 0.0) {
+            return position;
+        }
+        float normalized = (position - origin) / extent;
+        return origin + reverseStretch(amount, normalized) * extent;
+    }
+
+    half4 main(float2 coord) {
+        float2 position = cardOrigin + coord * cardScale;
+        float2 samplePosition = float2(
+            compensateAxis(position.x, stretchAmount.x, stretchOrigin.x, stretchSize.x),
+            compensateAxis(position.y, stretchAmount.y, stretchOrigin.y, stretchSize.y)
+        );
+        return background.eval(samplePosition);
+    }
+"""
+
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+private class StretchBackgroundRenderer {
+    companion object {
+        val shared by lazy(LazyThreadSafetyMode.NONE) {
+            StretchBackgroundRenderer()
+        }
+    }
+
+    private val runtimeShader = RuntimeShader(STRETCH_BACKGROUND_SHADER)
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG).apply {
+        shader = runtimeShader
+    }
+    private var inputBitmap: Bitmap? = null
+
+    fun draw(
+        scope: ContentDrawScope,
+        bitmap: ImageBitmap,
+        boundsInBackground: Rect,
+        compensation: StretchBitmapCompensation,
+    ) {
+        val androidBitmap = bitmap.asAndroidBitmap()
+        if (inputBitmap !== androidBitmap) {
+            inputBitmap = androidBitmap
+            runtimeShader.setInputShader(
+                "background",
+                BitmapShader(androidBitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP),
+            )
+        }
+
+        with(scope) {
+            runtimeShader.setFloatUniform(
+                "cardOrigin",
+                boundsInBackground.left,
+                boundsInBackground.top,
+            )
+            runtimeShader.setFloatUniform(
+                "cardScale",
+                boundsInBackground.width / size.width,
+                boundsInBackground.height / size.height,
+            )
+            runtimeShader.setFloatUniform(
+                "stretchAmount",
+                compensation.horizontalAmount,
+                compensation.verticalAmount,
+            )
+            runtimeShader.setFloatUniform(
+                "stretchOrigin",
+                compensation.horizontalOrigin,
+                compensation.verticalOrigin,
+            )
+            runtimeShader.setFloatUniform(
+                "stretchSize",
+                compensation.horizontalSize,
+                compensation.verticalSize,
+            )
+            drawContext.canvas.nativeCanvas.drawRect(0f, 0f, size.width, size.height, paint)
+        }
+    }
+}
+
+private val stretchFallbackPaint =
+    Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+
+private data class BitmapSourceInterval(
+    val start: Int,
+    val end: Int,
+)
+
+private fun bitmapSourceInterval(
+    first: Float,
+    second: Float,
+    bitmapSize: Int,
+): BitmapSourceInterval? {
+    if (bitmapSize <= 0) return null
+
+    val lower = minOf(first, second)
+    val upper = maxOf(first, second)
+    if (upper <= 0f) return BitmapSourceInterval(0, 1)
+    if (lower >= bitmapSize) return BitmapSourceInterval(bitmapSize - 1, bitmapSize)
+
+    val start = floor(lower.coerceAtLeast(0f)).toInt().coerceIn(0, bitmapSize - 1)
+    val end = ceil(upper.coerceAtMost(bitmapSize.toFloat()))
+        .toInt()
+        .coerceIn(start + 1, bitmapSize)
+    return BitmapSourceInterval(start, end)
+}
+
+private fun reverseStretchPosition(
+    amount: Float,
+    normalizedInput: Float,
+): Float {
+    if (amount == 0f) return normalizedInput
+
+    val distanceStretched = 1f / (1f + abs(amount))
+    val distanceDifference = distanceStretched - 1f
+
+    if (amount > 0f) {
+        val numerator =
+            (-normalizedInput * amount * amount) -
+                    (2f * normalizedInput * amount) -
+                    normalizedInput
+        val denominator =
+            1f +
+                    (0.3f * amount) +
+                    (0.7f * normalizedInput * amount * amount) +
+                    (0.7f * normalizedInput * amount)
+        val output = -(numerator / denominator)
+        return if (output <= 1f) output else output - distanceDifference
+    }
+
+    val numerator =
+        (0.3f * amount * amount) -
+                (0.3f * normalizedInput * amount * amount) +
+                (1.3f * normalizedInput * amount) -
+                amount -
+                normalizedInput
+    val denominator =
+        (0.7f * normalizedInput * amount * amount) -
+                (0.7f * normalizedInput * amount) -
+                (0.7f * amount * amount) +
+                amount -
+                1f
+    val output = numerator / denominator
+    return if (output >= 0f) output else output + distanceDifference
+}
+
+private fun compensateBackgroundPosition(
+    position: Float,
+    amount: Float,
+    origin: Float,
+    extent: Float,
+): Float {
+    if (amount == 0f || extent <= 0f) return position
+    val normalized = (position - origin) / extent
+    return origin + reverseStretchPosition(amount, normalized) * extent
+}
+
+private fun ContentDrawScope.drawStretchCompensatedBitmap(
+    bitmap: ImageBitmap,
+    boundsInBackground: Rect,
+    compensation: StretchBitmapCompensation,
+) {
+    if (size.width <= 0f || size.height <= 0f) return
+
+    // Android 12/12L have no RuntimeShader API. A fine mesh is visually continuous for the
+    // already-blurred bitmap while preserving the same inverse mapping.
+    val xCellCount = if (compensation.horizontalAmount == 0f) {
+        1
+    } else {
+        ceil(size.width / 16f).toInt().coerceAtLeast(1)
+    }
+    val yCellCount = if (compensation.verticalAmount == 0f) {
+        1
+    } else {
+        ceil(size.height / 16f).toInt().coerceAtLeast(1)
+    }
+    val androidBitmap = bitmap.asAndroidBitmap()
+    val canvas = drawContext.canvas.nativeCanvas
+
+    for (xIndex in 0 until xCellCount) {
+        val destinationLeft = size.width * xIndex / xCellCount
+        val destinationRight = size.width * (xIndex + 1) / xCellCount
+        val backgroundLeft =
+            boundsInBackground.left + boundsInBackground.width * destinationLeft / size.width
+        val backgroundRight =
+            boundsInBackground.left + boundsInBackground.width * destinationRight / size.width
+        val sourceX = bitmapSourceInterval(
+            first = compensateBackgroundPosition(
+                position = backgroundLeft,
+                amount = compensation.horizontalAmount,
+                origin = compensation.horizontalOrigin,
+                extent = compensation.horizontalSize,
+            ),
+            second = compensateBackgroundPosition(
+                position = backgroundRight,
+                amount = compensation.horizontalAmount,
+                origin = compensation.horizontalOrigin,
+                extent = compensation.horizontalSize,
+            ),
+            bitmapSize = bitmap.width,
+        ) ?: continue
+
+        for (yIndex in 0 until yCellCount) {
+            val destinationTop = size.height * yIndex / yCellCount
+            val destinationBottom = size.height * (yIndex + 1) / yCellCount
+            val backgroundTop =
+                boundsInBackground.top + boundsInBackground.height * destinationTop / size.height
+            val backgroundBottom =
+                boundsInBackground.top + boundsInBackground.height * destinationBottom / size.height
+            val sourceY = bitmapSourceInterval(
+                first = compensateBackgroundPosition(
+                    position = backgroundTop,
+                    amount = compensation.verticalAmount,
+                    origin = compensation.verticalOrigin,
+                    extent = compensation.verticalSize,
+                ),
+                second = compensateBackgroundPosition(
+                    position = backgroundBottom,
+                    amount = compensation.verticalAmount,
+                    origin = compensation.verticalOrigin,
+                    extent = compensation.verticalSize,
+                ),
+                bitmapSize = bitmap.height,
+            ) ?: continue
+
+            canvas.drawBitmap(
+                androidBitmap,
+                android.graphics.Rect(
+                    sourceX.start,
+                    sourceY.start,
+                    sourceX.end,
+                    sourceY.end,
+                ),
+                RectF(
+                    destinationLeft,
+                    destinationTop,
+                    destinationRight,
+                    destinationBottom,
+                ),
+                stretchFallbackPaint,
             )
         }
     }
@@ -1237,14 +1727,16 @@ private fun BackgroundInitializer(uri: Uri) {
             .build(),
         onError = { error ->
             Log.e("ThemeSystem", "背景加载失败: ${error.result.throwable.message}")
+            backgroundImageBitmap = null
             ThemeConfig.customBackgroundUri = null
         },
         onSuccess = {
+            val bitmap = it.result.drawable.toBitmap()
+            backgroundImageBitmap = bitmap.asImageBitmap()
             Log.d("ThemeSystem", "背景加载成功")
             ThemeConfig.backgroundImageLoaded = true
             ThemeConfig.isThemeChanging = false
 
-            val bitmap = it.result.drawable.toBitmap()
             if (
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
                 ThemeConfig.isEnableBlurExp &&

@@ -38,7 +38,7 @@ fun SettingsJumpPageWidget(
     SettingsBaseWidget(
         icon = icon,
         iconPlaceholder = iconPlaceholder,
-        renderBackgroundBlur = renderBackgroundBlur,
+        isOnBackground = renderBackgroundBlur,
         title = title,
         description = description,
         descriptionColor = descriptionColor,

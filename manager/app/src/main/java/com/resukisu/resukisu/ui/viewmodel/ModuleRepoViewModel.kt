@@ -95,6 +95,8 @@ class ModuleRepoViewModel : ViewModel() {
     fun refresh(
         onFailure: (() -> Unit)? = null
     ) {
+        if (_uiState.value.isRefreshing) return
+
         viewModelScope.launch {
             val netAvailable = isNetworkAvailable(ksuApp)
             _uiState.update { it.copy(isRefreshing = true) }

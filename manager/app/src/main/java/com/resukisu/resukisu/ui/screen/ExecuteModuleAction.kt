@@ -56,6 +56,7 @@ import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.runModuleAction
+import com.resukisu.resukisu.ui.util.showReplacingSnackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -146,7 +147,7 @@ fun ExecuteModuleActionScreen(moduleId: String) {
                                 "KernelSU_module_action_log_${date}.log"
                             )
                             file.writeText(logContent.toString())
-                            snackBarHost.showSnackbar("Log saved to ${file.absolutePath}")
+                            snackBarHost.showReplacingSnackbar("Log saved to ${file.absolutePath}")
                         }
                     }
                 },

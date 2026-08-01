@@ -45,6 +45,7 @@ import com.resukisu.resukisu.ui.component.settings.SettingsSwitchWidget
 import com.resukisu.resukisu.ui.screen.susfs.RegisterSuSFSRefresh
 import com.resukisu.resukisu.ui.screen.susfs.SuSFSRefreshRegistrar
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
+import com.resukisu.resukisu.ui.util.showReplacingSnackbar
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -173,7 +174,7 @@ fun BackupRestoreSection(
         scope.launch {
             val ok = SuSFSConfigHelper.exportConfigToUri(uri)
             scope.launch {
-                snackbarHost.showSnackbar(if (ok) exportSuccessMsg else exportFailedMsg)
+                snackbarHost.showReplacingSnackbar(if (ok) exportSuccessMsg else exportFailedMsg)
             }
         }
     }
@@ -240,7 +241,7 @@ fun BackupRestoreSection(
                                     onConfigRestored()
                                 }
                                 scope.launch {
-                                    snackbarHost.showSnackbar(if (ok) importSuccessMsg else importFailedMsg)
+                                    snackbarHost.showReplacingSnackbar(if (ok) importSuccessMsg else importFailedMsg)
                                 }
                             }
                         }
@@ -281,7 +282,7 @@ private fun RestoreDefaultRow(
                 if (ok) {
                     onConfigRestored()
                 }
-                snackbarHost.showSnackbar(if (ok) operationSuccessMsg else operationFailedMsg)
+                snackbarHost.showReplacingSnackbar(if (ok) operationSuccessMsg else operationFailedMsg)
             }
         }
     )

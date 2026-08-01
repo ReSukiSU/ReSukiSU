@@ -62,6 +62,7 @@ import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.screen.susfs.RegisterSuSFSRefresh
 import com.resukisu.resukisu.ui.screen.susfs.SuSFSRefreshRegistrar
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
+import com.resukisu.resukisu.ui.util.showReplacingSnackbar
 import kotlinx.coroutines.launch
 
 private enum class UnameDialogTab {
@@ -149,7 +150,7 @@ fun StandardFeaturesTab(
                 if (ok) {
                     loggingEnabled = newValue
                 } else {
-                    snackbarHost.showSnackbar(operationFailedMsg)
+                    snackbarHost.showReplacingSnackbar(operationFailedMsg)
                 }
             }
         }
@@ -163,7 +164,7 @@ fun StandardFeaturesTab(
                     if (ok) {
                         avcLogSpoofingEnabled = newValue
                     } else {
-                        snackbarHost.showSnackbar(operationFailedMsg)
+                        snackbarHost.showReplacingSnackbar(operationFailedMsg)
                     }
                 }
             }
@@ -177,7 +178,7 @@ fun StandardFeaturesTab(
                     if (ok) {
                         hideSusMntsEnabled = newValue
                     } else {
-                        snackbarHost.showSnackbar(operationFailedMsg)
+                        snackbarHost.showReplacingSnackbar(operationFailedMsg)
                     }
                 }
             }
@@ -209,7 +210,7 @@ fun StandardFeaturesTab(
                             unameRelease = r
                             showUnameDialog = false
                         } else {
-                            snackbarHost.showSnackbar(operationFailedMsg)
+                            snackbarHost.showReplacingSnackbar(operationFailedMsg)
                         }
                     } finally {
                         isLoading = false
@@ -231,7 +232,7 @@ fun StandardFeaturesTab(
                     } else {
                         isLoading = false
                         scope.launch {
-                            snackbarHost.showSnackbar(operationFailedMsg)
+                            snackbarHost.showReplacingSnackbar(operationFailedMsg)
                         }
                     }
                     isLoading = false
@@ -467,7 +468,7 @@ fun StandardFeaturesTab(
                                                         title = slot.slotName,
                                                         description = "${slot.uname}\n${slot.buildTime}",
                                                         selected = selected,
-                                                        renderBackgroundBlur = false,
+                                                        isOnBackground = false,
                                                         onClick = {
                                                             selectedSlotName = slot.slotName
                                                         },

@@ -100,7 +100,7 @@ object ManagerUpdateRepository {
     ): ManagerUpdateInfo? {
         val workflowRuns = requestJson(
             "https://api.github.com/repos/$REPOSITORY/actions/workflows/$WORKFLOW_FILE/runs" +
-                    "?branch=$BRANCH&status=success&per_page=1"
+                    "?branch=$BRANCH&status=success&per_page=1&event=push"
         )?.optJSONArray("workflow_runs") ?: return null
         val run = workflowRuns.optJSONObject(0) ?: return null
         val runId = run.optLong("id", -1L)

@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.ksuApp
+import com.resukisu.resukisu.ui.activity.util.isNetworkAvailable
 import com.resukisu.resukisu.ui.util.HanziToPinyin
 import com.resukisu.resukisu.ui.util.getRootShell
 import com.resukisu.resukisu.ui.util.listModules
@@ -50,6 +51,20 @@ class ModuleViewModel : ViewModel() {
     private var updateCheckJob: Job? = null
     private val _uiState = MutableStateFlow(ModuleUiState())
     val uiState: StateFlow<ModuleUiState> = _uiState.asStateFlow()
+
+    init {
+        refreshUserSettings(ksuApp)
+    }
+
+    fun refreshUserSettings(context: Context) {
+        val prefs = context.appPreferences
+        _uiState.update {
+            it.copy(
+                showMoreModuleInfo = prefs.getBoolean("show_more_module_info", false),
+                isHideTagRow = prefs.getBoolean("is_hide_tag_row", false),
+            )
+        }
+    }
 
     fun loadSize(dirId: String) = viewModelScope.launch(Dispatchers.IO) {
         val size = formatFileSize(
@@ -182,6 +197,12 @@ class ModuleViewModel : ViewModel() {
         _uiState.update { it.copy(isNeedRefresh = true) }
     }
 
+    fun updateCachedModuleEnabled(dirId: String, enabled: Boolean) {
+        modules = modules.map { module ->
+            if (module.dirId == dirId) module.copy(enabled = enabled) else module
+        }
+    }
+
     fun fetchModuleList(
         manualRefresh: Boolean = false,
         callBack: () -> Unit = {},
@@ -283,6 +304,14 @@ class ModuleViewModel : ViewModel() {
         moduleVersionKeys: List<String>,
     ) {
         updateCheckJob?.cancel()
+        if (!isModuleUpdateCheckEnabled()) {
+            updateCheckJob = null
+            return
+        }
+        if (!isNetworkAvailable(ksuApp)) {
+            updateCheckJob = null
+            return
+        }
         updateCheckJob = viewModelScope.launch(Dispatchers.IO) {
             val updatedModules = moduleSnapshot.map { module ->
                 async {
@@ -357,10 +386,19 @@ class ModuleViewModel : ViewModel() {
         return version.replace(Regex("[^a-zA-Z0-9.\\-_]"), "_")
     }
 
+    private fun isModuleUpdateCheckEnabled(): Boolean {
+        val prefs = ksuApp.ensurePreferencesRepository()
+        return prefs.getBoolean(
+            "check_module_update",
+            prefs.getBoolean("check_update", true),
+        )
+    }
+
     fun checkUpdate(updateUrl: String, versionCode: Int): ModuleUpdateInfo? {
-        val isCheckUpdateEnabled =
-            ksuApp.ensurePreferencesRepository().getBoolean("check_update", true)
-        if (!isCheckUpdateEnabled) {
+        if (!isModuleUpdateCheckEnabled()) {
+            return null
+        }
+        if (!isNetworkAvailable(ksuApp)) {
             return null
         }
 

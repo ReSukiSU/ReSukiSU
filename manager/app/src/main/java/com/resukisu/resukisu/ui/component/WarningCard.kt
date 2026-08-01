@@ -111,7 +111,7 @@ private fun WarningCardInner(
         SettingsBaseWidget(
             modifier = modifier,
             title = null,
-            renderBackgroundBlur = renderBackground,
+            isOnBackground = renderBackground,
             containerColor = color ?: MaterialTheme.colorScheme.errorContainer,
             leadingContent = icon,
             foreContent = {

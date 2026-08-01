@@ -111,6 +111,7 @@ import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
+import com.resukisu.resukisu.ui.util.ActivityResumeEffect
 import com.resukisu.resukisu.ui.viewmodel.HomeUiState
 import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
 import com.resukisu.resukisu.ui.viewmodel.ModuleUiState
@@ -273,9 +274,10 @@ fun ThemeSettingsScreen() {
         }
     )
 
-    // 初始化设置
-    LaunchedEffect(Unit) {
+    // 初始化设置，并在 Activity 恢复时重新同步持久化状态。
+    ActivityResumeEffect(systemIsDark) {
         settingsViewModel.initialize(context, systemIsDark)
+        moduleViewModel.refreshUserSettings(context)
     }
 
     // 各种设置对话框

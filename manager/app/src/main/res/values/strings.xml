@@ -160,6 +160,10 @@
     <string name="module_changelog_failed">Fetch changelog failed: %s</string>
     <string name="settings_check_update">Update notifications</string>
     <string name="settings_check_update_summary">Auto-check for module and manager updates</string>
+    <string name="settings_check_manager_update">Check manager updates</string>
+    <string name="settings_check_manager_update_summary">Auto-check for manager updates</string>
+    <string name="settings_check_module_update">Check module updates</string>
+    <string name="settings_check_module_update_summary">Auto-check for installed module updates</string>
     <string name="grant_root_failed">Failed to grant root!</string>
     <string name="home_pr_build_warning">This is a PR debug build. Do NOT use it in production!</string>
     <string name="action">Action</string>

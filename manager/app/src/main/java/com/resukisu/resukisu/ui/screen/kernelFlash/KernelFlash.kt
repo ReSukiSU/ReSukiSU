@@ -75,6 +75,7 @@ import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.install
 import com.resukisu.resukisu.ui.util.reboot
+import com.resukisu.resukisu.ui.util.showReplacingSnackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -240,7 +241,7 @@ fun KernelFlashScreen(
                             "KernelSU_kernel_flash_log_${date}.log"
                         )
                         file.writeText(logContent.toString())
-                        snackBarHost.showSnackbar(logSavedString.format(file.absolutePath))
+                        snackBarHost.showReplacingSnackbar(logSavedString.format(file.absolutePath))
                     }
                 },
                 scrollBehavior = scrollBehavior

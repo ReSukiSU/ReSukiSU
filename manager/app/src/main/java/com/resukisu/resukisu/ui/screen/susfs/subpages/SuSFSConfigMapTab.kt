@@ -36,6 +36,7 @@ import com.resukisu.resukisu.ui.screen.susfs.component.SuSFSDescriptionCard
 import com.resukisu.resukisu.ui.screen.susfs.component.susfsEntryList
 import com.resukisu.resukisu.ui.screen.susfs.component.toImportedEntryLines
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
+import com.resukisu.resukisu.ui.util.showReplacingSnackbar
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -162,7 +163,7 @@ fun SusMapTab(
                     }
                 }
                 isLoading = false
-                snackbarMessage?.let { snackbarHost.showSnackbar(it) }
+                snackbarMessage?.let { snackbarHost.showReplacingSnackbar(it) }
             }
         },
         formContent = {
@@ -198,7 +199,7 @@ fun SusMapTab(
                     } else {
                         isLoading = false
                         scope.launch {
-                            snackbarHost.showSnackbar(operationFailedMsg)
+                            snackbarHost.showReplacingSnackbar(operationFailedMsg)
                         }
                     }
                     isLoading = false

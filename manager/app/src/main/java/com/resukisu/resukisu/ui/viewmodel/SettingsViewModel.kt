@@ -16,6 +16,7 @@ import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.data.AppPreferencesRepository
 import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.magica.BootCompletedReceiver
@@ -94,8 +95,9 @@ data class SettingsUiState(
     val isDpiCustom: Boolean = true,
     val dpiPresets: Map<String, Int> = emptyMap(),
 
-    val checkUpdate: Boolean = true,
+    val checkManagerUpdate: Boolean = true,
     val checkBetaUpdate: Boolean = true,
+    val checkModuleUpdate: Boolean = true,
     val suCompatMode: Int = 0,
     val suStatus: String = "",
     val kernelUmountStatus: String = "",
@@ -114,10 +116,22 @@ class SettingsViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
+    private fun loadModuleUpdatePreference(prefs: AppPreferencesRepository): Boolean {
+        val enabled = prefs.getBoolean(
+            "check_module_update",
+            prefs.getBoolean("check_update", true),
+        )
+        if (!prefs.contains("check_module_update")) {
+            prefs.putBoolean("check_module_update", enabled)
+        }
+        return enabled
+    }
+
     fun initialize(context: Context, systemIsDark: Boolean = isSystemDark(context)) {
         val prefs = context.appPreferences
         val systemDpi = context.resources.displayMetrics.densityDpi
         val currentDpi = prefs.getInt("app_dpi", systemDpi)
+        val checkModuleUpdate = loadModuleUpdatePreference(prefs)
 
         CardConfig.load(context)
 
@@ -153,8 +167,9 @@ class SettingsViewModel : ViewModel() {
                 tempDpi = currentDpi,
                 isDpiCustom = !dpiPresetValues().contains(currentDpi),
                 dpiPresets = dpiPresets(context),
-                checkUpdate = prefs.getBoolean("check_update", true),
+                checkManagerUpdate = prefs.getBoolean("check_update", true),
                 checkBetaUpdate = prefs.getBoolean("check_beta_update", true),
+                checkModuleUpdate = checkModuleUpdate,
                 autoJailbreakEnabled = prefs.getBoolean("auto_jailbreak", false),
             )
         }
@@ -198,14 +213,16 @@ class SettingsViewModel : ViewModel() {
             val prefs = context.appPreferences
             val currentSuEnabled = runCatching { Natives.isSuEnabled() }.getOrDefault(false)
             val suPersistValue = runCatching { getFeaturePersistValue("su_compat") }.getOrNull()
+            val checkModuleUpdate = loadModuleUpdatePreference(prefs)
             val suCompatMode = suPersistValue?.let { value ->
                 if (value == 0L) 2 else if (!currentSuEnabled) 1 else 0
             } ?: if (!currentSuEnabled) 1 else 0
 
             _uiState.update {
                 it.copy(
-                    checkUpdate = prefs.getBoolean("check_update", true),
+                    checkManagerUpdate = prefs.getBoolean("check_update", true),
                     checkBetaUpdate = prefs.getBoolean("check_beta_update", true),
+                    checkModuleUpdate = checkModuleUpdate,
                     suCompatMode = suCompatMode,
                     suStatus = runCatching { getFeatureStatus("su_compat") }.getOrDefault(""),
                     kernelUmountStatus = runCatching { getFeatureStatus("kernel_umount") }.getOrDefault(
@@ -436,8 +453,10 @@ class SettingsViewModel : ViewModel() {
             .show()
     }
 
-    fun handleCheckUpdateChange(context: Context, enabled: Boolean) {
-        updateBooleanPref(context, "check_update", enabled) { it.copy(checkUpdate = enabled) }
+    fun handleCheckManagerUpdateChange(context: Context, enabled: Boolean) {
+        updateBooleanPref(context, "check_update", enabled) {
+            it.copy(checkManagerUpdate = enabled)
+        }
         if (!enabled) {
             updateBooleanPref(context, "check_beta_update", false) {
                 it.copy(checkBetaUpdate = false)
@@ -453,6 +472,14 @@ class SettingsViewModel : ViewModel() {
             enabled
         ) { it.copy(checkBetaUpdate = enabled) }
         refreshHomeData(context)
+    }
+
+    fun handleCheckModuleUpdateChange(context: Context, enabled: Boolean) {
+        updateBooleanPref(context, "check_module_update", enabled) {
+            it.copy(checkModuleUpdate = enabled)
+        }
+        ViewModelProvider(ksuApp)[ModuleViewModel::class.java]
+            .fetchModuleList(manualRefresh = true)
     }
 
     private fun refreshHomeData(context: Context) {

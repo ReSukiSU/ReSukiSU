@@ -88,6 +88,7 @@ import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
+import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
 import com.resukisu.resukisu.ui.util.LkmSelection
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.flashModule
@@ -96,6 +97,7 @@ import com.resukisu.resukisu.ui.util.installBoot
 import com.resukisu.resukisu.ui.util.module.ModuleUtils
 import com.resukisu.resukisu.ui.util.reboot
 import com.resukisu.resukisu.ui.util.restoreBoot
+import com.resukisu.resukisu.ui.util.showReplacingSnackbar
 import com.resukisu.resukisu.ui.util.uninstallPermanently
 import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel
 import com.topjohnwu.superuser.io.SuFile
@@ -504,7 +506,7 @@ fun FlashScreen(flashIt: FlashIt) {
                             "KernelSU_install_log_${date}.log"
                         )
                         file.writeText(logContent.toString())
-                        snackBarHost.showSnackbar(logSavedString.format(file.absolutePath))
+                        snackBarHost.showReplacingSnackbar(logSavedString.format(file.absolutePath))
                     }
                 },
                 scrollBehavior = scrollBehavior
@@ -546,10 +548,11 @@ fun FlashScreen(flashIt: FlashIt) {
         Column(
             modifier = Modifier
                 .fillMaxSize(1f)
-                .padding(innerPadding)
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .blurSource(),
         ) {
+            Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+
             if (flashIt is FlashIt.FlashModules) {
                 ModuleInstallProgressBar(
                     currentIndex = flashIt.currentIndex + 1,
@@ -579,6 +582,7 @@ fun FlashScreen(flashIt: FlashIt) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
+            Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding()))
         }
     }
 }
@@ -653,9 +657,12 @@ fun ModuleInstallProgressBar(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(16.dp)
+            .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceBright
+            containerColor = if (ThemeConfig.isEnableBlurExp) Color.Transparent else MaterialTheme.colorScheme.surfaceBright.copy(
+                alpha = CardConfig.cardAlpha
+            )
         )
     ) {
         Column(
@@ -756,8 +763,6 @@ private fun TopBar(
     onSave: () -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior
 ) {
-    MaterialTheme.colorScheme
-
     val statusColor = when(status) {
         FlashingStatus.FLASHING -> MaterialTheme.colorScheme.primary
         FlashingStatus.SUCCESS -> MaterialTheme.colorScheme.tertiary

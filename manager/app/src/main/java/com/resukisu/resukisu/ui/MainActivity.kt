@@ -164,9 +164,30 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         try {
             super.onResume()
-            ThemeUtils.onActivityResume()
+            ThemeUtils.onActivityResume(this)
+            refreshUiData()
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    private fun refreshUiData() {
+        if (!isInitialized) return
+
+        settingsViewModel.initialize(this)
+        moduleViewModel.refreshUserSettings(this)
+
+        homeViewModel.refreshData(
+            context = this,
+            refreshUI = homeViewModel.uiState.value.isInitialDataLoaded,
+        )
+
+        if (!moduleViewModel.uiState.value.isRefreshing) {
+            moduleViewModel.fetchModuleList()
+        }
+
+        lifecycleScope.launch {
+            superUserViewModel.fetchAppList()
         }
     }
 

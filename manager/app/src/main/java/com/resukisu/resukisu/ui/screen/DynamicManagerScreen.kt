@@ -60,7 +60,9 @@ import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.theme.blurSource
+import com.resukisu.resukisu.ui.util.ActivityResumeEffect
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
+import com.resukisu.resukisu.ui.util.showReplacingSnackbar
 import com.resukisu.resukisu.ui.viewmodel.DynamicManagerAppItem
 import com.resukisu.resukisu.ui.viewmodel.DynamicManagerViewModel
 import kotlinx.coroutines.launch
@@ -103,7 +105,7 @@ fun DynamicManagerScreen() {
             if (!confirmPrivilegeGrant()) return@launch
             val success = operation()
             if (success) viewModel.refresh()
-            snackbarHost.showSnackbar(if (success) setSuccess else setFailed)
+            snackbarHost.showReplacingSnackbar(if (success) setSuccess else setFailed)
         }
     }
 
@@ -117,7 +119,7 @@ fun DynamicManagerScreen() {
             if (confirmed != ConfirmResult.Confirmed) return@launch
             val success = viewModel.clearConfig()
             if (success) viewModel.refresh()
-            snackbarHost.showSnackbar(if (success) clearSuccess else clearFailed)
+            snackbarHost.showReplacingSnackbar(if (success) clearSuccess else clearFailed)
         }
     }
 
@@ -127,6 +129,9 @@ fun DynamicManagerScreen() {
 
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
+    }
+
+    ActivityResumeEffect {
         viewModel.refresh()
     }
 

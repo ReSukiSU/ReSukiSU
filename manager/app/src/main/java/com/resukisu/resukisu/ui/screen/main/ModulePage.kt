@@ -62,6 +62,9 @@ import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuGroup
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
@@ -70,6 +73,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PrimaryTabRow
@@ -158,6 +162,7 @@ import com.resukisu.resukisu.ui.util.hasMagisk
 import com.resukisu.resukisu.ui.util.module.ModuleUtils
 import com.resukisu.resukisu.ui.util.module.Shortcut
 import com.resukisu.resukisu.ui.util.reboot
+import com.resukisu.resukisu.ui.util.showReplacingSnackbar
 import com.resukisu.resukisu.ui.util.toggleModule
 import com.resukisu.resukisu.ui.util.undoUninstallModule
 import com.resukisu.resukisu.ui.util.uninstallModule
@@ -179,7 +184,7 @@ private enum class ShortcutType {
  * @date 2025/9/29.
  */
 @SuppressLint("ResourceType", "AutoboxingStateCreation")
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ModulePage(bottomPadding: Dp) {
     val navigator = LocalNavigator.current
@@ -193,11 +198,7 @@ fun ModulePage(bottomPadding: Dp) {
     val scope = rememberCoroutineScope()
     var lastClickTime by remember { mutableStateOf(0L) }
 
-    val bottomSheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
-    var showBottomSheet by remember { mutableStateOf(false) }
+    var showDropdown by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
 
     var showConfirmationDialog by remember { mutableStateOf(false) }
@@ -255,7 +256,7 @@ fun ModulePage(bottomPadding: Dp) {
                 }
 
                 if (selectedModules.isEmpty()) {
-                    snackBarHost.showSnackbar("Unable to access selected module files")
+                    snackBarHost.showReplacingSnackbar("Unable to access selected module files")
                     return@launch
                 }
                 selectedModules.forEach { it ->
@@ -269,7 +270,7 @@ fun ModulePage(bottomPadding: Dp) {
                 // 单个安装模块
                 try {
                     if (!ModuleUtils.isUriAccessible(context, uri)) {
-                        snackBarHost.showSnackbar("Unable to access selected module files")
+                        snackBarHost.showReplacingSnackbar("Unable to access selected module files")
                         return@launch
                     }
 
@@ -281,7 +282,7 @@ fun ModulePage(bottomPadding: Dp) {
                     showConfirmationDialog = true
                 } catch (e: Exception) {
                     Log.e("ModuleScreen", "Error processing a single URI: $uri, Error: ${e.message}")
-                    snackBarHost.showSnackbar("Error processing module file: ${e.message}")
+                    snackBarHost.showReplacingSnackbar("Error processing module file: ${e.message}")
                 }
             }
         }
@@ -313,11 +314,19 @@ fun ModulePage(bottomPadding: Dp) {
                 onSearchTextChange = viewModel::updateSearch,
                 dropdownContent = {
                     IconButton(
-                        onClick = { showBottomSheet = true },
+                        onClick = { showDropdown = true },
                     ) {
                         Icon(
                             imageVector = Icons.TwoTone.MoreVert,
                             contentDescription = stringResource(id = R.string.settings),
+                        )
+
+                        ModuleDropdown(
+                            expanded = showDropdown,
+                            onDismissRequest = { showDropdown = false },
+                            viewModel = viewModel,
+                            uiState = uiState,
+                            prefs = prefs,
                         )
                     }
                 },
@@ -456,7 +465,7 @@ fun ModulePage(bottomPadding: Dp) {
                             } catch (e: Exception) {
                                 Log.e("ModuleScreen", "Error launching WebUI: ${e.message}", e)
                                 scope.launch {
-                                    snackBarHost.showSnackbar("Error launching WebUI: ${e.message}")
+                                    snackBarHost.showReplacingSnackbar("Error launching WebUI: ${e.message}")
                                 }
                             }
                             return@ModuleList
@@ -469,146 +478,49 @@ fun ModulePage(bottomPadding: Dp) {
                 )
             }
         }
-
-        if (showBottomSheet) {
-            ModalBottomSheet(
-                onDismissRequest = {
-                    showBottomSheet = false
-                },
-                sheetState = bottomSheetState,
-                dragHandle = {
-                    Surface(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .padding(vertical = 11.dp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Box(
-                            Modifier.size(
-                                width = 32.dp,
-                                height = 4.dp
-                            )
-                        )
-                    }
-                }
-            ) {
-                ModuleBottomSheetContent(
-                    viewModel = viewModel,
-                    uiState = uiState,
-                    prefs = prefs
-                )
-            }
-        }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun ModuleBottomSheetContent(
+private fun ModuleDropdown(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
     viewModel: ModuleViewModel,
     uiState: ModuleUiState,
-    prefs: AppPreferencesRepository
+    prefs: AppPreferencesRepository,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 24.dp)
+    DropdownMenuPopup(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
     ) {
-        // 标题
-        Text(
-            text = stringResource(R.string.menu_options),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
-        )
-
-        // 排序选项
-
-        Text(
-            text = stringResource(R.string.sort_options),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
-        )
-
-        Column(
-            modifier = Modifier.padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        DropdownMenuGroup(
+            shapes = MenuDefaults.groupShapes(),
         ) {
-            // 优先显示有操作的模块
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.module_sort_action_first),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Switch(
-                    checked = uiState.sortActionFirst,
-                    onCheckedChange = { checked ->
-                        viewModel.setSortActionFirst(checked)
-                        prefs.putBoolean("module_sort_action_first", checked)
-                    },
-                    thumbContent = {
-                        if (uiState.sortActionFirst) {
-                            Icon(
-                                imageVector = Icons.TwoTone.Check,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(SwitchDefaults.IconSize),
-                            )
-                        } else
-                        {
-                            Icon(
-                                imageVector = Icons.TwoTone.Close,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.surfaceBright,
-                                modifier = Modifier.size(SwitchDefaults.IconSize),
-                            )
-                        }
-                    }
-                )
-            }
-
-            // 优先显示已启用的模块
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.module_sort_enabled_first),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Switch(
-                    checked = uiState.sortEnabledFirst,
-                    onCheckedChange = { checked ->
-                        viewModel.setSortEnabledFirst(checked)
-                        prefs.putBoolean("module_sort_enabled_first", checked)
-                    },
-                    thumbContent = {
-                        if (uiState.sortEnabledFirst) {
-                            Icon(
-                                imageVector = Icons.TwoTone.Check,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(SwitchDefaults.IconSize),
-                            )
-                        } else
-                        {
-                            Icon(
-                                imageVector = Icons.TwoTone.Close,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.surfaceBright,
-                                modifier = Modifier.size(SwitchDefaults.IconSize),
-                            )
-                        }
-                    }
-                )
-            }
+            DropdownMenuItem(
+                checked = uiState.sortActionFirst,
+                onCheckedChange = { checked ->
+                    viewModel.setSortActionFirst(checked)
+                    prefs.putBoolean("module_sort_action_first", checked)
+                },
+                text = { Text(stringResource(R.string.module_sort_action_first)) },
+                shapes = MenuDefaults.itemShape(
+                    index = 0,
+                    count = 2,
+                ),
+            )
+            DropdownMenuItem(
+                checked = uiState.sortEnabledFirst,
+                onCheckedChange = { checked ->
+                    viewModel.setSortEnabledFirst(checked)
+                    prefs.putBoolean("module_sort_enabled_first", checked)
+                },
+                text = { Text(stringResource(R.string.module_sort_enabled_first)) },
+                shapes = MenuDefaults.itemShape(
+                    index = 1,
+                    count = 2,
+                ),
+            )
         }
     }
 }
@@ -902,7 +814,7 @@ private fun ModuleList(
         } else {
             null
         }
-        val result = snackBarHost.showSnackbar(
+        val result = snackBarHost.showReplacingSnackbar(
             message = message,
             actionLabel = actionLabel,
             duration = SnackbarDuration.Long
@@ -978,7 +890,7 @@ private fun ModuleList(
             },
         ) {
             item {
-                Spacer(modifier = Modifier.height(topPadding + 1.dp))
+                Spacer(modifier = Modifier.height(topPadding))
             }
 
             if (metaModuleWarningText != null) {
@@ -1006,30 +918,31 @@ private fun ModuleList(
                             }
                         }
                     },
-                    onCheckChanged = {
-                        viewModel.viewModelScope.launch {
-                            withContext(Dispatchers.IO) {
-                                val success = withContext(Dispatchers.IO) {
-                                    toggleModule(module.dirId, !module.enabled)
-                                }
-                                if (success) {
-                                    viewModel.fetchModuleList()
-
-                                    val result = snackBarHost.showSnackbar(
-                                        message = rebootToApply,
-                                        actionLabel = reboot,
-                                        duration = SnackbarDuration.Long
-                                    )
-                                    if (result == SnackbarResult.ActionPerformed) {
+                    onCheckChanged = { enabled ->
+                        val success = withContext(Dispatchers.IO) {
+                            toggleModule(module.dirId, enabled)
+                        }
+                        if (success) {
+                            viewModel.updateCachedModuleEnabled(module.dirId, enabled)
+                            viewModel.viewModelScope.launch {
+                                val result = snackBarHost.showReplacingSnackbar(
+                                    message = rebootToApply,
+                                    actionLabel = reboot,
+                                    duration = SnackbarDuration.Long
+                                )
+                                if (result == SnackbarResult.ActionPerformed) {
+                                    withContext(Dispatchers.IO) {
                                         reboot()
                                     }
-                                } else {
-                                    val message =
-                                        if (module.enabled) failedDisable else failedEnable
-                                    snackBarHost.showSnackbar(message.format(module.name))
                                 }
                             }
+                        } else {
+                            val message = if (enabled) failedEnable else failedDisable
+                            viewModel.viewModelScope.launch {
+                                snackBarHost.showReplacingSnackbar(message.format(module.name))
+                            }
                         }
+                        success
                     },
                     onUpdate = {
                         viewModel.viewModelScope.launch {
@@ -1145,7 +1058,7 @@ private fun ModuleList(
                         item {
                             SettingsBaseWidget(
                                 icon = Icons.TwoTone.Photo,
-                                renderBackgroundBlur = false,
+                                isOnBackground = false,
                                 title = stringResource(id = R.string.module_shortcut_icon_pick),
                                 onClick = {
                                     pickShortcutIconLauncher.launch("image/*")
@@ -1163,7 +1076,7 @@ private fun ModuleList(
                         item {
                             SettingsBaseWidget(
                                 icon = Icons.TwoTone.Restore,
-                                renderBackgroundBlur = false,
+                                isOnBackground = false,
                                 title = stringResource(id = R.string.restore),
                                 onClick = {
                                     shortcutIconUri = defaultShortcutIconUri
@@ -1270,7 +1183,7 @@ fun ModuleItem(
     moduleSizes: Map<String, String>,
     updateUrl: String,
     onUninstallClicked: (ModuleViewModel.ModuleInfo) -> Unit,
-    onCheckChanged: (Boolean) -> Unit,
+    onCheckChanged: suspend (Boolean) -> Boolean,
     onUpdate: (ModuleViewModel.ModuleInfo) -> Unit,
     onClick: (ModuleViewModel.ModuleInfo) -> Unit,
     onModuleAddShortcut: (ModuleViewModel.ModuleInfo) -> Unit,
@@ -1285,6 +1198,13 @@ fun ModuleItem(
     // 剪贴板管理器和触觉反馈
     val clipboardManager = context.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
     val hapticFeedback = LocalHapticFeedback.current
+    val scope = rememberCoroutineScope()
+    var isEnabled by remember(module.dirId) { mutableStateOf(module.enabled) }
+    var isChangingEnabled by remember(module.dirId) { mutableStateOf(false) }
+
+    LaunchedEffect(module.enabled) {
+        isEnabled = module.enabled
+    }
 
     Surface(
         modifier = Modifier
@@ -1410,12 +1330,23 @@ fun ModuleItem(
                     horizontalArrangement = Arrangement.End,
                 ) {
                     Switch(
-                        enabled = !module.update,
-                        checked = module.enabled,
-                        onCheckedChange = onCheckChanged,
+                        enabled = !module.update && !isChangingEnabled,
+                        checked = isEnabled,
+                        onCheckedChange = { enabled ->
+                            scope.launch {
+                                isChangingEnabled = true
+                                try {
+                                    if (onCheckChanged(enabled)) {
+                                        isEnabled = enabled
+                                    }
+                                } finally {
+                                    isChangingEnabled = false
+                                }
+                            }
+                        },
                         interactionSource = if (!module.hasWebUi) interactionSource else null,
                         thumbContent = {
-                            if (module.enabled) {
+                            if (isEnabled) {
                                 Icon(
                                     imageVector = Icons.TwoTone.Check,
                                     contentDescription = null,
@@ -1487,7 +1418,7 @@ fun ModuleItem(
                 if (module.hasActionScript) {
                     FilledTonalButton(
                         modifier = Modifier.defaultMinSize(minWidth = 52.dp, minHeight = 32.dp),
-                        enabled = !module.remove && module.enabled,
+                        enabled = !module.remove && isEnabled,
                         onClick = {
                             navigator.push(Route.ExecuteModuleAction(module.dirId))
                             viewModel.markNeedRefresh()
@@ -1505,7 +1436,7 @@ fun ModuleItem(
                 if (module.hasWebUi) {
                     FilledTonalButton(
                         modifier = Modifier.defaultMinSize(minWidth = 52.dp, minHeight = 32.dp),
-                        enabled = !module.remove && module.enabled,
+                        enabled = !module.remove && isEnabled,
                         onClick = { onClick(module) },
                         interactionSource = interactionSource,
                         contentPadding = ButtonDefaults.TextButtonContentPadding,
@@ -1590,7 +1521,7 @@ fun ModuleItemPreview() {
         emptyMap(),
         "",
         {},
-        {},
+        { true },
         {},
         {},
         {})

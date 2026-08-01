@@ -26,19 +26,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Check
-import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.Download
 import androidx.compose.material.icons.twotone.Extension
 import androidx.compose.material.icons.twotone.MoreVert
-import androidx.compose.material.icons.twotone.SignalWifiOff
 import androidx.compose.material.icons.twotone.Star
 import androidx.compose.material.icons.twotone.WebAsset
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuGroup
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -46,23 +44,17 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetState
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -71,7 +63,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -99,6 +90,7 @@ import com.resukisu.resukisu.ui.activity.util.isNetworkAvailable
 import com.resukisu.resukisu.ui.component.ConfirmDialogHandle
 import com.resukisu.resukisu.ui.component.ConfirmResult
 import com.resukisu.resukisu.ui.component.DialogHandle
+import com.resukisu.resukisu.ui.component.NetworkRefreshContent
 import com.resukisu.resukisu.ui.component.SearchAppBar
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
@@ -112,6 +104,7 @@ import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
+import com.resukisu.resukisu.ui.util.ActivityResumeEffect
 import com.resukisu.resukisu.ui.util.LocalPermissionRequestInterface
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.downloader.download
@@ -146,18 +139,25 @@ fun ModuleRepoScreen() {
         ChooseDialogContent(currentModuleForChooseDialog, viewModel, dismiss)
     })
     val confirmDialog = rememberConfirmDialog()
-    val bottomSheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
-    )
-    var showBottomSheet by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
+    var showDropdown by remember { mutableStateOf(false) }
     val pullRefreshState = rememberPullToRefreshState()
+    var offline by remember { mutableStateOf(!isNetworkAvailable(context)) }
+
+    val refreshModules = {
+        offline = !isNetworkAvailable(context)
+        if (!offline) {
+            viewModel.refresh(onFailure = { offline = true })
+        }
+    }
 
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
 
         viewModel.setSortStargazerCountFirst(prefs.getBoolean("module_repo_sort_star_first", false))
+    }
+
+    ActivityResumeEffect {
+        refreshModules()
     }
 
     val isLoading = uiState.modules.isEmpty() && uiState.search.isEmpty()
@@ -173,11 +173,19 @@ fun ModuleRepoScreen() {
                 onSearchTextChange = viewModel::updateSearch,
                 dropdownContent = {
                     IconButton(
-                        onClick = { showBottomSheet = true },
+                        onClick = { showDropdown = true },
                     ) {
                         Icon(
                             imageVector = Icons.TwoTone.MoreVert,
                             contentDescription = stringResource(id = R.string.settings),
+                        )
+
+                        ModuleRepoDropdown(
+                            expanded = showDropdown,
+                            onDismissRequest = { showDropdown = false },
+                            viewModel = viewModel,
+                            uiState = uiState,
+                            prefs = prefs,
                         )
                     }
                 },
@@ -195,60 +203,14 @@ fun ModuleRepoScreen() {
         ),
         snackbarHost = { SwipeableSnackbarHost(hostState = snackBarHost) }
     ) { innerPadding ->
-        var offline by remember { mutableStateOf(!isNetworkAvailable(context)) }
-
         if (isLoading) {
-            Box(
+            NetworkRefreshContent(
+                offline = offline,
+                onRetry = refreshModules,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-                contentAlignment = Alignment.Center
-            ) {
-                if (offline) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(
-                            modifier = Modifier
-                                .size(64.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.surfaceVariant),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.TwoTone.SignalWifiOff,
-                                contentDescription = null,
-                                modifier = Modifier.size(32.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Spacer(Modifier.height(12.dp))
-
-                        Text(
-                            text = stringResource(R.string.network_offline),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.titleMediumEmphasized
-                        )
-                        Spacer(modifier = Modifier.height(1.dp))
-
-                        Text(
-                            text = stringResource(R.string.please_check_network),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodyMediumEmphasized
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Button(
-                            contentPadding = PaddingValues(horizontal = 50.dp),
-                            onClick = { viewModel.refresh() },
-                        ) {
-                            Text(text = stringResource(R.string.network_retry))
-                        }
-                    }
-                } else {
-                    LoadingIndicator()
-                    viewModel.refresh(onFailure = {
-                        offline = true
-                    })
-                }
-            }
+            )
         } else if (uiState.modules.isEmpty() && uiState.search.isNotEmpty()) {
             Box(
                 modifier = Modifier
@@ -324,115 +286,37 @@ fun ModuleRepoScreen() {
                 }
             }
         }
-        if (showBottomSheet) {
-            ModalBottomSheet(
-                onDismissRequest = {
-                    showBottomSheet = false
-                },
-                sheetState = bottomSheetState,
-                dragHandle = {
-                    Surface(
-                        modifier = Modifier.padding(vertical = 11.dp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Box(
-                            Modifier.size(
-                                width = 32.dp,
-                                height = 4.dp
-                            )
-                        )
-                    }
-                }
-            ) {
-                ModuleRepoBottomSheetContent(
-                    viewModel = viewModel,
-                    uiState = uiState,
-                    prefs = prefs,
-                    scope = scope,
-                    bottomSheetState = bottomSheetState,
-                    onDismiss = { showBottomSheet = false }
-                )
-            }
-        }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun ModuleRepoBottomSheetContent(
+private fun ModuleRepoDropdown(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
     viewModel: ModuleRepoViewModel,
     uiState: ModuleRepoUiState,
     prefs: AppPreferencesRepository,
-    scope: CoroutineScope,
-    bottomSheetState: SheetState,
-    onDismiss: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 24.dp)
+    DropdownMenuPopup(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
     ) {
-        // 标题
-        Text(
-            text = stringResource(R.string.menu_options),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
-        )
-
-        // 排序选项
-
-        Text(
-            text = stringResource(R.string.sort_options),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
-        )
-
-        Column(
-            modifier = Modifier.padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        DropdownMenuGroup(
+            shapes = MenuDefaults.groupShapes(),
         ) {
-            // 优先显示有星标的模块
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.module_sort_star_first),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Switch(
-                    checked = uiState.sortStargazerCountFirst,
-                    onCheckedChange = { checked ->
-                        viewModel.setSortStargazerCountFirst(checked)
-                        prefs.putBoolean("module_repo_sort_star_first", checked)
-                        scope.launch {
-                            bottomSheetState.hide()
-                            onDismiss()
-                        }
-                    },
-                    thumbContent = {
-                        if (uiState.sortStargazerCountFirst) {
-                            Icon(
-                                imageVector = Icons.TwoTone.Check,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(SwitchDefaults.IconSize),
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.TwoTone.Close,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.surfaceBright,
-                                modifier = Modifier.size(SwitchDefaults.IconSize),
-                            )
-                        }
-                    }
-                )
-            }
+            DropdownMenuItem(
+                checked = uiState.sortStargazerCountFirst,
+                onCheckedChange = { checked ->
+                    viewModel.setSortStargazerCountFirst(checked)
+                    prefs.putBoolean("module_repo_sort_star_first", checked)
+                },
+                text = { Text(stringResource(R.string.module_sort_star_first)) },
+                shapes = MenuDefaults.itemShape(
+                    index = 0,
+                    count = 1,
+                ),
+            )
         }
     }
 }

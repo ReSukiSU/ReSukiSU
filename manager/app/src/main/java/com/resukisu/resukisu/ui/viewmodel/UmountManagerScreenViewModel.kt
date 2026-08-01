@@ -12,6 +12,7 @@ import com.resukisu.resukisu.ui.util.listKernelUmountPaths
 import com.resukisu.resukisu.ui.util.listUmountConfigUmountPaths
 import com.resukisu.resukisu.ui.util.removeKernelUmountPath
 import com.resukisu.resukisu.ui.util.removeUmountConfigUmountPath
+import com.resukisu.resukisu.ui.util.showReplacingSnackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,8 +61,8 @@ class UmountManagerScreenViewModel : ViewModel() {
             }.toList()
     }
 
-    fun refreshData(context: Context) {
-        if (!dirty) return
+    fun refreshData(context: Context, force: Boolean = false) {
+        if (!force && !dirty) return
 
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isRefreshing = !it.isLoading) }
@@ -125,7 +126,7 @@ class UmountManagerScreenViewModel : ViewModel() {
 
             if (!success) {
                 context?.let {
-                    snackBarHost?.showSnackbar(context.getString(R.string.operation_failed))
+                    snackBarHost?.showReplacingSnackbar(context.getString(R.string.operation_failed))
                 }
                 return@launch
             }
@@ -135,7 +136,7 @@ class UmountManagerScreenViewModel : ViewModel() {
             }
 
             context?.let {
-                snackBarHost?.showSnackbar(context.getString(R.string.umount_path_removed))
+                snackBarHost?.showReplacingSnackbar(context.getString(R.string.umount_path_removed))
             }
         }
     }
@@ -144,7 +145,7 @@ class UmountManagerScreenViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             val success = addUmountConfigUmountPath(path, flags) && addKernelUmountPath(path, flags)
             if (!success) {
-                snackBarHost?.showSnackbar(context.getString(R.string.operation_failed))
+                snackBarHost?.showReplacingSnackbar(context.getString(R.string.operation_failed))
                 return@launch
             }
             _uiState.update { state ->
@@ -157,7 +158,7 @@ class UmountManagerScreenViewModel : ViewModel() {
                 )
             }
 
-            snackBarHost?.showSnackbar(context.getString(R.string.umount_path_added))
+            snackBarHost?.showReplacingSnackbar(context.getString(R.string.umount_path_added))
         }
     }
 }

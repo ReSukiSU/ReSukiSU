@@ -157,6 +157,10 @@
     <string name="module_changelog_failed">擷取更新日誌失敗：%s</string>
     <string name="settings_check_update">更新提醒</string>
     <string name="settings_check_update_summary">自動檢查模組和管理器的更新</string>
+    <string name="settings_check_manager_update">檢查管理器更新</string>
+    <string name="settings_check_manager_update_summary">自動檢查管理器更新</string>
+    <string name="settings_check_module_update">檢查模組更新</string>
+    <string name="settings_check_module_update_summary">自動檢查已安裝模組的更新</string>
     <string name="grant_root_failed">取得 root 權限失敗！</string>
     <string name="home_pr_build_warning">當前為 PR 除錯構建，請勿在生產環境中使用！</string>
     <string name="action">執行</string>

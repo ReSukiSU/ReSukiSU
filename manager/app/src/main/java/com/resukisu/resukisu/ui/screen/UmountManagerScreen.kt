@@ -67,6 +67,7 @@ import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
+import com.resukisu.resukisu.ui.util.ActivityResumeEffect
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.viewmodel.UmountManagerScreenViewModel
 import kotlinx.coroutines.Dispatchers
@@ -92,7 +93,10 @@ fun UmountManagerScreen() {
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset =
             scrollBehavior.state.heightOffsetLimit
-        viewModel.refreshData(context)
+    }
+
+    ActivityResumeEffect {
+        viewModel.refreshData(context, force = true)
     }
 
     Scaffold(

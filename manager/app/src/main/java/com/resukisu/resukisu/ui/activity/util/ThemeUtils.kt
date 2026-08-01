@@ -5,8 +5,10 @@ import android.os.Handler
 import android.provider.Settings
 import com.resukisu.resukisu.data.appPreferences
 import com.resukisu.resukisu.ui.MainActivity
+import com.resukisu.resukisu.ui.theme.BackgroundManager
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
+import com.resukisu.resukisu.ui.theme.ThemeManager
 import com.resukisu.resukisu.ui.viewmodel.SettingsViewModel
 
 class ThemeChangeContentObserver(
@@ -22,13 +24,9 @@ class ThemeChangeContentObserver(
 object ThemeUtils {
 
     fun initializeThemeSettings(activity: MainActivity, settingsViewModel: SettingsViewModel) {
-        settingsViewModel.initialize(activity)
         settingsViewModel.initializeFirstRunSettings(activity)
-
-        loadThemeMode()
-        loadThemeSeedColor()
-        loadDynamicColorState()
-        CardConfig.load(activity.applicationContext)
+        loadThemeSettings(activity)
+        settingsViewModel.initialize(activity)
     }
 
     fun registerThemeChangeObserver(activity: MainActivity): ThemeChangeContentObserver {
@@ -36,7 +34,7 @@ object ThemeUtils {
             activity.runOnUiThread {
                 if (!ThemeConfig.preventBackgroundRefresh) {
                     ThemeConfig.backgroundImageLoaded = false
-                    loadCustomBackground()
+                    BackgroundManager.loadCustomBackground(activity)
                 }
             }
         }
@@ -60,21 +58,19 @@ object ThemeUtils {
         ThemeConfig.preventBackgroundRefresh = true
     }
 
-    fun onActivityResume() {
-        if (!ThemeConfig.backgroundImageLoaded && !ThemeConfig.preventBackgroundRefresh) {
-            loadCustomBackground()
-        }
+    fun onActivityResume(activity: MainActivity) {
+        activity.appPreferences.putBoolean("prevent_background_refresh", false)
+        ThemeConfig.preventBackgroundRefresh = false
+        loadThemeSettings(activity)
     }
 
-    private fun loadThemeMode() {
-    }
-
-    private fun loadThemeSeedColor() {
-    }
-
-    private fun loadDynamicColorState() {
-    }
-
-    private fun loadCustomBackground() {
+    private fun loadThemeSettings(activity: MainActivity) {
+        ThemeManager.loadThemeMode(activity)
+        ThemeManager.loadSeedColor(activity)
+        ThemeManager.loadDynamicColorState(activity)
+        ThemeManager.loadDynamicColorSpec(activity)
+        ThemeManager.loadDynamicPaletteStyle(activity)
+        CardConfig.load(activity.applicationContext)
+        BackgroundManager.loadCustomBackground(activity)
     }
 }

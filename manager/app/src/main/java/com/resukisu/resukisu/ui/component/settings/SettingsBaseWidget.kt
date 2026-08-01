@@ -94,7 +94,7 @@ val LocalSegmentedItemShape = compositionLocalOf<Shape> { RoundedCornerShape(16.
  * If [onClick] is not null, this also controls clickability.
  * @param isError If true, applies the error color to the description text.
  * @param selected If true, highlights the widget with a primary container background.
- * @param renderBackgroundBlur If true, this composable will renderBackgroundBlur.
+ * @param isOnBackground If true, this composable will renderBackgroundBlur, and will process cardAlpha.
  * @param fillMaxWidth If true, this composable will fill max width.
  * @param onClick Callback to be invoked when the widget is clicked. If null, the widget is not clickable.
  * @param onLongClick Callback to be invoked when the widget is LONG CLICKED. If null, the widget is not clickable.
@@ -120,7 +120,7 @@ fun SettingsBaseWidget(
     enabled: Boolean = true,
     isError: Boolean = false,
     selected: Boolean = false,
-    renderBackgroundBlur: Boolean = true,
+    isOnBackground: Boolean = true,
     fillMaxWidth: Boolean = true,
     onClick: ((Offset) -> Unit)? = null,
     onLongClick: ((Offset) -> Unit)? = null,
@@ -129,6 +129,7 @@ fun SettingsBaseWidget(
     foreContent: @Composable RowScope.() -> Unit = {},
     descriptionColumnContent: (@Composable ColumnScope.() -> Unit)? = null,
     containerColor: Color? = null,
+    containerAlpha: Float = CardConfig.cardAlpha,
     trailingContent: (@Composable BoxScope.(interactionSource: MutableInteractionSource) -> Unit)? = null,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
@@ -141,17 +142,21 @@ fun SettingsBaseWidget(
 
     val baseShape = LocalSegmentedItemShape.current
 
-    val finalContainerColor = containerColor
+    val finalContainerColor = (containerColor
         ?: if (selected) {
             MaterialTheme.colorScheme.primaryContainer
         } else {
             MaterialTheme.colorScheme.surfaceBright
-        }.copy(
-            alpha = CardConfig.cardAlpha
-        )
+        }).run {
+        if (isOnBackground) {
+            copy(
+                alpha = containerAlpha
+            )
+        } else this
+    }
 
     val backgroundColor = run {
-        if (renderBackgroundBlur && ThemeConfig.isEnableBlurExp)
+        if (isOnBackground && ThemeConfig.isEnableBlurExp)
             Color.Transparent
         else finalContainerColor
     }
@@ -241,7 +246,7 @@ fun SettingsBaseWidget(
     }
 
     var itemModifier = (if (fillMaxWidth) modifier.fillMaxWidth() else modifier)
-    if (renderBackgroundBlur && ThemeConfig.isEnableBlurExp)
+    if (isOnBackground && ThemeConfig.isEnableBlurExp)
         itemModifier = itemModifier
             .clip(clipShape)
             .renderBackgroundBlur(finalContainerColor)

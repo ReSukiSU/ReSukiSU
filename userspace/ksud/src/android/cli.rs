@@ -428,7 +428,15 @@ enum Profile {
     },
 
     /// list all templates
-    ListTemplates,
+    ListTemplates {
+        /// print template names instead of ids
+        #[arg(short, long)]
+        name: bool,
+
+        /// locale used to resolve localized template names (for example, zh_CN)
+        #[arg(long, requires = "name")]
+        locale: Option<String>,
+    },
 }
 
 #[derive(clap::Subcommand, Debug)]
@@ -729,7 +737,9 @@ pub fn run() -> Result<()> {
             Profile::GetTemplate { id } => profile::get_template(id),
             Profile::SetTemplate { id, template } => profile::set_template(id, template),
             Profile::DeleteTemplate { id } => profile::delete_template(id),
-            Profile::ListTemplates => profile::list_templates(),
+            Profile::ListTemplates { name, locale } => {
+                profile::list_templates(name, locale.as_deref())
+            }
         },
 
         Commands::Feature { command } => match command {

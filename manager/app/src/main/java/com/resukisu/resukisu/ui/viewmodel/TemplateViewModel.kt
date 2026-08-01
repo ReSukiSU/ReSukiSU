@@ -7,7 +7,9 @@ import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.profile.Capabilities
 import com.resukisu.resukisu.profile.Groups
+import com.resukisu.resukisu.ui.activity.util.isNetworkAvailable
 import com.resukisu.resukisu.ui.util.getAppProfileTemplate
+import com.resukisu.resukisu.ui.util.listAppProfileTemplateNames
 import com.resukisu.resukisu.ui.util.listAppProfileTemplates
 import com.resukisu.resukisu.ui.util.setAppProfileTemplate
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +32,17 @@ const val TAG = "TemplateViewModel"
 
 data class TemplateUiState(
     val templateList: List<TemplateViewModel.TemplateInfo> = emptyList(),
+    val profileTemplates: List<String> = emptyList(),
+    val profileTemplateNames: List<String> = emptyList(),
     val isRefreshing: Boolean = false,
+    val isOffline: Boolean = false,
+)
+
+private data class TemplateLoadResult(
+    val templates: List<TemplateViewModel.TemplateInfo>,
+    val profileTemplates: List<String>,
+    val profileTemplateNames: List<String>,
+    val offline: Boolean,
 )
 
 class TemplateViewModel : ViewModel() {
@@ -60,21 +72,48 @@ class TemplateViewModel : ViewModel() {
     ) : Parcelable
 
     suspend fun fetchTemplates(sync: Boolean = false) {
-        _uiState.update { it.copy(isRefreshing = true) }
-        withContext(Dispatchers.IO) {
-            val localTemplateIds = listAppProfileTemplates()
-            Log.i(TAG, "localTemplateIds: $localTemplateIds")
-            if (localTemplateIds.isEmpty() || sync) {
-                fetchRemoteTemplates()
+        if (_uiState.value.isRefreshing) return
+
+        _uiState.update { it.copy(isRefreshing = true, isOffline = false) }
+        try {
+            val result = withContext(Dispatchers.IO) {
+                runCatching {
+                    val localTemplateIds = listAppProfileTemplates()
+                    Log.i(TAG, "localTemplateIds: $localTemplateIds")
+                    val shouldFetchRemote = localTemplateIds.isEmpty() || sync
+                    val remoteFetchSucceeded = !shouldFetchRemote ||
+                            isNetworkAvailable(ksuApp) && fetchRemoteTemplates()
+
+                    val profileTemplates = listAppProfileTemplates()
+                    TemplateLoadResult(
+                        templates = profileTemplates.mapNotNull(::getTemplateInfoById),
+                        profileTemplates = profileTemplates,
+                        profileTemplateNames = listAppProfileTemplateNames(),
+                        offline = shouldFetchRemote && !remoteFetchSucceeded,
+                    )
+                }.onFailure {
+                    Log.e(TAG, "fetchTemplates: $it", it)
+                }.getOrElse {
+                    TemplateLoadResult(
+                        templates = templates,
+                        profileTemplates = _uiState.value.profileTemplates,
+                        profileTemplateNames = _uiState.value.profileTemplateNames,
+                        offline = true,
+                    )
+                }
             }
 
-            templates = listAppProfileTemplates().mapNotNull(::getTemplateInfoById)
+            templates = result.templates
             _uiState.update {
                 it.copy(
                     templateList = buildTemplateList(),
-                    isRefreshing = false,
+                    profileTemplates = result.profileTemplates,
+                    profileTemplateNames = result.profileTemplateNames,
+                    isOffline = result.offline,
                 )
             }
+        } finally {
+            _uiState.update { it.copy(isRefreshing = false) }
         }
     }
 
@@ -135,16 +174,18 @@ class TemplateViewModel : ViewModel() {
     }
 }
 
-private fun fetchRemoteTemplates() {
-    runCatching {
+private fun fetchRemoteTemplates(): Boolean {
+    return runCatching {
         ksuApp.okhttpClient.newCall(
             Request.Builder().url(TEMPLATE_INDEX_URL).build()
         ).execute().use { response ->
             if (!response.isSuccessful) {
-                return
+                return@use false
             }
-            val remoteTemplateIds = JSONArray(response.body!!.string())
+            val body = response.body?.string() ?: return@use false
+            val remoteTemplateIds = JSONArray(body)
             Log.i(TAG, "fetchRemoteTemplates: $remoteTemplateIds")
+            var fetchedAny = remoteTemplateIds.length() == 0
             0.until(remoteTemplateIds.length()).forEach { i ->
                 val id = remoteTemplateIds.getString(i)
                 Log.i(TAG, "fetch template: $id")
@@ -164,15 +205,20 @@ private fun fetchRemoteTemplates() {
                     val json = JSONObject(templateJson)
                     fromJSON(json)?.let {
                         json.put("local", false)
-                        setAppProfileTemplate(id, json.toString())
+                        if (setAppProfileTemplate(id, json.toString())) {
+                            fetchedAny = true
+                        }
                     }
                 }.onFailure {
                     Log.e(TAG, "ignore invalid template: $it", it)
                     return@forEach
                 }
             }
+            fetchedAny
         }
-    }.onFailure { Log.e(TAG, "fetchRemoteTemplates: $it", it) }
+    }.onFailure {
+        Log.e(TAG, "fetchRemoteTemplates: $it", it)
+    }.getOrDefault(false)
 }
 
 @Suppress("UNCHECKED_CAST")

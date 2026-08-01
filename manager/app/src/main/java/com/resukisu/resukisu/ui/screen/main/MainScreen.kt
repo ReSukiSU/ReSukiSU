@@ -32,6 +32,7 @@ import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.LocalBlurState
 import com.resukisu.resukisu.ui.util.LocalHandlePageChange
+import com.resukisu.resukisu.ui.util.LocalPagerPage
 import com.resukisu.resukisu.ui.util.LocalPagerState
 import com.resukisu.resukisu.ui.util.LocalSelectedPage
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
@@ -133,7 +134,12 @@ fun MainScreen() {
                     val snackBarHostState = remember { SnackbarHostState() }
                     CompositionLocalProvider(
                         LocalSnackbarHost provides snackBarHostState,
-                        LocalBlurState provides rememberMaterial3BlurBackdrop(ThemeConfig.isEnableBlur),
+                        LocalPagerPage provides pageIndex,
+                        LocalBlurState provides rememberMaterial3BlurBackdrop(
+                            enableBlur = ThemeConfig.isEnableBlur,
+                            pagerState = pagerState,
+                            pagerPage = pageIndex,
+                        ),
                     ) {
                         val destination = pages[pageIndex]
                         destination.direction(paddingBottom)

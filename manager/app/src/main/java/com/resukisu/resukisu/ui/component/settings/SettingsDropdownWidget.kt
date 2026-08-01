@@ -53,7 +53,7 @@ fun SettingsDropdownWidget(
             title = title,
             description = description,
             enabled = enabled,
-            renderBackgroundBlur = renderBackgroundBlur,
+            isOnBackground = renderBackgroundBlur,
             isError = isError,
             onClick = { offest ->
                 touchPoint = offest

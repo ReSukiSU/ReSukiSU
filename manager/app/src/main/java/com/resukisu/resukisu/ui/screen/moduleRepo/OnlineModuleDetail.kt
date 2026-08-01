@@ -509,7 +509,8 @@ fun ReleaseCard(
                         description = stringResource(R.string.assert_support_content).format(
                             formatFileSize(assetInfo.size),
                             assetInfo.downloadCount
-                        )
+                        ),
+                        isOnBackground = false
                     ) {
                         FilledTonalButton(
                             onClick = onClick,

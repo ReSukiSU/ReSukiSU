@@ -34,6 +34,7 @@ import androidx.compose.material.icons.twotone.BugReport
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.DeleteForever
 import androidx.compose.material.icons.twotone.ElectricalServices
+import androidx.compose.material.icons.twotone.Extension
 import androidx.compose.material.icons.twotone.Fence
 import androidx.compose.material.icons.twotone.FolderDelete
 import androidx.compose.material.icons.twotone.FolderOff
@@ -107,6 +108,7 @@ import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.getBugreportFile
+import com.resukisu.resukisu.ui.util.showReplacingSnackbar
 import com.resukisu.resukisu.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -166,7 +168,7 @@ fun SettingsPage(bottomPadding: Dp) {
                     }
                 }
                 loadingDialog.hide()
-                snackBarHost.showSnackbar(logSaved)
+                snackBarHost.showReplacingSnackbar(logSaved)
             }
         }
 
@@ -331,15 +333,18 @@ fun SettingsPage(bottomPadding: Dp) {
                     title = stringResource(R.string.app_settings),
                     content = {
                         expandableItem(
-                            expanded = uiState.checkUpdate,
+                            expanded = uiState.checkManagerUpdate,
                             topContent = {
                                 SettingsSwitchWidget(
                                     icon = Icons.TwoTone.Update,
-                                    title = stringResource(R.string.settings_check_update),
-                                    description = stringResource(R.string.settings_check_update_summary),
-                                    checked = uiState.checkUpdate,
+                                    title = stringResource(R.string.settings_check_manager_update),
+                                    description = stringResource(R.string.settings_check_manager_update_summary),
+                                    checked = uiState.checkManagerUpdate,
                                     onCheckedChange = { enabled ->
-                                        settingsViewModel.handleCheckUpdateChange(context, enabled)
+                                        settingsViewModel.handleCheckManagerUpdateChange(
+                                            context,
+                                            enabled
+                                        )
                                     }
                                 )
                             }
@@ -359,6 +364,21 @@ fun SettingsPage(bottomPadding: Dp) {
                                     }
                                 )
                             }
+                        }
+
+                        item {
+                            SettingsSwitchWidget(
+                                icon = Icons.TwoTone.Extension,
+                                title = stringResource(R.string.settings_check_module_update),
+                                description = stringResource(R.string.settings_check_module_update_summary),
+                                checked = uiState.checkModuleUpdate,
+                                onCheckedChange = { enabled ->
+                                    settingsViewModel.handleCheckModuleUpdateChange(
+                                        context,
+                                        enabled
+                                    )
+                                }
+                            )
                         }
 
                         item {
@@ -746,8 +766,7 @@ private fun TopBar(
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
     LargeFlexibleTopAppBar(
-        modifier = Modifier.blurEffect(
-        ),
+        modifier = Modifier.blurEffect(),
         title = {
             Text(text = stringResource(R.string.settings))
         },
