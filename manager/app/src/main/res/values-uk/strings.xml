@@ -221,7 +221,7 @@
     <string name="home_device_model">Модель пристрою</string>
     <string name="su_not_allowed">Надання прав суперкористувача для %s заборонено</string>
     <string name="settings_sucompat">Перенаправлення бінарного файлу su</string>
-    <string name="settings_sucompat_summary">Дозволяє програмам з правами Суперкористувача в профілі програми отримати оболонку суперкористувача шляхом виконання /system/bin/su; діє тільки для нових процесів.</string>
+    <string name="settings_sucompat_summary">Дозволяє додаткам з правами Суперкористувача в профілі додатка отримати оболонку суперкористувача шляхом виконання /system/bin/su; діє тільки для нових процесів.</string>
     <string name="settings_kernel_umount">Розмонтування ядра</string>
     <string name="settings_kernel_umount_summary">Поведінка розмонтування на рівні ядра, контрольована KernelSU</string>
     <string name="feature_status_unsupported_summary">Ядро не підтримує цю функцію</string>
@@ -585,4 +585,8 @@
     <string name="manager_update_details">Версія: %1$s (%2$d)\nАрхітектура: %3$s</string>
     <string name="settings_check_beta_update">Перевірити бета-оновлення</string>
     <string name="settings_check_beta_update_summary">Автоматично перевіряти бета-збірки з головної гілки</string>
+    <string name="settings_check_manager_update">Перевірити оновлення менеджера</string>
+    <string name="settings_check_manager_update_summary">Автоматична перевірка оновлень менеджера</string>
+    <string name="settings_check_module_update">Перевірити оновлення модуля</string>
+    <string name="settings_check_module_update_summary">Автоматична перевірка встановленого модуля оновлень</string>
 </resources>

@@ -131,4 +131,13 @@
     <string name="sulog_clean_title">Napló ürítése</string>
     <string name="module_repo">Modulkönyvtár</string>
     <string name="module_sort_action_first">Sorbarendezés (futtatható előre)</string>
+    <string name="module_sort_star_first">Sorbarendezés (csillagozottak előre)</string>
+    <string name="module_sort_enabled_first">Sorbarendezés (aktívak előre)</string>
+    <string name="join_telegram_group">Válj közösségünk tagjává</string>
+    <string name="join_telegram_group_detail">Csatlakozz a telegram csoportunkhoz</string>
+    <string name="open_source_license">Nyílt forráskódú licenc</string>
+    <string name="open_source_license_settings_description">Tekintsd meg a harmadik féltől származó nyílt forráskódú könyvtárakat és azok szabadságjogait</string>
+    <string name="get_source_code">Forráskód</string>
+    <string name="get_source_code_detail">Forráskód megtekintése GitHubon</string>
+    <string name="metamodule_uninstall_confirm">Biztos hogy el akarod távolítani ezt a modult? %s Ennek a modulnak az eltávolítása hatással lesz az összes többi modulra, és bizonyos funkciók amiket a metamodul szolgáltatott (mint például modulok által létrehozott meghajtók fájlrendszerhez való csatolása) nem lesznek elérhetőek</string>
 </resources>
