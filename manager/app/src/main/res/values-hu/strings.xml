@@ -113,4 +113,22 @@
     <string name="settings_sucompat_summary">Lehetővé teszi az App Profile-ban Superuser engedéllyel rendelkező alkalmazások számára, hogy superuser shell-t kapjanak a /system/bin/su végrehajtásával; csak új folyamatoknál hatékony.</string>
     <string name="settings_kernel_umount">Kernel leválasztása</string>
     <string name="settings_kernel_umount_summary">KernelSU által vezérelt kernel szintű leválasztási viselkedés</string>
+    <string name="learn_more">Tudj meg többet</string>
+    <string name="home_susfs_version">SuSFS Verzió</string>
+    <string name="home_seccomp_status">Seccomp állapot</string>
+    <string name="seccomp_status_not_supported">Nem támogatott</string>
+    <string name="seccomp_status_disabled">Letiltva</string>
+    <string name="seccomp_status_unknown">Ismeretlen</string>
+    <string name="sulog">SU napló</string>
+    <string name="sulog_log_files">Log fájlok</string>
+    <string name="seccomp_status_strict">Kötött</string>
+    <string name="seccomp_status_filter">Szűr</string>
+    <string name="sulog_failed_to_load">SU napló betöltése nem sikerült</string>
+    <string name="sulog_disabled_title">SU napló nincs bekapcsolva</string>
+    <string name="sulog_unsupported_title">SU napló nem támogatott</string>
+    <string name="sulog_enable_action">Bekapcsol</string>
+    <string name="sulog_filter_title">Szűrés típus szerint</string>
+    <string name="sulog_clean_title">Napló ürítése</string>
+    <string name="module_repo">Modulkönyvtár</string>
+    <string name="module_sort_action_first">Sorbarendezés (futtatható előre)</string>
 </resources>
