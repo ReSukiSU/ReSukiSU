@@ -343,7 +343,7 @@
     <string name="module_shortcut_name_label">바로가기 이름</string>
     <string name="module_shortcut_icon_pick">사용자 지정 아이콘 선택</string>
     <string name="module_shortcut_not_supported">런처가 데스크탑 바로가기를 지원하지 않습니다.</string>
-    <string name="module_shortcut_should_not_empty">"데스크탑 바로가기는 비워둘 수 없습니다."</string>
+    <string name="module_shortcut_should_not_empty">데스크탑 바로가기는 비워둘 수 없습니다.</string>
     <string name="module_shortcut_created">데스크탑에 바로가기를 만들었습니다.</string>
     <string name="module_shortcut_updated">바로가기 업데이트됨</string>
     <string name="module_shortcut_delete">바로가기 삭제</string>

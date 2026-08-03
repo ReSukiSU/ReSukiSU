@@ -406,7 +406,7 @@
     <string name="module_shortcut_name_label">捷徑名稱</string>
     <string name="module_shortcut_icon_pick">選擇自訂圖標</string>
     <string name="module_shortcut_not_supported">啟動器唔支援桌面捷徑。</string>
-    <string name="module_shortcut_should_not_empty">"桌面捷徑名稱唔可以為空"</string>
+    <string name="module_shortcut_should_not_empty">桌面捷徑名稱唔可以為空</string>
     <string name="module_shortcut_created">已喺桌面建立捷徑。</string>
     <string name="module_shortcut_updated">捷徑已更新。</string>
     <string name="module_shortcut_delete">刪除捷徑</string>

@@ -448,7 +448,7 @@ Lanjutkan?</string>
     <string name="module_shortcut_name_label">Nama pintasan</string>
     <string name="module_shortcut_icon_pick">Pilih ikon kustom</string>
     <string name="module_shortcut_not_supported">Peluncur tidak mendukung pintasan layar utama.</string>
-    <string name="module_shortcut_should_not_empty">"Pintasan layar utama tidak boleh kosong"</string>
+    <string name="module_shortcut_should_not_empty">Pintasan layar utama tidak boleh kosong</string>
     <string name="module_shortcut_created">Pintasan dibuat di layar utama.</string>
     <string name="module_shortcut_updated">Pintasan diperbarui.</string>
     <string name="module_shortcut_delete">Hapus pintasan</string>

@@ -400,7 +400,7 @@
     <string name="module_shortcut_name_label">Kısayol adı</string>
     <string name="module_shortcut_icon_pick">Özel simge seç</string>
     <string name="module_shortcut_not_supported">Başlatıcı, kısayolları desteklemiyor.</string>
-    <string name="module_shortcut_should_not_empty">"Kısayol adı boş olamaz"</string>
+    <string name="module_shortcut_should_not_empty">Kısayol adı boş olamaz</string>
     <string name="module_shortcut_created">Kısayol ana ekranda oluşturuldu.</string>
     <string name="module_shortcut_updated">Kısayol güncellendi.</string>
     <string name="module_shortcut_delete">Kısayolu sil</string>

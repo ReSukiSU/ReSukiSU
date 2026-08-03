@@ -426,7 +426,7 @@
     <string name="module_shortcut_name_label">Имя ярлыка</string>
     <string name="module_shortcut_icon_pick">Выбрать кастомную иконку</string>
     <string name="module_shortcut_not_supported">Лаунчер не поддерживает ярлыки.</string>
-    <string name="module_shortcut_should_not_empty">"Ярлыки не должны быть пустыми"</string>
+    <string name="module_shortcut_should_not_empty">Ярлыки не должны быть пустыми</string>
     <string name="module_shortcut_created">Ярлык создан на рабочем столе.</string>
     <string name="module_shortcut_updated">Ярлык обновлен.</string>
     <string name="module_shortcut_delete">Удалить ярлык</string>
