@@ -446,7 +446,7 @@
     <string name="module_shortcut_name_label">Назва ярлика</string>
     <string name="module_shortcut_icon_pick">Вибрати власну іконку</string>
     <string name="module_shortcut_not_supported">Лаунчер не підтримує ярлики на робочому столі.</string>
-    <string name="module_shortcut_should_not_empty">"Ярлик на робочому столі не може бути порожнім"</string>
+    <string name="module_shortcut_should_not_empty">Ярлик на робочому столі не може бути порожнім</string>
     <string name="module_shortcut_created">Ярлик створено на робочому столі.</string>
     <string name="module_shortcut_updated">Ярлик оновлено.</string>
     <string name="module_shortcut_delete">Видалити ярлик</string>
