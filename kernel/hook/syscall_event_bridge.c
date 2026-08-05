@@ -10,10 +10,10 @@
 #include "arch.h"
 #include "klog.h" // IWYU pragma: keep
 #include "hook/tp_marker.h"
+#include "runtime/ksud.h"
 #include "feature/sucompat.h"
 #include "hook/setuid_hook.h"
 #include "policy/app_profile.h"
-#include "runtime/ksud.h"
 #include "sulog/event.h"
 #include "hook/syscall_hook.h"
 #include "hook/syscall_event_bridge.h"

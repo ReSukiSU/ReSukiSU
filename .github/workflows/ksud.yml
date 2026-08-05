@@ -38,12 +38,14 @@ jobs:
     - name: Prepare LKM fies
       if: ${{ inputs.pack_lkm }}
       run: |
-        cp android*-lkm/*_kernelsu.ko ./userspace/ksud/bin/aarch64/
+        cp aarch64-android*-lkm/*_kernelsu.ko ./userspace/ksud/bin/aarch64/
+        cp x86_64-android*-lkm/*_kernelsu.ko ./userspace/ksud/bin/x86_64/
     
     - name: Prepare ksuinit
       if: ${{ inputs.pack_ksuinit }}
       run: |
-        mv ksuinit/*/release/ksuinit ./userspace/ksud/bin/aarch64/
+        mv ksuinit-aarch64/ksuinit ./userspace/ksud/bin/aarch64/
+        mv ksuinit-x86_64/ksuinit ./userspace/ksud/bin/x86_64/
      
     - name: Setup Rust toolchain
       uses: dtolnay/rust-toolchain@stable
@@ -51,7 +53,7 @@ jobs:
         toolchain: nightly
         targets: ${{ inputs.target }}
         components: rust-src
-        
+
     - uses: Swatinem/rust-cache@v2
       if: github.event_name != 'pull_request'
       with:

@@ -3,8 +3,9 @@
 #include <linux/kobject.h>
 #include <linux/module.h>
 #include <linux/rcupdate.h>
-#include <generated/utsrelease.h>
+#ifndef MODULE
 #include <generated/compile.h>
+#endif
 #include <linux/version.h> /* LINUX_VERSION_CODE, KERNEL_VERSION macros */
 #include <linux/moduleparam.h>
 
@@ -155,7 +156,22 @@ module_param_named(norc, ksu_no_custom_rc, bool, 0);
 
 int __init kernelsu_init(void)
 {
-    pr_info("Initialized on: %s (%s) with driver version: %u\n", UTS_RELEASE, UTS_MACHINE, KSU_VERSION);
+    // clang-format off
+    
+    // ddk in x86-64 doesn't have generated/compile.h
+    // manually ifdef in there...
+#ifdef MODULE
+    #if defined(__x86_64__) 
+        pr_info("Initialized with driver version: %u, full_version: %s, ABI: x86-64, Work mode: LKM\n", KSU_VERSION, KSU_VERSION_FULL);
+    #elif defined(CONFIG_ARM64)
+        pr_info("Initialized with driver version: %u, full_version: %s, ABI: aarch64, Work mode: LKM\n", KSU_VERSION, KSU_VERSION_FULL);
+    #else
+        #error Unsupported arch!
+    #endif
+#else
+    pr_info("Initialized with driver version: %u, full_version: %s, ABI: %s, Work mode: Built-in\n", KSU_VERSION, KSU_VERSION_FULL, UTS_MACHINE);
+#endif
+    // clang-format on
 
 #ifdef MODULE
     ksu_late_loaded = (current->pid != 1);

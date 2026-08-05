@@ -26,7 +26,6 @@
 #include "objsec.h"
 #endif // #ifdef CONFIG_KSU_SUSFS
 
-#include "compat/kernel_compat.h"
 #include "arch.h"
 #include "policy/allowlist.h"
 #include "policy/feature.h"
@@ -40,6 +39,7 @@
 #include "feature/adb_root.h"
 #endif
 #include "sulog/event.h"
+#include "compat/kernel_compat.h"
 
 #define SU_PATH "/system/bin/su"
 #define SH_PATH "/system/bin/sh"

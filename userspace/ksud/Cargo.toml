@@ -20,7 +20,7 @@ sha256 = "1"
 tempfile = "3"
 chrono = "0.4"
 regex-lite = "0.1"
-android-bootimg = { git = "https://github.com/5ec1cff/android_bootimg" }
+android-bootimg = { git = "https://github.com/5ec1cff/android_bootimg", rev = "150425b027c76ea104c82e408571651f2181b2c2" }
 memmap2 = "0.9.10"
 bitflags = "2.11.0"
 base16ct = { version = "1.0.0", features = ["alloc"] }

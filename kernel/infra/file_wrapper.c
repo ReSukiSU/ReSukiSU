@@ -15,7 +15,6 @@
 #include <linux/version.h>
 #include <linux/mount.h>
 
-#include "compat/kernel_compat.h"
 #include "objsec.h"
 
 #include "klog.h" // IWYU pragma: keep
@@ -23,6 +22,7 @@
 #include "runtime/ksud_boot.h"
 
 #include "infra/file_wrapper.h"
+#include "compat/kernel_compat.h"
 
 struct ksu_file_wrapper {
     struct file *orig;
