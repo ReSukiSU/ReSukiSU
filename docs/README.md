@@ -75,7 +75,7 @@ Help translate ReSukiSU on Weblate:
 
 https://hosted.weblate.org/engage/resukisu/
 
-[![Localization Status](https://hosted.weblate.org/widget/resukisu/strings/multi-auto.svg)](https://hosted.weblate.org/engage/resukisu/)
+[![Localization Status](https://hosted.weblate.org/widget/resukisu/multi-auto.svg)](https://hosted.weblate.org/engage/resukisu/)
 
 ## Credit
 
