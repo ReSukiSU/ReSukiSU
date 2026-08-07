@@ -948,6 +948,22 @@ private fun SegmentedColumnScope.backgroundAdjustmentControls(
     )
 
     item(
+        topPadding = 1.dp,
+    ) {
+        val context = LocalContext.current
+
+        SettingsSwitchWidget(
+            icon = Icons.TwoTone.Style,
+            title = stringResource(id = R.string.settings_config_floating_bar),
+            description = stringResource(id = R.string.settings_config_floating_bar_summary),
+            checked = ThemeConfig.useFloatingBar,
+            onCheckedChange = { isChecked ->
+                BackgroundManager.saveUseFloatingBar(context, isChecked)
+            }
+        )
+    }
+
+    item(
         visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && state.useDynamicColor,
         topPadding = 1.dp,
     ) {

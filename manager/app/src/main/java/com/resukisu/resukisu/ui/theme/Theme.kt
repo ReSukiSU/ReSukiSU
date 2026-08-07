@@ -53,6 +53,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -130,6 +131,7 @@ object ThemeConfig {
     var isEnableBlur by mutableStateOf(false)
     var isEnableBlurExp by mutableStateOf(false)
     var isUseBackgroundSeedColor by mutableStateOf(false)
+    var useFloatingBar by mutableStateOf(false)
 
     // 主题变化检测
     private var lastDarkModeState: Boolean? = null
@@ -278,6 +280,11 @@ object BackgroundManager {
         context.appPreferences.putBoolean("enable_blur_exp", enable)
     }
 
+    fun saveUseFloatingBar(context: Context, enable: Boolean) {
+        ThemeConfig.useFloatingBar = enable
+        context.appPreferences.putBoolean("use_floating_bar", enable)
+    }
+
     fun saveUseBackgroundSeedColor(context: Context, enable: Boolean) {
         ThemeConfig.isUseBackgroundSeedColor = enable
         context.appPreferences.putBoolean("use_background_seed_color", enable)
@@ -333,6 +340,7 @@ object BackgroundManager {
         ThemeConfig.backgroundDim = prefs.getFloat("background_dim", 0f).coerceIn(0f, 1f)
         ThemeConfig.isEnableBlur = prefs.getBoolean("enable_blur", false)
         ThemeConfig.isEnableBlurExp = prefs.getBoolean("enable_blur_exp", false)
+        ThemeConfig.useFloatingBar = prefs.getBoolean("use_floating_bar", false)
         ThemeConfig.isUseBackgroundSeedColor = prefs.getBoolean("use_background_seed_color", false)
         ThemeConfig.isHighContrastMode = prefs.getBoolean("high_contrast_mode", false)
     }
@@ -626,6 +634,31 @@ fun Modifier.blurEffect(): Modifier {
             )
         )
     } ?: renderBackgroundFallback()
+}
+
+@Composable
+fun Modifier.blurEffect(shape: Shape): Modifier {
+    if (!ThemeConfig.isEnableBlur || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+        return this
+    }
+
+    return LocalBlurState.current?.let { backdrop ->
+        val blendColor =
+            MaterialTheme.colorScheme.surfaceContainer.copy(alpha = CardConfig.cardAlpha)
+
+        this.then(
+            Modifier.textureBlur(
+                backdrop = backdrop,
+                shape = shape,
+                blurRadius = 25f,
+                colors = BlurColors(
+                    blendColors = listOf(
+                        BlendColorEntry(color = blendColor)
+                    )
+                )
+            )
+        )
+    } ?: this
 }
 
 private fun Modifier.renderBackgroundFallback(): Modifier = composed {
