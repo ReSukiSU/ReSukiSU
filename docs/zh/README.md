@@ -73,7 +73,7 @@
 
 https://hosted.weblate.org/engage/resukisu/
 
-[![翻译状态](https://hosted.weblate.org/widget/resukisu/strings/multi-auto.svg)](https://hosted.weblate.org/engage/resukisu/)
+[![翻译状态](https://hosted.weblate.org/widget/resukisu/multi-auto.svg)](https://hosted.weblate.org/engage/resukisu/)
 
 ## 鸣谢
 
