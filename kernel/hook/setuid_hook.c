@@ -112,23 +112,19 @@ int ksu_handle_setuid(uid_t new_uid, uid_t old_uid)
         }
 #ifdef CONFIG_KSU_TRACEPOINT_HOOK
         ksu_set_task_tracepoint_flag(current);
-#else
-        ksu_clear_current_proc_unprivillege();
 #endif
+        ksu_clear_current_proc_unprivillege();
     } else {
 #ifdef CONFIG_KSU_TRACEPOINT_HOOK
         ksu_clear_task_tracepoint_flag_if_needed(current);
-#else
-        ksu_set_current_proc_unprivillege();
 #endif
+        ksu_set_current_proc_unprivillege();
     }
 
 #else // #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
     if (ksu_is_allow_uid_for_current(new_uid)) {
         disable_seccomp();
-#ifndef CONFIG_KSU_TRACEPOINT_HOOK
         ksu_clear_current_proc_unprivillege();
-#endif
 
         if (ksu_is_manager_uid(new_uid)) {
             pr_info("install fd for ksu manager(uid=%d)\n", new_uid);
@@ -151,7 +147,7 @@ int ksu_handle_setuid(uid_t new_uid, uid_t old_uid)
 
 int ksu_handle_setresuid(uid_t ruid, uid_t euid, uid_t suid)
 {
-#ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK
+#ifdef KSU_HOOK_AUTO_SETUID_HOOK
     return 0; // dummy hook here
 #else
     // we rely on the fact that zygote always call setresuid(3) with same uids

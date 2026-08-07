@@ -256,9 +256,7 @@ static inline void ksu_handle_execveat_init(const char *filename, void *envp)
         if (unlikely(strcmp(filename, KSUD_PATH) == 0)) {
             pr_info("hook_manager: escape to root for init executing ksud: %d\n", current->pid);
             escape_to_root_for_init();
-        }
-#if !defined(CONFIG_KSU_TRACEPOINT_HOOK)
-        else if (likely(strstr(filename, "/app_process") == NULL && strstr(filename, "/adbd") == NULL)) {
+        } else if (likely(strstr(filename, "/app_process") == NULL && strstr(filename, "/adbd") == NULL)) {
             pr_info("mark no sucompat checks for pid: '%d', exec: '%s'\n", current->pid, filename);
 
             if (!ksu_is_current_proc_unprivillege())
@@ -269,7 +267,6 @@ static inline void ksu_handle_execveat_init(const char *filename, void *envp)
                 susfs_set_current_proc_umounted();
 #endif
         }
-#endif
         int ret = ksu_adb_root_handle_execve_manual(filename, (struct user_arg_ptr *)envp);
         if (ret) {
             pr_err("adb root failed: %d\n", (int)ret);
@@ -281,11 +278,9 @@ int ksu_handle_execve(int *fd, const char *filename, void *argv, void *envp, int
 {
     struct ksu_sulog_pending_event *pending_root_execve = NULL;
 
-#ifndef CONFIG_KSU_TRACEPOINT_HOOK
     if (ksu_is_current_proc_unprivillege()) {
         return 0;
     }
-#endif
 
     ksu_handle_execveat_init(filename, envp);
 
@@ -345,11 +340,9 @@ int ksu_handle_faccessat(int *dfd, const char __user **filename_user, int *mode,
 {
     char path[sizeof(su_path) + 1] = { 0 };
 
-#ifndef CONFIG_KSU_TRACEPOINT_HOOK
     if (ksu_is_current_proc_unprivillege()) {
         return 0;
     }
-#endif
 
 #ifdef KSU_COMPAT_USE_STATIC_KEY
     // Yep, maybe someusers love turn off sucompat <- idk how they managed to keep using it
@@ -409,11 +402,9 @@ int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags)
 {
     char path[sizeof(su_path) + 1] = { 0 };
 
-#ifndef CONFIG_KSU_TRACEPOINT_HOOK
     if (ksu_is_current_proc_unprivillege()) {
         return 0;
     }
-#endif
 
 #ifdef KSU_COMPAT_USE_STATIC_KEY
     // Yep, maybe someusers love turn off sucompat <- idk how they managed to keep using it

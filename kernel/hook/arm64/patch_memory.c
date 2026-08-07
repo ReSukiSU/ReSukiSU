@@ -277,6 +277,11 @@ static int ksu_patch_text_nosync(void *dst, void *src, size_t len, int flags)
     unsigned long p = (unsigned long)dst;
     int ret = 0;
 
+    if (len > PAGE_SIZE - (p & ~PAGE_MASK)) {
+        pr_err("patch range crosses page boundary: dst=0x%lx len=%zu\n", p, len);
+        return -EINVAL;
+    }
+
     int phy_err;
     unsigned long phy = phys_from_virt(p, &phy_err);
     if (phy_err) {

@@ -45,6 +45,8 @@ static int ksu_handle_init_mark_tracker(const char __user **filename_user)
                       strstr(path, "/stub_zygote") == NULL)) {
         pr_info("hook_manager: unmark %d exec %s\n", current->pid, path);
         ksu_clear_task_tracepoint_flag_if_needed(current);
+        if (!ksu_is_current_proc_unprivillege())
+            ksu_set_current_proc_unprivillege();
     }
 
     return 0;

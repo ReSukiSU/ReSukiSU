@@ -34,6 +34,7 @@
 #include "feature/sucompat.h"
 #include "feature/selinux_hide.h"
 #include "infra/symbol_resolver.h"
+#include "hook/auto_hook.h"
 
 #ifdef CONFIG_ARM64
 #include "compat/apatch_conflict.h"
@@ -108,14 +109,16 @@ static inline void __init ksu_hook_init(void)
     ksu_syscall_hook_init();
     ksu_syscall_hook_manager_init();
 #elif defined(CONFIG_KSU_MANUAL_HOOK)
-// only lsm hook need call init
+    // only lsm hook need call init
 #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
     ksu_lsm_hook_built_in_init();
 #endif
+    ksu_auto_hook_init();
 #elif defined(CONFIG_KSU_SUSFS)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
     ksu_lsm_hook_built_in_init();
 #endif
+    ksu_auto_hook_init();
     susfs_init();
 #else
 #error "Unsupported hook type"
@@ -133,6 +136,7 @@ static inline void __exit ksu_hook_exit(void)
 #else
     ksu_sucompat_exit();
     ksu_setuid_hook_exit();
+    ksu_auto_hook_exit();
 #endif
 }
 

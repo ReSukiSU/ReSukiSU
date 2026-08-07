@@ -13,7 +13,7 @@
 #include "ksu.h"
 #include "klog.h"
 
-#ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK
+#ifdef KSU_HOOK_AUTO_SETUID_HOOK
 #include "setuid_hook.h"
 
 static int ksu_task_fix_setuid(struct cred *new, const struct cred *old, int flags)
@@ -25,7 +25,7 @@ static int ksu_task_fix_setuid(struct cred *new, const struct cred *old, int fla
 }
 #endif
 
-#ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK
+#ifdef KSU_HOOK_AUTO_INITRC_HOOK
 #ifdef KSU_COMPAT_USE_STATIC_KEY
 extern struct static_key_true ksu_init_rc_hook;
 #else
@@ -73,11 +73,11 @@ static int ksu_inode_rename(struct inode *old_inode, struct dentry *old_dentry, 
 
 static struct security_hook_list ksu_hooks[] = {
     LSM_HOOK_INIT(inode_rename, ksu_inode_rename),
-#ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK
+#ifdef KSU_HOOK_AUTO_SETUID_HOOK
     LSM_HOOK_INIT(task_fix_setuid, ksu_task_fix_setuid),
 #endif
 
-#ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK
+#ifdef KSU_HOOK_AUTO_INITRC_HOOK
     LSM_HOOK_INIT(file_permission, ksu_file_permission),
 #endif
 };
@@ -100,16 +100,16 @@ void __init ksu_lsm_hook_built_in_init(void)
 #include "feature/selinux_hide.h"
 #include "infra/symbol_resolver.h"
 
-#ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK
-#define IF_CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK(x) x
+#ifdef KSU_HOOK_AUTO_SETUID_HOOK
+#define IF_AUTO_SETUID_HOOK(x) x
 #else
-#define IF_CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK(x)
+#define IF_AUTO_SETUID_HOOK(x)
 #endif
 
-#ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK
-#define IF_CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK(x) x
+#ifdef KSU_HOOK_AUTO_INITRC_HOOK
+#define IF_AUTO_INITRC_HOOK(x) x
 #else
-#define IF_CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK(x)
+#define IF_AUTO_INITRC_HOOK(x)
 #endif
 
 #define LSM_HOOK_LIST(HOOK_ITEM)                                                                                       \
@@ -117,11 +117,9 @@ void __init ksu_lsm_hook_built_in_init(void)
               (struct inode * old_inode, struct dentry * old_dentry, struct inode * new_inode,                         \
                struct dentry * new_dentry),                                                                            \
               (old_inode, old_dentry, new_inode, new_dentry))                                                          \
-    IF_CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK(HOOK_ITEM(task_fix_setuid, ksu_task_fix_setuid,                         \
-                                                         (struct cred * new, const struct cred *old, int flags),       \
-                                                         (new, old, flags)))                                           \
-    IF_CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK(                                                                        \
-        HOOK_ITEM(file_permission, ksu_file_permission, (struct file * file, int mask), (file, mask)))
+    IF_AUTO_SETUID_HOOK(HOOK_ITEM(task_fix_setuid, ksu_task_fix_setuid,                                                \
+                                  (struct cred * new, const struct cred *old, int flags), (new, old, flags)))          \
+    IF_AUTO_INITRC_HOOK(HOOK_ITEM(file_permission, ksu_file_permission, (struct file * file, int mask), (file, mask)))
 
 #define STRIP_PARENS(...) __VA_ARGS__
 
@@ -193,7 +191,7 @@ void ksu_register_setprocattr_lsm_hook()
     ops->setprocattr = ksu_handle_selinux_setprocattr;
 }
 
-#ifdef CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK
+#ifdef KSU_HOOK_AUTO_INITRC_HOOK
 static int ksu_unregister_file_permission(void *data)
 {
     struct security_operations *ops = (struct security_operations *)selinux_ops_addr;
