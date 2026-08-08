@@ -81,6 +81,8 @@ body:
     attributes:
       label: Logs / 日志
       description: If applicable, add crash or any other logs to help us figure out the problem. / 如果适用，请添加崩溃日志或其他日志以帮助我们找出问题。
+    validations:
+      required: true
 
   - type: textarea
     attributes:
