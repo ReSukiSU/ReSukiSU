@@ -281,6 +281,11 @@ void do_track_throne(void *data)
     mutex_lock(&app_list_lock);
     if (unlikely(!last_app_id_map)) {
         last_app_id_map = bitmap_zalloc(MAX_APP_ID, GFP_KERNEL);
+        if (!last_app_id_map) {
+            mutex_unlock(&app_list_lock);
+            pr_err("track_throne: failed to allocate last_app_id_map\n");
+            return;
+        }
     }
     mutex_unlock(&app_list_lock);
 
