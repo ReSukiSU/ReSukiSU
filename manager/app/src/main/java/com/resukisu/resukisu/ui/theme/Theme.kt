@@ -638,27 +638,29 @@ fun Modifier.blurEffect(): Modifier {
 
 @Composable
 fun Modifier.blurEffect(shape: Shape): Modifier {
-    if (!ThemeConfig.isEnableBlur || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-        return this
-    }
+    if (!ThemeConfig.isEnableBlur) return this
 
-    return LocalBlurState.current?.let { backdrop ->
-        val blendColor =
-            MaterialTheme.colorScheme.surfaceContainer.copy(alpha = CardConfig.cardAlpha)
+    val blendColor =
+        MaterialTheme.colorScheme.surfaceContainer.copy(alpha = CardConfig.cardAlpha)
 
-        this.then(
-            Modifier.textureBlur(
-                backdrop = backdrop,
-                shape = shape,
-                blurRadius = 25f,
-                colors = BlurColors(
-                    blendColors = listOf(
-                        BlendColorEntry(color = blendColor)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        LocalBlurState.current?.let { backdrop ->
+            return this.then(
+                Modifier.textureBlur(
+                    backdrop = backdrop,
+                    shape = shape,
+                    blurRadius = 25f,
+                    colors = BlurColors(
+                        blendColors = listOf(
+                            BlendColorEntry(color = blendColor)
+                        )
                     )
                 )
             )
-        )
-    } ?: this
+        }
+    }
+
+    return this.then(Modifier.background(blendColor, shape))
 }
 
 private fun Modifier.renderBackgroundFallback(): Modifier = composed {
