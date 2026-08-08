@@ -217,6 +217,10 @@
     <string name="background_crop_rotation_angle">Rotation</string>
     <string name="settings_config_enable_blur">Enable Blur</string>
     <string name="settings_config_enable_blur_summary">Enable blur process for this app</string>
+    <string name="settings_config_bottom_bar_style">Bottom bar style</string>
+    <string name="bottom_bar_style_default">Default</string>
+    <string name="bottom_bar_style_floating">Floating</string>
+    <string name="bottom_bar_style_glossy">Glossy</string>
     <string name="settings_exp_draw_background_to_blur">Draw Custom background to blur</string>
     <string name="settings_exp_draw_background_to_blur_description">Experiment feature, process with your own risk</string>
     <string name="settings_config_use_custom_background_seed_color">Pick color from custom background</string>

@@ -596,6 +596,26 @@ private fun AppearanceSettings(
             }
         }
 
+        item(topPadding = 1.dp) {
+            SettingsChooseWidget(
+                icon = Icons.TwoTone.Style,
+                title = stringResource(id = R.string.settings_config_bottom_bar_style),
+                items = listOf(
+                    stringResource(id = R.string.bottom_bar_style_default),
+                    stringResource(id = R.string.bottom_bar_style_floating),
+                    stringResource(id = R.string.bottom_bar_style_glossy),
+                ),
+                selectedIndex = ThemeConfig.bottomBarStyle,
+                onSelectedIndexChange = { index ->
+                    BackgroundManager.saveBottomBarStyle(context, index)
+                    // The floating (glass) bar needs a blur backdrop to render.
+                    if (index == 1 && !ThemeConfig.isEnableBlur) {
+                        BackgroundManager.saveEnableBlur(context, true)
+                    }
+                }
+            )
+        }
+
         expandableItem(
             expanded = ThemeConfig.customBackgroundUri != null,
             topContent = {

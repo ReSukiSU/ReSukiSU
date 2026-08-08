@@ -130,6 +130,7 @@ object ThemeConfig {
     var isEnableBlur by mutableStateOf(false)
     var isEnableBlurExp by mutableStateOf(false)
     var isUseBackgroundSeedColor by mutableStateOf(false)
+    var bottomBarStyle by mutableIntStateOf(0)
 
     // 主题变化检测
     private var lastDarkModeState: Boolean? = null
@@ -278,6 +279,11 @@ object BackgroundManager {
         context.appPreferences.putBoolean("enable_blur_exp", enable)
     }
 
+    fun saveBottomBarStyle(context: Context, style: Int) {
+        ThemeConfig.bottomBarStyle = style
+        context.appPreferences.putInt("bottom_bar_style", style)
+    }
+
     fun saveUseBackgroundSeedColor(context: Context, enable: Boolean) {
         ThemeConfig.isUseBackgroundSeedColor = enable
         context.appPreferences.putBoolean("use_background_seed_color", enable)
@@ -333,6 +339,7 @@ object BackgroundManager {
         ThemeConfig.backgroundDim = prefs.getFloat("background_dim", 0f).coerceIn(0f, 1f)
         ThemeConfig.isEnableBlur = prefs.getBoolean("enable_blur", false)
         ThemeConfig.isEnableBlurExp = prefs.getBoolean("enable_blur_exp", false)
+        ThemeConfig.bottomBarStyle = prefs.getInt("bottom_bar_style", 0)
         ThemeConfig.isUseBackgroundSeedColor = prefs.getBoolean("use_background_seed_color", false)
         ThemeConfig.isHighContrastMode = prefs.getBoolean("high_contrast_mode", false)
     }
