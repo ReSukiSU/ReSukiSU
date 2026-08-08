@@ -31,6 +31,7 @@
 #include "feature/sulog.h"
 #include "feature/adb_root.h"
 #include "feature/dynamic_manager.h"
+#include "feature/module_load_filter.h"
 #include "feature/sucompat.h"
 #include "feature/selinux_hide.h"
 #include "infra/symbol_resolver.h"
@@ -152,6 +153,11 @@ bool allow_shell = false;
 
 bool ksu_no_custom_rc = false;
 module_param_named(norc, ksu_no_custom_rc, bool, 0);
+
+char ksu_blocked_preset_modules[KSU_BLOCKED_PRESET_MODULES_MAX];
+module_param_string(blocked_preset_modules, ksu_blocked_preset_modules, sizeof(ksu_blocked_preset_modules),
+                    0);
+MODULE_PARM_DESC(blocked_preset_modules, "Comma-separated preset module names to acknowledge without loading");
 
 int __init kernelsu_init(void)
 {
