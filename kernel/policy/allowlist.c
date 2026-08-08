@@ -346,6 +346,35 @@ bool ksu_uid_should_umount(uid_t uid)
 #endif
 }
 
+bool ksu_uid_is_root_granted(uid_t uid)
+{
+    struct app_profile *profile;
+    bool res;
+
+    if (unlikely(ksu_is_manager_uid(uid))) {
+        return true;
+    }
+    if (unlikely(uid == WEBVIEW_ZYGOTE_UID)) {
+        return true;
+    }
+#ifdef CONFIG_KSU_DISABLE_POLICY
+    return __ksu_is_allow_uid(uid);
+#else
+    rcu_read_lock();
+    profile = ksu_get_app_profile(uid);
+    if (!profile) {
+        res = false;
+    } else {
+        res = profile->allow_su;
+    }
+    rcu_read_unlock();
+
+    if (profile)
+        ksu_put_app_profile(profile);
+    return res;
+#endif
+}
+
 void ksu_put_app_profile(struct app_profile *profile)
 {
     struct perm_data *p = container_of(profile, struct perm_data, profile);

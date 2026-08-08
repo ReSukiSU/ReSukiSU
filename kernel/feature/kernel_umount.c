@@ -144,8 +144,12 @@ int ksu_handle_umount(uid_t old_uid, uid_t new_uid)
         return 0;
     }
 
-    if (!ksu_uid_should_umount(new_uid) && !is_isolated_process(new_uid)) {
+    if (ksu_uid_is_root_granted(new_uid)) {
         return 0;
+    }
+
+    if (!ksu_uid_should_umount(new_uid) && !is_isolated_process(new_uid)) {
+        goto skip_umount_task;
     }
 
     // no need to check zygote here, because we already check it in the setuid call.

@@ -40,6 +40,9 @@ void ksu_put_app_profile(struct app_profile *);
 int ksu_set_app_profile(struct app_profile *);
 
 bool ksu_uid_should_umount(uid_t uid);
+// Whether uid is genuinely granted su (or is manager/webview zygote),
+// independent of the umount_modules toggle.
+bool ksu_uid_is_root_granted(uid_t uid);
 struct root_profile *ksu_get_root_profile(uid_t uid);
 // only used to put the root_profile returned by ksu_get_root_profile
 void ksu_put_root_profile(struct root_profile *);
