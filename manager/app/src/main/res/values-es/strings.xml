@@ -139,7 +139,7 @@
     <string name="simple_mode">Modo de simplicidad</string>
     <string name="simple_mode_summary">Ocultar tarjetas innecesarias al encender</string>
     <string name="hide_other_info">Ocultar otra información</string>
-    <string name="hide_other_info_summary">Oculta información sobre el número de superusuarios, módulos y módulos KPM en la página de inicio</string>
+    <string name="hide_other_info_summary">Oculta información sobre el número de superusuarios y módulos en la página de inicio</string>
     <string name="hide_susfs_status">Ocultar estado SuSFS</string>
     <string name="hide_susfs_status_summary">Ocultar información de estado de SuSFS en la página de inicio</string>
     <string name="hide_link_card">Ocultar el estado de la tarjeta de enlace</string>

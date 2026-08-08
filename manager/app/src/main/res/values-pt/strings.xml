@@ -146,7 +146,7 @@
     <string name="simple_mode">Modo de simplicidade</string>
     <string name="simple_mode_summary">Oculta cartas desnecessárias quando ativadas</string>
     <string name="hide_other_info">Ocultar outras informações</string>
-    <string name="hide_other_info_summary">Oculta informações sobre o número de super usuários, módulos e módulos do KPM na página inicial</string>
+    <string name="hide_other_info_summary">Oculta informações sobre o número de super usuários e módulos na página inicial</string>
     <string name="hide_susfs_status">Ocultar status SuSFS</string>
     <string name="hide_susfs_status_summary">Ocultar informações de status SuSFS na página inicial</string>
     <string name="hide_link_card">Ocultar status do link</string>
@@ -186,7 +186,13 @@
     <string name="horizon_restoring_original_slot">Restaurar Slot Padrão</string>
     <string name="current_slot">Slot padrão do sistema atual：%1$s </string>
     <string name="horizon_copy_failed">Falha ao copiar</string>
-    <string name="horizon_unknown_error">Você parece estar convertendo de um formato com degradação para&#10;&#10;um sem perdas. Esteja ciente que a perda de qualidade não pode ser desfeita,&#10;&#10;então este processo não melhorará a qualidade do áudio e provavelmente&#10;&#10;aumentará o tamanho do arquivo. Continuar assim mesmo?</string>
+    <string name="horizon_unknown_error">Você parece estar convertendo de um formato com degradação para
+
+um sem perdas. Esteja ciente que a perda de qualidade não pode ser desfeita,
+
+então este processo não melhorará a qualidade do áudio e provavelmente
+
+aumentará o tamanho do arquivo. Continuar assim mesmo?</string>
     <string name="flash_failed_message">Flash falhou</string>
     <string name="Lkm_install_methods">LKM reparo/instalação</string>
     <string name="GKI_install_methods">Flasheando kernel</string>

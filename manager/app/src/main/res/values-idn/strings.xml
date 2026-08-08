@@ -112,7 +112,7 @@
     <string name="profile_selinux_context">Konteks SELinux</string>
     <string name="profile_umount_modules">Lepas Kait Modul</string>
     <string name="failed_to_update_app_profile">Gagal memperbarui profil aplikasi untuk %s</string>
-    <string name="debug_version_notice">"Anda menggunakan manajer versi DEBUG, jika Anda tidak tahu apa itu versi DEBUG, segera beralih ke versi RELEASE"</string>
+    <string name="debug_version_notice">Anda menggunakan manajer versi DEBUG, jika Anda tidak tahu apa itu versi DEBUG, segera beralih ke versi RELEASE</string>
     <string name="unofficial_version_notice">"Manajer yang Anda gunakan bukan manajer resmi %s, dan Anda mungkin tidak bisa mendapatkan akses."</string>
     <string name="conflict_with_apatch">Terdeteksi APatch, semuanya mungkin akan berhenti berfungsi.</string>
     <string name="settings_umount_modules_default">Lepas kait modul secara bawaan</string>
@@ -237,7 +237,7 @@ Lanjutkan?</string>
     <string name="simple_mode">Mode Sederhana</string>
     <string name="simple_mode_summary">Menyembunyikan kartu yang tidak perlu saat diaktifkan</string>
     <string name="hide_other_info">Sembunyikan Informasi Lainnya</string>
-    <string name="hide_other_info_summary">Menyembunyikan titik merah yang menunjukkan jumlah superuser, modul, dan modul KPM di halaman navigasi bawah</string>
+    <string name="hide_other_info_summary">Menyembunyikan titik merah yang menunjukkan jumlah superuser dan modul di halaman navigasi bawah</string>
     <string name="hide_susfs_status">Sembunyikan Status SuSFS</string>
     <string name="hide_susfs_status_summary">Menyembunyikan informasi status SuSFS di halaman beranda</string>
     <string name="hide_zygisk_implement">Sembunyikan status Zygisk</string>

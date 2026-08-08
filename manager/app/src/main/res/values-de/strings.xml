@@ -131,7 +131,7 @@
     <string name="simple_mode">Einfachheit Modus</string>
     <string name="simple_mode_summary">Versteckt unnötige Karten beim Einschalten</string>
     <string name="hide_other_info">Andere Infos ausblenden</string>
-    <string name="hide_other_info_summary">Versteckt Informationen über die Anzahl der Supernutzer, Module und KPM-Module auf der Startseite</string>
+    <string name="hide_other_info_summary">Versteckt Informationen über die Anzahl der Supernutzer und Module auf der Startseite</string>
     <string name="hide_susfs_status">SuSFS-Status ausblenden</string>
     <string name="hide_susfs_status_summary">SuSFS Statusinformationen auf der Startseite ausblenden</string>
     <string name="hide_link_card">Link-Kartenstatus ausblenden</string>

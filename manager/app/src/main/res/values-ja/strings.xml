@@ -150,7 +150,7 @@
     <string name="simple_mode">シンプルモード</string>
     <string name="simple_mode_summary">ON にすると不要なカードを非表示にします。</string>
     <string name="hide_other_info">その他の情報を非表示</string>
-    <string name="hide_other_info_summary">ナビゲーションバーページでスーパーユーザー、モジュール、KPM モジュールの数のドットを非表示にします。</string>
+    <string name="hide_other_info_summary">ナビゲーションバーページでスーパーユーザー、モジュールの数のドットを非表示にします。</string>
     <string name="hide_susfs_status">SuSFS ステータスを非表示</string>
     <string name="hide_susfs_status_summary">ホームページ上の SuSFS ステータス情報を非表示にします。</string>
     <string name="hide_zygisk_implement">Zygisk のステータスを非表示</string>
