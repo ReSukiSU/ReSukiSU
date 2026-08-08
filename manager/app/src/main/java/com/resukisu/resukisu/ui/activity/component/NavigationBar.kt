@@ -42,6 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.ui.component.FloatingBottomBar
 import com.resukisu.resukisu.ui.component.FloatingBottomBarItem
+import com.resukisu.resukisu.ui.component.GlossyBottomBar
 import com.resukisu.resukisu.ui.screen.BottomBarDestination
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
@@ -74,7 +75,7 @@ fun NavigationBar(
 
     val backdrop = LocalBlurState.current
 
-    if (isBottomBar && ThemeConfig.useFloatingBar && backdrop != null) {
+    if (isBottomBar && ThemeConfig.bottomBarStyle == 1 && backdrop != null) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -130,6 +131,15 @@ fun NavigationBar(
                 }
             }
         }
+    } else if (isBottomBar && ThemeConfig.bottomBarStyle == 2) {
+        GlossyBottomBar(
+            destinations = destinations,
+            selectedIndex = page,
+            onSelect = handlePageChange,
+            superuserCount = superuserCount,
+            moduleCount = moduleCount,
+            isHideOtherInfo = isHideOtherInfo,
+        )
     } else if (isBottomBar) {
         FlexibleBottomAppBar(
             modifier = Modifier
