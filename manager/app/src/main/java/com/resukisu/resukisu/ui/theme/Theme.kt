@@ -53,7 +53,6 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -634,33 +633,6 @@ fun Modifier.blurEffect(): Modifier {
             )
         )
     } ?: renderBackgroundFallback()
-}
-
-@Composable
-fun Modifier.blurEffect(shape: Shape): Modifier {
-    if (!ThemeConfig.isEnableBlur) return this
-
-    val blendColor =
-        MaterialTheme.colorScheme.surfaceContainer.copy(alpha = CardConfig.cardAlpha)
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        LocalBlurState.current?.let { backdrop ->
-            return this.then(
-                Modifier.textureBlur(
-                    backdrop = backdrop,
-                    shape = shape,
-                    blurRadius = 25f,
-                    colors = BlurColors(
-                        blendColors = listOf(
-                            BlendColorEntry(color = blendColor)
-                        )
-                    )
-                )
-            )
-        }
-    }
-
-    return this.then(Modifier.background(blendColor, shape))
 }
 
 private fun Modifier.renderBackgroundFallback(): Modifier = composed {
