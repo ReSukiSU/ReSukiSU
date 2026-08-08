@@ -4,11 +4,13 @@ import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -28,6 +30,7 @@ import androidx.compose.material3.WideNavigationRailDefaults
 import androidx.compose.material3.WideNavigationRailItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -45,6 +48,7 @@ import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.util.LocalBlurState
 import com.resukisu.resukisu.ui.util.LocalHandlePageChange
+import com.resukisu.resukisu.ui.util.LocalPagerState
 import com.resukisu.resukisu.ui.util.LocalSelectedPage
 import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
 import top.yukonga.miuix.kmp.theme.LocalContentColor
@@ -66,12 +70,14 @@ fun NavigationBar(
     // 翻页处理
     val page = LocalSelectedPage.current
     val handlePageChange = LocalHandlePageChange.current
+    val pagerState = LocalPagerState.current
 
     val backdrop = LocalBlurState.current
 
     if (isBottomBar && ThemeConfig.useFloatingBar && backdrop != null) {
-        FloatingBottomBar(
+        Box(
             modifier = Modifier
+                .fillMaxWidth()
                 .windowInsetsPadding(
                     WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal)
                 )
@@ -79,44 +85,48 @@ fun NavigationBar(
                     bottom = 12.dp + WindowInsets.navigationBars.asPaddingValues()
                         .calculateBottomPadding()
                 ),
-            selectedIndex = { page },
-            onSelected = { handlePageChange(it) },
-            backdrop = backdrop,
-            tabsCount = destinations.size,
-            isBlurEnabled = ThemeConfig.isEnableBlur,
+            contentAlignment = Alignment.Center
         ) {
-            destinations.forEachIndexed { index, destination ->
-                FloatingBottomBarItem(
-                    onClick = { handlePageChange(index) },
-                    modifier = Modifier.defaultMinSize(minWidth = 76.dp)
-                ) {
-                    val contentColor = LocalContentColor.current
-                    val count = when (destination) {
-                        BottomBarDestination.SuperUser -> superuserCount
-                        BottomBarDestination.Module -> moduleCount
-                        else -> 0
-                    }
-                    val icon: @Composable () -> Unit = {
-                        Icon(
-                            imageVector = destination.iconSelected,
-                            contentDescription = stringResource(destination.label),
-                            tint = contentColor
+            FloatingBottomBar(
+                selectedIndex = { pagerState.targetPage },
+                onSelected = { handlePageChange(it) },
+                backdrop = backdrop,
+                tabsCount = destinations.size,
+                isBlurEnabled = ThemeConfig.isEnableBlur,
+            ) {
+                destinations.forEachIndexed { index, destination ->
+                    FloatingBottomBarItem(
+                        onClick = { handlePageChange(index) },
+                        modifier = Modifier.defaultMinSize(minWidth = 76.dp)
+                    ) {
+                        val contentColor = LocalContentColor.current
+                        val count = when (destination) {
+                            BottomBarDestination.SuperUser -> superuserCount
+                            BottomBarDestination.Module -> moduleCount
+                            else -> 0
+                        }
+                        val icon: @Composable () -> Unit = {
+                            Icon(
+                                imageVector = destination.iconSelected,
+                                contentDescription = stringResource(destination.label),
+                                tint = contentColor
+                            )
+                        }
+                        if (count > 0 && !isHideOtherInfo) {
+                            BadgedBox(badge = { Badge { Text(count.toString()) } }) { icon() }
+                        } else {
+                            icon()
+                        }
+                        Text(
+                            text = stringResource(destination.label),
+                            color = contentColor,
+                            fontSize = 11.sp,
+                            lineHeight = 14.sp,
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Visible
                         )
                     }
-                    if (count > 0 && !isHideOtherInfo) {
-                        BadgedBox(badge = { Badge { Text(count.toString()) } }) { icon() }
-                    } else {
-                        icon()
-                    }
-                    Text(
-                        text = stringResource(destination.label),
-                        color = contentColor,
-                        fontSize = 11.sp,
-                        lineHeight = 14.sp,
-                        maxLines = 1,
-                        softWrap = false,
-                        overflow = TextOverflow.Visible
-                    )
                 }
             }
         }
