@@ -8,6 +8,7 @@ display_usage() {
 	echo "  --cleanup:			  Cleans up previous modifications made by the script."
 	echo "  <commit-or-tag>:		Sets up or updates the KernelSU to specified tag or commit."
 	echo "  -h, --help:			 Displays this usage information."
+	echo "  --submodule:		  Resets KernelSU as a submodule."
 	echo "  (no args):			  Sets up or updates the KernelSU environment to the latest tagged version."
 }
 
@@ -64,16 +65,45 @@ setup_kernelsu() {
 	echo '[+] Done.'
 }
 
+# Setup KernelSU as submodule
+setup_submodule() {
+	cd "$GKI_ROOT"
+    if [ ! -d "$GKI_ROOT/.git" ]; then
+        echo '[!] GKI_ROOT is not a git repository. Skipping submodule setup.'
+        return 0
+    fi
+
+	if [ "${CI:-false}" = "true" ] || [ "${GITHUB_ACTIONS:-false}" = "true" ]; then
+		echo '[!] Running in CI. Skipping submodule setup.'
+		return 0
+	fi
+
+	if [ -f "$GKI_ROOT/.gitmodules" ] && grep -q 'KernelSU' "$GKI_ROOT/.gitmodules"; then
+		echo '[!] KernelSU is already a submodule. Skipping submodule setup.'
+		return 0
+	fi
+
+    echo '[+] Setting up KernelSU as submodule...'
+    git submodule add https://github.com/ReSukiSU/ReSukiSU KernelSU || echo '[!] Failed to add KernelSU as a submodule.'
+    echo '[+] Done.'
+}
+
 # Process command-line arguments
 if [ "$#" -eq 0 ]; then
 	initialize_variables
 	setup_kernelsu
+	setup_submodule
 elif [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 	display_usage
+elif [ "$1" = "--submodule" ]; then
+	initialize_variables
+	echo '[+] Resetting KernelSU as submodule...'
+	setup_submodule
 elif [ "$1" = "--cleanup" ]; then
 	initialize_variables
 	perform_cleanup
 else
 	initialize_variables
 	setup_kernelsu "$@"
+	setup_submodule
 fi
