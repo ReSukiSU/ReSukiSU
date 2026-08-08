@@ -112,7 +112,7 @@
     <string name="profile_selinux_context">SELinux 內容</string>
     <string name="profile_umount_modules">卸載模組</string>
     <string name="failed_to_update_app_profile">為 %s 更新 App Profile 失敗</string>
-    <string name="debug_version_notice">"您正在使用 DEBUG 組建的管理器，如果你不知道什麼是 DEBUG 組建，請立即切換至 RELEASE 組建"</string>
+    <string name="debug_version_notice">您正在使用 DEBUG 組建的管理器，如果你不知道什麼是 DEBUG 組建，請立即切換至 RELEASE 組建</string>
     <string name="unofficial_version_notice">"您使用的管理器不是 %s 官方管理器，您可能無法取得權限。"</string>
     <string name="conflict_with_apatch">檢測到APatch，所有功能均可能停止運作。</string>
     <string name="settings_umount_modules_default">預設卸載模組</string>
@@ -229,7 +229,7 @@
     <string name="simple_mode">簡潔模式</string>
     <string name="simple_mode_summary">啟用後將隱藏不必要的卡片</string>
     <string name="hide_other_info">強迫症開關</string>
-    <string name="hide_other_info_summary">隱藏導覽列上的超級使用者數量、模組數量及內核模組數量資訊</string>
+    <string name="hide_other_info_summary">隱藏導覽列上的超級使用者數量及模組數量資訊</string>
     <string name="hide_susfs_status">隱藏 SuSFS 狀態資訊</string>
     <string name="hide_susfs_status_summary">隱藏首頁的 SuSFS 狀態資訊</string>
     <string name="hide_zygisk_implement">隱藏 Zygisk 狀態資訊</string>
@@ -403,7 +403,7 @@
     <string name="require_kernel_version">目前 KernelSU 版本 %1$d 過低，管理器無法正常運作。請將內核 KernelSU 版本升級至 %2$d 或以上！</string>
     <string name="umount_path_manager">卸載路徑管理</string>
     <string name="umount_path_manager_summary">管理內核卸載路徑</string>
-    <string name="no_any_umount_path">沒有任何內核卸載路徑</string>
+    <string name="no_any_umount_path">沒有既有的內核卸載路徑</string>
     <string name="add_umount_path">新增卸載路徑</string>
     <string name="mount_path">掛載路徑</string>
     <string name="umount_flags">卸載指令標記</string>

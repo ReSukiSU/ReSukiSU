@@ -152,7 +152,7 @@
     <string name="simple_mode">Mode simple</string>
     <string name="simple_mode_summary">Sembunyikan papan kartu di beranda</string>
     <string name="hide_other_info">Sembunyikan info lain</string>
-    <string name="hide_other_info_summary">Sembunyikan notifikasi titik merah (jumlah Super User, modul, dan modul KPM) di bilah navigasi</string>
+    <string name="hide_other_info_summary">Sembunyikan notifikasi titik merah (jumlah Super User dan modul) di bilah navigasi</string>
     <string name="hide_susfs_status">Sembunyikan status SuSFs</string>
     <string name="hide_susfs_status_summary">Sembunyikan status susfs di halaman awal beranda</string>
     <string name="hide_zygisk_implement">Sembunyikan status zygisk</string>
@@ -298,4 +298,19 @@
     <string name="settings_sucompat_summary">Memungkinkan aplikasi yang diberi izin Superuser di Profil Aplikasi mendapatkan shell superuser dengan menjalankan /system/bin/su; efektif hanya untuk proses baru.</string>
     <string name="settings_kernel_umount">Umount kernel</string>
     <string name="settings_kernel_umount_summary">Perilaku umount tingkat kernel dikendalikan oleh KernelSU</string>
+    <string name="learn_more">Pelajari Selengkapnya</string>
+    <string name="home_seccomp_status">status seccomp</string>
+    <string name="seccomp_status_not_supported">tidak didukung</string>
+    <string name="seccomp_status_disabled">Dimatikan</string>
+    <string name="seccomp_status_strict">Ketat</string>
+    <string name="seccomp_status_filter">Saring</string>
+    <string name="seccomp_status_unknown">Tidak Diketahui</string>
+    <string name="sulog">SU Log</string>
+    <string name="sulog_log_files">File Log</string>
+    <string name="sulog_failed_to_load">Gagal Memuat SU log</string>
+    <string name="sulog_disabled_title">SU log tidak dihidupkan</string>
+    <string name="sulog_unsupported_title">SU log Tidak DiDukung</string>
+    <string name="sulog_enable_action">Hidupkan</string>
+    <string name="sulog_filter_title">Saring Bedasarkan Tipe</string>
+    <string name="sulog_clean_title">Bersihkan Log</string>
 </resources>

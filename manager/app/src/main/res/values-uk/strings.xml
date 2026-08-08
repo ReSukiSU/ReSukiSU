@@ -10,7 +10,7 @@
     <string name="home_kernel">Версія ядра</string>
     <string name="home_susfs_version">Версія SuSFS</string>
     <string name="home_manager_version">Версія менеджера</string>
-    <string name="home_selinux_status">Статус SELinux</string>
+    <string name="home_selinux_status">Стан SELinux</string>
     <string name="selinux_status_disabled">Вимкнено</string>
     <string name="selinux_status_enforcing">Примусовий</string>
     <string name="selinux_status_permissive">Дозвільний</string>
@@ -112,7 +112,7 @@
     <string name="profile_selinux_context">Контекст SELinux</string>
     <string name="profile_umount_modules">Розмонтувати модулі</string>
     <string name="failed_to_update_app_profile">Не вдалося оновити профіль додатка для %s</string>
-    <string name="debug_version_notice">"Ви використовуєте DEBUG-збірку менеджера. Якщо ви не знаєте, що таке DEBUG-версія, негайно перейдіть на RELEASE-збірку"</string>
+    <string name="debug_version_notice">Ви використовуєте налагоджувальну збірку менеджера. Якщо ви не знаєте, що таке налагоджувальна версія, негайно перейдіть на випускну збірку.</string>
     <string name="unofficial_version_notice">"Менеджер, який ви використовуєте, не є офіційним менеджером %s, і ви можете не отримати необхідних дозволів."</string>
     <string name="conflict_with_apatch">Виявлено APatch. Деякі функції можуть не працювати.</string>
     <string name="settings_umount_modules_default">Розмонтовувати модулі за замовчуванням</string>
@@ -235,9 +235,9 @@
     <string name="simple_mode">Спрощений режим</string>
     <string name="simple_mode_summary">Приховує непотрібні картки при ввімкненні</string>
     <string name="hide_other_info">Приховати іншу інформацію</string>
-    <string name="hide_other_info_summary">Приховує червону крапку про кількість суперкористувачів, модулів та KPM-модулів на сторінці навігаційної панелі</string>
+    <string name="hide_other_info_summary">Приховує червону крапку про кількість суперкористувачів та модулів на сторінці навігаційної панелі</string>
     <string name="hide_susfs_status">Приховати статус SuSFS</string>
-    <string name="hide_susfs_status_summary">Приховує інформацію про статус SuSFS на головній сторінці</string>
+    <string name="hide_susfs_status_summary">Приховує інформацію про стан SuSFS на головній сторінці</string>
     <string name="hide_zygisk_implement">Приховати стан Zygisk</string>
     <string name="hide_zygisk_implement_summary">Приховати інформацію про реалізацію Zygisk на головній сторінці</string>
     <string name="hide_meta_module_implement">Приховати стан метамодуля</string>
@@ -245,7 +245,7 @@
     <string name="hide_link_card">Приховати картку посилань</string>
     <string name="hide_link_card_summary">Приховує інформацію на картці посилань на головній сторінці</string>
     <string name="hide_tag_card">Приховати рядки тегів модуля</string>
-    <string name="hide_tag_card_summary">Приховує мітки з назвою папки та розміром у картках модулів</string>
+    <string name="hide_tag_card_summary">Приховує назву папки, розмір, позначки повідомлень метамодулів у картках модулів</string>
     <string name="theme_mode">Тема</string>
     <string name="theme_follow_system">Як у системі</string>
     <string name="theme_light">Світла</string>
@@ -484,9 +484,7 @@
     <string name="susfs_standard_avc_log_spoofing">Підміна журналу AVC</string>
     <string name="susfs_standard_avc_log_spoofing_desc">Підміна контексту \'su\' в журналі AVC. Запобігання виявленню su додатками за допомогою старого експлойту Android.</string>
     <string name="susfs_standard_hide_sus_mnts">Приховати монтування SUS для процесів, що не належать до SU</string>
-    <string name="susfs_standard_hide_sus_mnts_desc">Приховати монтування Sus для процесів, що не належать до Su. Це обійде налаштування розмонтування менеджера.
-
-Поведінка за замовчуванням — приховування лише для додатків у списку розмонтування.</string>
+    <string name="susfs_standard_hide_sus_mnts_desc">Приховати монтування Sus для процесів, що не належать до Su. Це обійде налаштування розмонтування менеджера. Поведінка за замовчуванням — приховування лише для додатків у списку розмонтування.</string>
     <string name="susfs_standard_uname">Uname</string>
     <string name="susfs_standard_uname_version">Версія</string>
     <string name="susfs_standard_uname_release">Випуск</string>

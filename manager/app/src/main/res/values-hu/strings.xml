@@ -212,7 +212,7 @@
     <string name="simple_mode">Egyszerű mód</string>
     <string name="simple_mode_summary">Elrejti a nem szükséges mezőket</string>
     <string name="hide_other_info">Egyéb infók elrejtése</string>
-    <string name="hide_other_info_summary">Elrejt információkat a navigációs sávban mint a superuser jogosultak, modulok és KPM modulok számát</string>
+    <string name="hide_other_info_summary">Elrejt információkat a navigációs sávban mint a superuser jogosultak és modulok számát</string>
     <string name="hide_susfs_status">SuSFS Állapot elrejtése</string>
     <string name="hide_susfs_status_summary">Elrejti a SuSFS állapotával kapcsolatos státuszinformációkat a kezdőlapról</string>
     <string name="hide_zygisk_implement">Zygisk Állapot elrejtése</string>
@@ -424,14 +424,14 @@
     <string name="module_shortcut_created">Ikon létrehozva a kezdőképernyőn.</string>
     <string name="module_shortcut_updated">Ikon frissítve.</string>
     <string name="module_shortcut_delete">Ikon törlése</string>
-    <string name="download_progress_title">Folyamatban %s</string>
+    <string name="download_progress_title">%s letöltése folyamatban</string>
     <string name="download_complete_title">Letöltés befejeződött</string>
     <string name="download_complete_content">%s sikeresen letöltve</string>
     <string name="download_failed_title">Letöltés sikertelen</string>
     <string name="download_failed_content">%s letöltése nem sikerült</string>
     <string name="download_cancel">Mégse</string>
     <string name="download_install">Telepít</string>
-    <string name="notification_permission_description">Értesítésengedélyek szükségesek a letöltés állásának mutatásához.</string>
+    <string name="notification_permission_description">Értesítésengedélyek szükségesek a letöltés állapotának megjelenítéséhez.</string>
     <string name="notification_permission_denied">Letöltés meghiúsult; értesítésengedélyek szükségesek</string>
     <string name="storage_permission_description">Külső tárhely hozzáférés engedélyezése szükséges a fájl írásához.</string>
     <string name="storage_permission_denied">Letöltés meghiúsult; tárhelyhez való hozzáférés megtagadva</string>
