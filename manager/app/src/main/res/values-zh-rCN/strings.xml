@@ -112,7 +112,7 @@
     <string name="profile_selinux_context">SELinux</string>
     <string name="profile_umount_modules">卸载模块</string>
     <string name="failed_to_update_app_profile">为 %s 更新 App Profile 失败</string>
-    <string name="debug_version_notice">"你正在使用管理器的 DEBUG 构建，如果你不知道什么是 DEBUG 构建，请立即切换至 RELEASE 构建"</string>
+    <string name="debug_version_notice">你正在使用管理器的 DEBUG 构建，如果你不知道什么是 DEBUG 构建，请立即切换至 RELEASE 构建</string>
     <string name="unofficial_version_notice">"您使用的管理器并非 %s 官方管理器，您可能无法获得权限。"</string>
     <string name="conflict_with_apatch">检测到 APatch, 所有功能均可能停止工作。</string>
     <string name="settings_umount_modules_default">默认卸载模块</string>
@@ -239,7 +239,7 @@
     <string name="simple_mode">简洁模式</string>
     <string name="simple_mode_summary">开启后将隐藏不必要的卡片</string>
     <string name="hide_other_info">强迫症开关</string>
-    <string name="hide_other_info_summary">隐藏导航栏上的超级用户数、模块数和 KPM 模块数红点</string>
+    <string name="hide_other_info_summary">隐藏导航栏上的超级用户数和模块数红点</string>
     <string name="hide_susfs_status">隐藏 SuSFS 状态信息</string>
     <string name="hide_susfs_status_summary">隐藏主页上的 SuSFS 状态信息</string>
     <string name="hide_zygisk_implement">隐藏 Zygisk 状态信息</string>

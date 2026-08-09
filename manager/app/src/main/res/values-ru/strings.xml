@@ -109,7 +109,7 @@
     <string name="profile_selinux_context">Контекст SELinux</string>
     <string name="profile_umount_modules">Размонтировать модули</string>
     <string name="failed_to_update_app_profile">Не удалось обновить профиль приложения для %s</string>
-    <string name="debug_version_notice">"Вы используете DEBUG сборку менеджера. Если вы не знаете, что это такое, немедленно переключитесь на RELEASE сборку"</string>
+    <string name="debug_version_notice">Вы используете DEBUG сборку менеджера. Если вы не знаете, что это такое, немедленно переключитесь на RELEASE сборку</string>
     <string name="unofficial_version_notice">"Менеджер, который вы используете, не является официальным менеджером %s, и вы можете не иметь возможности получить необходимые разрешения."</string>
     <string name="conflict_with_apatch">Обнаружен APatch, все может перестать работать.</string>
     <string name="settings_umount_modules_default">Размонтировать модули по умолчанию</string>
@@ -221,7 +221,7 @@
     <string name="simple_mode">Режим простоты</string>
     <string name="simple_mode_summary">Скрывать ненужные карточки при запуске</string>
     <string name="hide_other_info">Скрыть другую информацию</string>
-    <string name="hide_other_info_summary">Скрывать информацию о количестве приложений с рут-доступом, модулей и KPM-модулей на главной странице</string>
+    <string name="hide_other_info_summary">Скрывать информацию о количестве приложений с рут-доступом и модулей на главной странице</string>
     <string name="hide_susfs_status">Скрыть статус SuSFS</string>
     <string name="hide_susfs_status_summary">Скрывать информацию о статусе SuSFS на главной странице</string>
     <string name="hide_zygisk_implement">Скрыть статус Zygisk</string>

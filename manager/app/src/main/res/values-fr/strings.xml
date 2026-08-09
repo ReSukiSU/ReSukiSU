@@ -141,7 +141,7 @@
     <string name="simple_mode">Me simple</string>
     <string name="simple_mode_summary">Masque les cartes inutiles lorsqu\'il est activé</string>
     <string name="hide_other_info">Masquer les autres infos</string>
-    <string name="hide_other_info_summary">Masque des informations sur le nombre de super utilisateurs, de modules et de modules KPM sur la page d\'accueil</string>
+    <string name="hide_other_info_summary">Masque des informations sur le nombre de super utilisateurs et de modules sur la page d\'accueil</string>
     <string name="hide_susfs_status">Masquer le statut SuSFS</string>
     <string name="hide_susfs_status_summary">Masquer les informations de la carte de lien sur la page d\'accueil</string>
     <string name="hide_link_card">Masquer le statut du lien de la carte</string>

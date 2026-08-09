@@ -50,7 +50,7 @@
     <string name="profile_template">قالب</string>
     <string name="profile_custom">شخصی سازی شده</string>
     <string name="profile_umount_modules">جداکردن ماژول ها</string>
-     <string name="settings_check_update">نوتیفیکیشن‌های به‌روزرسانی</string>
+    <string name="settings_check_update">نوتیفیکیشن‌های به‌روزرسانی</string>
     <string name="settings_check_update_summary">بررسی خودکار برای به‌روزرسانی‌های ماژول و مدیر</string>
     <string name="settings_sucompat">تغییر مسیر باینری su</string>
     <string name="settings_sucompat_summary">تغییر مسیر /system/bin/su به ksud برای برنامه‌هایی که مجوز Superuser در پروفایل برنامه دارند؛ فقط برای فرآیندهای جدید موثر است.</string>
