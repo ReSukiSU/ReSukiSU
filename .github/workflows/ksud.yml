@@ -64,6 +64,12 @@ jobs:
     - name: Setup cargo-ndk
       run: cargo install cargo-ndk --locked
         
+    - name: Assemble LKM bootstrap
+      run: |
+        clang --target=aarch64-linux-gnu -c -nostdlib \
+          -o userspace/ksud/.lkm_image_bootstrap.o \
+          userspace/ksud/src/lkm_image_bootstrap.S
+     
     - name: Build ksud
       run: |
         cd userspace/ksud/

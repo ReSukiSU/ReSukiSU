@@ -302,8 +302,7 @@ fn map_file(file: &PathBuf) -> Result<Mmap> {
     Ok(mmap)
 }
 
-#[allow(clippy::needless_pass_by_value)]
-fn parse_kmi(buffer: Vec<u8>) -> Result<String> {
+pub fn parse_kmi(buffer: &[u8]) -> Result<String> {
     let re = Regex::new(r"(\d+\.\d+)(?:\S+)?(android\d+)").context("Failed to compile regex")?;
     buffer
         .windows(4)
@@ -342,7 +341,7 @@ fn parse_kmi(buffer: Vec<u8>) -> Result<String> {
 fn parse_kmi_from_kernel(kernel: &PathBuf) -> Result<String> {
     let data = std::fs::read(kernel).context("Failed to read kernel file")?;
 
-    parse_kmi(data)
+    parse_kmi(&data)
 }
 
 fn parse_kmi_from_boot(image: &PathBuf) -> Result<String> {
@@ -351,7 +350,7 @@ fn parse_kmi_from_boot(image: &PathBuf) -> Result<String> {
     if let Some(kernel) = bootimage.get_blocks().get_kernel() {
         let mut output = Vec::<u8>::new();
         kernel.dump(&mut output, false)?;
-        parse_kmi(output)
+        parse_kmi(&output)
     } else {
         bail!("no kernel found in boot image")
     }

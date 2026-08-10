@@ -3,3 +3,4 @@
 build.sh
 *.code-workspace
 .trae
+/userspace/ksud/.lkm_image_bootstrap.o
