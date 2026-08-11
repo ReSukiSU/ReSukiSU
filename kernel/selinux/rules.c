@@ -728,6 +728,7 @@ out_drop_new_policy:
 out_unlock:
     mutex_unlock(&selinux_state.policy_mutex);
 #else
+    ret = success_cmd_count;
     /* Save the old policydb to free later. */
     memcpy(oldpolicydb, policydb_ptr, sizeof(*policydb_ptr));
 
