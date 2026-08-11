@@ -1196,7 +1196,7 @@ int ksu_dup_policydb(struct policydb *old_db, struct policydb *new_db)
 
     // rewind fp
     fp.data = data;
-	size_t written = (size_t)len - fp.len; 
+    size_t written = (size_t)len - fp.len;
     fp.len = written;
 
     ret = policydb_read(new_db, &fp);
