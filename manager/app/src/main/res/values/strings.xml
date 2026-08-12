@@ -480,7 +480,7 @@
     <string name="susfs_standard_config_enabled_desc">Automatically apply the saved SUSFS configuration during boot.</string>
     <string name="susfs_management_disabled_warning">Built-in SUSFS management in Manager is disabled.</string>
     <string name="susfs_standard_logging">Logging</string>
-    <string name="susfs_standard_logging_desc">Enable SUSFS kernel log. Enable before this reporting bugs related to SUSFS.</string>
+    <string name="susfs_standard_logging_desc">Enables SUSFS kernel log. Enable it before reporting bugs related to SUSFS.</string>
     <string name="susfs_standard_avc_log_spoofing">AVC Log Spoofing</string>
     <string name="susfs_standard_avc_log_spoofing_desc">Spoof \'su\' tcontext in avc log. Prevent apps from detecting su by old Android exploit.</string>
     <string name="susfs_standard_hide_sus_mnts">Hide SUS Mounts for Non-SU Procs</string>

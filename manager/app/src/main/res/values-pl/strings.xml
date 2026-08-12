@@ -388,7 +388,7 @@
     <string name="no_active_manager">Brak aktywnego menadżera</string>
     <string name="home_zygisk_implement">Implementacja Zygisk</string>
     <string name="home_meta_module_implement">Implementacja Meta Modułu</string>
-    <string name="sus_loop_paths_description_title">Konfiguracja Pętli Ścieżki</string>
+    <string name="sus_loop_paths_description_title">Konfiguracja Ścieżek zapętlonych</string>
     <string name="sus_loop_paths_description_text">Pętle ścieżek są oznaczane jako SUS_PATH przy każdym starcie aplikacji bez roota lub odizolowanej usługi. To pomaga rozwiązać problem gdzie dodane ścieżki mają swój inode zresetowany lub stworzony ponownie w jądrze</string>
     <string name="home_hook_type">Hook</string>
     <string name="confirm_installation">Potwierdź instalację</string>
@@ -423,9 +423,9 @@
     <string name="operation_failed">Operacja nie powiodła się</string>
     <string name="changes_take_effect_immediately">Wszystkie zmiany zostaną zastosowane natychmiastowo</string>
     <string name="group_contains_apps">Zawiera %d aplikacji</string>
-    <string name="meta_module_disabled">moduł nie zamontowany, ponieważ meta moduł jest wyłączony</string>
-    <string name="meta_module_removed">moduł nie zamontowany, ponieważ meta moduł jest w trakcie usuwania</string>
-    <string name="no_meta_module_installed">moduł nie zamontowany, ponieważ meta moduł nie jest zainstalowany</string>
+    <string name="meta_module_disabled">moduł nie jest zamontowany, ponieważ meta moduł jest wyłączony</string>
+    <string name="meta_module_removed">moduł nie jest zamontowany, ponieważ meta moduł jest w trakcie usuwania</string>
+    <string name="no_meta_module_installed">moduł nie jest zamontowany, ponieważ meta moduł nie jest zainstalowany</string>
     <string name="network_offline">Jesteś offline</string>
     <string name="network_retry">Spróbuj ponownie</string>
     <string name="please_check_network">Sprawdź połączenie internetowe i spróbuj ponownie</string>
@@ -486,7 +486,7 @@
     <string name="susfs_standard_config_enabled_desc">Automatycznie stosuj zapisaną konfigurację SUSFS podczas uruchamiania.</string>
     <string name="susfs_management_disabled_warning">Wbudowany menadżer SUSFS jest wyłączony.</string>
     <string name="susfs_standard_logging">Logowanie</string>
-    <string name="susfs_standard_logging_desc">Przed zgłoszeniem jakichkolwiek problemów, włącz logi SUSFS.</string>
+    <string name="susfs_standard_logging_desc">Włącz logi SUSFS. Przed zgłoszeniem jakichkolwiek problemów, włącz logi SUSFS.</string>
     <string name="susfs_standard_avc_log_spoofing">Spoofing logów AVC</string>
     <string name="susfs_standard_avc_log_spoofing_desc">Ukrywa wzmianki o \'su\' w logach AVC. Zapobiega wykrywaniu su przez aplikacje używające starego exploitu Androida.</string>
     <string name="susfs_standard_hide_sus_mnts">Ukrywaj SUS Mounts dla procesów bez uprawnień SU</string>

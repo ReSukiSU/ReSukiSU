@@ -49,9 +49,9 @@
     <string name="module_sort_enabled_first">Urutkan (Aktif Terlebih Dahulu)</string>
     <string name="uninstall">Copot Pemasangan</string>
     <string name="install">Pasang</string>
-    <string name="reboot">Muat Ulang</string>
+    <string name="reboot">Mulai Ulang</string>
     <string name="settings">Pengaturan</string>
-    <string name="reboot_soft">Mulai ulang lembut</string>
+    <string name="reboot_soft">Mulai ulang ringan</string>
     <string name="reboot_userspace">Muat Ulang Lunak</string>
     <string name="reboot_recovery">Muat Ulang ke Recovery</string>
     <string name="reboot_bootloader">Muat Ulang ke Bootloader</string>
@@ -491,4 +491,8 @@ Lanjutkan?</string>
     <string name="manager_update_details">Versi: %1$s (%2$d)\nArsitektur: %3$s</string>
     <string name="settings_check_beta_update">Periksa pembaruan beta</string>
     <string name="settings_check_beta_update_summary">Memeriksa otomatis build beta dari branch utama</string>
+    <string name="susfs_status_enabled_features">Aktifkan Fitur</string>
+    <string name="susfs_standard_uname_version">Versi</string>
+    <string name="susfs_standard_uname_release">Rilis</string>
+    <string name="susfs_standard_uname_tab_manual">Manual</string>
 </resources>

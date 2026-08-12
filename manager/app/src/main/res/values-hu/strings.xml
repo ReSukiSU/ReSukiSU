@@ -57,8 +57,8 @@
     <string name="profile_selinux_domain">Tartomány</string>
     <string name="profile_selinux_rules">Szabályok</string>
     <string name="module_update">Frissítés</string>
-    <string name="module_downloading">Modul letöltése: %s</string>
-    <string name="module_start_downloading">Letöltés indítása: %s</string>
+    <string name="module_downloading">%s letöltése folyamatban</string>
+    <string name="module_start_downloading">%s letöltése megkezdődött</string>
     <string name="new_version_available">Új %s verzió érhető el, kattints a frissítéshez</string>
     <string name="launch_app">Indítás</string>
     <string name="force_stop_app" formatted="false">Kényszerített leállítás</string>
@@ -93,7 +93,7 @@
     <string name="select_file">Fájl kiválasztása</string>
     <string name="install_inactive_slot">Telepítés inaktív slot helyére (OTA rendszerfrissítést követően)</string>
     <string name="install_inactive_slot_warning">Az eszköz **KÉNYSZERÍTETTEN** a jelenleg inaktív slot-ból fog indulni újraindításkor!\nCsak sikeres OTA rendszerfrissítést követően használd.\nMehet?</string>
-    <string name="install_next">Következő</string>
+    <string name="install_next">Tovább</string>
     <string name="select_file_tip">%1$s partíció képfájl ajánlott</string>
     <string name="select_kmi">KMI kiválasztása</string>
     <string name="settings_uninstall">Eltávolítás</string>
@@ -114,7 +114,7 @@
     <string name="settings_kernel_umount">Kernel szintű leválasztás (Umount lecsatoló)</string>
     <string name="settings_kernel_umount_summary">KernelSU implementáció által vezérelt kernel szintű lecsatoló engedélyezése</string>
     <string name="learn_more">Tudj meg többet</string>
-    <string name="home_susfs_version">SuSFS Verzió</string>
+    <string name="home_susfs_version">SuSFS verzió</string>
     <string name="home_seccomp_status">Seccomp állapot</string>
     <string name="seccomp_status_not_supported">Nem támogatott</string>
     <string name="seccomp_status_disabled">Letiltva</string>
@@ -357,16 +357,16 @@
     <string name="delete">Törlés</string>
     <string name="search_apps">Keresés applikációk között</string>
     <string name="search_modules">Keresés modultárban</string>
-    <string name="dynamic_manager_title">Dinamikus Root Menedzser beállítása</string>
+    <string name="dynamic_manager_title">Dinamikus root menedzser beállítása</string>
     <string name="dynamic_manager_enabled_summary">Engedélyezve (Bithossz: %s)</string>
     <string name="dynamic_manager_disabled">Nincs engedélyezve</string>
-    <string name="dynamic_manager_set_success">Dinamikus Root Menedzser beállítása sikeres</string>
-    <string name="dynamic_manager_set_failed">Dinamikus Root Menedzser beállítása nem sikerült</string>
-    <string name="dynamic_manager_disabled_success">Dinamikus Root Menedzser letiltva</string>
-    <string name="dynamic_manager_clear_failed">Dinamikus Root Menedzser ürítése sikertelen</string>
+    <string name="dynamic_manager_set_success">Dinamikus root menedzser beállítása sikeres</string>
+    <string name="dynamic_manager_set_failed">Dinamikus root menedzser beállítása nem sikerült</string>
+    <string name="dynamic_manager_disabled_success">Dinamikus root menedzser letiltva</string>
+    <string name="dynamic_manager_clear_failed">Dinamikus root menedzser ürítése sikertelen</string>
     <string name="dynamic_managerature">Dinamikus</string>
-    <string name="multi_manager_list">Aktív Root Menedzserek</string>
-    <string name="no_active_manager">Nincs aktív Root Menedzser</string>
+    <string name="multi_manager_list">Aktív root menedzserek</string>
+    <string name="no_active_manager">Nincs aktív root menedzser</string>
     <string name="home_zygisk_implement">Zygisk implementáció</string>
     <string name="home_meta_module_implement">Meta Modul implementáció</string>
     <string name="home_hook_type">Beavatkozási pont típusa</string>
@@ -437,15 +437,15 @@
     <string name="storage_permission_denied">Letöltés meghiúsult; tárhelyhez való hozzáférés megtagadva</string>
     <string name="susfs_tab_status">Állapotjelző</string>
     <string name="susfs_tab_backup_restore">Biztonsági mentés / Visszaállítás</string>
-    <string name="susfs_status_version">SUSFS Verzió</string>
+    <string name="susfs_status_version">SuSFS verzió</string>
     <string name="susfs_status_variant">Kernel variáns</string>
     <string name="susfs_status_enabled_features">Elérhető és engedélyezett funkciók</string>
     <string name="susfs_status_no_data">Hiányos vagy nem olvasható adat</string>
     <string name="susfs_standard_config_enabled">Maradandó beállítások</string>
-    <string name="susfs_standard_config_enabled_desc">Minden mentett beállított SUSFS paramétert újra alkalmaz újraindításkor.</string>
-    <string name="susfs_management_disabled_warning">Beépített SUSFS menedzser a root-kezelőben le lett tiltva.</string>
+    <string name="susfs_standard_config_enabled_desc">Minden mentett beállított SuSFS paramétert újra alkalmaz újraindításkor.</string>
+    <string name="susfs_management_disabled_warning">Beépített SuSFS menedzser a root-kezelőben le lett tiltva.</string>
     <string name="susfs_standard_logging">Naplózás</string>
-    <string name="susfs_standard_logging_desc">Bekapcsolja a SUSFS kernel naplóbejegyzéseket és gyűjtését. Engedélyezd mielőtt hibajelentést tennél.</string>
+    <string name="susfs_standard_logging_desc">Bekapcsolja a SuSFS kernel naplóbejegyzéseket és gyűjtését. Engedélyezd mielőtt hibajelentést tennél.</string>
     <string name="susfs_standard_uname_tab_slot_info">Slot infók</string>
     <string name="susfs_standard_uname_slot_info_load_failed">Slot infók betöltése sikertelen</string>
     <string name="susfs_standard_uname_slot_info_empty">Boot partíció slot információ nem található</string>
@@ -486,10 +486,10 @@
     <string name="susfs_backup_restore_default">Visszaállítás alapértelmezett állapotba</string>
     <string name="susfs_backup_restore_default_desc">Jelenleg aktív SuSFS beállítások törlése.</string>
     <string name="dynamic_manager_current_status">Aktuális konfiguráció</string>
-    <string name="dynamic_manager_clear_config">Dinamikus Root Menedzser ürítése</string>
+    <string name="dynamic_manager_clear_config">Dinamikus root menedzser ürítése</string>
     <string name="dynamic_manager_clear_config_summary">Aktuális konfiguráció tiltása és eltávolítása</string>
     <string name="dynamic_manager_grant_confirm_title">Biztosan feljogosítod?</string>
-    <string name="dynamic_manager_clear_confirm_title">Dinamikus Root Menedzser ürítése</string>
+    <string name="dynamic_manager_clear_confirm_title">Dinamikus root menedzser ürítése</string>
     <string name="dynamic_manager_clear_confirm_message">Biztos törölni akarod az aktuális beállításokat?</string>
     <string name="manage_managers">Root menedzser applikációk kezelése</string>
     <string name="home_version_info">Komponensverziók</string>
@@ -508,8 +508,8 @@
     <string name="app_profile_template_id">Sablon ID</string>
     <string name="unknown_signature">Ismeretlen</string>
     <string name="show_detail_or_hide_detail">Részletes vagy részletek elrejtése</string>
-    <string name="signature_size">Dinamikus Menedzser aláírás bithossza</string>
-    <string name="signature_hash">Dinamikus Menedzser digitális aláírás lenyomata</string>
+    <string name="signature_size">Dinamikus menedzser digitális aláírás bithossza</string>
+    <string name="signature_hash">Dinamikus menedzser digitális aláírás lenyomata</string>
     <string name="hash_must_be_64_chars">A digitális aláírásnak hash lenyomatot kiadó 64 hexadecimális karakterből kell állnia</string>
     <string name="signature_index">Digitális aláírás: %1$d</string>
     <string name="umount_flags_hint">0=Szokványos normál leválasztás, 2=MNT_DETACH töredékes lecsatolás</string>
@@ -572,11 +572,11 @@
     <string name="susfs_kstat_field_nlink">nlink érték / elérési pontok száma</string>
     <string name="susfs_kstat_field_size">size érték / byteméret</string>
     <string name="susfs_kstat_field_atime">atime érték / utolsó hozzáférés ideje</string>
-    <string name="susfs_kstat_field_atime_nsec">atime_nsec érték / utolsó hozzáférés ideje nanoszekundumban</string>
+    <string name="susfs_kstat_field_atime_nsec">atime_nsec érték / -〃- nanoszekundumban</string>
     <string name="susfs_kstat_field_mtime">mtime érték / utolsó módosítás ideje</string>
-    <string name="susfs_kstat_field_mtime_nsec">mtime_nsec érték / utolsó módosítás ideje nanoszekundumban</string>
+    <string name="susfs_kstat_field_mtime_nsec">mtime_nsec érték / -〃- nanoszekundumban</string>
     <string name="susfs_kstat_field_ctime">ctime érték / metadata utolsó módosításának ideje</string>
-    <string name="susfs_kstat_field_ctime_nsec">ctime_nsec érték / metadata utolsó módosításának ideje nanoszekundumban</string>
+    <string name="susfs_kstat_field_ctime_nsec">ctime_nsec érték / -〃- nanoszekundumban</string>
     <string name="susfs_kstat_field_blocks">blocks érték / blokkok száma</string>
     <string name="susfs_kstat_field_blksize">blksize érték / blokkok bytemérete</string>
 </resources>
