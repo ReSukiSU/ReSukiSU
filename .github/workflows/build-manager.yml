@@ -26,7 +26,7 @@ jobs:
       key_password: ${{ steps.gen.outputs.key_password }}
     steps:
       - name: Generate temporary keystore
-        if: github.event_name == 'pull_request' || (github.event_name == 'push' && startsWith(github.ref_name,'dependabot'))
+        if: github.event_name == 'pull_request'
         id: gen
         run: |
           KEYSTORE_PASSWORD=$(openssl rand -hex 32)
@@ -47,7 +47,7 @@ jobs:
           echo "keystore=$(base64 -w 0 pr-key.jks)" >> $GITHUB_OUTPUT
 
       - name: Extract certificate hash and size
-        if: github.event_name == 'pull_request' || (github.event_name == 'push' && startsWith(github.ref_name,'dependabot'))
+        if: github.event_name == 'pull_request'
         id: extract
         env:
           STORE_PASS: ${{ steps.gen.outputs.keystore_password }}
@@ -148,9 +148,9 @@ jobs:
           ./randomizer
 
       - name: Write key
-        if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && !startsWith(github.ref_name,'dependabot')) || github.ref_type == 'tag' }}
+        if: ${{ github.event_name == 'workflow_dispatch' || ( github.event_name != 'pull_request') || github.ref_type == 'tag' }}
         run: |
-          if [ ! -z "${{ secrets.KEYSTORE }}" ] ; then
+          if [ ! -z "${{ secrets.KEYSTORE }}" ]; then
             {
               echo KEYSTORE_PASSWORD='${{ secrets.KEYSTORE_PASSWORD }}'
               echo KEY_ALIAS='${{ secrets.KEY_ALIAS }}'
@@ -161,7 +161,7 @@ jobs:
           fi
 
       - name: Write PR key
-        if: github.event_name == 'pull_request' || (github.event_name == 'push' && startsWith(github.ref_name,'dependabot'))
+        if: github.event_name == 'pull_request'
         env:
           PR_KEYSTORE: ${{ needs.generate-key.outputs.keystore }}
           PR_KEYSTORE_PASSWORD: ${{ needs.generate-key.outputs.keystore_password }}
@@ -286,9 +286,6 @@ jobs:
 
       - name: Prepare signing inputs
         env:
-          # dependabot doesn't have secret var??? Set this as TODO for fix it
-          IS_DEPENDABOT: ${{(github.event_name == 'push' && startsWith(github.ref_name,'dependabot'))}}
-          
           PR_KEYSTORE: ${{ needs.generate-key.outputs.keystore }}
           PR_KEYSTORE_PASSWORD: ${{ needs.generate-key.outputs.keystore_password }}
           PR_KEY_PASSWORD: ${{ needs.generate-key.outputs.key_password }}
@@ -297,7 +294,7 @@ jobs:
           PROD_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           PROD_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ] || [ "$IS_DEPENDABOT" = "true" ]; then
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "$PR_KEYSTORE" | base64 -d > pr-key.jks
             echo "SIGN_KEYSTORE_FILE=pr-key.jks" >> $GITHUB_ENV
             echo "SIGN_KEY_ALIAS=pr-key" >> $GITHUB_ENV
@@ -339,7 +336,7 @@ jobs:
 
   upload-telegram:
     needs: repack-manager
-    if: github.event_name != 'pull_request' && !(github.event_name == 'push' && startsWith(github.ref_name,'dependabot'))
+    if: github.event_name != 'pull_request' 
     runs-on: ubuntu-latest
     strategy:
       matrix:
