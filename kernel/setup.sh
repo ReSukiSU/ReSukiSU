@@ -92,12 +92,10 @@ setup_submodule() {
 if [ "$#" -eq 0 ]; then
 	initialize_variables
 	setup_kernelsu
-	setup_submodule
 elif [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 	display_usage
 elif [ "$1" = "--submodule" ]; then
 	initialize_variables
-	echo '[+] Resetting KernelSU as submodule...'
 	setup_submodule
 elif [ "$1" = "--cleanup" ]; then
 	initialize_variables
@@ -105,5 +103,4 @@ elif [ "$1" = "--cleanup" ]; then
 else
 	initialize_variables
 	setup_kernelsu "$@"
-	setup_submodule
 fi
