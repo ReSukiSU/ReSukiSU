@@ -63,19 +63,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
-import coil.request.CachePolicy
-import coil.request.ImageRequest
-import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.ksuApp
+import com.resukisu.resukisu.domain.model.AllowlistOperationResult
+import com.resukisu.resukisu.domain.model.InstalledAppGroup
 import com.resukisu.resukisu.ui.component.ConfirmResult
+import com.resukisu.resukisu.ui.component.PackageIcon
 import com.resukisu.resukisu.ui.component.SearchAppBar
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
@@ -88,10 +88,13 @@ import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.showReplacingSnackbar
 import com.resukisu.resukisu.ui.viewmodel.SortType
+import com.resukisu.resukisu.ui.viewmodel.SuperUserUiAction
+import com.resukisu.resukisu.ui.viewmodel.SuperUserUiEvent
 import com.resukisu.resukisu.ui.viewmodel.SuperUserUiState
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -106,9 +109,7 @@ private data class SuperUserMenuItem(
 @Composable
 fun SuperUserPage(bottomPadding: Dp) {
     val context = LocalContext.current
-    val viewModel = viewModel<SuperUserViewModel>(
-        viewModelStoreOwner = ksuApp
-    )
+    val viewModel = koinViewModel<SuperUserViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val topAppBarState = rememberTopAppBarState()
@@ -123,21 +124,42 @@ fun SuperUserPage(bottomPadding: Dp) {
     val confirmText = stringResource(R.string.confirm)
     val cancelText = stringResource(R.string.cancel)
 
+    LaunchedEffect(viewModel) {
+        viewModel.events.collectLatest { event ->
+            when (event) {
+                is SuperUserUiEvent.Error -> if (event.message.isNotBlank()) {
+                    snackBarHostState.showReplacingSnackbar(event.message)
+                }
+
+                is SuperUserUiEvent.AllowlistOperationFinished -> {
+                    val successMessage = if (event.restore) {
+                        R.string.allowlist_restore_success
+                    } else {
+                        R.string.allowlist_backup_success
+                    }
+                    val failureMessage = if (event.restore) {
+                        R.string.allowlist_restore_failed
+                    } else {
+                        R.string.allowlist_backup_failed
+                    }
+                    snackBarHostState.showReplacingSnackbar(
+                        message = context.allowlistOperationMessage(
+                            result = event.result,
+                            successMessage = successMessage,
+                            failureMessage = failureMessage,
+                        ),
+                        duration = SnackbarDuration.Long,
+                    )
+                }
+            }
+        }
+    }
+
     val backupLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/octet-stream")
     ) { uri ->
         if (uri != null) {
-            scope.launch {
-                val result = viewModel.backupAllowlist(uri)
-                snackBarHostState.showReplacingSnackbar(
-                    message = context.allowlistOperationMessage(
-                        result = result,
-                        successMessage = R.string.allowlist_backup_success,
-                        failureMessage = R.string.allowlist_backup_failed,
-                    ),
-                    duration = SnackbarDuration.Long,
-                )
-            }
+            viewModel.dispatch(SuperUserUiAction.BackupAllowlist(uri.toString()))
         }
     }
     val restoreLauncher = rememberLauncherForActivityResult(
@@ -153,18 +175,7 @@ fun SuperUserPage(bottomPadding: Dp) {
                 )
                 if (confirmed != ConfirmResult.Confirmed) return@launch
 
-                val result = viewModel.restoreAllowlist(uri)
-                if (result == SuperUserViewModel.AllowlistOperationResult.Success) {
-                    viewModel.notifySuperuserStatusChanged()
-                }
-                snackBarHostState.showReplacingSnackbar(
-                    message = context.allowlistOperationMessage(
-                        result = result,
-                        successMessage = R.string.allowlist_restore_success,
-                        failureMessage = R.string.allowlist_restore_failed,
-                    ),
-                    duration = SnackbarDuration.Long,
-                )
+                viewModel.dispatch(SuperUserUiAction.RestoreAllowlist(uri.toString()))
             }
         }
     }
@@ -172,15 +183,18 @@ fun SuperUserPage(bottomPadding: Dp) {
     val navigator = LocalNavigator.current
 
     LaunchedEffect(Unit) {
-        viewModel.updateSearch("")
+        viewModel.dispatch(SuperUserUiAction.Search(""))
     }
 
     Scaffold(
+        modifier = Modifier
+            .testTag(SUPER_USER_SCREEN_TEST_TAG)
+            .semantics { testTagsAsResourceId = true },
         topBar = {
             SearchAppBar(
                 title = stringResource(R.string.superuser),
                 searchText = uiState.search,
-                onSearchTextChange = viewModel::updateSearch,
+                onSearchTextChange = { viewModel.dispatch(SuperUserUiAction.Search(it)) },
                 dropdownContent = {
                     IconButton(onClick = { showDropdown = true }) {
                         Icon(
@@ -232,34 +246,33 @@ fun SuperUserPage(bottomPadding: Dp) {
             uiState = uiState,
             listState = listState,
             scrollBehavior = scrollBehavior,
-            scope = scope,
             bottomPadding = bottomPadding,
         )
     }
 }
 
 private fun Context.allowlistOperationMessage(
-    result: SuperUserViewModel.AllowlistOperationResult,
+    result: AllowlistOperationResult,
     successMessage: Int,
     failureMessage: Int,
 ): String {
     return when (result) {
-        SuperUserViewModel.AllowlistOperationResult.Success ->
+        AllowlistOperationResult.Success ->
             getString(successMessage)
 
-        SuperUserViewModel.AllowlistOperationResult.InvalidFile ->
+        AllowlistOperationResult.InvalidFile ->
             getString(failureMessage, getString(R.string.unknown_file))
 
-        SuperUserViewModel.AllowlistOperationResult.UnsupportedVersion ->
+        AllowlistOperationResult.UnsupportedVersion ->
             getString(failureMessage, getString(R.string.home_unsupported))
 
-        is SuperUserViewModel.AllowlistOperationResult.ProfileUpdateFailed ->
+        is AllowlistOperationResult.ProfileUpdateFailed ->
             getString(
                 failureMessage,
                 getString(R.string.failed_to_update_app_profile, result.uid.toString()),
             )
 
-        is SuperUserViewModel.AllowlistOperationResult.Failed ->
+        is AllowlistOperationResult.Failed ->
             getString(
                 failureMessage,
                 result.cause?.localizedMessage ?: getString(R.string.unknown),
@@ -280,7 +293,6 @@ private fun SuperUserContent(
     uiState: SuperUserUiState,
     listState: androidx.compose.foundation.lazy.LazyListState,
     scrollBehavior: TopAppBarScrollBehavior,
-    scope: CoroutineScope,
     bottomPadding: Dp,
 ) {
     val navigator = LocalNavigator.current
@@ -293,7 +305,7 @@ private fun SuperUserContent(
                 .blurSource(),
             contentAlignment = Alignment.Center
         ) {
-            if ((uiState.isRefreshing || uiState.appGroupList.isEmpty()) && uiState.search.isEmpty()) {
+            if (uiState.isRefreshing && uiState.search.isEmpty()) {
                 LoadingIndicator()
             } else {
                 val isSearchEmpty = uiState.search.isNotEmpty()
@@ -326,7 +338,7 @@ private fun SuperUserContent(
 
     PullToRefreshBox(
         state = pullRefreshState,
-        onRefresh = { scope.launch { viewModel.fetchAppList() } },
+        onRefresh = { viewModel.dispatch(SuperUserUiAction.Refresh) },
         isRefreshing = uiState.isRefreshing,
         modifier = Modifier
             .fillMaxSize()
@@ -345,6 +357,7 @@ private fun SuperUserContent(
             state = listState,
             modifier = Modifier
                 .fillMaxSize()
+                .testTag(SUPER_USER_LIST_TEST_TAG)
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
         ) {
             item {
@@ -358,7 +371,7 @@ private fun SuperUserContent(
                 AppGroupItem(
                     appGroup = appGroup
                 ) {
-                    navigator.push(Route.AppProfile(appGroup))
+                    navigator.push(Route.AppProfile(appGroup.uid, appGroup.mainApp.packageName))
                 }
             }
 
@@ -368,6 +381,9 @@ private fun SuperUserContent(
         }
     }
 }
+
+private const val SUPER_USER_LIST_TEST_TAG = "super_user_app_list"
+private const val SUPER_USER_SCREEN_TEST_TAG = "super_user_screen"
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -389,7 +405,7 @@ private fun SuperUserDropdown(
                 icon = if (uiState.showSystemApps) Icons.TwoTone.VisibilityOff else Icons.TwoTone.Visibility,
                 titleRes = if (uiState.showSystemApps) R.string.hide_system_apps else R.string.show_system_apps,
                 onClick = {
-                    viewModel.updateShowSystemApps(!uiState.showSystemApps)
+                    viewModel.dispatch(SuperUserUiAction.SetShowSystemApps(!uiState.showSystemApps))
                 }
             ),
             SuperUserMenuItem(
@@ -417,7 +433,7 @@ private fun SuperUserDropdown(
                     selected = uiState.currentSortType == sortType,
                     text = { Text(stringResource(sortType.displayNameRes)) },
                     onClick = {
-                        viewModel.updateCurrentSortType(sortType)
+                        viewModel.dispatch(SuperUserUiAction.SetSort(sortType))
                     },
                     shapes = MenuDefaults.itemShape(
                         index = index,
@@ -459,11 +475,10 @@ private fun SuperUserDropdown(
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun AppGroupItem(
-    appGroup: SuperUserViewModel.AppGroup,
+    appGroup: InstalledAppGroup,
     onClick: () -> Unit,
 ) {
     val mainApp = appGroup.mainApp
-
     SettingsBaseWidget(
         onClick = {
             onClick()
@@ -484,7 +499,7 @@ private fun AppGroupItem(
                 if (appGroup.allowSu) {
                     LabelText(label = "ROOT")
                 } else {
-                    if (Natives.uidShouldUmount(appGroup.uid)) {
+                    if (appGroup.shouldUmount) {
                         LabelText(
                             label = "UMOUNT",
                             containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -519,16 +534,12 @@ private fun AppGroupItem(
             }
         },
         leadingContent = {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(mainApp.packageInfo)
-                    .crossfade(true)
-                    .memoryCachePolicy(CachePolicy.ENABLED)
-                    .build(),
+            PackageIcon(
+                packageName = mainApp.packageName,
                 contentDescription = mainApp.label,
                 modifier = Modifier
                     .padding(4.dp)
-                    .size(48.dp)
+                    .size(48.dp),
             )
         },
         iconPlaceholder = false,

@@ -42,4 +42,4 @@
 -keep class com.yalantis.ucrop** { *; }
 -keep interface com.yalantis.ucrop** { *; }
 
--keep interface com.resukisu.zako.** { *; }
+-keep interface com.resukisu.rootService.** { *; }

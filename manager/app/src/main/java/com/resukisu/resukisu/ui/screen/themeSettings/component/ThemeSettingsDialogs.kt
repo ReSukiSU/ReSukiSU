@@ -34,29 +34,33 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.data.appPreferences
+import com.resukisu.resukisu.domain.usecase.IsSystemLanguageSettingsUseCase
+import com.resukisu.resukisu.domain.usecase.LaunchSystemLanguageSettingsUseCase
 import com.resukisu.resukisu.ui.component.settings.SettingsChooseDialog
-import com.resukisu.resukisu.ui.screen.themeSettings.util.launchSystemLanguageSettings
-import com.resukisu.resukisu.ui.screen.themeSettings.util.useSystemLanguageSettings
 import com.resukisu.resukisu.ui.theme.ThemeConfig
+import com.resukisu.resukisu.ui.viewmodel.SettingsUiAction
 import com.resukisu.resukisu.ui.viewmodel.SettingsUiState
 import com.resukisu.resukisu.ui.viewmodel.SettingsViewModel
+import org.koin.compose.koinInject
 import android.graphics.Color as AndroidColor
+
 
 @Composable
 fun ThemeSettingsDialogs(
     state: SettingsUiState,
     viewModel: SettingsViewModel
 ) {
+    val themeConfig: ThemeConfig = koinInject()
     if (state.showThemeColorDialog) {
-        val context = LocalContext.current
         ThemeColorDialog(
-            currentSeedColor = ThemeConfig.seedColor,
+            currentSeedColor = themeConfig.seedColor,
             onColorSelected = { seedColor ->
-                viewModel.handleThemeColorChange(context, seedColor)
-                viewModel.setThemeColorDialogVisible(false)
+                viewModel.dispatch(SettingsUiAction.SetThemeColor(seedColor))
+                viewModel.dispatch(SettingsUiAction.SetThemeColorDialogVisible(false))
             },
-            onDismiss = { viewModel.setThemeColorDialogVisible(false) }
+            onDismiss = {
+                viewModel.dispatch(SettingsUiAction.SetThemeColorDialogVisible(false))
+            }
         )
     }
 }
@@ -64,16 +68,20 @@ fun ThemeSettingsDialogs(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LanguageSelectionDialog(
+    currentLocale: String,
     onLanguageSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val isSystemLanguageSettingsUseCase =
+        koinInject<IsSystemLanguageSettingsUseCase>()
+    val launchSystemLanguageSettingsUseCase =
+        koinInject<LaunchSystemLanguageSettingsUseCase>()
     val context = LocalContext.current
     val languageUseSystemDefault = stringResource(R.string.language_system_default)
     val systemLanguage = stringResource(R.string.settings_language)
-    val prefs = context.appPreferences
 
-    if (useSystemLanguageSettings) {
-        launchSystemLanguageSettings(context)
+    if (isSystemLanguageSettingsUseCase()) {
+        launchSystemLanguageSettingsUseCase(context)
         onDismiss()
     } else {
         val supportedLocales = remember {
@@ -139,7 +147,6 @@ fun LanguageSelectionDialog(
             tag to displayName
         }
 
-        val currentLocale = prefs.getString("app_locale", "system") ?: "system"
         var selectedIndex by remember {
             mutableIntStateOf(allOptions.indexOfFirst { (tag, _) -> currentLocale == tag })
         }
@@ -154,7 +161,6 @@ fun LanguageSelectionDialog(
                 selectedIndex = index
                 if (selectedIndex >= 0 && selectedIndex < allOptions.size) {
                     val newLocale = allOptions[selectedIndex].first
-                    prefs.putString("app_locale", newLocale)
                     onLanguageSelected(newLocale)
                 }
             }

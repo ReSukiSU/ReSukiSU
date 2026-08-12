@@ -134,7 +134,7 @@
             android:useAppZygote="true" />
 
         <service
-            android:name=".ui.util.downloader.DownloadService"
+            android:name=".data.download.DownloadService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 

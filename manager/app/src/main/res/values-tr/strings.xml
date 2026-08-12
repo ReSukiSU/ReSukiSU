@@ -520,7 +520,6 @@
     <string name="susfs_backup_import_label">İçe Aktar</string>
     <string name="susfs_backup_restore_default">Varsayılanları Geri Yükle</string>
     <string name="susfs_backup_restore_default_desc">Mevcut SuSFS yapılandırmasını sil.</string>
-    <string name="susfs_backup_default_filename">susfs_yedegi.json</string>
     <string name="dynamic_manager_settings_summary">Dinamik yönetici imzasını yönet</string>
     <string name="dynamic_manager_current_status">Mevcut yapılandırma</string>
     <string name="dynamic_manager_manual_config">Manuel imza yapılandırması</string>

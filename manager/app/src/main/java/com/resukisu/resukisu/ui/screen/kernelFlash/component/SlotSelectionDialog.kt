@@ -34,7 +34,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.ui.util.getSlotSuffix
 
 /**
  * 槽位选择对话框组件
@@ -44,28 +43,20 @@ import com.resukisu.resukisu.ui.util.getSlotSuffix
 @Composable
 fun SlotSelectionDialog(
     show: Boolean,
+    currentSlot: String?,
     onDismiss: () -> Unit,
     onSlotSelected: (String) -> Unit
 ) {
-    var currentSlot by remember { mutableStateOf<String?>(null) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
     var selectedSlot by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(Unit) {
-        try {
-            currentSlot = getSlotSuffix(ota = false)
-                .removePrefix("_")
-                .takeIf { it == "a" || it == "b" }
+    LaunchedEffect(show, currentSlot) {
+        if (show) {
             // 设置默认选择为当前槽位
             selectedSlot = when (currentSlot) {
                 "a" -> "a"
                 "b" -> "b"
                 else -> null
             }
-            errorMessage = null
-        } catch (e: Exception) {
-            errorMessage = e.message
-            currentSlot = null
         }
     }
 
@@ -86,24 +77,15 @@ fun SlotSelectionDialog(
                     modifier = Modifier.padding(vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    if (errorMessage != null) {
-                        Text(
-                            text = "Error: $errorMessage",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Center
-                        )
-                    } else {
-                        Text(
-                            text = stringResource(
-                                id = R.string.current_slot,
-                                currentSlot ?: "Unknown"
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                    Text(
+                        text = stringResource(
+                            id = R.string.current_slot,
+                            currentSlot ?: "Unknown"
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
 
                     Spacer(modifier = Modifier.height(12.dp))
 

@@ -66,6 +66,7 @@ import com.resukisu.resukisu.ui.component.settings.material3internal.rememberAni
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
+import org.koin.compose.koinInject
 
 /**
  * A [CompositionLocal] that provides the dynamically calculated [Shape] for items
@@ -104,6 +105,7 @@ val LocalSegmentedItemShape = compositionLocalOf<Shape> { RoundedCornerShape(16.
  * @param trailingContent A composable slot for trailing content, e.g. switches, checkboxes, or arrows.
  * @param containerColor Custom container color, if provided, selected/isError will be ignored.
  */
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsBaseWidget(
@@ -129,9 +131,12 @@ fun SettingsBaseWidget(
     foreContent: @Composable RowScope.() -> Unit = {},
     descriptionColumnContent: (@Composable ColumnScope.() -> Unit)? = null,
     containerColor: Color? = null,
-    containerAlpha: Float = CardConfig.cardAlpha,
+    containerAlpha: Float? = null,
     trailingContent: (@Composable BoxScope.(interactionSource: MutableInteractionSource) -> Unit)? = null,
 ) {
+    val themeConfig: ThemeConfig = koinInject()
+    val cardConfig: CardConfig = koinInject()
+    val resolvedContainerAlpha = containerAlpha ?: cardConfig.cardAlpha
     val hapticFeedback = LocalHapticFeedback.current
     val alpha = if (enabled) 1f else 0.38f
 
@@ -150,13 +155,13 @@ fun SettingsBaseWidget(
         }).run {
         if (isOnBackground) {
             copy(
-                alpha = containerAlpha
+                alpha = resolvedContainerAlpha
             )
         } else this
     }
 
     val backgroundColor = run {
-        if (isOnBackground && ThemeConfig.isEnableBlurExp)
+        if (isOnBackground && themeConfig.isEnableBlurExp)
             Color.Transparent
         else finalContainerColor
     }
@@ -246,7 +251,7 @@ fun SettingsBaseWidget(
     }
 
     var itemModifier = (if (fillMaxWidth) modifier.fillMaxWidth() else modifier)
-    if (isOnBackground && ThemeConfig.isEnableBlurExp)
+    if (isOnBackground && themeConfig.isEnableBlurExp)
         itemModifier = itemModifier
             .clip(clipShape)
             .renderBackgroundBlur(finalContainerColor)

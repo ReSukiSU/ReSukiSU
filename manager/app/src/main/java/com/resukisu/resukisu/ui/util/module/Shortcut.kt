@@ -16,19 +16,22 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.core.graphics.scale
 import androidx.core.net.toUri
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.data.appPreferences
+import com.resukisu.resukisu.data.AppSettingsRepository
+import com.resukisu.resukisu.data.shell.ShortcutRepository
 import com.resukisu.resukisu.ui.MainActivity
-import com.resukisu.resukisu.ui.util.getRootShell
 import com.resukisu.resukisu.ui.util.isColorOS
 import com.resukisu.resukisu.ui.util.isHyperOS
 import com.resukisu.resukisu.ui.util.isMiui
 import com.resukisu.resukisu.ui.webui.WebUIActivity
-import com.topjohnwu.superuser.io.SuFile
-import com.topjohnwu.superuser.io.SuFileInputStream
 
-object Shortcut {
+class Shortcut(
+    private val settings: AppSettingsRepository,
+    private val shortcutRepository: ShortcutRepository,
+) {
 
-    private const val TAG = "ModuleShortcut"
+    private companion object {
+        const val TAG = "ModuleShortcut"
+    }
 
     fun createModuleActionShortcut(
         context: Context,
@@ -36,7 +39,7 @@ object Shortcut {
         name: String,
         iconUri: String?
     ) {
-        val usingAltIcon = context.appPreferences.getBoolean("use_alt_icon", false)
+        val usingAltIcon = settings.getBoolean("use_alt_icon", false)
         val mainActivity = ComponentName(context, MainActivity::class.java.name)
         val mainActivityAlias = ComponentName(context, "${MainActivity::class.java.name}Alias")
 
@@ -199,10 +202,7 @@ object Shortcut {
             val rawBitmap = if (uri.scheme.equals("su", ignoreCase = true)) {
                 val path = uri.path ?: ""
                 if (path.isNotBlank()) {
-                    val shell = getRootShell(true)
-                    val suFile = SuFile(path)
-                    suFile.shell = shell
-                    SuFileInputStream.open(suFile).use { input ->
+                    shortcutRepository.openRootFile(path)?.use { input ->
                         BitmapFactory.decodeStream(input)
                     }
                 } else null
@@ -363,15 +363,8 @@ object Shortcut {
 
     private fun tryGrantMiuiShortcutPermissionByRoot(context: Context): Boolean {
         val pkg = context.applicationContext.packageName
-        val cmd = "appops set $pkg 10017 allow"
-        return try {
-            val shell = getRootShell()
-            val result = shell.newJob().add(cmd).exec()
-            Log.d(TAG, "tryGrantMiuiShortcutPermissionByRoot: cmd=$cmd, code=${result.code}, isSuccess=${result.isSuccess}")
-            result.isSuccess
-        } catch (t: Throwable) {
-            Log.w(TAG, "tryGrantMiuiShortcutPermissionByRoot: exception=${t.message}", t)
-            false
+        return shortcutRepository.grantShortcutPermission(pkg).also { success ->
+            Log.d(TAG, "tryGrantMiuiShortcutPermissionByRoot: package=$pkg, success=$success")
         }
     }
 

@@ -79,7 +79,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.domain.model.CatalogModule
+import com.resukisu.resukisu.domain.model.ModuleRelease
+import com.resukisu.resukisu.domain.model.ModuleReleaseAsset
+import com.resukisu.resukisu.domain.usecase.EnqueueDownloadUseCase
+import com.resukisu.resukisu.domain.usecase.ObserveDownloadUseCase
 import com.resukisu.resukisu.ui.activity.PermissionRequestInterface
 import com.resukisu.resukisu.ui.component.ConfirmResult
 import com.resukisu.resukisu.ui.component.GithubMarkdown
@@ -98,20 +104,49 @@ import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
 import com.resukisu.resukisu.ui.util.LocalPermissionRequestInterface
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
-import com.resukisu.resukisu.ui.util.module.ReleaseAssetInfo
-import com.resukisu.resukisu.ui.util.module.ReleaseInfo
-import com.resukisu.resukisu.ui.viewmodel.ModuleRepoViewModel
+import com.resukisu.resukisu.ui.viewmodel.ModuleDetailUiAction
+import com.resukisu.resukisu.ui.viewmodel.ModuleDetailViewModel
 import com.resukisu.resukisu.ui.viewmodel.formatFileSize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
+import org.koin.core.parameter.parametersOf
 
 /**
  * @author AlexLiuDev233
  * @date 2025/12/7
  */
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun OnlineModuleDetailScreen(module: ModuleRepoViewModel.RepoModule) {
+fun OnlineModuleDetailScreen(moduleId: String) {
+    val viewModel = koinViewModel<ModuleDetailViewModel>(parameters = { parametersOf(moduleId) })
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val module = state.module
+    if (module == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            if (state.loading) {
+                LoadingIndicator()
+            } else {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(stringResource(R.string.please_check_network))
+                    FilledTonalButton(onClick = { viewModel.dispatch(ModuleDetailUiAction.Retry) }) {
+                        Text(stringResource(R.string.network_retry))
+                    }
+                }
+            }
+        }
+        return
+    }
+    OnlineModuleDetailContent(module)
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun OnlineModuleDetailContent(module: CatalogModule) {
+    val themeConfig: ThemeConfig = koinInject()
+    val cardConfig: CardConfig = koinInject()
     val navigator = LocalNavigator.current
     val snackBarHost = LocalSnackbarHost.current
     val topAppBarState = rememberTopAppBarState()
@@ -130,8 +165,7 @@ fun OnlineModuleDetailScreen(module: ModuleRepoViewModel.RepoModule) {
     Scaffold(
         topBar = {
             Column(
-                modifier = Modifier.blurEffect(
-                )
+                modifier = Modifier.blurEffect()
             ) {
                 LargeFlexibleTopAppBar(
                     title = { Text(module.moduleName) },
@@ -157,15 +191,15 @@ fun OnlineModuleDetailScreen(module: ModuleRepoViewModel.RepoModule) {
                     },
                     colors = TopAppBarDefaults.topAppBarColors().copy(
                         containerColor =
-                            if (ThemeConfig.isEnableBlur)
+                            if (themeConfig.isEnableBlur)
                                 Color.Transparent
                             else
-                                MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha),
+                                MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
                         scrolledContainerColor =
-                            if (ThemeConfig.isEnableBlur)
+                            if (themeConfig.isEnableBlur)
                                 Color.Transparent
                             else
-                                MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha)
+                                MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha)
                     ),
                     windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 )
@@ -173,10 +207,10 @@ fun OnlineModuleDetailScreen(module: ModuleRepoViewModel.RepoModule) {
                 PrimaryTabRow(
                     selectedTabIndex = pagerState.currentPage,
                     containerColor =
-                        if (ThemeConfig.isEnableBlur)
+                        if (themeConfig.isEnableBlur)
                             Color.Transparent
                         else
-                            MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha),
+                            MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     tabTitles.forEachIndexed { index, title ->
@@ -239,7 +273,7 @@ fun OnlineModuleDetailScreen(module: ModuleRepoViewModel.RepoModule) {
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun InfoTab(
-    module: ModuleRepoViewModel.RepoModule,
+    module: CatalogModule,
     nestedScrollConnection: NestedScrollConnection,
     innerPadding: PaddingValues
 ) {
@@ -303,7 +337,7 @@ fun InfoTab(
 
 @Composable
 fun ReleasesTab(
-    module: ModuleRepoViewModel.RepoModule,
+    module: CatalogModule,
     nestedScrollConnection: NestedScrollConnection,
     coroutineScope: CoroutineScope,
     innerPadding: PaddingValues,
@@ -332,10 +366,12 @@ fun ReleasesTab(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ReadmeTab(
-    module: ModuleRepoViewModel.RepoModule,
+    module: CatalogModule,
     nestedScrollConnection: NestedScrollConnection,
     innerPadding: PaddingValues
 ) {
+    val themeConfig: ThemeConfig = koinInject()
+    val cardConfig: CardConfig = koinInject()
     val loading = remember { mutableStateOf(true) }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -355,10 +391,10 @@ fun ReadmeTab(
                         .clip(RoundedCornerShape(16.dp))
                         .renderBackgroundBlur(),
                     color =
-                        if (ThemeConfig.isEnableBlurExp)
+                        if (themeConfig.isEnableBlurExp)
                             Color.Transparent
                         else
-                            MaterialTheme.colorScheme.surfaceBright.copy(CardConfig.cardAlpha),
+                            MaterialTheme.colorScheme.surfaceBright.copy(cardConfig.cardAlpha),
                 ) {
                     GithubMarkdown(
                         content = module.readme,
@@ -408,13 +444,17 @@ fun ReadmeTab(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ReleaseCard(
-    module: ModuleRepoViewModel.RepoModule,
-    release: ReleaseInfo,
+    module: CatalogModule,
+    release: ModuleRelease,
     coroutineScope: CoroutineScope
 ) {
+    val themeConfig: ThemeConfig = koinInject()
+    val cardConfig: CardConfig = koinInject()
     val navigator = LocalNavigator.current
     val context = LocalContext.current
     val permissionRequestInterface = LocalPermissionRequestInterface.current
+    val enqueueDownload = koinInject<EnqueueDownloadUseCase>()
+    val observeDownload = koinInject<ObserveDownloadUseCase>()
     val confirmInstallTitle =
         stringResource(R.string.confirm_install_module_title, module.moduleName)
     val confirmDialog = rememberConfirmDialog()
@@ -427,10 +467,10 @@ fun ReleaseCard(
             .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright),
         shape = RoundedCornerShape(16.dp),
         color =
-            if (ThemeConfig.isEnableBlurExp)
+            if (themeConfig.isEnableBlurExp)
                 Color.Transparent
             else
-                MaterialTheme.colorScheme.surfaceBright.copy(CardConfig.cardAlpha),
+                MaterialTheme.colorScheme.surfaceBright.copy(cardConfig.cardAlpha),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -493,7 +533,9 @@ fun ReleaseCard(
                                 module,
                                 assetInfo,
                                 navigator,
-                                coroutineScope
+                                coroutineScope,
+                                enqueueDownload,
+                                observeDownload,
                             )
                         }
                     }
@@ -579,14 +621,14 @@ fun CollapsibleContent(
 @Composable
 @Preview
 fun ReleaseCardPreview() {
-    val release = ReleaseInfo(
+    val release = ModuleRelease(
         name = "name",
         tagName = "tagName",
         publishedAt = "publishedAt",
         descriptionHTML = "descriptionHTML",
-        assets = ArrayList<ReleaseAssetInfo>().apply {
+        assets = ArrayList<ModuleReleaseAsset>().apply {
             add(
-                ReleaseAssetInfo(
+                ModuleReleaseAsset(
                     name = "name",
                     downloadUrl = "downloadUrl",
                     size = 0,
@@ -594,7 +636,7 @@ fun ReleaseCardPreview() {
                 )
             )
             add(
-                ReleaseAssetInfo(
+                ModuleReleaseAsset(
                     name = "name2",
                     downloadUrl = "downloadUrl2",
                     size = 0,
@@ -607,7 +649,7 @@ fun ReleaseCardPreview() {
     val fakeModule = initFakeRepoModuleForPreview()
 
     CompositionLocalProvider(
-        LocalNavigator provides Navigator(Route.ModuleRepoDetail(fakeModule)),
+        LocalNavigator provides Navigator(Route.ModuleRepoDetail(fakeModule.moduleId)),
         LocalPermissionRequestInterface provides object : PermissionRequestInterface {
             override fun requestPermission(
                 permission: String,

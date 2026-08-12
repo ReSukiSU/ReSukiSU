@@ -22,12 +22,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
-import com.resukisu.resukisu.data.susfs.SusKstatItem
-import com.resukisu.resukisu.data.susfs.SusKstatType
+import com.resukisu.resukisu.domain.model.SusKstatItem
+import com.resukisu.resukisu.domain.model.SusKstatStatically
+import com.resukisu.resukisu.domain.model.SusKstatType
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
@@ -40,7 +39,13 @@ import com.resukisu.resukisu.ui.screen.susfs.component.susfsEntryList
 import com.resukisu.resukisu.ui.screen.susfs.component.toImportedEntryLines
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.showReplacingSnackbar
+import com.resukisu.resukisu.ui.viewmodel.SuSFSUiAction
+import com.resukisu.resukisu.ui.viewmodel.SuSFSViewModel
+import com.resukisu.resukisu.ui.viewmodel.SusKstatOperation
+import com.resukisu.resukisu.ui.viewmodel.awaitSuSFSBoolean
+import com.resukisu.resukisu.ui.viewmodel.awaitSuSFSConfig
 import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,8 +54,8 @@ fun SusKstatTab(
     innerPadding: PaddingValues,
     onRegisterRefresh: SuSFSRefreshRegistrar,
 ) {
+    val configHelper = koinViewModel<SuSFSViewModel>()
     val snackbarHost = LocalSnackbarHost.current
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     var entries by remember { mutableStateOf<Set<SusKstatItem>>(emptySet()) }
@@ -113,18 +118,6 @@ fun SusKstatTab(
     val noEntriesMsg = stringResource(R.string.susfs_entry_no_entries)
     val noEntriesHint = stringResource(R.string.susfs_entry_no_entries_hint)
     val operationFailedMsg = stringResource(R.string.susfs_operation_failed)
-    val fieldInoLabel = stringResource(R.string.susfs_kstat_field_ino)
-    val fieldDevLabel = stringResource(R.string.susfs_kstat_field_dev)
-    val fieldNlinkLabel = stringResource(R.string.susfs_kstat_field_nlink)
-    val fieldSizeLabel = stringResource(R.string.susfs_kstat_field_size)
-    val fieldAtimeLabel = stringResource(R.string.susfs_kstat_field_atime)
-    val fieldAtimeNsecLabel = stringResource(R.string.susfs_kstat_field_atime_nsec)
-    val fieldMtimeLabel = stringResource(R.string.susfs_kstat_field_mtime)
-    val fieldMtimeNsecLabel = stringResource(R.string.susfs_kstat_field_mtime_nsec)
-    val fieldCtimeLabel = stringResource(R.string.susfs_kstat_field_ctime)
-    val fieldCtimeNsecLabel = stringResource(R.string.susfs_kstat_field_ctime_nsec)
-    val fieldBlocksLabel = stringResource(R.string.susfs_kstat_field_blocks)
-    val fieldBlksizeLabel = stringResource(R.string.susfs_kstat_field_blksize)
     val defaultValueLabel = stringResource(R.string.susfs_value_default)
     val susfsEntryImportSuccess = stringResource(R.string.susfs_entry_import_success)
 
@@ -207,26 +200,31 @@ fun SusKstatTab(
                 var successCount = 0
                 var failCount = 0
                 paths.forEach { path ->
-                    val ok = when (selectedSubtype) {
-                        subtypeFullClone -> SuSFSConfigHelper.addSusKstatFullClone(path)
-                        subtypeStatically -> {
-                            SuSFSConfigHelper.addSusKstatStatically(
-                                path,
-                                statIno.text.toString().trim().toLongOrNull(),
-                                statDev.text.toString().trim().toLongOrNull(),
-                                statNlink.text.toString().trim().toLongOrNull(),
-                                statSize.text.toString().trim().toLongOrNull(),
-                                statAtime.text.toString().trim().toLongOrNull(),
-                                statAtimeNsec.text.toString().trim().toLongOrNull(),
-                                statMtime.text.toString().trim().toLongOrNull(),
-                                statMtimeNsec.text.toString().trim().toLongOrNull(),
-                                statCtime.text.toString().trim().toLongOrNull(),
-                                statCtimeNsec.text.toString().trim().toLongOrNull(),
-                                statBlocks.text.toString().trim().toLongOrNull(),
-                                statBlksize.text.toString().trim().toLongOrNull()
-                            )
-                        }
-                        else -> SuSFSConfigHelper.addSusKstat(path)
+                    val staticValues = SusKstatStatically(
+                        statIno.text.toString().trim().toLongOrNull(),
+                        statDev.text.toString().trim().toLongOrNull(),
+                        statNlink.text.toString().trim().toLongOrNull(),
+                        statSize.text.toString().trim().toLongOrNull(),
+                        statAtime.text.toString().trim().toLongOrNull(),
+                        statAtimeNsec.text.toString().trim().toLongOrNull(),
+                        statMtime.text.toString().trim().toLongOrNull(),
+                        statMtimeNsec.text.toString().trim().toLongOrNull(),
+                        statCtime.text.toString().trim().toLongOrNull(),
+                        statCtimeNsec.text.toString().trim().toLongOrNull(),
+                        statBlocks.text.toString().trim().toLongOrNull(),
+                        statBlksize.text.toString().trim().toLongOrNull(),
+                    )
+                    val ok = awaitSuSFSBoolean(configHelper) { reply ->
+                        SuSFSUiAction.AddSusKstat(
+                            path = path,
+                            type = when (selectedSubtype) {
+                                subtypeFullClone -> SusKstatOperation.FullClone
+                                subtypeStatically -> SusKstatOperation.Statically
+                                else -> SusKstatOperation.Normal
+                            },
+                            values = staticValues,
+                            reply = reply,
+                        )
                     }
                     if (ok) {
                         successCount++
@@ -235,7 +233,9 @@ fun SusKstatTab(
                     }
                 }
                 if (successCount > 0) {
-                    entries = SuSFSConfigHelper.refreshConfig().sus_kstat
+                    entries = awaitSuSFSConfig(configHelper) { reply ->
+                        SuSFSUiAction.Refresh(reply)
+                    }?.sus_kstat.orEmpty()
                 }
                 if (paths.size == 1) {
                     if (successCount > 0) {
@@ -279,18 +279,18 @@ fun SusKstatTab(
                 )
             }
             listOf(
-                fieldInoLabel to statIno,
-                fieldDevLabel to statDev,
-                fieldNlinkLabel to statNlink,
-                fieldSizeLabel to statSize,
-                fieldAtimeLabel to statAtime,
-                fieldAtimeNsecLabel to statAtimeNsec,
-                fieldMtimeLabel to statMtime,
-                fieldMtimeNsecLabel to statMtimeNsec,
-                fieldCtimeLabel to statCtime,
-                fieldCtimeNsecLabel to statCtimeNsec,
-                fieldBlocksLabel to statBlocks,
-                fieldBlksizeLabel to statBlksize
+                "ino" to statIno,
+                "dev" to statDev,
+                "nlink" to statNlink,
+                "size" to statSize,
+                "atime" to statAtime,
+                "atime_nsec" to statAtimeNsec,
+                "mtime" to statMtime,
+                "mtime_nsec" to statMtimeNsec,
+                "ctime" to statCtime,
+                "ctime_nsec" to statCtimeNsec,
+                "blocks" to statBlocks,
+                "blksize" to statBlksize
             ).forEachIndexed { index, (label, state) ->
                 item(key = "susfs_kstat_static_$index") {
                     SettingsTextFieldWidget(
@@ -312,18 +312,18 @@ fun SusKstatTab(
             spoofTypeLabel to item.spoof_type.localizedLabel()
         )
         item.statically?.let { st ->
-            fields.add(fieldInoLabel to (st.ino?.toString() ?: defaultValueLabel))
-            fields.add(fieldDevLabel to (st.dev?.toString() ?: defaultValueLabel))
-            fields.add(fieldNlinkLabel to (st.nlink?.toString() ?: defaultValueLabel))
-            fields.add(fieldSizeLabel to (st.size?.toString() ?: defaultValueLabel))
-            fields.add(fieldAtimeLabel to (st.atime?.toString() ?: defaultValueLabel))
-            fields.add(fieldAtimeNsecLabel to (st.atime_nsec?.toString() ?: defaultValueLabel))
-            fields.add(fieldMtimeLabel to (st.mtime?.toString() ?: defaultValueLabel))
-            fields.add(fieldMtimeNsecLabel to (st.mtime_nsec?.toString() ?: defaultValueLabel))
-            fields.add(fieldCtimeLabel to (st.ctime?.toString() ?: defaultValueLabel))
-            fields.add(fieldCtimeNsecLabel to (st.ctime_nsec?.toString() ?: defaultValueLabel))
-            fields.add(fieldBlocksLabel to (st.blocks?.toString() ?: defaultValueLabel))
-            fields.add(fieldBlksizeLabel to (st.blksize?.toString() ?: defaultValueLabel))
+            fields.add("ino" to (st.ino?.toString() ?: defaultValueLabel))
+            fields.add("dev" to (st.dev?.toString() ?: defaultValueLabel))
+            fields.add("nlink" to (st.nlink?.toString() ?: defaultValueLabel))
+            fields.add("size" to (st.size?.toString() ?: defaultValueLabel))
+            fields.add("atime" to (st.atime?.toString() ?: defaultValueLabel))
+            fields.add("atime_nsec" to (st.atime_nsec?.toString() ?: defaultValueLabel))
+            fields.add("mtime" to (st.mtime?.toString() ?: defaultValueLabel))
+            fields.add("mtime_nsec" to (st.mtime_nsec?.toString() ?: defaultValueLabel))
+            fields.add("ctime" to (st.ctime?.toString() ?: defaultValueLabel))
+            fields.add("ctime_nsec" to (st.ctime_nsec?.toString() ?: defaultValueLabel))
+            fields.add("blocks" to (st.blocks?.toString() ?: defaultValueLabel))
+            fields.add("blksize" to (st.blksize?.toString() ?: defaultValueLabel))
         }
         EntryDetailDialog(
             showDialog = true,
@@ -333,9 +333,13 @@ fun SusKstatTab(
             onDelete = {
                 scope.launch {
                     isLoading = true
-                    val ok = SuSFSConfigHelper.removeSusKstat(item.path)
+                    val ok = awaitSuSFSBoolean(configHelper) { reply ->
+                        SuSFSUiAction.RemoveSusKstat(item.path, reply)
+                    }
                     if (ok) {
-                        entries = SuSFSConfigHelper.refreshConfig().sus_kstat
+                        entries = awaitSuSFSConfig(configHelper) { reply ->
+                            SuSFSUiAction.Refresh(reply)
+                        }?.sus_kstat.orEmpty()
                         detailItem = null
                     } else {
                         isLoading = false

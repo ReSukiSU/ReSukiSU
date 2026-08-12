@@ -2,30 +2,26 @@ package com.resukisu.resukisu.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.resukisu.resukisu.ksuApp
-import com.resukisu.resukisu.ui.util.SulogEntry
-import com.resukisu.resukisu.ui.util.SulogEventFilter
-import com.resukisu.resukisu.ui.util.SulogFile
-import com.resukisu.resukisu.ui.util.SulogFileCleanAction
-import com.resukisu.resukisu.ui.util.buildVisibleSulogEntries
-import com.resukisu.resukisu.ui.util.cleanSulogFile
-import com.resukisu.resukisu.ui.util.defaultSulogEventFilters
-import com.resukisu.resukisu.ui.util.deleteSulogFile
-import com.resukisu.resukisu.ui.util.execKsud
-import com.resukisu.resukisu.ui.util.getFeaturePersistValue
-import com.resukisu.resukisu.ui.util.getFeatureStatus
-import com.resukisu.resukisu.ui.util.listSulogFiles
-import com.resukisu.resukisu.ui.util.parseSulogLines
-import com.resukisu.resukisu.ui.util.readSulogFile
-import com.resukisu.resukisu.ui.util.resolveSulogFileCleanAction
-import kotlinx.coroutines.Dispatchers
+import com.resukisu.resukisu.domain.model.SulogEntry
+import com.resukisu.resukisu.domain.model.SulogEventFilter
+import com.resukisu.resukisu.domain.model.SulogFile
+import com.resukisu.resukisu.domain.model.defaultSulogEventFilters
+import com.resukisu.resukisu.domain.model.filterSulogEntries
+import com.resukisu.resukisu.domain.usecase.CleanSulogUseCase
+import com.resukisu.resukisu.domain.usecase.EnableSulogUseCase
+import com.resukisu.resukisu.domain.usecase.GetStringSetPreferenceUseCase
+import com.resukisu.resukisu.domain.usecase.ObserveSulogStateUseCase
+import com.resukisu.resukisu.domain.usecase.RefreshSulogUseCase
+import com.resukisu.resukisu.domain.usecase.SetStringSetPreferenceUseCase
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class SulogScreenState(
@@ -57,152 +53,104 @@ data class SulogFileSelector(
     val selectedIndex: Int,
 )
 
-data class SulogUiState(
-    val isLoading: Boolean = true,
-    val isRefreshing: Boolean = false,
-    val sulogStatus: String = "",
-    val isSulogEnabled: Boolean = false,
-    val searchText: String = "",
-    val selectedFilters: Set<SulogEventFilter> = defaultSulogEventFilters(),
-    val files: List<SulogFile> = emptyList(),
-    val selectedFilePath: String? = null,
-    val entries: List<SulogEntry> = emptyList(),
-    val visibleEntries: List<SulogEntry> = emptyList(),
-    val errorMessage: String? = null,
-)
+typealias SulogUiState = SulogScreenState
 
-class SulogViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(SulogUiState())
-    val uiState: StateFlow<SulogUiState> = _uiState.asStateFlow()
-    private val prefs = ksuApp.ensurePreferencesRepository()
+sealed interface SulogUiAction {
+    data object Refresh : SulogUiAction
+    data object RefreshLatest : SulogUiAction
+    data object Enable : SulogUiAction
+    data object CleanFile : SulogUiAction
+    data class Search(val query: String) : SulogUiAction
+    data class ToggleFilter(val filter: SulogEventFilter) : SulogUiAction
+    data class SelectFile(val path: String) : SulogUiAction
+}
 
-    private var refreshJob: Job? = null
+sealed interface SulogUiEvent {
+    data class Error(val message: String) : SulogUiEvent
+}
 
-    init {
-        val savedFilters = prefs.getStringSet(PREF_SULOG_FILTERS, emptySet())
+class SulogViewModel(
+    observeState: ObserveSulogStateUseCase,
+    private val refreshSulog: RefreshSulogUseCase,
+    private val setSulogEnabled: EnableSulogUseCase,
+    private val cleanSulog: CleanSulogUseCase,
+    getStringSetPreference: GetStringSetPreferenceUseCase,
+    private val setStringSetPreference: SetStringSetPreferenceUseCase,
+) : ViewModel() {
+    private val search = MutableStateFlow("")
+    private val filters = MutableStateFlow(
+        getStringSetPreference(PREF_SULOG_FILTERS)
             .mapNotNull { raw -> SulogEventFilter.entries.firstOrNull { it.name == raw } }
             .toSet()
-            .ifEmpty { defaultSulogEventFilters() }
-        _uiState.update { it.copy(selectedFilters = savedFilters) }
+            .ifEmpty(::defaultSulogEventFilters)
+    )
+    private var refreshJob: Job? = null
+    private val mutableEvents = MutableSharedFlow<SulogUiEvent>(extraBufferCapacity = 1)
+    val events: SharedFlow<SulogUiEvent> = mutableEvents.asSharedFlow()
+
+    val state: StateFlow<SulogUiState> = combine(
+        observeState(),
+        search,
+        filters,
+    ) { source, query, selectedFilters ->
+        SulogUiState(
+            isLoading = source.isLoading,
+            isRefreshing = source.isRefreshing,
+            sulogStatus = source.status,
+            isSulogEnabled = source.enabled,
+            searchText = query,
+            selectedFilters = selectedFilters,
+            files = source.files,
+            selectedFilePath = source.selectedFilePath,
+            entries = source.entries,
+            visibleEntries = filterSulogEntries(source.entries, query, selectedFilters),
+            errorMessage = source.errorMessage,
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = SulogUiState(selectedFilters = filters.value),
+    )
+    val uiState: StateFlow<SulogUiState> = state
+
+    fun dispatch(action: SulogUiAction) {
+        when (action) {
+            SulogUiAction.Refresh -> refresh(state.value.selectedFilePath)
+            SulogUiAction.RefreshLatest -> refresh(null)
+            SulogUiAction.Enable -> viewModelScope.launch {
+                val result = setSulogEnabled(true)
+                result.exceptionOrNull()?.let {
+                    mutableEvents.emit(SulogUiEvent.Error(it.message.orEmpty()))
+                } ?: refresh(state.value.selectedFilePath)
+            }
+
+            SulogUiAction.CleanFile -> state.value.selectedFilePath?.let { path ->
+                viewModelScope.launch {
+                    val result = cleanSulog(path)
+                    result.exceptionOrNull()?.let {
+                        mutableEvents.emit(SulogUiEvent.Error(it.message.orEmpty()))
+                    } ?: refresh(path)
+                }
+            }
+
+            is SulogUiAction.Search -> search.value = action.query
+            is SulogUiAction.ToggleFilter -> {
+                filters.value = filters.value.toMutableSet().apply {
+                    if (!add(action.filter)) remove(action.filter)
+                }
+                setStringSetPreference(PREF_SULOG_FILTERS, filters.value.map { it.name }.toSet())
+            }
+
+            is SulogUiAction.SelectFile -> refresh(action.path)
+        }
     }
 
-    fun refresh(preferredFilePath: String? = _uiState.value.selectedFilePath) {
+    private fun refresh(preferredFilePath: String?) {
         refreshJob?.cancel()
-        refreshJob = viewModelScope.launch(Dispatchers.IO) {
-            _uiState.update {
-                if (it.isLoading) {
-                    it.copy(errorMessage = null)
-                } else {
-                    it.copy(isRefreshing = true, errorMessage = null)
-                }
+        refreshJob = viewModelScope.launch {
+            refreshSulog(preferredFilePath).exceptionOrNull()?.let {
+                mutableEvents.emit(SulogUiEvent.Error(it.message.orEmpty()))
             }
-            runCatching {
-                val sulogStatus = getFeatureStatus("sulog")
-                val isSulogEnabled = getFeaturePersistValue("sulog") == 1L
-                val files = listSulogFiles()
-                currentCoroutineContext().ensureActive()
-                val selectedFile = when {
-                    files.isEmpty() -> null
-                    preferredFilePath != null -> files.firstOrNull { it.path == preferredFilePath }
-                        ?: files.first()
-
-                    else -> files.first()
-                }
-                val logLines = selectedFile?.let { readSulogFile(it.path) }.orEmpty()
-                val entries = parseSulogLines(logLines)
-                val currentState = _uiState.value
-                currentCoroutineContext().ensureActive()
-                SulogUiState(
-                    isLoading = false,
-                    isRefreshing = false,
-                    sulogStatus = sulogStatus,
-                    isSulogEnabled = isSulogEnabled,
-                    searchText = currentState.searchText,
-                    selectedFilters = currentState.selectedFilters,
-                    files = files,
-                    selectedFilePath = selectedFile?.path,
-                    entries = entries,
-                    visibleEntries = buildVisibleSulogEntries(
-                        entries,
-                        currentState.searchText,
-                        currentState.selectedFilters,
-                    ),
-                )
-            }.onSuccess { state ->
-                _uiState.value = state
-            }.onFailure { error ->
-                if (error is kotlinx.coroutines.CancellationException) {
-                    throw error
-                }
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        isRefreshing = false,
-                        errorMessage = error.message,
-                    )
-                }
-            }
-        }
-    }
-
-    fun refreshLatest() {
-        refresh(preferredFilePath = null)
-    }
-
-    fun setSulogEnabled(enabled: Boolean): Boolean =
-        execKsud("feature set sulog ${if (enabled) 1 else 0}", true)
-
-    fun enableSulog() {
-        val preferredFilePath = _uiState.value.selectedFilePath
-        viewModelScope.launch(Dispatchers.IO) {
-            _uiState.update { it.copy(isRefreshing = true, errorMessage = null) }
-            if (setSulogEnabled(true)) {
-                execKsud("feature save", true)
-            }
-            refresh(preferredFilePath)
-        }
-    }
-
-    fun cleanFile() {
-        val currentState = _uiState.value
-        val path = currentState.selectedFilePath ?: return
-        val cleanAction = resolveSulogFileCleanAction(currentState.files, path)
-        viewModelScope.launch(Dispatchers.IO) {
-            when (cleanAction) {
-                SulogFileCleanAction.Clear -> cleanSulogFile(path)
-                SulogFileCleanAction.Delete -> deleteSulogFile(path)
-            }
-            refresh(path)
-        }
-    }
-
-    fun setSearchText(searchText: String) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                searchText = searchText,
-                visibleEntries = buildVisibleSulogEntries(
-                    currentState.entries,
-                    searchText,
-                    currentState.selectedFilters,
-                )
-            )
-        }
-    }
-
-    fun toggleFilter(filter: SulogEventFilter) {
-        _uiState.update { currentState ->
-            val selectedFilters = currentState.selectedFilters.toMutableSet().apply {
-                if (!add(filter)) remove(filter)
-            }
-            prefs.putStringSet(PREF_SULOG_FILTERS, selectedFilters.map { it.name }.toSet())
-            currentState.copy(
-                selectedFilters = selectedFilters,
-                visibleEntries = buildVisibleSulogEntries(
-                    currentState.entries,
-                    currentState.searchText,
-                    selectedFilters,
-                )
-            )
         }
     }
 
