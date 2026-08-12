@@ -63,6 +63,7 @@ setup_kernelsu() {
 	grep -q "kernelsu" "$DRIVER_MAKEFILE" || printf "\nobj-\$(CONFIG_KSU) += kernelsu/\n" >> "$DRIVER_MAKEFILE" && echo "[+] Modified Makefile."
 	grep -q "source \"drivers/kernelsu/Kconfig\"" "$DRIVER_KCONFIG" || sed -i "/endmenu/i\source \"drivers/kernelsu/Kconfig\"" "$DRIVER_KCONFIG" && echo "[+] Modified Kconfig."
 	echo '[+] Done.'
+	echo '[!] If you want to add submodule in your kernelsource,you can run this setup script with --submodule argument.'
 }
 
 # Setup KernelSU as submodule
