@@ -1,6 +1,5 @@
 #include <asm/elf.h>
 
-#include <linux/capability.h>
 #include <linux/elf.h>
 #include <linux/file.h>
 #include <linux/fs.h>
@@ -15,6 +14,9 @@
 #include "feature/module_load_filter.h"
 #include "klog.h" // IWYU pragma: keep
 #include "arch.h"
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
+#include "hook/syscall_hook.h"
+#endif
 
 // This is a load-time policy, not an attempt to infer whether arbitrary
 // modules are safe. Userspace can pass device-specific .modinfo names through
@@ -65,6 +67,13 @@ static int ksu_reader_read(struct ksu_elf_reader *r, loff_t offset, void *buf, s
     return 0;
 }
 
+// Kernel module names never contain '-'; modpost rewrites it to '_'. Userspace
+// is allowed to configure the filename spelling, so fold it on that side too.
+static char ksu_normalize_module_char(char ch)
+{
+    return ch == '-' ? '_' : ch;
+}
+
 static bool ksu_name_matches(const char *name, size_t name_len, const char *configured, size_t configured_len,
                              bool normalize_filename)
 {
@@ -74,11 +83,9 @@ static bool ksu_name_matches(const char *name, size_t name_len, const char *conf
         return false;
 
     for (i = 0; i < name_len; i++) {
-        char ch = name[i];
+        char ch = normalize_filename ? ksu_normalize_module_char(name[i]) : name[i];
 
-        if (normalize_filename && ch == '-')
-            ch = '_';
-        if (ch != configured[i])
+        if (ch != ksu_normalize_module_char(configured[i]))
             return false;
     }
 
@@ -247,41 +254,8 @@ out:
     return should_block;
 }
 
-int ksu_handle_init_module(const void __user *umod, unsigned long umod_len)
+static bool ksu_get_blocked_file_module(struct file *file, int flags, struct ksu_module_name *blocked)
 {
-    struct ksu_module_name blocked = { 0 };
-    struct ksu_elf_reader r = {
-        .umod = (const char __user *)umod,
-        .umod_len = umod_len,
-        .file = NULL,
-        .file_size = 0,
-    };
-
-    if (!ksu_blocked_preset_modules[0])
-        return 1;
-
-    if (r.umod && r.umod_len >= sizeof(Elf_Ehdr) && ksu_is_block_module(&r, &blocked)) {
-        pr_info("module_load_filter: block %.*s load due to it in blocklist\n", (int)blocked.len, blocked.name);
-        return 0;
-    }
-
-    return 1;
-}
-
-int ksu_handle_finit_module(int fd, int flags)
-{
-    struct ksu_module_name blocked = { 0 };
-    struct file *file;
-    int should_block = 0;
-
-    if (!ksu_blocked_preset_modules[0])
-        return 1;
-
-    file = fget(fd);
-
-    if (!file)
-        return 0;
-
     struct ksu_elf_reader r = {
         .umod = NULL,
         .umod_len = 0,
@@ -293,37 +267,83 @@ int ksu_handle_finit_module(int fd, int flags)
     // linux kernel 5.17+
 #ifdef MODULE_INIT_COMPRESSED_FILE
     if (flags & MODULE_INIT_COMPRESSED_FILE)
-        should_block = ksu_get_blocked_compressed_module(file, &blocked);
-    else
+        return ksu_get_blocked_compressed_module(file, blocked);
 #else
-    {
-        should_block = r.file_size >= (loff_t)sizeof(Elf_Ehdr) && ksu_is_block_module(&r, &blocked);
-    }
+    (void)flags;
 #endif
 
-        if (should_block) {
+    return r.file_size >= (loff_t)sizeof(Elf_Ehdr) && ksu_is_block_module(&r, blocked);
+}
+
+int ksu_handle_init_module(const void __user *umod, unsigned long umod_len)
+{
+    struct ksu_module_name blocked = { 0 };
+    struct ksu_elf_reader r = {
+        .umod = (const char __user *)umod,
+        .umod_len = umod_len,
+        .file = NULL,
+        .file_size = 0,
+    };
+
+    if (!ksu_blocked_preset_modules[0])
+        return KSU_MODULE_LOAD_CONTINUE;
+
+    if (r.umod && r.umod_len >= sizeof(Elf_Ehdr) && ksu_is_block_module(&r, &blocked)) {
         pr_info("module_load_filter: block %.*s load due to it in blocklist\n", (int)blocked.len, blocked.name);
+        return 0;
     }
 
+    return KSU_MODULE_LOAD_CONTINUE;
+}
+
+int ksu_handle_finit_module(int fd, int flags)
+{
+    struct ksu_module_name blocked = { 0 };
+    struct file *file;
+    bool should_block;
+
+    if (!ksu_blocked_preset_modules[0])
+        return KSU_MODULE_LOAD_CONTINUE;
+
+    file = fget(fd);
+
+    if (!file)
+        return KSU_MODULE_LOAD_CONTINUE;
+
+    // @blocked points into ksu_blocked_preset_modules, so it stays valid here.
+    should_block = ksu_get_blocked_file_module(file, flags, &blocked);
     fput(file);
-    return should_block;
+
+    if (should_block) {
+        pr_info("module_load_filter: block %.*s load due to it in blocklist\n", (int)blocked.len, blocked.name);
+        return 0;
+    }
+
+    return KSU_MODULE_LOAD_CONTINUE;
 }
 
 #ifdef CONFIG_KSU_TRACEPOINT_HOOK
+// init_module(2): sys_init_module(void __user *umod, unsigned long len,
+//                                const char __user *uargs)
 static long (*orig_sys_init_module)(const struct pt_regs *regs);
 static long ksu_sys_init_module(const struct pt_regs *regs)
 {
-    if (ksu_handle_init_module((const void __user *)PT_REGS_PARM1(regs), (unsigned long)PT_REGS_PARM2(regs)))
-        return 0;
+    int ret = ksu_handle_init_module((const void __user *)PT_REGS_PARM1(regs), (unsigned long)PT_REGS_PARM2(regs));
+
+    if (ret != KSU_MODULE_LOAD_CONTINUE)
+        return ret;
 
     return orig_sys_init_module(regs);
 }
 
+// finit_module(2): sys_finit_module(int fd, const char __user *uargs, int flags)
 static long (*orig_sys_finit_module)(const struct pt_regs *regs);
 static long ksu_sys_finit_module(const struct pt_regs *regs)
 {
-    if (ksu_handle_finit_module((int)PT_REGS_PARM1(regs), (int)PT_REGS_PARM3(regs)))
-        return 0;
+    int ret = ksu_handle_finit_module((int)PT_REGS_PARM1(regs), (int)PT_REGS_PARM3(regs));
+
+    if (ret != KSU_MODULE_LOAD_CONTINUE)
+        return ret;
 
     return orig_sys_finit_module(regs);
 }

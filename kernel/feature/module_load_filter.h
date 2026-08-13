@@ -4,6 +4,7 @@
 #include <linux/types.h>
 
 #define KSU_BLOCKED_PRESET_MODULES_MAX 256
+#define KSU_MODULE_LOAD_CONTINUE 1
 
 extern char ksu_blocked_preset_modules[KSU_BLOCKED_PRESET_MODULES_MAX];
 
@@ -12,5 +13,8 @@ extern char ksu_blocked_preset_modules[KSU_BLOCKED_PRESET_MODULES_MAX];
 // contract as the tracepoint-hook adapter.
 int ksu_handle_init_module(const void __user *umod, unsigned long umod_len);
 int ksu_handle_finit_module(int fd, int flags);
+
+void ksu_module_load_filter_hook_init(void);
+void ksu_module_load_filter_hook_exit(void);
 
 #endif
