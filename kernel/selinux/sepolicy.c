@@ -1173,15 +1173,12 @@ int ksu_dup_policydb(struct policydb *old_db, struct policydb *new_db)
     }
     ksu_unlock_sepolicy_legacy();
 
-    // calculate actual written size first
-    size_t written = (size_t)len - fp.len;
-
     // https://android-review.googlesource.com/c/kernel/common/+/3009995
     // Android won't add these flags to policydb_write....
     // fixup config
     // 4*2+8+4
     static const size_t kConfigOff = 20;
-    if (written >= kConfigOff + sizeof(u32)) {
+    if (len >= kConfigOff + sizeof(u32)) {
         u32 *config_ptr = data + kConfigOff;
 #ifdef KSU_COMPAT_HAS_POLICYDB_CONFIG_ANDROID_NETLINK_ROUTE
         if (old_db->android_netlink_route) {
@@ -1199,7 +1196,7 @@ int ksu_dup_policydb(struct policydb *old_db, struct policydb *new_db)
 
     // rewind fp
     fp.data = data;
-    fp.len = written;
+    fp.len = len;
 
     ret = policydb_read(new_db, &fp);
     if (ret) {
@@ -1207,10 +1204,10 @@ int ksu_dup_policydb(struct policydb *old_db, struct policydb *new_db)
         goto out_free_data;
     }
 
-    new_db->len = written;
+    new_db->len = old_db->len;
 
     vfree(data);
-    ret = (int)written;
+    ret = len;
 
     return ret;
 
