@@ -32,7 +32,7 @@ use crate::{
             get_zip_uncompressed_size, getprop, switch_cgroups,
         },
     },
-    assets, defs,
+    assets, banner, defs,
     defs::{MODULE_DIR, MODULE_UPDATE_DIR, UPDATE_FILE_NAME},
 };
 
@@ -529,7 +529,7 @@ fn install_module_to_system(zip: &str) -> Result<()> {
     ensure_boot_completed()?;
 
     // print banner
-    println!(include_str!("../banner"));
+    println!("{}", banner::print_banner());
 
     assets::ensure_binaries(false).with_context(|| "Failed to extract assets")?;
 

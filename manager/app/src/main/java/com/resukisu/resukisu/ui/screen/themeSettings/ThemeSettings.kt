@@ -82,12 +82,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.ksuApp
+import com.resukisu.resukisu.domain.model.availablePaletteStyles
 import com.resukisu.resukisu.ui.component.ConfirmResult
 import com.resukisu.resukisu.ui.component.KeyPointSlider
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
@@ -103,27 +102,33 @@ import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.screen.themeSettings.component.LanguageSelectionDialog
 import com.resukisu.resukisu.ui.screen.themeSettings.component.ThemeSettingsDialogs
 import com.resukisu.resukisu.ui.screen.themeSettings.crop.BackgroundCropActivity
-import com.resukisu.resukisu.ui.screen.themeSettings.util.restartActivity
 import com.resukisu.resukisu.ui.theme.BackgroundManager
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
+import com.resukisu.resukisu.ui.viewmodel.HomeUiAction
 import com.resukisu.resukisu.ui.viewmodel.HomeUiState
 import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
+import com.resukisu.resukisu.ui.viewmodel.ModuleUiAction
 import com.resukisu.resukisu.ui.viewmodel.ModuleUiState
 import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel
 import com.resukisu.resukisu.ui.viewmodel.PredictiveBackAnimation
 import com.resukisu.resukisu.ui.viewmodel.PredictiveBackExitDirection
+import com.resukisu.resukisu.ui.viewmodel.SettingsUiAction
 import com.resukisu.resukisu.ui.viewmodel.SettingsUiState
 import com.resukisu.resukisu.ui.viewmodel.SettingsViewModel
+import com.resukisu.resukisu.ui.viewmodel.dpiFriendlyNameRes
 import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import java.io.File
 import kotlin.math.roundToInt
+
 
 @SuppressLint(
     "LocalContextConfigurationRead", "LocalContextResourcesRead", "ObsoleteSdkInt",
@@ -131,20 +136,23 @@ import kotlin.math.roundToInt
 )
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun ThemeSettingsScreen() {
+fun ThemeSettingsScreen(
+    settingsViewModel: SettingsViewModel,
+) {
+    val themeConfig: ThemeConfig = koinInject()
+    val cardConfig: CardConfig = koinInject()
     // 顶部滚动行为
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     // 创建设置状态管理器
-    val settingsViewModel = viewModel<SettingsViewModel>(viewModelStoreOwner = ksuApp)
     val settingsState by settingsViewModel.uiState.collectAsStateWithLifecycle()
 
-    val homeViewModel = viewModel<HomeViewModel>(viewModelStoreOwner = ksuApp)
+    val homeViewModel = koinViewModel<HomeViewModel>()
     val homeUiState by homeViewModel.uiState.collectAsStateWithLifecycle()
 
-    val moduleViewModel = viewModel<ModuleViewModel>(viewModelStoreOwner = ksuApp)
+    val moduleViewModel = koinViewModel<ModuleViewModel>()
     val moduleUiState by moduleViewModel.uiState.collectAsStateWithLifecycle()
 
     // Image selection and cropping
@@ -161,7 +169,9 @@ fun ThemeSettingsScreen() {
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.let { data ->
                 UCrop.getOutput(data)?.let {
-                    settingsViewModel.handleCustomBackground(context, it)
+                    settingsViewModel.dispatch(
+                        SettingsUiAction.SetCustomBackground(it.toString())
+                    )
                 }
             }
         } else if (result.resultCode == UCrop.RESULT_ERROR) {
@@ -179,7 +189,9 @@ fun ThemeSettingsScreen() {
         if (result.resultCode == Activity.RESULT_OK) {
             val outputUri = pendingExternalCropOutputUri ?: result.data?.data
             outputUri?.let {
-                settingsViewModel.handleCustomBackground(context, it)
+                settingsViewModel.dispatch(
+                    SettingsUiAction.SetCustomBackground(it.toString())
+                )
             }
         }
         pendingExternalCropOutputUri = null
@@ -302,15 +314,15 @@ fun ThemeSettingsScreen() {
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor =
-                        if (ThemeConfig.isEnableBlur)
+                        if (themeConfig.isEnableBlur)
                             Color.Transparent
                         else
-                            MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha),
+                            MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
                     scrolledContainerColor =
-                        if (ThemeConfig.isEnableBlur)
+                        if (themeConfig.isEnableBlur)
                             Color.Transparent
                         else
-                            MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha),
+                            MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
                 ),
                 windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 scrollBehavior = scrollBehavior
@@ -358,7 +370,9 @@ fun ThemeSettingsScreen() {
                                 transition.playTimeNanos
                             )
 
-                            settingsViewModel.setPredictiveBackAnimation(context, animation)
+                            settingsViewModel.dispatch(
+                                SettingsUiAction.SetPredictiveBackAnimation(animation)
+                            )
                         }
                     }
                     item(
@@ -366,7 +380,9 @@ fun ThemeSettingsScreen() {
                                 settingsState.predictiveBackAnimation == PredictiveBackAnimation.AOSP
                     ) {
                         PredictiveBackAnimationDirectionWidget(settingsState) { direction ->
-                            settingsViewModel.setPredictiveBackExitDirection(context, direction)
+                            settingsViewModel.dispatch(
+                                SettingsUiAction.SetPredictiveBackExitDirection(direction)
+                            )
                         }
                     }
                 }
@@ -478,7 +494,10 @@ private fun AppearanceSettings(
     pickImageLauncher: ManagedActivityResultLauncher<String, Uri?>,
     coroutineScope: CoroutineScope
 ) {
-    val context = LocalContext.current
+    val themeConfig: ThemeConfig = koinInject()
+    val cardConfig: CardConfig = koinInject()
+    val backgroundManager: BackgroundManager = koinInject()
+    val paletteStyles = state.dynamicColorSpec.availablePaletteStyles()
     SegmentedColumn(title = stringResource(R.string.appearance_settings)) {
         item {
             // 语言设置
@@ -490,10 +509,10 @@ private fun AppearanceSettings(
             SettingsChooseWidget(
                 icon = Icons.TwoTone.DarkMode,
                 title = stringResource(R.string.theme_mode),
-                items = state.themeOptions,
+                items = state.themeOptions.map { stringResource(it) },
                 selectedIndex = state.themeMode,
                 onSelectedIndexChange = { index ->
-                    viewModel.handleThemeModeChange(context, index)
+                    viewModel.dispatch(SettingsUiAction.SetThemeMode(index))
                 }
             )
         }
@@ -505,7 +524,9 @@ private fun AppearanceSettings(
                 title = stringResource(R.string.dynamic_color_title),
                 description = stringResource(R.string.dynamic_color_summary),
                 checked = state.useDynamicColor,
-                onCheckedChange = { viewModel.handleDynamicColorChange(context, it) }
+                onCheckedChange = { enabled ->
+                    viewModel.dispatch(SettingsUiAction.SetDynamicColor(enabled))
+                }
             )
         }
 
@@ -521,12 +542,13 @@ private fun AppearanceSettings(
             SettingsChooseWidget(
                 icon = Icons.TwoTone.Style,
                 title = stringResource(R.string.dynamic_palette_style),
-                items = PaletteStyle.entries.map { it.displayName() },
-                selectedIndex = PaletteStyle.entries.indexOf(state.dynamicPaletteStyle),
+                items = paletteStyles.map { it.displayName() },
+                selectedIndex = paletteStyles.indexOf(state.dynamicPaletteStyle).coerceAtLeast(0),
                 onSelectedIndexChange = { index ->
-                    viewModel.handleDynamicPaletteStyleChange(
-                        context,
-                        PaletteStyle.entries.getOrElse(index) { PaletteStyle.TonalSpot }
+                    viewModel.dispatch(
+                        SettingsUiAction.SetDynamicPaletteStyle(
+                            paletteStyles.getOrElse(index) { PaletteStyle.TonalSpot }
+                        )
                     )
                 }
             )
@@ -539,11 +561,12 @@ private fun AppearanceSettings(
                 items = ColorSpec.SpecVersion.entries.map { it.displayName() },
                 selectedIndex = ColorSpec.SpecVersion.entries.indexOf(state.dynamicColorSpec),
                 onSelectedIndexChange = { index ->
-                    viewModel.handleDynamicColorSpecChange(
-                        context,
-                        ColorSpec.SpecVersion.entries.getOrElse(index) {
-                            ColorSpec.SpecVersion.SPEC_2021
-                        }
+                    viewModel.dispatch(
+                        SettingsUiAction.SetDynamicColorSpec(
+                            ColorSpec.SpecVersion.entries.getOrElse(index) {
+                                ColorSpec.SpecVersion.SPEC_2021
+                            }
+                        )
                     )
                 }
             )
@@ -557,7 +580,7 @@ private fun AppearanceSettings(
                 onClick = {},
             ) {
                 Text(
-                    text = viewModel.getDpiFriendlyName(context, state.tempDpi),
+                    text = stringResource(dpiFriendlyNameRes(state.tempDpi)),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -571,8 +594,8 @@ private fun AppearanceSettings(
                 modifier = Modifier
                     .clip(shape)
                     .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright),
-                color = if (ThemeConfig.isEnableBlurExp) Color.Transparent else MaterialTheme.colorScheme.surfaceBright.copy(
-                    alpha = CardConfig.cardAlpha
+                color = if (themeConfig.isEnableBlurExp) Color.Transparent else MaterialTheme.colorScheme.surfaceBright.copy(
+                    alpha = cardConfig.cardAlpha
                 ),
                 shape = shape
             ) {
@@ -596,7 +619,13 @@ private fun AppearanceSettings(
                 )
             },
             bottomContent = {
-                backgroundAdjustmentControls(state, viewModel, coroutineScope)
+                backgroundAdjustmentControls(
+                    state,
+                    viewModel,
+                    coroutineScope,
+                    themeConfig,
+                    backgroundManager,
+                )
             }
         )
     }
@@ -611,7 +640,6 @@ private fun CustomizationSettings(
     homeViewModel: HomeViewModel,
     moduleViewModel: ModuleViewModel,
 ) {
-    val context = LocalContext.current
     SegmentedColumn(title = stringResource(R.string.custom_settings)) {
         item {
             // 图标切换
@@ -620,7 +648,9 @@ private fun CustomizationSettings(
                 title = stringResource(R.string.icon_switch_title),
                 description = stringResource(R.string.icon_switch_summary),
                 checked = settingsUiState.useAltIcon,
-                onCheckedChange = { settingsViewModel.handleIconChange(context, it) }
+                onCheckedChange = { enabled ->
+                    settingsViewModel.dispatch(SettingsUiAction.SetAlternateIcon(enabled))
+                }
             )
         }
 
@@ -631,7 +661,9 @@ private fun CustomizationSettings(
                 title = stringResource(R.string.show_more_module_info),
                 description = stringResource(R.string.show_more_module_info_summary),
                 checked = moduleUiState.showMoreModuleInfo,
-                onCheckedChange = { moduleViewModel.handleShowMoreModuleInfoChange(context, it) }
+                onCheckedChange = { enabled ->
+                    moduleViewModel.dispatch(ModuleUiAction.SetShowMoreInfo(enabled))
+                }
             )
         }
 
@@ -642,7 +674,9 @@ private fun CustomizationSettings(
                 title = stringResource(R.string.simple_mode),
                 description = stringResource(R.string.simple_mode_summary),
                 checked = homeUiState.isSimpleMode,
-                onCheckedChange = { homeViewModel.handleSimpleModeChange(context, it) }
+                onCheckedChange = { enabled ->
+                    homeViewModel.dispatch(HomeUiAction.SetSimpleMode(enabled))
+                }
             )
         }
 
@@ -663,7 +697,9 @@ private fun SegmentedColumnScope.hideOptionsSettings(
             title = stringResource(R.string.hide_other_info),
             description = stringResource(R.string.hide_other_info_summary),
             checked = homeUiState.isHideOtherInfo,
-            onCheckedChange = homeViewModel::handleHideOtherInfoChange
+            onCheckedChange = { enabled ->
+                homeViewModel.dispatch(HomeUiAction.SetHideOtherInfo(enabled))
+            }
         )
     }
 
@@ -674,7 +710,9 @@ private fun SegmentedColumnScope.hideOptionsSettings(
             title = stringResource(R.string.hide_susfs_status),
             description = stringResource(R.string.hide_susfs_status_summary),
             checked = homeUiState.isHideSusfsStatus,
-            onCheckedChange = homeViewModel::handleHideSusfsStatusChange
+            onCheckedChange = { enabled ->
+                homeViewModel.dispatch(HomeUiAction.SetHideSusfsStatus(enabled))
+            }
         )
     }
 
@@ -685,7 +723,9 @@ private fun SegmentedColumnScope.hideOptionsSettings(
             title = stringResource(R.string.hide_zygisk_implement),
             description = stringResource(R.string.hide_zygisk_implement_summary),
             checked = homeUiState.isHideZygiskImplement,
-            onCheckedChange = homeViewModel::handleHideZygiskImplementChange
+            onCheckedChange = { enabled ->
+                homeViewModel.dispatch(HomeUiAction.SetHideZygiskImplement(enabled))
+            }
         )
     }
 
@@ -696,7 +736,9 @@ private fun SegmentedColumnScope.hideOptionsSettings(
             title = stringResource(R.string.hide_meta_module_implement),
             description = stringResource(R.string.hide_meta_module_implement_summary),
             checked = homeUiState.isHideMetaModuleImplement,
-            onCheckedChange = homeViewModel::handleHideMetaModuleImplementChange
+            onCheckedChange = { enabled ->
+                homeViewModel.dispatch(HomeUiAction.SetHideMetaModuleImplement(enabled))
+            }
         )
     }
 
@@ -707,7 +749,9 @@ private fun SegmentedColumnScope.hideOptionsSettings(
             title = stringResource(R.string.hide_link_card),
             description = stringResource(R.string.hide_link_card_summary),
             checked = homeUiState.isHideLinkCard,
-            onCheckedChange = homeViewModel::handleHideLinkCardChange
+            onCheckedChange = { enabled ->
+                homeViewModel.dispatch(HomeUiAction.SetHideLinkCard(enabled))
+            }
         )
     }
 
@@ -718,24 +762,29 @@ private fun SegmentedColumnScope.hideOptionsSettings(
             title = stringResource(R.string.hide_tag_card),
             description = stringResource(R.string.hide_tag_card_summary),
             checked = moduleUiState.isHideTagRow,
-            onCheckedChange = moduleViewModel::handleHideTagRowChange
+            onCheckedChange = { enabled ->
+                moduleViewModel.dispatch(ModuleUiAction.SetHideTagRow(enabled))
+            }
         )
     }
 }
 
 @Composable
 private fun ThemeColorSelection(viewModel: SettingsViewModel) {
+    val themeConfig: ThemeConfig = koinInject()
     SettingsBaseWidget(
         icon = Icons.TwoTone.Palette,
         title = stringResource(R.string.theme_color),
-        description = ThemeConfig.seedColor.toSeedColorHex(),
-        onClick = { viewModel.setThemeColorDialogVisible(true) },
+        description = themeConfig.seedColor.toSeedColorHex(),
+        onClick = {
+            viewModel.dispatch(SettingsUiAction.SetThemeColorDialogVisible(true))
+        },
     ) {
         Box(
             modifier = Modifier
                 .size(20.dp)
                 .clip(CircleShape)
-                .background(Color(ThemeConfig.seedColor))
+                .background(Color(themeConfig.seedColor))
         )
     }
 }
@@ -748,7 +797,6 @@ private fun DpiSliderControls(
     viewModel: SettingsViewModel,
     coroutineScope: CoroutineScope
 ) {
-    val context = LocalContext.current
     val confirmDialog = rememberConfirmDialog()
     val dpiConfirmTitle = stringResource(R.string.dpi_confirm_title)
     val dpiConfirmMessage =
@@ -764,7 +812,7 @@ private fun DpiSliderControls(
     KeyPointSlider(
         value = sliderValue,
         onValueChange = { newValue ->
-            viewModel.updateTempDpi(newValue.toInt())
+            viewModel.dispatch(SettingsUiAction.SetTempDpi(newValue.toInt()))
         },
         modifier = Modifier.fillMaxWidth(),
         valueRange = 160f..600f,
@@ -777,7 +825,7 @@ private fun DpiSliderControls(
             .fillMaxWidth()
             .padding(top = 8.dp),
     ) {
-        state.dpiPresets.forEach { (name, dpi) ->
+        state.dpiPresets.forEach { (nameResource, dpi) ->
             val isSelected = state.tempDpi == dpi
             val buttonColor = if (isSelected)
                 MaterialTheme.colorScheme.primaryContainer
@@ -791,13 +839,13 @@ private fun DpiSliderControls(
                     .clip(RoundedCornerShape(8.dp))
                     .background(buttonColor)
                     .clickable {
-                        viewModel.updateTempDpi(dpi)
+                        viewModel.dispatch(SettingsUiAction.SetTempDpi(dpi))
                     }
                     .padding(vertical = 8.dp, horizontal = 4.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = name,
+                    text = stringResource(nameResource),
                     style = MaterialTheme.typography.labelMedium,
                     color = if (isSelected)
                         MaterialTheme.colorScheme.onPrimaryContainer
@@ -814,7 +862,7 @@ private fun DpiSliderControls(
         text = if (state.isDpiCustom)
             "${stringResource(R.string.dpi_size_custom)}: ${state.tempDpi}"
         else
-            "${viewModel.getDpiFriendlyName(context, state.tempDpi)}: ${state.tempDpi}",
+            "${stringResource(dpiFriendlyNameRes(state.tempDpi))}: ${state.tempDpi}",
         style = MaterialTheme.typography.bodySmall,
         modifier = Modifier.padding(top = 8.dp)
     )
@@ -831,7 +879,7 @@ private fun DpiSliderControls(
 
                 if (confirmResult != ConfirmResult.Confirmed) return@launch
 
-                viewModel.handleDpiApply(context)
+                viewModel.dispatch(SettingsUiAction.ApplyDpi)
             }
         },
         modifier = Modifier
@@ -855,7 +903,6 @@ private fun CustomBackgroundSettings(
     viewModel: SettingsViewModel,
     pickImageLauncher: ManagedActivityResultLauncher<String, Uri?>,
 ) {
-    val context = LocalContext.current
     // TODO Portrait/Landscape wallpaper split
 
     SettingsSwitchWidget(
@@ -867,7 +914,7 @@ private fun CustomBackgroundSettings(
             if (isChecked) {
                 pickImageLauncher.launch("image/*")
             } else {
-                viewModel.handleRemoveCustomBackground(context)
+                viewModel.dispatch(SettingsUiAction.RemoveCustomBackground)
             }
         },
     )
@@ -877,6 +924,8 @@ private fun SegmentedColumnScope.backgroundAdjustmentControls(
     state: SettingsUiState,
     viewModel: SettingsViewModel,
     coroutineScope: CoroutineScope,
+    themeConfig: ThemeConfig,
+    backgroundManager: BackgroundManager,
 ) {
     item(
         topPadding = 1.dp
@@ -900,20 +949,18 @@ private fun SegmentedColumnScope.backgroundAdjustmentControls(
 
     expandableItem(
         animatedVisibility = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
-        expanded = ThemeConfig.isEnableBlur,
+        expanded = themeConfig.isEnableBlur,
         topPadding = 1.dp,
         topContent = {
-            val context = LocalContext.current
-
             SettingsSwitchWidget(
                 icon = Icons.TwoTone.BlurOn,
                 title = stringResource(id = R.string.settings_config_enable_blur),
                 description = stringResource(id = R.string.settings_config_enable_blur_summary),
-                checked = ThemeConfig.isEnableBlur,
+                checked = themeConfig.isEnableBlur,
                 onCheckedChange = { isChecked ->
-                    BackgroundManager.saveEnableBlur(context, isChecked)
+                    backgroundManager.saveEnableBlur(isChecked)
                     if (!isChecked)
-                        BackgroundManager.saveEnableBlurExp(context, false)
+                        backgroundManager.saveEnableBlurExp(false)
                 }
             )
         },
@@ -921,16 +968,14 @@ private fun SegmentedColumnScope.backgroundAdjustmentControls(
             item(
                 topPadding = 1.dp,
             ) {
-                val context = LocalContext.current
-
                 SettingsSwitchWidget(
                     icon = Icons.TwoTone.Draw,
                     title = stringResource(id = R.string.settings_exp_draw_background_to_blur),
                     description = stringResource(id = R.string.settings_exp_draw_background_to_blur_description),
                     isError = true,
-                    checked = ThemeConfig.isEnableBlurExp,
+                    checked = themeConfig.isEnableBlurExp,
                     onCheckedChange = { isChecked ->
-                        BackgroundManager.saveEnableBlurExp(context, isChecked)
+                        backgroundManager.saveEnableBlurExp(isChecked)
                     }
                 )
             }
@@ -941,15 +986,13 @@ private fun SegmentedColumnScope.backgroundAdjustmentControls(
         visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && state.useDynamicColor,
         topPadding = 1.dp,
     ) {
-        val context = LocalContext.current
-
         SettingsSwitchWidget(
             icon = Icons.TwoTone.FormatColorFill,
             title = stringResource(id = R.string.settings_config_use_custom_background_seed_color),
             description = stringResource(id = R.string.settings_config_use_custom_background_seed_color_summary),
-            checked = ThemeConfig.isUseBackgroundSeedColor,
+            checked = themeConfig.isUseBackgroundSeedColor,
             onCheckedChange = { isChecked ->
-                BackgroundManager.saveUseBackgroundSeedColor(context, isChecked)
+                backgroundManager.saveUseBackgroundSeedColor(isChecked)
             }
         )
     }
@@ -958,15 +1001,13 @@ private fun SegmentedColumnScope.backgroundAdjustmentControls(
         visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
         topPadding = 1.dp,
     ) {
-        val context = LocalContext.current
-
         SettingsSwitchWidget(
             icon = Icons.TwoTone.Contrast,
             title = stringResource(id = R.string.settings_custom_enable_high_contrast),
             description = stringResource(id = R.string.settings_custom_enable_high_contrast_summary),
-            checked = ThemeConfig.isHighContrastMode,
+            checked = themeConfig.isHighContrastMode,
             onCheckedChange = { isChecked ->
-                BackgroundManager.saveEnableHighContrastMode(context, isChecked)
+                backgroundManager.saveEnableHighContrastMode(isChecked)
             }
         )
     }
@@ -978,7 +1019,6 @@ private fun AlphaSlider(
     viewModel: SettingsViewModel,
     coroutineScope: CoroutineScope
 ) {
-    val context = LocalContext.current
     SettingsBaseWidget(
         icon = Icons.TwoTone.Opacity,
         title = stringResource(R.string.settings_card_alpha),
@@ -991,11 +1031,11 @@ private fun AlphaSlider(
             KeyPointSlider(
                 value = alphaSliderValue,
                 onValueChange = { newValue ->
-                    viewModel.handleCardAlphaChange(context, newValue)
+                    viewModel.dispatch(SettingsUiAction.SetCardAlpha(newValue))
                 },
                 onValueChangeFinished = {
                     coroutineScope.launch(Dispatchers.IO) {
-                        viewModel.saveCardConfig(context)
+                        viewModel.dispatch(SettingsUiAction.SaveCardConfig)
                     }
                 },
                 valueRange = 0f..1f,
@@ -1023,7 +1063,6 @@ private fun DimSlider(
     viewModel: SettingsViewModel,
     coroutineScope: CoroutineScope
 ) {
-    val context = LocalContext.current
     SettingsBaseWidget(
         icon = Icons.TwoTone.LightMode,
         title = stringResource(R.string.settings_background_dim),
@@ -1036,11 +1075,11 @@ private fun DimSlider(
             KeyPointSlider(
                 value = dimSliderValue,
                 onValueChange = { newValue ->
-                    viewModel.handleBackgroundDimChange(context, newValue)
+                    viewModel.dispatch(SettingsUiAction.SetBackgroundDim(newValue))
                 },
                 onValueChangeFinished = {
                     coroutineScope.launch(Dispatchers.IO) {
-                        viewModel.saveCardConfig(context)
+                        viewModel.dispatch(SettingsUiAction.SaveCardConfig)
                     }
                 },
                 valueRange = 0f..1f,
@@ -1065,7 +1104,6 @@ private fun DimSlider(
 
 @Composable
 private fun LanguageSetting(state: SettingsUiState, viewModel: SettingsViewModel) {
-    val context = LocalContext.current
     val language = stringResource(id = R.string.settings_language)
     val languageSystemDefault = stringResource(R.string.language_system_default)
 
@@ -1083,19 +1121,26 @@ private fun LanguageSetting(state: SettingsUiState, viewModel: SettingsViewModel
         icon = Icons.TwoTone.Translate,
         title = language,
         description = currentLanguageDisplay,
-        onClick = { viewModel.setLanguageDialogVisible(true) }
+        onClick = {
+            viewModel.dispatch(SettingsUiAction.SetLanguageDialogVisible(true))
+        }
     )
 
     // Language Selection Dialog
     if (state.showLanguageDialog) {
         LanguageSelectionDialog(
-            onLanguageSelected = {
+            currentLocale = state.currentAppLocale?.let { locale ->
+                if (locale.country.isEmpty()) locale.language else "${locale.language}_${locale.country}"
+            } ?: "system",
+            onLanguageSelected = { localeTag ->
                 // Update local state immediately
-                viewModel.refreshCurrentLocale(context)
+                viewModel.dispatch(SettingsUiAction.SetLanguage(localeTag))
                 // Apply locale change immediately for Android < 13
-                restartActivity(context)
+                viewModel.dispatch(SettingsUiAction.RestartActivity)
             },
-            onDismiss = { viewModel.setLanguageDialogVisible(false) }
+            onDismiss = {
+                viewModel.dispatch(SettingsUiAction.SetLanguageDialogVisible(false))
+            }
         )
     }
 }

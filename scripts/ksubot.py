@@ -39,15 +39,28 @@ try:
         last_commit = commits[-1]
 
     elif 'head_commit' in GITHUB_EVENT:
-        msg = GITHUB_EVENT["head_commit"]["msg"]
+        msg = GITHUB_EVENT["head_commit"]["message"]
         if len(msg) > 3192:
             msg = msg[:3189] + '...'
         commit_message = f'{msg.strip()}'
     else:
         commit_message = f'(no commit message)'
+except IndexError:
+    print("[!] IndexError Found! try another way to get commit...")
+    try:
+        if 'head_commit' in GITHUB_EVENT:
+            msg = GITHUB_EVENT["head_commit"]["message"]
+            if len(msg) > 3192:
+                msg = msg[:3189] + '...'
+            commit_message = f'{msg.strip()}'
+    except:
+        from traceback import print_exc
+        print_exc()
+        commit_message = f'(no commit message)'
 except:
     from traceback import print_exc
     print_exc()
+    commit_message = f'(Unexpected Error! So no commit message)'
 
 if 'compare' in GITHUB_EVENT:
     commit_url = GITHUB_EVENT['compare']
@@ -146,7 +159,7 @@ async def send_message(bot: Bot, chat_id: int, text: str, message_thread_id=None
     try:
         await asyncio.sleep(random.uniform(0.2, 0.8))
         return await bot.send_message(chat_id=chat_id, text=text, parse_mode=ParseMode.HTML, message_thread_id=message_thread_id,
-                                       read_timeout=350,write_timeout=350,connect_timeout=350,pool_timeout=350)
+                                       read_timeout=350,write_timeout=350,connect_timeout=350,pool_timeout=350,disable_web_page_preview=True)
     except RetryAfter as e:
         print(f"[-] Hit Telegram flood limit, retrying after {e.retry_after} seconds...")
         await asyncio.sleep(e.retry_after)

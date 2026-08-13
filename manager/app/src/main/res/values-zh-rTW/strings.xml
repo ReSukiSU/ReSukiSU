@@ -521,18 +521,6 @@
     <string name="susfs_kstat_subtype_statically">靜態</string>
     <string name="susfs_kstat_spoof_type">偽裝類型</string>
     <string name="susfs_kstat_statically_fields">靜態欄位(可選，留空使用預設值)</string>
-    <string name="susfs_kstat_field_ino">ino</string>
-    <string name="susfs_kstat_field_dev">dev</string>
-    <string name="susfs_kstat_field_nlink">nlink</string>
-    <string name="susfs_kstat_field_size">size</string>
-    <string name="susfs_kstat_field_atime">atime</string>
-    <string name="susfs_kstat_field_atime_nsec">atime_nsec</string>
-    <string name="susfs_kstat_field_mtime">mtime</string>
-    <string name="susfs_kstat_field_mtime_nsec">mtime_nsec</string>
-    <string name="susfs_kstat_field_ctime">ctime</string>
-    <string name="susfs_kstat_field_ctime_nsec">ctime_nsec</string>
-    <string name="susfs_kstat_field_blocks">blocks</string>
-    <string name="susfs_kstat_field_blksize">blksize</string>
     <string name="susfs_redirect_target_path">路徑</string>
     <string name="susfs_redirect_redirected_path">目標路徑</string>
     <string name="susfs_redirect_uid_scheme">應用於</string>
@@ -562,7 +550,6 @@
     <string name="susfs_backup_import_label">匯入</string>
     <string name="susfs_backup_restore_default">恢復預設</string>
     <string name="susfs_backup_restore_default_desc">刪除當前SUSFS設定。</string>
-    <string name="susfs_backup_default_filename">susfs_backup.json</string>
     <string name="dynamic_manager_settings_summary">管理動態管理器簽章</string>
     <string name="dynamic_manager_current_status">當前設定</string>
     <string name="dynamic_manager_manual_config">手動簽章設定</string>

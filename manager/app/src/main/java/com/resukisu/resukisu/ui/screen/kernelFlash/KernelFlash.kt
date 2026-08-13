@@ -1,6 +1,5 @@
 package com.resukisu.resukisu.ui.screen.kernelFlash
 
-import android.net.Uri
 import android.os.Environment
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -44,15 +43,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
@@ -63,22 +56,23 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.data.appPreferences
+import com.resukisu.resukisu.domain.model.FlashProgress
 import com.resukisu.resukisu.ui.component.KeyEventBlocker
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
-import com.resukisu.resukisu.ui.screen.kernelFlash.state.FlashState
-import com.resukisu.resukisu.ui.screen.kernelFlash.state.HorizonKernelState
-import com.resukisu.resukisu.ui.screen.kernelFlash.state.HorizonKernelWorker
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
-import com.resukisu.resukisu.ui.util.reboot
 import com.resukisu.resukisu.ui.util.showReplacingSnackbar
-import kotlinx.coroutines.Dispatchers
+import com.resukisu.resukisu.ui.viewmodel.KernelFlashUiAction
+import com.resukisu.resukisu.ui.viewmodel.KernelFlashUiEvent
+import com.resukisu.resukisu.ui.viewmodel.KernelFlashViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -89,141 +83,63 @@ import kotlin.time.Duration.Companion.milliseconds
  * @author ShirkNeko
  * @date 2025/5/31.
  */
-private object KernelFlashStateHolder {
-    var currentState: HorizonKernelState? = null
-    var currentUri: Uri? = null
-    var currentSlot: String? = null
-    var isFlashing = false
-}
-
 /**
  * Kernel刷写界面
  */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KernelFlashScreen(
-    kernelUri: Uri,
+    kernelUri: String,
     selectedSlot: String? = null
 ) {
     val context = LocalContext.current
-
-    val shouldAutoExit = remember {
-        context.appPreferences.getBoolean("auto_exit_after_flash", false)
-    }
 
     val scrollState = rememberScrollState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val snackBarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
-    var logText by rememberSaveable { mutableStateOf("") }
-    var showFloatAction by rememberSaveable { mutableStateOf(false) }
-    val logContent = rememberSaveable { StringBuilder() }
-    val horizonKernelState = remember {
-        if (KernelFlashStateHolder.currentState != null &&
-            KernelFlashStateHolder.currentUri == kernelUri &&
-            KernelFlashStateHolder.currentSlot == selectedSlot) {
-            KernelFlashStateHolder.currentState!!
-        } else {
-            HorizonKernelState().also {
-                KernelFlashStateHolder.currentState = it
-                KernelFlashStateHolder.currentUri = kernelUri
-                KernelFlashStateHolder.currentSlot = selectedSlot
-                KernelFlashStateHolder.isFlashing = false
-            }
-        }
-    }
-
-    val flashState by horizonKernelState.state.collectAsState()
+    val viewModel = koinViewModel<KernelFlashViewModel>()
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
+    val flashState = uiState.flash
     val logSavedString = stringResource(R.string.log_saved)
+    val horizonFlashComplete = stringResource(R.string.horizon_flash_complete)
+    val logText = buildString {
+        append(flashState.logs.joinToString("\n"))
+        if (flashState.error.isNotEmpty()) append("\n${flashState.error}\n")
+        if (flashState.isCompleted) append("\n$horizonFlashComplete\n\n\n")
+    }
 
-    val onFlashComplete = {
-        showFloatAction = true
-        KernelFlashStateHolder.isFlashing = false
-
-        if (shouldAutoExit) {
-            scope.launch {
-                delay(1500.milliseconds)
-                context.appPreferences.remove("auto_exit_after_flash")
-                (context as? ComponentActivity)?.finish()
+    LaunchedEffect(viewModel) {
+        viewModel.events.collectLatest { event ->
+            when (event) {
+                is KernelFlashUiEvent.Error -> if (event.message.isNotBlank()) {
+                    snackBarHost.showReplacingSnackbar(event.message)
+                }
             }
         }
     }
-
-    val horizonFlashComplete = stringResource(R.string.horizon_flash_complete)
 
     // 开始刷写
-    LaunchedEffect(Unit) {
-        if (!KernelFlashStateHolder.isFlashing && !flashState.isCompleted && flashState.error.isEmpty()) {
-            KernelFlashStateHolder.isFlashing = true
-            val worker = HorizonKernelWorker(
-                context = context,
-                state = horizonKernelState,
-                slot = selectedSlot
-            )
-            worker.uri = kernelUri
-            worker.setOnFlashCompleteListener(onFlashComplete)
-            worker.start()
+    LaunchedEffect(kernelUri, selectedSlot) {
+        viewModel.dispatch(KernelFlashUiAction.Start(kernelUri, selectedSlot))
+    }
 
-            // 监听日志更新
-            while (true) {
-                val currentState = horizonKernelState.state.value
-                if (currentState.logs.isNotEmpty()) {
-                    logText = currentState.logs.joinToString("\n")
-                }
-                val fullLog = horizonKernelState.getFullLog()
-                if (fullLog.isNotEmpty()) {
-                    logContent.clear()
-                    logContent.append(fullLog)
-                }
-                if (currentState.isCompleted || currentState.error.isNotEmpty()) {
-                    break
-                }
-                delay(100.milliseconds)
-            }
-
-            val finalState = horizonKernelState.state.value
-            if (finalState.error.isNotEmpty()) {
-                logText += "\n${finalState.error}\n"
-                logContent.append("\n${finalState.error}\n")
-                KernelFlashStateHolder.isFlashing = false
-            }
-        } else {
-            logText = flashState.logs.joinToString("\n")
-            logContent.clear()
-            logContent.append(horizonKernelState.getFullLog())
-            if (flashState.error.isNotEmpty()) {
-                logText += "\n${flashState.error}\n"
-                logContent.append("\n${flashState.error}\n")
-            } else if (flashState.isCompleted) {
-                logText += "\n${horizonFlashComplete}\n\n\n"
-                showFloatAction = true
-            }
+    LaunchedEffect(flashState.isCompleted, uiState.autoExit) {
+        if (flashState.isCompleted && uiState.autoExit) {
+            delay(1500.milliseconds)
+            viewModel.dispatch(KernelFlashUiAction.ConsumeAutoExit)
+            (context as? ComponentActivity)?.finish()
         }
     }
 
+            // 监听日志更新
     val navigator = LocalNavigator.current
 
     val onBack: () -> Unit = {
         if (!flashState.isFlashing || flashState.isCompleted || flashState.error.isNotEmpty()) {
             // 清理全局状态
-            if (flashState.isCompleted || flashState.error.isNotEmpty()) {
-                KernelFlashStateHolder.currentState = null
-                KernelFlashStateHolder.currentUri = null
-                KernelFlashStateHolder.currentSlot = null
-                KernelFlashStateHolder.isFlashing = false
-            }
             navigator.pop()
-        }
-    }
-
-    DisposableEffect(shouldAutoExit) {
-        onDispose {
-            if (shouldAutoExit) {
-                KernelFlashStateHolder.currentState = null
-                KernelFlashStateHolder.currentUri = null
-                KernelFlashStateHolder.currentSlot = null
-                KernelFlashStateHolder.isFlashing = false
-            }
         }
     }
 
@@ -244,7 +160,7 @@ fun KernelFlashScreen(
                             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
                             "KernelSU_kernel_flash_log_${date}.log"
                         )
-                        file.writeText(logContent.toString())
+                        file.writeText(uiState.fullLog)
                         snackBarHost.showReplacingSnackbar(logSavedString.format(file.absolutePath))
                     }
                 },
@@ -252,14 +168,10 @@ fun KernelFlashScreen(
             )
         },
         floatingActionButton = {
-            if (showFloatAction) {
+            if (flashState.isCompleted) {
                 ExtendedFloatingActionButton(
                     onClick = {
-                        scope.launch {
-                            withContext(Dispatchers.IO) {
-                                reboot()
-                            }
-                        }
+                        viewModel.dispatch(KernelFlashUiAction.Reboot)
                     },
                     icon = {
                         Icon(
@@ -315,7 +227,7 @@ fun KernelFlashScreen(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun FlashProgressIndicator(
-    flashState: FlashState
+    flashState: FlashProgress
 ) {
     val progressColor = when {
         flashState.error.isNotEmpty() -> MaterialTheme.colorScheme.error
@@ -432,11 +344,12 @@ private fun FlashProgressIndicator(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBar(
-    flashState: FlashState,
+    flashState: FlashProgress,
     onBack: () -> Unit,
     onSave: () -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
+    val cardConfig: CardConfig = koinInject()
     val statusColor = when {
         flashState.error.isNotEmpty() -> MaterialTheme.colorScheme.error
         flashState.isCompleted -> MaterialTheme.colorScheme.tertiary
@@ -444,12 +357,12 @@ private fun TopBar(
     }
 
     val colorScheme = MaterialTheme.colorScheme
-    val cardColor = if (CardConfig.isCustomBackgroundEnabled) {
+    val cardColor = if (cardConfig.isCustomBackgroundEnabled) {
         colorScheme.surfaceContainerLow
     } else {
         colorScheme.background
     }
-    val cardAlpha = CardConfig.cardAlpha
+    val cardAlpha = cardConfig.cardAlpha
 
     TopAppBar(
         title = {

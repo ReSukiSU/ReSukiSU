@@ -1,378 +1,98 @@
 package com.resukisu.resukisu.ui.viewmodel
 
-import android.os.Parcelable
-import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.resukisu.resukisu.Natives
-import com.resukisu.resukisu.ksuApp
-import com.resukisu.resukisu.profile.Capabilities
-import com.resukisu.resukisu.profile.Groups
-import com.resukisu.resukisu.ui.activity.util.isNetworkAvailable
-import com.resukisu.resukisu.ui.util.getAppProfileTemplate
-import com.resukisu.resukisu.ui.util.listAppProfileTemplateNames
-import com.resukisu.resukisu.ui.util.listAppProfileTemplates
-import com.resukisu.resukisu.ui.util.setAppProfileTemplate
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.lifecycle.viewModelScope
+import com.resukisu.resukisu.domain.model.ProfileTemplate
+import com.resukisu.resukisu.domain.usecase.ExportProfileTemplatesUseCase
+import com.resukisu.resukisu.domain.usecase.ImportProfileTemplatesUseCase
+import com.resukisu.resukisu.domain.usecase.ObserveProfileTemplateOfflineUseCase
+import com.resukisu.resukisu.domain.usecase.ObserveProfileTemplateRefreshingUseCase
+import com.resukisu.resukisu.domain.usecase.ObserveProfileTemplatesUseCase
+import com.resukisu.resukisu.domain.usecase.RefreshProfileTemplatesUseCase
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.withContext
-import kotlinx.parcelize.Parcelize
-import okhttp3.Request
-import org.json.JSONArray
-import org.json.JSONObject
-import java.text.Collator
-import java.util.Locale
-
-const val TEMPLATE_INDEX_URL = "https://kernelsu.org/templates/index.json"
-const val TEMPLATE_URL = "https://kernelsu.org/templates/%s"
-
-const val TAG = "TemplateViewModel"
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 data class TemplateUiState(
-    val templateList: List<TemplateViewModel.TemplateInfo> = emptyList(),
+    val templateList: List<ProfileTemplate> = emptyList(),
     val profileTemplates: List<String> = emptyList(),
     val profileTemplateNames: List<String> = emptyList(),
     val isRefreshing: Boolean = false,
     val isOffline: Boolean = false,
 )
 
-private data class TemplateLoadResult(
-    val templates: List<TemplateViewModel.TemplateInfo>,
-    val profileTemplates: List<String>,
-    val profileTemplateNames: List<String>,
-    val offline: Boolean,
-)
+sealed interface TemplateUiAction {
+    data class Refresh(val synchronize: Boolean = false) : TemplateUiAction
+    data class Import(val json: String) : TemplateUiAction
+    data object Export : TemplateUiAction
+}
 
-class TemplateViewModel : ViewModel() {
-    private var templates: List<TemplateInfo> = emptyList()
+sealed interface TemplateUiEvent {
+    data object ImportCompleted : TemplateUiEvent
+    data class Exported(val json: String) : TemplateUiEvent
+    data object ExportEmpty : TemplateUiEvent
+    data class Error(val message: String) : TemplateUiEvent
+}
 
-    private val _uiState = MutableStateFlow(TemplateUiState())
-    val uiState: StateFlow<TemplateUiState> = _uiState.asStateFlow()
+class TemplateViewModel(
+    observeTemplates: ObserveProfileTemplatesUseCase,
+    observeRefreshing: ObserveProfileTemplateRefreshingUseCase,
+    observeOffline: ObserveProfileTemplateOfflineUseCase,
+    private val refreshTemplates: RefreshProfileTemplatesUseCase,
+    private val importTemplatesUseCase: ImportProfileTemplatesUseCase,
+    private val exportTemplatesUseCase: ExportProfileTemplatesUseCase,
+) : ViewModel() {
+    private val mutableEvents = MutableSharedFlow<TemplateUiEvent>(extraBufferCapacity = 1)
+    val events: SharedFlow<TemplateUiEvent> = mutableEvents.asSharedFlow()
 
-    @Parcelize
-    data class TemplateInfo(
-        val id: String = "",
-        val name: String = "",
-        val description: String = "",
-        val author: String = "",
-        val local: Boolean = true,
-
-        val namespace: Int = Natives.Profile.Namespace.INHERITED.ordinal,
-        val uid: Int = Natives.ROOT_UID,
-        val gid: Int = Natives.ROOT_GID,
-        val groups: List<Int> = mutableListOf(),
-        val capabilities: List<Int> = mutableListOf(),
-        val context: String = Natives.KERNEL_SU_DOMAIN,
-        val rules: List<String> = mutableListOf(),
-        val flags: List<Int> = mutableListOf(
-            Natives.Profile.RootProfileFlag.NO_NEW_PRIVS.ordinal // default no new privs for new template
+    val state: StateFlow<TemplateUiState> = combine(
+        observeTemplates(),
+        observeRefreshing(),
+        observeOffline(),
+    ) { templates, refreshing, offline ->
+        TemplateUiState(
+            templateList = templates,
+            profileTemplates = templates.map(ProfileTemplate::id),
+            profileTemplateNames = templates.map { template ->
+                template.name.ifBlank { template.id }
+            },
+            isRefreshing = refreshing,
+            isOffline = offline,
         )
-    ) : Parcelable
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, TemplateUiState())
+    val uiState: StateFlow<TemplateUiState> = state
+
+    init {
+        dispatch(TemplateUiAction.Refresh())
+    }
 
     suspend fun fetchTemplates(sync: Boolean = false) {
-        if (_uiState.value.isRefreshing) return
-
-        _uiState.update { it.copy(isRefreshing = true, isOffline = false) }
-        try {
-            val result = withContext(Dispatchers.IO) {
-                runCatching {
-                    val localTemplateIds = listAppProfileTemplates()
-                    Log.i(TAG, "localTemplateIds: $localTemplateIds")
-                    val shouldFetchRemote = localTemplateIds.isEmpty() || sync
-                    val remoteFetchSucceeded = !shouldFetchRemote ||
-                            isNetworkAvailable(ksuApp) && fetchRemoteTemplates()
-
-                    val profileTemplates = listAppProfileTemplates()
-                    TemplateLoadResult(
-                        templates = profileTemplates.mapNotNull(::getTemplateInfoById),
-                        profileTemplates = profileTemplates,
-                        profileTemplateNames = listAppProfileTemplateNames(),
-                        offline = shouldFetchRemote && !remoteFetchSucceeded,
-                    )
-                }.onFailure {
-                    Log.e(TAG, "fetchTemplates: $it", it)
-                }.getOrElse {
-                    TemplateLoadResult(
-                        templates = templates,
-                        profileTemplates = _uiState.value.profileTemplates,
-                        profileTemplateNames = _uiState.value.profileTemplateNames,
-                        offline = true,
-                    )
-                }
-            }
-
-            templates = result.templates
-            _uiState.update {
-                it.copy(
-                    templateList = buildTemplateList(),
-                    profileTemplates = result.profileTemplates,
-                    profileTemplateNames = result.profileTemplateNames,
-                    isOffline = result.offline,
+        refreshTemplates(sync).exceptionOrNull()?.let {
+            mutableEvents.emit(TemplateUiEvent.Error(it.message.orEmpty()))
+        }
+    }
+    fun dispatch(action: TemplateUiAction) {
+        when (action) {
+            is TemplateUiAction.Refresh -> viewModelScope.launch { fetchTemplates(action.synchronize) }
+            is TemplateUiAction.Import -> viewModelScope.launch {
+                val result = importTemplatesUseCase(action.json)
+                result.fold(
+                    onSuccess = { mutableEvents.emit(TemplateUiEvent.ImportCompleted) },
+                    onFailure = { mutableEvents.emit(TemplateUiEvent.Error(it.message.orEmpty())) },
                 )
             }
-        } finally {
-            _uiState.update { it.copy(isRefreshing = false) }
-        }
-    }
 
-    suspend fun importTemplates(
-        templates: String,
-        onSuccess: suspend () -> Unit,
-        onFailure: suspend (String) -> Unit
-    ) {
-        withContext(Dispatchers.IO) {
-            runCatching {
-                JSONArray(templates)
-            }.getOrElse {
-                runCatching {
-                    val json = JSONObject(templates)
-                    JSONArray().apply { put(json) }
-                }.getOrElse {
-                    onFailure("invalid templates: $templates")
-                    return@withContext
-                }
-            }.let {
-                0.until(it.length()).forEach { i ->
-                    runCatching {
-                        val template = it.getJSONObject(i)
-                        val id = template.getString("id")
-                        template.put("local", true)
-                        setAppProfileTemplate(id, template.toString())
-                    }.onFailure { e ->
-                        Log.e(TAG, "ignore invalid template: $it", e)
-                    }
-                }
-                onSuccess()
+            TemplateUiAction.Export -> viewModelScope.launch {
+                exportTemplatesUseCase().fold(
+                    onSuccess = { mutableEvents.emit(TemplateUiEvent.Exported(it)) },
+                    onFailure = { mutableEvents.emit(TemplateUiEvent.ExportEmpty) },
+                )
             }
         }
     }
-
-    suspend fun exportTemplates(onTemplateEmpty: () -> Unit, callback: (String) -> Unit) {
-        withContext(Dispatchers.IO) {
-            val templates = listAppProfileTemplates().mapNotNull(::getTemplateInfoById).filter {
-                it.local
-            }
-            templates.ifEmpty {
-                onTemplateEmpty()
-                return@withContext
-            }
-            JSONArray(templates.map {
-                it.toJSON()
-            }).toString().let(callback)
-        }
-    }
-
-    private fun buildTemplateList(): List<TemplateInfo> {
-        val comparator = compareBy(TemplateInfo::local).reversed().then(
-            compareBy(
-                Collator.getInstance(Locale.getDefault()), TemplateInfo::id
-            )
-        )
-        return templates.sortedWith(comparator)
-    }
-}
-
-private fun fetchRemoteTemplates(): Boolean {
-    return runCatching {
-        ksuApp.okhttpClient.newCall(
-            Request.Builder().url(TEMPLATE_INDEX_URL).build()
-        ).execute().use { response ->
-            if (!response.isSuccessful) {
-                return@use false
-            }
-            val body = response.body?.string() ?: return@use false
-            val remoteTemplateIds = JSONArray(body)
-            Log.i(TAG, "fetchRemoteTemplates: $remoteTemplateIds")
-            var fetchedAny = remoteTemplateIds.length() == 0
-            0.until(remoteTemplateIds.length()).forEach { i ->
-                val id = remoteTemplateIds.getString(i)
-                Log.i(TAG, "fetch template: $id")
-                val templateJson = ksuApp.okhttpClient.newCall(
-                    Request.Builder().url(TEMPLATE_URL.format(id)).build()
-                ).runCatching {
-                    execute().use { response ->
-                        if (!response.isSuccessful) {
-                            return@forEach
-                        }
-                        response.body!!.string()
-                    }
-                }.getOrNull() ?: return@forEach
-                Log.i(TAG, "template: $templateJson")
-
-                runCatching {
-                    val json = JSONObject(templateJson)
-                    fromJSON(json)?.let {
-                        json.put("local", false)
-                        if (setAppProfileTemplate(id, json.toString())) {
-                            fetchedAny = true
-                        }
-                    }
-                }.onFailure {
-                    Log.e(TAG, "ignore invalid template: $it", it)
-                    return@forEach
-                }
-            }
-            fetchedAny
-        }
-    }.onFailure {
-        Log.e(TAG, "fetchRemoteTemplates: $it", it)
-    }.getOrDefault(false)
-}
-
-@Suppress("UNCHECKED_CAST")
-private fun <T, R> JSONArray.mapCatching(
-    transform: (T) -> R, onFail: (Throwable) -> Unit
-): List<R> {
-    return List(length()) { i -> get(i) as T }.mapNotNull { element ->
-        runCatching {
-            transform(element)
-        }.onFailure(onFail).getOrNull()
-    }
-}
-
-private inline fun <reified T : Enum<T>> getEnumOrdinals(
-    jsonArray: JSONArray?, enumClass: Class<T>
-): List<T> {
-    return jsonArray?.mapCatching<String, T>({ name ->
-        enumValueOf(name.uppercase())
-    }, {
-        Log.e(TAG, "ignore invalid enum ${enumClass.simpleName}: $it", it)
-    }).orEmpty()
-}
-
-fun getTemplateInfoById(id: String): TemplateViewModel.TemplateInfo? {
-    return runCatching {
-        fromJSON(JSONObject(getAppProfileTemplate(id)))
-    }.onFailure {
-        Log.e(TAG, "ignore invalid template: $it", it)
-    }.getOrNull()
-}
-
-private fun getLocaleString(json: JSONObject, key: String): String {
-    val fallback = json.getString(key)
-    val locale = Locale.getDefault()
-    val localeKey = "${locale.language}_${locale.country}"
-    json.optJSONObject("locales")?.let {
-        it.optJSONObject(localeKey)?.let { json ->
-            return json.optString(key, fallback)
-        }
-        it.optJSONObject(locale.language)?.let { json ->
-            return json.optString(key, fallback)
-        }
-    }
-    return fallback
-}
-
-private fun fromJSON(templateJson: JSONObject): TemplateViewModel.TemplateInfo? {
-    return runCatching {
-        val groupsJsonArray = templateJson.optJSONArray("groups")
-        val capabilitiesJsonArray = templateJson.optJSONArray("capabilities")
-        val flagsJsonArray = templateJson.optJSONArray("flags")
-        val context = templateJson.optString("context").takeIf { it.isNotEmpty() }
-            ?: Natives.KERNEL_SU_DOMAIN
-        val namespace = templateJson.optString("namespace").takeIf { it.isNotEmpty() }
-            ?: Natives.Profile.Namespace.INHERITED.name
-
-        val rulesJsonArray = templateJson.optJSONArray("rules")
-        TemplateViewModel.TemplateInfo(
-            id = templateJson.getString("id"),
-            name = getLocaleString(templateJson, "name"),
-            description = getLocaleString(templateJson, "description"),
-            author = templateJson.optString("author"),
-            local = templateJson.optBoolean("local"),
-            namespace = Natives.Profile.Namespace.valueOf(namespace.uppercase()).ordinal,
-            uid = templateJson.optInt("uid", Natives.ROOT_UID),
-            gid = templateJson.optInt("gid", Natives.ROOT_GID),
-            groups = getEnumOrdinals(groupsJsonArray, Groups::class.java).map { it.gid },
-            capabilities = getEnumOrdinals(
-                capabilitiesJsonArray, Capabilities::class.java
-            ).map { it.cap },
-            context = context,
-            rules = rulesJsonArray?.mapCatching<String, String>({ it }, {
-                Log.e(TAG, "ignore invalid rule: $it", it)
-            }).orEmpty(),
-            flags = flagsJsonArray?.let {
-                getEnumOrdinals(
-                    it,
-                    Natives.Profile.RootProfileFlag::class.java
-                ).map { flag -> flag.ordinal }
-            } ?: listOf(Natives.Profile.RootProfileFlag.NO_NEW_PRIVS.ordinal),
-        )
-    }.onFailure {
-        Log.e(TAG, "ignore invalid template: $it", it)
-    }.getOrNull()
-}
-
-fun TemplateViewModel.TemplateInfo.toJSON(): JSONObject {
-    val template = this
-    return JSONObject().apply {
-        put("id", template.id)
-        put("name", template.name.ifBlank { template.id })
-        put("description", template.description.ifBlank { template.id })
-        if (template.author.isNotEmpty()) {
-            put("author", template.author)
-        }
-        put("namespace", Natives.Profile.Namespace.entries[template.namespace].name)
-        put("uid", template.uid)
-        put("gid", template.gid)
-
-        if (template.groups.isNotEmpty()) {
-            put("groups", JSONArray(
-                Groups.entries.filter {
-                    template.groups.contains(it.gid)
-                }.map {
-                    it.name
-                }
-            ))
-        }
-
-        if (template.capabilities.isNotEmpty()) {
-            put("capabilities", JSONArray(
-                Capabilities.entries.filter {
-                    template.capabilities.contains(it.cap)
-                }.map {
-                    it.name
-                }
-            ))
-        }
-
-        if (template.context.isNotEmpty()) {
-            put("context", template.context)
-        }
-
-        if (template.rules.isNotEmpty()) {
-            put("rules", JSONArray(template.rules))
-        }
-
-        put(
-            "flags", JSONArray(
-                Natives.Profile.RootProfileFlag.entries.filter {
-                    template.flags.contains(it.ordinal)
-                }.map {
-                    it.name
-                }
-            ))
-    }
-}
-
-@Suppress("unused")
-fun generateTemplates() {
-    val templateJson = JSONObject()
-    templateJson.put("id", "com.example")
-    templateJson.put("name", "Example")
-    templateJson.put("description", "This is an example template")
-    templateJson.put("local", true)
-    templateJson.put("namespace", Natives.Profile.Namespace.INHERITED.name)
-    templateJson.put("uid", 0)
-    templateJson.put("gid", 0)
-
-    templateJson.put("groups", JSONArray().apply { put(Groups.INET.name) })
-    templateJson.put("capabilities", JSONArray().apply { put(Capabilities.CAP_NET_RAW.name) })
-    templateJson.put("context", "u:r:ksu:s0")
-    templateJson.put(
-        "flags",
-        JSONArray().apply { put(Natives.Profile.RootProfileFlag.NO_NEW_PRIVS.name) })
-    Log.i(TAG, "$templateJson")
 }

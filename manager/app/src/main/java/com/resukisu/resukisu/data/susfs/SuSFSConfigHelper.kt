@@ -1,21 +1,25 @@
 package com.resukisu.resukisu.data.susfs
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
-import com.resukisu.resukisu.ksuApp
-import com.resukisu.resukisu.ui.util.withNewRootShell
+import com.resukisu.resukisu.data.shell.KsuCliRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 
-object SuSFSConfigHelper {
-    private const val TAG = "SuSFSConfigHelper"
-    const val CURRENT_VERSION: Int = 2
+class SuSFSConfigHelper(
+    private val ksuCliRepository: KsuCliRepository,
+) {
+    companion object {
+        private const val TAG = "SuSFSConfigHelper"
+        const val CURRENT_VERSION: Int = 2
+    }
 
     private val gson = Gson()
 
@@ -25,6 +29,7 @@ object SuSFSConfigHelper {
     @Volatile
     private var cachedStatusInfo: SuSFSStatusInfo? = null
 
+    private val configMutex = Mutex()
     private val statusInfoMutex = Mutex()
 
     private data class CommandResult(
@@ -33,7 +38,16 @@ object SuSFSConfigHelper {
         val stderr: String,
     )
 
-    suspend fun loadConfig(): SuSFSConfig = withContext(Dispatchers.IO) {
+    suspend fun loadConfig(): SuSFSConfig = configMutex.withLock {
+        loadConfigLocked()
+    }
+
+    suspend fun refreshConfig(): SuSFSConfig = configMutex.withLock {
+        cachedConfig = null
+        loadConfigLocked()
+    }
+
+    private suspend fun loadConfigLocked(): SuSFSConfig = withContext(Dispatchers.IO) {
         cachedConfig?.let { return@withContext it }
 
         val result = executeSusfsCommand("config list_all")
@@ -57,11 +71,6 @@ object SuSFSConfigHelper {
             Log.e(TAG, "Failed to parse SUSFS config", e)
             SuSFSConfig.createDefault().also { cachedConfig = it }
         }
-    }
-
-    suspend fun refreshConfig(): SuSFSConfig {
-        cachedConfig = null
-        return loadConfig()
     }
 
     suspend fun restoreDefaultConfig(): Boolean {
@@ -289,9 +298,8 @@ object SuSFSConfigHelper {
 
     suspend fun showEnabledFeatures(): String = loadStatusInfo().enabledFeatures
 
-    suspend fun showVariant(): String = loadStatusInfo().variant
-
-    suspend fun exportConfigToUri(uri: Uri): Boolean = withContext(Dispatchers.IO) {
+    suspend fun exportConfigToUri(context: Context, uri: Uri): Boolean =
+        withContext(Dispatchers.IO) {
         try {
             val result = executeSusfsCommand("config backup")
             if (!result.success || result.stdout.isBlank()) {
@@ -299,7 +307,7 @@ object SuSFSConfigHelper {
                 return@withContext false
             }
 
-            ksuApp.contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { writer ->
+            context.contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { writer ->
                 writer.write(result.stdout)
                 writer.newLine()
             } ?: return@withContext false
@@ -311,16 +319,17 @@ object SuSFSConfigHelper {
         }
     }
 
-    suspend fun importConfigFromUri(uri: Uri): Boolean = withContext(Dispatchers.IO) {
-        val tempFile = File.createTempFile("susfs_restore", ".json", ksuApp.cacheDir)
+    suspend fun importConfigFromUri(context: Context, uri: Uri): Boolean =
+        withContext(Dispatchers.IO) {
+            val tempFile = File.createTempFile("susfs_restore", ".json", context.cacheDir)
         try {
-            val fileName = DocumentFile.fromSingleUri(ksuApp, uri)?.name.orEmpty()
+            val fileName = DocumentFile.fromSingleUri(context, uri)?.name.orEmpty()
             if (!fileName.endsWith(".json", ignoreCase = true)) {
                 Log.e(TAG, "Rejected SUSFS backup with invalid extension: $fileName")
                 return@withContext false
             }
 
-            ksuApp.contentResolver.openInputStream(uri)?.use { input ->
+            context.contentResolver.openInputStream(uri)?.use { input ->
                 tempFile.outputStream().use { output -> input.copyTo(output) }
             } ?: return@withContext false
 
@@ -336,6 +345,13 @@ object SuSFSConfigHelper {
     private suspend fun executeConfigMutation(
         command: String,
         currentKernelCommands: List<String> = emptyList(),
+    ): Boolean = configMutex.withLock {
+        executeConfigMutationLocked(command, currentKernelCommands)
+    }
+
+    private suspend fun executeConfigMutationLocked(
+        command: String,
+        currentKernelCommands: List<String>,
     ): Boolean {
         currentKernelCommands.forEach { currentKernelCommand ->
             val result = executeSusfsCommand(currentKernelCommand)
@@ -351,6 +367,7 @@ object SuSFSConfigHelper {
         val result = executeSusfsCommand("config $command")
         if (result.success) {
             cachedConfig = null
+            cachedStatusInfo = null
         } else {
             Log.e(TAG, "SUSFS config command failed: $command: ${result.stderr}")
         }
@@ -362,9 +379,9 @@ object SuSFSConfigHelper {
             try {
                 val stdout = ArrayList<String>()
                 val stderr = ArrayList<String>()
-                val result = withNewRootShell {
+                val result = ksuCliRepository.withNewRootShell {
                     newJob()
-                        .add("${shellQuote(getKsuDaemonPath())} susfs $command")
+                        .add("${shellQuote(ksuCliRepository.getKsuDaemonPath())} susfs $command")
                         .to(stdout, stderr)
                         .exec()
                 }
@@ -379,10 +396,6 @@ object SuSFSConfigHelper {
                 CommandResult(false, "", e.message.orEmpty())
             }
         }
-
-    private fun getKsuDaemonPath(): String {
-        return ksuApp.applicationInfo.nativeLibraryDir + File.separator + "libksud.so"
-    }
 
     private fun shellQuote(value: String): String {
         return "'${value.replace("'", "'\"'\"'")}'"

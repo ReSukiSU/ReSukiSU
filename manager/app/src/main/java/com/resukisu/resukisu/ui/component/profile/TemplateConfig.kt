@@ -22,16 +22,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.resukisu.resukisu.Natives
+import org.koin.compose.viewmodel.koinViewModel
+import com.resukisu.resukisu.domain.model.AppProfile
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.ksuApp
 import com.resukisu.resukisu.ui.component.NetworkRefreshContent
 import com.resukisu.resukisu.ui.component.settings.SettingsChooseWidget
 import com.resukisu.resukisu.ui.util.ActivityResumeEffect
-import com.resukisu.resukisu.ui.util.setSepolicy
 import com.resukisu.resukisu.ui.viewmodel.TemplateViewModel
-import com.resukisu.resukisu.ui.viewmodel.getTemplateInfoById
+import com.resukisu.resukisu.ui.viewmodel.TemplateUiAction
 import kotlinx.coroutines.launch
 
 /**
@@ -41,19 +39,19 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TemplateConfig(
-    profile: Natives.Profile,
+    profile: AppProfile,
     onViewTemplate: (id: String) -> Unit = {},
-    onProfileChange: (Natives.Profile) -> Unit
+    onProfileChange: (AppProfile) -> Unit
 ) {
-    val viewModel = viewModel<TemplateViewModel>(viewModelStoreOwner = ksuApp)
+    val viewModel = koinViewModel<TemplateViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
     ActivityResumeEffect(viewModel) {
-        viewModel.fetchTemplates()
+        viewModel.dispatch(TemplateUiAction.Refresh())
     }
 
-    var template by rememberSaveable {
+    var template by rememberSaveable(profile.rootTemplate) {
         mutableStateOf(profile.rootTemplate ?: "")
     }
     val profileTemplates = listOf("None") + uiState.profileTemplates
@@ -70,7 +68,9 @@ fun TemplateConfig(
                 NetworkRefreshContent(
                     offline = uiState.isOffline,
                     onRetry = {
-                        scope.launch { viewModel.fetchTemplates(sync = true) }
+                        scope.launch {
+                            viewModel.dispatch(TemplateUiAction.Refresh(synchronize = true))
+                        }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -102,22 +102,21 @@ fun TemplateConfig(
 
         template = profileTemplates[index]
 
-        val templateInfo =
-            getTemplateInfoById(template) ?: return@SettingsChooseWidget
+        val templateInfo = uiState.templateList.firstOrNull { it.id == template }
+            ?: return@SettingsChooseWidget
 
-        if (setSepolicy(template, templateInfo.rules.joinToString("\n"))) {
-            onProfileChange(
-                profile.copy(
-                    rootTemplate = template,
-                    rootUseDefault = false,
-                    uid = templateInfo.uid,
-                    gid = templateInfo.gid,
-                    groups = templateInfo.groups,
-                    capabilities = templateInfo.capabilities,
-                    context = templateInfo.context,
-                    namespace = templateInfo.namespace,
-                )
+        onProfileChange(
+            profile.copy(
+                rootTemplate = template,
+                rootUseDefault = false,
+                uid = templateInfo.uid,
+                gid = templateInfo.gid,
+                groups = templateInfo.groups,
+                capabilities = templateInfo.capabilities,
+                context = templateInfo.context,
+                rules = templateInfo.rules.joinToString("\n"),
+                namespace = templateInfo.namespace,
             )
-        }
+        )
     }
 }

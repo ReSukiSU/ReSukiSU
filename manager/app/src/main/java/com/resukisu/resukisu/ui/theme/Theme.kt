@@ -1,6 +1,7 @@
 package com.resukisu.resukisu.ui.theme
 
 import android.R
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -35,6 +36,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -86,18 +88,19 @@ import com.materialkolor.dynamicColorScheme
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.quantize.QuantizerCelebi
 import com.materialkolor.score.Score
-import com.resukisu.resukisu.data.appPreferences
+import com.resukisu.resukisu.data.AppSettingsRepository
+import com.resukisu.resukisu.data.theme.ThemeRepository
 import com.resukisu.resukisu.ui.overscroll.StretchOverscrollCompensationState
 import com.resukisu.resukisu.ui.util.LocalBackgroundBlurAnchor
 import com.resukisu.resukisu.ui.util.LocalBlurState
 import com.resukisu.resukisu.ui.util.LocalPagerPage
 import com.resukisu.resukisu.ui.util.LocalPagerState
 import com.resukisu.resukisu.ui.util.LocalStretchOverscrollCompensationState
-import com.resukisu.resukisu.ui.webui.MonetColorsProvider
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurColors
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -110,14 +113,16 @@ import kotlin.math.floor
 import dev.kdrag0n.monet.theme.ColorScheme as MonetCompatColorScheme
 
 @Stable
-object ThemeConfig {
+class ThemeConfig(
+    private val defaultSeedColor: () -> Int,
+) {
     // 主题状态
     var customBackgroundUri by mutableStateOf<Uri?>(null)
     var backgroundDim by mutableFloatStateOf(0f)
     var forceDarkMode by mutableStateOf<Boolean?>(null)
-    var seedColor by mutableIntStateOf(ThemeSeedColors.Default.toArgb())
+    var seedColor by mutableIntStateOf(defaultSeedColor())
     var useDynamicColor by mutableStateOf(false)
-    var monetCompatSeedColor by mutableIntStateOf(ThemeSeedColors.Default.toArgb())
+    var monetCompatSeedColor by mutableIntStateOf(defaultSeedColor())
     var dynamicColorSpec by mutableStateOf(ColorSpec.SpecVersion.SPEC_2021)
     var dynamicPaletteStyle by mutableStateOf(PaletteStyle.TonalSpot)
 
@@ -146,22 +151,12 @@ object ThemeConfig {
         isThemeChanging = true
     }
 
-    fun updateTheme(
-        seedColor: Int? = null,
-        dynamicColor: Boolean? = null,
-        darkMode: Boolean? = null
-    ) {
-        seedColor?.let { this.seedColor = it }
-        dynamicColor?.let { useDynamicColor = it }
-        darkMode?.let { forceDarkMode = it }
-    }
-
     fun reset() {
         customBackgroundUri = null
         forceDarkMode = null
-        seedColor = ThemeSeedColors.Default.toArgb()
+        seedColor = defaultSeedColor()
         useDynamicColor = false
-        monetCompatSeedColor = ThemeSeedColors.Default.toArgb()
+        monetCompatSeedColor = defaultSeedColor()
         dynamicColorSpec = ColorSpec.SpecVersion.SPEC_2021
         dynamicPaletteStyle = PaletteStyle.TonalSpot
         backgroundImageLoaded = false
@@ -171,120 +166,50 @@ object ThemeConfig {
     }
 }
 
-object ThemeManager {
-    fun saveThemeMode(context: Context, forceDark: Boolean?) {
-        context.appPreferences.putString(
-            "theme_mode", when (forceDark) {
-                true -> "dark"
-                false -> "light"
-                null -> "system"
-            }
-        )
-        ThemeConfig.forceDarkMode = forceDark
-    }
-
-    fun loadThemeMode(context: Context) {
-        val mode = context.appPreferences.getString("theme_mode", "system")
-
-        ThemeConfig.forceDarkMode = when (mode) {
-            "dark" -> true
-            "light" -> false
-            else -> null
-        }
-    }
-
-    fun saveSeedColor(context: Context, seedColor: Int) {
-        context.appPreferences.putInt("theme_seed_color", seedColor)
-        ThemeConfig.seedColor = seedColor
-    }
-
-    fun loadSeedColor(context: Context) {
-        val prefs = context.appPreferences
-        if (!prefs.contains("theme_seed_color")) {
-            val legacyThemeName = prefs.getString("theme_colors", "default") ?: "default"
-            val migratedSeedColor = ThemeSeedColors.fromLegacyNameArgb(legacyThemeName)
-            prefs.putInt("theme_seed_color", migratedSeedColor)
-            ThemeConfig.seedColor = migratedSeedColor
-            return
-        }
-
-        ThemeConfig.seedColor = prefs.getInt(
-            "theme_seed_color",
-            ThemeSeedColors.Default.toArgb()
-        )
-    }
-
-    fun saveDynamicColorState(context: Context, enabled: Boolean) {
-        context.appPreferences.putBoolean("use_dynamic_color", enabled)
-        ThemeConfig.useDynamicColor = enabled
-    }
-
-
-    fun loadDynamicColorState(context: Context) {
-        val enabled = context.appPreferences.getBoolean(
-            "use_dynamic_color",
-            true
-        )
-        ThemeConfig.useDynamicColor = enabled
-    }
-
-    fun saveDynamicColorSpec(context: Context, spec: ColorSpec.SpecVersion) {
-        context.appPreferences.putString("dynamic_color_spec", spec.name)
-        ThemeConfig.dynamicColorSpec = spec
-    }
-
-    fun loadDynamicColorSpec(context: Context) {
-        val specName = context.appPreferences.getString(
-            "dynamic_color_spec",
-            ColorSpec.SpecVersion.SPEC_2021.name
-        )
-        ThemeConfig.dynamicColorSpec = ColorSpec.SpecVersion.entries
-            .find { it.name == specName }
-            ?: ColorSpec.SpecVersion.SPEC_2021
-    }
-
-    fun saveDynamicPaletteStyle(context: Context, style: PaletteStyle) {
-        context.appPreferences.putString("dynamic_palette_style", style.name)
-        ThemeConfig.dynamicPaletteStyle = style
-    }
-
-    fun loadDynamicPaletteStyle(context: Context) {
-        val styleName = context.appPreferences.getString(
-            "dynamic_palette_style",
-            PaletteStyle.TonalSpot.name
-        )
-        ThemeConfig.dynamicPaletteStyle = PaletteStyle.entries
-            .find { it.name == styleName }
-            ?: PaletteStyle.TonalSpot
-    }
+@Stable
+class BackgroundRenderState {
+    var imagePainter: AsyncImagePainter? by mutableStateOf(null)
+    var imageBitmap: ImageBitmap? by mutableStateOf(null)
+    var blurImageBitmap: ImageBitmap? by mutableStateOf(null)
+    var blurViewportSize by mutableStateOf(IntSize(0, 0))
+    var blurFrameTick by mutableIntStateOf(0)
+    var seedColor by mutableIntStateOf(0)
 }
 
-object BackgroundManager {
-    private const val TAG = "BackgroundManager"
+val LocalBackgroundRenderState = compositionLocalOf<BackgroundRenderState> {
+    error("BackgroundRenderState is not provided")
+}
 
-    fun saveBackgroundDim(context: Context, dim: Float) {
-        ThemeConfig.backgroundDim = dim
-        context.appPreferences.putFloat("background_dim", dim)
+class BackgroundManager(
+    private val settings: AppSettingsRepository,
+    private val config: ThemeConfig,
+    private val cardConfig: CardConfig,
+) {
+    private val tag = "BackgroundManager"
+
+    fun saveBackgroundDim(dim: Float) {
+        config.backgroundDim = dim
+        settings.putFloat("background_dim", dim)
     }
 
-    fun saveEnableBlur(context: Context, enable: Boolean) {
-        ThemeConfig.isEnableBlur = enable
-        context.appPreferences.putBoolean("enable_blur", enable)
+    fun saveEnableBlur(enable: Boolean) {
+        config.isEnableBlur = enable
+        settings.putBoolean("enable_blur", enable)
     }
 
-    fun saveEnableBlurExp(context: Context, enable: Boolean) {
-        ThemeConfig.isEnableBlurExp = enable
-        context.appPreferences.putBoolean("enable_blur_exp", enable)
+    fun saveEnableBlurExp(enable: Boolean) {
+        config.isEnableBlurExp = enable
+        settings.putBoolean("enable_blur_exp", enable)
     }
 
-    fun saveUseBackgroundSeedColor(context: Context, enable: Boolean) {
-        ThemeConfig.isUseBackgroundSeedColor = enable
-        context.appPreferences.putBoolean("use_background_seed_color", enable)
+    fun saveUseBackgroundSeedColor(enable: Boolean) {
+        config.isUseBackgroundSeedColor = enable
+        settings.putBoolean("use_background_seed_color", enable)
     }
 
-    fun saveEnableHighContrastMode(context: Context, enable: Boolean) {
-        ThemeConfig.isHighContrastMode = enable
-        context.appPreferences.putBoolean("high_contrast_mode", enable)
+    fun saveEnableHighContrastMode(enable: Boolean) {
+        config.isHighContrastMode = enable
+        settings.putBoolean("high_contrast_mode", enable)
     }
 
     suspend fun saveAndApplyCustomBackground(
@@ -297,64 +222,63 @@ object BackgroundManager {
                 copyImageToInternalStorage(appContext, uri)
             } ?: return false
 
-            saveBackgroundUri(appContext, finalUri)
-            ThemeConfig.customBackgroundUri = finalUri
-            CardConfig.updateBackground(true)
+            saveBackgroundUri(finalUri)
+            config.customBackgroundUri = finalUri
+            cardConfig.updateBackground(true)
             withContext(Dispatchers.IO) {
                 clearBackgroundBlurCache(appContext)
             }
-            resetBackgroundState(appContext)
+            resetBackgroundState()
 
             true
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            Log.e(TAG, "保存背景失败: ${e.message}", e)
+            Log.e(tag, "保存背景失败: ${e.message}", e)
             false
         }
     }
 
     fun clearCustomBackground(context: Context) {
-        saveBackgroundUri(context, null)
-        ThemeConfig.customBackgroundUri = null
-        CardConfig.updateBackground(false)
+        saveBackgroundUri(null)
+        config.customBackgroundUri = null
+        cardConfig.updateBackground(false)
         clearBackgroundBlurCache(context)
-        resetBackgroundState(context)
+        resetBackgroundState()
     }
 
-    fun loadCustomBackground(context: Context) {
-        val prefs = context.appPreferences
+    fun loadCustomBackground() {
+        val prefs = settings
         val uriString = prefs.getString("custom_background", null)
 
         val newUri = uriString?.toUri()
         val preventRefresh = prefs.getBoolean("prevent_background_refresh", false)
 
-        ThemeConfig.preventBackgroundRefresh = preventRefresh
+        config.preventBackgroundRefresh = preventRefresh
 
-        if (!preventRefresh || ThemeConfig.customBackgroundUri?.toString() != newUri?.toString()) {
-            Log.d(TAG, "加载自定义背景: $uriString")
-            ThemeConfig.customBackgroundUri = newUri
-            ThemeConfig.backgroundImageLoaded = false
-            CardConfig.updateBackground(newUri != null)
+        if (config.customBackgroundUri?.toString() != newUri?.toString()) {
+            Log.d(tag, "加载自定义背景: $uriString")
+            config.customBackgroundUri = newUri
+            config.backgroundImageLoaded = false
+            cardConfig.updateBackground(newUri != null)
         }
 
-        ThemeConfig.backgroundDim = prefs.getFloat("background_dim", 0f).coerceIn(0f, 1f)
-        ThemeConfig.isEnableBlur = prefs.getBoolean("enable_blur", false)
-        ThemeConfig.isEnableBlurExp = prefs.getBoolean("enable_blur_exp", false)
-        ThemeConfig.isUseBackgroundSeedColor = prefs.getBoolean("use_background_seed_color", false)
-        ThemeConfig.isHighContrastMode = prefs.getBoolean("high_contrast_mode", false)
+        config.backgroundDim = prefs.getFloat("background_dim", 0f).coerceIn(0f, 1f)
+        config.isEnableBlur = prefs.getBoolean("enable_blur", false)
+        config.isEnableBlurExp = prefs.getBoolean("enable_blur_exp", false)
+        config.isUseBackgroundSeedColor = prefs.getBoolean("use_background_seed_color", false)
+        config.isHighContrastMode = prefs.getBoolean("high_contrast_mode", false)
     }
 
-    private fun saveBackgroundUri(context: Context, uri: Uri?) {
-        context.appPreferences.putString("custom_background", uri?.toString())
-        context.appPreferences.putBoolean("prevent_background_refresh", false)
+    private fun saveBackgroundUri(uri: Uri?) {
+        settings.putString("custom_background", uri?.toString())
+        settings.putBoolean("prevent_background_refresh", false)
     }
 
-    private fun resetBackgroundState(context: Context) {
-        ThemeConfig.backgroundImageLoaded = false
-        ThemeConfig.preventBackgroundRefresh = false
-        blurBackgroundImageBitmap = null
-        context.appPreferences.putBoolean("prevent_background_refresh", false)
+    private fun resetBackgroundState() {
+        config.backgroundImageLoaded = false
+        config.preventBackgroundRefresh = false
+        settings.putBoolean("prevent_background_refresh", false)
     }
 
     fun clearBackgroundBlurCache(context: Context) {
@@ -362,7 +286,7 @@ object BackgroundManager {
             backgroundBlurCacheFile(context).delete()
             legacyBackgroundBlurCacheDir(context).deleteRecursively()
         }.onFailure {
-            Log.w(TAG, "Failed to clear background blur cache: ${it.message}")
+            Log.w(tag, "Failed to clear background blur cache: ${it.message}")
         }
     }
 
@@ -384,7 +308,7 @@ object BackgroundManager {
 
             Uri.fromFile(file)
         } catch (e: Exception) {
-            Log.e(TAG, "复制图片失败: ${e.message}", e)
+            Log.e(tag, "复制图片失败: ${e.message}", e)
             null
         }
     }
@@ -394,21 +318,41 @@ object BackgroundManager {
 @Composable
 fun KernelSUTheme(
     dpi: Int = 0,
-    darkTheme: Boolean = isInDarkTheme(ThemeConfig.forceDarkMode),
-    dynamicColor: Boolean = ThemeConfig.useDynamicColor,
+    darkTheme: Boolean? = null,
+    dynamicColor: Boolean? = null,
     content: @Composable () -> Unit
 ) {
+    val themeConfig = koinInject<ThemeConfig>()
+    val themeRepository = koinInject<ThemeRepository>()
+    val backgroundManager = koinInject<BackgroundManager>()
+    val cardConfig = koinInject<CardConfig>()
+    val settings = koinInject<AppSettingsRepository>()
+    val backgroundRenderState = remember { BackgroundRenderState() }
+    val resolvedDarkTheme = darkTheme ?: isInDarkTheme(themeConfig.forceDarkMode)
+    val resolvedDynamicColor = dynamicColor ?: themeConfig.useDynamicColor
     val context = LocalContext.current
     val systemIsDark = isSystemInDarkTheme()
 
     // 初始化主题
-    ThemeInitializer(context = context, systemIsDark = systemIsDark)
+    ThemeInitializer(
+        context = context,
+        systemIsDark = systemIsDark,
+        themeConfig = themeConfig,
+        themeRepository = themeRepository,
+        backgroundManager = backgroundManager,
+        cardConfig = cardConfig,
+    )
 
     // 创建颜色方案
-    val colorScheme = createColorScheme(darkTheme, dynamicColor)
+    val colorScheme = createColorScheme(
+        resolvedDarkTheme,
+        resolvedDynamicColor,
+        themeConfig,
+        backgroundRenderState,
+    )
 
     // 系统栏样式
-    SystemBarController(darkTheme)
+    SystemBarController(resolvedDarkTheme)
 
     val systemDensity = LocalDensity.current
 
@@ -422,16 +366,16 @@ fun KernelSUTheme(
     }
 
     CompositionLocalProvider(
-        LocalDensity provides density
+        LocalDensity provides density,
+        LocalBackgroundRenderState provides backgroundRenderState,
     ) {
         MaterialExpressiveTheme(
             colorScheme = colorScheme,
             motionScheme = MotionScheme.expressive(),
-            typography = generateTypography()
+            typography = generateTypography(themeConfig)
         ) {
-            MonetColorsProvider.UpdateCss()
             Box(modifier = Modifier.fillMaxSize()) {
-                BackgroundLayer()
+                BackgroundLayer(themeConfig, settings, backgroundRenderState)
                 content()
             }
         }
@@ -439,24 +383,31 @@ fun KernelSUTheme(
 }
 
 @Composable
-private fun ThemeInitializer(context: Context, systemIsDark: Boolean) {
-    val themeChanged = ThemeConfig.detectThemeChange(systemIsDark)
+private fun ThemeInitializer(
+    context: Context,
+    systemIsDark: Boolean,
+    themeConfig: ThemeConfig,
+    themeRepository: ThemeRepository,
+    backgroundManager: BackgroundManager,
+    cardConfig: CardConfig,
+) {
+    val themeChanged = themeConfig.detectThemeChange(systemIsDark)
     val scope = rememberCoroutineScope()
 
     // 处理系统主题变化
     LaunchedEffect(systemIsDark, themeChanged) {
-        if (ThemeConfig.forceDarkMode == null && themeChanged) {
+        if (themeConfig.forceDarkMode == null && themeChanged) {
             Log.d("ThemeSystem", "系统主题变化: $systemIsDark")
-            ThemeConfig.resetBackgroundState()
+            themeConfig.resetBackgroundState()
 
-            if (!ThemeConfig.preventBackgroundRefresh) {
-                BackgroundManager.loadCustomBackground(context)
+            if (!themeConfig.preventBackgroundRefresh) {
+                backgroundManager.loadCustomBackground()
             }
 
-            CardConfig.apply {
-                load(context)
+            cardConfig.apply {
+                load()
                 setThemeDefaults(systemIsDark)
-                save(context)
+                save()
             }
         }
     }
@@ -464,33 +415,35 @@ private fun ThemeInitializer(context: Context, systemIsDark: Boolean) {
     // 初始加载配置
     LaunchedEffect(Unit) {
         scope.launch {
-            ThemeManager.loadThemeMode(context)
-            ThemeManager.loadSeedColor(context)
-            ThemeManager.loadDynamicColorState(context)
-            ThemeManager.loadDynamicColorSpec(context)
-            ThemeManager.loadDynamicPaletteStyle(context)
-            CardConfig.load(context)
+            themeConfig.forceDarkMode = themeRepository.loadThemeMode()
+            themeConfig.seedColor = themeRepository.loadSeedColor()
+            themeConfig.useDynamicColor = themeRepository.loadDynamicColorState()
+            themeConfig.dynamicColorSpec = themeRepository.loadDynamicColorSpec()
+            themeConfig.dynamicPaletteStyle = themeRepository.loadDynamicPaletteStyle(
+                themeConfig.dynamicColorSpec,
+            )
+            cardConfig.load()
 
-            if (!ThemeConfig.backgroundImageLoaded && !ThemeConfig.preventBackgroundRefresh) {
-                BackgroundManager.loadCustomBackground(context)
+            if (!themeConfig.backgroundImageLoaded && !themeConfig.preventBackgroundRefresh) {
+                backgroundManager.loadCustomBackground()
             }
         }
     }
 
-    MonetCompatInitializer(context)
+    MonetCompatInitializer(context, themeConfig)
 }
 
 @Composable
-private fun MonetCompatInitializer(context: Context) {
+private fun MonetCompatInitializer(context: Context, themeConfig: ThemeConfig) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) return
 
     val scope = rememberCoroutineScope()
 
     DisposableEffect(context) {
         val monet = MonetCompat.setup(context)
-        monet.defaultPrimaryColor = ThemeConfig.seedColor
-        monet.defaultSecondaryColor = ThemeConfig.seedColor
-        monet.defaultAccentColor = ThemeConfig.seedColor
+        monet.defaultPrimaryColor = themeConfig.seedColor
+        monet.defaultSecondaryColor = themeConfig.seedColor
+        monet.defaultAccentColor = themeConfig.seedColor
 
         val listener = object : MonetColorsChangedListener {
             override fun onMonetColorsChanged(
@@ -499,8 +452,8 @@ private fun MonetCompatInitializer(context: Context) {
                 isInitialChange: Boolean
             ) {
                 scope.launch {
-                    ThemeConfig.monetCompatSeedColor =
-                        monet.getSelectedWallpaperColor() ?: ThemeConfig.seedColor
+                    themeConfig.monetCompatSeedColor =
+                        monet.getSelectedWallpaperColor() ?: themeConfig.seedColor
                 }
             }
         }
@@ -511,47 +464,50 @@ private fun MonetCompatInitializer(context: Context) {
         }
     }
 
-    LaunchedEffect(ThemeConfig.useDynamicColor, ThemeConfig.seedColor) {
-        if (!ThemeConfig.useDynamicColor) return@LaunchedEffect
+    LaunchedEffect(themeConfig.useDynamicColor, themeConfig.seedColor) {
+        if (!themeConfig.useDynamicColor) return@LaunchedEffect
 
         val monet = MonetCompat.setup(context)
-        monet.defaultPrimaryColor = ThemeConfig.seedColor
-        monet.defaultSecondaryColor = ThemeConfig.seedColor
-        monet.defaultAccentColor = ThemeConfig.seedColor
+        monet.defaultPrimaryColor = themeConfig.seedColor
+        monet.defaultSecondaryColor = themeConfig.seedColor
+        monet.defaultAccentColor = themeConfig.seedColor
         monet.updateConfiguration(context)
-        ThemeConfig.monetCompatSeedColor =
-            monet.getSelectedWallpaperColor() ?: ThemeConfig.seedColor
+        themeConfig.monetCompatSeedColor =
+            monet.getSelectedWallpaperColor() ?: themeConfig.seedColor
         monet.updateMonetColors()
     }
 }
 
 @Composable
-private fun BackgroundLayer() {
-    val context = LocalContext.current
-    val backgroundUri = rememberSaveable { mutableStateOf(ThemeConfig.customBackgroundUri) }
+private fun BackgroundLayer(
+    themeConfig: ThemeConfig,
+    settings: AppSettingsRepository,
+    renderState: BackgroundRenderState,
+) {
+    val backgroundUri = rememberSaveable { mutableStateOf(themeConfig.customBackgroundUri) }
 
-    LaunchedEffect(ThemeConfig.customBackgroundUri) {
-        backgroundUri.value = ThemeConfig.customBackgroundUri
-        backgroundImageBitmap = null
+    LaunchedEffect(themeConfig.customBackgroundUri) {
+        backgroundUri.value = themeConfig.customBackgroundUri
+        renderState.imageBitmap = null
         if (backgroundUri.value == null) {
-            backgroundImagePainter = null
-            blurBackgroundImageBitmap = null
-            backgroundSeedColor = 0
-            context.appPreferences.remove("cached_seed_color")
+            renderState.imagePainter = null
+            renderState.blurImageBitmap = null
+            renderState.seedColor = 0
+            settings.remove("cached_seed_color")
         }
     }
 
-    val hasBlurBitmap = blurBackgroundImageBitmap != null
+    val hasBlurBitmap = renderState.blurImageBitmap != null
 
-    LaunchedEffect(ThemeConfig.isEnableBlurExp, hasBlurBitmap) {
-        if (!ThemeConfig.isEnableBlurExp || !hasBlurBitmap) return@LaunchedEffect
+    LaunchedEffect(themeConfig.isEnableBlurExp, hasBlurBitmap) {
+        if (!themeConfig.isEnableBlurExp || !hasBlurBitmap) return@LaunchedEffect
 
         while (true) {
             withFrameNanos { }
-            backgroundBlurFrameTick = if (backgroundBlurFrameTick == Int.MAX_VALUE) {
+            renderState.blurFrameTick = if (renderState.blurFrameTick == Int.MAX_VALUE) {
                 0
             } else {
-                backgroundBlurFrameTick + 1
+                renderState.blurFrameTick + 1
             }
         }
     }
@@ -565,10 +521,10 @@ private fun BackgroundLayer() {
                 if (
                     size.width > 0 &&
                     size.height > 0 &&
-                    backgroundBlurViewportSize != size
+                    renderState.blurViewportSize != size
                 ) {
-                    backgroundBlurViewportSize = size
-                    blurBackgroundImageBitmap = null
+                    renderState.blurViewportSize = size
+                    renderState.blurImageBitmap = null
                 }
             }
             .background(
@@ -578,16 +534,14 @@ private fun BackgroundLayer() {
 
     // 自定义背景
     backgroundUri.value?.let { uri ->
-        BackgroundInitializer(uri = uri)
+        BackgroundInitializer(
+            uri = uri,
+            themeConfig = themeConfig,
+            settings = settings,
+            renderState = renderState,
+        )
     }
 }
-
-var backgroundImagePainter: AsyncImagePainter? by mutableStateOf(null)
-private var backgroundImageBitmap: ImageBitmap? by mutableStateOf(null)
-var blurBackgroundImageBitmap: ImageBitmap? by mutableStateOf(null)
-private var backgroundBlurViewportSize by mutableStateOf(IntSize(0, 0))
-private var backgroundBlurFrameTick by mutableIntStateOf(0)
-var backgroundSeedColor by mutableIntStateOf(0)
 
 private const val BACKGROUND_BLUR_RADIUS = 45f
 
@@ -613,13 +567,15 @@ fun Modifier.blurSource(): Modifier {
  */
 @Composable
 fun Modifier.blurEffect(): Modifier {
-    if (!ThemeConfig.isEnableBlur || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+    val themeConfig = koinInject<ThemeConfig>()
+    val cardConfig = koinInject<CardConfig>()
+    if (!themeConfig.isEnableBlur || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
         return renderBackgroundFallback()
     }
 
     return LocalBlurState.current?.let { backdrop ->
         val blendColor =
-            MaterialTheme.colorScheme.surfaceContainer.copy(alpha = CardConfig.cardAlpha)
+            MaterialTheme.colorScheme.surfaceContainer.copy(alpha = cardConfig.cardAlpha)
 
         this.then(
             Modifier.textureBlur(
@@ -637,13 +593,15 @@ fun Modifier.blurEffect(): Modifier {
 }
 
 private fun Modifier.renderBackgroundFallback(): Modifier = composed {
+    val themeConfig = koinInject<ThemeConfig>()
+    val renderState = LocalBackgroundRenderState.current
     var coordinates by remember {
         mutableStateOf<LayoutCoordinates?>(null)
     }
 
     val backgroundColor = MaterialTheme.colorScheme.surfaceContainer
-    val dimColor = backgroundColor.copy(alpha = ThemeConfig.backgroundDim)
-    val backgroundBitmap = backgroundImageBitmap
+    val dimColor = backgroundColor.copy(alpha = themeConfig.backgroundDim)
+    val backgroundBitmap = renderState.imageBitmap
     val backgroundAnchor = LocalBackgroundBlurAnchor.current
     val pagerPage = LocalPagerPage.current
     val pagerState = if (pagerPage != null) LocalPagerState.current else null
@@ -658,18 +616,14 @@ private fun Modifier.renderBackgroundFallback(): Modifier = composed {
             val viewportSize = backgroundAnchor
                 ?.takeIf { it.isAttached && it.size.width > 0 && it.size.height > 0 }
                 ?.size
-                ?: backgroundBlurViewportSize
+                ?: renderState.blurViewportSize
             val currentPagerPage = pagerPage
             val currentPagerState = pagerState?.takeIf { state ->
                 currentPagerPage != null && currentPagerPage in 0 until state.pageCount
             }
-            val hasPagerPage = currentPagerState != null && currentPagerPage != null
-            val pagerViewportSize = if (currentPagerState != null) {
-                currentPagerState.layoutInfo.viewportSize.takeIf {
-                    it.width > 0 && it.height > 0
-                }
-            } else {
-                null
+            val hasPagerPage = currentPagerState != null
+            val pagerViewportSize = currentPagerState?.layoutInfo?.viewportSize?.takeIf {
+                it.width > 0 && it.height > 0
             }
             val renderViewportSize = pagerViewportSize ?: viewportSize
             val pageOffset = if (currentPagerState != null && currentPagerPage != null) {
@@ -694,7 +648,7 @@ private fun Modifier.renderBackgroundFallback(): Modifier = composed {
                 }
             }
             val bitmapBounds = if (
-                ThemeConfig.backgroundImageLoaded &&
+                themeConfig.backgroundImageLoaded &&
                 backgroundBitmap != null &&
                 offsetBoundsInBackground != null
             ) {
@@ -751,29 +705,40 @@ private fun Rect.mapToBitmapBounds(
 }
 
 
+@SuppressLint("NewApi")
 fun Modifier.renderBackgroundBlur(
     tintColor: Color? = null
 ): Modifier = composed {
-    if (!ThemeConfig.isEnableBlurExp) return@composed this
+    val themeConfig = koinInject<ThemeConfig>()
+    val cardConfig = koinInject<CardConfig>()
+    val renderState = LocalBackgroundRenderState.current
+    if (!themeConfig.isEnableBlurExp) return@composed this
 
     var coordinates by remember {
         mutableStateOf<LayoutCoordinates?>(null)
     }
 
     val tintColor = (tintColor ?: MaterialTheme.colorScheme.surfaceBright).copy(
-        alpha = CardConfig.cardAlpha
+        alpha = cardConfig.cardAlpha
     )
     val backgroundBlurAnchor = LocalBackgroundBlurAnchor.current
     val stretchOverscrollState = LocalStretchOverscrollCompensationState.current
+    val stretchRenderer = remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            StretchBackgroundRenderer()
+        } else {
+            null
+        }
+    }
 
     this
         .onGloballyPositioned { newCoordinates ->
             coordinates = newCoordinates.takeIf { it.isAttached }
         }
         .drawWithContent {
-            backgroundBlurFrameTick
+            renderState.blurFrameTick
 
-            val currentBitmap = blurBackgroundImageBitmap
+            val currentBitmap = renderState.blurImageBitmap
             val currentBoundsInBackground = coordinates?.boundsInBackgroundNow(backgroundBlurAnchor)
             val stretchCompensation = stretchOverscrollState
                 ?.resolveBitmapCompensation(backgroundBlurAnchor)
@@ -785,8 +750,8 @@ fun Modifier.renderBackgroundBlur(
                 currentBoundsInBackground.height > 0f
             ) {
                 if (stretchCompensation != null) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        StretchBackgroundRenderer.shared.draw(
+                    if (stretchRenderer != null) {
+                        stretchRenderer.draw(
                             scope = this,
                             bitmap = currentBitmap,
                             boundsInBackground = currentBoundsInBackground,
@@ -1149,12 +1114,6 @@ private const val STRETCH_BACKGROUND_SHADER = """
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 private class StretchBackgroundRenderer {
-    companion object {
-        val shared by lazy(LazyThreadSafetyMode.NONE) {
-            StretchBackgroundRenderer()
-        }
-    }
-
     private val runtimeShader = RuntimeShader(STRETCH_BACKGROUND_SHADER)
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG).apply {
         shader = runtimeShader
@@ -1693,7 +1652,12 @@ private fun saveBackgroundBlurCache(cacheFile: File, bitmap: Bitmap) {
 }
 
 @Composable
-private fun BackgroundInitializer(uri: Uri) {
+private fun BackgroundInitializer(
+    uri: Uri,
+    themeConfig: ThemeConfig,
+    settings: AppSettingsRepository,
+    renderState: BackgroundRenderState,
+) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -1703,31 +1667,31 @@ private fun BackgroundInitializer(uri: Uri) {
         else -12417548
 
     val calcedCachedSeedColor =
-        context.appPreferences.getInt("cached_seed_color", dynamicColorFromSystem)
+        settings.getInt("cached_seed_color", dynamicColorFromSystem)
 
-    LaunchedEffect(ThemeConfig.isEnableBlurExp, backgroundBlurViewportSize) {
+    LaunchedEffect(themeConfig.isEnableBlurExp, renderState.blurViewportSize) {
         if (
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-            ThemeConfig.isEnableBlurExp &&
-            backgroundBlurViewportSize.width > 0 &&
-            backgroundBlurViewportSize.height > 0
+            themeConfig.isEnableBlurExp &&
+            renderState.blurViewportSize.width > 0 &&
+            renderState.blurViewportSize.height > 0
         ) {
-            backgroundImagePainter?.let {
+            renderState.imagePainter?.let {
                 if (it.state !is AsyncImagePainter.State.Success) return@let
 
                 val bitmap = (it.state as AsyncImagePainter.State.Success).result.drawable.toBitmap()
-                blurBackgroundImageBitmap = bitmap.createBackgroundBlurImage(
+                renderState.blurImageBitmap = bitmap.createBackgroundBlurImage(
                     context = context,
-                    viewportSize = backgroundBlurViewportSize,
+                    viewportSize = renderState.blurViewportSize,
                     blurRadius = BACKGROUND_BLUR_RADIUS,
                 )
             }
         } else {
-            blurBackgroundImageBitmap = null
+            renderState.blurImageBitmap = null
         }
     }
 
-    backgroundImagePainter = rememberAsyncImagePainter(
+    renderState.imagePainter = rememberAsyncImagePainter(
         model = ImageRequest.Builder(context)
             .data(uri)
             .allowHardware(false)
@@ -1735,51 +1699,51 @@ private fun BackgroundInitializer(uri: Uri) {
             .build(),
         onError = { error ->
             Log.e("ThemeSystem", "背景加载失败: ${error.result.throwable.message}")
-            backgroundImageBitmap = null
-            ThemeConfig.customBackgroundUri = null
+            renderState.imageBitmap = null
+            themeConfig.customBackgroundUri = null
         },
         onSuccess = {
             val bitmap = it.result.drawable.toBitmap()
-            backgroundImageBitmap = bitmap.asImageBitmap()
+            renderState.imageBitmap = bitmap.asImageBitmap()
             Log.d("ThemeSystem", "背景加载成功")
-            ThemeConfig.backgroundImageLoaded = true
-            ThemeConfig.isThemeChanging = false
+            themeConfig.backgroundImageLoaded = true
+            themeConfig.isThemeChanging = false
 
             if (
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                ThemeConfig.isEnableBlurExp &&
-                backgroundBlurViewportSize.width > 0 &&
-                backgroundBlurViewportSize.height > 0
+                themeConfig.isEnableBlurExp &&
+                renderState.blurViewportSize.width > 0 &&
+                renderState.blurViewportSize.height > 0
             ) {
                 coroutineScope.launch {
-                    blurBackgroundImageBitmap = bitmap.createBackgroundBlurImage(
+                    renderState.blurImageBitmap = bitmap.createBackgroundBlurImage(
                         context = context,
-                        viewportSize = backgroundBlurViewportSize,
+                        viewportSize = renderState.blurViewportSize,
                         blurRadius = BACKGROUND_BLUR_RADIUS,
                     )
                 }
             } else {
-                blurBackgroundImageBitmap = null
+                renderState.blurImageBitmap = null
             }
 
-            backgroundSeedColor = calcedCachedSeedColor
+            renderState.seedColor = calcedCachedSeedColor
             coroutineScope.launch {
-                backgroundSeedColor = bitmap.extractSeedColor(
+                renderState.seedColor = bitmap.extractSeedColor(
                     fallbackColorArgb = calcedCachedSeedColor
                 )
 
-                context.appPreferences.putInt("cached_seed_color", backgroundSeedColor)
+                settings.putInt("cached_seed_color", renderState.seedColor)
             }
         }
     )
 }
 
 @Composable
-private fun generateTypography(): androidx.compose.material3.Typography {
-    val darkMode = isInDarkTheme(ThemeConfig.forceDarkMode)
+private fun generateTypography(themeConfig: ThemeConfig): androidx.compose.material3.Typography {
+    val darkMode = isInDarkTheme(themeConfig.forceDarkMode)
 
     fun generateShadow(originalShadow: Shadow?): Shadow? {
-        if (!ThemeConfig.isHighContrastMode) return originalShadow
+        if (!themeConfig.isHighContrastMode) return originalShadow
         val shadow = originalShadow ?: Shadow(
             offset = Offset(1.5f, 1.5f),
             blurRadius = 0f
@@ -1829,12 +1793,14 @@ private fun generateTypography(): androidx.compose.material3.Typography {
 @Composable
 private fun createColorScheme(
     darkTheme: Boolean,
-    dynamicColor: Boolean
+    dynamicColor: Boolean,
+    themeConfig: ThemeConfig,
+    renderState: BackgroundRenderState,
 ): ColorScheme {
     val seedColor =
         when {
-            dynamicColor && ThemeConfig.isUseBackgroundSeedColor && backgroundSeedColor != 0 -> {
-                backgroundSeedColor
+            dynamicColor && themeConfig.isUseBackgroundSeedColor && renderState.seedColor != 0 -> {
+                renderState.seedColor
             }
 
             dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
@@ -1842,19 +1808,19 @@ private fun createColorScheme(
             }
 
             dynamicColor -> {
-                ThemeConfig.monetCompatSeedColor
+                themeConfig.monetCompatSeedColor
             }
 
             else -> {
-                ThemeConfig.seedColor
+                themeConfig.seedColor
             }
         }
 
     return dynamicColorScheme(
         seedColor = Color(seedColor),
         isDark = darkTheme,
-        style = ThemeConfig.dynamicPaletteStyle,
-        specVersion = ThemeConfig.dynamicColorSpec,
+        style = themeConfig.dynamicPaletteStyle,
+        specVersion = themeConfig.dynamicColorSpec,
     )
 }
 
@@ -1879,28 +1845,6 @@ private fun SystemBarController(darkMode: Boolean) {
             }
         )
     }
-}
-
-fun Context.saveThemeMode(forceDark: Boolean?) {
-    ThemeManager.saveThemeMode(this, forceDark)
-}
-
-
-fun Context.saveThemeSeedColor(seedColor: Int) {
-    ThemeManager.saveSeedColor(this, seedColor)
-}
-
-
-fun Context.saveDynamicColorState(enabled: Boolean) {
-    ThemeManager.saveDynamicColorState(this, enabled)
-}
-
-fun Context.saveDynamicColorSpec(spec: ColorSpec.SpecVersion) {
-    ThemeManager.saveDynamicColorSpec(this, spec)
-}
-
-fun Context.saveDynamicPaletteStyle(style: PaletteStyle) {
-    ThemeManager.saveDynamicPaletteStyle(this, style)
 }
 
 @Composable

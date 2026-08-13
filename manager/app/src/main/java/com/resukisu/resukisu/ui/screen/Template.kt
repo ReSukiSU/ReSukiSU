@@ -1,5 +1,8 @@
 package com.resukisu.resukisu.ui.screen
 
+import org.koin.compose.koinInject
+import com.resukisu.resukisu.ui.theme.CardConfig
+import com.resukisu.resukisu.ui.theme.ThemeConfig
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.widget.Toast
@@ -64,8 +67,9 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.getSystemService
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
-import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.compose.viewmodel.koinViewModel
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.domain.model.ProfileTemplate
 import com.resukisu.resukisu.ui.component.NetworkRefreshContent
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
@@ -73,13 +77,12 @@ import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Navigator
 import com.resukisu.resukisu.ui.navigation.Route
-import com.resukisu.resukisu.ui.theme.CardConfig
-import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.ActivityResumeEffect
+import com.resukisu.resukisu.ui.viewmodel.TemplateUiEvent
 import com.resukisu.resukisu.ui.viewmodel.TemplateViewModel
-import kotlinx.coroutines.Dispatchers
+import com.resukisu.resukisu.ui.viewmodel.TemplateUiAction
 import kotlinx.coroutines.launch
 
 /**
@@ -87,16 +90,57 @@ import kotlinx.coroutines.launch
  * @date 2023/10/20.
  */
 
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AppProfileTemplateScreen() {
     val pullRefreshState = rememberPullToRefreshState()
-    val viewModel = viewModel<TemplateViewModel>()
+    val viewModel = koinViewModel<TemplateViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    var isUserRefreshing by remember { mutableStateOf(false) }
     val scrollBehavior =
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val navigator = LocalNavigator.current
+    val context = LocalContext.current
+    val clipboardManager = context.getSystemService<ClipboardManager>()
+    val appProfileTemplateImportEmpty =
+        stringResource(R.string.app_profile_template_import_empty)
+    val appProfileTemplateImportSuccess =
+        stringResource(R.string.app_profile_template_import_success)
+    val appProfileTemplateExportEmpty =
+        stringResource(R.string.app_profile_template_export_empty)
+
+    LaunchedEffect(viewModel, clipboardManager) {
+        viewModel.events.collect { event ->
+            when (event) {
+                TemplateUiEvent.ImportCompleted -> {
+                    Toast.makeText(
+                        context,
+                        appProfileTemplateImportSuccess,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                    viewModel.dispatch(TemplateUiAction.Refresh())
+                }
+
+                is TemplateUiEvent.Exported -> {
+                    clipboardManager?.setPrimaryClip(ClipData.newPlainText("", event.json))
+                }
+
+                TemplateUiEvent.ExportEmpty -> {
+                    Toast.makeText(
+                        context,
+                        appProfileTemplateExportEmpty,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+
+                is TemplateUiEvent.Error -> if (event.message.isNotBlank()) {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
@@ -104,62 +148,37 @@ fun AppProfileTemplateScreen() {
         navigator.observeResult<Boolean>("template_edit").collect { success ->
             if (success) {
                 navigator.clearResult("template_edit")
-                scope.launch { viewModel.fetchTemplates() }
+                scope.launch { viewModel.dispatch(TemplateUiAction.Refresh()) }
             }
         }
     }
 
     ActivityResumeEffect {
-        viewModel.fetchTemplates()
+        viewModel.dispatch(TemplateUiAction.Refresh())
     }
 
     Scaffold(
         topBar = {
-            val context = LocalContext.current
-            val clipboardManager = context.getSystemService<ClipboardManager>()
-            val showToast = fun(msg: String) {
-                scope.launch(Dispatchers.Main) {
-                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-                }
-            }
-            val appProfileTemplateImportEmpty =
-                stringResource(R.string.app_profile_template_import_empty)
-            val appProfileTemplateImportSuccess =
-                stringResource(R.string.app_profile_template_import_success)
-            val appProfileTemplateExportEmpty =
-                stringResource(R.string.app_profile_template_export_empty)
             TopBar(
                 onBack = dropUnlessResumed { navigator.pop() },
                 onSync = {
-                    scope.launch { viewModel.fetchTemplates(true) }
+                    viewModel.dispatch(TemplateUiAction.Refresh(synchronize = true))
                 },
                 onImport = {
-                    scope.launch {
-                        val clipboardText = clipboardManager?.primaryClip?.getItemAt(0)?.text?.toString()
-                        if (clipboardText.isNullOrEmpty()) {
-                            showToast(appProfileTemplateImportEmpty)
-                            return@launch
-                        }
-                        viewModel.importTemplates(
-                            clipboardText,
-                            {
-                                showToast(appProfileTemplateImportSuccess)
-                                viewModel.fetchTemplates(false)
-                            },
-                            showToast
-                        )
+                    val clipboardText =
+                        clipboardManager?.primaryClip?.getItemAt(0)?.text?.toString()
+                    if (clipboardText.isNullOrEmpty()) {
+                        Toast.makeText(
+                            context,
+                            appProfileTemplateImportEmpty,
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    } else {
+                        viewModel.dispatch(TemplateUiAction.Import(clipboardText))
                     }
                 },
                 onExport = {
-                    scope.launch {
-                        viewModel.exportTemplates(
-                            {
-                                showToast(appProfileTemplateExportEmpty)
-                            }
-                        ) { text ->
-                            clipboardManager?.setPrimaryClip(ClipData.newPlainText("", text))
-                        }
-                    }
+                    viewModel.dispatch(TemplateUiAction.Export)
                 },
                 scrollBehavior = scrollBehavior,
             )
@@ -170,8 +189,9 @@ fun AppProfileTemplateScreen() {
                 onClick = {
                     navigator.navigateForResult(
                         Route.TemplateEditor(
-                            TemplateViewModel.TemplateInfo(),
-                            false
+                            templateId = "",
+                            readOnly = false,
+                            isCreation = true,
                         ),
                         "template_edit"
                     )
@@ -200,7 +220,7 @@ fun AppProfileTemplateScreen() {
                         modifier = Modifier.fillParentMaxSize(),
                         offline = uiState.isOffline,
                         onRetry = {
-                            scope.launch { viewModel.fetchTemplates(sync = true) }
+                            scope.launch { viewModel.dispatch(TemplateUiAction.Refresh(synchronize = true)) }
                         },
                     )
                 }
@@ -216,14 +236,21 @@ fun AppProfileTemplateScreen() {
                         scrollBehavior.nestedScrollConnection
                     )
                     .blurSource(),
-                isRefreshing = uiState.isRefreshing,
+                isRefreshing = isUserRefreshing,
                 onRefresh = {
-                    scope.launch { viewModel.fetchTemplates() }
+                    scope.launch {
+                        isUserRefreshing = true
+                        try {
+                            viewModel.fetchTemplates()
+                        } finally {
+                            isUserRefreshing = false
+                        }
+                    }
                 },
                 indicator = {
                     PullToRefreshDefaults.LoadingIndicator(
                         state = pullRefreshState,
-                        isRefreshing = uiState.isRefreshing,
+                        isRefreshing = isUserRefreshing,
                         modifier = Modifier
                             .align(Alignment.TopCenter)
                             .padding(top = innerPadding.calculateTopPadding()),
@@ -260,7 +287,7 @@ fun AppProfileTemplateScreen() {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun TemplateItem(
-    template: TemplateViewModel.TemplateInfo
+    template: ProfileTemplate
 ) {
     val navigator = LocalNavigator.current
     SettingsJumpPageWidget(
@@ -268,7 +295,7 @@ private fun TemplateItem(
         iconPlaceholder = false,
         onClick = {
             navigator.navigateForResult(
-                Route.TemplateEditor(template, !template.local),
+                Route.TemplateEditor(template.id, !template.local),
                 "template_edit"
             )
         },
@@ -314,7 +341,7 @@ fun TemplateItemPreview() {
     CompositionLocalProvider(
         LocalNavigator provides Navigator(Route.AppProfileTemplate)
     ) {
-        TemplateItem(TemplateViewModel.TemplateInfo())
+        TemplateItem(ProfileTemplate())
     }
 }
 
@@ -327,6 +354,8 @@ private fun TopBar(
     onExport: () -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
+    val themeConfig: ThemeConfig = koinInject()
+    val cardConfig: CardConfig = koinInject()
     LargeFlexibleTopAppBar(
         modifier = Modifier.blurEffect(
         ),
@@ -335,15 +364,15 @@ private fun TopBar(
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor =
-                if (ThemeConfig.isEnableBlur)
+                if (themeConfig.isEnableBlur)
                     Color.Transparent
                 else
-                    MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha),
+                    MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
             scrolledContainerColor =
-                if (ThemeConfig.isEnableBlur)
+                if (themeConfig.isEnableBlur)
                     Color.Transparent
                 else
-                    MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha),
+                    MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
         ),
         navigationIcon = {
             AppBackButton(

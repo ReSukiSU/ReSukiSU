@@ -537,24 +537,24 @@ NativeBridgeNP(getHookType, jstring) {
 	return GetEnvironment()->NewStringUTF(env, hook_type);
 }
 
-// Get KernelPatch implement
-NativeBridgeNP(getKernelPatchImplement, jobject) {
+// Get KernelPatch implementation
+NativeBridgeNP(getKernelPatchImplementation, jobject) {
 	int type = get_kernel_patch_implement();
 
 	jclass cls = GetEnvironment()->FindClass(env,
-											 "com/resukisu/resukisu/Natives$KernelPatchImplement");
+                                             "com/resukisu/resukisu/Natives$KernelPatchImplementation");
 	if (cls == nullptr) {
 		jclass exCls = GetEnvironment()->FindClass(env, "java/lang/IllegalStateException");
-		GetEnvironment()->ThrowNew(env, exCls, "Could not find KernelPatchImplement class");
+        GetEnvironment()->ThrowNew(env, exCls, "Could not find KernelPatchImplementation class");
 		return nullptr;
 	}
 
 	jmethodID valuesMethod = GetEnvironment()->GetStaticMethodID(env, cls, "values",
-																 "()[Lcom/resukisu/resukisu/Natives$KernelPatchImplement;");
+                                                                 "()[Lcom/resukisu/resukisu/Natives$KernelPatchImplementation;");
 	if (valuesMethod == nullptr) {
 		jclass exCls = GetEnvironment()->FindClass(env, "java/lang/IllegalStateException");
 		GetEnvironment()->ThrowNew(env, exCls,
-								   "Could not find values() method in KernelPatchImplement");
+                                   "Could not find values() method in KernelPatchImplementation");
 		return nullptr;
 	}
 
@@ -562,26 +562,12 @@ NativeBridgeNP(getKernelPatchImplement, jobject) {
 																					   valuesMethod);
 	if (valuesArray == nullptr) {
 		jclass exCls = GetEnvironment()->FindClass(env, "java/lang/IllegalStateException");
-		GetEnvironment()->ThrowNew(env, exCls, "Could get valuesArray in KernelPatchImplement");
+        GetEnvironment()->ThrowNew(env, exCls,
+                                   "Could not get valuesArray in KernelPatchImplementation");
 		return nullptr;
 	}
 
 	return GetEnvironment()->GetObjectArrayElement(env, valuesArray, (jsize) type);
-}
-
-// dynamic manager
-NativeBridge(setDynamicManager, jboolean, jint size, jstring hash) {
-	if (!hash) {
-        LOGD("setDynamicManager: hash is null");
-		return false;
-	}
-
-	const char* chash = GetEnvironment()->GetStringUTFChars(env, hash, nullptr);
-	bool result = set_dynamic_manager((unsigned int)size, chash);
-	GetEnvironment()->ReleaseStringUTFChars(env, hash, chash);
-
-    LOGD("setDynamicManager: size=0x%x, result=%d", size, result);
-	return result;
 }
 
 NativeBridgeNP(getDynamicManager, jobject) {
@@ -601,12 +587,6 @@ NativeBridgeNP(getDynamicManager, jobject) {
 
     LOGD("getDynamicManager: size=0x%x, hash=%.16s...", cmd.size, cmd.hash);
 	return obj;
-}
-
-NativeBridgeNP(clearDynamicManager, jboolean) {
-	bool result = clear_dynamic_manager();
-    LOGD("clearDynamicManager: result=%d", result);
-	return result;
 }
 
 // Get a list of active managers

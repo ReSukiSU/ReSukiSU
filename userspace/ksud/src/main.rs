@@ -6,6 +6,7 @@ mod android;
 mod anykernel3;
 mod apk_sign;
 mod assets;
+mod banner;
 mod boot_patch;
 #[cfg(not(target_os = "android"))]
 mod cli_non_android;

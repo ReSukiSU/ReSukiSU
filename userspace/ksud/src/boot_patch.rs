@@ -15,7 +15,7 @@ use anyhow::{Context, Result, anyhow, bail, ensure};
 use memmap2::{Mmap, MmapOptions};
 use regex_lite::Regex;
 
-use crate::assets;
+use crate::{assets, banner};
 
 #[cfg(target_os = "android")]
 mod android {
@@ -486,7 +486,7 @@ pub fn patch(args: BootPatchArgs) -> Result<()> {
             ..
         } = args;
 
-        println!(include_str!("./android/banner"));
+        println!("{}", banner::print_banner());
 
         #[cfg(target_os = "android")]
         let patch_file = image.is_some();

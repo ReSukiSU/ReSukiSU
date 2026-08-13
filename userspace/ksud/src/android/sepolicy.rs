@@ -68,6 +68,7 @@ trait SeObjectParser<'a> {
         Self: Sized;
 }
 
+#[allow(clippy::redundant_field_names)]
 #[derive(Debug, PartialEq, Eq, new)]
 struct NormalPerm<'a> {
     op: &'a str,
@@ -77,6 +78,7 @@ struct NormalPerm<'a> {
     perm: SeObject<'a>,
 }
 
+#[allow(clippy::redundant_field_names)]
 #[derive(Debug, PartialEq, Eq, new)]
 struct XPerm<'a> {
     op: &'a str,
@@ -87,29 +89,34 @@ struct XPerm<'a> {
     perm_set: SeObject<'a>,
 }
 
+#[allow(clippy::redundant_field_names)]
 #[derive(Debug, PartialEq, Eq, new)]
 struct TypeState<'a> {
     op: &'a str,
     stype: SeObject<'a>,
 }
 
+#[allow(clippy::redundant_field_names)]
 #[derive(Debug, PartialEq, Eq, new)]
 struct TypeAttr<'a> {
     stype: SeObject<'a>,
     sattr: SeObject<'a>,
 }
 
+#[allow(clippy::redundant_field_names)]
 #[derive(Debug, PartialEq, Eq, new)]
 struct Type<'a> {
     name: &'a str,
     attrs: SeObject<'a>,
 }
 
+#[allow(clippy::redundant_field_names)]
 #[derive(Debug, PartialEq, Eq, new)]
 struct Attr<'a> {
     name: &'a str,
 }
 
+#[allow(clippy::redundant_field_names)]
 #[derive(Debug, PartialEq, Eq, new)]
 struct TypeTransition<'a> {
     source: &'a str,
@@ -119,6 +126,7 @@ struct TypeTransition<'a> {
     object_name: Option<&'a str>,
 }
 
+#[allow(clippy::redundant_field_names)]
 #[derive(Debug, PartialEq, Eq, new)]
 struct TypeChange<'a> {
     op: &'a str,
@@ -128,6 +136,7 @@ struct TypeChange<'a> {
     default_type: &'a str,
 }
 
+#[allow(clippy::redundant_field_names)]
 #[derive(Debug, PartialEq, Eq, new)]
 struct GenFsCon<'a> {
     fs_name: &'a str,
@@ -397,7 +406,7 @@ impl TryFrom<&str> for PolicyObject {
 /// normal statement would be expand to atomic statement, for example:
 /// allow domain1 domain2:file1 { read write }; would be expand to two atomic statement
 /// allow domain1 domain2:file1 read;allow domain1 domain2:file1 write;
-#[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_arguments, clippy::redundant_field_names)]
 #[derive(Debug, new)]
 struct AtomicStatement {
     cmd: u32,

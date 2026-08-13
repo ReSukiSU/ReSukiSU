@@ -32,6 +32,7 @@ miuix = "0.9.2"
 datastore = "1.2.1"
 benchmark = "1.5.0-alpha07"
 profileinstaller = "1.4.1"
+koin-bom = "4.2.2"
 
 [plugins]
 agp-app = { id = "com.android.application", version.ref = "agp" }
@@ -44,6 +45,12 @@ lsplugin-apksign = { id = "org.lsposed.lsplugin.apksign", version.ref = "apksign
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
 
 [libraries]
+koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
+koin-core = { module = "io.insert-koin:koin-core" }
+koin-android = { module = "io.insert-koin:koin-android" }
+koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose" }
+koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }
+
 accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref = "accompanist-drawablepainter" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 

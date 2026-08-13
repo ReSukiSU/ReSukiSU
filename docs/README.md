@@ -44,7 +44,7 @@ See the [documentation](https://ReSukiSU.github.io).
 
 ## Translation
 
-If you need to submit a translation for the manager, please go to [Crowdin](https://crowdin.com/project/ReSukiSU).
+If you need to submit a translation for the manager, please go to [Weblate](https://hosted.weblate.org/engage/resukisu/).
 
 ## Sponsor
 

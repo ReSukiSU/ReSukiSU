@@ -23,9 +23,8 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.data.susfs.OpenRedirectItem
-import com.resukisu.resukisu.data.susfs.SuSFSConfigHelper
-import com.resukisu.resukisu.data.susfs.UidScheme
+import com.resukisu.resukisu.domain.model.OpenRedirectItem
+import com.resukisu.resukisu.domain.model.UidScheme
 import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
@@ -37,7 +36,12 @@ import com.resukisu.resukisu.ui.screen.susfs.component.SuSFSDescriptionCard
 import com.resukisu.resukisu.ui.screen.susfs.component.susfsEntryList
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.showReplacingSnackbar
+import com.resukisu.resukisu.ui.viewmodel.SuSFSUiAction
+import com.resukisu.resukisu.ui.viewmodel.SuSFSViewModel
+import com.resukisu.resukisu.ui.viewmodel.awaitSuSFSBoolean
+import com.resukisu.resukisu.ui.viewmodel.awaitSuSFSConfig
 import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,6 +50,7 @@ fun OpenRedirectTab(
     innerPadding: PaddingValues,
     onRegisterRefresh: SuSFSRefreshRegistrar,
 ) {
+    val configHelper = koinViewModel<SuSFSViewModel>()
     val snackbarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
 
@@ -155,9 +160,13 @@ fun OpenRedirectTab(
             if (target.isEmpty() || redirected.isEmpty()) return@ManualAddDialog
             scope.launch {
                 isLoading = true
-                val ok = SuSFSConfigHelper.addOpenRedirect(target, redirected, manualUidScheme)
+                val ok = awaitSuSFSBoolean(configHelper) { reply ->
+                    SuSFSUiAction.AddOpenRedirect(target, redirected, manualUidScheme, reply)
+                }
                 if (ok) {
-                    entries = SuSFSConfigHelper.refreshConfig().open_redirect
+                    entries = awaitSuSFSConfig(configHelper) { reply ->
+                        SuSFSUiAction.Refresh(reply)
+                    }?.open_redirect.orEmpty()
                     showManualAdd = false
                 } else {
                     snackbarHost.showReplacingSnackbar(operationFailedMsg)
@@ -214,9 +223,13 @@ fun OpenRedirectTab(
             onDelete = {
                 scope.launch {
                     isLoading = true
-                    val ok = SuSFSConfigHelper.removeOpenRedirect(item.target_path)
+                    val ok = awaitSuSFSBoolean(configHelper) { reply ->
+                        SuSFSUiAction.RemoveOpenRedirect(item.target_path, reply)
+                    }
                     if (ok) {
-                        entries = SuSFSConfigHelper.refreshConfig().open_redirect
+                        entries = awaitSuSFSConfig(configHelper) { reply ->
+                            SuSFSUiAction.Refresh(reply)
+                        }?.open_redirect.orEmpty()
                         detailItem = null
                     } else {
                         snackbarHost.showReplacingSnackbar(operationFailedMsg)

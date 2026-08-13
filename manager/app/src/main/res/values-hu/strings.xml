@@ -533,7 +533,6 @@
     <string name="dynamic_manager_fixed_manager_summary">%1$s\nKezeléséért felelős: %2$s</string>
     <string name="dynamic_manager_grant_confirm_message">A kiválasztott applikáció dinamikus menedzser feljogosítást kap. Amennyiben már létezik feljogosított dinamikus menedzser, ez a beállítás azonnal elérvénytelenedik.\n\nEz a készülékkezelést tekintően a legmagasabb felhatalmazás. Amennyiben bizonytalan lennél ne folytasd.</string>
     <string name="susfs_redirect_important_notes">Fontos kikötések:\n• Mind a jelen útvonalnak és az átvezetéshez használt célútvonalnak is léteznie kell a bejegyzést megelőzően.\n• Be kell állítanod az útvonalakhoz tartozó SELinux engedélyeket.\n• Az átvezetés csak a beállított UID Sémának megfelelően hatékony.</string>
-    <string name="susfs_backup_default_filename">susfs_backup.json</string>
     <string name="susfs_entry_import_success">%1$d importálva, %2$d meghiúsult</string>
     <string name="susfs_standard_uname_tab_manual">Manuális</string>
     <string name="susfs_redirect_entry_description">%1$s · %2$s</string>
@@ -567,16 +566,4 @@
     <string name="susfs_kstat_statically_fields">Statikus mezők (opcionális, az alapértelmezett értékek megtartásához hagyd üresen)</string>
     <string name="sus_maps_warning">Fontos kikötés: Azoknál az applikációknál, amelyeknek jól implementált beavatkozás érzékelő mechanizmusai vannak, a beavatkozások észlelésének és felismerésének megakadályozása nem garantálható.</string>
     <string name="sus_maps_debug_info">A bejegyzést megelőzően keresd ki a célapplikáció PID és UID azonosítóit a „ps -enf\" paranccsal, ellenőrizd a releváns elérési útvonalakat a „/proc/&lt;pid&gt;/maps\" címtérben, és vesd össze az értékeket a „/proc/1/mountinfo\" címtérben szereplővel az egyezésért. Csak akkor működik megfelelően a címtér fájlleképezés rejtése memóriából funkció, amennyiben az értékek megfelelően lettek egyeztetve.</string>
-    <string name="susfs_kstat_field_ino">ino érték / statikus lenyomat</string>
-    <string name="susfs_kstat_field_dev">dev érték / eszköz azonosító ID</string>
-    <string name="susfs_kstat_field_nlink">nlink érték / elérési pontok száma</string>
-    <string name="susfs_kstat_field_size">size érték / byteméret</string>
-    <string name="susfs_kstat_field_atime">atime érték / utolsó hozzáférés ideje</string>
-    <string name="susfs_kstat_field_atime_nsec">atime_nsec érték / utolsó hozzáférés ideje nanoszekundumban</string>
-    <string name="susfs_kstat_field_mtime">mtime érték / utolsó módosítás ideje</string>
-    <string name="susfs_kstat_field_mtime_nsec">mtime_nsec érték / utolsó módosítás ideje nanoszekundumban</string>
-    <string name="susfs_kstat_field_ctime">ctime érték / metadata utolsó módosításának ideje</string>
-    <string name="susfs_kstat_field_ctime_nsec">ctime_nsec érték / metadata utolsó módosításának ideje nanoszekundumban</string>
-    <string name="susfs_kstat_field_blocks">blocks érték / blokkok száma</string>
-    <string name="susfs_kstat_field_blksize">blksize érték / blokkok bytemérete</string>
 </resources>

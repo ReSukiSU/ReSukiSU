@@ -75,8 +75,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.domain.model.SulogEntry
+import com.resukisu.resukisu.domain.model.SulogEventFilter
+import com.resukisu.resukisu.domain.model.SulogEventType
+import com.resukisu.resukisu.domain.model.SulogFile
+import com.resukisu.resukisu.domain.model.toSulogDisplayName
 import com.resukisu.resukisu.ui.component.SearchAppBar
 import com.resukisu.resukisu.ui.component.WarningCard
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
@@ -87,26 +91,25 @@ import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.ActivityResumeEffect
 import com.resukisu.resukisu.ui.util.LocalBlurState
-import com.resukisu.resukisu.ui.util.SulogEntry
-import com.resukisu.resukisu.ui.util.SulogEventFilter
-import com.resukisu.resukisu.ui.util.SulogEventType
-import com.resukisu.resukisu.ui.util.SulogFile
-import com.resukisu.resukisu.ui.util.toSulogDisplayName
 import com.resukisu.resukisu.ui.viewmodel.SulogActions
 import com.resukisu.resukisu.ui.viewmodel.SulogFileSelector
 import com.resukisu.resukisu.ui.viewmodel.SulogScreenState
+import com.resukisu.resukisu.ui.viewmodel.SulogUiAction
 import com.resukisu.resukisu.ui.viewmodel.SulogViewModel
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
+
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun SulogScreen() {
     val navigator = LocalNavigator.current
-    val viewModel = viewModel<SulogViewModel>()
+    val viewModel = koinViewModel<SulogViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     ActivityResumeEffect {
-        viewModel.refreshLatest()
+        viewModel.dispatch(SulogUiAction.RefreshLatest)
     }
 
     val state = SulogScreenState(
@@ -124,12 +127,12 @@ fun SulogScreen() {
     )
     val actions = SulogActions(
         onBack = dropUnlessResumed { navigator.pop() },
-        onRefresh = viewModel::refreshLatest,
-        onEnableSulog = viewModel::enableSulog,
-        onCleanFile = viewModel::cleanFile,
-        onSearchTextChange = viewModel::setSearchText,
-        onToggleFilter = viewModel::toggleFilter,
-        onSelectFile = viewModel::refresh,
+        onRefresh = { viewModel.dispatch(SulogUiAction.RefreshLatest) },
+        onEnableSulog = { viewModel.dispatch(SulogUiAction.Enable) },
+        onCleanFile = { viewModel.dispatch(SulogUiAction.CleanFile) },
+        onSearchTextChange = { viewModel.dispatch(SulogUiAction.Search(it)) },
+        onToggleFilter = { viewModel.dispatch(SulogUiAction.ToggleFilter(it)) },
+        onSelectFile = { viewModel.dispatch(SulogUiAction.SelectFile(it)) },
     )
 
     SulogScreenContent(
@@ -144,6 +147,7 @@ private fun SulogScreenContent(
     state: SulogScreenState,
     actions: SulogActions,
 ) {
+    val cardConfig: CardConfig = koinInject()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
         rememberTopAppBarState(
             initialHeightOffset = -154f,
@@ -290,7 +294,7 @@ private fun SulogScreenContent(
                                     .clip(RoundedCornerShape(16.dp))
                                     .background(
                                         MaterialTheme.colorScheme.surfaceBright.copy(
-                                            alpha = CardConfig.cardAlpha
+                                            alpha = cardConfig.cardAlpha
                                         )
                                     )
                             ) {

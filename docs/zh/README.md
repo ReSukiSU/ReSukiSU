@@ -42,7 +42,7 @@
 
 ## 参与翻译
 
-要将 ReSukiSU 翻译成您的语言，或完善现有的翻译，请使用 [Crowdin](https://crowdin.com/project/ReSukiSU).
+要将 ReSukiSU 翻译成您的语言，或完善现有的翻译，请使用 [Weblate](https://hosted.weblate.org/engage/resukisu/).
 
 ## 许可证
 

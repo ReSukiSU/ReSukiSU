@@ -517,18 +517,6 @@
     <string name="susfs_kstat_subtype_statically">Статично</string>
     <string name="susfs_kstat_spoof_type">Тип підміни</string>
     <string name="susfs_kstat_statically_fields">Статичні поля (необов\'язково, залиште порожнім для значення за замовчуванням)</string>
-    <string name="susfs_kstat_field_ino">ino</string>
-    <string name="susfs_kstat_field_dev">dev</string>
-    <string name="susfs_kstat_field_nlink">nlink</string>
-    <string name="susfs_kstat_field_size">розмір</string>
-    <string name="susfs_kstat_field_atime">atime</string>
-    <string name="susfs_kstat_field_atime_nsec">atime_nsec</string>
-    <string name="susfs_kstat_field_mtime">mtime</string>
-    <string name="susfs_kstat_field_mtime_nsec">mtime_nsec</string>
-    <string name="susfs_kstat_field_ctime">ctime</string>
-    <string name="susfs_kstat_field_ctime_nsec">ctime_nsec</string>
-    <string name="susfs_kstat_field_blocks">блоки</string>
-    <string name="susfs_kstat_field_blksize">blksize</string>
     <string name="susfs_redirect_target_path">Шлях</string>
     <string name="susfs_redirect_redirected_path">Цільовий шлях</string>
     <string name="susfs_redirect_uid_scheme">Схема UID</string>
@@ -558,7 +546,6 @@
     <string name="susfs_backup_import_label">Імпорт</string>
     <string name="susfs_backup_restore_default">Відновити значення за замовчуванням</string>
     <string name="susfs_backup_restore_default_desc">Видалити поточну конфігурацію SuSFS.</string>
-    <string name="susfs_backup_default_filename">susfs_backup.json</string>
     <string name="dynamic_manager_settings_summary">Керування підписом динамічного менеджера</string>
     <string name="dynamic_manager_current_status">Поточна конфігурація</string>
     <string name="dynamic_manager_manual_config">Ручне налаштування підпису</string>
