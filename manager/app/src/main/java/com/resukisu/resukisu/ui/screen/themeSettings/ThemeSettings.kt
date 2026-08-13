@@ -665,6 +665,17 @@ private fun CustomizationSettings(
                 }
             )
         }
+        
+        item {
+            // 使用内置Mono字体开关
+            SettingsSwitchWidget(
+                icon = Icons.TwoTone.FormatSize,
+                title = stringResource(R.string.settings_custom_monospace_font),
+                description = stringResource(R.string.settings_custom_monospace_font_summary),
+                checked = settingsUiState.useBuiltinMonoFont,
+                onCheckedChange = { settingsViewModel.handleBuiltinMonospaceFontChange(it) }
+            )
+        }
 
         item {
             // 简洁模式开关

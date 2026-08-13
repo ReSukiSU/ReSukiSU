@@ -68,6 +68,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -124,6 +126,7 @@ class ThemeConfig(
     var forceDarkMode by mutableStateOf<Boolean?>(null)
     var seedColor by mutableIntStateOf(defaultSeedColor())
     var useDynamicColor by mutableStateOf(false)
+    var useBuiltinMonoFont by mutableStateOf(false)
     var monetCompatSeedColor by mutableIntStateOf(defaultSeedColor())
     var dynamicColorSpec by mutableStateOf(ColorSpec.SpecVersion.SPEC_2021)
     var dynamicPaletteStyle by mutableStateOf(PaletteStyle.TonalSpot)
@@ -165,6 +168,20 @@ class ThemeConfig(
         isThemeChanging = false
         preventBackgroundRefresh = false
         lastDarkModeState = null
+    }
+}
+
+private val BuiltinspaceFontFamily = FontFamily(
+    Font(com.resukisu.resukisu.R.font.jetbrains_mono)
+)
+
+@Composable
+fun MonospaceFontFamily(): FontFamily {
+    val themeConfig = koinInject<ThemeConfig>()
+    return if (themeConfig.useBuiltinMonoFont) {
+        BuiltinspaceFontFamily
+    } else {
+        FontFamily.Monospace
     }
 }
 

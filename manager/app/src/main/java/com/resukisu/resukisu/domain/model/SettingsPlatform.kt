@@ -22,6 +22,7 @@ data class SettingsPlatformSnapshot(
     val checkBetaUpdate: Boolean = true,
     val checkModuleUpdate: Boolean = true,
     val autoJailbreakEnabled: Boolean = false,
+    val useBuiltinMonoFont: Boolean = false,
 )
 
 data class PlatformFeatureStatus(
@@ -77,4 +78,5 @@ sealed interface PlatformSetting {
     data class AutoJailbreak(val enabled: Boolean) : PlatformSetting
     data class AdbRoot(val enabled: Boolean) : PlatformSetting
     data class SuCompatMode(val value: Int) : PlatformSetting
+    data class BuiltinMonospaceFont(val enabled: Boolean) : PlatformSetting
 }
