@@ -25,6 +25,7 @@ env:
   CARGO_TERM_COLOR: always
 jobs:
   build:
+    name: Build ksud (${{ inputs.target }})
     runs-on: ${{ inputs.os }}
     steps:
     - uses: actions/checkout@v7

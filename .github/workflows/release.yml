@@ -24,8 +24,7 @@ jobs:
       - name: Check is rc tags
         id: is_rc_tag
         run: |
-          REF_NAME="${{ github.ref_name }}"
-          if [[ "$REF_NAME" =~ -rc[0-9]+$ ]]; then
+          if [ "${{ contains(github.ref_name,'-rc') }}" == 'true' ]; then
             echo "IS_RC_TAG=true" >> $GITHUB_OUTPUT
           else
             echo "IS_RC_TAG=false" >> $GITHUB_OUTPUT
@@ -34,5 +33,6 @@ jobs:
       - name: release
         uses: softprops/action-gh-release@v3
         with:
+          prerelease: ${{ steps.is_rc_tag.outputs.IS_RC_TAG == 'true' }}
           files: |
             manager/*.apk
