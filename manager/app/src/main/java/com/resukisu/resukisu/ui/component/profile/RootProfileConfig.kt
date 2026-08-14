@@ -30,8 +30,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
-import com.resukisu.resukisu.Natives
+import com.resukisu.resukisu.Natives.Profile.RootProfileFlag
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.domain.model.AppProfile
 import com.resukisu.resukisu.profile.Capabilities
 import com.resukisu.resukisu.profile.Groups
 import com.resukisu.resukisu.toRawFlags
@@ -41,25 +42,30 @@ import com.resukisu.resukisu.ui.component.settings.SegmentedColumnScope
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsChooseWidget
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
-import com.resukisu.resukisu.ui.util.isSepolicyValid
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RootProfileConfig(
-    profile: Natives.Profile,
-    onProfileChange: (Natives.Profile) -> Unit,
+    profile: AppProfile,
+    sepolicyValid: Boolean = true,
+    onValidateSepolicy: (String) -> Unit = {},
+    onProfileChange: (AppProfile) -> Unit,
 ) {
     SegmentedColumn {
         rootProfileConfig(
             profile,
+            sepolicyValid,
+            onValidateSepolicy,
             onProfileChange
         )
     }
 }
 
 fun SegmentedColumnScope.rootProfileConfig(
-    profile: Natives.Profile,
-    onProfileChange: (Natives.Profile) -> Unit,
+    profile: AppProfile,
+    sepolicyValid: Boolean,
+    onValidateSepolicy: (String) -> Unit,
+    onProfileChange: (AppProfile) -> Unit,
 ) {
     item {
         UidPanel(uid = profile.uid, label = "uid", onUidChange = {
@@ -136,7 +142,11 @@ fun SegmentedColumnScope.rootProfileConfig(
     }
 
     item {
-        SELinuxPanel(profile = profile, onSELinuxChange = { domain, rules ->
+        SELinuxPanel(
+            profile = profile,
+            sepolicyValid = sepolicyValid,
+            onValidateSepolicy = onValidateSepolicy,
+            onSELinuxChange = { domain, rules ->
             onProfileChange(
                 profile.copy(
                     context = domain,
@@ -144,7 +154,8 @@ fun SegmentedColumnScope.rootProfileConfig(
                     rootUseDefault = false
                 )
             )
-        })
+            },
+        )
     }
 }
 
@@ -274,7 +285,7 @@ private fun UidPanel(uid: Int, label: String, onUidChange: (Int) -> Unit) {
 }
 @Composable
 fun MountNameSpacePanel(
-    profile: Natives.Profile, onMntNamespaceChange: (namespaceType: Int) -> Unit
+    profile: AppProfile, onMntNamespaceChange: (namespaceType: Int) -> Unit
 ) {
     SettingsChooseWidget(
         iconPlaceholder = false,
@@ -290,12 +301,12 @@ fun MountNameSpacePanel(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RootProfileFlagPanel(
-    selected: List<Natives.Profile.RootProfileFlag>,
-    onFlagChange: (flags: List<Natives.Profile.RootProfileFlag>) -> Unit
+    selected: List<RootProfileFlag>,
+    onFlagChange: (flags: List<RootProfileFlag>) -> Unit
 ) {
     val caps = remember(selected) {
-        Natives.Profile.RootProfileFlag.entries.toTypedArray().sortedWith(
-            compareBy<Natives.Profile.RootProfileFlag> { if (selected.contains(it)) 0 else 1 }
+        RootProfileFlag.entries.toTypedArray().sortedWith(
+            compareBy<RootProfileFlag> { if (selected.contains(it)) 0 else 1 }
                 .then(compareBy { it.name })
         )
     }
@@ -329,7 +340,9 @@ fun RootProfileFlagPanel(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SELinuxPanel(
-    profile: Natives.Profile,
+    profile: AppProfile,
+    sepolicyValid: Boolean,
+    onValidateSepolicy: (String) -> Unit,
     onSELinuxChange: (domain: String, rules: String) -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
@@ -346,7 +359,8 @@ private fun SELinuxPanel(
     if (showDialog) {
         var domain by remember(profile.context) { mutableStateOf(profile.context) }
         var rules by remember(profile.rules) { mutableStateOf(profile.rules) }
-        val canConfirm = isSELinuxDomainValid(domain) && isSepolicyValid(rules)
+        LaunchedEffect(rules) { onValidateSepolicy(rules) }
+        val canConfirm = isSELinuxDomainValid(domain) && sepolicyValid
 
         AlertDialog(
             onDismissRequest = { showDialog = false },
@@ -378,7 +392,7 @@ private fun SELinuxPanel(
                         ),
                         singleLine = false,
                         minLines = 4,
-                        isError = !isSepolicyValid(rules),
+                        isError = !sepolicyValid,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -406,7 +420,7 @@ private fun SELinuxPanel(
 @Preview
 @Composable
 private fun RootProfileConfigPreview() {
-    var profile by remember { mutableStateOf(Natives.Profile("")) }
+    var profile by remember { mutableStateOf(AppProfile("")) }
     RootProfileConfig(profile = profile) {
         profile = it
     }

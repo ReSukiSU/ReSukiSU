@@ -297,16 +297,6 @@ int get_kernel_patch_implement() {
     return cmd.type;
 }
 
-bool set_dynamic_manager(unsigned int size, const char *hash)
-{
-	struct ksu_dynamic_manager_cmd cmd = {0};
-	cmd.operation = DYNAMIC_MANAGER_OP_SET;
-	cmd.size	  = size;
-	strlcpy((char *) cmd.hash, hash, sizeof(cmd.hash));
-
-	return ksuctl(KSU_IOCTL_DYNAMIC_MANAGER, &cmd) == 0;
-}
-
 bool get_dynamic_manager(struct ksu_dynamic_manager_cmd *cfg)
 {
 	if (!cfg) 
@@ -320,13 +310,6 @@ bool get_dynamic_manager(struct ksu_dynamic_manager_cmd *cfg)
 
 	*cfg = cmd;
 	return true;
-}
-
-bool clear_dynamic_manager(void)
-{
-	struct ksu_dynamic_manager_cmd cmd = {0};
-	cmd.operation = DYNAMIC_MANAGER_OP_WIPE;
-	return ksuctl(KSU_IOCTL_DYNAMIC_MANAGER, &cmd) == 0;
 }
 
 /**

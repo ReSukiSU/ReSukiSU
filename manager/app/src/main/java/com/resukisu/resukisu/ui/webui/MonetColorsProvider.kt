@@ -3,30 +3,20 @@ package com.resukisu.resukisu.ui.webui
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import java.util.concurrent.atomic.AtomicReference
-import kotlin.collections.iterator
 
 /**
  * @author rifsxd
  * @date 2025/6/2.
  */
-object MonetColorsProvider {
-
-    private val colorsCss: AtomicReference<String?> = AtomicReference(null)
-
-    fun getColorsCss(): String {
-        return colorsCss.get() ?: ""
-    }
+class MonetColorsProvider {
 
     @Composable
-    fun UpdateCss() {
+    fun getColorsCss(): String {
         val colorScheme = MaterialTheme.colorScheme
-
-        LaunchedEffect(colorScheme) {
-            // Generate CSS only when colorScheme changes
+        return remember(colorScheme) {
             val monetColors = mapOf(
                 // App Base Colors
                 "primary" to colorScheme.primary.toCssValue(),
@@ -76,7 +66,7 @@ object MonetColorsProvider {
                 "filledCardDisabledContainerColor" to colorScheme.surfaceVariant.toCssValue()
             )
 
-            colorsCss.set(monetColors.toCssVars())
+            monetColors.toCssVars()
         }
     }
 

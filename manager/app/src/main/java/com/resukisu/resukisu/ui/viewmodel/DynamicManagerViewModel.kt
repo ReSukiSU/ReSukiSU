@@ -1,220 +1,116 @@
 package com.resukisu.resukisu.ui.viewmodel
 
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import com.resukisu.resukisu.Natives
-import com.resukisu.resukisu.ksuApp
-import com.resukisu.resukisu.ui.util.DynamicManagerCliConfig
-import com.resukisu.resukisu.ui.util.clearDynamicManager
-import com.resukisu.resukisu.ui.util.getDynamicManagerConfig
-import com.resukisu.resukisu.ui.util.setDynamicManager
-import com.resukisu.resukisu.ui.util.setDynamicManagerApk
-import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.viewModelScope
+import com.resukisu.resukisu.domain.model.DynamicManagerApp
+import com.resukisu.resukisu.domain.model.DynamicManagerConfig
+import com.resukisu.resukisu.domain.usecase.ClearDynamicManagerUseCase
+import com.resukisu.resukisu.domain.usecase.ObserveDynamicManagerStateUseCase
+import com.resukisu.resukisu.domain.usecase.RefreshDynamicManagerUseCase
+import com.resukisu.resukisu.domain.usecase.SelectDynamicManagerUseCase
+import com.resukisu.resukisu.domain.usecase.SetManualDynamicManagerUseCase
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.withContext
-import java.io.File
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+
+typealias DynamicManagerAppItem = DynamicManagerApp
 
 @Immutable
 data class DynamicManagerUiState(
-    val config: DynamicManagerCliConfig? = null,
-    val apps: List<DynamicManagerAppItem> = emptyList(),
+    val config: DynamicManagerConfig? = null,
+    val apps: List<DynamicManagerApp> = emptyList(),
     val search: String = "",
     val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
     val isSubmitting: Boolean = false,
 )
 
-@Immutable
-data class DynamicManagerAppItem(
-    val label: String,
-    val packageName: String,
-    val uid: Int,
-    val packageInfo: PackageInfo,
-    val apkPath: String,
-    val isSelected: Boolean = false,
-    val managerSignatureIndex: Int? = null,
-    val isChangeable: Boolean = true,
-)
+sealed interface DynamicManagerUiAction {
+    data object Refresh : DynamicManagerUiAction
+    data class Search(val query: String) : DynamicManagerUiAction
+    data class SelectApp(val app: DynamicManagerApp) : DynamicManagerUiAction
+    data class SetManual(val size: Int, val hash: String) : DynamicManagerUiAction
+    data object Clear : DynamicManagerUiAction
+}
 
-class DynamicManagerViewModel : ViewModel() {
-    private companion object {
-        const val DYNAMIC_MANAGER_SIGNATURE_INDEX = 255
-    }
+enum class DynamicManagerOperation { Set, Clear }
 
-    private val _uiState = MutableStateFlow(DynamicManagerUiState())
-    val uiState: StateFlow<DynamicManagerUiState> = _uiState.asStateFlow()
+sealed interface DynamicManagerUiEvent {
+    data class OperationCompleted(
+        val operation: DynamicManagerOperation,
+        val success: Boolean,
+    ) : DynamicManagerUiEvent
+}
 
-    private var allApps: List<DynamicManagerAppItem> = emptyList()
+class DynamicManagerViewModel(
+    observeState: ObserveDynamicManagerStateUseCase,
+    private val refreshDynamicManager: RefreshDynamicManagerUseCase,
+    private val selectDynamicManager: SelectDynamicManagerUseCase,
+    private val setManualDynamicManager: SetManualDynamicManagerUseCase,
+    private val clearDynamicManager: ClearDynamicManagerUseCase,
+) : ViewModel() {
+    private val search = MutableStateFlow("")
+    private val mutableEvents = MutableSharedFlow<DynamicManagerUiEvent>(extraBufferCapacity = 1)
+    val events: SharedFlow<DynamicManagerUiEvent> = mutableEvents.asSharedFlow()
 
-    suspend fun refresh() {
-        withContext(Dispatchers.IO) {
-            _uiState.update { it.copy(isRefreshing = !it.isLoading) }
-
-            if (SuperUserViewModel.getCachedApps(includeManager = true).isEmpty()) {
-                ViewModelProvider(ksuApp)[SuperUserViewModel::class.java].fetchAppList()
-            }
-
-            val config = getDynamicManagerConfig()
-            val managerSignatureIndexes = getManagerSignatureIndexes()
-            allApps = loadManagerCandidateApps()
-                .mapNotNull { app ->
-                    val applicationInfo = app.packageInfo.applicationInfo ?: return@mapNotNull null
-                    if (!hasKsuDaemon(applicationInfo.nativeLibraryDir)) return@mapNotNull null
-                    val managerSignatureIndex =
-                        managerSignatureIndexes[app.uid % 100000] // PER_USER_RANGE
-                    DynamicManagerAppItem(
-                        label = app.label,
-                        packageName = app.packageName,
-                        uid = app.uid,
-                        packageInfo = app.packageInfo,
-                        apkPath = applicationInfo.sourceDir,
-                        isSelected = managerSignatureIndex == DYNAMIC_MANAGER_SIGNATURE_INDEX,
-                        managerSignatureIndex = managerSignatureIndex,
-                        isChangeable = managerSignatureIndex == null ||
-                                managerSignatureIndex == DYNAMIC_MANAGER_SIGNATURE_INDEX,
-                    )
-                }
-                .sortedWith(dynamicManagerAppComparator())
-
-            _uiState.update { state ->
-                state.copy(
-                    config = config,
-                    apps = filterApps(state.search),
-                    isLoading = false,
-                    isRefreshing = false,
-                )
-            }
-        }
-    }
-
-    private fun hasKsuDaemon(nativeLibraryDir: String?): Boolean {
-        if (nativeLibraryDir.isNullOrBlank()) return false
-        return File(nativeLibraryDir, "libksud.so").isFile
-    }
-
-    private fun loadManagerCandidateApps(): List<SuperUserViewModel.AppInfo> {
-        val cachedApps = SuperUserViewModel.getCachedApps(includeManager = true)
-        if (cachedApps.isNotEmpty()) return cachedApps
-
-        return runCatching {
-            val packageInfo = ksuApp.packageManager.getPackageInfo(
-                ksuApp.packageName,
-                PackageManager.GET_META_DATA
-            )
-            val label = packageInfo.applicationInfo
-                ?.loadLabel(ksuApp.packageManager)
-                ?.toString()
-                ?: ksuApp.packageName
-            listOf(
-                SuperUserViewModel.AppInfo(
-                    label = label,
-                    packageInfo = packageInfo,
-                    profile = null,
-                )
-            )
-        }.getOrDefault(emptyList())
-    }
-
-    fun updateSearch(search: String) {
-        _uiState.update {
-            it.copy(
-                search = search,
-                apps = filterApps(search)
-            )
-        }
-    }
-
-    suspend fun setManagerApp(app: DynamicManagerAppItem): Boolean {
-        return setManagerApk(app.apkPath)
-    }
-
-    suspend fun setManualConfig(size: Int, hash: String): Boolean {
-        return submit {
-            setDynamicManager(size, hash)
-        }
-    }
-
-    suspend fun clearConfig(): Boolean {
-        return submit {
-            clearDynamicManager()
-        }
-    }
-
-    private suspend fun setManagerApk(apkPath: String): Boolean {
-        return submit {
-            setDynamicManagerApk(apkPath)
-        }
-    }
-
-    private suspend fun submit(block: () -> Boolean): Boolean {
-        return withContext(Dispatchers.IO) {
-            _uiState.update { it.copy(isSubmitting = true) }
-            val success = block()
-            val config = if (success) getDynamicManagerConfig() else _uiState.value.config
-            val managerSignatureIndexes = if (success) {
-                getManagerSignatureIndexes()
+    val state: StateFlow<DynamicManagerUiState> = combine(observeState(), search) { source, query ->
+        val normalized = query.trim()
+        DynamicManagerUiState(
+            config = source.config,
+            apps = if (normalized.isEmpty()) {
+                source.apps
             } else {
-                selectedSignatureIndexes()
+                source.apps.filter { app ->
+                    app.label.contains(normalized, ignoreCase = true) ||
+                            app.packageName.contains(normalized, ignoreCase = true)
+                }
+            },
+            search = query,
+            isLoading = source.isLoading,
+            isRefreshing = source.isRefreshing,
+            isSubmitting = source.isSubmitting,
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = DynamicManagerUiState(),
+    )
+    val uiState: StateFlow<DynamicManagerUiState> = state
+
+    fun dispatch(action: DynamicManagerUiAction) {
+        when (action) {
+            DynamicManagerUiAction.Refresh -> viewModelScope.launch { refresh() }
+            is DynamicManagerUiAction.Search -> search.value = action.query
+            is DynamicManagerUiAction.SelectApp -> submit(DynamicManagerOperation.Set) {
+                selectDynamicManager(action.app.apkPath)
             }
-            allApps = markSelected(allApps, managerSignatureIndexes)
-            _uiState.update {
-                it.copy(
-                    config = config,
-                    apps = filterApps(it.search),
-                    isSubmitting = false,
-                )
+
+            is DynamicManagerUiAction.SetManual -> submit(DynamicManagerOperation.Set) {
+                setManualDynamicManager(action.size, action.hash)
             }
-            success
+
+            DynamicManagerUiAction.Clear -> submit(DynamicManagerOperation.Clear) {
+                clearDynamicManager()
+            }
         }
     }
 
-    private fun markSelected(
-        apps: List<DynamicManagerAppItem>,
-        managerSignatureIndexes: Map<Int, Int>
-    ): List<DynamicManagerAppItem> {
-        return apps.map { app ->
-            val managerSignatureIndex = managerSignatureIndexes[app.uid % 100000] // PER_USER_RANGE
-            app.copy(
-                isSelected = managerSignatureIndex == DYNAMIC_MANAGER_SIGNATURE_INDEX,
-                managerSignatureIndex = managerSignatureIndex,
-                isChangeable = managerSignatureIndex == null ||
-                        managerSignatureIndex == DYNAMIC_MANAGER_SIGNATURE_INDEX,
-            )
-        }.sortedWith(dynamicManagerAppComparator())
-    }
+    suspend fun refresh(): Result<Unit> = refreshDynamicManager()
 
-    private fun getManagerSignatureIndexes(): Map<Int, Int> {
-        return runCatching {
-            Natives.getManagersList()?.managers
-                ?.associate { it.uid to it.signatureIndex }
-                .orEmpty()
-        }.getOrDefault(emptyMap())
-    }
-
-    private fun selectedSignatureIndexes(): Map<Int, Int> {
-        return allApps.mapNotNull { app ->
-            app.managerSignatureIndex?.let { app.uid to it }
-        }.toMap()
-    }
-
-    private fun filterApps(search: String): List<DynamicManagerAppItem> {
-        val query = search.trim()
-        if (query.isEmpty()) return allApps
-
-        return allApps.filter { app ->
-            app.label.contains(query, ignoreCase = true) ||
-                    app.packageName.contains(query, ignoreCase = true)
+    private fun submit(
+        operation: DynamicManagerOperation,
+        command: suspend () -> Result<Unit>,
+    ) {
+        viewModelScope.launch {
+            val success = command().isSuccess
+            mutableEvents.emit(DynamicManagerUiEvent.OperationCompleted(operation, success))
         }
-    }
-
-    private fun dynamicManagerAppComparator(): Comparator<DynamicManagerAppItem> {
-        return compareByDescending<DynamicManagerAppItem> { it.managerSignatureIndex != null }
-            .thenBy(String.CASE_INSENSITIVE_ORDER) { it.label }
     }
 }

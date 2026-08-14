@@ -14,37 +14,25 @@ jobs:
       - build-manager
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v8
-
       - name: Download Manager artifacts
         uses: actions/download-artifact@v8
         with:
           path: manager
-          pattern: "Manager-*"
+          name: "Manager-release"
           merge-multiple: true
 
-      - name: Rename ksud
+      - name: Check is rc tags
+        id: is_rc_tag
         run: |
-          mkdir -p ksud
-          for dir in ./ksud-*; do
-              if [ -d "$dir" ]; then
-                 echo "----- Rename $dir -----"
-                 ksud_platform_name=$(basename "$dir")
-                 find "$dir" -type f -name "ksud" -path "*/release/*" | while read -r ksud_file; do
-                   if [ -f "$ksud_file" ]; then
-                     mv "$ksud_file" "ksud/$ksud_platform_name"
-                   fi
-                 done
-              fi
-          done
-
-      - name: Display structure of downloaded files
-        run: ls -R
+          if [ "${{ contains(github.ref_name,'-rc') }}" == 'true' ]; then
+            echo "IS_RC_TAG=true" >> $GITHUB_OUTPUT
+          else
+            echo "IS_RC_TAG=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: release
         uses: softprops/action-gh-release@v3
         with:
+          prerelease: ${{ steps.is_rc_tag.outputs.IS_RC_TAG == 'true' }}
           files: |
             manager/*.apk
-            ksud/ksud-*

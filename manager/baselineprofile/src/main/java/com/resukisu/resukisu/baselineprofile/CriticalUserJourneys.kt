@@ -4,7 +4,7 @@ import androidx.benchmark.macro.MacrobenchmarkScope
 
 private const val SWIPE_EDGE_FRACTION = 0.2f
 private const val SWIPE_STEPS = 20
-private const val HOME_PAGER_PAGE_TRANSITIONS = 3
+private const val HOME_PAGER_PAGE_TRANSITIONS = 5
 private const val PAGER_SETTLE_TIMEOUT_MILLIS = 1_000L
 
 internal fun MacrobenchmarkScope.scrollHomePagerBackAndForth() {

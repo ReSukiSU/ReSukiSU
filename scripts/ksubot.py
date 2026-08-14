@@ -39,15 +39,28 @@ try:
         last_commit = commits[-1]
 
     elif 'head_commit' in GITHUB_EVENT:
-        msg = GITHUB_EVENT["head_commit"]["msg"]
+        msg = GITHUB_EVENT["head_commit"]["message"]
         if len(msg) > 3192:
             msg = msg[:3189] + '...'
         commit_message = f'{msg.strip()}'
     else:
         commit_message = f'(no commit message)'
+except IndexError:
+    print("[!] IndexError Found! try another way to get commit...")
+    try:
+        if 'head_commit' in GITHUB_EVENT:
+            msg = GITHUB_EVENT["head_commit"]["message"]
+            if len(msg) > 3192:
+                msg = msg[:3189] + '...'
+            commit_message = f'{msg.strip()}'
+    except:
+        from traceback import print_exc
+        print_exc()
+        commit_message = f'(no commit message)'
 except:
     from traceback import print_exc
     print_exc()
+    commit_message = f'(Unexpected Error! So no commit message)'
 
 if 'compare' in GITHUB_EVENT:
     commit_url = GITHUB_EVENT['compare']

@@ -67,6 +67,9 @@ import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+import kotlin.time.Duration.Companion.milliseconds
+
 
 private fun Modifier.textFieldBackground(color: ColorProducer, shape: Shape): Modifier =
     this.drawWithCache {
@@ -86,6 +89,7 @@ private fun CompactSearchBar(
     interactionSource: MutableInteractionSource? = null,
     shape: Shape = inputFieldShape,
 ) {
+    val cardConfig: CardConfig = koinInject()
     val focusManager = LocalFocusManager.current
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
@@ -106,7 +110,7 @@ private fun CompactSearchBar(
 
     LaunchedEffect(allowFocus) {
         if (allowFocus && hasFocusReassignBug) {
-            delay(100)
+            delay(100.milliseconds)
             focusRequester.requestFocus()
         }
     }
@@ -121,7 +125,7 @@ private fun CompactSearchBar(
         if (!isImeVisible && focused) {
             if (hasFocusReassignBug) {
                 allowFocus = false
-                delay(100)
+                delay(100.milliseconds)
                 focusManager.clearFocus()
             } else {
                 focusManager.clearFocus()
@@ -139,7 +143,7 @@ private fun CompactSearchBar(
             .fillMaxWidth()
             .clip(CircleShape)
             .background(
-                MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = CardConfig.cardAlpha)
+                MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = cardConfig.cardAlpha)
             )
             .heightIn(0.dp, 45.dp)
             .focusRequester(focusRequester)
@@ -155,7 +159,7 @@ private fun CompactSearchBar(
             if (hasFocusReassignBug) {
                 coroutineScope.launch {
                     allowFocus = false
-                    delay(100)
+                    delay(100.milliseconds)
                     focusManager.clearFocus()
                 }
             } else {
@@ -212,6 +216,8 @@ fun SearchAppBar(
     searchBarPlaceHolderText: String,
     blur: Boolean = true,
 ) {
+    val themeConfig: ThemeConfig = koinInject()
+    val cardConfig: CardConfig = koinInject()
     val textFieldState = rememberTextFieldState(initialText = searchText)
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -229,10 +235,10 @@ fun SearchAppBar(
                     } else Modifier
                 )
                 .background(
-                    if (ThemeConfig.isEnableBlur)
+                    if (themeConfig.isEnableBlur)
                         Color.Transparent
                     else
-                        MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha)
+                        MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha)
                 )
         ) {
             LargeFlexibleTopAppBar(
@@ -259,10 +265,10 @@ fun SearchAppBar(
                 windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor =
-                        if (ThemeConfig.backgroundImageLoaded) Color.Transparent
+                        if (themeConfig.backgroundImageLoaded) Color.Transparent
                         else MaterialTheme.colorScheme.surfaceContainer,
                     scrolledContainerColor =
-                        if (ThemeConfig.backgroundImageLoaded) Color.Transparent
+                        if (themeConfig.backgroundImageLoaded) Color.Transparent
                         else MaterialTheme.colorScheme.surfaceContainer,
                 ),
             )
@@ -292,7 +298,7 @@ fun SearchAppBar(
 
             Spacer(modifier = Modifier.height(5.dp))
         }
-        if (ThemeConfig.backgroundImageLoaded)
+        if (themeConfig.backgroundImageLoaded)
             Spacer(modifier = Modifier.height(5.dp))
     }
 }

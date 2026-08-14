@@ -3,61 +3,30 @@ package com.resukisu.resukisu.data.update
 import android.os.Build
 import android.util.Log
 import com.resukisu.resukisu.BuildConfig
-import com.resukisu.resukisu.ksuApp
-import okhttp3.CacheControl
-import okhttp3.Request
+import com.resukisu.resukisu.data.network.NetworkRequestRepository
+import com.resukisu.resukisu.domain.model.ManagerApkSource
+import com.resukisu.resukisu.domain.model.ManagerUpdateChannel
+import com.resukisu.resukisu.domain.model.ManagerUpdateInfo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.util.concurrent.TimeUnit
 
-enum class ManagerUpdateChannel {
-    STABLE,
-    BETA,
-}
+class ManagerUpdateRepository(
+    private val networkRequestRepository: NetworkRequestRepository,
+) {
+    private companion object {
+        const val UPDATE_CALL_TIMEOUT_SECONDS = 8L
+        const val TAG = "ManagerUpdateRepository"
+        const val REPOSITORY = "ReSukiSU/ReSukiSU"
+        const val WORKFLOW_FILE = "build-manager.yml"
+        const val BRANCH = "main"
+        const val RELEASE_ARTIFACT = "Manager-release"
+        val GITHUB_HEADERS = mapOf("Accept" to "application/vnd.github+json")
 
-sealed interface ManagerApkSource {
-    val url: String
-
-    data class DirectApk(
-        override val url: String,
-    ) : ManagerApkSource
-
-    data class NightlyArtifact(
-        override val url: String,
-        val preferredAbi: String,
-        val expectedVersionCode: Int,
-    ) : ManagerApkSource
-}
-
-data class ManagerUpdateInfo(
-    val channel: ManagerUpdateChannel,
-    val versionCode: Int,
-    val versionName: String,
-    val abi: String,
-    val fileName: String,
-    val source: ManagerApkSource,
-    val changelog: String = "",
-)
-
-object ManagerUpdateRepository {
-
-    private const val TAG = "ManagerUpdateRepository"
-    private const val REPOSITORY = "ReSukiSU/ReSukiSU"
-    private const val WORKFLOW_FILE = "build-manager.yml"
-    private const val BRANCH = "main"
-    private const val RELEASE_ARTIFACT = "Manager-release"
-
-    // sync with build.gradle.kts
-    private const val CI_MANAGER_VERSION_CODE_OFFSET = 30000 + 700
-    private const val SHORT_SHA_LENGTH = 7
-    private const val UNIVERSAL_ABI = "universal"
-
-    private val updateClient by lazy {
-        ksuApp.okhttpClient.newBuilder()
-            .connectTimeout(5, TimeUnit.SECONDS)
-            .readTimeout(5, TimeUnit.SECONDS)
-            .writeTimeout(5, TimeUnit.SECONDS)
-            .callTimeout(8, TimeUnit.SECONDS)
-            .build()
+        // sync with build.gradle.kts
+        const val CI_MANAGER_VERSION_CODE_OFFSET = 30000 + 700
+        const val SHORT_SHA_LENGTH = 7
+        const val UNIVERSAL_ABI = "universal"
     }
 
     private val managerApkPattern = Regex(
@@ -65,14 +34,12 @@ object ManagerUpdateRepository {
     )
     private val commitCountLinkPattern = Regex("""[?&]page=(\d+)>; rel="last"""")
 
-    fun checkStableUpdate(
-        supportedAbis: List<String> = Build.SUPPORTED_ABIS.toList(),
-        currentVersionCode: Int = BuildConfig.VERSION_CODE,
-    ): ManagerUpdateInfo? {
+    suspend fun checkStableUpdate(): ManagerUpdateInfo? = withContext(Dispatchers.IO) {
+        val supportedAbis = Build.SUPPORTED_ABIS.toList()
         val release = requestJson("https://api.github.com/repos/$REPOSITORY/releases/latest")
-            ?: return null
+            ?: return@withContext null
         val changelog = release.optString("body")
-        val assets = release.optJSONArray("assets") ?: return null
+        val assets = release.optJSONArray("assets") ?: return@withContext null
         val candidates = mutableListOf<ManagerApkCandidate>()
 
         for (index in 0 until assets.length()) {
@@ -90,29 +57,28 @@ object ManagerUpdateRepository {
             )
         }
 
-        return selectCandidate(candidates, supportedAbis, currentVersionCode)
+        return@withContext selectCandidate(candidates, supportedAbis)
             ?.toUpdateInfo(ManagerUpdateChannel.STABLE, changelog)
     }
 
-    fun checkBetaUpdate(
-        supportedAbis: List<String> = Build.SUPPORTED_ABIS.toList(),
-        currentVersionCode: Int = BuildConfig.VERSION_CODE,
-    ): ManagerUpdateInfo? {
+    suspend fun checkBetaUpdate(): ManagerUpdateInfo? = withContext(Dispatchers.IO) {
+        val supportedAbis = Build.SUPPORTED_ABIS.toList()
+        val currentVersionCode = BuildConfig.VERSION_CODE
         val workflowRuns = requestJson(
             "https://api.github.com/repos/$REPOSITORY/actions/workflows/$WORKFLOW_FILE/runs" +
                     "?branch=$BRANCH&status=success&per_page=1&event=push"
-        )?.optJSONArray("workflow_runs") ?: return null
-        val run = workflowRuns.optJSONObject(0) ?: return null
+        )?.optJSONArray("workflow_runs") ?: return@withContext null
+        val run = workflowRuns.optJSONObject(0) ?: return@withContext null
         val runId = run.optLong("id", -1L)
         val headSha = run.optString("head_sha")
-        if (runId <= 0L || headSha.isBlank()) return null
+        if (runId <= 0L || headSha.isBlank()) return@withContext null
 
-        val commitCount = requestCommitCount(headSha) ?: return null
+        val commitCount = requestCommitCount(headSha) ?: return@withContext null
         val versionCode = CI_MANAGER_VERSION_CODE_OFFSET + commitCount
-        if (versionCode <= currentVersionCode) return null
+        if (versionCode <= currentVersionCode) return@withContext null
 
         val preferredAbi = supportedAbis.firstOrNull() ?: UNIVERSAL_ABI
-        return ManagerUpdateInfo(
+        return@withContext ManagerUpdateInfo(
             channel = ManagerUpdateChannel.BETA,
             versionCode = versionCode,
             versionName = headSha.take(SHORT_SHA_LENGTH),
@@ -144,35 +110,30 @@ object ManagerUpdateRepository {
         return candidates.firstOrNull { (_, parsed) -> parsed.abi == UNIVERSAL_ABI }?.first
     }
 
-    private fun requestJson(url: String): JSONObject? {
-        return updateClient.newCall(
-            newGithubRequest(url).build()
-        ).execute().use { response ->
-            if (!response.isSuccessful) {
-                Log.w(TAG, "GitHub update request failed with HTTP ${response.code}")
-                return null
-            }
-            val body = response.body?.string() ?: return null
-            JSONObject(body)
-        }
-    }
+    private suspend fun requestJson(url: String): JSONObject? = networkRequestRepository
+        .fetch(
+            url = url,
+            headers = GITHUB_HEADERS,
+            forceNetwork = true,
+            callTimeoutSeconds = UPDATE_CALL_TIMEOUT_SECONDS,
+        )
+        .onFailure { Log.w(TAG, "GitHub update request failed", it) }
+        .mapCatching { JSONObject(it) }
+        .getOrNull()
 
-    private fun requestCommitCount(commitSha: String): Int? {
+    private suspend fun requestCommitCount(commitSha: String): Int? {
         val url = "https://api.github.com/repos/$REPOSITORY/commits?sha=$commitSha&per_page=1"
-        return updateClient.newCall(newGithubRequest(url).build()).execute().use { response ->
-            if (!response.isSuccessful) {
-                Log.w(TAG, "GitHub commit history request failed with HTTP ${response.code}")
-                return null
-            }
-            parseCommitCount(response.header("Link")) ?: 1
+        val response = networkRequestRepository.request(
+            url = url,
+            headers = GITHUB_HEADERS,
+            forceNetwork = true,
+            callTimeoutSeconds = UPDATE_CALL_TIMEOUT_SECONDS,
+        ).getOrElse {
+            Log.w(TAG, "GitHub commit history request failed", it)
+            return null
         }
+        return parseCommitCount(response.header("Link")) ?: 1
     }
-
-    private fun newGithubRequest(url: String): Request.Builder =
-        Request.Builder()
-            .url(url)
-            .header("Accept", "application/vnd.github+json")
-            .cacheControl(CacheControl.FORCE_NETWORK)
 
     internal fun parseCommitCount(linkHeader: String?): Int? =
         commitCountLinkPattern.find(linkHeader.orEmpty())
@@ -194,10 +155,9 @@ object ManagerUpdateRepository {
     private fun selectCandidate(
         candidates: List<ManagerApkCandidate>,
         supportedAbis: List<String>,
-        currentVersionCode: Int,
     ): ManagerApkCandidate? {
         val latestVersionCode = candidates.maxOfOrNull { it.versionCode } ?: return null
-        if (latestVersionCode <= currentVersionCode) return null
+        if (latestVersionCode <= BuildConfig.VERSION_CODE) return null
 
         val latestCandidates = candidates.filter { it.versionCode == latestVersionCode }
         supportedAbis.forEach { abi ->
