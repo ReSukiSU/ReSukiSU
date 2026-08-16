@@ -4,6 +4,7 @@
 #define TRACK_THRONE_PRUNE_ONLY (1 << 0)
 #define TRACK_THRONE_FORCE_SEARCH_MGR (1 << 1)
 #define TRACK_THRONE_FROM_RENAMEAT (1 << 2)
+#define TRACK_THRONE_FORCE_SYNCHRONOUS (1 << 3)
 
 #ifdef CONFIG_KSU_DISABLE_MANAGER
 static inline void ksu_throne_tracker_init(void)

@@ -24,11 +24,18 @@ mod android {
     pub const MODULE_UPDATE_DIR: &str = concatcp!(ADB_DIR, "modules_update/");
     pub const METAMODULE_DIR: &str = concatcp!(ADB_DIR, "metamodule/");
 
+    // Prefer /metadata/watchdog/ when present, else /metadata
+    pub const PREINIT_DIR_WATCHDOG: &str = "/metadata/watchdog/ksu/";
+    pub const PREINIT_DIR_DEFAULT: &str = "/metadata/ksu/";
+    pub const MODULES_RC_FILE: &str = "modules.rc";
+    pub const MODULES_RC_TMP_FILE: &str = ".modules.rc.tmp";
+
     pub const MODULE_WEB_DIR: &str = "webroot";
     pub const MODULE_ACTION_SH: &str = "action.sh";
     pub const DISABLE_FILE_NAME: &str = "disable";
     pub const UPDATE_FILE_NAME: &str = "update";
     pub const REMOVE_FILE_NAME: &str = "remove";
+    pub const MODULE_INIT_RC_DIR: &str = "initrc";
 
     // Module config system
     pub const MODULE_CONFIG_DIR: &str = concatcp!(WORKING_DIR, "module_configs/");
@@ -50,6 +57,7 @@ mod android {
     pub const UMOUNT_CONFIG_PATH: &str = concatcp!(WORKING_DIR, ".umount");
 
     pub const DYNAMIC_MANAGER: &str = concatcp!(WORKING_DIR, ".dynamic_manager");
+    pub const SUSFS_CONFIG: &str = concatcp!(WORKING_DIR, ".susfs.json");
 
     #[derive(Serialize)]
     pub struct MountInfo {
@@ -60,6 +68,12 @@ mod android {
 
 pub const VERSION_CODE: &str = include_str!(concat!(env!("OUT_DIR"), "/VERSION_CODE"));
 pub const VERSION_NAME: &str = include_str!(concat!(env!("OUT_DIR"), "/VERSION_NAME"));
+#[cfg(target_os = "android")]
+pub const FULL_VERSION: &str = const_format::formatcp!(
+    "{} (uapi: {})",
+    VERSION_NAME,
+    crate::android::uapi::KERNEL_SU_UAPI_VERSION
+);
 
 #[cfg(target_os = "android")]
 pub use android::*;

@@ -17,6 +17,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,20 +27,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Input
-import androidx.compose.material.icons.filled.AutoFixHigh
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.FileUpload
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.automirrored.twotone.Input
+import androidx.compose.material.icons.twotone.AutoFixHigh
+import androidx.compose.material.icons.twotone.Edit
+import androidx.compose.material.icons.twotone.FileUpload
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -52,7 +50,6 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
@@ -61,7 +58,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -75,72 +71,71 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import com.maxkeppeker.sheets.core.models.base.Header
-import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
-import com.maxkeppeler.sheets.list.ListDialog
-import com.maxkeppeler.sheets.list.models.ListOption
-import com.maxkeppeler.sheets.list.models.ListSelection
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.getKernelVersion
+import com.resukisu.resukisu.domain.model.LkmSelection
 import com.resukisu.resukisu.ui.component.DialogHandle
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.rememberCustomDialog
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
-import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
+import com.resukisu.resukisu.ui.component.settings.SettingsChooseDialog
+import com.resukisu.resukisu.ui.component.settings.SettingsChooseWidget
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Route
+import com.resukisu.resukisu.ui.screen.kernelFlash.component.SlotSelectionDialog
 import com.resukisu.resukisu.ui.theme.CardConfig
-import com.resukisu.resukisu.ui.theme.CardConfig.cardAlpha
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.theme.getCardColors
 import com.resukisu.resukisu.ui.theme.getCardElevation
-import com.resukisu.resukisu.ui.util.LkmSelection
-import com.resukisu.resukisu.ui.util.getAvailablePartitions
-import com.resukisu.resukisu.ui.util.getCurrentKmi
-import com.resukisu.resukisu.ui.util.getDefaultPartition
-import com.resukisu.resukisu.ui.util.getSlotSuffix
-import com.resukisu.resukisu.ui.util.getSupportedKmis
-import com.resukisu.resukisu.ui.util.isAbDevice
-import com.resukisu.resukisu.ui.util.rootAvailable
-import zako.zako.zako.zakoui.screen.kernelFlash.component.SlotSelectionDialog
+import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
+import com.resukisu.resukisu.ui.viewmodel.InstallUiEvent
+import com.resukisu.resukisu.ui.viewmodel.InstallViewModel
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * @author ShirkNeko
  * @date 2025/5/31.
  */
 
-enum class KpmPatchOption {
-    FOLLOW_KERNEL,
-    PATCH_KPM,
-    UNDO_PATCH_KPM
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InstallScreen(
     preselectedKernelUri: String? = null
 ) {
+    val themeConfig: ThemeConfig = koinInject()
+    val cardConfig: CardConfig = koinInject()
+    val viewModel = koinViewModel<InstallViewModel>()
+    val installState by viewModel.state.collectAsStateWithLifecycle()
+    val environment = installState.environment
     val context = LocalContext.current
     var installMethod by remember { mutableStateOf<InstallMethod?>(null) }
     var lkmSelection by remember { mutableStateOf<LkmSelection>(LkmSelection.KmiNone) }
-    var kpmPatchOption by remember { mutableStateOf(KpmPatchOption.FOLLOW_KERNEL) }
-    var showRebootDialog by remember { mutableStateOf(false) }
     var showSlotSelectionDialog by remember { mutableStateOf(false) }
-    var showKpmPatchDialog by remember { mutableStateOf(false) }
     var tempKernelUri by remember { mutableStateOf<Uri?>(null) }
 
-    val kernelVersion = getKernelVersion()
-    val isGKI = kernelVersion.isGKI()
-    val isAbDevice = produceState(initialValue = false) {
-        value = isAbDevice()
-    }.value
+    val isGKI = environment.isGki
+    val isAbDevice = environment.isAbDevice
     val summary = stringResource(R.string.horizon_kernel_summary)
+    val failedReboot = stringResource(R.string.failed_reboot)
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is InstallUiEvent.Error -> {
+                    val message = event.message.ifBlank { failedReboot }
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     // 处理预选的内核文件
-    LaunchedEffect(preselectedKernelUri) {
+    LaunchedEffect(preselectedKernelUri, installState.loading, isAbDevice) {
+        if (installState.loading) return@LaunchedEffect
         preselectedKernelUri?.let { uriString ->
             try {
                 val preselectedUri = uriString.toUri()
@@ -153,32 +148,10 @@ fun InstallScreen(
 
                 if (isAbDevice) {
                     showSlotSelectionDialog = true
-                } else {
-                    showKpmPatchDialog = true
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
+            } catch (_: Exception) {
             }
         }
-    }
-
-    if (showRebootDialog) {
-        RebootDialog(
-            show = true,
-            onDismiss = { showRebootDialog = false },
-            onConfirm = {
-                showRebootDialog = false
-                try {
-                    val process = Runtime.getRuntime().exec("su")
-                    process.outputStream.bufferedWriter().use { writer ->
-                        writer.write("svc power reboot\n")
-                        writer.write("exit\n")
-                    }
-                } catch (_: Exception) {
-                    Toast.makeText(context, R.string.failed_reboot, Toast.LENGTH_SHORT).show()
-                }
-            }
-        )
     }
 
     var partitionSelectionIndex by remember { mutableIntStateOf(0) }
@@ -193,10 +166,8 @@ fun InstallScreen(
                     method.uri?.let { uri ->
                         navigator.push(
                             Route.KernelFlash(
-                                kernelUri = uri,
-                                selectedSlot = method.slot,
-                                kpmPatchEnabled = kpmPatchOption == KpmPatchOption.PATCH_KPM,
-                                kpmUndoPatch = kpmPatchOption == KpmPatchOption.UNDO_PATCH_KPM
+                                kernelUri = uri.toString(),
+                                selectedSlot = method.slot
                             )
                         )
                     }
@@ -204,13 +175,19 @@ fun InstallScreen(
                 else -> {
                     val isOta = method is InstallMethod.DirectInstallToInactiveSlot
                     val partitionSelection = partitionsState.getOrNull(partitionSelectionIndex)
-                    val flashIt = FlashIt.FlashBoot(
-                        boot = if (method is InstallMethod.SelectFile) method.uri else null,
-                        lkm = lkmSelection,
-                        ota = isOta,
-                        partition = partitionSelection
+                    navigator.push(
+                        Route.Flash.boot(
+                            bootUri = if (method is InstallMethod.SelectFile) {
+                                method.uri?.toString()
+                            } else {
+                                null
+                            },
+                            lkmUri = (lkmSelection as? LkmSelection.LkmUri)?.uri,
+                            kmi = (lkmSelection as? LkmSelection.KmiString)?.value,
+                            ota = isOta,
+                            partition = partitionSelection,
+                        )
                     )
-                    navigator.push(Route.Flash(flashIt))
                 }
             }
         }
@@ -220,6 +197,8 @@ fun InstallScreen(
     // 槽位选择
     SlotSelectionDialog(
         show = showSlotSelectionDialog && isAbDevice,
+        currentSlot = environment.activeSlotSuffix.removePrefix("_")
+            .takeIf { it == "a" || it == "b" },
         onDismiss = { showSlotSelectionDialog = false },
         onSlotSelected = { slot ->
             showSlotSelectionDialog = false
@@ -229,28 +208,12 @@ fun InstallScreen(
                 summary = summary
             )
             installMethod = horizonMethod
-
-            if (preselectedKernelUri != null) {
-                showKpmPatchDialog = true
-            }
         }
     )
 
-    KpmPatchSelectionDialog(
-        show = showKpmPatchDialog,
-        currentOption = kpmPatchOption,
-        onDismiss = { showKpmPatchDialog = false },
-        onOptionSelected = { option ->
-            kpmPatchOption = option
-            showKpmPatchDialog = false
-        }
-    )
+    val currentKmi = environment.currentKmi
 
-    val currentKmi by produceState(initialValue = "") {
-        value = getCurrentKmi()
-    }
-
-    val selectKmiDialog = rememberSelectKmiDialog { kmi ->
+    val selectKmiDialog = rememberSelectKmiDialog(environment.supportedKmis) { kmi ->
         kmi?.let {
             lkmSelection = LkmSelection.KmiString(it)
             onInstall()
@@ -273,7 +236,7 @@ fun InstallScreen(
             it.data?.data?.let { uri ->
                 val isKo = isKoFile(context, uri)
                 if (isKo) {
-                    lkmSelection = LkmSelection.LkmUri(uri)
+                    lkmSelection = LkmSelection.LkmUri(uri.toString())
                 } else {
                     lkmSelection = LkmSelection.KmiNone
                     Toast.makeText(
@@ -309,253 +272,198 @@ fun InstallScreen(
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .verticalScroll(rememberScrollState())
                 .blurSource()
                 .padding(top = 12.dp)
         ) {
-            SelectInstallMethod(
-                isGKI = isGKI,
-                onSelected = { method ->
-                    if (method is InstallMethod.HorizonKernel && method.uri != null) {
-                        if (isAbDevice) {
-                            tempKernelUri = method.uri
-                            showSlotSelectionDialog = true
-                        } else {
-                            installMethod = method
-                            showKpmPatchDialog = true
-                        }
-                    } else {
-                        installMethod = method
-                    }
-                },
-                kpmPatchOption = kpmPatchOption,
-                onKpmPatchOptionChanged = { kpmPatchOption = it },
-                selectedMethod = installMethod
-            )
+            item {
+                Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+            }
 
-            // 选择LKM直接安装分区
-            AnimatedVisibility(
-                visible = installMethod is InstallMethod.DirectInstall || installMethod is InstallMethod.DirectInstallToInactiveSlot,
-                enter = fadeIn() + expandVertically(),
-                exit = shrinkVertically() + fadeOut()
-            ) {
+            item {
+                if (installState.loading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(240.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                } else {
+                    SelectInstallMethod(
+                        isGKI = isGKI,
+                        rootAvailable = environment.rootAvailable,
+                        isAbDevice = environment.isAbDevice,
+                        defaultPartitionName = environment.defaultPartition,
+                        onSelected = { method ->
+                            if (method is InstallMethod.HorizonKernel && method.uri != null) {
+                                if (isAbDevice) {
+                                    tempKernelUri = method.uri
+                                    showSlotSelectionDialog = true
+                                } else {
+                                    installMethod = method
+                                }
+                            } else {
+                                installMethod = method
+                            }
+                        },
+                        selectedMethod = installMethod,
+                    )
+                }
+            }
+
+            if (!installState.loading) item {
+                // 选择LKM直接安装分区
+                AnimatedVisibility(
+                    visible = installMethod is InstallMethod.DirectInstall || installMethod is InstallMethod.DirectInstallToInactiveSlot,
+                    enter = fadeIn() + expandVertically(),
+                    exit = shrinkVertically() + fadeOut()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        ElevatedCard(
+                            colors = getCardColors(MaterialTheme.colorScheme.surfaceBright),
+                            elevation = getCardElevation(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 12.dp)
+                                .clip(CardDefaults.elevatedShape)
+                                .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright),
+                        ) {
+                            val isOta = installMethod is InstallMethod.DirectInstallToInactiveSlot
+                            val suffix = if (isOta) {
+                                environment.inactiveSlotSuffix
+                            } else {
+                                environment.activeSlotSuffix
+                            }
+                            val partitions = environment.availablePartitions
+                            val defaultPartition = environment.defaultPartition
+
+                            partitionsState = partitions
+                            val displayPartitions = partitions.map { name ->
+                                if (defaultPartition == name) "$name (default)" else name
+                            }
+
+                            val defaultIndex =
+                                partitions.indexOf(defaultPartition).takeIf { it >= 0 } ?: 0
+                            if (!hasCustomSelected) partitionSelectionIndex = defaultIndex
+
+                            if (displayPartitions.isNotEmpty()) {
+                                SettingsChooseWidget(
+                                    icon = Icons.TwoTone.Edit,
+                                    items = displayPartitions,
+                                    selectedIndex = partitionSelectionIndex,
+                                    title = "${stringResource(R.string.install_select_partition)} (${suffix})",
+                                    onSelectedIndexChange = { index ->
+                                        hasCustomSelected = true
+                                        partitionSelectionIndex = index
+                                    },
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!installState.loading) item {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
                 ) {
-                    ElevatedCard(
-                        colors = getCardColors(MaterialTheme.colorScheme.surfaceVariant),
-                        elevation = getCardElevation(),
+                    if (isGKI) {
+                        // 使用本地的LKM文件
+                        ElevatedCard(
+                            colors = getCardColors(MaterialTheme.colorScheme.surfaceBright),
+                            elevation = getCardElevation(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 12.dp)
+                                .clip(CardDefaults.elevatedShape)
+                                .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright),
+                        ) {
+                            SettingsBaseWidget(
+                                title = stringResource(id = R.string.install_upload_lkm_file),
+                                onClick = {
+                                    onLkmUpload()
+                                },
+                                description = (lkmSelection as? LkmSelection.LkmUri)?.let {
+                                    stringResource(
+                                        id = R.string.selected_lkm,
+                                        it.uri.toUri().lastPathSegment ?: "(file)"
+                                    )
+                                },
+                                icon = Icons.AutoMirrored.TwoTone.Input,
+                            ) { }
+                        }
+                    }
+
+                    (installMethod as? InstallMethod.HorizonKernel)?.let { method ->
+                        if (method.slot != null) {
+                            ElevatedCard(
+                                colors = getCardColors(MaterialTheme.colorScheme.surfaceBright),
+                                elevation = getCardElevation(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 12.dp)
+                                    .clip(CardDefaults.elevatedShape)
+                                    .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright)
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        id = R.string.selected_slot,
+                                        if (method.slot == "a") stringResource(id = R.string.slot_a)
+                                        else stringResource(id = R.string.slot_b)
+                                    ),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                            }
+                        }
+
+                    }
+
+                    val containerColor = MaterialTheme.colorScheme.primary
+                    val disabledContainerColor = MaterialTheme.colorScheme.surfaceBright.copy(
+                        alpha = cardConfig.cardAlpha
+                    )
+
+                    Button(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 12.dp),
-                    ) {
-                        val isOta = installMethod is InstallMethod.DirectInstallToInactiveSlot
-                        val suffix = produceState(initialValue = "", isOta) {
-                            value = getSlotSuffix(isOta)
-                        }.value
-
-                        val partitions = produceState(initialValue = emptyList()) {
-                            value = getAvailablePartitions()
-                        }.value
-
-                        val defaultPartition = produceState(initialValue = "") {
-                            value = getDefaultPartition()
-                        }.value
-
-                        partitionsState = partitions
-                        val displayPartitions = partitions.map { name ->
-                            if (defaultPartition == name) "$name (default)" else name
-                        }
-
-                        val defaultIndex = partitions.indexOf(defaultPartition).takeIf { it >= 0 } ?: 0
-                        if (!hasCustomSelected) partitionSelectionIndex = defaultIndex
-
-                        if (displayPartitions.isNotEmpty()) {
-                            SettingsDropdownWidget(
-                                icon = Icons.Default.Edit,
-                                items = displayPartitions,
-                                selectedIndex = partitionSelectionIndex,
-                                title = "${stringResource(R.string.install_select_partition)} (${suffix})",
-                                onSelectedIndexChange = { index ->
-                                    hasCustomSelected = true
-                                    partitionSelectionIndex = index
-                                },
+                            .clip(MaterialTheme.shapes.medium)
+                            .renderBackgroundBlur(if (installMethod != null) containerColor else disabledContainerColor),
+                        enabled = installMethod != null,
+                        onClick = onClickNext,
+                        shape = MaterialTheme.shapes.medium,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (themeConfig.isEnableBlurExp) Color.Transparent else containerColor,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContainerColor = if (themeConfig.isEnableBlurExp) Color.Transparent else disabledContainerColor,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                alpha = 0.6f
                             )
-                        }
+                        )
+                    ) {
+                        Text(
+                            stringResource(id = R.string.install_next),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
                     }
                 }
             }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                if (isGKI) {
-                    // 使用本地的LKM文件
-                    ElevatedCard(
-                        colors = getCardColors(MaterialTheme.colorScheme.surfaceVariant),
-                        elevation = getCardElevation(),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp),
-                    ) {
-                        SettingsBaseWidget(
-                            title = stringResource(id = R.string.install_upload_lkm_file),
-                            onClick = {
-                                onLkmUpload()
-                            },
-                            description = (lkmSelection as? LkmSelection.LkmUri)?.let {
-                                stringResource(
-                                    id = R.string.selected_lkm,
-                                    it.uri.lastPathSegment ?: "(file)"
-                                )
-                            },
-                            icon = Icons.AutoMirrored.Filled.Input,
-                        ) { }
-                    }
-                }
-
-                (installMethod as? InstallMethod.HorizonKernel)?.let { method ->
-                    if (method.slot != null) {
-                        ElevatedCard(
-                            colors = getCardColors(MaterialTheme.colorScheme.surfaceVariant),
-                            elevation = getCardElevation(),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 12.dp)
-                        ) {
-                            Text(
-                                text = stringResource(
-                                    id = R.string.selected_slot,
-                                    if (method.slot == "a") stringResource(id = R.string.slot_a)
-                                    else stringResource(id = R.string.slot_b)
-                                ),
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(16.dp)
-                            )
-                        }
-                    }
-
-                    // KPM 状态显示卡片
-                    if (kpmPatchOption != KpmPatchOption.FOLLOW_KERNEL) {
-                        ElevatedCard(
-                            colors = getCardColors(MaterialTheme.colorScheme.surfaceVariant),
-                            elevation = getCardElevation(),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 12.dp)
-                        ) {
-                            Text(
-                                text = when (kpmPatchOption) {
-                                    KpmPatchOption.PATCH_KPM -> stringResource(R.string.kpm_patch_enabled)
-                                    KpmPatchOption.UNDO_PATCH_KPM -> stringResource(R.string.kpm_undo_patch_enabled)
-                                    else -> ""
-                                },
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(16.dp),
-                                color = when (kpmPatchOption) {
-                                    KpmPatchOption.PATCH_KPM -> MaterialTheme.colorScheme.primary
-                                    KpmPatchOption.UNDO_PATCH_KPM -> MaterialTheme.colorScheme.tertiary
-                                    else -> MaterialTheme.colorScheme.onSurface
-                                }
-                            )
-                        }
-                    }
-                }
-
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = installMethod != null,
-                    onClick = onClickNext,
-                    shape = MaterialTheme.shapes.medium,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-                        disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                    )
-                ) {
-                    Text(
-                        stringResource(id = R.string.install_next),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
+            item {
+                Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding()))
             }
         }
-    }
-}
-
-@Composable
-private fun KpmPatchSelectionDialog(
-    show: Boolean,
-    currentOption: KpmPatchOption,
-    onDismiss: () -> Unit,
-    onOptionSelected: (KpmPatchOption) -> Unit
-) {
-    if (show) {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { Text(stringResource(R.string.kpm_patch_options)) },
-            text = {
-                Column {
-                    Text(
-                        text = stringResource(R.string.kpm_patch_description),
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-
-                    KpmPatchOptionGroup(
-                        selectedOption = currentOption,
-                        onOptionChanged = onOptionSelected
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = { onOptionSelected(currentOption) }
-                ) {
-                    Text(stringResource(android.R.string.ok))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss) {
-                    Text(stringResource(android.R.string.cancel))
-                }
-            }
-        )
-    }
-}
-
-@Composable
-private fun RebootDialog(
-    show: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit
-) {
-    if (show) {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { Text(stringResource(id = R.string.reboot_complete_title)) },
-            text = { Text(stringResource(id = R.string.reboot_complete_msg)) },
-            confirmButton = {
-                TextButton(onClick = onConfirm) {
-                    Text(stringResource(id = R.string.yes))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss) {
-                    Text(stringResource(id = R.string.no))
-                }
-            }
-        )
     }
 }
 
@@ -590,18 +498,13 @@ sealed class InstallMethod {
 @Composable
 private fun SelectInstallMethod(
     isGKI: Boolean = false,
+    rootAvailable: Boolean,
+    isAbDevice: Boolean,
+    defaultPartitionName: String,
     onSelected: (InstallMethod) -> Unit = {},
-    kpmPatchOption: KpmPatchOption = KpmPatchOption.FOLLOW_KERNEL,
-    onKpmPatchOptionChanged: (KpmPatchOption) -> Unit = {},
     selectedMethod: InstallMethod? = null
 ) {
-    val rootAvailable = rootAvailable()
-    val isAbDevice = produceState(initialValue = false) {
-        value = isAbDevice()
-    }.value
-    val defaultPartitionName = produceState(initialValue = "boot") {
-        value = getDefaultPartition()
-    }.value
+    val cardConfig: CardConfig = koinInject()
     val horizonKernelSummary = stringResource(R.string.horizon_kernel_summary)
     val selectFileTip = stringResource(
         id = R.string.select_file_tip, defaultPartitionName
@@ -696,21 +599,23 @@ private fun SelectInstallMethod(
         // LKM 安装/修补
         if (isGKI) {
             ElevatedCard(
-                colors = getCardColors(MaterialTheme.colorScheme.surfaceVariant),
+                colors = getCardColors(MaterialTheme.colorScheme.surfaceBright),
                 elevation = getCardElevation(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
+                    .clip(CardDefaults.elevatedShape)
+                    .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright)
             ) {
                 MaterialTheme(
                     colorScheme = MaterialTheme.colorScheme.copy(
-                        surface = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant
+                        surface = if (cardConfig.isCustomBackgroundEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceBright
                     )
                 ) {
                     ListItem(
                         leadingContent = {
                             Icon(
-                                Icons.Filled.AutoFixHigh,
+                                Icons.TwoTone.AutoFixHigh,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary
                             )
@@ -743,9 +648,9 @@ private fun SelectInstallMethod(
                             val interactionSource = remember { MutableInteractionSource() }
                             Surface(
                                 color = if (option.javaClass == selectedOption?.javaClass)
-                                    MaterialTheme.colorScheme.secondaryContainer.copy(alpha = cardAlpha)
+                                    MaterialTheme.colorScheme.secondaryContainer.copy(alpha = cardConfig.cardAlpha)
                                 else
-                                    MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = cardAlpha),
+                                    MaterialTheme.colorScheme.surfaceBright.copy(alpha = cardConfig.cardAlpha),
                                 shape = MaterialTheme.shapes.medium,
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -802,21 +707,23 @@ private fun SelectInstallMethod(
         // anykernel3 刷写
         if (rootAvailable) {
             ElevatedCard(
-                colors = getCardColors(MaterialTheme.colorScheme.surfaceVariant),
+                colors = getCardColors(MaterialTheme.colorScheme.surfaceBright),
                 elevation = getCardElevation(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 12.dp)
+                    .clip(CardDefaults.elevatedShape)
+                    .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright)
             ) {
                 MaterialTheme(
                     colorScheme = MaterialTheme.colorScheme.copy(
-                        surface = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant
+                        surface = if (cardConfig.isCustomBackgroundEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceBright
                     )
                 ) {
                     ListItem(
                         leadingContent = {
                             Icon(
-                                Icons.Filled.FileUpload,
+                                Icons.TwoTone.FileUpload,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary
                             )
@@ -849,9 +756,9 @@ private fun SelectInstallMethod(
                             val interactionSource = remember { MutableInteractionSource() }
                             Surface(
                                 color = if (option.javaClass == selectedOption?.javaClass)
-                                    MaterialTheme.colorScheme.secondaryContainer.copy(alpha = cardAlpha)
+                                    MaterialTheme.colorScheme.secondaryContainer.copy(alpha = cardConfig.cardAlpha)
                                 else
-                                    MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = cardAlpha),
+                                    MaterialTheme.colorScheme.surfaceBright.copy(alpha = cardConfig.cardAlpha),
                                 shape = MaterialTheme.shapes.medium,
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -901,126 +808,6 @@ private fun SelectInstallMethod(
                             }
                         }
 
-                        // KPM修补
-                        if (selectedMethod is InstallMethod.HorizonKernel && selectedMethod.uri != null) {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                            ) {
-                                Icon(
-                                    Icons.Filled.Security,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.tertiary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    stringResource(R.string.kpm_patch_options),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = MaterialTheme.colorScheme.tertiary
-                                )
-                            }
-
-                            Text(
-                                stringResource(R.string.kpm_patch_description),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(bottom = 12.dp)
-                            )
-
-                            KpmPatchOptionGroup(
-                                selectedOption = kpmPatchOption,
-                                onOptionChanged = onKpmPatchOptionChanged
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun KpmPatchOptionGroup(
-    selectedOption: KpmPatchOption,
-    onOptionChanged: (KpmPatchOption) -> Unit
-) {
-    val options = listOf(
-        KpmPatchOption.FOLLOW_KERNEL to stringResource(R.string.kpm_follow_kernel_file),
-        KpmPatchOption.PATCH_KPM to stringResource(R.string.enable_kpm_patch),
-        KpmPatchOption.UNDO_PATCH_KPM to stringResource(R.string.enable_kpm_undo_patch)
-    )
-
-    val descriptions = mapOf(
-        KpmPatchOption.FOLLOW_KERNEL to stringResource(R.string.kpm_follow_kernel_description),
-        KpmPatchOption.PATCH_KPM to stringResource(R.string.kpm_patch_switch_description),
-        KpmPatchOption.UNDO_PATCH_KPM to stringResource(R.string.kpm_undo_patch_switch_description)
-    )
-
-    Column {
-        options.forEach { (option, label) ->
-            val interactionSource = remember { MutableInteractionSource() }
-            Surface(
-                color = if (option == selectedOption)
-                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = cardAlpha)
-                else
-                    MaterialTheme.colorScheme.surfaceContainer.copy(alpha = cardAlpha),
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 2.dp)
-                    .clip(MaterialTheme.shapes.medium)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .selectable(
-                            selected = option == selectedOption,
-                            onClick = { onOptionChanged(option) },
-                            role = Role.RadioButton,
-                            indication = LocalIndication.current,
-                            interactionSource = interactionSource
-                        )
-                        .padding(vertical = 12.dp, horizontal = 12.dp)
-                ) {
-                    RadioButton(
-                        selected = option == selectedOption,
-                        onClick = null,
-                        interactionSource = interactionSource,
-                        colors = RadioButtonDefaults.colors(
-                            selectedColor = when (option) {
-                                KpmPatchOption.FOLLOW_KERNEL -> MaterialTheme.colorScheme.primary
-                                KpmPatchOption.PATCH_KPM -> MaterialTheme.colorScheme.primary
-                                KpmPatchOption.UNDO_PATCH_KPM -> MaterialTheme.colorScheme.tertiary
-                            },
-                            unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = label,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = if (option == selectedOption)
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            else
-                                MaterialTheme.colorScheme.onSurface
-                        )
-                        descriptions[option]?.let { description ->
-                            Text(
-                                text = description,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = if (option == selectedOption)
-                                    MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                                else
-                                    MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(top = 2.dp)
-                            )
-                        }
                     }
                 }
             }
@@ -1030,36 +817,26 @@ private fun KpmPatchOptionGroup(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun rememberSelectKmiDialog(onSelected: (String?) -> Unit): DialogHandle {
+fun rememberSelectKmiDialog(
+    supportedKmi: List<String>,
+    onSelected: (String?) -> Unit,
+): DialogHandle {
     return rememberCustomDialog { dismiss ->
-        val supportedKmi by produceState(initialValue = emptyList()) {
-            value = getSupportedKmis()
-        }
-        val options = supportedKmi.map { value ->
-            ListOption(
-                titleText = value
-            )
-        }
-
-        var selection by remember { mutableStateOf<String?>(null) }
-
         MaterialTheme(
             colorScheme = MaterialTheme.colorScheme.copy(
-                surface = MaterialTheme.colorScheme.surfaceContainerHigh
+                surface = MaterialTheme.colorScheme.surfaceBright
             )
         ) {
-            ListDialog(state = rememberUseCaseState(visible = true, onFinishedRequest = {
-                onSelected(selection)
-            }, onCloseRequest = {
-                dismiss()
-            }), header = Header.Default(
+            SettingsChooseDialog(
+                show = true,
                 title = stringResource(R.string.select_kmi),
-            ), selection = ListSelection.Single(
-                showRadioButtons = true,
-                options = options,
-            ) { _, option ->
-                selection = option.titleText
-            })
+                items = supportedKmi,
+                selectedIndex = -1,
+                onDismiss = dismiss,
+                onSelectedIndexChange = { index ->
+                    onSelected(supportedKmi.getOrNull(index))
+                }
+            )
         }
     }
 }
@@ -1070,6 +847,8 @@ private fun TopBar(
     onBack: () -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
+    val themeConfig: ThemeConfig = koinInject()
+    val cardConfig: CardConfig = koinInject()
     LargeFlexibleTopAppBar(
         modifier = Modifier.blurEffect(
         ),
@@ -1080,15 +859,15 @@ private fun TopBar(
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor =
-                if (ThemeConfig.isEnableBlur)
+                if (themeConfig.isEnableBlur)
                     Color.Transparent
                 else
-                    MaterialTheme.colorScheme.surfaceContainer.copy(cardAlpha),
+                    MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
             scrolledContainerColor =
-                if (ThemeConfig.isEnableBlur)
+                if (themeConfig.isEnableBlur)
                     Color.Transparent
                 else
-                    MaterialTheme.colorScheme.surfaceContainer.copy(cardAlpha),
+                    MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
         ),
         navigationIcon = {
             AppBackButton(

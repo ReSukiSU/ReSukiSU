@@ -25,9 +25,10 @@ env:
   CARGO_TERM_COLOR: always
 jobs:
   build:
+    name: Build ksud (${{ inputs.target }})
     runs-on: ${{ inputs.os }}
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         fetch-depth: 0
 
@@ -37,12 +38,14 @@ jobs:
     - name: Prepare LKM fies
       if: ${{ inputs.pack_lkm }}
       run: |
-        cp android*-lkm/*_kernelsu.ko ./userspace/ksud/bin/aarch64/
+        cp aarch64-android*-lkm/*_kernelsu.ko ./userspace/ksud/bin/aarch64/
+        cp x86_64-android*-lkm/*_kernelsu.ko ./userspace/ksud/bin/x86_64/
     
     - name: Prepare ksuinit
       if: ${{ inputs.pack_ksuinit }}
       run: |
-        mv ksuinit/*/release/ksuinit ./userspace/ksud/bin/aarch64/
+        mv ksuinit-aarch64/ksuinit ./userspace/ksud/bin/aarch64/
+        mv ksuinit-x86_64/ksuinit ./userspace/ksud/bin/x86_64/
      
     - name: Setup Rust toolchain
       uses: dtolnay/rust-toolchain@stable
@@ -50,7 +53,7 @@ jobs:
         toolchain: nightly
         targets: ${{ inputs.target }}
         components: rust-src
-        
+
     - uses: Swatinem/rust-cache@v2
       if: github.event_name != 'pull_request'
       with:
@@ -61,6 +64,12 @@ jobs:
     - name: Setup cargo-ndk
       run: cargo install cargo-ndk --locked
         
+    - name: Assemble LKM bootstrap
+      run: |
+        clang --target=aarch64-linux-gnu -c -nostdlib \
+          -o userspace/ksud/.lkm_image_bootstrap.o \
+          userspace/ksud/src/lkm_image_bootstrap.S
+     
     - name: Build ksud
       run: |
         cd userspace/ksud/

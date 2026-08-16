@@ -5,6 +5,7 @@ use crate::{
     apk_sign,
     boot_patch::{BootPatchArgs, BootRestoreArgs},
     defs,
+    lkm_image::BootPatchV2Args,
 };
 
 /// KernelSU cli for non-android
@@ -22,6 +23,11 @@ enum Commands {
 
     /// Restore boot or init_boot images patched by KernelSU
     BootRestore(BootRestoreArgs),
+
+    /// Patch KernelSU into a boot image
+    ///
+    /// Always operates on a boot image; never selects init_boot or vendor_boot.
+    BootPatchV2(BootPatchV2Args),
 
     /// Get apk size and hash
     GetSign {
@@ -50,6 +56,8 @@ pub fn run() -> Result<()> {
         Commands::BootPatch(boot_patch) => crate::boot_patch::patch(boot_patch),
 
         Commands::BootRestore(boot_restore) => crate::boot_patch::restore(boot_restore),
+
+        Commands::BootPatchV2(patch) => crate::lkm_image::patch_boot(&patch),
 
         Commands::SupportedKmis => {
             let kmi = crate::assets::list_supported_kmi();

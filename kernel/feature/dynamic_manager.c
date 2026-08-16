@@ -56,6 +56,7 @@ int ksu_handle_dynamic_manager(struct ksu_dynamic_manager_cmd *cmd)
     }
 
     switch (cmd->operation) {
+    case DYNAMIC_MANAGER_OP_SET_SYNCHRONOUS:
     case DYNAMIC_MANAGER_OP_SET:
         if (cmd->size < 0x100 || cmd->size > 0x1000) {
             pr_err("invalid size: 0x%x\n", cmd->size);
@@ -83,15 +84,19 @@ int ksu_handle_dynamic_manager(struct ksu_dynamic_manager_cmd *cmd)
 
         dynamic_manager.is_set = 1;
 
-        track_throne(TRACK_THRONE_FORCE_SEARCH_MGR);
+        if (cmd->operation == DYNAMIC_MANAGER_OP_SET_SYNCHRONOUS)
+            track_throne(TRACK_THRONE_FORCE_SEARCH_MGR | TRACK_THRONE_FORCE_SYNCHRONOUS);
+        else
+            track_throne(TRACK_THRONE_FORCE_SEARCH_MGR);
         pr_info("dynamic manager updated: size=0x%x, hash=%.16s\n", cmd->size, cmd->hash);
         break;
 
     case DYNAMIC_MANAGER_OP_GET:
         if (dynamic_manager.is_set) {
             cmd->size = dynamic_manager.size;
-            memcpy(cmd->hash, dynamic_manager.hash,
-                   64); // just copy [64] is enough, userspace will handle that
+
+            // only copy [64] is enough, userspace will handle that
+            memcpy(cmd->hash, dynamic_manager.hash, 64);
             ret = 0;
         } else {
             ret = -ENODATA;

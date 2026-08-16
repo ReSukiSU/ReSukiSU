@@ -1,42 +1,13 @@
 package com.resukisu.resukisu.ui.component
 
 import androidx.compose.runtime.Composable
-import com.resukisu.resukisu.Natives
-import com.resukisu.resukisu.ui.util.rootAvailable
+import com.resukisu.resukisu.domain.model.KernelStatus
 
 @Composable
 inline fun KsuIsValid(
+    status: KernelStatus,
     content: @Composable () -> Unit
 ) {
-    if (ksuIsValid())
+    if (status.isValid)
         content()
-}
-
-private var tested = false
-private var ksuIsValid = false
-
-/**
- * Check the manager is valid or not
- *
- * true = ksu valid
- * false = ksu invalid
- *
- * invalid = not is manager
- */
-fun ksuIsValid() : Boolean {
-    if (tested) return ksuIsValid
-
-    val isManager = Natives.isManager
-    val ksuVersion = if (isManager) Natives.version else null
-    ksuIsValid = ksuVersion != null && ksuVersion >= Natives.MINIMAL_SUPPORTED_KERNEL
-    tested = true
-
-    return ksuIsValid
-}
-
-/**
- * Check is full feature
- */
-fun isFullFeatured(): Boolean {
-    return ksuIsValid() && !Natives.requireNewKernel() && rootAvailable()
 }

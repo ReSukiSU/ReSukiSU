@@ -1,34 +1,43 @@
 [versions]
 accompanist-drawablepainter = "0.37.3"
-agp = "9.2.0"
+agp = "9.3.0"
 gson = "2.14.0"
-kotlin = "2.3.21"
-m3color = "2026.1"
+kotlin = "2.4.0"
+materialKolor = "4.1.1"
+monetCompat = "0.4.1"
+materialComponents = "1.14.0"
 capsule = "2.1.3"
-compose-bom = "2026.04.01"
+compose-bom = "2026.05.01"
 lifecycle = "2.10.0"
-navigation3 = "1.2.0-alpha02"
-navigationevent = "1.1.0"
+navigation3 = "1.2.0-alpha04"
+navigationevent = "1.1.1"
 activity-compose = "1.13.0"
-kotlinx-coroutines = "1.10.2"
+core-splashscreen = "1.2.0"
+kotlinx-coroutines = "1.11.0"
 coil-compose = "2.7.0"
-sheets-compose-dialogs = "1.3.0"
+ucrop = "2.2.11"
 markdown = "4.6.2"
-webkit = "1.15.0"
+webkit = "1.16.0"
 appiconloader-coil = "1.5.0"
 parcelablelist = "2.0.1"
 libsu = "6.0.0"
 apksign = "1.4"
-compose-material3 = "1.5.0-alpha18"
-compose-ui = "1.11.0"
+compose-material3 = "1.5.0-alpha21"
+compose-ui = "1.11.2"
 documentfile = "1.1.0"
 ndk = "29.0.14206865"
-foundation = "1.11.0"
-aboutLibraries = "14.1.0"
-miuix = "0.9.0"
+foundation = "1.11.2"
+aboutLibraries = "14.2.1"
+miuix = "0.9.2"
+datastore = "1.2.1"
+benchmark = "1.5.0-alpha07"
+profileinstaller = "1.4.1"
+koin-bom = "4.2.2"
 
 [plugins]
 agp-app = { id = "com.android.application", version.ref = "agp" }
+agp-test = { id = "com.android.test", version.ref = "agp" }
+androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "benchmark" }
 kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
@@ -36,13 +45,22 @@ lsplugin-apksign = { id = "org.lsposed.lsplugin.apksign", version.ref = "apksign
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
 
 [libraries]
+koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
+koin-core = { module = "io.insert-koin:koin-core" }
+koin-android = { module = "io.insert-koin:koin-android" }
+koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose" }
+koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }
+
 accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref = "accompanist-drawablepainter" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 
 androidx-compose-runtime-tracing = { module = "androidx.compose.runtime:runtime-tracing" }
 androidx-foundation = { module = "androidx.compose.foundation:foundation" }
 
-m3color = { module = "com.github.Kyant0:m3color", version.ref = "m3color" }
+material-kolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
+monet-compat = { module = "com.github.KieronQuinn:MonetCompat", version.ref = "monetCompat" }
+material-components = { group = "com.google.android.material", name = "material", version.ref = "materialComponents" }
+androidx-palette-ktx = { group = "androidx.palette", name = "palette-ktx", version = "1.0.0" }
 capsule = { module = "io.github.kyant0:capsule", version.ref = "capsule" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
@@ -66,7 +84,9 @@ com-github-topjohnwu-libsu-io = { group = "com.github.topjohnwu.libsu", name = "
 dev-rikka-rikkax-parcelablelist = { module = "dev.rikka.rikkax.parcelablelist:parcelablelist", version.ref = "parcelablelist" }
 
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "core-splashscreen" }
 io-coil-kt-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil-compose" }
+ucrop = { module = "com.github.yalantis:ucrop", version.ref = "ucrop" }
 
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 
@@ -77,16 +97,15 @@ miuix-navigation = { group = "top.yukonga.miuix.kmp", name = "miuix-navigation3-
 miuix-blur = { group = "top.yukonga.miuix.kmp", name = "miuix-blur-android", version.ref = "miuix" }
 androidx-navigationevent = { module = "androidx.navigationevent:navigationevent", version.ref = "navigationevent" }
 
-sheet-compose-dialogs-core = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "core", version.ref = "sheets-compose-dialogs" }
-sheet-compose-dialogs-list = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "list", version.ref = "sheets-compose-dialogs" }
-sheet-compose-dialogs-input = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "input", version.ref = "sheets-compose-dialogs" }
-
 markdown = { group = "io.noties.markwon", name = "core", version.ref = "markdown" }
 
 lsposed-cxx = { module = "org.lsposed.libcxx:libcxx", version.ref = "ndk" }
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+androidx-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "benchmark" }
+androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
 
 # Core module (required for accessing library data)
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibraries" }

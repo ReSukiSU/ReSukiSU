@@ -67,6 +67,9 @@ import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+import kotlin.time.Duration.Companion.milliseconds
+
 
 private fun Modifier.textFieldBackground(color: ColorProducer, shape: Shape): Modifier =
     this.drawWithCache {
@@ -86,6 +89,7 @@ private fun CompactSearchBar(
     interactionSource: MutableInteractionSource? = null,
     shape: Shape = inputFieldShape,
 ) {
+    val cardConfig: CardConfig = koinInject()
     val focusManager = LocalFocusManager.current
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
@@ -106,7 +110,7 @@ private fun CompactSearchBar(
 
     LaunchedEffect(allowFocus) {
         if (allowFocus && hasFocusReassignBug) {
-            delay(100)
+            delay(100.milliseconds)
             focusRequester.requestFocus()
         }
     }
@@ -121,7 +125,7 @@ private fun CompactSearchBar(
         if (!isImeVisible && focused) {
             if (hasFocusReassignBug) {
                 allowFocus = false
-                delay(100)
+                delay(100.milliseconds)
                 focusManager.clearFocus()
             } else {
                 focusManager.clearFocus()
@@ -139,7 +143,7 @@ private fun CompactSearchBar(
             .fillMaxWidth()
             .clip(CircleShape)
             .background(
-                MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = CardConfig.cardAlpha)
+                MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = cardConfig.cardAlpha)
             )
             .heightIn(0.dp, 45.dp)
             .focusRequester(focusRequester)
@@ -155,7 +159,7 @@ private fun CompactSearchBar(
             if (hasFocusReassignBug) {
                 coroutineScope.launch {
                     allowFocus = false
-                    delay(100)
+                    delay(100.milliseconds)
                     focusManager.clearFocus()
                 }
             } else {
@@ -210,8 +214,10 @@ fun SearchAppBar(
     navigationContent: @Composable (() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     searchBarPlaceHolderText: String,
-    haze: Boolean = true,
+    blur: Boolean = true,
 ) {
+    val themeConfig: ThemeConfig = koinInject()
+    val cardConfig: CardConfig = koinInject()
     val textFieldState = rememberTextFieldState(initialText = searchText)
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -219,78 +225,81 @@ fun SearchAppBar(
         onSearchTextChange(textFieldState.text.toString())
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                if (ThemeConfig.isEnableBlur)
-                    Color.Transparent
-                else
-                    MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha)
-            )
-            .then(
-                if (haze) {
-                    Modifier.blurEffect(
-                    )
-                } else Modifier
-            )
-    ) {
-        LargeFlexibleTopAppBar(
-            scrollBehavior = scrollBehavior,
-            title = {
-                Text(
-                    text = title
-                )
-            },
-            navigationIcon = {
-                if (onBackClick != null) {
-                    AppBackButton(
-                        onClick = {
-                            onBackClick.invoke()
-                        }
-                    )
-                } else {
-                    navigationContent?.invoke()
-                }
-            },
-            actions = {
-                dropdownContent?.invoke()
-            },
-            windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor =
-                    if (ThemeConfig.backgroundImageLoaded) Color.Transparent
-                    else MaterialTheme.colorScheme.surfaceContainer,
-                scrolledContainerColor =
-                    if (ThemeConfig.backgroundImageLoaded) Color.Transparent
-                    else MaterialTheme.colorScheme.surfaceContainer,
-            ),
-        )
-
-        CompactSearchBar(
-            modifier = Modifier
+    Column {
+        Column(
+            modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 0.dp),
-            textFieldState = textFieldState,
-            onSearch = {
-                keyboardController?.hide()
-            },
-            placeholder = {
-                Text(
-                    text = searchBarPlaceHolderText,
-                    style = MaterialTheme.typography.bodyLarge
+                .then(
+                    if (blur) {
+                        Modifier.blurEffect()
+                    } else Modifier
                 )
-            },
-            leadingIcon = {
-                Icon(
-                    Icons.TwoTone.Search,
-                    contentDescription = null,
-                    modifier = Modifier.padding(start = 8.dp)
+                .background(
+                    if (themeConfig.isEnableBlur)
+                        Color.Transparent
+                    else
+                        MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha)
                 )
-            },
-        )
+        ) {
+            LargeFlexibleTopAppBar(
+                scrollBehavior = scrollBehavior,
+                title = {
+                    Text(
+                        text = title
+                    )
+                },
+                navigationIcon = {
+                    if (onBackClick != null) {
+                        AppBackButton(
+                            onClick = {
+                                onBackClick.invoke()
+                            }
+                        )
+                    } else {
+                        navigationContent?.invoke()
+                    }
+                },
+                actions = {
+                    dropdownContent?.invoke()
+                },
+                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor =
+                        if (themeConfig.backgroundImageLoaded) Color.Transparent
+                        else MaterialTheme.colorScheme.surfaceContainer,
+                    scrolledContainerColor =
+                        if (themeConfig.backgroundImageLoaded) Color.Transparent
+                        else MaterialTheme.colorScheme.surfaceContainer,
+                ),
+            )
 
-        Spacer(modifier = Modifier.height(8.dp))
+            CompactSearchBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 0.dp),
+                textFieldState = textFieldState,
+                onSearch = {
+                    keyboardController?.hide()
+                },
+                placeholder = {
+                    Text(
+                        text = searchBarPlaceHolderText,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        Icons.TwoTone.Search,
+                        contentDescription = null,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                },
+            )
+
+            Spacer(modifier = Modifier.height(5.dp))
+        }
+        if (themeConfig.backgroundImageLoaded)
+            Spacer(modifier = Modifier.height(5.dp))
     }
 }
 

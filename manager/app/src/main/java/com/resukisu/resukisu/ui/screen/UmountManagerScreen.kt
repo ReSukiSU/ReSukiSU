@@ -16,9 +16,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.twotone.Add
+import androidx.compose.material.icons.twotone.Delete
+import androidx.compose.material.icons.twotone.Folder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -52,7 +52,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.ConfirmResult
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
@@ -60,29 +60,36 @@ import com.resukisu.resukisu.ui.component.WarningCard
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
-import com.resukisu.resukisu.ui.component.settings.splicedLazyColumnGroup
+import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
+import com.resukisu.resukisu.ui.util.ActivityResumeEffect
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
+import com.resukisu.resukisu.ui.util.showReplacingSnackbar
 import com.resukisu.resukisu.ui.viewmodel.UmountManagerScreenViewModel
-import kotlinx.coroutines.Dispatchers
+import com.resukisu.resukisu.ui.viewmodel.UmountManagerUiAction
+import com.resukisu.resukisu.ui.viewmodel.UmountManagerUiEvent
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun UmountManagerScreen() {
-    val viewModel = viewModel<UmountManagerScreenViewModel>()
+    val themeConfig: ThemeConfig = koinInject()
+    val cardConfig: CardConfig = koinInject()
+    val viewModel = koinViewModel<UmountManagerScreenViewModel>()
+    val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val snackBarHost = LocalSnackbarHost.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val confirmDialog = rememberConfirmDialog()
 
-    var isLoading by remember { mutableStateOf(false) }
     val pullToRefreshState = rememberPullToRefreshState()
     var showAddDialog by remember { mutableStateOf(false) }
 
@@ -91,7 +98,19 @@ fun UmountManagerScreen() {
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset =
             scrollBehavior.state.heightOffsetLimit
-        viewModel.refreshData(context)
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collectLatest { event ->
+            when (event) {
+                is UmountManagerUiEvent.Message ->
+                    snackBarHost.showReplacingSnackbar(context.getString(event.stringResource))
+            }
+        }
+    }
+
+    ActivityResumeEffect {
+        viewModel.dispatch(UmountManagerUiAction.Refresh(force = true))
     }
 
     Scaffold(
@@ -112,15 +131,15 @@ fun UmountManagerScreen() {
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor =
-                        if (ThemeConfig.isEnableBlur)
+                        if (themeConfig.isEnableBlur)
                             Color.Transparent
                         else
-                            MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha),
+                            MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
                     scrolledContainerColor =
-                        if (ThemeConfig.isEnableBlur)
+                        if (themeConfig.isEnableBlur)
                             Color.Transparent
                         else
-                            MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha),
+                            MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
                 )
             )
         },
@@ -128,14 +147,14 @@ fun UmountManagerScreen() {
             FloatingActionButton(
                 onClick = { showAddDialog = true }
             ) {
-                Icon(Icons.Filled.Add, contentDescription = null)
+                Icon(Icons.TwoTone.Add, contentDescription = null)
             }
         },
         snackbarHost = { SwipeableSnackbarHost(hostState = snackBarHost) },
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
     ) { paddingValues ->
-        if (isLoading) { // 初次加载时动画
+        if (uiState.isLoading) { // 初次加载时动画
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -148,15 +167,14 @@ fun UmountManagerScreen() {
         else {
             PullToRefreshBox(
                 state = pullToRefreshState,
-                isRefreshing = viewModel.isRefreshing,
+                isRefreshing = uiState.isRefreshing,
                 onRefresh = {
-                    viewModel.markUmountPathDirty()
-                    viewModel.refreshData(context)
+                    viewModel.dispatch(UmountManagerUiAction.Refresh())
                 },
                 indicator = {
                     PullToRefreshDefaults.LoadingIndicator(
                         state = pullToRefreshState,
-                        isRefreshing = viewModel.isRefreshing,
+                        isRefreshing = uiState.isRefreshing,
                         modifier = Modifier
                             .align(Alignment.TopCenter)
                             .padding(top = paddingValues.calculateTopPadding()),
@@ -187,7 +205,7 @@ fun UmountManagerScreen() {
                         Spacer(modifier = Modifier.height(16.dp))
                     }
 
-                    if (viewModel.umountPaths.isEmpty()) {
+                    if (uiState.umountPaths.isEmpty()) {
                         item {
                             WarningCard(
                                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -199,11 +217,11 @@ fun UmountManagerScreen() {
                         }
                     }
 
-                    splicedLazyColumnGroup(
-                        viewModel.umountPaths,
+                    lazySegmentColumn(
+                        uiState.umountPaths,
                         key = { _, it -> it.path }) { _, entry ->
                         SettingsBaseWidget(
-                            icon = Icons.Filled.Folder,
+                            icon = Icons.TwoTone.Folder,
                             title = entry.path,
                             descriptionColumnContent = {
                                 Row(
@@ -221,7 +239,7 @@ fun UmountManagerScreen() {
                                         }
                                     )
                                     LabelText(
-                                        label = entry.flagName,
+                                        label = entry.flags.toUmountFlagName(),
                                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                     )
                                 }
@@ -240,14 +258,12 @@ fun UmountManagerScreen() {
                                         )
                                         if (confirmResult != ConfirmResult.Confirmed)
                                             return@launch
-                                        withContext(Dispatchers.IO) {
-                                            viewModel.removePath(entry, snackBarHost, context)
-                                        }
+                                        viewModel.dispatch(UmountManagerUiAction.Remove(entry))
                                     }
                                 }
                             ) {
                                 Icon(
-                                    imageVector = Icons.Filled.Delete,
+                                    imageVector = Icons.TwoTone.Delete,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.error
                                 )
@@ -264,24 +280,26 @@ fun UmountManagerScreen() {
                 onConfirm = { path, flags ->
                     showAddDialog = false
 
-                    viewModel.umountPaths.filter { it.path == path }.forEach {
-                        viewModel.removePath(
-                            entry = it,
-                            snackBarHost = null,
-                            context = null,
-                        )
+                    uiState.umountPaths.filter { it.path == path }.forEach {
+                        viewModel.dispatch(UmountManagerUiAction.Remove(it))
                     }
 
-                    viewModel.addPath(
-                        path = path,
-                        flags = flags,
-                        snackBarHost = snackBarHost,
-                        context = context
-                    )
+                    viewModel.dispatch(UmountManagerUiAction.Add(path, flags))
                 }
             )
         }
     }
+}
+
+@Composable
+private fun Int.toUmountFlagName(): String = when (this) {
+    -1 -> stringResource(R.string.unknown)
+    0 -> "UMOUNT_UNUSED"
+    1 -> "MNT_FORCE"
+    2 -> "MNT_DETACH"
+    4 -> "MNT_EXPIRE"
+    8 -> "UMOUNT_NOFOLLOW"
+    else -> toString()
 }
 
 @Composable

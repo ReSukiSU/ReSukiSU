@@ -2,6 +2,7 @@ menu "KernelSU"
 
 config KSU
 	  tristate "KernelSU function support"
+      select KALLSYMS
 	  default y
 	  help
 		Enable kernel-level root privileges on Android System.
@@ -61,23 +62,20 @@ config KSU_DISABLE_POLICY
 	  Escalation will always use the default full root profile, and
 	  non-root handling will follow the global umount policy only.
 
+config KSU_X86_PATCH_SYSCALL_DISPATCHER
+	bool "Dynamically patch x64's hardened syscall dispatcher to support syscall hooks"
+	depends on KSU && X86_64
+	default n
+	help
+	  Dynamically patch x64's hardened syscall dispatcher to support syscall hooks. This is a
+	  replacement for a kernel source code patch, and is useful for x86_64 LKM mode.
+
 config KSU_MULTI_MANAGER_SUPPORT
 	bool "Multi KernelSU manager support"
 	depends on KSU && !KSU_DISABLE_MANAGER
 	default y
 	help
 		Enable multi KernelSU manager support
-
-config KPM
-    bool "Enable SukiSU KPM"
-    depends on KSU && 64BIT
-    select KALLSYMS
-    select KALLSYMS_ALL
-    default n
-    help
-	  Enabling this option will activate the KPM feature of SukiSU.
-	  This option is suitable for scenarios where you need to force KPM to be enabled.
-	  but it may affect system stability.
 
 choice
 	prompt "KernelSU Hooking Method"
@@ -105,7 +103,7 @@ config KSU_MANUAL_HOOK
 
 config KSU_SUSFS
 	bool "SUSFS Inline Hook"
-	depends on THREAD_INFO_IN_TASK
+	depends on THREAD_INFO_IN_TASK && 64BIT
 	help
 	  Patch and Enable SUSFS to kernel with KernelSU.
 	  SuSFS Officially support kernel 5.10+

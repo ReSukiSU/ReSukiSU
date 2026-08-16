@@ -2,28 +2,18 @@ package com.resukisu.resukisu.ui.screen
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AdminPanelSettings
-import androidx.compose.material.icons.filled.Archive
-import androidx.compose.material.icons.filled.Extension
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.AdminPanelSettings
-import androidx.compose.material.icons.outlined.Archive
-import androidx.compose.material.icons.outlined.Extension
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.twotone.AdminPanelSettings
+import androidx.compose.material.icons.twotone.Extension
+import androidx.compose.material.icons.twotone.Home
+import androidx.compose.material.icons.twotone.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.ui.MainActivity
-import com.resukisu.resukisu.ui.component.ksuIsValid
 import com.resukisu.resukisu.ui.screen.main.HomePage
-import com.resukisu.resukisu.ui.screen.main.KpmPage
 import com.resukisu.resukisu.ui.screen.main.ModulePage
 import com.resukisu.resukisu.ui.screen.main.SettingsPage
 import com.resukisu.resukisu.ui.screen.main.SuperUserPage
-import com.resukisu.resukisu.ui.util.getKpmVersion
 
 enum class BottomBarDestination(
     val direction: @Composable (bottomPadding: Dp) -> Unit,
@@ -35,59 +25,39 @@ enum class BottomBarDestination(
     Home(
         { bottomPadding -> HomePage(bottomPadding) },
         R.string.home,
-        Icons.Filled.Home,
-        Icons.Outlined.Home,
+        Icons.TwoTone.Home,
+        Icons.TwoTone.Home,
         false
-    ),
-    Kpm(
-        { bottomPadding -> KpmPage(bottomPadding) },
-        R.string.kpm_title,
-        Icons.Filled.Archive,
-        Icons.Outlined.Archive,
-        true
     ),
     SuperUser(
         { bottomPadding -> SuperUserPage(bottomPadding) },
         R.string.superuser,
-        Icons.Filled.AdminPanelSettings,
-        Icons.Outlined.AdminPanelSettings,
+        Icons.TwoTone.AdminPanelSettings,
+        Icons.TwoTone.AdminPanelSettings,
         true
     ),
     Module(
         { bottomPadding -> ModulePage(bottomPadding) },
         R.string.module,
-        Icons.Filled.Extension,
-        Icons.Outlined.Extension,
+        Icons.TwoTone.Extension,
+        Icons.TwoTone.Extension,
         true
     ),
     Settings(
         { bottomPadding -> SettingsPage(bottomPadding) },
         R.string.settings,
-        Icons.Filled.Settings,
-        Icons.Outlined.Settings,
+        Icons.TwoTone.Settings,
+        Icons.TwoTone.Settings,
         false
     );
 
     companion object {
-        fun getPages(settings: MainActivity.SettingsState) : List<BottomBarDestination> {
-            if (ksuIsValid()) {
+        fun getPages(isKsuValid: Boolean): List<BottomBarDestination> {
+            return if (isKsuValid) {
                 // 全功能管理器
-                val kpmVersion = runCatching {
-                    getKpmVersion()
-                }.getOrNull()
-
-                val showKpmInfo = settings.showKpmInfo
-                return BottomBarDestination.entries.filter {
-                    when (it) {
-                        Kpm -> {
-                            kpmVersion?.isNotEmpty() ?: false && !showKpmInfo
-                        }
-
-                        else -> true
-                    }
-                }
+                BottomBarDestination.entries.toList()
             } else {
-                return BottomBarDestination.entries.filter {
+                BottomBarDestination.entries.filter {
                     !it.rootRequired
                 }
             }

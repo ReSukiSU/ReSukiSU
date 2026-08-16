@@ -10,10 +10,10 @@
 #include "arch.h"
 #include "klog.h" // IWYU pragma: keep
 #include "hook/tp_marker.h"
+#include "runtime/ksud.h"
 #include "feature/sucompat.h"
 #include "hook/setuid_hook.h"
 #include "policy/app_profile.h"
-#include "runtime/ksud.h"
 #include "sulog/event.h"
 #include "hook/syscall_hook.h"
 #include "hook/syscall_event_bridge.h"
@@ -41,7 +41,8 @@ static int ksu_handle_init_mark_tracker(const char __user **filename_user)
     if (unlikely(strcmp(path, KSUD_PATH) == 0)) {
         pr_info("hook_manager: escape to root for init executing ksud: %d\n", current->pid);
         escape_to_root_for_init();
-    } else if (likely(strstr(path, "/app_process") == NULL && strstr(path, "/adbd") == NULL)) {
+    } else if (likely(strstr(path, "/app_process") == NULL && strstr(path, "/adbd") == NULL &&
+                      strstr(path, "/stub_zygote") == NULL)) {
         pr_info("hook_manager: unmark %d exec %s\n", current->pid, path);
         ksu_clear_task_tracepoint_flag_if_needed(current);
     }

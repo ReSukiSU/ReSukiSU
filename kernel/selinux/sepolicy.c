@@ -1,14 +1,16 @@
+#include <linux/gfp.h>
+#include <linux/printk.h>
+#include <linux/slab.h>
+#include <linux/version.h>
+#include <linux/vmalloc.h>
+#include <linux/mutex.h>
+
 #include "ss/avtab.h"
 #include "ss/constraint.h"
 #include "ss/ebitmap.h"
 #include "ss/hashtab.h"
 #include "ss/policydb.h"
 #include "ss/services.h"
-#include <linux/gfp.h>
-#include <linux/printk.h>
-#include <linux/slab.h>
-#include <linux/version.h>
-#include <linux/vmalloc.h>
 
 #include "selinux.h"
 #include "sepolicy.h"
@@ -70,7 +72,7 @@ static bool add_typeattribute(struct policydb *db, const char *type, const char 
 
 // htable is a struct instead of pointer above 5.8.0:
 // https://elixir.bootlin.com/linux/v5.8-rc1/source/security/selinux/ss/symtab.h
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 8, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 8, 0) || defined(KSU_COMPAT_HAS_NON_POINTER_SYMTAB_STRUCT)
 #define ksu_hashtab_for_each(htab, cur) ksu_hash_for_each(htab.htable, htab.size, cur)
 #else
 #define ksu_hashtab_for_each(htab, cur) ksu_hash_for_each(htab->htable, htab->size, cur)
@@ -78,7 +80,7 @@ static bool add_typeattribute(struct policydb *db, const char *type, const char 
 
 // symtab_search is introduced on 5.9.0:
 // https://elixir.bootlin.com/linux/v5.9-rc1/source/security/selinux/ss/symtab.h
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 9, 0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 9, 0) && !defined(KSU_COMPAT_HAS_SYMTAB_SEARCH)
 #define symtab_search(s, name) hashtab_search((s)->table, name)
 #define symtab_insert(s, name, datum) hashtab_insert((s)->table, name, datum)
 #endif
@@ -164,7 +166,7 @@ static bool remove_avtab_node(struct policydb *db, struct avtab_node *node)
     for (i = 0; i < db->te_avtab.nslot; i++) {
         prev = NULL;
         // https://github.com/torvalds/linux/commit/acdf52d97f824019888422842757013b37441dd1   <- 5.1
-        //https://github.com/torvalds/linux/commit/ba39db6e0519aa8362dbda6523ceb69349a18dc3    <- 4.1
+        // https://github.com/torvalds/linux/commit/ba39db6e0519aa8362dbda6523ceb69349a18dc3   <- 4.1
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 1, 0) || LINUX_VERSION_CODE < KERNEL_VERSION(4, 1, 0) ||                   \
     defined(KSU_COMPAT_HAS_MODERN_POLICYDB)
         for (n = db->te_avtab.htable[i]; n; prev = n, n = n->next) {
@@ -532,7 +534,7 @@ static bool add_type_rule(struct policydb *db, const char *s, const char *t, con
 // 5.9.0 : static inline int hashtab_insert(struct hashtab *h, void *key, void
 // *datum, struct hashtab_key_params key_params) 5.8.0: int
 // hashtab_insert(struct hashtab *h, void *k, void *d);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0) || defined(KSU_COMPAT_HAS_HASHTAB_KEY_PARAMS)
 static u32 filenametr_hash(const void *k)
 {
     const struct filename_trans_key *ft = k;
@@ -598,7 +600,7 @@ static bool add_filename_trans(struct policydb *db, const char *s, const char *t
         return false;
     }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 7, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 7, 0) || defined(KSU_COMPAT_HAS_FILENAME_TRANS_KEY)
     struct filename_trans_key key;
     key.ttype = tgt->value;
     key.tclass = cls->value;
@@ -606,7 +608,7 @@ static bool add_filename_trans(struct policydb *db, const char *s, const char *t
 
     struct filename_trans_datum *last = NULL;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0) || defined(KSU_COMPAT_HAS_HASHTAB_KEY_PARAMS)
     struct filename_trans_datum *trans = policydb_filenametr_search(db, &key);
 #else
     struct filename_trans_datum *trans = hashtab_search(&db->filename_trans, &key);
@@ -625,9 +627,24 @@ static bool add_filename_trans(struct policydb *db, const char *s, const char *t
 
     if (trans == NULL) {
         trans = (struct filename_trans_datum *)kcalloc(1, sizeof(*trans), GFP_KERNEL);
+        if (!trans) {
+            pr_err("add_filename_trans: Failed to alloc datum\n");
+            return false;
+        }
         struct filename_trans_key *new_key = (struct filename_trans_key *)kzalloc(sizeof(*new_key), GFP_KERNEL);
+        if (!new_key) {
+            pr_err("add_filename_trans: Failed to alloc new_key\n");
+            kfree(trans);
+            return false;
+        }
         *new_key = key;
         new_key->name = kstrdup(key.name, GFP_KERNEL);
+        if (!new_key->name) {
+            pr_err("add_filename_trans: Failed to dup name\n");
+            kfree(new_key);
+            kfree(trans);
+            return false;
+        }
         trans->next = last;
         trans->otype = def->value;
         hashtab_insert(&db->filename_trans, new_key, trans, filenametr_key_params);
@@ -708,7 +725,8 @@ static bool add_type(struct policydb *db, const char *type_name, bool attr)
         return false;
     }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 1, 0) || defined(KSU_COMPAT_HAS_MODERN_POLICYDB)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 1, 0) ||                                                                   \
+    (defined(KSU_COMPAT_HAS_MODERN_POLICYDB) && !defined(KSU_COMPAT_TYPE_ATTR_MAP_ARRAY_NOT_FOUND))
     struct ebitmap *new_type_attr_map_array =
         ksu_kvrealloc(db->type_attr_map_array, value * sizeof(struct ebitmap), (value - 1) * sizeof(struct ebitmap));
 
@@ -749,7 +767,8 @@ static bool add_type(struct policydb *db, const char *type_name, bool attr)
 
     return true;
 
-#elif defined(KSU_COMPAT_IS_HISI_LEGACY)
+    // safe? because only huawei do this fucking things
+#elif defined(KSU_COMPAT_TYPE_ATTR_MAP_ARRAY_NOT_FOUND)
     /*
    * Huawei use type_attr_map and type_val_to_struct.
    * And use ebitmap not flex_array.
@@ -778,7 +797,11 @@ static bool add_type(struct policydb *db, const char *type_name, bool attr)
     }
 
     db->type_attr_map = new_type_attr_map;
+#ifdef HISI_SELINUX_EBITMAP_RO
     ebitmap_init(&db->type_attr_map[value - 1], HISI_SELINUX_EBITMAP_RO);
+#else
+    ebitmap_init(&db->type_attr_map[value - 1], HKIP_SELINUX_EBITMAP_RO);
+#endif
     ebitmap_set_bit(&db->type_attr_map[value - 1], value - 1, 1);
 
     db->type_val_to_struct = new_type_val_to_struct;
@@ -927,18 +950,23 @@ static bool set_type_state(struct policydb *db, const char *type_name, bool perm
 
 static void add_typeattribute_raw(struct policydb *db, struct type_datum *type, struct type_datum *attr)
 {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 1, 0) || defined(KSU_COMPAT_HAS_MODERN_POLICYDB)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 1, 0) ||                                                                   \
+    (defined(KSU_COMPAT_HAS_MODERN_POLICYDB) && !defined(KSU_COMPAT_TYPE_ATTR_MAP_ARRAY_NOT_FOUND))
     struct ebitmap *sattr = &db->type_attr_map_array[type->value - 1];
+#elif defined(KSU_COMPAT_TYPE_ATTR_MAP_ARRAY_NOT_FOUND)
+    /*
+    *  HISI_SELINUX_EBITMAP_RO is Huawei's unique features.
+    *  HKIP_SELINUX_EBITMAP_RO is Honor's rename
+    */
+#ifdef HISI_SELINUX_EBITMAP_RO
+    struct ebitmap *sattr = &db->type_attr_map[type->value - 1], HISI_SELINUX_EBITMAP_RO;
+#else
+    struct ebitmap *sattr = &db->type_attr_map[type->value - 1], HKIP_SELINUX_EBITMAP_RO;
+#endif // #ifndef HISI_SELINUX_EBITMAP_RO
 
 #elif defined(KSU_COMPAT_IS_HISI_LEGACY_HM2)
     /* EMUI 10+ / HM2 dedicated branch (HKIP is closed, use the original flex_array_get) */
     struct ebitmap *sattr = flex_array_get(db->type_attr_map_array, type->value - 1);
-
-#elif defined(KSU_COMPAT_IS_HISI_LEGACY)
-    /*
-    *  HISI_SELINUX_EBITMAP_RO is Huawei's unique features.
-    */
-    struct ebitmap *sattr = &db->type_attr_map[type->value - 1], HISI_SELINUX_EBITMAP_RO;
 #else
     struct ebitmap *sattr = flex_array_get(db->type_attr_map_array, type->value - 1);
 #endif
@@ -1086,9 +1114,7 @@ void ksu_destroy_policydb(struct policydb *db)
 }
 
 // handle backport
-#ifdef KSU_COMPAT_HAS_EXPORTED_POLICY_RWLOCK
-extern rwlock_t policy_rwlock;
-#endif
+extern rwlock_t *ksu_policy_rwlock_ptr;
 
 static inline void ksu_lock_sepolicy_legacy(void)
 {
@@ -1096,12 +1122,9 @@ static inline void ksu_lock_sepolicy_legacy(void)
 // 4.14 - 5.10
 #if defined(KSU_COMPAT_USE_SELINUX_STATE)
     read_lock(&selinux_state.ss->policy_rwlock);
-// 4.14- with manual export rwlock
-#elif defined(KSU_COMPAT_HAS_EXPORTED_POLICY_RWLOCK)
-    read_lock(&policy_rwlock);
-// 4.14- mostly
+// 4.14-
 #else
-    // do nothing
+    read_lock(ksu_policy_rwlock_ptr);
 #endif
 #endif
 }
@@ -1112,12 +1135,9 @@ static inline void ksu_unlock_sepolicy_legacy(void)
 // 4.14 - 5.10
 #if defined(KSU_COMPAT_USE_SELINUX_STATE)
     read_unlock(&selinux_state.ss->policy_rwlock);
-// 4.14- with manual export rwlock
-#elif defined(KSU_COMPAT_HAS_EXPORTED_POLICY_RWLOCK)
-    read_unlock(&policy_rwlock);
-// 4.14- mostly
+// 4.14-
 #else
-    // do nothing
+    read_unlock(ksu_policy_rwlock_ptr);
 #endif
 #endif
 }
@@ -1186,13 +1206,13 @@ int ksu_dup_policydb(struct policydb *old_db, struct policydb *new_db)
 
     new_db->len = old_db->len;
 
-    kvfree(data);
+    vfree(data);
     ret = len;
 
     return ret;
 
 out_free_data:
-    kvfree(data);
+    vfree(data);
     return ret;
 }
 

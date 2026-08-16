@@ -1,525 +1,251 @@
 package com.resukisu.resukisu.ui.viewmodel
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.os.Build
-import android.system.Os
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.resukisu.resukisu.KernelVersion
-import com.resukisu.resukisu.Natives
-import com.resukisu.resukisu.getKernelVersion
-import com.resukisu.resukisu.ksuApp
-import com.resukisu.resukisu.ui.susfs.util.SuSFSManager
-import com.resukisu.resukisu.ui.util.downloader.checkNewVersion
-import com.resukisu.resukisu.ui.util.getKpmModuleCount
-import com.resukisu.resukisu.ui.util.getKpmVersion
-import com.resukisu.resukisu.ui.util.getMetaModuleImplement
-import com.resukisu.resukisu.ui.util.getModuleCount
-import com.resukisu.resukisu.ui.util.getSELinuxStatus
-import com.resukisu.resukisu.ui.util.getSuSFSFeatures
-import com.resukisu.resukisu.ui.util.getSuSFSStatus
-import com.resukisu.resukisu.ui.util.getSuSFSVersion
-import com.resukisu.resukisu.ui.util.getSuperuserCount
-import com.resukisu.resukisu.ui.util.getZygiskImplement
-import com.resukisu.resukisu.ui.util.isOfficialSignature
-import com.resukisu.resukisu.ui.util.isSELinuxPermissive
-import com.resukisu.resukisu.ui.util.module.LatestVersionInfo
-import com.resukisu.resukisu.ui.util.rootAvailable
-import kotlinx.coroutines.Dispatchers
+import com.resukisu.resukisu.data.system.HomeStateRepository
+import com.resukisu.resukisu.domain.model.HomeDashboardState
+import com.resukisu.resukisu.domain.model.HomeSystemInfo
+import com.resukisu.resukisu.domain.model.ManagerUpdateChannel
+import com.resukisu.resukisu.domain.usecase.CheckManagerUpdateUseCase
+import com.resukisu.resukisu.domain.usecase.GetBooleanPreferenceUseCase
+import com.resukisu.resukisu.domain.usecase.GetHomeBasicInfoUseCase
+import com.resukisu.resukisu.domain.usecase.GetHomeModuleOverviewUseCase
+import com.resukisu.resukisu.domain.usecase.GetHomeSuperuserCountUseCase
+import com.resukisu.resukisu.domain.usecase.GetKernelStatusUseCase
+import com.resukisu.resukisu.domain.usecase.GetManagerRuntimeInfoUseCase
+import com.resukisu.resukisu.domain.usecase.GetSuSFSStatusUseCase
+import com.resukisu.resukisu.domain.usecase.IsNetworkAvailableUseCase
+import com.resukisu.resukisu.domain.usecase.RebootUseCase
+import com.resukisu.resukisu.domain.usecase.SetBooleanPreferenceUseCase
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
-class HomeViewModel : ViewModel() {
+typealias HomeUiState = HomeDashboardState
 
-    // 系统状态
-    data class SystemStatus(
-        val isManager: Boolean = false,
-        val ksuVersion: Int? = null,
-        val ksuFullVersion : String? = null,
-        val lkmMode: Boolean? = null,
-        val kernelVersion: KernelVersion = getKernelVersion(),
-        val isRootAvailable: Boolean = false,
-        val isKpmConfigured: Boolean = false,
-        val requireNewKernel: Boolean = false,
-        val isSELinuxPermissive: Boolean = false,
-        val isOfficialSignature: Boolean = true,
-        val kernelPatchImplement: Natives.KernelPatchImplement = Natives.KernelPatchImplement.NO_KERNEL_PATCH_SUPPORT,
-    )
+sealed interface HomeUiAction {
+    data object AwaitInitialData : HomeUiAction
+    data class Refresh(val showIndicator: Boolean = true) : HomeUiAction
+    data class SetSimpleMode(val enabled: Boolean) : HomeUiAction
+    data class SetHideOtherInfo(val enabled: Boolean) : HomeUiAction
+    data class SetHideSusfsStatus(val enabled: Boolean) : HomeUiAction
+    data class SetHideZygiskImplement(val enabled: Boolean) : HomeUiAction
+    data class SetHideMetaModuleImplement(val enabled: Boolean) : HomeUiAction
+    data class SetHideLinkCard(val enabled: Boolean) : HomeUiAction
+    data class Reboot(val reason: String) : HomeUiAction
+}
 
-    // 系统信息
-    data class SystemInfo(
-        val kernelRelease: String = "",
-        val androidVersion: String = "",
-        val deviceModel: String = "",
-        val managerVersion: Pair<String, Long> = Pair("", 0L),
-        val selinuxStatus: String = "",
-        val kpmVersion: String = "",
-        val susfsEnabled: Boolean = false,
-        val susfsVersionSupported: Boolean = false,
-        val susfsVersion: String = "",
-        val susfsFeatures: String = "",
-        val superuserCount: Int = 0,
-        val moduleCount: Int = 0,
-        val kpmModuleCount: Int = 0,
-        val managersList: Natives.ManagersList? = null,
-        val isDynamicSignEnabled: Boolean = false,
-        val zygiskImplement: String = "",
-        val metaModuleImplement: String = "",
-        val seccompStatus: Int = -1,
-    )
+sealed interface HomeUiEvent {
+    data class Error(val message: String) : HomeUiEvent
+}
 
-    // 状态变量
-    var systemStatus by mutableStateOf(SystemStatus())
-        private set
+class HomeViewModel(
+    private val homeStateRepository: HomeStateRepository,
+    private val checkManagerUpdate: CheckManagerUpdateUseCase,
+    private val getKernelStatus: GetKernelStatusUseCase,
+    private val getManagerRuntimeInfo: GetManagerRuntimeInfoUseCase,
+    private val getSuSFSStatus: GetSuSFSStatusUseCase,
+    private val getBasicInfo: GetHomeBasicInfoUseCase,
+    private val getModuleOverview: GetHomeModuleOverviewUseCase,
+    private val getSuperuserCount: GetHomeSuperuserCountUseCase,
+    private val isNetworkAvailable: IsNetworkAvailableUseCase,
+    private val getBooleanPreference: GetBooleanPreferenceUseCase,
+    private val setBooleanPreference: SetBooleanPreferenceUseCase,
+    private val reboot: RebootUseCase,
+) : ViewModel() {
+    val state = homeStateRepository.state
+    val uiState = state
+    private val mutableEvents = MutableSharedFlow<HomeUiEvent>(extraBufferCapacity = 1)
+    val events: SharedFlow<HomeUiEvent> = mutableEvents.asSharedFlow()
 
-    var systemInfo by mutableStateOf(SystemInfo())
-        private set
+    private val refreshMutex = Mutex()
+    private var refreshJob: Job? = null
+    private var updateJob: Job? = null
 
-    var latestVersionInfo by mutableStateOf(LatestVersionInfo())
-        private set
-
-    var isSimpleMode by mutableStateOf(false)
-        private set
-    var isHideVersion by mutableStateOf(false)
-        private set
-    var isHideOtherInfo by mutableStateOf(false)
-        private set
-    var isHideSusfsStatus by mutableStateOf(false)
-        private set
-    var isHideZygiskImplement by mutableStateOf(false)
-        private set
-    var isHideMetaModuleImplement by mutableStateOf(false)
-        private set
-    var isHideLinkCard by mutableStateOf(false)
-        private set
-    var showKpmInfo by mutableStateOf(false)
-        private set
-
-    var isCoreDataLoaded by mutableStateOf(false)
-        private set
-    var isExtendedDataLoaded by mutableStateOf(false)
-        private set
-    var isRefreshing by mutableStateOf(false)
-        private set
-
-    private var loadingJobs = mutableListOf<Job>()
-
-    fun loadUserSettings(context: Context) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val settingsPrefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-            isSimpleMode = settingsPrefs.getBoolean("is_simple_mode", false)
-            isHideVersion = settingsPrefs.getBoolean("is_hide_version", false)
-            isHideOtherInfo = settingsPrefs.getBoolean("is_hide_other_info", false)
-            isHideSusfsStatus = settingsPrefs.getBoolean("is_hide_susfs_status", false)
-            isHideLinkCard = settingsPrefs.getBoolean("is_hide_link_card", false)
-            isHideZygiskImplement = settingsPrefs.getBoolean("is_hide_zygisk_Implement", false)
-            isHideMetaModuleImplement = settingsPrefs.getBoolean("is_hide_meta_module_Implement", false)
-            showKpmInfo = settingsPrefs.getBoolean("show_kpm_info", false)
-        }
+    init {
+        // Every navigation-scoped instance publishes persisted toggles to the shared state source.
+        applyUserSettings()
     }
 
-    fun loadCoreData() {
-        if (isCoreDataLoaded) return
-
-        val job = viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val kernelVersion = getKernelVersion()
-                val isManager = try {
-                    Natives.isManager
-                } catch (_: Exception) {
-                    false
-                }
-
-                val ksuVersion = if (isManager) Natives.version else null
-
-                val fullVersion = try {
-                    Natives.getFullVersion()
-                } catch (_: Exception) {
-                    "Unknown"
-                }
-
-                val lkmMode = ksuVersion?.let {
-                    if (kernelVersion.isGKI()) Natives.isLkmMode else null
-                }
-
-                val isRootAvailable = try {
-                    rootAvailable()
-                } catch (_: Exception) {
-                    false
-                }
-
-                val isKpmConfigured = try {
-                    Natives.isKPMEnabled()
-                } catch (_: Exception) {
-                    false
-                }
-
-                val requireNewKernel = try {
-                    isManager && Natives.requireNewKernel()
-                } catch (_: Exception) {
-                    false
-                }
-
-                val isSELinuxPermissive = try {
-                    isSELinuxPermissive()
-                } catch (_: Exception) {
-                    false
-                }
-
-                val isOfficialSignature = try {
-                    isOfficialSignature()
-                } catch (_: Exception) {
-                    false
-                }
-
-                systemStatus = SystemStatus(
-                    isManager = isManager,
-                    ksuVersion = ksuVersion,
-                    ksuFullVersion = "$fullVersion (${Natives.version})",
-                    lkmMode = lkmMode,
-                    kernelVersion = kernelVersion,
-                    isRootAvailable = isRootAvailable,
-                    isKpmConfigured = isKpmConfigured,
-                    requireNewKernel = requireNewKernel,
-                    isSELinuxPermissive = isSELinuxPermissive,
-                    isOfficialSignature = isOfficialSignature,
-                    kernelPatchImplement = Natives.getKernelPatchImplement(),
-                )
-
-                isCoreDataLoaded = true
-            } catch (_: Exception) {
-            }
-        }
-        loadingJobs.add(job)
+    suspend fun awaitInitialData() {
+        refreshData(refreshUI = false).join()
     }
 
-    fun loadExtendedData(context: Context) {
-        if (isExtendedDataLoaded) return
-
-        val job = viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val (kernelRelease, androidVersion, deviceModel, managerVersion, selinuxStatus, seccompStatus) = loadBasicSystemInfo(
-                    context
-                )
-                systemInfo = systemInfo.copy(
-                    kernelRelease = kernelRelease,
-                    androidVersion = androidVersion,
-                    deviceModel = deviceModel,
-                    managerVersion = managerVersion,
-                    selinuxStatus = selinuxStatus,
-                    seccompStatus = seccompStatus
-                )
-
-                if (!isSimpleMode) {
-                    val moduleInfo = loadModuleInfo()
-                    systemInfo = systemInfo.copy(
-                        kpmVersion = moduleInfo.first,
-                        superuserCount = moduleInfo.second,
-                        moduleCount = moduleInfo.third,
-                        kpmModuleCount = moduleInfo.fourth,
-                        zygiskImplement = moduleInfo.fifth,
-                        metaModuleImplement = moduleInfo.sixth
-                    )
-                }
-
-                if (!isHideSusfsStatus) {
-                    val susfsInfo = loadSuSFSInfo()
-                    systemInfo = systemInfo.copy(
-                        susfsEnabled = susfsInfo.first,
-                        susfsVersionSupported = susfsInfo.first && SuSFSManager.isBinaryAvailable(
-                            context
-                        ), // enabled & have binary
-                        susfsVersion = susfsInfo.second,
-                        susfsFeatures = susfsInfo.third,
-                    )
-                }
-
-                val managerInfo = loadManagerInfo()
-                systemInfo = systemInfo.copy(
-                    managersList = managerInfo.first,
-                    isDynamicSignEnabled = managerInfo.second
-                )
-
-                isExtendedDataLoaded = true
-            } catch (_: Exception) {}
+    fun refreshData(refreshUI: Boolean = false): Job {
+        if (!refreshUI) {
+            refreshJob?.takeIf(Job::isActive)?.let { return it }
+            if (state.value.isInitialDataLoaded) return completedJob()
         }
-        loadingJobs.add(job)
-    }
-
-    fun refreshData(
-        context: Context,
-        refreshUI: Boolean = false
-    ) {
-        viewModelScope.launch {
-            if (refreshUI)
-                isRefreshing = true
-
-            try {
-                // 取消正在进行的加载任务
-                loadingJobs.forEach { it.cancel() }
-                loadingJobs.clear()
-
-                // 重置状态
-                if (refreshUI) {
-                    isCoreDataLoaded = false
-                    isExtendedDataLoaded = false
-                }
-
-                // 重新加载用户设置
-                loadUserSettings(context)
-
-                // 重新加载核心数据
-                loadCoreData()
-
-                // 重新加载扩展数据
-                loadExtendedData(context)
-
-                // 检查更新
-                val settingsPrefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-                val checkUpdate = settingsPrefs.getBoolean("check_update", true)
-                if (checkUpdate) {
-                    try {
-                        val newVersionInfo = withContext(Dispatchers.IO) {
-                            checkNewVersion()
-                        }
-                        latestVersionInfo = newVersionInfo
-                    } catch (_: Exception) {
-                    }
-                }
-            } catch (_: Exception) {
-                // 静默处理错误
-            } finally {
-                isRefreshing = false
-            }
-        }
-    }
-
-    private suspend fun loadBasicSystemInfo(context: Context): Tuple6<String, String, String, Pair<String, Long>, String, Int> {
-        return withContext(Dispatchers.IO) {
-            val uname = try {
-                Os.uname()
-            } catch (_: Exception) {
-                null
-            }
-
-            val deviceModel = try {
-                getDeviceModel()
-            } catch (_: Exception) {
-                "Unknown"
-            }
-
-            val managerVersion = try {
-                getManagerVersion(context)
-            } catch (_: Exception) {
-                Pair("Unknown", 0L)
-            }
-
-            val selinuxStatus = try {
-                getSELinuxStatus(ksuApp.applicationContext)
-            } catch (_: Exception) {
-                "Unknown"
-            }
-
-            val seccompStatus = runCatching {
-                Os.prctl(21 /* PR_GET_SECCOMP */, 0, 0, 0, 0)
-            }.getOrDefault(-1)
-
-            Tuple6(
-                uname?.release ?: "Unknown",
-                Build.VERSION.RELEASE ?: "Unknown",
-                deviceModel,
-                managerVersion,
-                selinuxStatus,
-                seccompStatus
-            )
-        }
-    }
-
-    private suspend fun loadModuleInfo(): Tuple6<String, Int, Int, Int, String, String> {
-        return withContext(Dispatchers.IO) {
-            val kpmVersion = try {
-                getKpmVersion()
-            } catch (_: Exception) {
-                "Unknown"
-            }
-
-            val superuserCount = try {
-                getSuperuserCount()
-            } catch (_: Exception) {
-                0
-            }
-
-            val moduleCount = try {
-                getModuleCount()
-            } catch (_: Exception) {
-                0
-            }
-
-            val kpmModuleCount = try {
-                getKpmModuleCount()
-            } catch (_: Exception) {
-                0
-            }
-
-            val zygiskImplement = try {
-                getZygiskImplement()
-            } catch (_: Exception) {
-                "None"
-            }
-
-            val metaModuleImplement = try {
-                getMetaModuleImplement()
-            } catch (_: Exception) {
-                "None"
-            }
-
-            Tuple6(kpmVersion, superuserCount, moduleCount, kpmModuleCount, zygiskImplement, metaModuleImplement)
-        }
-    }
-
-    private suspend fun loadSuSFSInfo(): Triple<Boolean, String, String> {
-        return withContext(Dispatchers.IO) {
-            val susfsEnabled = try {
-                getSuSFSStatus().equals("true", ignoreCase = true)
-            } catch (_: Exception) {
-                false
-            }
-
-            if (!susfsEnabled) {
-                return@withContext Triple(false, "", "")
-            }
-
-            val susfsVersion = try {
-                getSuSFSVersion()
-            } catch (_: Exception) {
-                ""
-            }
-
-            if (susfsVersion.isEmpty()) {
-                return@withContext Triple(true, "", "")
-            }
-
-            val susfsFeatures = try {
-                getSuSFSFeatures()
-            } catch (_: Exception) {
-                ""
-            }
-
-            Triple(true, susfsVersion, susfsFeatures)
-        }
-    }
-
-    private suspend fun loadManagerInfo(): Pair<Natives.ManagersList?, Boolean> {
-        return withContext(Dispatchers.IO) {
-            val dynamicSignConfig = try {
-                Natives.getDynamicManager()
-            } catch (_: Exception) {
-                null
-            }
-
-            val isDynamicSignEnabled = try {
-                dynamicSignConfig?.isValid() == true
-            } catch (_: Exception) {
-                false
-            }
-
-            val managersList = try {
-                Natives.getManagersList()
-            } catch (_: Exception) {
-                null
-            }
-
-            Pair(managersList, isDynamicSignEnabled)
-        }
-    }
-
-    @SuppressLint("PrivateApi")
-    private fun getDeviceModel(): String {
-        return try {
-            val systemProperties = Class.forName("android.os.SystemProperties")
-            val getMethod = systemProperties.getMethod("get", String::class.java, String::class.java)
-            val marketNameKeys = listOf(
-                "ro.product.marketname",
-                "ro.vendor.oplus.market.name",
-                "ro.vivo.market.name",
-                "ro.config.marketing_name"
-            )
-            var result = getDeviceInfo()
-            for (key in marketNameKeys) {
+        refreshManagerUpdates(force = refreshUI)
+        return viewModelScope.launch {
+            refreshMutex.withLock {
+                homeStateRepository.update { it.copy(isRefreshing = refreshUI) }
                 try {
-                    val marketName = getMethod.invoke(null, key, "") as String
-                    if (marketName.isNotEmpty()) {
-                        result = marketName
-                        break
+                    applyUserSettings()
+                    val kernelStatus = runCatching { getKernelStatus() }
+                        .getOrElse { state.value.systemStatus }
+                    homeStateRepository.update {
+                        it.copy(systemStatus = kernelStatus, isCoreDataLoaded = true)
                     }
-                } catch (_: Exception) {
+
+                    val basic = async { getBasicInfo(kernelStatus.managerUAPIVersion) }
+                    val module = async { getModuleOverview() }
+                    val superusers = async { getSuperuserCount() }
+                    val managers = async { getManagerRuntimeInfo() }
+                    val susfs = if (!state.value.isHideSusfsStatus) {
+                        async { getSuSFSStatus() }
+                    } else {
+                        null
+                    }
+                    val basicInfo = basic.await()
+                    val moduleInfo = module.await()
+                    val superuserCount = superusers.await()
+                    val managerInfo = managers.await()
+                    val susfsInfo = susfs?.await()
+                    homeStateRepository.update { current ->
+                        current.copy(
+                            systemInfo = HomeSystemInfo(
+                                kernelRelease = basicInfo.kernelRelease,
+                                androidVersion = basicInfo.androidVersion,
+                                deviceModel = basicInfo.deviceModel,
+                                managerVersion = basicInfo.managerVersion,
+                                selinuxStatus = basicInfo.selinuxStatus,
+                                susfsEnabled = susfsInfo?.enabled ?: false,
+                                susfsVersionSupported = susfsInfo?.enabled ?: false,
+                                susfsVersion = susfsInfo?.version.orEmpty(),
+                                susfsFeatures = susfsInfo?.enabledFeatures.orEmpty(),
+                                superuserCount = superuserCount,
+                                moduleCount = moduleInfo.count,
+                                managersList = managerInfo,
+                                isDynamicSignEnabled = managerInfo.dynamicSignatureEnabled,
+                                zygiskImplement = moduleInfo.zygiskImplementation,
+                                metaModuleImplement = moduleInfo.metaModuleImplementation,
+                                seccompStatus = basicInfo.seccompStatus,
+                            ),
+                            isInitialDataLoaded = true,
+                            isExtendedDataLoaded = true,
+                        )
+                    }
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Exception) {
+                    mutableEvents.emit(HomeUiEvent.Error(error.message.orEmpty()))
+                } finally {
+                    homeStateRepository.update {
+                        it.copy(isInitialDataLoaded = true, isRefreshing = false)
+                    }
                 }
             }
-            result
-        } catch (
-
-            _: Exception) {
-            getDeviceInfo()
-        }
+        }.also { refreshJob = it }
     }
+    fun handleSimpleModeChange(enabled: Boolean) =
+        updatePreference(PREF_SIMPLE_MODE, enabled) { it.copy(isSimpleMode = enabled) }
 
-    private fun getDeviceInfo(): String {
-        return try {
-            var manufacturer = Build.MANUFACTURER ?: "Unknown"
-            manufacturer = manufacturer[0].uppercaseChar().toString() + manufacturer.substring(1)
+    fun handleHideOtherInfoChange(enabled: Boolean) =
+        updatePreference(PREF_HIDE_OTHER_INFO, enabled) { it.copy(isHideOtherInfo = enabled) }
 
-            val brand = Build.BRAND ?: ""
-            if (brand.isNotEmpty() && !brand.equals(Build.MANUFACTURER, ignoreCase = true)) {
-                manufacturer += " " + brand[0].uppercaseChar() + brand.substring(1)
+    fun handleHideSusfsStatusChange(enabled: Boolean) =
+        updatePreference(PREF_HIDE_SUSFS, enabled) { it.copy(isHideSusfsStatus = enabled) }
+
+    fun handleHideZygiskImplementChange(enabled: Boolean) =
+        updatePreference(PREF_HIDE_ZYGISK, enabled) { it.copy(isHideZygiskImplement = enabled) }
+
+    fun handleHideMetaModuleImplementChange(enabled: Boolean) =
+        updatePreference(PREF_HIDE_META, enabled) { it.copy(isHideMetaModuleImplement = enabled) }
+
+    fun handleHideLinkCardChange(enabled: Boolean) =
+        updatePreference(PREF_HIDE_LINK, enabled) { it.copy(isHideLinkCard = enabled) }
+
+    fun dispatch(action: HomeUiAction) {
+        when (action) {
+            HomeUiAction.AwaitInitialData -> viewModelScope.launch { awaitInitialData() }
+            is HomeUiAction.Refresh -> refreshData(action.showIndicator)
+            is HomeUiAction.SetSimpleMode -> handleSimpleModeChange(action.enabled)
+            is HomeUiAction.SetHideOtherInfo -> handleHideOtherInfoChange(action.enabled)
+            is HomeUiAction.SetHideSusfsStatus -> handleHideSusfsStatusChange(action.enabled)
+            is HomeUiAction.SetHideZygiskImplement -> handleHideZygiskImplementChange(action.enabled)
+            is HomeUiAction.SetHideMetaModuleImplement -> handleHideMetaModuleImplementChange(action.enabled)
+            is HomeUiAction.SetHideLinkCard -> handleHideLinkCardChange(action.enabled)
+            is HomeUiAction.Reboot -> viewModelScope.launch {
+                reboot(action.reason).onFailure {
+                    mutableEvents.tryEmit(HomeUiEvent.Error(it.message.orEmpty()))
+                }
             }
+        }
+    }
 
-            val model = Build.MODEL ?: ""
-            if (model.isNotEmpty()) {
-                manufacturer += " $model "
+    private fun refreshManagerUpdates(force: Boolean) {
+        val stableEnabled = getBooleanPreference(PREF_CHECK_UPDATE, true)
+        val betaEnabled = getBooleanPreference(PREF_CHECK_BETA_UPDATE, true)
+        if (!stableEnabled && !betaEnabled) {
+            homeStateRepository.update {
+                it.copy(
+                    stableManagerUpdate = null,
+                    betaManagerUpdate = null,
+                    isBetaManagerUpdateCheckFailed = false,
+                )
             }
-
-            manufacturer
-        } catch (_: Exception) {
-            "Unknown Device"
+            return
+        }
+        if (!isNetworkAvailable()) return
+        if (!force && updateJob?.isActive == true) return
+        updateJob?.cancel()
+        updateJob = viewModelScope.launch {
+            if (stableEnabled) launch {
+                val update =
+                    runCatching { checkManagerUpdate(ManagerUpdateChannel.STABLE) }.getOrNull()
+                homeStateRepository.update { it.copy(stableManagerUpdate = update) }
+            }
+            if (betaEnabled) launch {
+                val result = runCatching { checkManagerUpdate(ManagerUpdateChannel.BETA) }
+                homeStateRepository.update {
+                    it.copy(
+                        betaManagerUpdate = result.getOrNull(),
+                        isBetaManagerUpdateCheckFailed = result.isFailure,
+                    )
+                }
+            }
         }
     }
 
-    private fun getManagerVersion(context: Context): Pair<String, Long> {
-        return try {
-            val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-            val versionCode = androidx.core.content.pm.PackageInfoCompat.getLongVersionCode(packageInfo)
-            val versionName = packageInfo.versionName ?: "Unknown"
-            Pair(versionName, versionCode)
-        } catch (_: Exception) {
-            Pair("Unknown", 0L)
+    private fun applyUserSettings() {
+        homeStateRepository.update {
+            it.copy(
+                isSimpleMode = getBooleanPreference(PREF_SIMPLE_MODE),
+                isHideOtherInfo = getBooleanPreference(PREF_HIDE_OTHER_INFO),
+                isHideSusfsStatus = getBooleanPreference(PREF_HIDE_SUSFS),
+                isHideLinkCard = getBooleanPreference(PREF_HIDE_LINK),
+                isHideZygiskImplement = getBooleanPreference(PREF_HIDE_ZYGISK),
+                isHideMetaModuleImplement = getBooleanPreference(PREF_HIDE_META),
+            )
         }
     }
 
-    data class Tuple6<T1, T2, T3, T4, T5, T6>(
-        val first: T1,
-        val second: T2,
-        val third: T3,
-        val fourth: T4,
-        val fifth: T5,
-        val sixth: T6
-    )
+    private fun updatePreference(
+        key: String,
+        value: Boolean,
+        reducer: (HomeUiState) -> HomeUiState,
+    ) {
+        setBooleanPreference(key, value)
+        homeStateRepository.update(reducer)
+    }
 
-    data class Tuple5<T1, T2, T3, T4, T5>(
-        val first: T1,
-        val second: T2,
-        val third: T3,
-        val fourth: T4,
-        val fifth: T5
-    )
+    private fun completedJob(): Job = Job().apply { complete() }
 
-    override fun onCleared() {
-        super.onCleared()
-        loadingJobs.forEach { it.cancel() }
-        loadingJobs.clear()
+    private companion object {
+        const val PREF_CHECK_UPDATE = "check_update"
+        const val PREF_CHECK_BETA_UPDATE = "check_beta_update"
+        const val PREF_SIMPLE_MODE = "is_simple_mode"
+        const val PREF_HIDE_OTHER_INFO = "is_hide_other_info"
+        const val PREF_HIDE_SUSFS = "is_hide_susfs_status"
+        const val PREF_HIDE_LINK = "is_hide_link_card"
+        const val PREF_HIDE_ZYGISK = "is_hide_zygisk_Implement"
+        const val PREF_HIDE_META = "is_hide_meta_module_Implement"
     }
 }

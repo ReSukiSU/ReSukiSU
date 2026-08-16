@@ -1,16 +1,23 @@
+use std::{
+    fmt::Write as FmtWrite,
+    fs::{self, DirBuilder, File, OpenOptions, Permissions},
+    io::{self, ErrorKind, LineWriter, Write},
+    mem::size_of,
+    os::{
+        fd::{AsRawFd, FromRawFd, OwnedFd, RawFd},
+        unix::{
+            fs::{DirBuilderExt, OpenOptionsExt, PermissionsExt},
+            process::CommandExt,
+        },
+    },
+    path::{Path, PathBuf},
+    process::{Command, Stdio},
+    thread,
+    time::Duration,
+};
+
 use anyhow::{Context, Result, bail, ensure};
 use chrono::{Days, Local, NaiveDate};
-use std::fmt::Write as FmtWrite;
-use std::fs::{self, DirBuilder, File, OpenOptions, Permissions};
-use std::io::{self, ErrorKind, LineWriter, Write};
-use std::mem::size_of;
-use std::os::fd::{AsRawFd, FromRawFd, OwnedFd, RawFd};
-use std::os::unix::fs::{DirBuilderExt, OpenOptionsExt, PermissionsExt};
-use std::os::unix::process::CommandExt;
-use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
-use std::thread;
-use std::time::Duration;
 
 use crate::{
     android::{ksucalls, module::module_config, utils},
@@ -782,8 +789,7 @@ pub fn run_sulogd() -> Result<()> {
 
 pub fn spawn_sulogd() -> Result<()> {
     if utils::create_daemon(true)? {
-        let current_exe = std::env::current_exe().context("failed to resolve current ksud path")?;
-        let mut command = Command::new(current_exe);
+        let mut command = Command::new("/proc/self/exe");
         command
             .arg("sulogd")
             .stdin(Stdio::null())
@@ -791,10 +797,13 @@ pub fn spawn_sulogd() -> Result<()> {
             .stderr(Stdio::null())
             .current_dir("/");
 
-        Err(command.exec()).context("failed to exec sulogd")
-    } else {
-        Ok(())
+        let err = command.exec();
+        log::error!("failed to exec sulogd: {err:#}");
+        unsafe {
+            libc::_exit(1);
+        }
     }
+    Ok(())
 }
 
 pub fn ensure_sulogd_running() -> Result<()> {

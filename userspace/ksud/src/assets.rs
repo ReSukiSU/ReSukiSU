@@ -8,8 +8,10 @@ mod android {
     use crate::{android::utils::ensure_binary, assets::Asset, defs::BINARY_DIR};
 
     pub const RESETPROP_PATH: &str = concatcp!(BINARY_DIR, "resetprop");
+    pub const KSU_SUSFS: &str = concatcp!(BINARY_DIR, "ksu_susfs");
     pub const BUSYBOX_PATH: &str = concatcp!(BINARY_DIR, "busybox");
     pub const BOOTCTL_PATH: &str = concatcp!(BINARY_DIR, "bootctl");
+    pub const MKBOOTFS_PATH: &str = concatcp!(BINARY_DIR, "mkbootfs");
 
     pub fn ensure_binaries(ignore_if_exist: bool) -> anyhow::Result<()> {
         for file in Asset::iter() {
@@ -27,6 +29,12 @@ mod android {
         let _ = std::fs::remove_file(resetprop_link);
         std::os::unix::fs::symlink("/data/adb/ksud", resetprop_link)?;
 
+        // Create ksu_susfs -> ksud symlink (hard link)
+        if crate::android::susfs::api::features::show::version().is_ok() {
+            let ksu_susfs = KSU_SUSFS;
+            let _ = std::fs::remove_file(ksu_susfs);
+            std::fs::hard_link("/data/adb/ksud", ksu_susfs)?;
+        }
         Ok(())
     }
 }
@@ -39,7 +47,6 @@ pub use android::*;
 #[folder = "bin/x86_64"]
 struct Asset;
 
-// IF NOT x86_64 ANDROID, ie. macos, linux, windows, always use aarch64
 #[cfg(all(target_arch = "aarch64", target_os = "android"))]
 #[derive(RustEmbed)]
 #[folder = "bin/aarch64"]
@@ -48,6 +55,12 @@ struct Asset;
 #[cfg(all(target_arch = "arm", target_os = "android"))]
 #[derive(RustEmbed)]
 #[folder = "bin/arm"]
+struct Asset;
+
+// If not Android, ie. macos, linux, windows, include both
+#[cfg(not(target_os = "android"))]
+#[derive(RustEmbed)]
+#[folder = "bin"]
 struct Asset;
 
 pub fn list_supported_kmi() -> std::vec::Vec<std::string::String> {
@@ -61,12 +74,7 @@ pub fn list_supported_kmi() -> std::vec::Vec<std::string::String> {
     list
 }
 
-pub fn get_asset(name: &str) -> Result<Box<dyn AsRef<[u8]>>> {
-    let asset = Asset::get(name).ok_or_else(|| anyhow::anyhow!("asset not found: {name}"))?;
-    Ok(Box::new(asset.data))
-}
-
-pub fn get_asset_data(name: &str) -> Result<std::borrow::Cow<'static, [u8]>> {
+pub fn get_asset(name: &str) -> Result<std::borrow::Cow<'static, [u8]>> {
     let asset = Asset::get(name).ok_or_else(|| anyhow::anyhow!("asset not found: {name}"))?;
     Ok(asset.data)
 }

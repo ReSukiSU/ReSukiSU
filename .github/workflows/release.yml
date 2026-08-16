@@ -14,60 +14,25 @@ jobs:
       - build-manager
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifacts
+      - name: Download Manager artifacts
         uses: actions/download-artifact@v8
-      - name: Rename ksud
-        run: |
-          mkdir -p ksud
-          for dir in ./ksud-*; do
-              if [ -d "$dir" ]; then
-                 echo "----- Rename $dir -----"
-                 ksud_platform_name=$(basename "$dir")
-                 find "$dir" -type f -name "ksud" -path "*/release/*" | while read -r ksud_file; do
-                   if [ -f "$ksud_file" ]; then
-                     mv "$ksud_file" "ksud/$ksud_platform_name"
-                   fi
-                 done
-              fi
-          done
-      - name: Zip AnyKernel3
-        run: |
-          for dir in AnyKernel3-*; do
-            if [ -d "$dir" ]; then
-              echo "----- Zip $dir -----"
-              (cd $dir && zip -r9 "$dir".zip ./* -x .git .gitignore ./*.zip && mv *.zip ..)
-            fi
-          done
+        with:
+          path: manager
+          name: "Manager-release"
+          merge-multiple: true
 
-      - name: Zip WSA kernel
+      - name: Check is rc tags
+        id: is_rc_tag
         run: |
-          for dir in kernel-WSA-*; do
-            if [ -d "$dir" ]; then
-              echo "------ Zip $dir ----------"
-              (cd $dir && zip -r9 "$dir".zip ./* -x .git .gitignore ./*.zip && mv *.zip ..)
-            fi
-          done
-
-      - name: Zip ChromeOS ARCVM kernel
-        run: |
-          for dir in kernel-ARCVM-*; do
-            if [ -d "$dir" ]; then
-              echo "------ Zip $dir ----------"
-              (cd $dir && zip -r9 "$dir".zip ./* -x .git .gitignore ./*.zip && mv *.zip ..)
-            fi
-          done
-
-      - name: Display structure of downloaded files
-        run: ls -R
+          if [ "${{ contains(github.ref_name,'-rc') }}" == 'true' ]; then
+            echo "IS_RC_TAG=true" >> $GITHUB_OUTPUT
+          else
+            echo "IS_RC_TAG=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: release
         uses: softprops/action-gh-release@v3
         with:
+          prerelease: ${{ steps.is_rc_tag.outputs.IS_RC_TAG == 'true' }}
           files: |
             manager/*.apk
-            android*-lkm/*_kernelsu.ko
-            AnyKernel3-*.zip
-            boot-images-*/Image-*/*.img.gz
-            kernel-WSA*.zip
-            kernel-ARCVM*.zip
-            ksud/ksud-*

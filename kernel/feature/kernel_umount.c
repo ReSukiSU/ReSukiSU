@@ -27,6 +27,7 @@
 #include "policy/feature.h"
 #include "runtime/ksud_boot.h"
 #include "ksu.h"
+#include "feature/sucompat.h"
 
 static bool ksu_kernel_umount_enabled = true;
 

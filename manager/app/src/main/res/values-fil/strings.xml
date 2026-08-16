@@ -4,7 +4,6 @@
     <string name="home_not_installed">Hindi naka-install</string>
     <string name="home_click_to_install">Pindutin para mag-install</string>
     <string name="home_working">Gumagana</string>
-    <string name="home_working_version">Bersyon: %s</string>
     <string name="home_unsupported">Hindi Suportado</string>
     <string name="home_unsupported_reason">Sinusuportahan lang ng KernelSU ang mga kernel ng GKI ngayon</string>
     <string name="home_manager_version">Bersyon ng Manager</string>

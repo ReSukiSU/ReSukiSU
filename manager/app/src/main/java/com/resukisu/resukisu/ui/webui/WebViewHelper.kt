@@ -3,7 +3,6 @@ package com.resukisu.resukisu.ui.webui
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ActivityManager
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -19,15 +18,25 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.webkit.WebViewAssetLoader
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.ui.util.createRootShell
+import com.resukisu.resukisu.data.AppSettingsRepository
+import com.resukisu.resukisu.data.packageinfo.AppIconDataSource
+import com.resukisu.resukisu.data.packageinfo.InstalledPackageRepository
+import com.resukisu.resukisu.data.webui.WebUiRepository
+import com.resukisu.resukisu.ui.viewmodel.ModuleUiAction
+import com.resukisu.resukisu.ui.viewmodel.ModuleUiEvent
 import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel
+import com.resukisu.resukisu.ui.viewmodel.SuperUserUiAction
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
+import kotlin.time.Duration.Companion.milliseconds
 
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -36,15 +45,44 @@ internal suspend fun prepareWebView(
     moduleId: String,
     webUIState: WebUIState,
     moduleViewModel: ModuleViewModel,
+    superUserViewModel: SuperUserViewModel,
+    settingsRepository: AppSettingsRepository,
+    packageRepository: InstalledPackageRepository,
+    appIconDataSource: AppIconDataSource,
+    webUiRepository: WebUiRepository,
+    colorsCssProvider: () -> String,
 ) {
     withContext(Dispatchers.IO) {
-        suspendCancellableCoroutine { continuation ->
-            moduleViewModel.fetchModuleList(callBack = {
-                if (continuation.isActive) continuation.resume(Unit) { _, _, _ -> }
-            })
+        val refreshEvent = async(start = CoroutineStart.UNDISPATCHED) {
+            moduleViewModel.events.first { event ->
+                event is ModuleUiEvent.RefreshCompleted || event is ModuleUiEvent.Error
+            }
+        }
+        moduleViewModel.dispatch(ModuleUiAction.Refresh())
+        when (val event = withTimeoutOrNull(30_000L.milliseconds) { refreshEvent.await() }) {
+            is ModuleUiEvent.Error -> {
+                withContext(Dispatchers.Main) {
+                    webUIState.uiEvent = WebUIEvent.Error(
+                        activity.getString(R.string.module_unavailable, event.message),
+                    )
+                }
+                return@withContext
+            }
+
+            null -> {
+                withContext(Dispatchers.Main) {
+                    webUIState.uiEvent = WebUIEvent.Error(
+                        activity.getString(R.string.module_unavailable, moduleId),
+                    )
+                }
+                return@withContext
+            }
+
+            else -> Unit
         }
 
-        val moduleInfo = moduleViewModel.moduleList.find { info -> info.id == moduleId }
+        val moduleInfo =
+            moduleViewModel.uiState.value.moduleList.find { info -> info.id == moduleId }
 
         if (moduleInfo == null) {
             withContext(Dispatchers.Main) {
@@ -63,12 +101,9 @@ internal suspend fun prepareWebView(
         webUIState.moduleName = moduleInfo.name
         webUIState.modDir = "/data/adb/modules/${moduleId}"
 
-        if (SuperUserViewModel.apps.isEmpty()) {
-            SuperUserViewModel().fetchAppList()
+        if (packageRepository.packages.value.isEmpty()) {
+            superUserViewModel.dispatch(SuperUserUiAction.Refresh)
         }
-        val shell = createRootShell(true)
-        webUIState.rootShell = shell
-
         withContext(Dispatchers.Main) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
                 @Suppress("DEPRECATION")
@@ -83,8 +118,9 @@ internal suspend fun prepareWebView(
             val webView = WebView(activity)
             webView.setBackgroundColor(Color.TRANSPARENT)
 
-            val prefs = activity.getSharedPreferences("settings", Context.MODE_PRIVATE)
-            WebView.setWebContentsDebuggingEnabled(prefs.getBoolean("enable_web_debugging", false))
+            WebView.setWebContentsDebuggingEnabled(
+                settingsRepository.getBoolean("enable_web_debugging", false)
+            )
 
             webView.settings.apply {
                 javaScriptEnabled = true
@@ -97,7 +133,13 @@ internal suspend fun prepareWebView(
                 .setDomain("mui.kernelsu.org")
                 .addPathHandler(
                     "/",
-                    SuFilePathHandler(webRoot, shell, { webUIState.currentInsets }, { enable -> webUIState.isInsetsEnabled = enable })
+                    SuFilePathHandler(
+                        webRoot,
+                        webUiRepository,
+                        { webUIState.currentInsets },
+                        { enable -> webUIState.isInsetsEnabled = enable },
+                        colorsCssProvider,
+                    )
                 )
                 .build()
 
@@ -108,7 +150,7 @@ internal suspend fun prepareWebView(
                     if (url.scheme.equals("ksu", ignoreCase = true) && url.host.equals("icon", ignoreCase = true)) {
                         val packageName = url.path?.substring(1)
                         if (!packageName.isNullOrEmpty()) {
-                            val icon = AppIconUtil.loadAppIconSync(activity, packageName, 512)
+                            val icon = appIconDataSource.loadSync(packageName, 512)
                             if (icon != null) {
                                 val stream = ByteArrayOutputStream()
                                 icon.compress(Bitmap.CompressFormat.PNG, 100, stream)
@@ -166,7 +208,7 @@ internal suspend fun prepareWebView(
             }
 
             // JS Interface
-            val webviewInterface = WebViewInterface(webUIState)
+            val webviewInterface = WebViewInterface(webUIState, packageRepository, webUiRepository)
             webUIState.webView = webView
             webView.addJavascriptInterface(webviewInterface, "ksu")
             webUIState.uiEvent = WebUIEvent.WebViewReady

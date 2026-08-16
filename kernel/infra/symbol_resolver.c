@@ -3,6 +3,7 @@
 #include <linux/string.h>
 #include <linux/version.h>
 
+#include "klog.h" // IWYU pragma: keep
 #include "infra/symbol_resolver.h"
 #include "compat/kernel_compat.h"
 
@@ -98,7 +99,7 @@ static int lookup_symbol_variant_cb(void *data, const char *name, struct module 
 
     if (strcmp(name, ctx->symbol_name) != 0) {
         if (name_len <= ctx->symbol_len || strncmp(name, ctx->symbol_name, ctx->symbol_len) != 0 ||
-            name[ctx->symbol_len] != '.')
+            (name[ctx->symbol_len] != '.' && name[ctx->symbol_len] != '$'))
             return 0;
     }
 

@@ -15,6 +15,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -33,15 +34,13 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.Download
-import androidx.compose.material.icons.outlined.OpenInBrowser
+import androidx.compose.material.icons.twotone.Code
+import androidx.compose.material.icons.twotone.Download
+import androidx.compose.material.icons.twotone.KeyboardArrowDown
+import androidx.compose.material.icons.twotone.Link
+import androidx.compose.material.icons.twotone.OpenInBrowser
+import androidx.compose.material.icons.twotone.Person
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
@@ -78,17 +77,23 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.domain.model.CatalogModule
+import com.resukisu.resukisu.domain.model.ModuleRelease
+import com.resukisu.resukisu.domain.model.ModuleReleaseAsset
+import com.resukisu.resukisu.domain.usecase.EnqueueDownloadUseCase
+import com.resukisu.resukisu.domain.usecase.ObserveDownloadUseCase
 import com.resukisu.resukisu.ui.activity.PermissionRequestInterface
 import com.resukisu.resukisu.ui.component.ConfirmResult
 import com.resukisu.resukisu.ui.component.GithubMarkdown
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
+import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
-import com.resukisu.resukisu.ui.component.settings.SplicedColumnGroup
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Navigator
 import com.resukisu.resukisu.ui.navigation.Route
@@ -96,22 +101,52 @@ import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
+import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
 import com.resukisu.resukisu.ui.util.LocalPermissionRequestInterface
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
-import com.resukisu.resukisu.ui.util.module.ReleaseAssetInfo
-import com.resukisu.resukisu.ui.util.module.ReleaseInfo
-import com.resukisu.resukisu.ui.viewmodel.ModuleRepoViewModel
+import com.resukisu.resukisu.ui.viewmodel.ModuleDetailUiAction
+import com.resukisu.resukisu.ui.viewmodel.ModuleDetailViewModel
 import com.resukisu.resukisu.ui.viewmodel.formatFileSize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
+import org.koin.core.parameter.parametersOf
 
 /**
  * @author AlexLiuDev233
  * @date 2025/12/7
  */
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun OnlineModuleDetailScreen(module: ModuleRepoViewModel.RepoModule) {
+fun OnlineModuleDetailScreen(moduleId: String) {
+    val viewModel = koinViewModel<ModuleDetailViewModel>(parameters = { parametersOf(moduleId) })
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val module = state.module
+    if (module == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            if (state.loading) {
+                LoadingIndicator()
+            } else {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(stringResource(R.string.please_check_network))
+                    FilledTonalButton(onClick = { viewModel.dispatch(ModuleDetailUiAction.Retry) }) {
+                        Text(stringResource(R.string.network_retry))
+                    }
+                }
+            }
+        }
+        return
+    }
+    OnlineModuleDetailContent(module)
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun OnlineModuleDetailContent(module: CatalogModule) {
+    val themeConfig: ThemeConfig = koinInject()
+    val cardConfig: CardConfig = koinInject()
     val navigator = LocalNavigator.current
     val snackBarHost = LocalSnackbarHost.current
     val topAppBarState = rememberTopAppBarState()
@@ -130,8 +165,7 @@ fun OnlineModuleDetailScreen(module: ModuleRepoViewModel.RepoModule) {
     Scaffold(
         topBar = {
             Column(
-                modifier = Modifier.blurEffect(
-                )
+                modifier = Modifier.blurEffect()
             ) {
                 LargeFlexibleTopAppBar(
                     title = { Text(module.moduleName) },
@@ -150,22 +184,22 @@ fun OnlineModuleDetailScreen(module: ModuleRepoViewModel.RepoModule) {
                             }
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.OpenInBrowser,
+                                imageVector = Icons.TwoTone.OpenInBrowser,
                                 contentDescription = stringResource(R.string.open_module_home_page),
                             )
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors().copy(
                         containerColor =
-                            if (ThemeConfig.isEnableBlur)
+                            if (themeConfig.isEnableBlur)
                                 Color.Transparent
                             else
-                                MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha),
+                                MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
                         scrolledContainerColor =
-                            if (ThemeConfig.isEnableBlur)
+                            if (themeConfig.isEnableBlur)
                                 Color.Transparent
                             else
-                                MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha)
+                                MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha)
                     ),
                     windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 )
@@ -173,10 +207,10 @@ fun OnlineModuleDetailScreen(module: ModuleRepoViewModel.RepoModule) {
                 PrimaryTabRow(
                     selectedTabIndex = pagerState.currentPage,
                     containerColor =
-                        if (ThemeConfig.isEnableBlur)
+                        if (themeConfig.isEnableBlur)
                             Color.Transparent
                         else
-                            MaterialTheme.colorScheme.surfaceContainer.copy(CardConfig.cardAlpha),
+                            MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     tabTitles.forEachIndexed { index, title ->
@@ -221,14 +255,15 @@ fun OnlineModuleDetailScreen(module: ModuleRepoViewModel.RepoModule) {
                 modifier = Modifier.fillMaxSize()
             ) { page ->
                 when (page) {
-                    0 -> ReadmeTab(module, scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding())
+                    0 -> ReadmeTab(module, scrollBehavior.nestedScrollConnection, innerPadding)
                     1 -> ReleasesTab(
                         module,
                         scrollBehavior.nestedScrollConnection,
                         coroutineScope,
-                        innerPadding.calculateTopPadding()
+                        innerPadding
                     )
-                    2 -> InfoTab(module, scrollBehavior.nestedScrollConnection, innerPadding.calculateTopPadding())
+
+                    2 -> InfoTab(module, scrollBehavior.nestedScrollConnection, innerPadding)
                 }
             }
         }
@@ -238,9 +273,9 @@ fun OnlineModuleDetailScreen(module: ModuleRepoViewModel.RepoModule) {
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun InfoTab(
-    module: ModuleRepoViewModel.RepoModule,
+    module: CatalogModule,
     nestedScrollConnection: NestedScrollConnection,
-    topPadding: Dp
+    innerPadding: PaddingValues
 ) {
     val uriHandler = LocalUriHandler.current
 
@@ -250,16 +285,16 @@ fun InfoTab(
         .nestedScroll(nestedScrollConnection)
     ) {
         item {
-            Spacer(Modifier.height(topPadding))
+            Spacer(Modifier.height(innerPadding.calculateTopPadding()))
         }
         item {
-            SplicedColumnGroup(
+            SegmentedColumn(
                 title = stringResource(R.string.author)
             ) {
                 module.authorList.forEach { author ->
                     item {
                         SettingsBaseWidget(
-                            icon = Icons.Default.Person,
+                            icon = Icons.TwoTone.Person,
                             onClick = {
                                 uriHandler.openUri(author.link)
                             },
@@ -267,7 +302,7 @@ fun InfoTab(
                         ) {
                             Icon(
                                 modifier = Modifier.size(24.dp),
-                                imageVector = Icons.Default.Link,
+                                imageVector = Icons.TwoTone.Link,
                                 contentDescription = stringResource(R.string.author_link)
                             )
                         }
@@ -276,30 +311,36 @@ fun InfoTab(
             }
         }
 
-        item {
-            SplicedColumnGroup(
-                title = stringResource(R.string.source_code)
-            ) {
-                item {
-                    SettingsBaseWidget(
-                        icon = Icons.Default.Code,
-                        title = module.sourceUrl,
-                        onClick = {
-                            uriHandler.openUri(module.sourceUrl)
-                        }
-                    ) {}
+        if (module.sourceUrl.isNotEmpty() && module.sourceUrl != "null") {
+            item {
+                SegmentedColumn(
+                    title = stringResource(R.string.source_code)
+                ) {
+                    item {
+                        SettingsBaseWidget(
+                            icon = Icons.TwoTone.Code,
+                            title = module.sourceUrl,
+                            onClick = {
+                                uriHandler.openUri(module.sourceUrl)
+                            }
+                        )
+                    }
                 }
             }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding()))
         }
     }
 }
 
 @Composable
 fun ReleasesTab(
-    module: ModuleRepoViewModel.RepoModule,
+    module: CatalogModule,
     nestedScrollConnection: NestedScrollConnection,
     coroutineScope: CoroutineScope,
-    topPadding: Dp
+    innerPadding: PaddingValues,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -308,7 +349,7 @@ fun ReleasesTab(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Spacer(Modifier.height(topPadding))
+            Spacer(Modifier.height(innerPadding.calculateTopPadding()))
         }
         items(
             items = module.releases,
@@ -316,16 +357,21 @@ fun ReleasesTab(
         ) {
             ReleaseCard(module, it, coroutineScope)
         }
+        item {
+            Spacer(Modifier.height(innerPadding.calculateBottomPadding()))
+        }
     }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ReadmeTab(
-    module: ModuleRepoViewModel.RepoModule,
+    module: CatalogModule,
     nestedScrollConnection: NestedScrollConnection,
-    topPadding: Dp
+    innerPadding: PaddingValues
 ) {
+    val themeConfig: ThemeConfig = koinInject()
+    val cardConfig: CardConfig = koinInject()
     val loading = remember { mutableStateOf(true) }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -336,16 +382,19 @@ fun ReadmeTab(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                Spacer(Modifier.height(topPadding))
+                Spacer(Modifier.height(innerPadding.calculateTopPadding()))
             }
             item {
                 Surface(
                     modifier = Modifier
                         .padding(16.dp)
-                        .clip(RoundedCornerShape(12.dp)),
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
-                        alpha = CardConfig.cardAlpha
-                    )
+                        .clip(RoundedCornerShape(16.dp))
+                        .renderBackgroundBlur(),
+                    color =
+                        if (themeConfig.isEnableBlurExp)
+                            Color.Transparent
+                        else
+                            MaterialTheme.colorScheme.surfaceBright.copy(cardConfig.cardAlpha),
                 ) {
                     GithubMarkdown(
                         content = module.readme,
@@ -373,6 +422,16 @@ fun ReadmeTab(
                     }
                 }
             }
+            item {
+                Spacer(
+                    modifier = Modifier.height(
+                        max(
+                            innerPadding.calculateBottomPadding() - 16.dp,
+                            0.dp
+                        )
+                    )
+                )
+            }
         }
         if (loading.value) {
             LoadingIndicator(
@@ -385,28 +444,33 @@ fun ReadmeTab(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ReleaseCard(
-    module: ModuleRepoViewModel.RepoModule,
-    release: ReleaseInfo,
+    module: CatalogModule,
+    release: ModuleRelease,
     coroutineScope: CoroutineScope
 ) {
+    val themeConfig: ThemeConfig = koinInject()
+    val cardConfig: CardConfig = koinInject()
     val navigator = LocalNavigator.current
     val context = LocalContext.current
     val permissionRequestInterface = LocalPermissionRequestInterface.current
+    val enqueueDownload = koinInject<EnqueueDownloadUseCase>()
+    val observeDownload = koinInject<ObserveDownloadUseCase>()
     val confirmInstallTitle =
         stringResource(R.string.confirm_install_module_title, module.moduleName)
     val confirmDialog = rememberConfirmDialog()
 
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 12.dp, end = 12.dp, top = 12.dp),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(4.dp),
-        colors = CardDefaults.cardColors().copy(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
-                alpha = CardConfig.cardAlpha
-            )
-        )
+            .padding(start = 12.dp, end = 12.dp, top = 12.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright),
+        shape = RoundedCornerShape(16.dp),
+        color =
+            if (themeConfig.isEnableBlurExp)
+                Color.Transparent
+            else
+                MaterialTheme.colorScheme.surfaceBright.copy(cardConfig.cardAlpha),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -449,7 +513,7 @@ fun ReleaseCard(
                     bottom = 5.dp
                 )
             )
-            if (release.assets.isEmpty()) return@Card
+            if (release.assets.isEmpty()) return@Surface
 
             Column {
                 release.assets.forEach { assetInfo ->
@@ -469,14 +533,17 @@ fun ReleaseCard(
                                 module,
                                 assetInfo,
                                 navigator,
-                                coroutineScope
+                                coroutineScope,
+                                enqueueDownload,
+                                observeDownload,
                             )
                         }
                     }
                     SettingsBaseWidget(
-                        modifier = Modifier.clip(RoundedCornerShape(12.dp)),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .renderBackgroundBlur(tintColor = MaterialTheme.colorScheme.surfaceBright),
                         title = assetInfo.name,
-                        noVerticalPadding = true,
                         onClick = {
                             onClick()
                         },
@@ -484,7 +551,8 @@ fun ReleaseCard(
                         description = stringResource(R.string.assert_support_content).format(
                             formatFileSize(assetInfo.size),
                             assetInfo.downloadCount
-                        )
+                        ),
+                        isOnBackground = false
                     ) {
                         FilledTonalButton(
                             onClick = onClick,
@@ -492,7 +560,7 @@ fun ReleaseCard(
                         ) {
                             Icon(
                                 modifier = Modifier.size(20.dp),
-                                imageVector = Icons.Outlined.Download,
+                                imageVector = Icons.TwoTone.Download,
                                 contentDescription = null
                             )
                         }
@@ -519,7 +587,7 @@ fun CollapsibleContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(16.dp))
                 .clickable { expanded = !expanded }
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -532,7 +600,7 @@ fun CollapsibleContent(
             )
 
             Icon(
-                imageVector = Icons.Default.KeyboardArrowDown,
+                imageVector = Icons.TwoTone.KeyboardArrowDown,
                 contentDescription = null,
                 modifier = Modifier.rotate(rotation),
                 tint = MaterialTheme.colorScheme.onBackground
@@ -553,14 +621,14 @@ fun CollapsibleContent(
 @Composable
 @Preview
 fun ReleaseCardPreview() {
-    val release = ReleaseInfo(
+    val release = ModuleRelease(
         name = "name",
         tagName = "tagName",
         publishedAt = "publishedAt",
         descriptionHTML = "descriptionHTML",
-        assets = ArrayList<ReleaseAssetInfo>().apply {
+        assets = ArrayList<ModuleReleaseAsset>().apply {
             add(
-                ReleaseAssetInfo(
+                ModuleReleaseAsset(
                     name = "name",
                     downloadUrl = "downloadUrl",
                     size = 0,
@@ -568,7 +636,7 @@ fun ReleaseCardPreview() {
                 )
             )
             add(
-                ReleaseAssetInfo(
+                ModuleReleaseAsset(
                     name = "name2",
                     downloadUrl = "downloadUrl2",
                     size = 0,
@@ -581,7 +649,7 @@ fun ReleaseCardPreview() {
     val fakeModule = initFakeRepoModuleForPreview()
 
     CompositionLocalProvider(
-        LocalNavigator provides Navigator(Route.ModuleRepoDetail(fakeModule)),
+        LocalNavigator provides Navigator(Route.ModuleRepoDetail(fakeModule.moduleId)),
         LocalPermissionRequestInterface provides object : PermissionRequestInterface {
             override fun requestPermission(
                 permission: String,

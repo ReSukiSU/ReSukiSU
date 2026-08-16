@@ -2,7 +2,9 @@ package com.resukisu.resukisu
 
 import android.os.Parcelable
 import androidx.annotation.Keep
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
+import com.resukisu.resukisu.Natives.Profile.RootProfileFlag
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -23,12 +25,22 @@ object Natives {
     // 34709: breaking: unify uapi
     // 34713: change kernel_su_domain to u:r:ksu:s0
     // 34795: feature id 3 to adb root
-    const val MINIMAL_SUPPORTED_KERNEL = 34795
+    // 34944: Drop KPM support
+    // 34966(upstream 32513): add uapi version
+    // 34967(upstream 32514): allowlist v4 root profile flags
+    // 35002: add sync set dynamic-manager api
+    const val MINIMAL_SUPPORTED_KERNEL = 35002
 
     const val KERNEL_SU_DOMAIN = "u:r:ksu:s0"
 
     const val ROOT_UID = 0
     const val ROOT_GID = 0
+
+    const val ALLOWLIST_RESTORE_SUCCESS = 0
+    const val ALLOWLIST_RESTORE_INVALID_FILE = 1
+    const val ALLOWLIST_RESTORE_UNSUPPORTED_VERSION = 2
+    const val ALLOWLIST_RESTORE_IO_ERROR = 3
+    const val ALLOWLIST_RESTORE_PROFILE_ERROR = 4
 
     external fun getFullVersion(): String
 
@@ -54,11 +66,11 @@ object Natives {
     val isPrBuild: Boolean
         external get
 
-    enum class KernelPatchImplement {
+    enum class KernelPatchImplementation {
         /**
          * Kernel Patch was not found in this kernel
          */
-        NO_KERNEL_PATCH_SUPPORT,
+        NONE,
 
         /**
          * Detected Kernel Patch official in this kernel
@@ -67,7 +79,7 @@ object Natives {
          *
          * @see <a href="https://github.com/bmax121/KernelPatch">https://github.com/bmax121/KernelPatch</a>
          */
-        KERNEL_PATCH_OFFICIAL,
+        OFFICIAL,
 
         /**
          * Detected Rifsxd's Kernel Patch fork in this kernel
@@ -85,15 +97,15 @@ object Natives {
          *
          * @see <a href="https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch">https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch</a>
          */
-        SUKISU_KERNEL_PATCH_PATCH
+        SUKISU,
     }
 
     /**
-     * Get Kernel Patch Implement
+     * Get Kernel Patch implementation
      * @return type
-     * @throws IllegalStateException when can't access KernelPatchImplement enum
+     * @throws IllegalStateException when can't access KernelPatchImplementation enum
      */
-    external fun getKernelPatchImplement(): KernelPatchImplement
+    external fun getKernelPatchImplementation(): KernelPatchImplementation
 
     external fun uidShouldUmount(uid: Int): Boolean
 
@@ -104,6 +116,12 @@ object Natives {
      */
     external fun getAppProfile(key: String?, uid: Int): Profile
     external fun setAppProfile(profile: Profile?): Boolean
+
+    /**
+     * Parse an allowlist backup from [fd] and submit every profile to the kernel.
+     * [failedUid] receives the UID whose profile could not be submitted.
+     */
+    external fun restoreAllowlistFromFd(fd: Int, failedUid: IntArray): Int
 
     /**
      * `su` compat mode can be disabled temporarily.
@@ -135,29 +153,13 @@ object Natives {
     external fun isSelinuxHideEnabled(): Boolean
     external fun setSelinuxHideEnabled(enabled: Boolean): Int
 
-    external fun isKPMEnabled(): Boolean
     external fun getHookType(): String
-
-    /**
-     * Set dynamic managerature configuration
-     * @param size APK signature size
-     * @param hash APK signature hash (64 character hex string)
-     * @return true if successful, false otherwise
-     */
-    external fun setDynamicManager(size: Int, hash: String): Boolean
-
 
     /**
      * Get current dynamic manager configuration
      * @return DynamicManagerConfig object containing current configuration, or null if not set
      */
     external fun getDynamicManager(): DynamicManagerConfig?
-
-    /**
-     * Clear dynamic manager configuration
-     * @return true if successful, false otherwise
-     */
-    external fun clearDynamicManager(): Boolean
 
     /**
      * Get active managers list
@@ -189,8 +191,18 @@ object Natives {
         }
     }
 
+    val kernelUAPIVersion: Int
+        external get
+
+    val managerUAPIVersion: Int
+        external get
+
+    fun checkUAPIMismatch(): Boolean {
+        return kernelUAPIVersion != managerUAPIVersion
+    }
+
     fun requireNewKernel(): Boolean {
-        return version != -1 && version < MINIMAL_SUPPORTED_KERNEL
+        return (version != -1 && version < MINIMAL_SUPPORTED_KERNEL) || checkUAPIMismatch()
     }
 
     @Immutable
@@ -250,7 +262,17 @@ object Natives {
         val nonRootUseDefault: Boolean = true,
         val umountModules: Boolean = true,
         var rules: String = "", // this field is save in ksud!!
+
+        val flags: Long = FLAG_KSU_NO_NEW_PRIVS,
     ) : Parcelable {
+        @Keep
+        enum class RootProfileFlag(val display: String, @param:StringRes val desc: Int) {
+            NO_NEW_PRIVS(
+                "NO_NEW_PRIVS",
+                R.string.profile_flags_desc_no_new_privs
+            )
+        }
+
         enum class Namespace {
             INHERITED,
             GLOBAL,
@@ -259,4 +281,12 @@ object Natives {
 
         constructor() : this("")
     }
+
+    const val FLAG_KSU_NO_NEW_PRIVS = 1L
 }
+
+fun List<RootProfileFlag>.toRawFlags(): Long =
+    fold(0L) { acc, flag -> acc.or(1L.shl(flag.ordinal)) }
+
+fun Long.toRootProfileFlags(): List<RootProfileFlag> =
+    RootProfileFlag.entries.filter { 1L.shl(it.ordinal).and(this) != 0L }.toList()

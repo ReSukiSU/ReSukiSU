@@ -8,6 +8,9 @@
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
+    <uses-permission
+        android:name="android.permission.REQUEST_INSTALL_PACKAGES"
+        tools:ignore="RequestInstallPackagesPolicy" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -38,7 +41,7 @@
             android:launchMode="standard"
             android:documentLaunchMode="intoExisting"
             android:autoRemoveFromRecents="true"
-            android:theme="@style/Theme.KernelSU">
+            android:theme="@style/Theme.KernelSU.Starting">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -108,6 +111,11 @@
             android:configChanges="density|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|locale|layoutDirection|fontScale|keyboard|keyboardHidden"
             />
 
+        <activity
+            android:name=".ui.screen.themeSettings.crop.BackgroundCropActivity"
+            android:exported="false"
+            android:theme="@style/Theme.KernelSU" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -126,7 +134,7 @@
             android:useAppZygote="true" />
 
         <service
-            android:name=".ui.util.downloader.DownloadService"
+            android:name=".data.download.DownloadService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 

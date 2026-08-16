@@ -1,43 +1,18 @@
 package com.resukisu.resukisu
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.os.Build
-import android.system.Os
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
-import coil.Coil
-import coil.ImageLoader
-import com.resukisu.resukisu.ui.util.generateMainShellBuilder
-import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
-import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel
-import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
-import com.topjohnwu.superuser.internal.MainShell
-import kotlinx.coroutines.CoroutineScope
+import com.resukisu.resukisu.di.appModules
+import com.resukisu.resukisu.domain.usecase.InitializeApplicationUseCase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import me.zhanghai.android.appiconloader.coil.AppIconFetcher
-import me.zhanghai.android.appiconloader.coil.AppIconKeyer
-import okhttp3.Cache
-import okhttp3.OkHttpClient
-import java.io.File
-import java.util.Locale
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.runBlocking
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
 
-lateinit var ksuApp: KernelSUApplication
-
-class KernelSUApplication : Application(), ViewModelStoreOwner {
-
-    lateinit var okhttpClient: OkHttpClient
-    val UserAgent = "ReSukiSU/${BuildConfig.VERSION_CODE}"
-    private val appViewModelStore by lazy { ViewModelStore() }
-
-    @SuppressLint("RestrictedApi")
+class KernelSUApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        ksuApp = this
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val processName = getProcessName()
             if (processName.endsWith("MagicaService")) {
@@ -46,51 +21,13 @@ class KernelSUApplication : Application(), ViewModelStoreOwner {
             }
         }
 
-        MainShell.setBuilder(generateMainShellBuilder())
-
-        // For faster response when first entering superuser or webui activity
-        val superUserViewModel = ViewModelProvider(this)[SuperUserViewModel::class.java]
-        val homeViewModel = ViewModelProvider(this)[HomeViewModel::class.java]
-        val moduleViewModel = ViewModelProvider(this)[ModuleViewModel::class.java]
-        CoroutineScope(Dispatchers.Main).launch {
-            homeViewModel.refreshData(this@KernelSUApplication)
-            superUserViewModel.fetchAppList()
-            moduleViewModel.fetchModuleList()
+        val koin = startKoin {
+            androidLogger()
+            androidContext(this@KernelSUApplication)
+            modules(appModules)
+        }.koin
+        runBlocking(Dispatchers.IO) {
+            koin.get<InitializeApplicationUseCase>()()
         }
-
-        val context = this
-        val iconSize = resources.getDimensionPixelSize(android.R.dimen.app_icon_size)
-        Coil.setImageLoader(
-            ImageLoader.Builder(context)
-                .components {
-                    add(AppIconKeyer())
-                    add(AppIconFetcher.Factory(iconSize, false, context))
-                }
-                .build()
-        )
-
-        val webroot = File(dataDir, "webroot")
-        if (!webroot.exists()) {
-            webroot.mkdir()
-        }
-
-        // Provide working env for rust's temp_dir()
-        Os.setenv("TMPDIR", cacheDir.absolutePath, true)
-
-        okhttpClient =
-            OkHttpClient.Builder().cache(Cache(File(cacheDir, "okhttp"), 10 * 1024 * 1024))
-                .addInterceptor { block ->
-                    block.proceed(
-                        block.request().newBuilder()
-                            .header("User-Agent", UserAgent)
-                            .header("Accept-Language", Locale.getDefault().toLanguageTag()).build()
-                    )
-                }
-                .connectTimeout(5, TimeUnit.SECONDS)
-                .readTimeout(5, TimeUnit.SECONDS)
-                .writeTimeout(5, TimeUnit.SECONDS)
-                .build()
     }
-    override val viewModelStore: ViewModelStore
-        get() = appViewModelStore
 }

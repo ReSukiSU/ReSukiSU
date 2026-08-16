@@ -1,7 +1,3 @@
-use anyhow::{Context, Error, Ok, Result, bail};
-use rustix::fs::{Mode, OFlags, open};
-use rustix::process::setpgid;
-use rustix::stdio::{dup2_stderr, dup2_stdin, dup2_stdout};
 #[cfg(unix)]
 use std::os::unix::prelude::PermissionsExt;
 use std::{
@@ -14,8 +10,12 @@ use std::{
     process::Command,
 };
 
+use anyhow::{Context, Error, Ok, Result, bail};
 use rustix::{
+    fs::{Mode, OFlags, open},
     process,
+    process::setpgid,
+    stdio::{dup2_stderr, dup2_stdin, dup2_stdout},
     thread::{LinkNameSpaceType, move_into_link_name_space},
 };
 
@@ -124,9 +124,9 @@ pub fn is_safe_mode() -> bool {
 
 pub fn get_zip_uncompressed_size(zip_path: &str) -> Result<u64> {
     let mut zip = zip::ZipArchive::new(std::fs::File::open(zip_path)?)?;
-    let total: u64 = (0..zip.len())
-        .map(|i| zip.by_index(i).unwrap().size())
-        .sum();
+    let total = (0..zip.len())
+        .map(|i| zip.by_index(i).map(|f| f.size()))
+        .sum::<zip::result::ZipResult<u64>>()?;
     Ok(total)
 }
 
@@ -219,13 +219,14 @@ pub fn uninstall(package_name: &str) -> Result<()> {
     std::fs::remove_dir_all(defs::WORKING_DIR).ok();
     std::fs::remove_file(defs::DAEMON_PATH).ok();
     std::fs::remove_dir_all(defs::MODULE_DIR).ok();
+    std::fs::remove_dir_all(defs::PREINIT_DIR_WATCHDOG).ok();
+    std::fs::remove_dir_all(defs::PREINIT_DIR_DEFAULT).ok();
     println!("- Restore boot image..");
     boot_patch::restore(BootRestoreArgs {
         boot: None,
         flash: true,
         out_name: None,
-        stock: false,
-        partition: None,
+        out: None,
     })?;
     println!("- Uninstall KernelSU manager..");
     Command::new("pm")

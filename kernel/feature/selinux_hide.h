@@ -7,6 +7,8 @@
 void ksu_selinux_hide_init();
 void ksu_selinux_hide_exit();
 void ksu_selinux_hide_drop_backup_if_unused();
+void ksu_selinux_hide_handle_second_stage();
+void ksu_selinux_hide_handle_post_fs_data();
 
 // https://github.com/torvalds/linux/commit/b21507e272627c434e8dd74e8d51fd8245281b59
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0) || defined(KSU_COMPAT_SETPROCATTR_USE_NEW_PROTOTYPE)

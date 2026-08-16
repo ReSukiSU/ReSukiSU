@@ -1,0 +1,242 @@
+package com.resukisu.resukisu.ui.screen.susfs.subpages
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
+import com.resukisu.resukisu.R
+import com.resukisu.resukisu.domain.model.OpenRedirectItem
+import com.resukisu.resukisu.domain.model.UidScheme
+import com.resukisu.resukisu.ui.component.settings.SettingsDropdownWidget
+import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
+import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
+import com.resukisu.resukisu.ui.screen.susfs.RegisterSuSFSRefresh
+import com.resukisu.resukisu.ui.screen.susfs.SuSFSRefreshRegistrar
+import com.resukisu.resukisu.ui.screen.susfs.component.EntryDetailDialog
+import com.resukisu.resukisu.ui.screen.susfs.component.ManualAddDialog
+import com.resukisu.resukisu.ui.screen.susfs.component.SuSFSDescriptionCard
+import com.resukisu.resukisu.ui.screen.susfs.component.susfsEntryList
+import com.resukisu.resukisu.ui.util.LocalSnackbarHost
+import com.resukisu.resukisu.ui.util.showReplacingSnackbar
+import com.resukisu.resukisu.ui.viewmodel.SuSFSUiAction
+import com.resukisu.resukisu.ui.viewmodel.SuSFSViewModel
+import com.resukisu.resukisu.ui.viewmodel.awaitSuSFSBoolean
+import com.resukisu.resukisu.ui.viewmodel.awaitSuSFSConfig
+import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun OpenRedirectTab(
+    nestedScrollConnection: NestedScrollConnection,
+    innerPadding: PaddingValues,
+    onRegisterRefresh: SuSFSRefreshRegistrar,
+) {
+    val configHelper = koinViewModel<SuSFSViewModel>()
+    val snackbarHost = LocalSnackbarHost.current
+    val scope = rememberCoroutineScope()
+
+    var entries by remember { mutableStateOf<Set<OpenRedirectItem>>(emptySet()) }
+    var isLoading by remember { mutableStateOf(false) }
+    var showManualAdd by remember { mutableStateOf(false) }
+    var detailItem by remember { mutableStateOf<OpenRedirectItem?>(null) }
+
+    val manualTarget = remember { TextFieldState() }
+    val manualRedirected = remember { TextFieldState() }
+    var manualUidScheme by remember { mutableStateOf(UidScheme.NonApp) }
+
+    val uidSchemeOptions = listOf(
+        UidScheme.NonApp to stringResource(R.string.susfs_uid_scheme_non_app),
+        UidScheme.RootExceptSu to stringResource(R.string.susfs_uid_scheme_root_except_su),
+        UidScheme.NonSu to stringResource(R.string.susfs_uid_scheme_non_su),
+        UidScheme.UnmountedApp to stringResource(R.string.susfs_uid_scheme_unmounted_app),
+        UidScheme.Unmounted to stringResource(R.string.susfs_uid_scheme_unmounted),
+    )
+
+    RegisterSuSFSRefresh(onRegisterRefresh) { config, _ ->
+        entries = config.open_redirect
+    }
+
+    LaunchedEffect(showManualAdd) {
+        if (!showManualAdd) {
+            manualTarget.clearText()
+            manualRedirected.clearText()
+            manualUidScheme = UidScheme.NonApp
+        }
+    }
+
+    val manualAddTitle = stringResource(R.string.susfs_entry_manual_add)
+    val detailTitle = stringResource(R.string.susfs_entry_detail)
+    val targetPathLabel = stringResource(R.string.susfs_redirect_target_path)
+    val redirectedPathLabel = stringResource(R.string.susfs_redirect_redirected_path)
+    val uidSchemeLabel = stringResource(R.string.susfs_redirect_uid_scheme)
+    val noEntriesMsg = stringResource(R.string.susfs_entry_no_entries)
+    val noEntriesHint = stringResource(R.string.susfs_entry_no_entries_hint)
+    val operationFailedMsg = stringResource(R.string.susfs_operation_failed)
+    val selectedUidLabel = uidSchemeOptions.first { it.first == manualUidScheme }.second
+
+    fun UidScheme.localizedLabel(): String {
+        return uidSchemeOptions.first { it.first == this }.second
+    }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(nestedScrollConnection),
+    ) {
+        item {
+            Spacer(Modifier.height(innerPadding.calculateTopPadding()))
+        }
+
+        item {
+            SuSFSDescriptionCard(
+                title = stringResource(R.string.susfs_tab_open_redirect),
+                description = stringResource(R.string.susfs_redirect_description),
+            ) {
+                Text(
+                    text = stringResource(R.string.susfs_redirect_uid_schemes_description),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Text(
+                    text = stringResource(R.string.susfs_redirect_important_notes),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+
+        susfsEntryList(
+            entries = entries.toList(),
+            addEntryTitle = manualAddTitle,
+            emptyTitle = noEntriesMsg,
+            emptyDescription = noEntriesHint,
+            entryKey = { "${it.target_path}|${it.redirected_path}|${it.uid_scheme.value}" },
+            onAddEntry = { showManualAdd = true },
+        ) { item ->
+            SettingsJumpPageWidget(
+                iconPlaceholder = false,
+                title = item.target_path,
+                description = stringResource(
+                    R.string.susfs_redirect_entry_description,
+                    item.redirected_path,
+                    item.uid_scheme.localizedLabel(),
+                ),
+                onClick = { detailItem = item },
+            )
+        }
+
+        item {
+            Spacer(Modifier.height(innerPadding.calculateBottomPadding()))
+        }
+    }
+
+    ManualAddDialog(
+        showDialog = showManualAdd,
+        title = manualAddTitle,
+        subtypes = emptyList(),
+        selectedSubtype = "",
+        onSubtypeChange = {},
+        onDismiss = { showManualAdd = false },
+        onConfirm = {
+            val target = manualTarget.text.toString().trim()
+            val redirected = manualRedirected.text.toString().trim()
+            if (target.isEmpty() || redirected.isEmpty()) return@ManualAddDialog
+            scope.launch {
+                isLoading = true
+                val ok = awaitSuSFSBoolean(configHelper) { reply ->
+                    SuSFSUiAction.AddOpenRedirect(target, redirected, manualUidScheme, reply)
+                }
+                if (ok) {
+                    entries = awaitSuSFSConfig(configHelper) { reply ->
+                        SuSFSUiAction.Refresh(reply)
+                    }?.open_redirect.orEmpty()
+                    showManualAdd = false
+                } else {
+                    snackbarHost.showReplacingSnackbar(operationFailedMsg)
+                }
+                isLoading = false
+            }
+        },
+        formContent = {
+            item {
+                SettingsTextFieldWidget(
+                    state = manualTarget,
+                    title = targetPathLabel,
+                    useLabelAsPlaceholder = true,
+                    enabled = !isLoading,
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    renderBackgroundBlur = false,
+                )
+            }
+            item {
+                SettingsTextFieldWidget(
+                    state = manualRedirected,
+                    title = redirectedPathLabel,
+                    useLabelAsPlaceholder = true,
+                    enabled = !isLoading,
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    renderBackgroundBlur = false,
+                )
+            }
+            item {
+                SettingsDropdownWidget(
+                    title = uidSchemeLabel,
+                    description = selectedUidLabel,
+                    iconPlaceholder = false,
+                    choice = uidSchemeOptions.indexOfFirst { it.first == manualUidScheme }
+                        .coerceAtLeast(0),
+                    data = uidSchemeOptions.map { it.second },
+                    renderBackgroundBlur = false,
+                    onChoiceChange = { index -> manualUidScheme = uidSchemeOptions[index].first },
+                )
+            }
+        },
+    )
+
+    detailItem?.let { item ->
+        EntryDetailDialog(
+            showDialog = true,
+            title = detailTitle,
+            fields = listOf(
+                targetPathLabel to item.target_path,
+                redirectedPathLabel to item.redirected_path,
+                uidSchemeLabel to item.uid_scheme.localizedLabel(),
+            ),
+            onDismiss = { detailItem = null },
+            onDelete = {
+                scope.launch {
+                    isLoading = true
+                    val ok = awaitSuSFSBoolean(configHelper) { reply ->
+                        SuSFSUiAction.RemoveOpenRedirect(item.target_path, reply)
+                    }
+                    if (ok) {
+                        entries = awaitSuSFSConfig(configHelper) { reply ->
+                            SuSFSUiAction.Refresh(reply)
+                        }?.open_redirect.orEmpty()
+                        detailItem = null
+                    } else {
+                        snackbarHost.showReplacingSnackbar(operationFailedMsg)
+                    }
+                    isLoading = false
+                }
+            },
+        )
+    }
+}

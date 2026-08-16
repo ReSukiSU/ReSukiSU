@@ -20,14 +20,23 @@ sha256 = "1"
 tempfile = "3"
 chrono = "0.4"
 regex-lite = "0.1"
-android-bootimg = { git = "https://github.com/5ec1cff/android_bootimg" }
+android-bootimg = { git = "https://github.com/5ec1cff/android_bootimg", rev = "150425b027c76ea104c82e408571651f2181b2c2" }
 memmap2 = "0.9.10"
+bitflags = "2.11.0"
+base16ct = { version = "1.0.0", features = ["alloc"] }
+figlet-rs = "1.0.0"
 
 [target.'cfg(target_os = "android")'.dependencies]
-rustix = { version = "=1.1.4", default-features = false, features = ["process", "thread", "fs", "system", "stdio"] }
+rustix = { version = "=1.1.4", default-features = false, features = [
+    "process",
+    "thread",
+    "fs",
+    "system",
+    "stdio",
+] }
 android-properties = { version = "0.2", features = ["bionic-deprecated"] }
 android_logger = { version = "0.15", default-features = false }
-zip = { version = "8",  features = [
+zip = { version = "8", features = [
     "deflate",
     "deflate64",
     "time",
@@ -45,7 +54,7 @@ encoding_rs = "0.8"
 humansize = "2"
 libc = "0.2"
 extattr = "1"
-jwalk = "0.8"
+jwalk = "0.9"
 is_executable = "1"
 nom = "8"
 derive-new = "0.7"
@@ -53,7 +62,9 @@ getopts = "0.2"
 serde = { version = "1.0", features = ["derive"] }
 ksuinit = { path = "../ksuinit" }
 adb_client = { git = "https://github.com/Kernel-SU/adb_client" }
-prop-rs-android = { git = "https://github.com/Kernel-SU/ksu_props" }
+num_enum = "0.7"
+inotify = "0.11.2"
+prop-rs-android = { git = "https://github.com/Kernel-SU/ksu_props", rev = "6f5723105d8d4cacad31d83d343defbf032c7b33" }
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
 env_logger = { version = "0.11.10", default-features = false }
@@ -66,3 +77,4 @@ codegen-units = 1
 
 [build-dependencies]
 bindgen = "0.72.1"
+cc = "1"
