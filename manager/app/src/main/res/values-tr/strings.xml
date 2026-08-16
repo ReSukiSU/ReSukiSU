@@ -284,7 +284,7 @@
     <string name="dpi_applied_success">DPI %1$d olarak ayarlandı</string>
     <string name="settings_language">Uygulama Dili</string>
     <string name="language_system_default">Sistemi takip et</string>
-    <string name="settings_background_dim">Arka Plan Koyuluğunu Ayarlama</string>
+    <string name="settings_background_dim">Arka Plan Koyuluğunu Ayarla</string>
     <string name="error_code">hata kodu</string>
     <string name="check_log">Lütfen günlük kaydını kontrol edin</string>
     <string name="installing_module">Modül yükleniyor %1$d/%2$d</string>
@@ -553,8 +553,8 @@
     <string name="background_crop_title">Arka planı kırp</string>
     <string name="settings_config_enable_blur">Bulanıklaştırmayı Etkinleştir</string>
     <string name="settings_config_enable_blur_summary">Uygulama genelinde bulanıklaştırma efektini etkinleştir</string>
-    <string name="settings_exp_draw_background_to_blur">Bulanıklaştırma için özel arkaplan çiz</string>
-    <string name="settings_config_use_custom_background_seed_color">Rengi özel arkaplana göre ayarla</string>
+    <string name="settings_exp_draw_background_to_blur">Bulanıklaştırma İçin Özel Arkaplan Çiz</string>
+    <string name="settings_config_use_custom_background_seed_color">Rengi Özel Arkaplana Göre Ayarla</string>
     <string name="settings_config_use_custom_background_seed_color_summary">Özel arkaplandan dinamik tema rengi çıkarır</string>
     <string name="settings_custom_enable_high_contrast_summary">Metinlerin etrafına gölge ekle</string>
     <string name="predictive_back_animation_scale">Ölçek</string>

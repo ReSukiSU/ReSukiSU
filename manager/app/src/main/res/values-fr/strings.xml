@@ -3,16 +3,16 @@
     <string name="home">Accueil</string>
     <string name="learn_more">En savoir plus</string>
     <string name="home_not_installed">Non installé</string>
-    <string name="home_click_to_install">Appuyez ici pour installer</string>
+    <string name="home_click_to_install">Appuyer ici pour installer</string>
     <string name="home_working">Fonctionnel</string>
     <string name="home_unsupported">Non pris en charge</string>
     <string name="home_unsupported_reason">KernelSU ne prend désormais en charge que les noyaux GKI</string>
     <string name="home_kernel">Noyau</string>
     <string name="home_susfs_version">Version SuSFS</string>
     <string name="home_manager_version">Version du gestionnaire</string>
-    <string name="home_selinux_status">Mode SELinux</string>
+    <string name="home_selinux_status">État SELinux</string>
     <string name="selinux_status_disabled">Désactivé</string>
-    <string name="selinux_status_enforcing">Imposer</string>
+    <string name="selinux_status_enforcing">Activé</string>
     <string name="unknown">Inconnu</string>
     <string name="superuser">Super-utilisateur</string>
     <string name="module_failed_to_enable">Échec de l\'activation du module : %s</string>
@@ -36,7 +36,7 @@
     <string name="module_uninstall_success">%s a été désinstallé</string>
     <string name="module_uninstall_failed">Échec de la désinstallation : %s</string>
     <string name="module_author">Auteur</string>
-    <string name="refresh">Rafraîchir</string>
+    <string name="refresh">Actualiser</string>
     <string name="show_system_apps">Afficher les applications système</string>
     <string name="hide_system_apps">Masquer les applications système</string>
     <string name="send_log">Envoyer les journaux</string>
@@ -211,4 +211,14 @@
     <string name="installing_module">Module en cours d\'installation %1$d/%2$d</string>
     <string name="module_failed_count">%d a échoué à installer un nouveau module</string>
     <string name="kernel_flashing">Clignotement du noyau</string>
+    <string name="selinux_status_permissive">Permissif</string>
+    <string name="home_seccomp_status">Statut Seccomp</string>
+    <string name="seccomp_status_not_supported">Non pris en charge</string>
+    <string name="seccomp_status_disabled">Désactivé</string>
+    <string name="seccomp_status_strict">Strict</string>
+    <string name="seccomp_status_filter">Filtrage</string>
+    <string name="seccomp_status_unknown">Inconnu</string>
+    <string name="sulog">Journalisation de SU</string>
+    <string name="sulog_log_files">Fichiers journaux</string>
+    <string name="sulog_failed_to_load">Échec de chargement du journal SU</string>
 </resources>
