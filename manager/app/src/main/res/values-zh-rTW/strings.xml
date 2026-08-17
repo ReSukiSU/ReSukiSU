@@ -83,6 +83,8 @@
     <string name="jailbreak_flash_warning_countdown">繼續（%1$d）</string>
     <string name="settings_auto_jailbreak">自動越獄</string>
     <string name="settings_auto_jailbreak_summary">當裝置開機偵測到 SELinux 為寬容模式則自動使用 Magica 提升權限。需要授予本應用程式開機自動啟動的權限。</string>
+    <string name="settings_soft_reboot">使用軟重啟代替重啟</string>
+    <string name="settings_soft_reboot_summary">安裝、更新或開關模組時使用軟重啟代替完整重啟</string>
     <string name="settings_adb_root_summary">以 root 權限運行 adbd 守護進程</string>
     <string name="settings_selinux_hide">隱藏 SELinux 修改</string>
     <string name="settings_selinux_hide_summary">限制應用檢測 SELinux 修改</string>

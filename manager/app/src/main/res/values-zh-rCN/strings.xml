@@ -84,6 +84,8 @@
     <string name="jailbreak_flash_warning_countdown">继续 (%1$d)</string>
     <string name="settings_auto_jailbreak">自动越狱</string>
     <string name="settings_auto_jailbreak_summary">开机检测到 Permissive SELinux 时自动使用 Magica 提权。需要授予本应用自启动权限。</string>
+    <string name="settings_soft_reboot">使用软重启代替重启</string>
+    <string name="settings_soft_reboot_summary">安装、更新或开关模块时使用软重启代替完整重启</string>
     <string name="settings_adb_root_summary">以 root 权限运行 adbd 守护进程</string>
     <string name="settings_selinux_hide">隐藏 SELinux 修改</string>
     <string name="settings_selinux_hide_summary">阻止应用检测 SELinux 修改</string>

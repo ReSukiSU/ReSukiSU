@@ -83,6 +83,8 @@
     <string name="jailbreak_flash_warning_countdown">繼續 (%1$d)</string>
     <string name="settings_auto_jailbreak">自動越獄</string>
     <string name="settings_auto_jailbreak_summary">開機檢測到 Permissive SELinux 時自動使用 Magica 提權。需要授予本應用程式自啟動權限。</string>
+    <string name="settings_soft_reboot">使用軟重啟代替重啟</string>
+    <string name="settings_soft_reboot_summary">安裝、更新或開關模組時使用軟重啟代替完整重啟</string>
     <string name="settings_adb_root_summary">以 root 權限運行守護 adbd 進程</string>
     <string name="reboot_to_apply">重新啟動生效</string>
     <string name="module_magisk_conflict">因同 Magisk 有衝突，所有模組唔可用！</string>

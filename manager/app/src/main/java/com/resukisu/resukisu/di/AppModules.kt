@@ -87,6 +87,7 @@ import com.resukisu.resukisu.domain.usecase.InitializeApplicationUseCase
 import com.resukisu.resukisu.domain.usecase.IsLateLoadModeUseCase
 import com.resukisu.resukisu.domain.usecase.IsModuleUriAccessibleUseCase
 import com.resukisu.resukisu.domain.usecase.IsNetworkAvailableUseCase
+import com.resukisu.resukisu.domain.usecase.IsSoftRebootPreferredUseCase
 import com.resukisu.resukisu.domain.usecase.IsSystemLanguageSettingsUseCase
 import com.resukisu.resukisu.domain.usecase.LaunchSystemLanguageSettingsUseCase
 import com.resukisu.resukisu.domain.usecase.LoadSettingsPlatformUseCase
@@ -298,6 +299,7 @@ val useCaseModule = module {
     factoryOf(::UpdateAppearanceUseCase)
     factoryOf(::UpdatePlatformSettingUseCase)
     factoryOf(::GetPlatformFeatureStatusUseCase)
+    factoryOf(::IsSoftRebootPreferredUseCase)
     factoryOf(::CheckManagerUpdateUseCase)
     factoryOf(::EnsureManagerInstalledUseCase)
     factoryOf(::RebootUseCase)
