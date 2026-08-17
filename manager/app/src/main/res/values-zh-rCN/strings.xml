@@ -74,9 +74,7 @@
     <string name="module_uninstall_failed">卸载失败：%s</string>
     <string name="module_version">版本</string>
     <string name="module_author">作者</string>
-    <string name="refresh">刷新</string>
     <string name="show_system_apps">显示系统应用</string>
-    <string name="hide_system_apps">隐藏系统应用</string>
     <string name="send_log">发送日志</string>
     <string name="safe_mode">安全模式</string>
     <string name="jailbreak_mode">越狱模式</string>
@@ -144,7 +142,6 @@
     <string name="app_profile_template_delete">删除</string>
     <string name="app_profile_template_view">查看模版</string>
     <string name="app_profile_template_readonly">只读</string>
-    <string name="app_profile_template_id_exist">模版 ID 已存在！</string>
     <string name="app_profile_import_export">导入/导出</string>
     <string name="app_profile_import_from_clipboard">从剪切板导入</string>
     <string name="app_profile_export_to_clipboard">导出到剪切板</string>
@@ -155,8 +152,6 @@
     <string name="app_profile_template_import_empty">剪切板为空！</string>
     <string name="affected_applications">受影响的应用</string>
     <string name="module_changelog_failed">获取更新日志失败：%s</string>
-    <string name="settings_check_update">更新提醒</string>
-    <string name="settings_check_update_summary">自动检查模块和管理器更新</string>
     <string name="settings_check_manager_update">检查管理器更新</string>
     <string name="settings_check_manager_update_summary">自动检查管理器更新</string>
     <string name="settings_check_module_update">检查模块更新</string>
@@ -191,7 +186,6 @@
     <string name="unknown_module">未知模块</string>
     <string name="confirm">确定</string>
     <string name="cancel">取消</string>
-    <string name="command_execution_failed">命令执行失败：%1$s</string>
     <string name="allowlist_backup_success">应用列表备份成功</string>
     <string name="allowlist_backup_failed">应用列表备份失败：%1$s</string>
     <string name="allowlist_restore_confirm_title">确认还原应用列表</string>
@@ -238,18 +232,6 @@
     <string name="theme_settings">主题设置</string>
     <string name="simple_mode">简洁模式</string>
     <string name="simple_mode_summary">开启后将隐藏不必要的卡片</string>
-    <string name="hide_other_info">强迫症开关</string>
-    <string name="hide_other_info_summary">隐藏导航栏上的超级用户数和模块数红点</string>
-    <string name="hide_susfs_status">隐藏 SuSFS 状态信息</string>
-    <string name="hide_susfs_status_summary">隐藏主页上的 SuSFS 状态信息</string>
-    <string name="hide_zygisk_implement">隐藏 Zygisk 状态信息</string>
-    <string name="hide_zygisk_implement_summary">隐藏主页上的 Zygisk 实现状态信息</string>
-    <string name="hide_meta_module_implement">隐藏元模块状态信息</string>
-    <string name="hide_meta_module_implement_summary">隐藏主页上的元模块实现状态信息</string>
-    <string name="hide_link_card">隐藏链接卡片</string>
-    <string name="hide_link_card_summary">隐藏主页上的链接卡片信息</string>
-    <string name="hide_tag_card">隐藏模块标签行</string>
-    <string name="hide_tag_card_summary">隐藏模块卡片中的文件夹名称、大小标签和是否为元模块</string>
     <string name="theme_mode">主题模式</string>
     <string name="theme_follow_system">跟随系统</string>
     <string name="theme_light">浅色</string>
@@ -262,10 +244,6 @@
     <string name="horizon_kernel">刷写 AnyKernel3 压缩包</string>
     <string name="horizon_kernel_summary">刷入 Anykernel3 内核</string>
     <string name="root_required">需要 root 权限</string>
-    <string name="reboot_complete_title">刷写完成</string>
-    <string name="reboot_complete_msg">是否立即重启？</string>
-    <string name="yes">是</string>
-    <string name="no">否</string>
     <string name="failed_reboot">重启失败</string>
     <string name="custom_settings">个性化设置</string>
     <string name="theme_color">主题颜色</string>
@@ -330,10 +308,6 @@
     <string name="kernel_flashing">内核刷写</string>
     <string name="warning_of_meta_module_title">需要元模块</string>
     <string name="warning_of_meta_module_summary">这个模块需要挂载一些文件。需要安装元模块，使它正常工作</string>
-    <string name="category_all_apps">全部</string>
-    <string name="category_root_apps">Root</string>
-    <string name="category_custom_apps">自定义</string>
-    <string name="category_default_apps">默认</string>
     <string name="sort_name_asc">名称升序</string>
     <string name="sort_name_desc">名称降序</string>
     <string name="sort_install_time_new">安装时间（新）</string>
@@ -344,9 +318,6 @@
     <string name="no_apps_in_category">此分类中没有应用</string>
     <string name="persistent">持久</string>
     <string name="temporary">临时</string>
-    <string name="menu_options">菜单选项</string>
-    <string name="sort_options">排序方式</string>
-    <string name="app_categories">应用类型选择</string>
     <string name="susfs_config_title">SUSFS</string>
     <string name="susfs_config_setting_title">SUSFS</string>
     <string name="module_update_json">更新配置</string>
@@ -467,7 +438,6 @@
     <string name="susfs_tab_sus_kstat">伪造元数据</string>
     <string name="susfs_tab_open_redirect">文件重定向</string>
     <string name="susfs_tab_sus_map">隐藏映射</string>
-    <string name="susfs_tab_backup_restore">备份 / 还原</string>
     <string name="susfs_status_version">SUSFS 版本</string>
     <string name="susfs_status_variant">变体</string>
     <string name="susfs_status_enabled_features">支持功能</string>
@@ -523,7 +493,6 @@
     <string name="susfs_uid_scheme_unmounted_app">卸载列表内的 Android 应用</string>
     <string name="susfs_uid_scheme_unmounted">卸载列表</string>
     <string name="susfs_map_subtype">SUS 映射</string>
-    <string name="susfs_refresh">刷新</string>
     <string name="susfs_save">保存</string>
     <string name="susfs_operation_failed">操作失败</string>
     <string name="susfs_operation_success">操作成功</string>

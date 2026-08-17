@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.zIndex
+import com.resukisu.resukisu.ui.theme.ThemeConfig
+import org.koin.compose.koinInject
 import kotlin.math.roundToInt
 
 private const val PADDING_HORIZONTAL = 16
@@ -71,8 +73,6 @@ data class SegmentedItemData(
 @SegmentedColumnDsl
 class SegmentedColumnScope {
     val items = mutableListOf<SegmentedItemData>()
-
-    // 内部维护的嵌套上下文状态：用于无感向后代传递“顶部强制扁平”和“全局可见性遮罩”
     private var isInsideExpandableBody: Boolean = false
     private var parentVisibilityMask: Boolean = true
 
@@ -146,6 +146,7 @@ fun SegmentedColumn(
     ),
     content: SegmentedColumnScope.() -> Unit
 ) {
+    val themeConfig: ThemeConfig = koinInject()
     val scope = SegmentedColumnScope().apply(content)
     val allItems = scope.items
 
@@ -221,8 +222,11 @@ fun SegmentedColumn(
                             bottomEnd = max(0.dp, currentBottomRadius)
                         )
 
-                        val targetTopPadding = itemData.customTopPadding
-                            ?: (if (isFirst) 0.dp else ListItemDefaults.SegmentedGap)
+                        val targetTopPadding =
+                            if (themeConfig.isEnableBlurExp) 0.dp else { // No segmented allowed in blured
+                                itemData.customTopPadding
+                                    ?: (if (isFirst) 0.dp else ListItemDefaults.SegmentedGap)
+                            }
                         val currentTopPadding = if (isDynamicDpSupported) {
                             animateDpAsState(targetTopPadding, dpSpring, label = "TopPadding").value
                         } else targetTopPadding
@@ -266,7 +270,14 @@ fun SegmentedColumn(
                                 }
                         ) {
                             CompositionLocalProvider(LocalSegmentedItemShape provides shape) {
-                                Column(modifier = Modifier.padding(top = currentTopPadding)) {
+                                Column(
+                                    modifier = Modifier.padding(
+                                        top = max(
+                                            currentTopPadding,
+                                            0.dp
+                                        )
+                                    )
+                                ) {
                                     itemData.content(shape)
                                 }
                             }

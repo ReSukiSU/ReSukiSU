@@ -198,7 +198,7 @@ fun HomePage(
                         start = 16.dp,
                         end = 16.dp
                     ),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(0.dp)
             ) {
                 // 状态卡片
                 if (uiState.isCoreDataLoaded) {
@@ -236,6 +236,7 @@ fun HomePage(
                                 }
                             )
                         }
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
 
                     // 警告信息
@@ -251,6 +252,7 @@ fun HomePage(
                                 )
                             }
                         )
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
 
                     if (!uiState.systemStatus.isOfficialSignature) {
@@ -268,6 +270,7 @@ fun HomePage(
                                 )
                             }
                         )
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
 
                     if (BuildConfig.IS_PR_BUILD || uiState.systemStatus.isPrBuild) {
@@ -284,6 +287,7 @@ fun HomePage(
                                 )
                             }
                         )
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
 
                     if (uiState.systemStatus.kernelPatchImplementation == KernelPatchImplementation.OFFICIAL) {
@@ -300,6 +304,7 @@ fun HomePage(
                                 )
                             }
                         )
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
 
                     if (uiState.systemStatus.ksuVersion != null && !uiState.systemStatus.isRootAvailable) {
@@ -314,6 +319,7 @@ fun HomePage(
                                 )
                             }
                         )
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
 
                     StatusCard(
@@ -340,9 +346,12 @@ fun HomePage(
                         }
                     )
                 }
+                Spacer(modifier = Modifier.height(10.dp))
 
                 ManagerUpdateCard(uiState.stableManagerUpdate)
+                Spacer(modifier = Modifier.height(10.dp))
                 ManagerUpdateCard(uiState.betaManagerUpdate)
+                Spacer(modifier = Modifier.height(10.dp))
                 if (uiState.isBetaManagerUpdateCheckFailed) {
                     WarningCard(
                         message = stringResource(R.string.beta_update_check_failed),
@@ -354,6 +363,7 @@ fun HomePage(
                             )
                         }
                     )
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
 
                 if (uiState.isExtendedDataLoaded) {
@@ -361,14 +371,11 @@ fun HomePage(
                         systemStatus = uiState.systemStatus,
                         systemInfo = uiState.systemInfo,
                         isSimpleMode = uiState.isSimpleMode,
-                        isHideSusfsStatus = uiState.isHideSusfsStatus,
-                        isHideZygiskImplement = uiState.isHideZygiskImplement,
-                        isHideMetaModuleImplement = uiState.isHideMetaModuleImplement,
                     )
                 }
 
                 // 链接卡片
-                if (!uiState.isSimpleMode && !uiState.isHideLinkCard) {
+                if (!uiState.isSimpleMode) {
                     DonateCard()
                     LearnMoreCard()
                 }
@@ -722,9 +729,6 @@ private fun InfoCard(
     systemStatus: KernelStatus,
     systemInfo: HomeSystemInfo,
     isSimpleMode: Boolean,
-    isHideSusfsStatus: Boolean,
-    isHideZygiskImplement: Boolean,
-    isHideMetaModuleImplement: Boolean
 ) {
     val managersList = systemInfo.managersList
 
@@ -779,7 +783,7 @@ private fun InfoCard(
         }
 
         item(
-            visible = !isSimpleMode && !isHideSusfsStatus && systemInfo.susfsEnabled && systemInfo.susfsVersion.isNotEmpty()
+            visible = !isSimpleMode && systemInfo.susfsEnabled && systemInfo.susfsVersion.isNotEmpty()
         ) {
             SettingsBaseWidget(
                 iconPlaceholder = false,
@@ -861,7 +865,7 @@ private fun InfoCard(
         }
 
         item(
-            visible = !isHideZygiskImplement && !isSimpleMode && systemInfo.zygiskImplement.isNotEmpty() && systemInfo.zygiskImplement != "None"
+            visible = !isSimpleMode && systemInfo.zygiskImplement.isNotEmpty() && systemInfo.zygiskImplement != "None"
         ) {
             SettingsBaseWidget(
                 iconPlaceholder = false,
@@ -871,7 +875,7 @@ private fun InfoCard(
         }
 
         item(
-            visible = !isHideMetaModuleImplement && !isSimpleMode && systemInfo.metaModuleImplement.isNotEmpty() && systemInfo.metaModuleImplement != "None"
+            visible = !isSimpleMode && systemInfo.metaModuleImplement.isNotEmpty() && systemInfo.metaModuleImplement != "None"
         ) {
             SettingsBaseWidget(
                 iconPlaceholder = false,

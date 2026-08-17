@@ -40,14 +40,12 @@
     <string name="reboot">הפעלה מחדש</string>
     <string name="home_unsupported_reason">KernelSU תומך רק בליבת GKI כעת</string>
     <string name="home_selinux_status">סטטוס SELinux</string>
-    <string name="hide_system_apps">הסתר אפליקציות מערכת</string>
     <string name="module_version">גרסה</string>
     <string name="home_unsupported">אינו נתמך</string>
     <string name="profile_selinux_domain">תחום</string>
     <string name="home">בית</string>
     <string name="profile_custom">מותאם אישית</string>
     <string name="profile_template">תבנית</string>
-    <string name="refresh">רענון</string>
     <string name="module_downloading">מוריד מודל: %s</string>
     <string name="module_update">עדכון</string>
     <string name="home_learn_kernelsu">למד אודות KernelSU</string>
@@ -67,8 +65,6 @@
     <string name="home_manager_version">גרסת מנהל</string>
     <string name="new_version_available">גרסה חדשה עבור: %s זמינה, לחץ כדי לשדרג</string>
     <string name="save_log">שמור יומנים</string>
-    <string name="settings_check_update">התראות עדכון</string>
-    <string name="settings_check_update_summary">בדוק אוטומטית אם יש עדכונים למודולים ולמנהל</string>
     <string name="settings_sucompat">ניתוב מחדש של su binary</string>
     <string name="settings_sucompat_summary">הפנה מחדש את /system/bin/su ל-ksud עבור אפליקציות שקיבלו הרשאת Superuser בפרופיל האפליקציה; יעיל לתהליכים חדשים בלבד.</string>
     <string name="settings_kernel_umount">ביטול טעינת קרנל</string>

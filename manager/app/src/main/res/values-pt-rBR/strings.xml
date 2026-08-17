@@ -35,9 +35,7 @@
     <string name="module_uninstall_failed">Não foi possível desinstalar %s</string>
     <string name="module_version">Versão</string>
     <string name="module_author">Autor</string>
-    <string name="refresh">Atualizar</string>
     <string name="show_system_apps">Mostrar apps do sistema</string>
-    <string name="hide_system_apps">Ocultar apps do sistema</string>
     <string name="send_log">Reportar registros</string>
     <string name="safe_mode">Modo de segurança</string>
     <string name="reboot_to_apply">Reinicie para entrar em vigor</string>
@@ -79,7 +77,6 @@
     <string name="app_profile_template_delete">Excluir</string>
     <string name="app_profile_template_view">Ver modelo</string>
     <string name="app_profile_template_readonly">Somente leitura</string>
-    <string name="app_profile_template_id_exist">O ID do modelo já existe!</string>
     <string name="app_profile_import_export">Importar/Exportar</string>
     <string name="app_profile_import_from_clipboard">Importar da área de transferência</string>
     <string name="app_profile_export_to_clipboard">Exportar para a área de transferência</string>
@@ -89,8 +86,6 @@
     <string name="app_profile_template_save_failed">Falha ao salvar o modelo</string>
     <string name="app_profile_template_import_empty">A área de transferência está vazia!</string>
     <string name="module_changelog_failed">Falha ao buscar o registro de alterações: %s</string>
-    <string name="settings_check_update">Notificações de atualização</string>
-    <string name="settings_check_update_summary">Verificar automaticamente se há atualizações do módulo e do gerenciador</string>
     <string name="grant_root_failed">Falha ao conceder acesso root!</string>
     <string name="action">Ação</string>
     <string name="direct_install">Instalação direta (recomendada)</string>

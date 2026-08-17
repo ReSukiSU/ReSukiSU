@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="home">Inicio</string>
-    <string name="settings_check_update">Notificacións de actualización</string>
-    <string name="settings_check_update_summary">Comprobar automaticamente as actualizacións do módulo e do xestor</string>
     <string name="settings_sucompat">Redirixir o binario su</string>
     <string name="settings_sucompat_summary">Permite que as aplicacións con permiso de Superusuario no perfil da aplicación obteñan un shell de superusuario executando /system/bin/su; efectivo só para novos procesos.</string>
     <string name="settings_kernel_umount">Desmontar núcleo</string>

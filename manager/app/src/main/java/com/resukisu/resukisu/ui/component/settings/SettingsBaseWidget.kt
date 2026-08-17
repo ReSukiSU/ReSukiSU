@@ -131,12 +131,10 @@ fun SettingsBaseWidget(
     foreContent: @Composable RowScope.() -> Unit = {},
     descriptionColumnContent: (@Composable ColumnScope.() -> Unit)? = null,
     containerColor: Color? = null,
-    containerAlpha: Float? = null,
     trailingContent: (@Composable BoxScope.(interactionSource: MutableInteractionSource) -> Unit)? = null,
 ) {
     val themeConfig: ThemeConfig = koinInject()
     val cardConfig: CardConfig = koinInject()
-    val resolvedContainerAlpha = containerAlpha ?: cardConfig.cardAlpha
     val hapticFeedback = LocalHapticFeedback.current
     val alpha = if (enabled) 1f else 0.38f
 
@@ -155,7 +153,7 @@ fun SettingsBaseWidget(
         }).run {
         if (isOnBackground) {
             copy(
-                alpha = resolvedContainerAlpha
+                alpha = cardConfig.cardAlpha
             )
         } else this
     }

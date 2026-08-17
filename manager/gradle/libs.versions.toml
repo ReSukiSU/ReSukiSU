@@ -18,7 +18,8 @@ coil-compose = "2.7.0"
 ucrop = "2.2.11"
 markdown = "4.6.2"
 webkit = "1.16.0"
-appiconloader-coil = "1.5.0"
+appiconloader = "1.5.0"
+hiddenapibypass = "6.1"
 parcelablelist = "2.0.1"
 libsu = "6.0.0"
 apksign = "1.4"
@@ -90,7 +91,9 @@ ucrop = { module = "com.github.yalantis:ucrop", version.ref = "ucrop" }
 
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 
-me-zhanghai-android-appiconloader-coil = { group = "me.zhanghai.android.appiconloader", name = "appiconloader-coil", version.ref = "appiconloader-coil" }
+me-zhanghai-android-appiconloader = { group = "me.zhanghai.android.appiconloader", name = "appiconloader", version.ref = "appiconloader" }
+me-zhanghai-android-appiconloader-coil = { group = "me.zhanghai.android.appiconloader", name = "appiconloader-coil", version.ref = "appiconloader" }
+org-lsposed-hiddenapibypass = { group = "org.lsposed.hiddenapibypass", name = "hiddenapibypass", version.ref = "hiddenapibypass" }
 
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 miuix-navigation = { group = "top.yukonga.miuix.kmp", name = "miuix-navigation3-ui-android", version.ref = "miuix" }

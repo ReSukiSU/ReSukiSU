@@ -33,9 +33,7 @@
     <string name="module_uninstall_failed">Neizdevās atinstalēt: %s</string>
     <string name="module_version">Versija</string>
     <string name="module_author">Autors</string>
-    <string name="refresh">Atjaunot</string>
     <string name="show_system_apps">Rādīt sistēmas lietotnes</string>
-    <string name="hide_system_apps">Slēpt sistēmas lietotnes</string>
     <string name="send_log">Ziņot žurnālu</string>
     <string name="safe_mode">Drošais režīms</string>
     <string name="reboot_to_apply">Restartējiet, lai stātos spēkā</string>
@@ -78,7 +76,6 @@
     <string name="app_profile_template_delete">Dzēst</string>
     <string name="app_profile_template_view">Skatīt veidni</string>
     <string name="app_profile_template_readonly">tikai lasīt</string>
-    <string name="app_profile_template_id_exist">veidnes id jau pastāv!</string>
     <string name="app_profile_import_export">Importēt/Eksportēt</string>
     <string name="app_profile_import_from_clipboard">Importēt no starpliktuves</string>
     <string name="app_profile_export_to_clipboard">Eksportēt starpliktuvē</string>
@@ -88,8 +85,6 @@
     <string name="app_profile_template_save_failed">Neizdevās saglabāt veidni</string>
     <string name="app_profile_template_import_empty">Starpliktuve ir tukša!</string>
     <string name="module_changelog_failed">Izmaiņu žurnāla iegūšana neizdevās: %s</string>
-    <string name="settings_check_update">Atjaunināšanas paziņojumi</string>
-    <string name="settings_check_update_summary">Automātiski pārbaudīt moduļa un pārvaldnieka atjauninājumus</string>
     <string name="grant_root_failed">Neizdevās piešķirt sakni!</string>
     <string name="direct_install">Tiešā instalēšana (Ieteicams)</string>
     <string name="select_file">Izvēlieties failu</string>

@@ -23,9 +23,7 @@
     <string name="module_uninstall_failed">ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ: %s</string>
     <string name="module_version">ವರ್ಷನ್</string>
     <string name="module_author">ಲೇಖಕ</string>
-    <string name="refresh">ರಿಫ್ರೆಶ್</string>
     <string name="show_system_apps">ಸಿಸ್ಟಮ್ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ತೋರಿಸಿ</string>
-    <string name="hide_system_apps">ಸಿಸ್ಟಮ್ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಮರೆಮಾಡಿ</string>
     <string name="send_log">ಲಾಗ್ ಕಳುಹಿಸಿ</string>
     <string name="safe_mode">ಸುರಕ್ಷಿತ ಮೋಡ್</string>
     <string name="reboot_to_apply">ಪರಿಣಾಮ ಬೀರಲು ರೀಬೂಟ್ ಮಾಡಿ</string>
@@ -53,8 +51,6 @@
     <string name="launch_app">ಲಾಂಚ್</string>
     <string name="force_stop_app" formatted="false">ಫೋರ್ಸ್ ಸ್ಟಾಪ್</string>
     <string name="module_changelog">ಚೇಂಜ್ಲಾಗ್</string>
-    <string name="settings_check_update">ಅಪ್‌ಡೇಟ್ ಅಧಿಸೂಚನೆಗಳು</string>
-    <string name="settings_check_update_summary">ಮಾಡ್ಯೂಲ್ ಮತ್ತು ಮ್ಯಾನೇಜರ್ ಅಪ್‌ಡೇಟ್‌ಗಳಿಗಾಗಿ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಪರಿಶೀಲಿಸಿ</string>
     <string name="save_log">ಲಾಗ್ಗಳನ್ನು ಉಳಿಸಿ</string>
     <string name="settings_sucompat">su ಬೈನರಿ ಮರುಮಾರ್ಗಗೊಳಿಸಿ</string>
     <string name="settings_sucompat_summary">ಆಪ್ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ ಸೂಪರ್‌ಯೂಸರ್ ಅನುಮತಿ ಪಡೆದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ /system/bin/su ಅನ್ನು ksud ಗೆ ಮರು ನಿರ್ದೇಶಿಸಿ; ಹೊಸ ಪ್ರಕ್ರಿಯೆಗಳಿಗೆ ಮಾತ್ರ ಪರಿಣಾಮಕಾರಿ.</string>

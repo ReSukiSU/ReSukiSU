@@ -32,7 +32,6 @@ data class ModulePreferences(
     val sortEnabledFirst: Boolean = false,
     val sortActionFirst: Boolean = false,
     val showMoreModuleInfo: Boolean = false,
-    val isHideTagRow: Boolean = false,
 )
 
 enum class MetaModuleStatus {

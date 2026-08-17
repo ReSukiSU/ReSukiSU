@@ -33,9 +33,7 @@
     <string name="module_uninstall_failed">আনইন্সটল ব্যর্থ: %s</string>
     <string name="module_version">ভার্সন</string>
     <string name="module_author">লেখক</string>
-    <string name="refresh">রিফ্রেশ</string>
     <string name="show_system_apps">শো সিস্টেম অ্যাপস</string>
-    <string name="hide_system_apps">হাইড সিস্টেম অ্যাপস</string>
     <string name="send_log" formatted="false">সেন্ড লগ</string>
     <string name="safe_mode">সেইফ মোড</string>
     <string name="reboot_to_apply">রিবুট এপ্লাই</string>
@@ -53,8 +51,6 @@
     <string name="profile_custom">কাস্টম</string>
     <string name="profile_umount_modules">আনমাউন্ট মোডিউল</string>
     <string name="save_log">লগ সংরক্ষণ করুন</string>
-    <string name="settings_check_update">আপডেটের বিজ্ঞপ্তি</string>
-    <string name="settings_check_update_summary">মডিউল এবং ম্যানেজার আপডেটের জন্য স্বয়ংক্রিয়ভাবে পরীক্ষা করুন</string>
     <string name="settings_sucompat">su বাইনারি রি-রুট করুন</string>
     <string name="settings_sucompat_summary">অ্যাপ প্রোফাইলে সুপার ইউজার অনুমতি প্রাপ্ত অ্যাপগুলির জন্য /system/bin/su কে ksud এ রিডাইরেক্ট করুন; শুধুমাত্র নতুন প্রসেসের জন্য কার্যকর।</string>
     <string name="settings_kernel_umount">কার্নেল আনমাউন্ট</string>

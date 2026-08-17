@@ -50,7 +50,6 @@ import androidx.compose.material.icons.twotone.Palette
 import androidx.compose.material.icons.twotone.Style
 import androidx.compose.material.icons.twotone.SwapHoriz
 import androidx.compose.material.icons.twotone.Translate
-import androidx.compose.material.icons.twotone.VisibilityOff
 import androidx.compose.material.icons.twotone.Wallpaper
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -679,93 +678,6 @@ private fun CustomizationSettings(
                 }
             )
         }
-
-        hideOptionsSettings(homeUiState, moduleUiState, homeViewModel, moduleViewModel)
-    }
-}
-
-private fun SegmentedColumnScope.hideOptionsSettings(
-    homeUiState: HomeUiState,
-    moduleUiState: ModuleUiState,
-    homeViewModel: HomeViewModel,
-    moduleViewModel: ModuleViewModel,
-) {
-    item {
-        // 隐藏模块数量等信息
-        SettingsSwitchWidget(
-            icon = Icons.TwoTone.VisibilityOff,
-            title = stringResource(R.string.hide_other_info),
-            description = stringResource(R.string.hide_other_info_summary),
-            checked = homeUiState.isHideOtherInfo,
-            onCheckedChange = { enabled ->
-                homeViewModel.dispatch(HomeUiAction.SetHideOtherInfo(enabled))
-            }
-        )
-    }
-
-    item {
-        // SuSFS 状态信息
-        SettingsSwitchWidget(
-            icon = Icons.TwoTone.VisibilityOff,
-            title = stringResource(R.string.hide_susfs_status),
-            description = stringResource(R.string.hide_susfs_status_summary),
-            checked = homeUiState.isHideSusfsStatus,
-            onCheckedChange = { enabled ->
-                homeViewModel.dispatch(HomeUiAction.SetHideSusfsStatus(enabled))
-            }
-        )
-    }
-
-    item {
-        // Zygisk 实现状态信息
-        SettingsSwitchWidget(
-            icon = Icons.TwoTone.VisibilityOff,
-            title = stringResource(R.string.hide_zygisk_implement),
-            description = stringResource(R.string.hide_zygisk_implement_summary),
-            checked = homeUiState.isHideZygiskImplement,
-            onCheckedChange = { enabled ->
-                homeViewModel.dispatch(HomeUiAction.SetHideZygiskImplement(enabled))
-            }
-        )
-    }
-
-    item {
-        // 元模块实现状态信息
-        SettingsSwitchWidget(
-            icon = Icons.TwoTone.VisibilityOff,
-            title = stringResource(R.string.hide_meta_module_implement),
-            description = stringResource(R.string.hide_meta_module_implement_summary),
-            checked = homeUiState.isHideMetaModuleImplement,
-            onCheckedChange = { enabled ->
-                homeViewModel.dispatch(HomeUiAction.SetHideMetaModuleImplement(enabled))
-            }
-        )
-    }
-
-    item {
-        // 隐藏链接信息
-        SettingsSwitchWidget(
-            icon = Icons.TwoTone.VisibilityOff,
-            title = stringResource(R.string.hide_link_card),
-            description = stringResource(R.string.hide_link_card_summary),
-            checked = homeUiState.isHideLinkCard,
-            onCheckedChange = { enabled ->
-                homeViewModel.dispatch(HomeUiAction.SetHideLinkCard(enabled))
-            }
-        )
-    }
-
-    item {
-        // 隐藏标签行
-        SettingsSwitchWidget(
-            icon = Icons.TwoTone.VisibilityOff,
-            title = stringResource(R.string.hide_tag_card),
-            description = stringResource(R.string.hide_tag_card_summary),
-            checked = moduleUiState.isHideTagRow,
-            onCheckedChange = { enabled ->
-                moduleViewModel.dispatch(ModuleUiAction.SetHideTagRow(enabled))
-            }
-        )
     }
 }
 

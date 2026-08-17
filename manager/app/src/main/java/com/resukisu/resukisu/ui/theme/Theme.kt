@@ -1,7 +1,6 @@
 package com.resukisu.resukisu.ui.theme
 
 import android.R
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -101,10 +100,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
+import top.yukonga.miuix.kmp.blur.BackdropEffectScope
 import top.yukonga.miuix.kmp.blur.BlendColorEntry
 import top.yukonga.miuix.kmp.blur.BlurColors
+import top.yukonga.miuix.kmp.blur.drawBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.blur.textureBlur
+import top.yukonga.miuix.kmp.blur.runtimeShaderEffect
+import top.yukonga.miuix.kmp.blur.textureBlurEffect
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.math.abs
@@ -497,10 +499,16 @@ private fun BackgroundLayer(
         }
     }
 
+    val hasBackgroundBitmap = renderState.imageBitmap != null
     val hasBlurBitmap = renderState.blurImageBitmap != null
+    val needsFallbackFrames = hasBackgroundBitmap &&
+            (!themeConfig.isEnableBlur || Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+    val needsBlurFrames =
+        (themeConfig.isEnableBlurExp && hasBlurBitmap) ||
+                (themeConfig.isEnableBlur && hasBackgroundBitmap)
 
-    LaunchedEffect(themeConfig.isEnableBlurExp, hasBlurBitmap) {
-        if (!themeConfig.isEnableBlurExp || !hasBlurBitmap) return@LaunchedEffect
+    LaunchedEffect(needsFallbackFrames, needsBlurFrames) {
+        if (!needsFallbackFrames && !needsBlurFrames) return@LaunchedEffect
 
         while (true) {
             withFrameNanos { }
@@ -563,14 +571,33 @@ fun Modifier.blurSource(): Modifier {
  * Render blur when backdrop available
  * Falls back to redrawing the app background below the content so translucent bars do not show
  * scrolling content through them when blur is disabled or unavailable.
+ * @param compensateHorizontalOverscroll reverse horizontal stretch in the sampled background
+ * @param compensateVerticalOverscroll reverse vertical stretch in the sampled background
+ * @param useFixedSurfaceBoundsForOverscroll use this surface's bounds with the published stretch
+ * amount; fixed navigation surfaces use this to stay visually stationary outside the scroller
  * @return modified modifier
  */
 @Composable
-fun Modifier.blurEffect(): Modifier {
+fun Modifier.blurEffect(
+    compensateHorizontalOverscroll: Boolean = true,
+    compensateVerticalOverscroll: Boolean = false,
+    useFixedSurfaceBoundsForOverscroll: Boolean = false,
+): Modifier {
     val themeConfig = koinInject<ThemeConfig>()
     val cardConfig = koinInject<CardConfig>()
     if (!themeConfig.isEnableBlur || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-        return renderBackgroundFallback()
+        return renderBackgroundFallback(
+            compensateHorizontalOverscroll = compensateHorizontalOverscroll,
+            compensateVerticalOverscroll = compensateVerticalOverscroll,
+            useFixedSurfaceBoundsForOverscroll = useFixedSurfaceBoundsForOverscroll,
+        )
+    }
+
+    val renderState = LocalBackgroundRenderState.current
+    val backgroundAnchor = LocalBackgroundBlurAnchor.current
+    val stretchOverscrollState = LocalStretchOverscrollCompensationState.current
+    var coordinates by remember {
+        mutableStateOf<LayoutCoordinates?>(null)
     }
 
     return LocalBlurState.current?.let { backdrop ->
@@ -578,21 +605,57 @@ fun Modifier.blurEffect(): Modifier {
             MaterialTheme.colorScheme.surfaceContainer.copy(alpha = cardConfig.cardAlpha)
 
         this.then(
-            Modifier.textureBlur(
-                backdrop = backdrop,
-                shape = RectangleShape,
-                blurRadius = 25f,
-                colors = BlurColors(
-                    blendColors = listOf(
-                        BlendColorEntry(color = blendColor)
-                    )
+            Modifier
+                .onGloballyPositioned { newCoordinates ->
+                    coordinates = newCoordinates.takeIf { it.isAttached }
+                }
+                .drawBackdrop(
+                    backdrop = backdrop,
+                    shape = { RectangleShape },
+                    effects = {
+                        renderState.blurFrameTick
+
+                        textureBlurEffect(
+                            blurRadiusX = 25f,
+                            colors = BlurColors(
+                                blendColors = listOf(
+                                    BlendColorEntry(color = blendColor)
+                                )
+                            ),
+                        )
+
+                        val boundsInBackground =
+                            coordinates?.boundsInBackgroundNow(backgroundAnchor)
+                        val stretchCompensation = stretchOverscrollState
+                            ?.resolveBitmapCompensation(
+                                backgroundCoordinates = backgroundAnchor,
+                                compensateHorizontal = compensateHorizontalOverscroll,
+                                compensateVertical = compensateVerticalOverscroll,
+                                compensationCoordinates = coordinates
+                                    .takeIf { useFixedSurfaceBoundsForOverscroll },
+                            )
+
+                        if (boundsInBackground != null && stretchCompensation != null) {
+                            stretchOverscrollCompensationEffect(
+                                boundsInBackground = boundsInBackground,
+                                compensation = stretchCompensation,
+                            )
+                        }
+                    },
                 )
-            )
         )
-    } ?: renderBackgroundFallback()
+    } ?: renderBackgroundFallback(
+        compensateHorizontalOverscroll = compensateHorizontalOverscroll,
+        compensateVerticalOverscroll = compensateVerticalOverscroll,
+        useFixedSurfaceBoundsForOverscroll = useFixedSurfaceBoundsForOverscroll,
+    )
 }
 
-private fun Modifier.renderBackgroundFallback(): Modifier = composed {
+private fun Modifier.renderBackgroundFallback(
+    compensateHorizontalOverscroll: Boolean,
+    compensateVerticalOverscroll: Boolean,
+    useFixedSurfaceBoundsForOverscroll: Boolean,
+): Modifier = composed {
     val themeConfig = koinInject<ThemeConfig>()
     val renderState = LocalBackgroundRenderState.current
     var coordinates by remember {
@@ -606,41 +669,59 @@ private fun Modifier.renderBackgroundFallback(): Modifier = composed {
     val pagerPage = LocalPagerPage.current
     val pagerState = if (pagerPage != null) LocalPagerState.current else null
     val layoutDirection = LocalLayoutDirection.current
+    val stretchOverscrollState = LocalStretchOverscrollCompensationState.current
+    val stretchRenderer = remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            StretchBackgroundRenderer()
+        } else {
+            null
+        }
+    }
 
     this
         .onGloballyPositioned { newCoordinates ->
             coordinates = newCoordinates.takeIf { it.isAttached }
         }
         .drawWithContent {
+            renderState.blurFrameTick
+
             val boundsInBackground = coordinates?.boundsInBackgroundNow(backgroundAnchor)
             val viewportSize = backgroundAnchor
                 ?.takeIf { it.isAttached && it.size.width > 0 && it.size.height > 0 }
                 ?.size
                 ?: renderState.blurViewportSize
-            val currentPagerPage = pagerPage
             val currentPagerState = pagerState?.takeIf { state ->
-                currentPagerPage != null && currentPagerPage in 0 until state.pageCount
+                pagerPage != null && pagerPage in 0 until state.pageCount
             }
             val hasPagerPage = currentPagerState != null
             val pagerViewportSize = currentPagerState?.layoutInfo?.viewportSize?.takeIf {
                 it.width > 0 && it.height > 0
             }
-            val renderViewportSize = pagerViewportSize ?: viewportSize
-            val pageOffset = if (currentPagerState != null && currentPagerPage != null) {
-                currentPagerState.getOffsetDistanceInPages(currentPagerPage)
+            val pagerViewportWidth = pagerViewportSize?.width ?: viewportSize.width
+            val pageOffset = if (currentPagerState != null && pagerPage != null) {
+                currentPagerState.getOffsetDistanceInPages(pagerPage)
             } else {
                 0f
             }
-            val physicalPageOffset = pageOffset * renderViewportSize.width *
+            val physicalPageOffset = pageOffset * pagerViewportWidth *
                     if (layoutDirection == LayoutDirection.Ltr) 1f else -1f
             val offsetBoundsInBackground = boundsInBackground?.let { bounds ->
                 if (hasPagerPage) {
+                    val leadingNavigationWidth =
+                        (viewportSize.width - pagerViewportWidth).coerceAtLeast(0)
+                    val pagerViewportLeft = if (layoutDirection == LayoutDirection.Ltr) {
+                        leadingNavigationWidth.toFloat()
+                    } else {
+                        0f
+                    }
+
                     // Equivalent to translating the backdrop painter by -physicalPageOffset:
-                    // crop from the page offset so the background remains fixed while the page moves.
+                    // crop from the page offset and account for a leading landscape navigation rail
+                    // so the background remains fixed while the page moves.
                     Rect(
-                        left = physicalPageOffset,
+                        left = pagerViewportLeft + physicalPageOffset,
                         top = bounds.top,
-                        right = physicalPageOffset + bounds.width,
+                        right = pagerViewportLeft + physicalPageOffset + bounds.width,
                         bottom = bounds.bottom,
                     )
                 } else {
@@ -654,17 +735,52 @@ private fun Modifier.renderBackgroundFallback(): Modifier = composed {
             ) {
                 offsetBoundsInBackground.mapToBitmapBounds(
                     bitmap = backgroundBitmap,
-                    viewportSize = renderViewportSize,
+                    viewportSize = viewportSize,
                 )
             } else {
                 null
             }
+            // Fixed navigation surfaces are outside the pager's stretch RenderNode. Their fallback
+            // draws the original, unstretched bitmap, so applying the published inverse mapping
+            // here would introduce movement instead of cancelling it.
+            val stretchCompensation = if (useFixedSurfaceBoundsForOverscroll) {
+                null
+            } else {
+                stretchOverscrollState
+                    ?.resolveBitmapCompensation(
+                        backgroundCoordinates = backgroundAnchor,
+                        compensateHorizontal = compensateHorizontalOverscroll,
+                        compensateVertical = compensateVerticalOverscroll,
+                    )
+                    ?.mapToBitmapCoordinates(
+                        bitmap = backgroundBitmap,
+                        viewportSize = viewportSize,
+                    )
+            }
 
             if (backgroundBitmap != null && bitmapBounds != null) {
-                drawBitmapIntersection(
-                    bitmap = backgroundBitmap,
-                    boundsInBackground = bitmapBounds,
-                )
+                if (stretchCompensation != null) {
+                    // in fact no need check sdk int. but make lint happy
+                    if (stretchRenderer != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        stretchRenderer.draw(
+                            scope = this,
+                            bitmap = backgroundBitmap,
+                            boundsInBackground = bitmapBounds,
+                            compensation = stretchCompensation,
+                        )
+                    } else {
+                        drawStretchCompensatedBitmap(
+                            bitmap = backgroundBitmap,
+                            boundsInBackground = bitmapBounds,
+                            compensation = stretchCompensation,
+                        )
+                    }
+                } else {
+                    drawBitmapIntersection(
+                        bitmap = backgroundBitmap,
+                        boundsInBackground = bitmapBounds,
+                    )
+                }
                 drawRect(color = dimColor)
             } else {
                 drawRect(color = backgroundColor)
@@ -705,7 +821,6 @@ private fun Rect.mapToBitmapBounds(
 }
 
 
-@SuppressLint("NewApi")
 fun Modifier.renderBackgroundBlur(
     tintColor: Color? = null
 ): Modifier = composed {
@@ -750,7 +865,8 @@ fun Modifier.renderBackgroundBlur(
                 currentBoundsInBackground.height > 0f
             ) {
                 if (stretchCompensation != null) {
-                    if (stretchRenderer != null) {
+                    // in fact no need check sdk int. but make lint happy
+                    if (stretchRenderer != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         stretchRenderer.draw(
                             scope = this,
                             bitmap = currentBitmap,
@@ -857,30 +973,116 @@ private data class StretchBitmapCompensation(
     val verticalSize: Float,
 )
 
+private fun StretchBitmapCompensation.mapToBitmapCoordinates(
+    bitmap: ImageBitmap?,
+    viewportSize: IntSize,
+): StretchBitmapCompensation? {
+    if (
+        bitmap == null ||
+        bitmap.width <= 0 ||
+        bitmap.height <= 0 ||
+        viewportSize.width <= 0 ||
+        viewportSize.height <= 0
+    ) {
+        return null
+    }
+
+    val scale = maxOf(
+        viewportSize.width / bitmap.width.toFloat(),
+        viewportSize.height / bitmap.height.toFloat(),
+    )
+    val renderedLeft = (viewportSize.width - bitmap.width * scale) / 2f
+    val renderedTop = (viewportSize.height - bitmap.height * scale) / 2f
+
+    return StretchBitmapCompensation(
+        horizontalAmount = horizontalAmount,
+        horizontalOrigin = (horizontalOrigin - renderedLeft) / scale,
+        horizontalSize = horizontalSize / scale,
+        verticalAmount = verticalAmount,
+        verticalOrigin = (verticalOrigin - renderedTop) / scale,
+        verticalSize = verticalSize / scale,
+    )
+}
+
 private fun StretchOverscrollCompensationState.resolveBitmapCompensation(
     backgroundCoordinates: LayoutCoordinates?,
+    compensateHorizontal: Boolean = true,
+    compensateVertical: Boolean = true,
+    compensationCoordinates: LayoutCoordinates? = null,
 ): StretchBitmapCompensation? {
-    val horizontalBounds = horizontal
-        ?.takeIf { it.amount != 0f }
-        ?.coordinates
+    val compensationBounds = compensationCoordinates
         ?.boundsInBackgroundNow(backgroundCoordinates)
-        ?.takeIf { it.width > 0f }
-    val verticalBounds = vertical
-        ?.takeIf { it.amount != 0f }
-        ?.coordinates
-        ?.boundsInBackgroundNow(backgroundCoordinates)
-        ?.takeIf { it.height > 0f }
+    val horizontalAxis = horizontal
+        ?.takeIf { compensateHorizontal && it.amount != 0f }
+    val verticalAxis = vertical
+        ?.takeIf { compensateVertical && it.amount != 0f }
+    val horizontalBounds = horizontalAxis?.let { axis ->
+        compensationBounds
+            ?.takeIf { it.width > 0f }
+            ?: axis.coordinates
+                .boundsInBackgroundNow(backgroundCoordinates)
+                ?.takeIf { it.width > 0f }
+    }
+    val verticalBounds = verticalAxis?.let { axis ->
+        compensationBounds
+            ?.takeIf { it.height > 0f }
+            ?: axis.coordinates
+                .boundsInBackgroundNow(backgroundCoordinates)
+                ?.takeIf { it.height > 0f }
+    }
 
     if (horizontalBounds == null && verticalBounds == null) return null
 
     return StretchBitmapCompensation(
-        horizontalAmount = if (horizontalBounds != null) horizontal?.amount ?: 0f else 0f,
+        horizontalAmount = if (horizontalBounds != null) horizontalAxis.amount else 0f,
         horizontalOrigin = horizontalBounds?.left ?: 0f,
         horizontalSize = horizontalBounds?.width ?: 1f,
-        verticalAmount = if (verticalBounds != null) vertical?.amount ?: 0f else 0f,
+        verticalAmount = if (verticalBounds != null) verticalAxis.amount else 0f,
         verticalOrigin = verticalBounds?.top ?: 0f,
         verticalSize = verticalBounds?.height ?: 1f,
     )
+}
+
+private fun BackdropEffectScope.stretchOverscrollCompensationEffect(
+    boundsInBackground: Rect,
+    compensation: StretchBitmapCompensation,
+) {
+    val inputScale = downscaleFactor.coerceAtLeast(1).toFloat()
+    val inputPadding = padding
+
+    runtimeShaderEffect(
+        key = "StretchOverscrollCompensation",
+        shaderString = STRETCH_BACKGROUND_SHADER,
+        uniformShaderName = "background",
+    ) {
+        setFloatUniform(
+            "cardOrigin",
+            boundsInBackground.left - inputPadding,
+            boundsInBackground.top - inputPadding,
+        )
+        setFloatUniform("cardScale", inputScale, inputScale)
+        setFloatUniform(
+            "inputOrigin",
+            (-boundsInBackground.left + inputPadding) / inputScale,
+            (-boundsInBackground.top + inputPadding) / inputScale,
+        )
+        setFloatUniform("inputScale", 1f / inputScale, 1f / inputScale)
+        setFloatUniform(
+            "stretchAmount",
+            compensation.horizontalAmount,
+            compensation.verticalAmount,
+        )
+        setFloatUniform(
+            "stretchOrigin",
+            compensation.horizontalOrigin,
+            compensation.verticalOrigin,
+        )
+        setFloatUniform(
+            "stretchSize",
+            compensation.horizontalSize,
+            compensation.verticalSize,
+        )
+    }
 }
 
 private data class BitmapDrawSegment(
@@ -1036,6 +1238,8 @@ private const val STRETCH_BACKGROUND_SHADER = """
     uniform shader background;
     uniform float2 cardOrigin;
     uniform float2 cardScale;
+    uniform float2 inputOrigin;
+    uniform float2 inputScale;
     uniform float2 stretchAmount;
     uniform float2 stretchOrigin;
     uniform float2 stretchSize;
@@ -1108,7 +1312,7 @@ private const val STRETCH_BACKGROUND_SHADER = """
             compensateAxis(position.x, stretchAmount.x, stretchOrigin.x, stretchSize.x),
             compensateAxis(position.y, stretchAmount.y, stretchOrigin.y, stretchSize.y)
         );
-        return background.eval(samplePosition);
+        return background.eval(inputOrigin + samplePosition * inputScale);
     }
 """
 
@@ -1146,6 +1350,8 @@ private class StretchBackgroundRenderer {
                 boundsInBackground.width / size.width,
                 boundsInBackground.height / size.height,
             )
+            runtimeShader.setFloatUniform("inputOrigin", 0f, 0f)
+            runtimeShader.setFloatUniform("inputScale", 1f, 1f)
             runtimeShader.setFloatUniform(
                 "stretchAmount",
                 compensation.horizontalAmount,

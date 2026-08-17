@@ -32,9 +32,7 @@
     <string name="module_uninstall_failed">Nem sikerült eltávolítani: %s</string>
     <string name="module_version">Verzió</string>
     <string name="module_author">Fejlesztő(k)</string>
-    <string name="refresh">Frissít</string>
     <string name="show_system_apps">Rendszeralkalmazások megjelenítése</string>
-    <string name="hide_system_apps">Rendszeralkalmazások elrejtése</string>
     <string name="send_log">Napló logfájlok küldése</string>
     <string name="safe_mode">Biztonságos mód</string>
     <string name="reboot_to_apply">Újraindítás szükséges a módosítások érvénybelépéséhez</string>
@@ -76,7 +74,6 @@
     <string name="app_profile_template_delete">Törlés</string>
     <string name="app_profile_template_view">Sablon megtekintése</string>
     <string name="app_profile_template_readonly">Írásvédett</string>
-    <string name="app_profile_template_id_exist">Sablon ID már létezik!</string>
     <string name="app_profile_import_from_clipboard">Importálás vágólapról</string>
     <string name="app_profile_export_to_clipboard">Exportálás vágólapra</string>
     <string name="app_profile_template_export_empty">Nem található helyi sablon az exportáláshoz!</string>
@@ -85,8 +82,6 @@
     <string name="app_profile_template_save_failed">Sablon mentése sikertelen</string>
     <string name="app_profile_template_import_empty">A vágólap üres!</string>
     <string name="module_changelog_failed">Változtatásnapló lekérése nem sikerült: %s</string>
-    <string name="settings_check_update">Frissítéssel kapcsolatos értesítések</string>
-    <string name="settings_check_update_summary">Modul- és kezelőfrissítések automatikus keresése</string>
     <string name="grant_root_failed">Root felhatalmazás sikertelen!</string>
     <string name="action">Művelet</string>
     <string name="direct_install">Közvetlen telepítés (Ajánlott)</string>
@@ -168,7 +163,6 @@
     <string name="unknown_module">Ismeretlen modul</string>
     <string name="confirm">Megerősít</string>
     <string name="cancel">Mégse</string>
-    <string name="command_execution_failed">Parancs futtatása nem sikerült: %1$s</string>
     <string name="allowlist_backup_success">Jogosultlista biztonsági mentése sikeresen végigfutott</string>
     <string name="allowlist_backup_failed">Jogosultlista biztonsági mentése meghiúsult: %1$s</string>
     <string name="allowlist_restore_confirm_title">Jogosultlista biztonsági mentésből való visszaállításának megerősítése</string>
@@ -211,18 +205,6 @@
     <string name="theme_settings">Téma beállítások</string>
     <string name="simple_mode">Egyszerű mód</string>
     <string name="simple_mode_summary">Elrejti a nem szükséges mezőket</string>
-    <string name="hide_other_info">Egyéb infók elrejtése</string>
-    <string name="hide_other_info_summary">Elrejt információkat a navigációs sávban mint a superuser jogosultak és modulok számát</string>
-    <string name="hide_susfs_status">SuSFS Állapot elrejtése</string>
-    <string name="hide_susfs_status_summary">Elrejti a SuSFS állapotával kapcsolatos státuszinformációkat a kezdőlapról</string>
-    <string name="hide_zygisk_implement">Zygisk Állapot elrejtése</string>
-    <string name="hide_zygisk_implement_summary">Elrejti a Zygisk implementáció feltüntetett megnevezését a kezdőlapról</string>
-    <string name="hide_meta_module_implement">Meta Modul Állapot elrejtése</string>
-    <string name="hide_meta_module_implement_summary">Elrejti a Meta Modul implementáció feltüntetett megnevezését a kezdőlapról</string>
-    <string name="hide_link_card">„Tudj meg többet\" és „Itt támogathatsz\" linkmezők elrejtése</string>
-    <string name="hide_link_card_summary">Elrejti a KernelSU opcionális támogatására szolgáló, és önképző használati útmutatóra mutató linkeket tartalmazó szövegmezőket</string>
-    <string name="hide_tag_card">Modulcímkék elrejtése</string>
-    <string name="hide_tag_card_summary">Mappa nevek, méret, metamodul megjegyzés címkék elrejtése a modulmezőkből</string>
     <string name="theme_mode">Téma</string>
     <string name="theme_follow_system">Automatikus</string>
     <string name="theme_light">Világos</string>
@@ -235,10 +217,6 @@
     <string name="horizon_kernel">Anykernel3 telepítés</string>
     <string name="horizon_kernel_summary">Anykernel3 kernel fájl telepítése</string>
     <string name="root_required">Root jogosultság szükséges</string>
-    <string name="reboot_complete_title">Scrubbing folyamat befejeződött</string>
-    <string name="reboot_complete_msg">Azonnali újraindítás?</string>
-    <string name="yes">Igen</string>
-    <string name="no">Nem</string>
     <string name="failed_reboot">Újraindítás meghiúsult</string>
     <string name="custom_settings">További személyreszabhatóságok</string>
     <string name="theme_color">Téma szín</string>
@@ -300,10 +278,6 @@
     <string name="kernel_flashing">Kernel telepítés</string>
     <string name="warning_of_meta_module_title">Metamodul szükséges</string>
     <string name="warning_of_meta_module_summary">Ez a modul adatot akar csatolni a fájlrendszer /system névterébe, ehhez metamodul szükséges. Másképp a megfelelő működés nem garantált</string>
-    <string name="category_all_apps">Összes</string>
-    <string name="category_root_apps">Root applikációk</string>
-    <string name="category_custom_apps">Személyreszabott</string>
-    <string name="category_default_apps">Alapértelmezett</string>
     <string name="sort_name_asc">ABC sorrendben növekvő</string>
     <string name="sort_name_desc">ABC sorrendben csökkenő</string>
     <string name="sort_install_time_new">Telepítés ideje szerint (újabbak előre)</string>
@@ -323,9 +297,6 @@
     <string name="predictive_back_animation_ksu_classic">KernelSU klasszikus</string>
     <string name="persistent">Tartós</string>
     <string name="temporary">Átmeneti</string>
-    <string name="menu_options">Menü beállítások</string>
-    <string name="sort_options">Rendezés</string>
-    <string name="app_categories">Kategória</string>
     <string name="susfs_config_title">SuSFS Menedzser</string>
     <string name="superuser">Superuser</string>
     <string name="sulog_filter_sucompat">SU bináris</string>
@@ -436,8 +407,7 @@
     <string name="storage_permission_description">Külső tárhely hozzáférés engedélyezése szükséges a fájl írásához.</string>
     <string name="storage_permission_denied">Letöltés meghiúsult; tárhelyhez való hozzáférés megtagadva</string>
     <string name="susfs_tab_status">Állapotjelző</string>
-    <string name="susfs_tab_backup_restore">Biztonsági mentés / Visszaállítás</string>
-    <string name="susfs_status_version">SuSFS verzió</string>
+    <string name="susfs_status_version">SUSFS Verzió</string>
     <string name="susfs_status_variant">Kernel variáns</string>
     <string name="susfs_status_enabled_features">Elérhető és engedélyezett funkciók</string>
     <string name="susfs_status_no_data">Hiányos vagy nem olvasható adat</string>
@@ -469,7 +439,6 @@
     <string name="susfs_uid_scheme_non_su">Nem SU</string>
     <string name="susfs_uid_scheme_unmounted_app">Leválasztott applikáció</string>
     <string name="susfs_uid_scheme_unmounted">Leválasztott</string>
-    <string name="susfs_refresh">Frissít</string>
     <string name="susfs_save">Mentés</string>
     <string name="susfs_operation_failed">Beavatkozás meghiúsult</string>
     <string name="susfs_operation_success">Beavatkozás sikerült</string>

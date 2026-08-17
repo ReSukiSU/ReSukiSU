@@ -36,9 +36,7 @@
     <string name="module_uninstall_failed">विस्थापित करण्यात अयशस्वी: %s</string>
     <string name="module_version">आवृत्ती</string>
     <string name="module_author">लेखक</string>
-    <string name="refresh">रिफ्रेश करा</string>
     <string name="show_system_apps">सिस्टम अॅप्स दाखवा</string>
-    <string name="hide_system_apps">सिस्टम अॅप्स लपवा</string>
     <string name="send_log">लॉग पाठवा</string>
     <string name="safe_mode">सुरक्षित मोड</string>
     <string name="reboot_to_apply">प्रभावी होण्यासाठी रीबूट करा</string>
@@ -69,8 +67,6 @@
     <string name="force_stop_app" formatted="false">सक्तीने थांबा</string>
     <string name="restart_app">पुन्हा सुरू करा</string>
     <string name="failed_to_update_sepolicy">यासाठी SELinux नियम अपडेट करण्यात अयशस्वी: %s</string>
-    <string name="settings_check_update">अपडेट सूचना</string>
-    <string name="settings_check_update_summary">मॉड्यूल आणि मॅनेजर अपडेट्ससाठी ऑटो-चेक करा</string>
     <string name="settings_sucompat">su बाइनरी पुन्हा मार्गस्थ करा</string>
     <string name="settings_sucompat_summary">ॲप प्रोफाईलमध्ये सुपरयुझर परवानगी दिलेल्या ॲप्ससाठी /system/bin/su ला ksud वर पुनर्निर्देशित करा; फक्त नवीन प्रक्रियांसाठी प्रभावी.</string>
     <string name="settings_kernel_umount">कर्नल अनमाउंट</string>

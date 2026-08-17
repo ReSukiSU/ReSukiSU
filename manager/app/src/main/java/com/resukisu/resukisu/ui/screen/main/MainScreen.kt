@@ -1,9 +1,12 @@
 package com.resukisu.resukisu.ui.screen.main
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
@@ -19,8 +22,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -120,8 +126,7 @@ fun MainScreen() {
             val content = @Composable { paddingBottom: Dp ->
                 HorizontalPager(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .blurSource(),
+                        .fillMaxSize(),
                     state = pagerState,
                     userScrollEnabled = userScrollEnabled,
                     beyondViewportPageCount = 1,
@@ -155,15 +160,44 @@ fun MainScreen() {
                     },
                     containerColor = Color.Transparent,
                 ) { innerPadding ->
-                    content(innerPadding.calculateBottomPadding())
+                    Box(
+                        modifier = Modifier.blurSource()
+                    ) {
+                        content(innerPadding.calculateBottomPadding())
+                    }
                 }
             } else {
-                Row(modifier = Modifier.fillMaxSize()) {
+                var navWidth by remember { mutableIntStateOf(0) }
+                val density = LocalDensity.current
+
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .blurSource()
+                    ) {
+                        Spacer(
+                            modifier = Modifier.width(
+                                with(density) { navWidth.toDp() }
+                            )
+                        )
+
+                        Box(Modifier.weight(1f)) {
+                            content(0.dp)
+                        }
+                    }
+
                     NavigationBar(
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .onSizeChanged {
+                                navWidth = it.width
+                            },
                         destinations = pages,
                         isBottomBar = false,
                     )
-                    content(0.dp)
                 }
             }
         }

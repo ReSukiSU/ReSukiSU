@@ -39,7 +39,6 @@ data class ModuleUiState(
     val metaModuleStatus: MetaModuleStatus = MetaModuleStatus.MISSING,
     val isNeedRefresh: Boolean = false,
     val showMoreModuleInfo: Boolean = false,
-    val isHideTagRow: Boolean = false,
 )
 
 sealed interface ModuleUiAction {
@@ -47,7 +46,6 @@ sealed interface ModuleUiAction {
     data object ReloadSettings : ModuleUiAction
     data class Search(val query: String) : ModuleUiAction
     data class Sort(val enabledFirst: Boolean, val actionFirst: Boolean) : ModuleUiAction
-    data class SetHideTagRow(val enabled: Boolean) : ModuleUiAction
     data class SetShowMoreInfo(val enabled: Boolean) : ModuleUiAction
     data class LoadSize(val moduleId: String) : ModuleUiAction
     data object MarkNeedRefresh : ModuleUiAction
@@ -117,7 +115,6 @@ class ModuleViewModel(
             metaModuleStatus = source.metaModuleStatus,
             isNeedRefresh = local.isNeedRefresh,
             showMoreModuleInfo = preferences.showMoreModuleInfo,
-            isHideTagRow = preferences.isHideTagRow,
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, ModuleUiState())
     val uiState: StateFlow<ModuleUiState> = state
@@ -129,10 +126,6 @@ class ModuleViewModel(
             is ModuleUiAction.Search -> controls.update { it.copy(search = action.query) }
             is ModuleUiAction.Sort -> {
                 modulePreferences.setSort(action.enabledFirst, action.actionFirst)
-            }
-
-            is ModuleUiAction.SetHideTagRow -> {
-                modulePreferences.setHideTagRow(action.enabled)
             }
 
             is ModuleUiAction.SetShowMoreInfo -> {

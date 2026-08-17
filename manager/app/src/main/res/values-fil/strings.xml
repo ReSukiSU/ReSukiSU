@@ -34,9 +34,7 @@
     <string name="module_uninstall_failed">Nabigong i-uninstall: %s</string>
     <string name="module_version">Bersyon</string>
     <string name="module_author">May-akda</string>
-    <string name="refresh">I-refresh</string>
     <string name="show_system_apps">Ipakita ang mga application ng system</string>
-    <string name="hide_system_apps">Itago ang mga application ng system</string>
     <string name="send_log">Magpadala ng Log</string>
     <string name="safe_mode">Safe mode</string>
     <string name="reboot_to_apply">I-reboot para umepekto</string>
@@ -62,8 +60,6 @@
     <string name="force_stop_app" formatted="false">Pilit na I-hinto</string>
     <string name="restart_app">I-restart</string>
     <string name="failed_to_update_sepolicy">Nabigong i-update ang mga panuntunan ng SELinux para sa: %s</string>
-    <string name="settings_check_update">Mga abiso sa update</string>
-    <string name="settings_check_update_summary">Awtomatikong mag-check para sa mga update ng module at manager</string>
     <string name="save_log">I-save ang mga Log</string>
     <string name="settings_sucompat">Klasikong su command</string>
     <string name="settings_sucompat_summary">Payagan ang root access gamit ang /system/bin/su, sa mga bagong proseso.</string>

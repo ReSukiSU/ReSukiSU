@@ -246,7 +246,9 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.core)
 
+    implementation(libs.me.zhanghai.android.appiconloader)
     implementation(libs.me.zhanghai.android.appiconloader.coil)
+    implementation(libs.org.lsposed.hiddenapibypass)
 
     implementation(libs.markdown)
     implementation(libs.androidx.webkit)

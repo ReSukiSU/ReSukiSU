@@ -34,9 +34,7 @@
     <string name="module_uninstall_failed">Neuspješna deinstalacija: %s</string>
     <string name="module_version">Verzija</string>
     <string name="module_author">Autor</string>
-    <string name="refresh">Osvježi</string>
     <string name="show_system_apps">Prikažite sistemske aplikacije</string>
-    <string name="hide_system_apps">Sakrijte sistemske aplikacije</string>
     <string name="send_log">Pošaljite Izvještaj</string>
     <string name="safe_mode">Sigurnosni mod</string>
     <string name="reboot_to_apply">Ponovo pokrenite da bi proradilo</string>
@@ -67,8 +65,6 @@
     <string name="force_stop_app" formatted="false">Prisilno Zaustavite</string>
     <string name="restart_app">Resetujte</string>
     <string name="failed_to_update_sepolicy">Neuspješno ažuriranje SELinux pravila za: %s</string>
-    <string name="settings_check_update">Obavijesti o ažuriranju</string>
-    <string name="settings_check_update_summary">Automatski provjeri ažuriranja modula i menadžera</string>
     <string name="horizon_flash_complete">Flash Complete</string>
     <string name="settings_sucompat">Preusmjeri su binarnu datoteku</string>
     <string name="settings_sucompat_summary">Preusmjeri /system/bin/su na ksud za aplikacije kojima je dodijeljeno dopuštenje Superuser u Profilu aplikacije; učinkovito samo za nove procese.</string>

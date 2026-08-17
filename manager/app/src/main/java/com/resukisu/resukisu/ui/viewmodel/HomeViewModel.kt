@@ -33,11 +33,6 @@ sealed interface HomeUiAction {
     data object AwaitInitialData : HomeUiAction
     data class Refresh(val showIndicator: Boolean = true) : HomeUiAction
     data class SetSimpleMode(val enabled: Boolean) : HomeUiAction
-    data class SetHideOtherInfo(val enabled: Boolean) : HomeUiAction
-    data class SetHideSusfsStatus(val enabled: Boolean) : HomeUiAction
-    data class SetHideZygiskImplement(val enabled: Boolean) : HomeUiAction
-    data class SetHideMetaModuleImplement(val enabled: Boolean) : HomeUiAction
-    data class SetHideLinkCard(val enabled: Boolean) : HomeUiAction
     data class Reboot(val reason: String) : HomeUiAction
 }
 
@@ -98,16 +93,12 @@ class HomeViewModel(
                     val module = async { getModuleOverview() }
                     val superusers = async { getSuperuserCount() }
                     val managers = async { getManagerRuntimeInfo() }
-                    val susfs = if (!state.value.isHideSusfsStatus) {
-                        async { getSuSFSStatus() }
-                    } else {
-                        null
-                    }
+                    val susfs = async { getSuSFSStatus() }
                     val basicInfo = basic.await()
                     val moduleInfo = module.await()
                     val superuserCount = superusers.await()
                     val managerInfo = managers.await()
-                    val susfsInfo = susfs?.await()
+                    val susfsInfo = susfs.await()
                     homeStateRepository.update { current ->
                         current.copy(
                             systemInfo = HomeSystemInfo(
@@ -116,10 +107,10 @@ class HomeViewModel(
                                 deviceModel = basicInfo.deviceModel,
                                 managerVersion = basicInfo.managerVersion,
                                 selinuxStatus = basicInfo.selinuxStatus,
-                                susfsEnabled = susfsInfo?.enabled ?: false,
-                                susfsVersionSupported = susfsInfo?.enabled ?: false,
-                                susfsVersion = susfsInfo?.version.orEmpty(),
-                                susfsFeatures = susfsInfo?.enabledFeatures.orEmpty(),
+                                susfsEnabled = susfsInfo.enabled,
+                                susfsVersionSupported = susfsInfo.enabled,
+                                susfsVersion = susfsInfo.version,
+                                susfsFeatures = susfsInfo.enabledFeatures,
                                 superuserCount = superuserCount,
                                 moduleCount = moduleInfo.count,
                                 managersList = managerInfo,
@@ -147,31 +138,11 @@ class HomeViewModel(
     fun handleSimpleModeChange(enabled: Boolean) =
         updatePreference(PREF_SIMPLE_MODE, enabled) { it.copy(isSimpleMode = enabled) }
 
-    fun handleHideOtherInfoChange(enabled: Boolean) =
-        updatePreference(PREF_HIDE_OTHER_INFO, enabled) { it.copy(isHideOtherInfo = enabled) }
-
-    fun handleHideSusfsStatusChange(enabled: Boolean) =
-        updatePreference(PREF_HIDE_SUSFS, enabled) { it.copy(isHideSusfsStatus = enabled) }
-
-    fun handleHideZygiskImplementChange(enabled: Boolean) =
-        updatePreference(PREF_HIDE_ZYGISK, enabled) { it.copy(isHideZygiskImplement = enabled) }
-
-    fun handleHideMetaModuleImplementChange(enabled: Boolean) =
-        updatePreference(PREF_HIDE_META, enabled) { it.copy(isHideMetaModuleImplement = enabled) }
-
-    fun handleHideLinkCardChange(enabled: Boolean) =
-        updatePreference(PREF_HIDE_LINK, enabled) { it.copy(isHideLinkCard = enabled) }
-
     fun dispatch(action: HomeUiAction) {
         when (action) {
             HomeUiAction.AwaitInitialData -> viewModelScope.launch { awaitInitialData() }
             is HomeUiAction.Refresh -> refreshData(action.showIndicator)
             is HomeUiAction.SetSimpleMode -> handleSimpleModeChange(action.enabled)
-            is HomeUiAction.SetHideOtherInfo -> handleHideOtherInfoChange(action.enabled)
-            is HomeUiAction.SetHideSusfsStatus -> handleHideSusfsStatusChange(action.enabled)
-            is HomeUiAction.SetHideZygiskImplement -> handleHideZygiskImplementChange(action.enabled)
-            is HomeUiAction.SetHideMetaModuleImplement -> handleHideMetaModuleImplementChange(action.enabled)
-            is HomeUiAction.SetHideLinkCard -> handleHideLinkCardChange(action.enabled)
             is HomeUiAction.Reboot -> viewModelScope.launch {
                 reboot(action.reason).onFailure {
                     mutableEvents.tryEmit(HomeUiEvent.Error(it.message.orEmpty()))
@@ -218,11 +189,6 @@ class HomeViewModel(
         homeStateRepository.update {
             it.copy(
                 isSimpleMode = getBooleanPreference(PREF_SIMPLE_MODE),
-                isHideOtherInfo = getBooleanPreference(PREF_HIDE_OTHER_INFO),
-                isHideSusfsStatus = getBooleanPreference(PREF_HIDE_SUSFS),
-                isHideLinkCard = getBooleanPreference(PREF_HIDE_LINK),
-                isHideZygiskImplement = getBooleanPreference(PREF_HIDE_ZYGISK),
-                isHideMetaModuleImplement = getBooleanPreference(PREF_HIDE_META),
             )
         }
     }
@@ -242,10 +208,5 @@ class HomeViewModel(
         const val PREF_CHECK_UPDATE = "check_update"
         const val PREF_CHECK_BETA_UPDATE = "check_beta_update"
         const val PREF_SIMPLE_MODE = "is_simple_mode"
-        const val PREF_HIDE_OTHER_INFO = "is_hide_other_info"
-        const val PREF_HIDE_SUSFS = "is_hide_susfs_status"
-        const val PREF_HIDE_LINK = "is_hide_link_card"
-        const val PREF_HIDE_ZYGISK = "is_hide_zygisk_Implement"
-        const val PREF_HIDE_META = "is_hide_meta_module_Implement"
     }
 }

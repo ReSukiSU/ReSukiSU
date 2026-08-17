@@ -36,9 +36,7 @@
     <string name="module_uninstall_failed">Nepavyko išdiegti: %s</string>
     <string name="module_version">Versija</string>
     <string name="module_author">Autorius</string>
-    <string name="refresh">Atšviežinti</string>
     <string name="show_system_apps">Rodyti sistemos programas</string>
-    <string name="hide_system_apps">Slėpti sistemos programas</string>
     <string name="send_log">Siųsti žurnalą</string>
     <string name="safe_mode">Saugus rėžimas</string>
     <string name="reboot_to_apply">Paleiskite iš naujo, kad įsigaliotų</string>
@@ -70,8 +68,6 @@
     <string name="restart_app">Perkrauti</string>
     <string name="failed_to_update_sepolicy">Nepavyko atnaujinti SELinux taisyklių: %s</string>
     <string name="module_changelog">Keitimų žurnalas</string>
-    <string name="settings_check_update">Atnaujinimo pranešimai</string>
-    <string name="settings_check_update_summary">Automatiškai tikrinti modulio ir valdytojo atnaujinimus</string>
     <string name="save_log">Saglabāt Žurnālus</string>
     <string name="settings_sucompat">Nukreipti su dvejetainį failą</string>
     <string name="settings_sucompat_summary">Nukreipti /system/bin/su į ksud programoms, kurioms suteiktas Superuser leidimas programos profilyje; veiksminga tik naujiems procesams.</string>

@@ -33,9 +33,7 @@
     <string name="module_uninstall_failed">%s अनइंस्टल करने में असफल</string>
     <string name="module_version">वर्जन</string>
     <string name="module_author">निर्माता</string>
-    <string name="refresh">रिफ्रेश</string>
     <string name="show_system_apps">सिस्टम एप्प दिखाए</string>
-    <string name="hide_system_apps">सिस्टम एप्प छिपाए</string>
     <string name="send_log">लॉग भेजे</string>
     <string name="safe_mode">सेफ मोड</string>
     <string name="reboot_to_apply">प्रभाव में होने के लिए रीबूट करें</string>
@@ -65,8 +63,6 @@
     <string name="restart_app">फिर से चालू करें</string>
     <string name="failed_to_update_sepolicy">%s के लिए SELinux नियमों को अपटेड करने में विफल</string>
     <string name="module_changelog">क्या बदलाव हुए है</string>
-    <string name="settings_check_update">अपडेट सूचनाएं</string>
-    <string name="settings_check_update_summary">मॉड्यूल और मैनेजर अपडेट के लिए ऑटो-चेक करें</string>
     <string name="save_log">लॉग सहेजें</string>
     <string name="allowlist_backup_success">Allowlist backup successful</string>
     <string name="allowlist_backup_failed">Allowlist backup failed: %1$s</string>

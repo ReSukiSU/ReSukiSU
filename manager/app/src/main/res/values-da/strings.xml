@@ -28,9 +28,7 @@
     <string name="module_uninstall_success">%s afinstalleret</string>
     <string name="module_uninstall_failed">Afinstallation af: %s fejlede</string>
     <string name="module_author">Forfatter</string>
-    <string name="refresh">Opdater</string>
     <string name="show_system_apps">Vis system-apps</string>
-    <string name="hide_system_apps">Gem system-apps</string>
     <string name="send_log">Send Log</string>
     <string name="safe_mode">Sikker tilstand</string>
     <string name="reboot_to_apply">Genstart for at tage effekt</string>
@@ -58,8 +56,6 @@
     <string name="force_stop_app" formatted="false">Tving Stop</string>
     <string name="restart_app">Genstart</string>
     <string name="failed_to_update_sepolicy">Opdatering af SELinux-regler for: %s fejlede</string>
-    <string name="settings_check_update">Opdateringsmeddelelser</string>
-    <string name="settings_check_update_summary">Tjek automatisk for opdateringer til modul og manager</string>
     <string name="save_log">Gem Logfiler</string>
     <string name="settings_sucompat">Omdiriger su binary</string>
 </resources>

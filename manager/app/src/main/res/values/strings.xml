@@ -75,9 +75,7 @@
     <string name="module_uninstall_failed">Failed to uninstall: %s</string>
     <string name="module_version">Version</string>
     <string name="module_author">Author</string>
-    <string name="refresh">Refresh</string>
     <string name="show_system_apps">Show system apps</string>
-    <string name="hide_system_apps">Hide system apps</string>
     <string name="send_log">Send logs</string>
     <string name="safe_mode">Safe mode</string>
     <string name="jailbreak_mode">Jailbreak mode</string>
@@ -147,7 +145,6 @@
     <string name="app_profile_template_delete">Delete</string>
     <string name="app_profile_template_view">View template</string>
     <string name="app_profile_template_readonly">Read only</string>
-    <string name="app_profile_template_id_exist">Template ID already exists!</string>
     <string name="app_profile_import_export">Import/Export</string>
     <string name="app_profile_import_from_clipboard">Import from clipboard</string>
     <string name="app_profile_export_to_clipboard">Export to clipboard</string>
@@ -158,8 +155,6 @@
     <string name="app_profile_template_import_empty">Clipboard is empty!</string>
     <string name="affected_applications">Affected applications</string>
     <string name="module_changelog_failed">Fetch changelog failed: %s</string>
-    <string name="settings_check_update">Update notifications</string>
-    <string name="settings_check_update_summary">Auto-check for module and manager updates</string>
     <string name="settings_check_manager_update">Check manager updates</string>
     <string name="settings_check_manager_update_summary">Auto-check for manager updates</string>
     <string name="settings_check_module_update">Check module updates</string>
@@ -194,7 +189,6 @@
     <string name="unknown_module">Unknown module</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
-    <string name="command_execution_failed">Failed to execute command: %1$s</string>
     <string name="allowlist_backup_success">Allowlist backed up successfully</string>
     <string name="allowlist_backup_failed">Failed to backup allowlist: %1$s</string>
     <string name="allowlist_restore_confirm_title">Confirm Allowlist Restoration</string>
@@ -241,18 +235,6 @@
     <string name="theme_settings">Theme settings</string>
     <string name="simple_mode">Simplicity mode</string>
     <string name="simple_mode_summary">Hides unnecessary cards when turned on</string>
-    <string name="hide_other_info">Hide other info</string>
-    <string name="hide_other_info_summary">Hides Red dot about the number of super users and modules on the navigation bar page</string>
-    <string name="hide_susfs_status">Hide SuSFS status</string>
-    <string name="hide_susfs_status_summary">Hides SuSFS status information on the home page</string>
-    <string name="hide_zygisk_implement">Hide Zygisk status</string>
-    <string name="hide_zygisk_implement_summary">Hides Zygisk implementation information on the home page</string>
-    <string name="hide_meta_module_implement">Hide Meta Module status</string>
-    <string name="hide_meta_module_implement_summary">Hides Meta Module implementation information on the home page</string>
-    <string name="hide_link_card">Hide Link Card Status</string>
-    <string name="hide_link_card_summary">Hides link card information on the home page</string>
-    <string name="hide_tag_card">Hide module label rows</string>
-    <string name="hide_tag_card_summary">Hides folder name, size, metamodule notice labels in module cards</string>
     <string name="theme_mode">Theme</string>
     <string name="theme_follow_system">Follow system</string>
     <string name="theme_light">Light</string>
@@ -265,10 +247,6 @@
     <string name="horizon_kernel">Install Anykernel3</string>
     <string name="horizon_kernel_summary">Flash AnyKernel3 kernel file</string>
     <string name="root_required">Requires root privileges</string>
-    <string name="reboot_complete_title">Scrubbing complete</string>
-    <string name="reboot_complete_msg">Whether to reboot immediately?</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
     <string name="failed_reboot">Reboot Failed</string>
     <string name="custom_settings">Custom settings</string>
     <string name="theme_color">Theme Color</string>
@@ -334,10 +312,6 @@
     <string name="kernel_flashing">Kernel Flashing</string>
     <string name="warning_of_meta_module_title">Require Meta module</string>
     <string name="warning_of_meta_module_summary">This module wants to mount /system, which is handled by the meta module. Without it, the module might not work</string>
-    <string name="category_all_apps">All</string>
-    <string name="category_root_apps">Root</string>
-    <string name="category_custom_apps">Custom</string>
-    <string name="category_default_apps">Default</string>
     <string name="sort_name_asc">Ascending order of name</string>
     <string name="sort_name_desc">Name descending</string>
     <string name="sort_install_time_new">Installation time (New)</string>
@@ -348,9 +322,6 @@
     <string name="no_apps_in_category">No application in this category</string>
     <string name="persistent">Persistent</string>
     <string name="temporary">Temporary</string>
-    <string name="menu_options">Menu Options</string>
-    <string name="sort_options">Sort by</string>
-    <string name="app_categories">Application Type Selection</string>
     <string name="susfs_config_title">SuSFS Configuration</string>
     <string name="susfs_config_setting_title">SuSFS Configuration</string>
     <string name="module_update_json">Update JSON</string>
@@ -471,7 +442,6 @@
     <string name="susfs_tab_sus_kstat">SUS Kstat</string>
     <string name="susfs_tab_open_redirect">Open Redirect</string>
     <string name="susfs_tab_sus_map">SUS Map</string>
-    <string name="susfs_tab_backup_restore">Backup / Restore</string>
     <string name="susfs_status_version">SUSFS Version</string>
     <string name="susfs_status_variant">Variant</string>
     <string name="susfs_status_enabled_features">Enabled Features</string>
@@ -530,7 +500,6 @@
     <string name="susfs_uid_scheme_unmounted_app">Unmounted App</string>
     <string name="susfs_uid_scheme_unmounted">Unmounted</string>
     <string name="susfs_map_subtype">SUS Map</string>
-    <string name="susfs_refresh">Refresh</string>
     <string name="susfs_save">Save</string>
     <string name="susfs_operation_failed">Operation failed</string>
     <string name="susfs_operation_success">Operation succeeded</string>

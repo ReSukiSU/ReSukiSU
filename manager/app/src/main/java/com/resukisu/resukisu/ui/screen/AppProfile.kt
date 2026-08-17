@@ -81,6 +81,7 @@ import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.theme.CardConfig
+import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
@@ -243,6 +244,7 @@ private fun AppProfileInner(
     onProfileChange: (AppProfile) -> Unit,
 ) {
     val cardConfig: CardConfig = koinInject()
+    val themeConfig: ThemeConfig = koinInject()
     val isRootGranted = profile.allowSu
     val affectedApplicationsTitle = stringResource(R.string.affected_applications)
 
@@ -324,9 +326,11 @@ private fun AppProfileInner(
                                 .clip(RoundedCornerShape(16.dp))
                                 .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright),
                             shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceBright.copy(
-                                alpha = cardConfig.cardAlpha
-                            ),
+                            color = if (themeConfig.isEnableBlurExp) Color.Transparent else {
+                                MaterialTheme.colorScheme.surfaceBright.copy(
+                                    alpha = cardConfig.cardAlpha
+                                )
+                            },
                             contentColor = MaterialTheme.colorScheme.onSurface,
                         ) {
                             ProfileBox(mode, true) {
@@ -400,9 +404,11 @@ private fun AppProfileInner(
                                 .clip(RoundedCornerShape(16.dp))
                                 .renderBackgroundBlur(MaterialTheme.colorScheme.surfaceBright),
                             shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceBright.copy(
-                                alpha = cardConfig.cardAlpha
-                            ),
+                            color = if (themeConfig.isEnableBlurExp) Color.Transparent else {
+                                MaterialTheme.colorScheme.surfaceBright.copy(
+                                    alpha = cardConfig.cardAlpha
+                                )
+                            },
                             contentColor = MaterialTheme.colorScheme.onSurface,
                         ) {
                             ProfileBox(mode, false) {
@@ -522,7 +528,7 @@ private fun ProfileBox(
             title = stringResource(R.string.profile),
             description = mode.text,
             isOnBackground = false,
-            containerAlpha = 0f
+            containerColor = Color.Transparent,
         )
 
         Row(

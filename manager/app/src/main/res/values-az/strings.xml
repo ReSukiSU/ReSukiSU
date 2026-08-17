@@ -33,9 +33,7 @@
     <string name="module_uninstall_failed">Silmək mümkün olmadı: %s</string>
     <string name="module_version">Versiya</string>
     <string name="module_author">Sahib</string>
-    <string name="refresh">Yenilə</string>
     <string name="show_system_apps">Sistem proqramlarını göstər</string>
-    <string name="hide_system_apps">Sistem proqramlarını gizlət</string>
     <string name="send_log">Log-u göndər</string>
     <string name="safe_mode">Təhlükəsiz rejimi</string>
     <string name="reboot_to_apply">Qüvvəyə minməsi üçün yenidən başlat</string>
@@ -66,8 +64,6 @@
     <string name="restart_app">Yenidən başlat</string>
     <string name="failed_to_update_sepolicy">%s görə SELinux qaydalarını güncəlləmək mümkün olmadı</string>
     <string name="settings_profile_template_summary">Manage local and online template of App Profile</string>
-    <string name="settings_check_update">Yeniləmə bildirişləri</string>
-    <string name="settings_check_update_summary">Modul və menecer yeniləmələrini avtomatik yoxlayın</string>
     <string name="save_log">Girişləri Saxla</string>
     <string name="settings_sucompat">su binary yönləndirmə</string>
     <string name="settings_sucompat_summary">Tətbiq Profilinə Superuser icazəsi verilmiş proqramları /system/bin/su vasitəsilə superuser shell əldə etməyə icazə verir; yalnız yeni proseslər üçün effektivdir.</string>

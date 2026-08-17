@@ -29,6 +29,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -590,10 +594,37 @@ fun rememberMaterial3BlurBackdrop(
     val backgroundColor =
         MaterialTheme.colorScheme.surfaceContainer
     val layoutDirection = LocalLayoutDirection.current
+    val backgroundAnchor = LocalBackgroundBlurAnchor.current
 
     return rememberLayerBackdrop {
         if (themeConfig.isEnableBlurExp) {
             backgroundRenderState.imagePainter?.let { painter ->
+                val backgroundViewportSize = backgroundAnchor
+                    ?.takeIf { it.isAttached && it.size.width > 0 && it.size.height > 0 }
+                    ?.size
+                    ?: backgroundRenderState.blurViewportSize
+                val backgroundWidth = backgroundViewportSize.width
+                    .takeIf { it > 0 }
+                    ?.toFloat()
+                    ?: size.width
+                val backgroundHeight = backgroundViewportSize.height
+                    .takeIf { it > 0 }
+                    ?.toFloat()
+                    ?: size.height
+                val pagerViewportWidth = pagerState
+                    ?.layoutInfo
+                    ?.viewportSize
+                    ?.width
+                    ?.takeIf { it > 0 }
+                    ?.toFloat()
+                    ?: size.width
+                val leadingNavigationWidth =
+                    (backgroundWidth - pagerViewportWidth).coerceAtLeast(0f)
+                val pagerViewportLeft = if (layoutDirection == LayoutDirection.Ltr) {
+                    leadingNavigationWidth
+                } else {
+                    0f
+                }
                 val pageOffset = if (
                     pagerState != null &&
                     pagerPage != null &&
@@ -603,12 +634,45 @@ fun rememberMaterial3BlurBackdrop(
                 } else {
                     0f
                 }
-                val physicalPageOffset = pageOffset * size.width *
+                val physicalPageOffset = pageOffset * pagerViewportWidth *
                         if (layoutDirection == LayoutDirection.Ltr) 1f else -1f
+                val backgroundOffset = pagerViewportLeft + physicalPageOffset
+                val backgroundBitmap = backgroundRenderState.imageBitmap
 
-                translate(left = -physicalPageOffset) {
-                    with(painter) {
-                        draw(size = drawContext.size)
+                if (
+                    backgroundBitmap != null &&
+                    backgroundBitmap.width > 0 &&
+                    backgroundBitmap.height > 0
+                ) {
+                    val backgroundScale = maxOf(
+                        backgroundWidth / backgroundBitmap.width,
+                        backgroundHeight / backgroundBitmap.height,
+                    )
+                    val renderedLeft =
+                        (backgroundWidth - backgroundBitmap.width * backgroundScale) / 2f
+                    val renderedTop =
+                        (backgroundHeight - backgroundBitmap.height * backgroundScale) / 2f
+
+                    translate(
+                        left = -backgroundOffset + renderedLeft,
+                        top = renderedTop,
+                    ) {
+                        scale(
+                            scaleX = backgroundScale,
+                            scaleY = backgroundScale,
+                            pivot = Offset.Zero,
+                        ) {
+                            drawImage(
+                                image = backgroundBitmap,
+                                filterQuality = FilterQuality.Low,
+                            )
+                        }
+                    }
+                } else {
+                    translate(left = -backgroundOffset) {
+                        with(painter) {
+                            draw(size = Size(backgroundWidth, backgroundHeight))
+                        }
                     }
                 }
             }
