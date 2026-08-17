@@ -23,8 +23,11 @@ struct user_arg_ptr {
 };
 
 void ksu_handle_execveat_ksud(const char *filename, struct user_arg_ptr *argv, struct user_arg_ptr *envp, int *flags);
-void ksu_execve_hook_ksud(const struct pt_regs *regs);
 void ksu_stop_ksud_execve_hook(void);
+#ifdef CONFIG_KSU_TRACEPOINT_HOOK
+void ksu_execve_hook_ksud(const struct pt_regs *regs);
+void ksu_execveat_hook_ksud(const struct pt_regs *regs);
+#endif
 void ksu_stop_input_hook_runtime(void);
 
 #endif
