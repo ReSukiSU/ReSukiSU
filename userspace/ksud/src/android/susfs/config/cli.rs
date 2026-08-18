@@ -9,9 +9,11 @@ use crate::android::susfs::{config::model::Config, enums::UidScheme};
 
 #[derive(Debug, Subcommand)]
 pub enum ConfigCommand {
-    /// Enable applying the persisted SUSFS configuration during boot.
+    /// Enable SUSFS management: apply the persisted configuration during boot
+    /// and keep the ksu_susfs hard link.
     Enable,
-    /// Disable applying the persisted SUSFS configuration during boot.
+    /// Disable SUSFS management: stop applying the persisted configuration and
+    /// remove the ksu_susfs hard link.
     Disable,
     /// Print the complete persisted configuration as JSON.
     #[command(name = "list_all")]
@@ -157,14 +159,27 @@ enum BooleanField {
 
 pub fn run(command: ConfigCommand) -> Result<()> {
     match command {
-        ConfigCommand::Enable => update_config(|config| {
-            config.set_enabled(true);
+        ConfigCommand::Enable => {
+            update_config(|config| {
+                config.set_enabled(true);
+                Ok(())
+            })?;
+            // Recreate the ksu_susfs hard link once SUSFS management is enabled.
+            if crate::android::susfs::api::features::show::version().is_ok() {
+                crate::assets::ensure_susfs_link()?;
+            }
             Ok(())
-        }),
-        ConfigCommand::Disable => update_config(|config| {
-            config.set_enabled(false);
+        }
+        ConfigCommand::Disable => {
+            update_config(|config| {
+                config.set_enabled(false);
+                Ok(())
+            })?;
+            // Remove the ksu_susfs hard link (only if it is a hard link to ksud),
+            // without recreating it.
+            crate::assets::remove_susfs_link()?;
             Ok(())
-        }),
+        }
         ConfigCommand::ListAll | ConfigCommand::Backup => print_json(&Config::read_or_default()),
         ConfigCommand::Restore { path } => {
             let config = match path {
