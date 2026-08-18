@@ -352,22 +352,22 @@
     <string name="dpi_applied_success">DPI telah diatur ke %1$d</string>
     <string name="settings_background_dim">Penyesuaian Keredupan Latar Belakang</string>
     <string name="warning_of_meta_module_title">Memerlukan Meta modul</string>
-    <string name="warning_of_meta_module_summary">Modul ini ingin memerlukan akses mount /system yang ditangani oleh meta modul. Tanpa modul tersebut, mungkin tidak akan berfungsi</string>
+    <string name="warning_of_meta_module_summary">Modul ini ingin me-mount /system yang ditangani oleh modul meta. Tanpa modul ini, kemungkin tidak akan berfungsi</string>
     <string name="background_crop_method_external">Krop eksternal</string>
     <string name="background_external_crop_unavailable">Crop eksternal tidak tersedia. Gunakan crop bawaan aplikasi.</string>
     <string name="background_crop_method_in_app">Crop Bawaan</string>
     <string name="predictive_back_animation">Animasi Predictive Back</string>
     <string name="predictive_back_exit_direction">Arah Keluar</string>
-    <string name="search_modules">Pencarian modul</string>
+    <string name="search_modules">Cari modul</string>
     <string name="home_meta_module_implement">Implementasi Modul Meta</string>
     <string name="sus_maps_description_text">Sembunyikan jalur asli dari pemetaan memori di /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap]. Catatan: Fitur ini tidak mendukung penyembunyian pemetaan memori anonim, serta tidak dapat menyembunyikan inline hook atau PLT hook yang disebabkan oleh library yang diinjeksi itu sendiri</string>
     <string name="sus_maps_warning">Pemberitahuan Penting: Untuk aplikasi dengan mekanisme deteksi injeksi yang dirancang dengan baik, fitur ini mungkin tidak akan efektif untuk membypass deteksi</string>
-    <string name="sus_maps_debug_info">Pertama, temukan PID dan UID aplikasi target menggunakan ps -enf, lalu periksa path terkait di /proc//maps dan bandingkan nomor perangkat dengan yang ada di /proc/1/mountinfo untuk memastikan konsistensi. Fungsi penyembunyian pemetaan memori hanya dapat bekerja dengan benar jika nomor perangkat tersebut cocok</string>
+    <string name="sus_maps_debug_info">Pertama, temukan PID dan UID aplikasi target menggunakan ps -enf, lalu cek jalur terkait di /proc//maps dan bandingkan nomor perangkat dengan yang ada di /proc/1/mountinfo untuk memastikan konsistensi. Fungsi penyembunyian pemetaan memori hanya dapat bekerja dengan benar jika nomor perangkat tersebut cocok</string>
     <string name="require_manager_version">Versi manajer (%1$d) terlalu rendah. Perbarui ke versi %2$d atau lebih tinggi agar KernelSU berjalan normal!</string>
     <string name="require_kernel_version">Versi KernelSU (%1$d) terlalu rendah. Perbarui ke versi %2$d atau lebih tinggi agar manajer berjalan normal!</string>
     <string name="umount_path_manager">Manajemen Jalur Umount</string>
-    <string name="umount_path_manager_summary">Kelola path unmount kernel</string>
-    <string name="no_any_umount_path">Jalur umount kosong</string>
+    <string name="umount_path_manager_summary">Kelola jalur unmount kernel</string>
+    <string name="no_any_umount_path">Jalur unmount kosong</string>
     <string name="add_umount_path">Tambahkan Jalur Umount</string>
     <string name="mount_path">Jalur Mount</string>
     <string name="umount_flags_hint">0=Umount normal, 2=MNT_DETACH</string>
@@ -382,4 +382,17 @@
     <string name="module_sort_star_first">Urutan (Berbintang)</string>
     <string name="selinux_status_enforcing">Enforcing</string>
     <string name="reboot_soft">Mulai ulang cepat</string>
+    <string name="network_retry">Coba lagi</string>
+    <string name="please_check_network">Silakan periksa koneksi internet anda dan coba lagi</string>
+    <string name="assets_multiple_select_dialog_title">Pilih aset yang ingin anda instal</string>
+    <string name="assets_multiple_select_dialog_warning">Tidak ada aset yang dipilih</string>
+    <string name="temporary">Sementara</string>
+    <string name="flash_success">Flash berhasil</string>
+    <string name="flash_failed">Flash gagal</string>
+    <string name="predictive_back_settings">Kembali Prediktif</string>
+    <string name="persistent">Persisten</string>
+    <string name="network_offline">Anda sedang offline</string>
+    <string name="confirm_install_module_title">Apakah Anda ingin menginstal modul %s?</string>
+    <string name="assets_multiple_select_dialog_content_description">Ukuran: %1$s, Jumlah download: %2$s</string>
+    <string name="open_module_home_page">Buka halaman utama modul di browser</string>
 </resources>

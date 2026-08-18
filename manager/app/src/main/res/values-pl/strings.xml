@@ -18,7 +18,7 @@
     <string name="module_failed_to_disable">Nie udało się wyłączyć modułu: %s</string>
     <string name="module_empty">Brak zainstalowanych modułów</string>
     <string name="module">Moduły</string>
-    <string name="module_sort_action_first">Sortuj (najpierw działania)</string>
+    <string name="module_sort_action_first">Sortuj (najpierw z przyciskiem akcji)</string>
     <string name="module_sort_enabled_first">Sortuj (najpierw włączone)</string>
     <string name="uninstall">Odinstaluj</string>
     <string name="install">Instaluj</string>
