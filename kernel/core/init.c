@@ -228,6 +228,7 @@ int __init kernelsu_init(void)
     ksu_selinux_hide_init();
 
     ksu_supercalls_init();
+    ksu_app_profile_init();
 
     ksu_setuid_hook_init();
     ksu_sucompat_init();
