@@ -7,6 +7,11 @@ on:
         description: 'KMI version'
         required: true
         type: string
+      arch:
+        description: "target's architecture (arm64/x86_64)"
+        required: true
+        type: string
+        default: 'arm64'
       ddk_release:
         description: 'DDK release version'
         required: false
@@ -26,7 +31,7 @@ on:
 
 jobs:
   build-kernelsu-ko:
-    name: Build kernelsu.ko for ${{ inputs.kmi }}
+    name: Build kernelsu.ko for ${{ inputs.kmi }} ${{ inputs.arch }}
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/ylarod/ddk-min:${{ inputs.kmi }}-${{ inputs.ddk_release }}
@@ -36,12 +41,16 @@ jobs:
     - name: Checkout source code
       uses: actions/checkout@v7
 
+    - name: Add Safe Directory
+      run: |
+        git config --global --add safe.directory /__w/ReSukiSU/ReSukiSU
+
     - name: Build kernelsu.ko
+      if: ${{ inputs.arch == 'arm64' }}
       env:
         EXPECTED_PR_BUILD_SIZE: ${{ inputs.expected_pr_build_size }}
         EXPECTED_PR_BUILD_HASH: ${{ inputs.expected_pr_build_hash }}
       run: |
-        git config --global --add safe.directory /__w/ReSukiSU/ReSukiSU
         cd kernel
 
         echo "=== Building kernelsu.ko for KMI: ${{ inputs.kmi }} ==="
@@ -77,18 +86,19 @@ jobs:
         echo "Size after stripping: $(du -h "$OUT_DIR/$OUTPUT_NAME" | cut -f1)"
 
     - name: Upload kernelsu.ko artifact
+      if: ${{ inputs.arch == 'arm64' }}
       uses: actions/upload-artifact@v7
       with:
         name: aarch64-${{ inputs.kmi }}-lkm
         path: /github/workspace/out/aarch64/${{ inputs.kmi }}_kernelsu.ko
 
     - name: Build kernelsu.ko for x64
+      if: ${{ inputs.arch == 'x86_64' }}
       env:
         EXPECTED_PR_BUILD_SIZE: ${{ inputs.expected_pr_build_size }}
         EXPECTED_PR_BUILD_HASH: ${{ inputs.expected_pr_build_hash }}
       run: |
         cd kernel
-        make clean
 
         echo "=== Preparing KDIR for x64 ==="
 
@@ -147,6 +157,7 @@ jobs:
         echo "Size after stripping: $(du -h "$OUT_DIR/$OUTPUT_NAME" | cut -f1)"
         
     - name: Upload x64 kernelsu.ko artifact
+      if: ${{ inputs.arch == 'x86_64' }}
       uses: actions/upload-artifact@v7
       with:
         name: x86_64-${{ inputs.kmi }}-lkm
