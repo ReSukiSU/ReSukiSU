@@ -627,10 +627,6 @@ private fun AppearanceSettings(
                 onSelectedIndexChange = { index ->
                     val style = BottomBarStyle.fromOrdinal(index)
                     backgroundManager.saveBottomBarStyle(style)
-                    // The floating (glass) bar needs a blur backdrop to render.
-                    if (style == BottomBarStyle.FLOATING && !themeConfig.isEnableBlur) {
-                        backgroundManager.saveEnableBlur(true)
-                    }
                 }
             )
         }
