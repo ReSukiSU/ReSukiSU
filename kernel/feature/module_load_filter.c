@@ -20,7 +20,7 @@
 
 // This is a load-time policy, not an attempt to infer whether arbitrary
 // modules are safe. Userspace can pass device-specific .modinfo names through
-// blocked_preset_modules=foo,bar. An empty value disables the policy.
+// block_modules=foo,bar. An empty value disables the policy.
 
 struct ksu_module_name {
     const char *name;
@@ -95,8 +95,8 @@ static bool ksu_name_matches(const char *name, size_t name_len, const char *conf
 static bool ksu_find_blocked_module(const char *name, size_t name_len, bool normalize_filename,
                                     struct ksu_module_name *blocked)
 {
-    const char *cursor = ksu_blocked_preset_modules;
-    const char *end = cursor + strnlen(cursor, sizeof(ksu_blocked_preset_modules));
+    const char *cursor = ksu_block_modules;
+    const char *end = cursor + strnlen(cursor, sizeof(ksu_block_modules));
 
     while (cursor < end) {
         const char *separator = memchr(cursor, ',', end - cursor);
@@ -285,7 +285,7 @@ int ksu_handle_init_module(const void __user *umod, unsigned long umod_len)
         .file_size = 0,
     };
 
-    if (!ksu_blocked_preset_modules[0])
+    if (!ksu_block_modules[0])
         return KSU_MODULE_LOAD_CONTINUE;
 
     if (r.umod && r.umod_len >= sizeof(Elf_Ehdr) && ksu_is_block_module(&r, &blocked)) {
@@ -302,7 +302,7 @@ int ksu_handle_finit_module(int fd, int flags)
     struct file *file;
     bool should_block;
 
-    if (!ksu_blocked_preset_modules[0])
+    if (!ksu_block_modules[0])
         return KSU_MODULE_LOAD_CONTINUE;
 
     file = fget(fd);
@@ -310,7 +310,7 @@ int ksu_handle_finit_module(int fd, int flags)
     if (!file)
         return KSU_MODULE_LOAD_CONTINUE;
 
-    // @blocked points into ksu_blocked_preset_modules, so it stays valid here.
+    // @blocked points into ksu_block_modules, so it stays valid here.
     should_block = ksu_get_blocked_file_module(file, flags, &blocked);
     fput(file);
 
@@ -351,7 +351,7 @@ static long ksu_sys_finit_module(const struct pt_regs *regs)
 
 void __init ksu_module_load_filter_hook_init(void)
 {
-    if (!ksu_blocked_preset_modules[0]) {
+    if (!ksu_block_modules[0]) {
         pr_info("module_load_filter: no modules should be blocked\n");
         return;
     }
@@ -361,12 +361,12 @@ void __init ksu_module_load_filter_hook_init(void)
     ksu_syscall_table_hook(__NR_init_module, ksu_sys_init_module, &orig_sys_init_module);
     ksu_syscall_table_hook(__NR_finit_module, ksu_sys_finit_module, &orig_sys_finit_module);
 #endif
-    pr_info("module_load_filter: target modules: %s\n", ksu_blocked_preset_modules);
+    pr_info("module_load_filter: target modules: %s\n", ksu_block_modules);
 }
 
 void __exit ksu_module_load_filter_hook_exit(void)
 {
-    if (!ksu_blocked_preset_modules[0])
+    if (!ksu_block_modules[0])
         return;
 
 #ifdef CONFIG_KSU_TRACEPOINT_HOOK

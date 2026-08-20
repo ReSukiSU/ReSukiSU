@@ -17,11 +17,11 @@ use regex_lite::Regex;
 
 use crate::{assets, banner};
 
-const KSU_BLOCKED_PRESET_MODULES_CONFIG: &str = "ksu_blocked_preset_modules";
-const KSU_BLOCKED_PRESET_MODULES_MAX_LEN: usize = 255;
+const KSU_BLOCK_MODULES_CONFIG: &str = "ksu_block_modules";
+const KSU_BLOCK_MODULES_MAX_LEN: usize = 255;
 
-fn valid_blocked_preset_modules(modules: &str) -> bool {
-    modules.len() <= KSU_BLOCKED_PRESET_MODULES_MAX_LEN
+fn valid_block_modules(modules: &str) -> bool {
+    modules.len() <= KSU_BLOCK_MODULES_MAX_LEN
         && (modules.is_empty()
             || modules.split(',').all(|name| {
                 !name.is_empty()
@@ -476,7 +476,7 @@ pub struct BootPatchArgs {
 
     /// Block what module loading?
     #[arg(long, value_name = "NAMES")]
-    blocked_preset_modules: Option<String>,
+    block_modules: Option<String>,
 
     #[cfg(not(target_os = "android"))]
     #[arg(long, default_value = "aarch64")]
@@ -502,7 +502,7 @@ pub fn patch(args: BootPatchArgs) -> Result<()> {
             adb_debug_prop,
             cmdline,
             no_install,
-            blocked_preset_modules,
+            block_modules,
             #[cfg(target_os = "android")]
             ota,
             #[cfg(target_os = "android")]
@@ -515,9 +515,9 @@ pub fn patch(args: BootPatchArgs) -> Result<()> {
             ramdisk,
         } = args;
 
-        if let Some(modules) = &blocked_preset_modules {
+        if let Some(modules) = &block_modules {
             ensure!(
-                valid_blocked_preset_modules(modules),
+                valid_block_modules(modules),
                 "blocked preset module list must be at most 255 bytes and contain only letters, digits, '_' or '-'"
             );
         }
@@ -745,12 +745,12 @@ pub fn patch(args: BootPatchArgs) -> Result<()> {
         // remove legacy config file
         cpio.rm("allow_shell", false);
 
-        if let Some(modules) = blocked_preset_modules {
+        if let Some(modules) = block_modules {
             if !modules.is_empty() {
                 println!("- Blocking preset modules: {modules}");
             }
             cpio.add(
-                KSU_BLOCKED_PRESET_MODULES_CONFIG,
+                KSU_BLOCK_MODULES_CONFIG,
                 CpioEntry::regular(0o644, Box::new(modules.into_bytes())),
             )?;
         }

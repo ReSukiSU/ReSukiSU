@@ -17,12 +17,12 @@ struct AutoUmount {
 }
 
 const KSU_CONFIG_PATH: &str = "/ksu_config";
-const KSU_BLOCKED_PRESET_MODULES_PATH: &str = "/ksu_blocked_preset_modules";
-const KSU_BLOCKED_PRESET_MODULES_MAX_LEN: usize = 255;
-const KSU_DEFAULT_BLOCKED_PRESET_MODULES: &str = "vr";
+const KSU_BLOCK_MODULES_PATH: &str = "/ksu_block_modules";
+const KSU_BLOCK_MODULES_MAX_LEN: usize = 255;
+const KSU_DEFAULT_BLOCK_MODULES: &str = "vr";
 
-fn valid_blocked_preset_modules(modules: &str) -> bool {
-    modules.len() <= KSU_BLOCKED_PRESET_MODULES_MAX_LEN
+fn valid_block_modules(modules: &str) -> bool {
+    modules.len() <= KSU_BLOCK_MODULES_MAX_LEN
         && (modules.is_empty()
             || modules.split(',').all(|name| {
                 !name.is_empty()
@@ -35,19 +35,19 @@ fn valid_blocked_preset_modules(modules: &str) -> bool {
 fn load_module_params() -> Result<CString> {
     let mut params = std::fs::read(KSU_CONFIG_PATH).unwrap_or_default();
 
-    let blocked_modules = match std::fs::read_to_string(KSU_BLOCKED_PRESET_MODULES_PATH) {
+    let blocked_modules = match std::fs::read_to_string(KSU_BLOCK_MODULES_PATH) {
         Ok(modules) => modules,
         Err(err) if err.kind() == ErrorKind::NotFound => {
-            KSU_DEFAULT_BLOCKED_PRESET_MODULES.to_owned()
+            KSU_DEFAULT_BLOCK_MODULES.to_owned()
         }
         Err(err) => {
             return Err(err)
-                .with_context(|| format!("Cannot read {KSU_BLOCKED_PRESET_MODULES_PATH}"));
+                .with_context(|| format!("Cannot read {KSU_BLOCK_MODULES_PATH}"));
         }
     };
 
     ensure!(
-        valid_blocked_preset_modules(&blocked_modules),
+        valid_block_modules(&blocked_modules),
         "Invalid blocked preset module list"
     );
     if params
@@ -56,7 +56,7 @@ fn load_module_params() -> Result<CString> {
     {
         params.push(b' ');
     }
-    params.extend_from_slice(format!("blocked_preset_modules={blocked_modules}").as_bytes());
+    params.extend_from_slice(format!("block_modules={blocked_modules}").as_bytes());
 
     CString::new(params).context("KernelSU module parameters contain a NUL byte")
 }
