@@ -422,10 +422,17 @@ int ksu_handle_execve(int *fd, const char *filename, void *argv, void *envp, int
 #endif
 
     // We only care AT_FDCWD & flags = 0
+    // check int* fd and int* flags, because they might NOT ptr
+    // Who exactly is so fond of type casting that even wrote it into the old version of documentation?
+    if (fd == (int *)AT_FDCWD && flags == 0) {
+        goto skip_check;
+    }
+
     if (*fd != AT_FDCWD || *flags != 0) {
         return 0;
     }
 
+skip_check:
     ksu_handle_execveat_init(filename, envp);
 
 #ifdef KSU_COMPAT_USE_STATIC_KEY
