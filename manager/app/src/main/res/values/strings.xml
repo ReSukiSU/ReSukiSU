@@ -446,9 +446,9 @@
     <string name="susfs_status_variant">Variant</string>
     <string name="susfs_status_enabled_features">Enabled Features</string>
     <string name="susfs_status_no_data">No data</string>
-    <string name="susfs_standard_config_enabled">SUSFS manager</string>
-    <string name="susfs_standard_config_enabled_desc">Control SUSFS management. When enabled, the saved SUSFS configuration is applied during boot and the ksu_susfs link is kept. Disabling stops applying the configuration and removes the ksu_susfs link.</string>
-    <string name="susfs_management_disabled_warning">Built-in SUSFS management in Manager is disabled. The SUSFS configuration will not be applied and the ksu_susfs link has been removed.</string>
+    <string name="susfs_enable_config">SUSFS manager</string>
+    <string name="susfs_enable_config_summary">Enable built-in SUSFS manager. May conflict with third-party modules.</string>
+    <string name="susfs_config_disable_warning">Built-in SUSFS manager is disabled. Enable it or install a third-party module to use SUSFS features.</string>
     <string name="susfs_standard_logging">Logging</string>
     <string name="susfs_standard_logging_desc">Enables SUSFS kernel log. Enable it before reporting bugs related to SUSFS.</string>
     <string name="susfs_standard_avc_log_spoofing">AVC Log Spoofing</string>

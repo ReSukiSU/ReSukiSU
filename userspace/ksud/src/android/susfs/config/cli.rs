@@ -9,11 +9,9 @@ use crate::android::susfs::{config::model::Config, enums::UidScheme};
 
 #[derive(Debug, Subcommand)]
 pub enum ConfigCommand {
-    /// Enable SUSFS management: apply the persisted configuration during boot
-    /// and keep the ksu_susfs hard link.
+    /// Enable SUSFS management
     Enable,
-    /// Disable SUSFS management: stop applying the persisted configuration and
-    /// remove the ksu_susfs hard link.
+    /// Disable SUSFS management
     Disable,
     /// Print the complete persisted configuration as JSON.
     #[command(name = "list_all")]
@@ -165,10 +163,7 @@ pub fn run(command: ConfigCommand) -> Result<()> {
                 Ok(())
             })?;
             // Recreate the ksu_susfs hard link once SUSFS management is enabled.
-            if crate::android::susfs::api::features::show::version().is_ok() {
-                crate::assets::ensure_susfs_link()?;
-            }
-            Ok(())
+            crate::assets::reconcile_susfs_link()
         }
         ConfigCommand::Disable => {
             update_config(|config| {
@@ -177,8 +172,7 @@ pub fn run(command: ConfigCommand) -> Result<()> {
             })?;
             // Remove the ksu_susfs hard link (only if it is a hard link to ksud),
             // without recreating it.
-            crate::assets::remove_susfs_link()?;
-            Ok(())
+            crate::assets::reconcile_susfs_link()
         }
         ConfigCommand::ListAll | ConfigCommand::Backup => print_json(&Config::read_or_default()),
         ConfigCommand::Restore { path } => {
@@ -186,7 +180,10 @@ pub fn run(command: ConfigCommand) -> Result<()> {
                 Some(path) => Config::read_from(path)?,
                 None => Config::default(),
             };
-            config.save()
+            config.save()?;
+            // A restored config may change `enabled`; bring the ksu_susfs hard
+            // link back in sync with the new state.
+            crate::assets::reconcile_susfs_link()
         }
         ConfigCommand::CmdlineOrBootconfig { command } => run_string(command),
         ConfigCommand::AvcLogSpoofing { command } => {

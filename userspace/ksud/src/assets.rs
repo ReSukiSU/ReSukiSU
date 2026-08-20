@@ -49,6 +49,21 @@ mod android {
         }
     }
 
+    /// Align the ksu_susfs hard link with the persisted SUSFS manager state:
+    /// create it when management is enabled and SUSFS is available, otherwise
+    /// remove it (only when it is genuinely a hard link to ksud). Used after an
+    /// explicit state change (enable / disable / restore).
+    pub fn reconcile_susfs_link() -> anyhow::Result<()> {
+        if crate::android::susfs::config::model::Config::read_or_default().is_enabled() {
+            if crate::android::susfs::api::features::show::version().is_ok() {
+                ensure_susfs_link()?;
+            }
+        } else {
+            remove_susfs_link()?;
+        }
+        Ok(())
+    }
+
     pub fn ensure_binaries(ignore_if_exist: bool) -> anyhow::Result<()> {
         for file in Asset::iter() {
             if file == "ksuinit" || file.ends_with(".ko") {
