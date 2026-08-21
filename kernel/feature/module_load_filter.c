@@ -244,8 +244,7 @@ int ksu_handle_finit_module(int fd, int flags)
             const char *suffix = compression_suffixes[i];
             size_t suffix_len = strlen(suffix);
 
-            if (name_len > suffix_len &&
-                !memcmp(filename->name + name_len - suffix_len, suffix, suffix_len)) {
+            if (name_len > suffix_len && !memcmp(filename->name + name_len - suffix_len, suffix, suffix_len)) {
                 name_len -= suffix_len;
                 break;
             }
@@ -275,8 +274,7 @@ int ksu_handle_finit_module(int fd, int flags)
     fput(file);
 
     if (should_block) {
-        pr_info("module_load_filter: block %.*s load due to it in blocklist\n",
-                (int)blocked.len, blocked.name);
+        pr_info("module_load_filter: block %.*s load due to it in blocklist\n", (int)blocked.len, blocked.name);
         return 0;
     }
 
