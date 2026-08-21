@@ -109,6 +109,9 @@ private val iosIndicatorSpecular: Highlight = Highlight(
 // Mirrors miuix-blur HighlightStyle's LIGHT_REF — keep in sync.
 private const val LIGHT_REF_X = 0.5f
 private const val LIGHT_REF_Y = 0.7f
+// Keep part of the pill's lens and specular visible while it sits idle, so the
+// indicator still reads as glass when it is not being pressed.
+private const val PILL_REST_GLASS = 0.4f
 private const val GRAVITY_DIR_THRESHOLD_SQ = 0.01f // |g_xy| > 0.1, ≈ 6° tilt
 
 /** Tracks gravity for a `dualPeak` highlight's primary light, with an extra UV-clockwise offset on top. */
@@ -321,32 +324,30 @@ fun FloatingBottomBar(
                     onClick = {}
                 )
                 .then(
-                    if (isBlurEnabled) {
-                        Modifier.drawBackdrop(
-                            backdrop = backdrop,
-                            shape = { pillShape },
-                            effects = {
+                    Modifier.drawBackdrop(
+                        backdrop = backdrop,
+                        shape = { pillShape },
+                        effects = {
+                            if (isBlurEnabled) {
                                 vibrancy()
                                 blur(4.dp.toPx(), 4.dp.toPx())
                                 lens(
                                     refractionHeight = 24.dp.toPx(),
                                     refractionAmount = 24.dp.toPx(),
                                 )
-                            },
-                            highlight = { baseHighlight.copy(alpha = 0.75f) },
-                            layerBlock = {
-                                val width = size.width.coerceAtLeast(1f)
-                                val s = lerp(1f, 1f + 16.dp.toPx() / width, dampedDragAnimation.pressProgress)
-                                scaleX = s
-                                scaleY = s
-                            },
-                            onDrawSurface = { drawRect(containerColor) },
-                        )
-                    } else {
-                        Modifier.background(containerColor, pillShape)
-                    }
+                            }
+                        },
+                        highlight = { baseHighlight.copy(alpha = 0.75f) },
+                        layerBlock = {
+                            val width = size.width.coerceAtLeast(1f)
+                            val s = lerp(1f, 1f + 16.dp.toPx() / width, dampedDragAnimation.pressProgress)
+                            scaleX = s
+                            scaleY = s
+                        },
+                        onDrawSurface = { drawRect(containerColor) },
+                    )
                 )
-                .then(if (isBlurEnabled) interactiveHighlight.modifier else Modifier)
+                .then(interactiveHighlight.modifier)
                 .height(64.dp)
                 .padding(4.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -407,7 +408,8 @@ fun FloatingBottomBar(
                             backdrop = combinedBackdrop,
                             shape = { pillShape },
                             effects = {
-                                val progress = dampedDragAnimation.pressProgress
+                                val progress = PILL_REST_GLASS +
+                                    (1f - PILL_REST_GLASS) * dampedDragAnimation.pressProgress
                                 lens(
                                     refractionHeight = 10.dp.toPx() * progress,
                                     refractionAmount = 14.dp.toPx() * progress,
@@ -415,7 +417,12 @@ fun FloatingBottomBar(
                                     chromaticAberration = 0.5f,
                                 )
                             },
-                            highlight = { pillHighlight.copy(alpha = dampedDragAnimation.pressProgress) },
+                            highlight = {
+                                pillHighlight.copy(
+                                    alpha = PILL_REST_GLASS +
+                                        (1f - PILL_REST_GLASS) * dampedDragAnimation.pressProgress
+                                )
+                            },
                             layerBlock = {
                                 scaleX = dampedDragAnimation.scaleX
                                 scaleY = dampedDragAnimation.scaleY
