@@ -3,14 +3,11 @@
 
 #include <linux/types.h>
 
-#define KSU_BLOCK_MODULES_MAX 256
-#define KSU_MODULE_LOAD_CONTINUE 1
+// 256 should enough
+extern char ksu_block_modules[256];
 
-extern char ksu_block_modules[KSU_BLOCK_MODULES_MAX];
-
-// Return KSU_MODULE_LOAD_CONTINUE to execute the original syscall. Any other
-// value is returned directly to userspace. Manual hooks can use the same
-// contract as the tracepoint-hook adapter.
+// return is errno, use if to check
+// when the if statement is false, return ret to the userspace.
 int ksu_handle_init_module(const void __user *umod, unsigned long umod_len);
 int ksu_handle_finit_module(int fd, int flags);
 
