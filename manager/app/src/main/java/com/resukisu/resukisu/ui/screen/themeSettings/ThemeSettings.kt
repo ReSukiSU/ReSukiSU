@@ -631,40 +631,20 @@ private fun AppearanceSettings(
             )
         }
 
-        expandableItem(
-            animatedVisibility = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
-            expanded = themeConfig.isEnableBlur,
-            topPadding = 1.dp,
-            topContent = {
-                SettingsSwitchWidget(
-                    icon = Icons.TwoTone.BlurOn,
-                    title = stringResource(id = R.string.settings_config_enable_blur),
-                    description = stringResource(id = R.string.settings_config_enable_blur_summary),
-                    checked = themeConfig.isEnableBlur,
-                    onCheckedChange = { isChecked ->
-                        backgroundManager.saveEnableBlur(isChecked)
-                        if (!isChecked)
-                            backgroundManager.saveEnableBlurExp(false)
-                    }
-                )
-            },
-            bottomContent = {
-                item(
-                    topPadding = 1.dp,
-                ) {
-                    SettingsSwitchWidget(
-                        icon = Icons.TwoTone.Draw,
-                        title = stringResource(id = R.string.settings_exp_draw_background_to_blur),
-                        description = stringResource(id = R.string.settings_exp_draw_background_to_blur_description),
-                        isError = true,
-                        checked = themeConfig.isEnableBlurExp,
-                        onCheckedChange = { isChecked ->
-                            backgroundManager.saveEnableBlurExp(isChecked)
-                        }
-                    )
+        item(visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            SettingsSwitchWidget(
+                icon = Icons.TwoTone.BlurOn,
+                title = stringResource(id = R.string.settings_config_enable_blur),
+                description = stringResource(id = R.string.settings_config_enable_blur_summary),
+                checked = themeConfig.isEnableBlur,
+                onCheckedChange = { isChecked ->
+                    backgroundManager.saveEnableBlur(isChecked)
+                    if (!isChecked)
+                        backgroundManager.saveEnableBlurExp(false)
                 }
-            }
-        )
+            )
+        }
+
 
         expandableItem(
             expanded = state.isCustomBackgroundEnabled,
@@ -914,6 +894,19 @@ private fun SegmentedColumnScope.backgroundAdjustmentControls(
             state = state,
             viewModel = viewModel,
             coroutineScope = coroutineScope
+        )
+    }
+
+    item(visible = themeConfig.isEnableBlur, topPadding = 1.dp) {
+        SettingsSwitchWidget(
+            icon = Icons.TwoTone.Draw,
+            title = stringResource(id = R.string.settings_exp_draw_background_to_blur),
+            description = stringResource(id = R.string.settings_exp_draw_background_to_blur_description),
+            isError = true,
+            checked = themeConfig.isEnableBlurExp,
+            onCheckedChange = { isChecked ->
+                backgroundManager.saveEnableBlurExp(isChecked)
+            }
         )
     }
 
