@@ -474,7 +474,7 @@ pub struct BootPatchArgs {
     #[arg(long, default_value = "false")]
     no_custom_rc: bool,
 
-    /// Block what module loading?
+    /// Block what module loading
     #[arg(
         long,
         value_name = "NAMES",
@@ -751,7 +751,7 @@ pub fn patch(args: BootPatchArgs) -> Result<()> {
 
         if let Some(modules) = block_modules {
             if !modules.is_empty() {
-                println!("- Blocking preset modules: {modules}");
+                println!("- Blocking modules: {modules}");
             }
             cpio.add(
                 KSU_BLOCK_MODULES_CONFIG,
