@@ -475,7 +475,11 @@ pub struct BootPatchArgs {
     no_custom_rc: bool,
 
     /// Block what module loading?
-    #[arg(long, value_name = "NAMES", default_value = "vr,vklp,oplus_secure_guard,oplus_secure_guard_new")]
+    #[arg(
+        long,
+        value_name = "NAMES",
+        default_value = "vr,vklp,oplus_secure_guard,oplus_secure_guard_new"
+    )]
     block_modules: Option<String>,
 
     #[cfg(not(target_os = "android"))]

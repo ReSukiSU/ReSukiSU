@@ -37,12 +37,9 @@ fn load_module_params() -> Result<CString> {
 
     let blocked_modules = match std::fs::read_to_string(KSU_BLOCK_MODULES_PATH) {
         Ok(modules) => modules,
-        Err(err) if err.kind() == ErrorKind::NotFound => {
-            KSU_DEFAULT_BLOCK_MODULES.to_owned()
-        }
+        Err(err) if err.kind() == ErrorKind::NotFound => KSU_DEFAULT_BLOCK_MODULES.to_owned(),
         Err(err) => {
-            return Err(err)
-                .with_context(|| format!("Cannot read {KSU_BLOCK_MODULES_PATH}"));
+            return Err(err).with_context(|| format!("Cannot read {KSU_BLOCK_MODULES_PATH}"));
         }
     };
 
