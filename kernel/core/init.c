@@ -155,7 +155,7 @@ bool allow_shell = false;
 bool ksu_no_custom_rc = false;
 module_param_named(norc, ksu_no_custom_rc, bool, 0);
 
-char ksu_block_modules[KSU_BLOCK_MODULES_MAX];
+char ksu_block_modules[256];
 module_param_string(block_modules, ksu_block_modules, sizeof(ksu_block_modules), 0);
 MODULE_PARM_DESC(block_modules, "Comma-separated preset module names to acknowledge without loading");
 
