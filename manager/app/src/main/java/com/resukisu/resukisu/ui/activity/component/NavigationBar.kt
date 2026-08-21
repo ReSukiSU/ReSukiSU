@@ -52,6 +52,7 @@ import com.resukisu.resukisu.ui.util.LocalSelectedPage
 import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 
 @SuppressLint("ContextCastToActivity")
@@ -73,8 +74,10 @@ fun NavigationBar(
     val pagerState = LocalPagerState.current
 
     val backdrop = LocalBlurState.current
+    val fallbackBackdrop = rememberLayerBackdrop()
+    val isBlurEnabled = backdrop != null
 
-    if (isBottomBar && themeConfig.bottomBarStyle == BottomBarStyle.FLOATING && backdrop != null) {
+    if (isBottomBar && themeConfig.bottomBarStyle == BottomBarStyle.FLOATING) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -90,9 +93,9 @@ fun NavigationBar(
             FloatingBottomBar(
                 selectedIndex = { pagerState.targetPage },
                 onSelected = { handlePageChange(it) },
-                backdrop = backdrop,
+                backdrop = backdrop ?: fallbackBackdrop,
                 tabsCount = destinations.size,
-                isBlurEnabled = themeConfig.isEnableBlur,
+                isBlurEnabled = isBlurEnabled,
             ) {
                 destinations.forEachIndexed { index, destination ->
                     FloatingBottomBarItem(
