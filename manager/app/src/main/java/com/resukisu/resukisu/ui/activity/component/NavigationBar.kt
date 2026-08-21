@@ -52,6 +52,7 @@ import com.resukisu.resukisu.ui.util.LocalSelectedPage
 import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 
@@ -61,7 +62,8 @@ import top.yukonga.miuix.kmp.theme.LocalContentColor
 fun NavigationBar(
     modifier: Modifier = Modifier,
     destinations: List<BottomBarDestination>,
-    isBottomBar: Boolean
+    isBottomBar: Boolean,
+    floatingBackdrop: Backdrop? = null
 ) {
     val themeConfig: ThemeConfig = koinInject()
     val cardConfig: CardConfig = koinInject()
@@ -75,7 +77,10 @@ fun NavigationBar(
 
     val backdrop = LocalBlurState.current
     val fallbackBackdrop = rememberLayerBackdrop()
-    val isBlurEnabled = backdrop != null
+    // The floating bar can publish its own backdrop layer, so its glass keeps working
+    // when the global blur setting is off.
+    val floatingBarBackdrop = backdrop ?: floatingBackdrop
+    val isBlurEnabled = floatingBarBackdrop != null
 
     if (isBottomBar && themeConfig.bottomBarStyle == BottomBarStyle.FLOATING) {
         Box(
@@ -93,7 +98,7 @@ fun NavigationBar(
             FloatingBottomBar(
                 selectedIndex = { pagerState.targetPage },
                 onSelected = { handlePageChange(it) },
-                backdrop = backdrop ?: fallbackBackdrop,
+                backdrop = floatingBarBackdrop ?: fallbackBackdrop,
                 tabsCount = destinations.size,
                 isBlurEnabled = isBlurEnabled,
             ) {

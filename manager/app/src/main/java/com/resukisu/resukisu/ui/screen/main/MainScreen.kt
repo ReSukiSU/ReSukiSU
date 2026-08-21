@@ -35,7 +35,10 @@ import com.resukisu.resukisu.ui.rememberMaterial3BlurBackdrop
 import com.resukisu.resukisu.ui.screen.BottomBarDestination
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurSource
+import com.resukisu.resukisu.ui.theme.BottomBarStyle
 import com.resukisu.resukisu.ui.util.LocalBlurState
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import com.resukisu.resukisu.ui.util.LocalHandlePageChange
 import com.resukisu.resukisu.ui.util.LocalPagerPage
 import com.resukisu.resukisu.ui.util.LocalPagerState
@@ -123,6 +126,11 @@ fun MainScreen() {
             modifier = Modifier.fillMaxSize()
         ) {
             val isPortrait = maxWidth < maxHeight || (maxHeight / maxWidth > 1.4f)
+            // Publish a backdrop for the floating bar when the global blur is off, so it
+            // can still refract the page behind it without turning blur on everywhere.
+            val floatingBarBackdrop = if (
+                !themeConfig.isEnableBlur && themeConfig.bottomBarStyle == BottomBarStyle.FLOATING
+            ) rememberLayerBackdrop() else null
             val content = @Composable { paddingBottom: Dp ->
                 HorizontalPager(
                     modifier = Modifier
@@ -156,12 +164,17 @@ fun MainScreen() {
                         NavigationBar(
                             destinations = pages,
                             isBottomBar = true,
+                            floatingBackdrop = floatingBarBackdrop,
                         )
                     },
                     containerColor = Color.Transparent,
                 ) { innerPadding ->
                     Box(
-                        modifier = Modifier.blurSource()
+                        modifier = Modifier
+                            .blurSource()
+                            .then(
+                                floatingBarBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier
+                            )
                     ) {
                         content(innerPadding.calculateBottomPadding())
                     }
