@@ -143,7 +143,7 @@ static int reboot_handler_pre(struct kprobe *p, struct pt_regs *regs)
 }
 
 static struct kprobe reboot_kp = {
-    .symbol_name = REBOOT_SYMBOL,
+    .symbol_name = SYS_REBOOT_SYMBOL,
     .pre_handler = reboot_handler_pre,
 };
 #endif
