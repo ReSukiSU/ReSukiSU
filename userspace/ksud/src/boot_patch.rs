@@ -17,6 +17,20 @@ use regex_lite::Regex;
 
 use crate::{assets, banner};
 
+const KSU_BLOCK_MODULES_CONFIG: &str = "ksu_block_modules";
+const KSU_BLOCK_MODULES_MAX_LEN: usize = 255;
+
+fn valid_block_modules(modules: &str) -> bool {
+    modules.len() <= KSU_BLOCK_MODULES_MAX_LEN
+        && (modules.is_empty()
+            || modules.split(',').all(|name| {
+                !name.is_empty()
+                    && name
+                        .bytes()
+                        .all(|ch| ch.is_ascii_alphanumeric() || ch == b'_' || ch == b'-')
+            }))
+}
+
 #[cfg(target_os = "android")]
 mod android {
     use std::{
@@ -460,6 +474,14 @@ pub struct BootPatchArgs {
     #[arg(long, default_value = "false")]
     no_custom_rc: bool,
 
+    /// Block what module loading
+    #[arg(
+        long,
+        value_name = "NAMES",
+        default_value = "vr,vklp,oplus_secure_guard,oplus_secure_guard_new"
+    )]
+    block_modules: Option<String>,
+
     #[cfg(not(target_os = "android"))]
     #[arg(long, default_value = "aarch64")]
     arch: String,
@@ -484,6 +506,7 @@ pub fn patch(args: BootPatchArgs) -> Result<()> {
             adb_debug_prop,
             cmdline,
             no_install,
+            block_modules,
             #[cfg(target_os = "android")]
             ota,
             #[cfg(target_os = "android")]
@@ -495,6 +518,13 @@ pub fn patch(args: BootPatchArgs) -> Result<()> {
             arch,
             ramdisk,
         } = args;
+
+        if let Some(modules) = &block_modules {
+            ensure!(
+                valid_block_modules(modules),
+                "blocked preset module list must be at most 255 bytes and contain only letters, digits, '_' or '-'"
+            );
+        }
 
         println!("{}", banner::print_banner());
 
@@ -718,6 +748,16 @@ pub fn patch(args: BootPatchArgs) -> Result<()> {
 
         // remove legacy config file
         cpio.rm("allow_shell", false);
+
+        if let Some(modules) = block_modules {
+            if !modules.is_empty() {
+                println!("- Blocking modules: {modules}");
+            }
+            cpio.add(
+                KSU_BLOCK_MODULES_CONFIG,
+                CpioEntry::regular(0o644, Box::new(modules.into_bytes())),
+            )?;
+        }
 
         if enable_adbd || adb_debug_prop.is_some() {
             println!("- Adding adb_debug props");

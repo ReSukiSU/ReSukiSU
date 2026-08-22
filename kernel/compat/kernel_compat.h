@@ -70,15 +70,6 @@ extern ssize_t ksu_kernel_write_compat(struct file *p, const void *buf, size_t c
 #endif
 #endif
 
-static inline int do_close_fd(unsigned int fd)
-{
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
-    return close_fd(fd);
-#else
-    return __close_fd(current->files, fd);
-#endif
-}
-
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3, 9, 0) && !defined(KSU_UL_HAS_FILE_INODE)
 static inline struct inode *file_inode(struct file *f)
 {
@@ -318,9 +309,12 @@ __weak long copy_from_kernel_nofault(void *dst, const void *src, size_t size)
 
 // https://github.com/torvalds/linux/commit/294f69e662d1570703e9b56e95be37a9fd3afba5
 // f**k old compiler, thx for your notices, but better don't notice next time
+#ifndef __GCC4_has_attribute___fallthrough__
+#define __GCC4_has_attribute___fallthrough__ 0
+#endif
+
 #ifndef __has_attribute
 #define __has_attribute(x) __GCC4_has_attribute_##x
-#define __GCC4_has_attribute___fallthrough__ 0
 #endif
 /*
  * Add the pseudo keyword 'fallthrough' so case statement blocks
@@ -358,5 +352,14 @@ static inline char *sym_name(struct policydb *p, unsigned int sym_num, unsigned 
 #endif
 }
 #endif
+
+static inline int ksu_close_fd(unsigned int fd)
+{
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
+    return close_fd(fd);
+#else
+    return __close_fd(current->files, fd);
+#endif
+}
 
 #endif

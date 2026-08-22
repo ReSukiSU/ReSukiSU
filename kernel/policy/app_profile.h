@@ -2,6 +2,7 @@
 #define __KSU_H_APP_PROFILE
 
 #include "uapi/app_profile.h"
+#include "linux/init.h"
 
 #ifdef CONFIG_64BIT
 #define TIF_KSU_DISABLE_ESCAPE_WITH_ROOT 63
@@ -14,5 +15,7 @@ int escape_with_root_profile(void);
 
 void disable_seccomp(void);
 void escape_to_root_for_init(void);
+
+void __init ksu_app_profile_init(void);
 
 #endif

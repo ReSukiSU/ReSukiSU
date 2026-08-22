@@ -40,6 +40,7 @@ class SettingsPlatformRepository(
         themeConfig.dynamicPaletteStyle = themeRepository.loadDynamicPaletteStyle(
             themeConfig.dynamicColorSpec,
         )
+        themeConfig.useBuiltinMonoFont = settings.getBoolean("use_builtin_monospace_font", false)
         backgroundManager.loadCustomBackground()
         val systemDpi = application.resources.displayMetrics.densityDpi
         val currentDpi = settings.getInt("app_dpi", systemDpi)
@@ -78,6 +79,7 @@ class SettingsPlatformRepository(
             checkBetaUpdate = settings.getBoolean("check_beta_update", true),
             checkModuleUpdate = loadModuleUpdatePreference(),
             autoJailbreakEnabled = settings.getBoolean("auto_jailbreak", false),
+            useBuiltinMonoFont = themeConfig.useBuiltinMonoFont,
         )
     }
 
@@ -180,6 +182,10 @@ class SettingsPlatformRepository(
             is PlatformSetting.AutoJailbreak -> setAutoJailbreak(setting.enabled)
             is PlatformSetting.AdbRoot -> setAdbRoot(setting.enabled)
             is PlatformSetting.SuCompatMode -> settings.putInt("su_compat_mode", setting.value)
+            is PlatformSetting.BuiltinMonospaceFont -> {
+                settings.putBoolean("use_builtin_monospace_font", setting.enabled)
+                themeConfig.useBuiltinMonoFont = setting.enabled
+            }
         }
         Result.success(load())
     } catch (error: CancellationException) {

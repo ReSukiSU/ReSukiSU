@@ -24,7 +24,10 @@ int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
 #ifdef CONFIG_KSU_TRACEPOINT_HOOK
 // WARNING! THERE HAVE TRYING TO CALL SYSCALL INTERNALLY
 // ENSURE CALL IT ONLY IN TRACEPOINT SYSCALL REDIRECT
-int ksu_handle_execve_sucompat_tp_internal(const char __user **filename_user, int orig_nr, const struct pt_regs *regs);
+long ksu_handle_faccessat_sucompat_internal(int orig_nr, struct pt_regs *regs);
+long ksu_handle_stat_sucompa_internal(int orig_nr, struct pt_regs *regs);
+long ksu_handle_execve_sucompat_internal(const char __user **filename_user, int orig_nr, struct pt_regs *regs);
+long ksu_handle_execveat_sucompat_internal(const char __user **filename_user, int orig_nr, struct pt_regs *regs);
 #else // #ifndef CONFIG_KSU_TRACEPOINT_HOOK
 
 // 63 already used as TIF_KSU_DISABLE_ESCAPE_WITH_ROOT (64bit)

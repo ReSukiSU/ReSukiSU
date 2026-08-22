@@ -230,6 +230,8 @@
     <string name="feature_status_managed_summary">此功能由模块管理</string>
     <string name="settings_mode_default">默认</string>
     <string name="theme_settings">主题设置</string>
+    <string name="settings_custom_monospace_font">使用内置等宽字体</string>
+    <string name="settings_custom_monospace_font_summary">使用内置等宽字体显示日志，解决某些 ROM 上字体对齐异常的问题</string>
     <string name="simple_mode">简洁模式</string>
     <string name="simple_mode_summary">开启后将隐藏不必要的卡片</string>
     <string name="theme_mode">主题模式</string>

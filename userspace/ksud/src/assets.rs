@@ -5,13 +5,64 @@ use rust_embed::RustEmbed;
 mod android {
     use const_format::concatcp;
 
-    use crate::{android::utils::ensure_binary, assets::Asset, defs::BINARY_DIR};
+    use crate::{
+        android::utils::ensure_binary,
+        assets::Asset,
+        defs::{BINARY_DIR, DAEMON_PATH},
+    };
 
     pub const RESETPROP_PATH: &str = concatcp!(BINARY_DIR, "resetprop");
     pub const KSU_SUSFS: &str = concatcp!(BINARY_DIR, "ksu_susfs");
     pub const BUSYBOX_PATH: &str = concatcp!(BINARY_DIR, "busybox");
     pub const BOOTCTL_PATH: &str = concatcp!(BINARY_DIR, "bootctl");
     pub const MKBOOTFS_PATH: &str = concatcp!(BINARY_DIR, "mkbootfs");
+
+    /// Create the ksu_susfs -> ksud hard link (it shares the same inode as ksud).
+    pub fn ensure_susfs_link() -> anyhow::Result<()> {
+        let ksu_susfs = KSU_SUSFS;
+        let _ = std::fs::remove_file(ksu_susfs);
+        std::fs::hard_link(DAEMON_PATH, ksu_susfs)?;
+        Ok(())
+    }
+
+    /// Remove the ksu_susfs hard link, but only if it is genuinely a hard link
+    /// to `/data/adb/ksud` (same device + inode). Any other file at that path is
+    /// left untouched so a third-party manager's `ksu_susfs` is never clobbered.
+    pub fn remove_susfs_link() -> anyhow::Result<()> {
+        use std::os::unix::fs::MetadataExt;
+        let ksu_susfs = std::path::Path::new(KSU_SUSFS);
+        let daemon = std::path::Path::new(DAEMON_PATH);
+
+        let is_daemon_hard_link = (|| -> std::io::Result<bool> {
+            let link = std::fs::metadata(ksu_susfs)?;
+            let daemon = std::fs::metadata(daemon)?;
+            Ok(link.dev() == daemon.dev() && link.ino() == daemon.ino())
+        })();
+
+        match is_daemon_hard_link {
+            // Path (or its target) does not exist: nothing to do.
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
+            // Not a hard link to ksud; leave it alone to avoid clobbering a
+            // third-party manager's link.
+            Ok(false) | Err(_) => Ok(()),
+            Ok(true) => std::fs::remove_file(ksu_susfs).map_err(Into::into),
+        }
+    }
+
+    /// Align the ksu_susfs hard link with the persisted SUSFS manager state:
+    /// create it when management is enabled and SUSFS is available, otherwise
+    /// remove it (only when it is genuinely a hard link to ksud). Used after an
+    /// explicit state change (enable / disable / restore).
+    pub fn reconcile_susfs_link() -> anyhow::Result<()> {
+        if crate::android::susfs::config::model::Config::read_or_default().is_enabled() {
+            if crate::android::susfs::api::features::show::version().is_ok() {
+                ensure_susfs_link()?;
+            }
+        } else {
+            remove_susfs_link()?;
+        }
+        Ok(())
+    }
 
     pub fn ensure_binaries(ignore_if_exist: bool) -> anyhow::Result<()> {
         for file in Asset::iter() {
@@ -29,11 +80,14 @@ mod android {
         let _ = std::fs::remove_file(resetprop_link);
         std::os::unix::fs::symlink("/data/adb/ksud", resetprop_link)?;
 
-        // Create ksu_susfs -> ksud symlink (hard link)
-        if crate::android::susfs::api::features::show::version().is_ok() {
-            let ksu_susfs = KSU_SUSFS;
-            let _ = std::fs::remove_file(ksu_susfs);
-            std::fs::hard_link("/data/adb/ksud", ksu_susfs)?;
+        // Create the ksu_susfs -> ksud hard link only while the SUSFS manager is
+        // enabled. Never remove the link here at boot: it may belong to a
+        // third-party manager, and removal only happens when the user explicitly
+        // disables the SUSFS manager (see `config disable`).
+        if crate::android::susfs::config::model::Config::read_or_default().is_enabled()
+            && crate::android::susfs::api::features::show::version().is_ok()
+        {
+            ensure_susfs_link()?;
         }
         Ok(())
     }

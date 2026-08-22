@@ -41,9 +41,8 @@ static inline long is_exec_adbd(const char *filename)
 }
 
 #ifdef CONFIG_KSU_TRACEPOINT_HOOK
-static long is_exec_adbd_tracepoint(struct pt_regs *regs)
+static long is_exec_adbd_tracepoint(const char __user *filename_user)
 {
-    char __user *filename_user = (char __user *)PT_REGS_PARM1(regs);
     // should be bigger than `/apex/com.android.adbd/bin/adbd`
     char buf[40];
     char __user *fn;
@@ -190,14 +189,9 @@ out_release_env_p:
 }
 
 #ifdef CONFIG_KSU_TRACEPOINT_HOOK
-static long setup_ld_preload_tracepoint(struct pt_regs *regs)
+static long do_ksu_adb_root_handle_execve(const char __user *filename_user, struct pt_regs *regs, unsigned long *envp_p)
 {
-    return setup_ld_preload((void ***)&PT_REGS_PARM3(regs));
-}
-
-static long do_ksu_adb_root_handle_execve(struct pt_regs *regs)
-{
-    if (likely(is_exec_adbd_tracepoint(regs) != 1)) {
+    if (likely(is_exec_adbd_tracepoint(filename_user) != 1)) {
         return 0;
     }
 
@@ -205,7 +199,7 @@ static long do_ksu_adb_root_handle_execve(struct pt_regs *regs)
         return 0;
     }
 
-    long ret = setup_ld_preload_tracepoint(regs);
+    long ret = setup_ld_preload((void ***)envp_p);
     if (ret) {
         return ret;
     }
@@ -220,7 +214,17 @@ long ksu_adb_root_handle_execve_tracepoint(struct pt_regs *regs)
     // Tracepoint Syscall Redirect hook always in GKI2
     // So there no need to check for modern static key interface
     if (static_branch_unlikely(&ksu_adb_root)) {
-        return do_ksu_adb_root_handle_execve(regs);
+        return do_ksu_adb_root_handle_execve((const char __user *)PT_REGS_PARM1(regs), regs,
+                                             (unsigned long *)&PT_REGS_PARM3(regs));
+    }
+    return 0;
+}
+
+long ksu_adb_root_handle_execveat_tracepoint(struct pt_regs *regs)
+{
+    if (static_branch_unlikely(&ksu_adb_root)) {
+        return do_ksu_adb_root_handle_execve((const char __user *)PT_REGS_PARM2(regs), regs,
+                                             (unsigned long *)&PT_REGS_SYSCALL_PARM4(regs));
     }
     return 0;
 }

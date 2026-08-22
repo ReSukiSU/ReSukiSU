@@ -9,9 +9,9 @@ use crate::android::susfs::{config::model::Config, enums::UidScheme};
 
 #[derive(Debug, Subcommand)]
 pub enum ConfigCommand {
-    /// Enable applying the persisted SUSFS configuration during boot.
+    /// Enable SUSFS management
     Enable,
-    /// Disable applying the persisted SUSFS configuration during boot.
+    /// Disable SUSFS management
     Disable,
     /// Print the complete persisted configuration as JSON.
     #[command(name = "list_all")]
@@ -157,21 +157,33 @@ enum BooleanField {
 
 pub fn run(command: ConfigCommand) -> Result<()> {
     match command {
-        ConfigCommand::Enable => update_config(|config| {
-            config.set_enabled(true);
-            Ok(())
-        }),
-        ConfigCommand::Disable => update_config(|config| {
-            config.set_enabled(false);
-            Ok(())
-        }),
+        ConfigCommand::Enable => {
+            update_config(|config| {
+                config.set_enabled(true);
+                Ok(())
+            })?;
+            // Recreate the ksu_susfs hard link once SUSFS management is enabled.
+            crate::assets::reconcile_susfs_link()
+        }
+        ConfigCommand::Disable => {
+            update_config(|config| {
+                config.set_enabled(false);
+                Ok(())
+            })?;
+            // Remove the ksu_susfs hard link (only if it is a hard link to ksud),
+            // without recreating it.
+            crate::assets::reconcile_susfs_link()
+        }
         ConfigCommand::ListAll | ConfigCommand::Backup => print_json(&Config::read_or_default()),
         ConfigCommand::Restore { path } => {
             let config = match path {
                 Some(path) => Config::read_from(path)?,
                 None => Config::default(),
             };
-            config.save()
+            config.save()?;
+            // A restored config may change `enabled`; bring the ksu_susfs hard
+            // link back in sync with the new state.
+            crate::assets::reconcile_susfs_link()
         }
         ConfigCommand::CmdlineOrBootconfig { command } => run_string(command),
         ConfigCommand::AvcLogSpoofing { command } => {

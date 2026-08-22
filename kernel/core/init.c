@@ -32,6 +32,7 @@
 #include "feature/sulog.h"
 #include "feature/adb_root.h"
 #include "feature/dynamic_manager.h"
+#include "feature/module_load_filter.h"
 #include "feature/sucompat.h"
 #include "feature/selinux_hide.h"
 #include "infra/symbol_resolver.h"
@@ -154,6 +155,10 @@ bool allow_shell = false;
 bool ksu_no_custom_rc = false;
 module_param_named(norc, ksu_no_custom_rc, bool, 0);
 
+char ksu_block_modules[256];
+module_param_string(block_modules, ksu_block_modules, sizeof(ksu_block_modules), 0);
+MODULE_PARM_DESC(block_modules, "Comma-separated preset module names to acknowledge without loading");
+
 int __init kernelsu_init(void)
 {
     // clang-format off
@@ -217,6 +222,7 @@ int __init kernelsu_init(void)
     ksu_cred = prepare_creds();
     if (!ksu_cred) {
         pr_err("prepare cred failed!\n");
+        return -ENOSYS;
     }
 
     ksu_init_symbol_resolver();
@@ -227,6 +233,7 @@ int __init kernelsu_init(void)
     ksu_selinux_hide_init();
 
     ksu_supercalls_init();
+    ksu_app_profile_init();
 
     ksu_setuid_hook_init();
     ksu_sucompat_init();
@@ -264,6 +271,8 @@ int __init kernelsu_init(void)
 #endif
     } else {
         ksu_hook_init();
+
+        ksu_module_load_filter_hook_init();
 
         ksu_allowlist_init();
 
@@ -304,10 +313,9 @@ void __exit kernelsu_exit(void)
     ksu_adb_root_exit();
     ksu_sulog_exit();
     ksu_feature_exit();
+    ksu_module_load_filter_hook_exit();
 
-    if (ksu_cred) {
-        put_cred(ksu_cred);
-    }
+    put_cred(ksu_cred);
 }
 
 #if NEED_OWN_STACKPROTECTOR

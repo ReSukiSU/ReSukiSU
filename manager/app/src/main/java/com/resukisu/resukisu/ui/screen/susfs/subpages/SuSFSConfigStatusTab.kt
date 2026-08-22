@@ -86,7 +86,7 @@ fun StatusTab(
             ) {
                 WarningCard(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    message = stringResource(R.string.susfs_management_disabled_warning),
+                    message = stringResource(R.string.susfs_config_disable_warning),
                 )
             }
         }
@@ -96,8 +96,8 @@ fun StatusTab(
                 item {
                     SettingsSwitchWidget(
                         icon = Icons.TwoTone.Save,
-                        title = stringResource(R.string.susfs_standard_config_enabled),
-                        description = stringResource(R.string.susfs_standard_config_enabled_desc),
+                        title = stringResource(R.string.susfs_enable_config),
+                        description = stringResource(R.string.susfs_enable_config_summary),
                         checked = configEnabled,
                         enabled = configEnabledLoaded,
                         onCheckedChange = onConfigEnabledChange,
