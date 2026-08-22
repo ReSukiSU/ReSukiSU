@@ -613,19 +613,13 @@ private fun AppearanceSettings(
             }
         }
 
-        // The bottom bar style only applies to the portrait bottom bar,
-        // not the NavigationRail used on wide (tablet) layouts.
-        item(visible = isPortrait, topPadding = 1.dp) {
-            SettingsChooseWidget(
-                icon = Icons.TwoTone.Style,
-                title = stringResource(id = R.string.settings_config_bottom_bar_style),
-                items = listOf(
-                    stringResource(id = R.string.bottom_bar_style_default),
-                    stringResource(id = R.string.bottom_bar_style_floating),
-                ),
-                selectedIndex = themeConfig.bottomBarStyle.ordinal,
-                onSelectedIndexChange = { index ->
-                    val style = BottomBarStyle.fromOrdinal(index)
+        item(visible = isPortrait) {
+            SettingsSwitchWidget(
+                title = stringResource(R.string.enable_floating_bottom_bar),
+                description = stringResource(R.string.enable_floating_bottom_bar_summary),
+                checked = themeConfig.bottomBarStyle == BottomBarStyle.FLOATING,
+                onCheckedChange = { enabled ->
+                    val style = if (enabled) BottomBarStyle.FLOATING else BottomBarStyle.MATERIAL3_EXPRESSIVE
                     backgroundManager.saveBottomBarStyle(style)
                 }
             )

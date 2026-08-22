@@ -289,9 +289,7 @@ class BackgroundManager(
         }
 
         config.backgroundDim = prefs.getFloat("background_dim", 0f).coerceIn(0f, 1f)
-        config.isEnableBlur = prefs.getBoolean("enable_blur", false)
         config.isEnableBlurExp = prefs.getBoolean("enable_blur_exp", false)
-        config.bottomBarStyle = BottomBarStyle.fromOrdinal(prefs.getInt("bottom_bar_style", 0))
         config.isUseBackgroundSeedColor = prefs.getBoolean("use_background_seed_color", false)
         config.isHighContrastMode = prefs.getBoolean("high_contrast_mode", false)
     }
@@ -448,6 +446,8 @@ private fun ThemeInitializer(
             themeConfig.dynamicPaletteStyle = themeRepository.loadDynamicPaletteStyle(
                 themeConfig.dynamicColorSpec,
             )
+            themeConfig.isEnableBlur = prefs.getBoolean("enable_blur", false)
+            themeConfig.bottomBarStyle = BottomBarStyle.fromOrdinal(prefs.getInt("bottom_bar_style", 0))
             cardConfig.load()
 
             if (!themeConfig.backgroundImageLoaded && !themeConfig.preventBackgroundRefresh) {
