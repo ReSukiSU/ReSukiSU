@@ -446,8 +446,8 @@ private fun ThemeInitializer(
             themeConfig.dynamicPaletteStyle = themeRepository.loadDynamicPaletteStyle(
                 themeConfig.dynamicColorSpec,
             )
-            themeConfig.isEnableBlur = prefs.getBoolean("enable_blur", false)
-            themeConfig.bottomBarStyle = BottomBarStyle.fromOrdinal(prefs.getInt("bottom_bar_style", 0))
+            themeConfig.isEnableBlur = settings.getBoolean("enable_blur", false)
+            themeConfig.bottomBarStyle = BottomBarStyle.fromOrdinal(settings.getInt("bottom_bar_style", 0))
             cardConfig.load()
 
             if (!themeConfig.backgroundImageLoaded && !themeConfig.preventBackgroundRefresh) {
