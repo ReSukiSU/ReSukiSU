@@ -535,4 +535,9 @@
     <string name="settings_check_manager_update_summary">Автоматична перевірка оновлень менеджера</string>
     <string name="settings_check_module_update">Перевірити оновлення модуля</string>
     <string name="settings_check_module_update_summary">Автоматична перевірка встановленого модуля оновлень</string>
+    <string name="settings_custom_monospace_font_summary">Використовувати вбудований шрифт JetBrains Mono для відображення журналу, щоб уникнути проблем із моноширинним розташуванням символів у системі</string>
+    <string name="susfs_config_disable_warning">Вбудований менеджер SUSFS вимкнено.\nУвімкніть його або встановіть сторонній модуль, щоб використовувати функції SUSFS.</string>
+    <string name="susfs_enable_config_summary">Увімкнути вбудований менеджер SUSFS. Може конфліктувати зі сторонніми модулями.</string>
+    <string name="susfs_enable_config">Менеджер SUSFS</string>
+    <string name="settings_custom_monospace_font">Використовувати вбудований моноширинний шрифт</string>
 </resources>

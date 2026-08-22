@@ -353,7 +353,7 @@
     <string name="sus_maps_debug_info">Сначала найдите PID и UID целевого приложения, используя ps -enf, затем проверьте соответствующие пути в /proc/&lt;pid&gt;/maps и сравните номера устройства с номерами в /proc/1/mountinfo. Функция скрытия  будет работать должным образом только если номера устройств совпадают.</string>
     <string name="umount_path_manager">Управление путями размонтирования</string>
     <string name="umount_path_manager_summary">Управления путями размонтирования ядра</string>
-    <string name="no_any_umount_path">Нет пути размонтирования</string>
+    <string name="no_any_umount_path">Нет существующих путей для размонтирования</string>
     <string name="add_umount_path">Добавить путь размонтирования</string>
     <string name="mount_path">Смонтировать путь</string>
     <string name="umount_flags">Флаги размонтирования</string>
@@ -365,9 +365,9 @@
     <string name="operation_failed">Неудача</string>
     <string name="changes_take_effect_immediately">Все изменения вступят в силу сразу.</string>
     <string name="group_contains_apps">Содержит %d приложений</string>
-    <string name="meta_module_disabled">Модуль не смонтирован, так как мета-модуль отключен</string>
-    <string name="meta_module_removed">Модуль не смонтирован, так как мета-модуль будет удален</string>
-    <string name="no_meta_module_installed">Модуль не смонтирован, так как мета-модуль не установлен</string>
+    <string name="meta_module_disabled">Модуль не может быть смонтирован, так как мета-модуль был отключен</string>
+    <string name="meta_module_removed">Модуль не может быть смонтирован, так как мета-модуль был удален</string>
+    <string name="no_meta_module_installed">Модуль не может быть смонтирован, так как не установлен мета-модуль</string>
     <string name="network_offline">Вы в оффлайне</string>
     <string name="network_retry">Повторить</string>
     <string name="please_check_network">Проверьте ваше интернет-соединение и попробуйте снова</string>

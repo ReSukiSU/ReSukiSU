@@ -339,7 +339,7 @@
     <string name="multi_manager_list">Aktív root menedzserek</string>
     <string name="no_active_manager">Nincs aktív root menedzser</string>
     <string name="home_zygisk_implement">Zygisk implementáció</string>
-    <string name="home_meta_module_implement">Meta Modul implementáció</string>
+    <string name="home_meta_module_implement">Metamodul implementáció</string>
     <string name="home_hook_type">Beavatkozási pont típusa</string>
     <string name="confirm_installation">Telepítés megerősítése</string>
     <string name="confirm_multiple_installation">Telepítés megerősítése (%d fájlok)</string>
@@ -407,7 +407,7 @@
     <string name="storage_permission_description">Külső tárhely hozzáférés engedélyezése szükséges a fájl írásához.</string>
     <string name="storage_permission_denied">Letöltés meghiúsult; tárhelyhez való hozzáférés megtagadva</string>
     <string name="susfs_tab_status">Állapotjelző</string>
-    <string name="susfs_status_version">SUSFS Verzió</string>
+    <string name="susfs_status_version">SuSFS Verzió</string>
     <string name="susfs_status_variant">Kernel variáns</string>
     <string name="susfs_status_enabled_features">Elérhető és engedélyezett funkciók</string>
     <string name="susfs_status_no_data">Hiányos vagy nem olvasható adat</string>
@@ -476,7 +476,7 @@
     <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
     <string name="app_profile_template_id">Sablon ID</string>
     <string name="unknown_signature">Ismeretlen</string>
-    <string name="show_detail_or_hide_detail">Részletes vagy részletek elrejtése</string>
+    <string name="show_detail_or_hide_detail">Részletek megjelenítése vagy elrejtése</string>
     <string name="signature_size">Dinamikus menedzser digitális aláírás bithossza</string>
     <string name="signature_hash">Dinamikus menedzser digitális aláírás lenyomata</string>
     <string name="hash_must_be_64_chars">A digitális aláírásnak hash lenyomatot kiadó 64 hexadecimális karakterből kell állnia</string>
@@ -535,4 +535,9 @@
     <string name="susfs_kstat_statically_fields">Statikus mezők (opcionális, az alapértelmezett értékek megtartásához hagyd üresen)</string>
     <string name="sus_maps_warning">Fontos kikötés: Azoknál az applikációknál, amelyeknek jól implementált beavatkozás érzékelő mechanizmusai vannak, a beavatkozások észlelésének és felismerésének megakadályozása nem garantálható.</string>
     <string name="sus_maps_debug_info">A bejegyzést megelőzően keresd ki a célapplikáció PID és UID azonosítóit a „ps -enf\" paranccsal, ellenőrizd a releváns elérési útvonalakat a „/proc/&lt;pid&gt;/maps\" címtérben, és vesd össze az értékeket a „/proc/1/mountinfo\" címtérben szereplővel az egyezésért. Csak akkor működik megfelelően a címtér fájlleképezés rejtése memóriából funkció, amennyiben az értékek megfelelően lettek egyeztetve.</string>
+    <string name="settings_custom_monospace_font">Beépített fix szóközszélességű karakterkészlet használata</string>
+    <string name="settings_custom_monospace_font_summary">A napló megjelenítéséhez a beépített JetBrains Mono betűtípus használata, ez segíthet elkerülni az android rendszer fix szóközszélességű karakterkészlet használata közben fellépő problémákat</string>
+    <string name="susfs_enable_config">SuSFS Menedzser</string>
+    <string name="susfs_enable_config_summary">Beépített SuSFS Menedzser engedélyezése vagy letiltása. Valamely harmadik féltől származó modullal összeférhetetlen lehet.</string>
+    <string name="susfs_config_disable_warning">Beépített SuSFS Menedzser letiltva. Engedélyezd, vagy telepíts egy harmadik féltől származó modult a SuSFS funkciók használatához.</string>
 </resources>
