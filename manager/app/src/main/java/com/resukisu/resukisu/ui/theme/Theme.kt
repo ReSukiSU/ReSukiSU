@@ -365,6 +365,7 @@ fun KernelSUTheme(
         themeRepository = themeRepository,
         backgroundManager = backgroundManager,
         cardConfig = cardConfig,
+        settings = settings,
     )
 
     // 创建颜色方案
@@ -414,6 +415,7 @@ private fun ThemeInitializer(
     themeRepository: ThemeRepository,
     backgroundManager: BackgroundManager,
     cardConfig: CardConfig,
+    settings: AppSettingsRepository,
 ) {
     val themeChanged = themeConfig.detectThemeChange(systemIsDark)
     val scope = rememberCoroutineScope()
