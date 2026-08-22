@@ -1,5 +1,5 @@
+#include <linux/version.h>
 #include <asm/elf.h>
-
 #include <linux/elf.h>
 #include <linux/file.h>
 #include <linux/fs.h>
@@ -8,7 +8,9 @@
 #include <linux/slab.h>
 #include <linux/string.h>
 #include <linux/uaccess.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0) || defined(KSU_COMPAT_HAS_UAPI_MODULE_H)
 #include <uapi/linux/module.h>
+#endif
 
 #include "compat/kernel_compat.h"
 #include "feature/module_load_filter.h"

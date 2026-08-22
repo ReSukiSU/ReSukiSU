@@ -293,3 +293,12 @@ ifneq ($(shell grep -q "sym_name" $(srctree)/security/selinux/ss/policydb.h; ech
 $(info -- $(REPO_NAME)/compat: sym_name not found)
 ccflags-y += -DKSU_COMPAT_SYM_NAME_NOT_FOUND
 endif
+
+# for kernel version below 3.8, include/uapi/linux/module.h maybe not found
+# https://github.com/torvalds/linux/commit/2f3238aebedb243804f58d62d57244edec4149b2
+ifneq ($(wildcard $(srctree)/uapi/include/linux/module.h),)
+$(info -- $(REPO_NAME)/compat: module.h found)
+ccflags-y += -DKSU_COMPAT_HAS_UAPI_MODULE_H
+endif
+
+

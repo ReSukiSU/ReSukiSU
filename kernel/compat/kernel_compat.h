@@ -309,9 +309,12 @@ __weak long copy_from_kernel_nofault(void *dst, const void *src, size_t size)
 
 // https://github.com/torvalds/linux/commit/294f69e662d1570703e9b56e95be37a9fd3afba5
 // f**k old compiler, thx for your notices, but better don't notice next time
+#ifndef __GCC4_has_attribute___fallthrough__
+#define __GCC4_has_attribute___fallthrough__ 0
+#endif
+
 #ifndef __has_attribute
 #define __has_attribute(x) __GCC4_has_attribute_##x
-#define __GCC4_has_attribute___fallthrough__ 0
 #endif
 /*
  * Add the pseudo keyword 'fallthrough' so case statement blocks
