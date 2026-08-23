@@ -27,6 +27,10 @@
 #include "compat/kernel_compat.h"
 #include "feature/kernel_umount.h"
 #include "feature/sucompat.h"
+#ifdef CONFIG_KSU_SUSFS
+#include <linux/susfs_def.h>
+#include <linux/workqueue.h>
+#endif
 
 static inline void ksu_set_file_immutable(const char *path_name, bool immutable)
 {
@@ -76,8 +80,74 @@ static inline void ksu_set_ksud_status(uid_t new_uid)
     }
 }
 
+#ifdef CONFIG_KSU_SUSFS
+extern struct work_struct susfs_extra_works;
+
+static int handle_zygote_next_setresuid(uid_t new_uid)
+{
+    // Check if spawned process is isolated service first, and force to do umount if so
+    if (is_isolated_process(new_uid)) {
+        susfs_set_current_proc_no_su();
+        susfs_set_current_proc_umounted();
+        susfs_set_current_proc_umounted_for_zygote_next();
+        goto do_susfs_work;
+    }
+
+    // manager NEVER use zygote next!
+
+    // we should not umount for webview zygote
+    if (unlikely(new_uid == WEBVIEW_ZYGOTE_UID)) {
+        susfs_set_current_proc_no_su();
+        return 0;
+    }
+
+    // Check if spawned process is normal user app and needs to be umounted
+    if (likely(is_appuid(new_uid) && ksu_uid_should_umount(new_uid))) {
+        susfs_set_current_proc_no_su();
+        susfs_set_current_proc_umounted();
+        susfs_set_current_proc_umounted_for_zygote_next();
+        goto do_susfs_work;
+    }
+
+    // - Disable seccomp restriction for root allowed apps since running with "su" will disable seccomp anyway
+    if (ksu_is_allow_uid_for_current(new_uid)) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
+        if (current->seccomp.mode == SECCOMP_MODE_FILTER && current->seccomp.filter) {
+            spin_lock_irq(&current->sighand->siglock);
+            ksu_seccomp_allow_cache(current->seccomp.filter, __NR_reboot);
+            spin_unlock_irq(&current->sighand->siglock);
+        }
+#else
+        disable_seccomp();
+#endif
+        return 0;
+    }
+
+    susfs_set_current_proc_no_su();
+    return 0;
+
+do_susfs_work: {
+    // Do not umount here as we are in init namespace now
+
+    // Handle extra susfs work
+    if (!work_pending(&susfs_extra_works))
+        schedule_work(&susfs_extra_works);
+}
+
+    return 0;
+}
+#endif
+
 int ksu_handle_setuid(uid_t new_uid, uid_t old_uid)
 {
+#ifdef CONFIG_KSU_SUSFS
+    // Only susfs will process zygote_next
+    // We don't care it in Tracepoint / Manual hook
+
+    if (is_zygote_next(current_cred())) {
+        handle_zygote_next_setresuid(new_uid);
+    }
+#endif
     // We are only interested in processes spawned by zygote.
     if (!is_zygote(current_cred())) {
         return 0;
@@ -87,61 +157,27 @@ int ksu_handle_setuid(uid_t new_uid, uid_t old_uid)
         pr_info("handle_setresuid from %d to %d\n", old_uid, new_uid);
     }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
-    if (ksu_is_manager_uid(new_uid)) {
-        pr_info("install fd for ksu manager(uid=%d)\n", new_uid);
-        ksu_mark_manager(new_uid);
-        ksu_set_ksud_status(new_uid);
-        ksu_install_fd();
-        spin_lock_irq(&current->sighand->siglock);
-        ksu_seccomp_allow_cache(current->seccomp.filter, __NR_reboot);
-#ifdef CONFIG_KSU_TRACEPOINT_HOOK
-        ksu_set_task_tracepoint_flag(current);
-#else
-        ksu_clear_current_proc_unprivillege();
-#endif
-        spin_unlock_irq(&current->sighand->siglock);
-        return 0;
-    }
-
     if (ksu_is_allow_uid_for_current(new_uid)) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
         if (current->seccomp.mode == SECCOMP_MODE_FILTER && current->seccomp.filter) {
             spin_lock_irq(&current->sighand->siglock);
             ksu_seccomp_allow_cache(current->seccomp.filter, __NR_reboot);
             spin_unlock_irq(&current->sighand->siglock);
         }
-#ifdef CONFIG_KSU_TRACEPOINT_HOOK
-        ksu_set_task_tracepoint_flag(current);
 #else
-        ksu_clear_current_proc_unprivillege();
-#endif
-    } else {
-#ifdef CONFIG_KSU_TRACEPOINT_HOOK
-        ksu_clear_task_tracepoint_flag_if_needed(current);
-#else
-        ksu_set_current_proc_unprivillege();
-#endif
-    }
-
-#else // #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
-    if (ksu_is_allow_uid_for_current(new_uid)) {
         disable_seccomp();
-#ifndef CONFIG_KSU_TRACEPOINT_HOOK
-        ksu_clear_current_proc_unprivillege();
 #endif
-
+        ksu_clear_current_proc_unprivillege();
         if (ksu_is_manager_uid(new_uid)) {
             pr_info("install fd for ksu manager(uid=%d)\n", new_uid);
             ksu_mark_manager(new_uid);
             ksu_set_ksud_status(new_uid);
             ksu_install_fd();
         }
-
         return 0;
-    } else {
-        ksu_set_current_proc_unprivillege();
     }
-#endif // #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
+
+    ksu_set_current_proc_unprivillege();
 
     // Handle kernel umount
     ksu_handle_umount(old_uid, new_uid);

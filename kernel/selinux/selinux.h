@@ -15,6 +15,7 @@
 #define KERNEL_SU_CONTEXT "u:r:" KERNEL_SU_DOMAIN ":s0"
 #define KSU_FILE_CONTEXT "u:object_r:" KERNEL_SU_FILE ":s0"
 #define ZYGOTE_CONTEXT "u:r:zygote:s0"
+#define ZYGOTE_NEXT_DOMAIN "u:r:zygote_next:s0"
 #define INIT_CONTEXT "u:r:init:s0"
 
 void setup_selinux(const char *, struct cred *);
@@ -30,6 +31,16 @@ bool is_task_ksu_domain(const struct cred *cred);
 bool is_ksu_domain(void);
 
 bool is_zygote(const struct cred *cred);
+
+#ifdef CONFIG_KSU_SUSFS
+bool is_zygote_next(const struct cred *cred);
+#else
+static inline bool is_zygote_next(const struct cred *cred)
+{
+    // no need when susfs disabled
+    return false;
+}
+#endif
 
 bool is_init(const struct cred *cred);
 

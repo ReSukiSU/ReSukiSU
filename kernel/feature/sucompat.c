@@ -397,11 +397,6 @@ static inline void ksu_handle_execveat_init(const char *filename, void *envp)
 
             if (!ksu_is_current_proc_unprivillege())
                 ksu_set_current_proc_unprivillege();
-
-#ifdef CONFIG_KSU_SUSFS
-            if (!susfs_is_current_proc_umounted())
-                susfs_set_current_proc_umounted();
-#endif
         }
 #endif
         int ret = ksu_adb_root_handle_execve_manual(filename, (struct user_arg_ptr *)envp);
@@ -487,6 +482,38 @@ int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr, void *
 #endif
 #endif
 
+#ifdef CONFIG_KSU_SUSFS
+int ksu_handle_faccessat(int *dfd, struct filename **filename, int *mode, int *__unused_flags)
+{
+    const struct cred *old_cred;
+
+    // we no need harden this check, susfs already complete in caller
+    // if (ksu_is_current_proc_unprivillege()) {
+    //     return 0;
+    // }
+
+    if (!static_branch_unlikely(&ksu_su_compat_enabled)) {
+        return 0;
+    }
+
+    if (unlikely(IS_ERR(*filename) || (*filename)->name == NULL))
+        return 0;
+
+    if (likely(memcmp((*filename)->name, su_path, sizeof(su_path))))
+        return 0;
+
+    old_cred = override_creds(ksu_cred);
+    if (is_ksud_exists()) {
+        pr_info("ksu_handle_faccessat su->sh!\n");
+        memcpy((void *)((*filename)->name), sh_path, sizeof(sh_path));
+    } else {
+        pr_info("no ksud found, don't process faccessat for su!");
+    }
+
+    revert_creds(old_cred);
+    return 0;
+}
+#else
 int ksu_handle_faccessat(int *dfd, const char __user **filename_user, int *mode, int *__unused_flags)
 {
     char path[sizeof(su_path) + 1] = { 0 };
@@ -499,8 +526,6 @@ int ksu_handle_faccessat(int *dfd, const char __user **filename_user, int *mode,
 #endif
 
 #ifdef KSU_COMPAT_USE_STATIC_KEY
-    // Yep, maybe someusers love turn off sucompat <- idk how they managed to keep using it
-    // But for mostly users, sucompat is enabled, so unlikely here
     if (!static_branch_unlikely(&ksu_su_compat_enabled)) {
         return 0;
     }
@@ -529,18 +554,18 @@ int ksu_handle_faccessat(int *dfd, const char __user **filename_user, int *mode,
 
     return 0;
 }
+#endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0) && defined(CONFIG_KSU_SUSFS)
+#ifdef CONFIG_KSU_SUSFS
 int ksu_handle_stat(int *dfd, struct filename **filename, int *flags)
 {
     const struct cred *old_cred;
 
-    if (ksu_is_current_proc_unprivillege()) {
-        return 0;
-    }
+    // we no need harden this check, susfs already complete in caller
+    // if (ksu_is_current_proc_unprivillege()) {
+    //     return 0;
+    // }
 
-    // Yep, maybe someusers love turn off sucompat <- idk how they managed to keep using it
-    // But for mostly users, sucompat is enabled, so unlikely here
     if (!static_branch_unlikely(&ksu_su_compat_enabled)) {
         return 0;
     }
