@@ -537,4 +537,9 @@
     <string name="manager_update_details">Wersja: %1$s (%2$d)\nArchitektura: %3$s</string>
     <string name="settings_check_beta_update">Sprawdź aktualizacje beta</string>
     <string name="settings_check_beta_update_summary">Automatycznie sprawdzaj wersje beta z głównej gałęzi</string>
+    <string name="settings_custom_monospace_font">Używaj wbudowanej czcionki monospace</string>
+    <string name="settings_custom_monospace_font_summary">Używaj wbudowanej czcionki JetBrains Mono do wyświetlenia logów, aby uniknąć problemów z szerokościami liter</string>
+    <string name="susfs_enable_config">Menadżer SUSFS</string>
+    <string name="susfs_enable_config_summary">Włącz wbudowany menadżer SUSFS. Może konfliktować z innymi modułami.</string>
+    <string name="susfs_config_disable_warning">Wbudowany menadżer SUSFS jest wyłączony. Włącz go lub zainstaluj zewnętrzny moduł, aby używać funkcji SUSFS.</string>
 </resources>

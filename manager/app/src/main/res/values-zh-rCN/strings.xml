@@ -537,4 +537,7 @@
     <string name="susfs_standard_uname">Uname</string>
     <string name="susfs_standard_cmdline_or_bootconfig">Cmdline / Bootconfig</string>
     <string name="susfs_redirect_entry_description">%1$s · %2$s</string>
+    <string name="susfs_enable_config">SUSFS管理器</string>
+    <string name="susfs_enable_config_summary">启用内置SUSFS管理器。这可能与第三方模块冲突。</string>
+    <string name="susfs_config_disable_warning">内置SUSFS管理器已关闭。启用它或安装第三方模块来使用SUSFS功能。</string>
 </resources>
