@@ -131,6 +131,7 @@ import com.resukisu.resukisu.domain.usecase.SetSelinuxHideEnabledUseCase
 import com.resukisu.resukisu.domain.usecase.SetStringPreferenceUseCase
 import com.resukisu.resukisu.domain.usecase.SetStringSetPreferenceUseCase
 import com.resukisu.resukisu.domain.usecase.SetSuEnabledUseCase
+import com.resukisu.resukisu.domain.usecase.SetWebViewZygoteUmountEnabledUseCase
 import com.resukisu.resukisu.domain.usecase.StartKernelFlashUseCase
 import com.resukisu.resukisu.domain.usecase.SuSFSConfigUseCase
 import com.resukisu.resukisu.domain.usecase.TakeModuleUriPermissionUseCase
@@ -319,6 +320,7 @@ val useCaseModule = module {
     factoryOf(::ConfigureSuLogUseCase)
     factoryOf(::SetSelinuxHideEnabledUseCase)
     factoryOf(::SetDefaultUmountModulesUseCase)
+    factoryOf(::SetWebViewZygoteUmountEnabledUseCase)
     factoryOf(::IsLateLoadModeUseCase)
     factoryOf(::GetAppProfileUseCase)
     factoryOf(::SetAppProfileUseCase)

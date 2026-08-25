@@ -67,6 +67,7 @@ class KernelRepository(
     suspend fun getFeatureSettings(): KernelFeatureSettings = withContext(Dispatchers.IO) {
         KernelFeatureSettings(
             suEnabled = runCatching { Natives.isSuEnabled() }.getOrDefault(false),
+            webViewZygoteUmountEnabled = runCatching { Natives.isWebViewZygoteUmountEnabled() }.getOrDefault(false),
             kernelUmountEnabled = runCatching { Natives.isKernelUmountEnabled() }.getOrDefault(false),
             suLogEnabled = runCatching { Natives.isSuLogEnabled() }.getOrDefault(false),
             selinuxHideEnabled = runCatching { Natives.isSelinuxHideEnabled() }.getOrDefault(false),
@@ -86,6 +87,10 @@ class KernelRepository(
 
     suspend fun setSuLogEnabled(enabled: Boolean): Boolean = saveFeature {
         Natives.setSuLogEnabled(enabled)
+    }
+
+    suspend fun setWebviewZygoteUmountEnabled(enabled: Boolean): Boolean = saveFeature {
+        Natives.setWebViewZygoteUmountEnabled(enabled)
     }
 
     suspend fun setSelinuxHideEnabled(enabled: Boolean): Int = withContext(Dispatchers.IO) {

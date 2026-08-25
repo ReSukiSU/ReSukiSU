@@ -97,6 +97,12 @@ static int handle_zygote_next_setresuid(uid_t new_uid)
 
     // we should not umount for webview zygote
     if (unlikely(new_uid == WEBVIEW_ZYGOTE_UID)) {
+        if (ksu_webview_zygote_umount_enabled) {
+            susfs_set_current_proc_no_su();
+            susfs_set_current_proc_umounted();
+            susfs_set_current_proc_umounted_for_zygote_next();
+            goto do_susfs_work;
+        }
         susfs_set_current_proc_no_su();
         return 0;
     }

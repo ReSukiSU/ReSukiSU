@@ -217,6 +217,9 @@ class SettingsPlatformRepository(
             selinuxHideStatus = runCatching {
                 ksuCliRepository.getFeatureStatus("selinux_hide")
             }.getOrDefault(""),
+            webViewZygoteUmountStatus = runCatching {
+                ksuCliRepository.getFeatureStatus("webview_zygote_umount")
+            }.getOrDefault(""),
         )
     }
 

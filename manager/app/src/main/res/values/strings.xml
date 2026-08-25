@@ -225,6 +225,8 @@
     <string name="settings_sucompat_summary">Allow root access via /system/bin/su, in new processes.</string>
     <string name="settings_kernel_umount">Module unmounting</string>
     <string name="settings_kernel_umount_summary">Unmount modules from kernel in App Profile</string>
+    <string name="settings_webview_zygote_umount">Unmount for WebView</string>
+    <string name="settings_webview_zygote_umount_summary">Prevent information leaks from WebView process but may break modules. Reboot to apply</string>
     <string name="feature_status_unsupported_summary">Kernel does not support this feature</string>
     <string name="settings_mode_disable_until_reboot">Disable until Reboot</string>
     <string name="settings_mode_disable_always">Always disable</string>

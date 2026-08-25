@@ -26,6 +26,7 @@ pub enum FeatureId {
     Sulog = 2,
     AdbRoot = 3,
     SelinuxHide = 4,
+    WebviewZygoteUmount = 5,
 }
 
 impl FeatureId {
@@ -36,6 +37,7 @@ impl FeatureId {
             2 => Some(Self::Sulog),
             3 => Some(Self::AdbRoot),
             4 => Some(Self::SelinuxHide),
+            5 => Some(Self::WebviewZygoteUmount),
             _ => None,
         }
     }
@@ -47,6 +49,7 @@ impl FeatureId {
             Self::Sulog => "sulog",
             Self::AdbRoot => "adb_root",
             Self::SelinuxHide => "selinux_hide",
+            Self::WebviewZygoteUmount => "webview_zygote_umount",
         }
     }
 
@@ -65,6 +68,9 @@ impl FeatureId {
             Self::SelinuxHide => {
                 "SELinux Hide - sanitize /sys/fs/selinux access results for app UIDs"
             }
+            Self::WebviewZygoteUmount => {
+                "WebView Zygote Umount - unmount modules from WebView zygote and its isolated children"
+            }
         }
     }
 }
@@ -76,6 +82,7 @@ fn parse_feature_id(name: &str) -> Result<FeatureId> {
         "sulog" | "2" => Ok(FeatureId::Sulog),
         "adb_root" | "3" => Ok(FeatureId::AdbRoot),
         "selinux_hide" | "4" => Ok(FeatureId::SelinuxHide),
+        "webview_zygote_umount" | "5" => Ok(FeatureId::WebviewZygoteUmount),
         _ => bail!("Unknown feature: {name}"),
     }
 }
@@ -322,6 +329,7 @@ pub fn list_features() {
         FeatureId::Sulog,
         FeatureId::AdbRoot,
         FeatureId::SelinuxHide,
+        FeatureId::WebviewZygoteUmount,
     ];
 
     for feature_id in &all_features {
@@ -385,6 +393,7 @@ pub fn save_config() -> Result<()> {
         FeatureId::Sulog,
         FeatureId::AdbRoot,
         FeatureId::SelinuxHide,
+        FeatureId::WebviewZygoteUmount,
     ];
 
     for feature_id in &all_features {

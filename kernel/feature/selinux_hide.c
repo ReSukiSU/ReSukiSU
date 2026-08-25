@@ -275,7 +275,7 @@ static ssize_t my_write_access(struct file *file, char *buf, size_t size)
     ksu_security_compute_av_user(ssid, tsid, tclass, &avd);
 #endif
 
-// stock reads 1; a loader load_policy may have bumped the backup before we load
+    // stock reads 1; a loader load_policy may have bumped the backup before we load
     avd.seqno = 1;
     length = scnprintf(buf, SIMPLE_TRANSACTION_LIMIT, "%x %x %x %x %u %x", avd.allowed, 0xffffffff, avd.auditallow,
                        avd.auditdeny, avd.seqno, avd.flags);

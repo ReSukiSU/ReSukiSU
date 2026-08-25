@@ -34,6 +34,10 @@ class SetDefaultUmountModulesUseCase(private val repository: KernelRepository) {
     suspend operator fun invoke(enabled: Boolean) = repository.setDefaultUmountModules(enabled)
 }
 
+class SetWebViewZygoteUmountEnabledUseCase(private val repository: KernelRepository) {
+    suspend operator fun  invoke(enabled: Boolean) = repository.setWebviewZygoteUmountEnabled(enabled)
+}
+
 class IsLateLoadModeUseCase(private val repository: KernelRepository) {
     operator fun invoke() = repository.isLateLoadMode()
 }

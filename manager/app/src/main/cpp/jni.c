@@ -514,6 +514,14 @@ NativeBridge(setKernelUmountEnabled, jboolean, jboolean enabled) {
     return set_kernel_umount_enabled(enabled);
 }
 
+NativeBridgeNP(isWebViewZygoteUmountEnabled, jboolean) {
+    return is_webview_zygote_umount_enabled();
+}
+
+NativeBridge(setWebViewZygoteUmountEnabled, jboolean, jboolean enabled) {
+    return set_webview_zygote_umount_enabled(enabled);
+}
+
 NativeBridgeNP(isSelinuxHideEnabled, jboolean) {
     return is_selinux_hide_enabled();
 }

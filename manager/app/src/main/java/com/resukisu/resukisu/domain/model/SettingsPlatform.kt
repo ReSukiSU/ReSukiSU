@@ -33,6 +33,7 @@ data class PlatformFeatureStatus(
     val adbRootEnabled: Boolean = false,
     val sulogStatus: String = "",
     val selinuxHideStatus: String = "",
+    val webViewZygoteUmountStatus: String = "",
 )
 
 sealed interface AppearanceSetting {
