@@ -171,7 +171,7 @@
     <string name="select_slot_title">Chọn Slot Flash</string>
     <string name="select_slot_description">Vui lòng chọn Slot để Flash Boot</string>
     <string name="selected_slot">Slot đã chọn: %1$s</string>
-    <string name="current_slot">Slot hiện tại: %1$s </string>
+    <string name="current_slot">Slot hiện tại: %1$s</string>
     <string name="horizon_copy_failed">Sao chép thất bại</string>
     <string name="horizon_unknown_error">Lỗi không xác định</string>
     <string name="flash_failed_message">Flash thất bại</string>

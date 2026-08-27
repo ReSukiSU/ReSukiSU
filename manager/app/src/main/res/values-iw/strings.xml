@@ -49,7 +49,7 @@
     <string name="module_downloading">מוריד מודל: %s</string>
     <string name="module_update">עדכון</string>
     <string name="home_learn_kernelsu">למד אודות KernelSU</string>
-    <string name="module_uninstall_confirm">האם אתה בטוח שברצונך להסיר את התקנת המודל %s\?</string>
+    <string name="module_uninstall_confirm">האם אתה בטוח שברצונך להסיר את התקנת המודל %s?</string>
     <string name="module_uninstall_failed">הסרת התקנת %s נכשלה:</string>
     <string name="superuser">משתמש על</string>
     <string name="settings">הגדרות</string>

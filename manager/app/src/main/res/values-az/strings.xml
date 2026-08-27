@@ -28,7 +28,7 @@
     <string name="reboot_download">Yükləmə rejimində yenidən başlat</string>
     <string name="reboot_edl">EDL rejimində yenidən başlat</string>
     <string name="about">Haqqında</string>
-    <string name="module_uninstall_confirm">Modulu silmək istədiyinizdən əminsiniz %s\?</string>
+    <string name="module_uninstall_confirm">Modulu silmək istədiyinizdən əminsiniz %s?</string>
     <string name="module_uninstall_success">%s silindi</string>
     <string name="module_uninstall_failed">Silmək mümkün olmadı: %s</string>
     <string name="module_version">Versiya</string>

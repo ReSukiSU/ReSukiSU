@@ -103,7 +103,7 @@
     <string name="profile_umount_modules">Modülleri bağlamayı kaldır</string>
     <string name="failed_to_update_app_profile">%s için Uygulama Profili güncellenemedi</string>
     <string name="debug_version_notice">Yöneticinin DEBUG sürümünü kullanıyorsunuz. Eğer DEBUG sürümünün ne anlama geldiğini bilmiyorsanız hemen RELEASE sürümüne geçin</string>
-    <string name="unofficial_version_notice">"Kullandığınız yönetici orijinal %s yöneticisi değil, kök erişimi alamayabilirsiniz."</string>
+    <string name="unofficial_version_notice">Kullandığınız yönetici orijinal %s yöneticisi değil, kök erişimi alamayabilirsiniz.</string>
     <string name="conflict_with_apatch">APatch tespit edildi, her şey çalışmayı durdurabilir.</string>
     <string name="settings_umount_modules_default">Modüllerin bağlantısını varsayılan olarak kes</string>
     <string name="settings_umount_modules_default_summary">Uygulama Profilindeki \"Modüllerin bağlantısını kes\" seçeneği için küresel varsayılan değer. Etkinleştirilirse, profili ayarlanmamış uygulamalar için sistemdeki tüm modül değişikliklerini kaldırır</string>
@@ -221,7 +221,7 @@
     <string name="slot_a">A Yuvası</string>
     <string name="slot_b">B Yuvası</string>
     <string name="selected_slot">Seçilen yuva: %1$s</string>
-    <string name="current_slot">Geçerli varsayılan sistem yuvası: %1$s </string>
+    <string name="current_slot">Geçerli varsayılan sistem yuvası: %1$s</string>
     <string name="horizon_copy_failed">Kopyalama başarısız</string>
     <string name="horizon_unknown_error">Bilinmeyen hata</string>
     <string name="flash_failed_message">Flash\'lama başarısız</string>

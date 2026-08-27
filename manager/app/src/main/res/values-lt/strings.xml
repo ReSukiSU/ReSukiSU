@@ -31,7 +31,7 @@
     <string name="reboot_download">Perkrauti į atsisiuntimo rėžimą</string>
     <string name="reboot_edl">Perkrauti į EDL</string>
     <string name="about">Apie</string>
-    <string name="module_uninstall_confirm">Ar tikrai norite išdiegti modulį %s\?</string>
+    <string name="module_uninstall_confirm">Ar tikrai norite išdiegti modulį %s?</string>
     <string name="module_uninstall_success">%s išdiegtas</string>
     <string name="module_uninstall_failed">Nepavyko išdiegti: %s</string>
     <string name="module_version">Versija</string>

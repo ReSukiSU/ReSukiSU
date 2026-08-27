@@ -85,9 +85,7 @@
     <string name="direct_install">Direkte Installation (empfohlen)</string>
     <string name="select_file">Datei auswählen</string>
     <string name="install_inactive_slot">In inaktiven Slot installieren (nach OTA)</string>
-    <string name="install_inactive_slot_warning">Nach einem Neustart wird dein Gerät **GEZWUNGEN** in den derzeit inaktiven Slot zu starten!
-\nBenutze dies nur nach Fertigstellung des OTA.
-\nFortfahren?</string>
+    <string name="install_inactive_slot_warning">Nach einem Neustart wird dein Gerät **GEZWUNGEN** in den derzeit inaktiven Slot zu starten! \nBenutze dies nur nach Fertigstellung des OTA. \nFortfahren?</string>
     <string name="install_next">Weiter</string>
     <string name="select_file_tip">%1$s Partitionsabbild empfohlen</string>
     <string name="select_kmi">KMI auswählen</string>
@@ -145,7 +143,7 @@
     <string name="select_slot_description">Bitte wählen Sie den Ziel-Slot zum Blinken des Boots aus</string>
     <string name="slot_b">Steckplatz B</string>
     <string name="selected_slot">Wähle LKM: %1$s</string>
-    <string name="current_slot">Aktueller Standard-Slot des Systems：%1$s </string>
+    <string name="current_slot">Aktueller Standard-Slot des Systems：%1$s</string>
     <string name="horizon_copy_failed">Kopieren fehlgeschlagen</string>
     <string name="horizon_unknown_error">Ein unbekannter Fehler ist aufgetreten</string>
     <string name="flash_failed_message">Schreiben fehlgeschlagen</string>
@@ -162,8 +160,8 @@
     <string name="icon_switched">Icon gewechselt</string>
     <string name="app_dpi_title">Angewendeter DPI</string>
     <string name="app_dpi_summary">Bildschirmanzahl nur für die aktuelle Anwendung anpassen</string>
-    <string name="dpi_size_small">Klein </string>
-    <string name="dpi_size_medium">Mittel </string>
+    <string name="dpi_size_small">Klein</string>
+    <string name="dpi_size_medium">Mittel</string>
     <string name="dpi_size_large">Groß</string>
     <string name="dpi_size_extra_large">übergröße</string>
     <string name="dpi_size_custom">anpassbar</string>

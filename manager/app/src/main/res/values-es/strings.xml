@@ -152,7 +152,7 @@
     <string name="select_slot_title">Seleccionar Ranura Flash</string>
     <string name="select_slot_description">Por favor, seleccione la ranura de destino para flashear el arranque</string>
     <string name="selected_slot">Slot selectionada</string>
-    <string name="current_slot">Ranura predeterminada del sistema actual：%1$s </string>
+    <string name="current_slot">Ranura predeterminada del sistema actual：%1$s</string>
     <string name="horizon_copy_failed">Hubo un fallo al copiar</string>
     <string name="horizon_unknown_error">Error desconocido</string>
     <string name="flash_failed_message">Flash falló</string>
@@ -171,8 +171,8 @@
     <string name="icon_switched">Icono cambiado</string>
     <string name="app_dpi_title">DPI aplicado</string>
     <string name="app_dpi_summary">Ajustar la densidad de pantalla para la aplicación actual</string>
-    <string name="dpi_size_small">Pequeño </string>
-    <string name="dpi_size_medium">Medio </string>
+    <string name="dpi_size_small">Pequeño</string>
+    <string name="dpi_size_medium">Medio</string>
     <string name="dpi_size_large">Original</string>
     <string name="dpi_size_extra_large">sobretamaño</string>
     <string name="dpi_size_custom">personalizable</string>

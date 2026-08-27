@@ -29,7 +29,7 @@
     <string name="reboot_download">Ponovo pokrenite u Preuzimanje</string>
     <string name="reboot_edl">Ponovo pokrenite u EDL</string>
     <string name="about">O</string>
-    <string name="module_uninstall_confirm">Jeste li sigurni da želite deinstalirati modulu %s\?</string>
+    <string name="module_uninstall_confirm">Jeste li sigurni da želite deinstalirati modulu %s?</string>
     <string name="module_uninstall_success">%s deinstalirana</string>
     <string name="module_uninstall_failed">Neuspješna deinstalacija: %s</string>
     <string name="module_version">Verzija</string>

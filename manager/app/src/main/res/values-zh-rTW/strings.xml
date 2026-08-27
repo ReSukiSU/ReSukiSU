@@ -111,7 +111,7 @@
     <string name="profile_umount_modules">卸載模組</string>
     <string name="failed_to_update_app_profile">為 %s 更新 App Profile 失敗</string>
     <string name="debug_version_notice">您正在使用 DEBUG 組建的管理器，如果你不知道什麼是 DEBUG 組建，請立即切換至 RELEASE 組建</string>
-    <string name="unofficial_version_notice">"您使用的管理器不是 %s 官方管理器，您可能無法取得權限。"</string>
+    <string name="unofficial_version_notice">您使用的管理器不是 %s 官方管理器，您可能無法取得權限。</string>
     <string name="conflict_with_apatch">檢測到APatch，所有功能均可能停止運作。</string>
     <string name="settings_umount_modules_default">預設卸載模組</string>
     <string name="settings_umount_modules_default_summary">App Profile 裡面「卸載模組」的全域預設值。如果啟用，將會為沒有配置 Profile 的應用程式移除所有針對系統修改的模組</string>
@@ -247,7 +247,7 @@
     <string name="slot_a">A 槽位</string>
     <string name="slot_b">B 槽位</string>
     <string name="selected_slot">已選取槽位：%1$s</string>
-    <string name="current_slot">目前系統預設槽位：%1$s </string>
+    <string name="current_slot">目前系統預設槽位：%1$s</string>
     <string name="horizon_copy_failed">複製失敗</string>
     <string name="horizon_unknown_error">未知錯誤</string>
     <string name="flash_failed_message">刷寫失敗</string>
@@ -279,8 +279,8 @@
     <string name="module_unavailable">模組 %s 被停用或待移除</string>
     <string name="app_dpi_title">應用程式 DPI</string>
     <string name="app_dpi_summary">只調整目前應用程式螢幕顯示的密度</string>
-    <string name="dpi_size_small">小 </string>
-    <string name="dpi_size_medium">中 </string>
+    <string name="dpi_size_small">小</string>
+    <string name="dpi_size_medium">中</string>
     <string name="dpi_size_large">大</string>
     <string name="dpi_size_extra_large">超大</string>
     <string name="dpi_size_custom">自訂</string>

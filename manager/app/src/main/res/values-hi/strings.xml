@@ -28,7 +28,7 @@
     <string name="reboot_download">डाउनलोड में रिबूट करें</string>
     <string name="reboot_edl">EDL मोड में रिबूट करें</string>
     <string name="about">हमारे बारे में</string>
-    <string name="module_uninstall_confirm">क्या आप सच में मॉड्यूल %s को अनइंस्टॉल करना चाहते हैं\?</string>
+    <string name="module_uninstall_confirm">क्या आप सच में मॉड्यूल %s को अनइंस्टॉल करना चाहते हैं?</string>
     <string name="module_uninstall_success">%s अनइंस्टॉल सफल हुआ</string>
     <string name="module_uninstall_failed">%s अनइंस्टल करने में असफल</string>
     <string name="module_version">वर्जन</string>

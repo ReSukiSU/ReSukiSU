@@ -159,7 +159,7 @@
     <string name="slot_a">Slot A</string>
     <string name="slot_b">Slot B</string>
     <string name="selected_slot">Slot yang dipilih: %1$s</string>
-    <string name="current_slot">Slot default sistem saat ini：%1$s </string>
+    <string name="current_slot">Slot default sistem saat ini：%1$s</string>
     <string name="horizon_copy_failed">Menyalin gagal</string>
     <string name="horizon_unknown_error">Kesalahan yang tidak diketahui</string>
     <string name="flash_failed_message">Flash gagal</string>

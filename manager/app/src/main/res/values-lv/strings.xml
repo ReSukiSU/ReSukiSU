@@ -89,9 +89,7 @@
     <string name="direct_install">Tiešā instalēšana (Ieteicams)</string>
     <string name="select_file">Izvēlieties failu</string>
     <string name="install_inactive_slot">Instalēt neaktīvajā slotā (pēc OTA)</string>
-    <string name="install_inactive_slot_warning">Pēc restartēšanas jūsu ierīce tiks **PIESPIESTI** palaista pašreizējā neaktīvajā slotā!
-\nIzmantojiet šo opciju tikai pēc OTA pabeigšanas
-\nTurpināt?</string>
+    <string name="install_inactive_slot_warning">Pēc restartēšanas jūsu ierīce tiks **PIESPIESTI** palaista pašreizējā neaktīvajā slotā! \nIzmantojiet šo opciju tikai pēc OTA pabeigšanas \nTurpināt?</string>
     <string name="install_next">Nākamais</string>
     <string name="select_file_tip">Ieteicams %1$s nodalījuma attēls</string>
     <string name="select_kmi">Izvēlieties KMI</string>

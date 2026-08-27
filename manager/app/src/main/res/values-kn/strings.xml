@@ -18,7 +18,7 @@
     <string name="reboot_userspace">ಸಾಫ್ಟ್ ರೀಬೂಟ್</string>
     <string name="reboot_edl">EDL ಗೆ ರೀಬೂಟ್</string>
     <string name="about">ಬಗ್ಗೆ</string>
-    <string name="module_uninstall_confirm">%s ಮಾಡ್ಯೂಲ್ ಅನ್ನು ಅಸ್ಥಾಪಿಸಲು ನೀವು ಖಚಿತವಾಗಿ ಬಯಸುವಿರಾ\?</string>
+    <string name="module_uninstall_confirm">%s ಮಾಡ್ಯೂಲ್ ಅನ್ನು ಅಸ್ಥಾಪಿಸಲು ನೀವು ಖಚಿತವಾಗಿ ಬಯಸುವಿರಾ?</string>
     <string name="module_uninstall_success">%s ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾಗಿದೆ</string>
     <string name="module_uninstall_failed">ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ: %s</string>
     <string name="module_version">ವರ್ಷನ್</string>

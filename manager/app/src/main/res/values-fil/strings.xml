@@ -29,7 +29,7 @@
     <string name="reboot_download">I-reboot sa Download</string>
     <string name="reboot_edl">I-reboot sa EDL</string>
     <string name="about">Tungkol</string>
-    <string name="module_uninstall_confirm">Sigurado ka bang gusto mong i-uninstall ang modyul %s\?</string>
+    <string name="module_uninstall_confirm">Sigurado ka bang gusto mong i-uninstall ang modyul %s?</string>
     <string name="module_uninstall_success">Na-uninstall ang %s</string>
     <string name="module_uninstall_failed">Nabigong i-uninstall: %s</string>
     <string name="module_version">Bersyon</string>

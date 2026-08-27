@@ -119,9 +119,7 @@
     <string name="direct_install">تثبيت مباشر (موصى به)</string>
     <string name="select_file">اختيار ملف</string>
     <string name="install_inactive_slot">التثبيت على فتحة غير نشطة (بعد OTA)</string>
-    <string name="install_inactive_slot_warning">سيتم **إجبار** جهازك على التمهيد إلى الفتحة غير النشطة الحالية بعد إعادة التشغيل!
-\nاستخدم هذا الخيار فقط بعد انتهاء التحديث.
-\nأستمرار؟</string>
+    <string name="install_inactive_slot_warning">سيتم **إجبار** جهازك على التمهيد إلى الفتحة غير النشطة الحالية بعد إعادة التشغيل! \nاستخدم هذا الخيار فقط بعد انتهاء التحديث. \nأستمرار؟</string>
     <string name="install_next">التالي</string>
     <string name="select_file_tip">يوصى باستخدام صورة القسم %1$s</string>
     <string name="select_kmi">اختر KMI</string>
@@ -183,14 +181,14 @@
     <string name="slot_a">خانة A</string>
     <string name="slot_b">الخانة B</string>
     <string name="selected_slot">الفتحة المحددة: %1$s</string>
-    <string name="current_slot">فتحة النظام الحالية الافتراضية：%1$s </string>
+    <string name="current_slot">فتحة النظام الحالية الافتراضية：%1$s</string>
     <string name="horizon_copy_failed">فشل النسخ</string>
     <string name="horizon_unknown_error">خطأ غير معروف</string>
     <string name="flash_failed_message">فشل التركيب</string>
     <string name="Lkm_install_methods">إصلاح/تثبيت LKM</string>
     <string name="GKI_install_methods">نواة رمادية</string>
     <string name="configuration">تعيين</string>
-    <string name="app_settings">إعدادات التطبيق </string>
+    <string name="app_settings">إعدادات التطبيق</string>
     <string name="tools">ادوات</string>
     <string name="no_apps_found">التطبيق غير موجود</string>
     <string name="appearance_settings">تخصيص شريط الأدوات</string>
@@ -200,8 +198,8 @@
     <string name="icon_switch_summary">غيّر أيقونة التطبيق لـKernelSU</string>
     <string name="app_dpi_title">تم تطبيق DPI</string>
     <string name="app_dpi_summary">ضبط كثافة عرض الشاشة للتطبيق الحالي فقط</string>
-    <string name="dpi_size_small">صغير </string>
-    <string name="dpi_size_medium">متوسط </string>
+    <string name="dpi_size_small">صغير</string>
+    <string name="dpi_size_medium">متوسط</string>
     <string name="dpi_size_large">كبير</string>
     <string name="dpi_size_extra_large">حجم كبير</string>
     <string name="dpi_size_custom">قابلة للتعديل</string>

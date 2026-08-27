@@ -226,7 +226,7 @@
     <string name="slot_a">A 槽位</string>
     <string name="slot_b">B 槽位</string>
     <string name="selected_slot">已選擇槽位: %1$s</string>
-    <string name="current_slot">當前系統預設槽位：%1$s </string>
+    <string name="current_slot">當前系統預設槽位：%1$s</string>
     <string name="horizon_copy_failed">複製失敗</string>
     <string name="horizon_unknown_error">未知錯誤</string>
     <string name="flash_failed_message">刷寫失敗</string>

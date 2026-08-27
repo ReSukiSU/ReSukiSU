@@ -108,7 +108,7 @@
     <string name="profile_umount_modules">Размонтировать модули</string>
     <string name="failed_to_update_app_profile">Не удалось обновить профиль приложения для %s</string>
     <string name="debug_version_notice">Вы используете DEBUG сборку менеджера. Если вы не знаете, что это такое, немедленно переключитесь на RELEASE сборку</string>
-    <string name="unofficial_version_notice">"Менеджер, который вы используете, не является официальным менеджером %s, и вы можете не иметь возможности получить необходимые разрешения."</string>
+    <string name="unofficial_version_notice">Менеджер, который вы используете, не является официальным менеджером %s, и вы можете не иметь возможности получить необходимые разрешения.</string>
     <string name="conflict_with_apatch">Обнаружен APatch, все может перестать работать.</string>
     <string name="settings_umount_modules_default">Размонтировать модули по умолчанию</string>
     <string name="settings_umount_modules_default_summary">Глобальное значение по умолчанию для \"Размонтировать модули\" в профиле приложения. При включении будут удалены все модификации модулей в системе для приложений, у которых не задан профиль</string>
@@ -154,9 +154,7 @@
     <string name="direct_install">Прямая установка (Рекомендуется)</string>
     <string name="select_file">Выбрать файл</string>
     <string name="install_inactive_slot">Установка в неактивный слот (После OTA)</string>
-    <string name="install_inactive_slot_warning">Ваше устройство будет **ПРИНУДИТЕЛЬНО** загружено в текущий неактивный слот после перезагрузки!
-\n Используйте эту опцию только после завершения OTA.
-\n Продолжить?</string>
+    <string name="install_inactive_slot_warning">Ваше устройство будет **ПРИНУДИТЕЛЬНО** загружено в текущий неактивный слот после перезагрузки! \n Используйте эту опцию только после завершения OTA. \n Продолжить?</string>
     <string name="install_next">Далее</string>
     <string name="install_select_partition">Выбрать раздел</string>
     <string name="install_upload_lkm_file">Использовать локальный файл LKM (.ko)</string>
@@ -237,7 +235,7 @@
     <string name="slot_a">Слот A</string>
     <string name="slot_b">Слот B</string>
     <string name="selected_slot">Выбран LKM: %1$s</string>
-    <string name="current_slot">Текущий слот по умолчанию：%1$s </string>
+    <string name="current_slot">Текущий слот по умолчанию：%1$s</string>
     <string name="horizon_copy_failed">Копирование не удалось</string>
     <string name="horizon_unknown_error">Неизвестная ошибка</string>
     <string name="flash_failed_message">Установка не выполнена</string>
@@ -271,7 +269,7 @@
     <string name="dpi_size_small">маленький</string>
     <string name="dpi_size_medium">средний</string>
     <string name="dpi_size_large">большой</string>
-    <string name="dpi_size_extra_large"> огромный</string>
+    <string name="dpi_size_extra_large">огромный</string>
     <string name="dpi_size_custom">Уровень DPI</string>
     <string name="dpi_apply_settings">Применить настройки DPI</string>
     <string name="dpi_confirm_title">Подтвердите изменение DPI</string>
@@ -350,7 +348,7 @@
     <string name="sus_maps_description_title">Скрыть настоящий файл mmapped с разных карт в /proc/self/</string>
     <string name="sus_maps_description_text">Скрыть реальные пути к папкам памяти из /proc/self/[maps|smaps_rollup|map_files|mem|pagemap]. Обратите внимание: эта функция не поддерживает скрытие анонимных карт и может скрыть встроенные хуки или PLT хуки вызванные инъекцией самой библиотеки.</string>
     <string name="sus_maps_warning">Важное уведомление: для приложений с хорошо реализованными механизмами обнаружений эта функция может работать не эффективно .</string>
-    <string name="sus_maps_debug_info">Сначала найдите PID и UID целевого приложения, используя ps -enf, затем проверьте соответствующие пути в /proc/&lt;pid&gt;/maps и сравните номера устройства с номерами в /proc/1/mountinfo. Функция скрытия  будет работать должным образом только если номера устройств совпадают.</string>
+    <string name="sus_maps_debug_info">Сначала найдите PID и UID целевого приложения, используя ps -enf, затем проверьте соответствующие пути в /proc/&lt;pid&gt;/maps и сравните номера устройства с номерами в /proc/1/mountinfo. Функция скрытия будет работать должным образом только если номера устройств совпадают.</string>
     <string name="umount_path_manager">Управление путями размонтирования</string>
     <string name="umount_path_manager_summary">Управления путями размонтирования ядра</string>
     <string name="no_any_umount_path">Нет существующих путей для размонтирования</string>

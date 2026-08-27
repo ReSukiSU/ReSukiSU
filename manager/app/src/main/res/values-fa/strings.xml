@@ -25,7 +25,7 @@
     <string name="reboot">راه اندازی دوباره</string>
     <string name="settings">تنظیمات</string>
     <string name="reboot_userspace">راه اندازی نرم</string>
-    <string name="reboot_recovery">راه اندازی به ریکاوری </string>
+    <string name="reboot_recovery">راه اندازی به ریکاوری</string>
     <string name="reboot_bootloader">راه اندازی به بوتلودر</string>
     <string name="reboot_download">راه اندازی به حالت دانلود</string>
     <string name="reboot_edl">راه اندازی به EDL</string>

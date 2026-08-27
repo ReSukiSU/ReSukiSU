@@ -24,7 +24,7 @@
     <string name="reboot_download">Genstart til Download</string>
     <string name="reboot_edl">Genstart til EDL</string>
     <string name="about">Om</string>
-    <string name="module_uninstall_confirm">Er du sikker på, at du vil afinstallere modulet %s\?</string>
+    <string name="module_uninstall_confirm">Er du sikker på, at du vil afinstallere modulet %s?</string>
     <string name="module_uninstall_success">%s afinstalleret</string>
     <string name="module_uninstall_failed">Afinstallation af: %s fejlede</string>
     <string name="module_author">Forfatter</string>

@@ -31,7 +31,7 @@
     <string name="reboot_download">डाउनलोड करण्यासाठी रीबूट करा</string>
     <string name="reboot_edl">EDL वर रीबूट करा</string>
     <string name="about">बद्दल</string>
-    <string name="module_uninstall_confirm">तुमची खात्री आहे की तुम्ही मॉड्यूल %s विस्थापित करू इच्छिता\?</string>
+    <string name="module_uninstall_confirm">तुमची खात्री आहे की तुम्ही मॉड्यूल %s विस्थापित करू इच्छिता?</string>
     <string name="module_uninstall_success">%s विस्थापित</string>
     <string name="module_uninstall_failed">विस्थापित करण्यात अयशस्वी: %s</string>
     <string name="module_version">आवृत्ती</string>

@@ -29,7 +29,7 @@
     <string name="reboot_download">Reboot ke Download</string>
     <string name="reboot_edl">Reboot ke EDL</string>
     <string name="about">Tentang</string>
-    <string name="module_uninstall_confirm">Apakah anda pasti ingin membuang modul %s\?</string>
+    <string name="module_uninstall_confirm">Apakah anda pasti ingin membuang modul %s?</string>
     <string name="settings_sucompat">Ubaḥ hala binari su</string>
     <string name="settings_sucompat_summary">Ubaḥ hala /system/bin/su ke ksud untuk aplikasi yang diberikan kebenaran Superuser dalam Profil Aplikasi; berkesan untuk proses baharu sahaja.</string>
     <string name="settings_kernel_umount">Umount kernel</string>

@@ -19,8 +19,8 @@
     <string name="module_failed_to_disable">Échec de la désactivation du module : %s</string>
     <string name="module_empty">Aucun module installé</string>
     <string name="module">Modules</string>
-    <string name="module_sort_action_first">Trié (avec action)</string>
-    <string name="module_sort_enabled_first">Trié (activé)</string>
+    <string name="module_sort_action_first">Tri (avec action)</string>
+    <string name="module_sort_enabled_first">Tri (activé en premier)</string>
     <string name="uninstall">Désinstaller</string>
     <string name="install">Installer</string>
     <string name="reboot">Redémarrer</string>
@@ -28,7 +28,7 @@
     <string name="reboot_userspace">Redémarrer en mode progressif</string>
     <string name="reboot_recovery">Redémarrer en mode de récupération</string>
     <string name="reboot_bootloader">Redémarrer en mode bootloader</string>
-    <string name="reboot_download">Redémarrer en mode de téléchargement</string>
+    <string name="reboot_download">Redémarrer en mode téléchargement</string>
     <string name="reboot_edl">Redémarrer en mode EDL</string>
     <string name="about">À propos</string>
     <string name="about_anime_character_sticker"><![CDATA[Les images des fichiers avec un autocollant de personnage d\'anime sont protégées par %1$s, la propriété intellectuelle des marques dans les images appartient à %2$s. Avant d\'utiliser ces fichiers, en plus de vous conformer à la licence %3$s, vous devez également vous conformer à l\'autorisation des deux auteurs d\'utiliser ces contenus artistiques.]]></string>
@@ -44,7 +44,7 @@
     <string name="reboot_to_apply">Redémarrer pour appliquer les modifications</string>
     <string name="module_magisk_conflict">Modules indisponibles en raison d\'un conflit avec Magisk !</string>
     <string name="home_learn_kernelsu">Découvrir KernelSU</string>
-    <string name="home_click_to_learn_kernelsu">Découvrez comment installer KernelSU et utiliser les modules</string>
+    <string name="home_click_to_learn_kernelsu">Découvrir comment installer KernelSU et utiliser les modules</string>
     <string name="home_support_title">Nous soutenir</string>
     <string name="home_support_content">KernelSU est, et restera toujours gratuit et en open source. Vous pouvez cependant nous témoigner de votre soutien en nous faisant un don.</string>
     <string name="profile_default">Par défaut</string>
@@ -53,16 +53,16 @@
     <string name="profile_groups">Groupes</string>
     <string name="profile_capabilities">Capacités</string>
     <string name="profile_selinux_context">Contexte SELinux</string>
-    <string name="profile_umount_modules">Démonter les modules</string>
+    <string name="profile_umount_modules">Démontage des modules</string>
     <string name="failed_to_update_app_profile">Échec de la modification du profil d\'application de %s</string>
-    <string name="settings_umount_modules_default">Démonter les modules par défaut</string>
-    <string name="settings_umount_modules_default_summary">Valeur globale par défaut pour l\'option \"Démonter les modules\" dans les profils d\'application. Lorsque l\'option est activée, les modifications apportées au système par les modules sont supprimées pour les applications qui n\'ont pas de profil défini.</string>
+    <string name="settings_umount_modules_default">Démontage des modules par défaut</string>
+    <string name="settings_umount_modules_default_summary">Valeur globale par défaut pour l\'option \"Démontage des modules\" dans les profils d\'application. Lorsque l\'option est activée, les modifications apportées au système par les modules sont supprimées pour les applications qui n\'ont pas de profil défini.</string>
     <string name="profile_umount_modules_summary">L\'activation de cette option permettra à KernelSU de restaurer tous les fichiers modifiés par les modules pour cette application.</string>
     <string name="profile_selinux_domain">Domaine</string>
     <string name="profile_selinux_rules">Règles</string>
     <string name="module_update">Mettre à jour</string>
-    <string name="module_downloading">Téléchargement du module : %s</string>
-    <string name="module_start_downloading">Début du téléchargement de : %s</string>
+    <string name="module_downloading">Téléchargement du module : %s</string>
+    <string name="module_start_downloading">Début du téléchargement de : %s</string>
     <string name="new_version_available">Nouvelle version %s disponible, appuyer ici pour mettre à jour.</string>
     <string name="launch_app">Lancer</string>
     <string name="force_stop_app" formatted="false">Forcer l\'arrêt</string>
@@ -86,9 +86,9 @@
     <string name="app_profile_template_import_success">Importation réussie</string>
     <string name="app_profile_template_sync">Synchroniser les modèles en ligne</string>
     <string name="app_profile_template_save_failed">Échec de l\'enregistrement du modèle</string>
-    <string name="app_profile_template_import_empty">Le presse-papiers est vide !</string>
-    <string name="module_changelog_failed">Échec de récupération du journal des modifications : %s</string>
-    <string name="grant_root_failed">Échec de l\'octroi des privilèges root !</string>
+    <string name="app_profile_template_import_empty">Le presse-papiers est vide !</string>
+    <string name="module_changelog_failed">Échec de récupération du journal des modifications : %s</string>
+    <string name="grant_root_failed">Échec de l\'octroi des privilèges root !</string>
     <string name="close">Fermer</string>
     <string name="direct_install">Installation directe (recommandé)</string>
     <string name="select_file">Sélectionner un fichier d\'image à modifier</string>
@@ -107,7 +107,7 @@
     <string name="flashing">Flashage en cours</string>
     <string name="flash_success">Flashage réussi</string>
     <string name="flash_failed">Échec du flashage</string>
-    <string name="selected_lkm">LKM sélectionné : %s</string>
+    <string name="selected_lkm">LKM sélectionné : %s</string>
     <string name="save_log">Enregistrer les journaux</string>
     <string name="log_saved">Journaux enregistrés</string>
     <string name="unknown_module">Module inconnu</string>
@@ -142,7 +142,7 @@
     <string name="horizon_kernel_summary">Flashage d\'un fichier noyau AnyKernel3</string>
     <string name="root_required">Nécessite des privilèges root</string>
     <string name="failed_reboot">Échec du redémarrage</string>
-    <string name="custom_settings">Paramètres personnalisés</string>
+    <string name="custom_settings">Paramètres supplémentaires</string>
     <string name="theme_color">Couleur du thème d\'affichage</string>
     <string name="horizon_flash_complete">Flashage terminé</string>
     <string name="horizon_preparing">Préparation…</string>
@@ -161,7 +161,7 @@
     <string name="app_settings">Paramètres de l\'application</string>
     <string name="tools">Outils</string>
     <string name="no_apps_found">Application introuvable</string>
-    <string name="appearance_settings">Personnalisation de la barre d\'outils</string>
+    <string name="appearance_settings">Paramètres de personnalisation</string>
     <string name="back">Retour</string>
     <string name="background_set_success">Arrière-plan appliqué</string>
     <string name="background_removed">Arrière-plan personnalisé supprimé</string>
@@ -171,7 +171,7 @@
     <string name="app_dpi_title">Densité d\'affichage (en PPP)</string>
     <string name="app_dpi_summary">Ajuste la densité d\'affichage de l\'écran pour cette application</string>
     <string name="dpi_size_small">Petite</string>
-    <string name="dpi_size_medium">Moyenne </string>
+    <string name="dpi_size_medium">Moyenne</string>
     <string name="dpi_size_large">Grande</string>
     <string name="dpi_size_extra_large">Surdimensionnée</string>
     <string name="dpi_size_custom">Personnalisable</string>
@@ -193,7 +193,7 @@
     <string name="seccomp_status_filter">Filtrage</string>
     <string name="seccomp_status_unknown">Inconnu</string>
     <string name="sulog">Journalisation de SU</string>
-    <string name="sulog_log_files">Fichiers journaux</string>
+    <string name="sulog_log_files">Fichier journal</string>
     <string name="sulog_failed_to_load">Échec de chargement du journal SU</string>
     <string name="sulog_disabled_title">Journalisation de SU non activée</string>
     <string name="sulog_unsupported_title">Journalisation de SU non prise en charge</string>
@@ -210,7 +210,7 @@
     <string name="sulog_entry_unknown_event">Événement inconnu</string>
     <string name="sulog_search_placeholder">Rechercher dans le journal</string>
     <string name="module_repo">Catalogue de modules</string>
-    <string name="module_sort_star_first">Trié (nombre d\'étoiles)</string>
+    <string name="module_sort_star_first">Tri (nombre d\'étoiles)</string>
     <string name="reboot_soft">Redémarrer en mode logiciel</string>
     <string name="get_source_code">Code source</string>
     <string name="get_source_code_detail">Consulter le code source sur GitHub</string>
@@ -249,7 +249,7 @@
     <string name="action">Action</string>
     <string name="app_profile_template_id">ID</string>
     <string name="affected_applications">Applications concernées</string>
-    <string name="settings_check_manager_update">Recherche des mises à jour du gestionnaire</string>
+    <string name="settings_check_manager_update">Recherche de mises à jour du gestionnaire</string>
     <string name="settings_check_manager_update_summary">Recherche automatiquement les mises à jour du gestionnaire</string>
     <string name="settings_check_module_update">Recherche des mises à jour de modules</string>
     <string name="settings_check_module_update_summary">Recherche automatiquement les mises à jour des modules installés</string>
@@ -288,7 +288,7 @@
     <string name="feature_status_managed_summary">Cette fonctionnalité est gérée par un module</string>
     <string name="settings_mode_default">Par défaut</string>
     <string name="theme_settings">Paramètres du thème d\'affichage</string>
-    <string name="settings_custom_monospace_font">Utiliser la police non proportionnelle intégrée</string>
+    <string name="settings_custom_monospace_font">Police non proportionnelle intégrée</string>
     <string name="settings_custom_monospace_font_summary">Utilise la police JetBrains Mono intégrée pour l\'affichage des journaux afin d\'éviter les problèmes d\'espacement à l\'affichage</string>
     <string name="dynamic_palette_style">Style de palette de couleurs</string>
     <string name="dynamic_color_spec">Spécifications colorimétriques</string>
@@ -322,7 +322,7 @@
     <string name="susfs_config_setting_title">Configuration de SuSFS</string>
     <string name="module_update_json">URL du fichier JSON de mise à jour</string>
     <string name="module_update_json_copied">URL du fichier JSON de mise à jour copié dans le presse-papiers</string>
-    <string name="show_more_module_info">Afficher plus d\'infos sur les modules</string>
+    <string name="show_more_module_info">Informations complémentaires sur les modules</string>
     <string name="show_more_module_info_summary">Affiche des informations complémentaires sur les modules telles que les URL des fichiers JSON de mise à jour</string>
     <string name="add">Ajouter</string>
     <string name="kstat_config_description_title">Configuration de Kstat</string>
@@ -355,7 +355,7 @@
     <string name="home_meta_module_implement">Métamodule utilisé</string>
     <string name="sus_loop_paths_description_title">Configuration des chemins de boucle</string>
     <string name="sus_loop_paths_description_text">Les chemins de boucle sont réétiquetés en SUS_PATH à chaque démarrage d\'une application utilisateur non root ou d\'un service isolé. Cela permet de résoudre les problèmes liés à la réinitialisation de l\'état des inodes des chemins ajoutés ou à leur recréation dans le noyau</string>
-    <string name="home_hook_type">Type de hook</string>
+    <string name="home_hook_type">Type d\'interception (hook)</string>
     <string name="confirm_installation">Confirmation de l\'installation</string>
     <string name="confirm_multiple_installation">Confirmation d\'installation (%d fichiers)</string>
     <string name="install_confirm">Installer</string>
@@ -379,7 +379,7 @@
     <string name="manager_update_beta">Mise à jour de version bêta</string>
     <string name="manager_update_details">Version : %1$s (%2$d)\nArchitecture : %3$s</string>
     <string name="settings_check_beta_update">Recherche de mise à jour de version bêta</string>
-    <string name="settings_check_beta_update_summary">Recherche automatiquement les versions bêta depuis la branche principale du dépôt GitHub</string>
+    <string name="settings_check_beta_update_summary">Recherche automatiquement les versions bêta du gestionnaire depuis la branche principale du dépôt GitHub</string>
     <string name="network_offline">Hors connexion</string>
     <string name="network_retry">Réessayer</string>
     <string name="please_check_network">Vérifier la connexion Internet et réessayer</string>

@@ -96,9 +96,7 @@
     <string name="direct_install">直接インストール (推奨)</string>
     <string name="select_file">パッチを行うイメージを選択</string>
     <string name="install_inactive_slot">非アクティブなスロットにインストール (OTA 後)</string>
-    <string name="install_inactive_slot_warning">再起動後、デバイスは**強制的に**、現在の非アクティブスロットから起動します。
-\nこのオプションは、OTA が完了した後にのみ使用してください。
-\n続行しますか？</string>
+    <string name="install_inactive_slot_warning">再起動後、デバイスは**強制的に**、現在の非アクティブスロットから起動します。 \nこのオプションは、OTA が完了した後にのみ使用してください。 \n続行しますか？</string>
     <string name="install_next">次へ</string>
     <string name="install_select_partition">パーティションを選択</string>
     <string name="install_upload_lkm_file">ローカル KVM ファイルを使用する</string>
@@ -166,7 +164,7 @@
     <string name="slot_a">スロット A</string>
     <string name="slot_b">スロット B</string>
     <string name="selected_slot">選択したスロット: %1$s</string>
-    <string name="current_slot">現在のシステムデフォルトスロット: %1$s </string>
+    <string name="current_slot">現在のシステムデフォルトスロット: %1$s</string>
     <string name="horizon_copy_failed">コピーに失敗しました</string>
     <string name="horizon_unknown_error">不明なエラー</string>
     <string name="flash_failed_message">フラッシュに失敗しました</string>
