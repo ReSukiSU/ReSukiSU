@@ -27,16 +27,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 enum class SortType(val displayNameRes: Int, val persistKey: String) {
-    NAME_ASC(R.string.sort_name_asc, "NAME_ASC"),
-    NAME_DESC(R.string.sort_name_desc, "NAME_DESC"),
-    INSTALL_TIME_NEW(R.string.sort_install_time_new, "INSTALL_TIME_NEW"),
-    INSTALL_TIME_OLD(R.string.sort_install_time_old, "INSTALL_TIME_OLD"),
-    SIZE_DESC(R.string.sort_size_desc, "SIZE_DESC"),
-    SIZE_ASC(R.string.sort_size_asc, "SIZE_ASC"),
+    NAME(R.string.sort_name, "NAME"),
+    INSTALL_TIME(R.string.sort_install_time, "INSTALL_TIME"),
+    UPDATE_TIME(R.string.sort_update_time, "UPDATE_TIME"),
+    SIZE(R.string.sort_size, "SIZE"),
     USAGE_FREQ(R.string.sort_usage_freq, "USAGE_FREQ");
 
     companion object {
-        fun fromPersistKey(key: String): SortType = entries.find { it.persistKey == key } ?: NAME_ASC
+        fun fromPersistKey(key: String): SortType = entries.find { it.persistKey == key } ?: NAME
     }
 }
 
@@ -44,7 +42,8 @@ data class SuperUserUiState(
     val appGroupList: List<InstalledAppGroup> = emptyList(),
     val search: String = "",
     val showSystemApps: Boolean = false,
-    val currentSortType: SortType = SortType.NAME_ASC,
+    val currentSortType: SortType = SortType.NAME,
+    val reverseOrder: Boolean = false,
     val isRefreshing: Boolean = false,
 )
 
@@ -55,6 +54,7 @@ sealed interface SuperUserUiAction {
     data class Search(val query: String) : SuperUserUiAction
     data class SetShowSystemApps(val enabled: Boolean) : SuperUserUiAction
     data class SetSort(val sortType: SortType) : SuperUserUiAction
+    data class SetReverseOrder(val enabled: Boolean) : SuperUserUiAction
     data object StatusChanged : SuperUserUiAction
 }
 
@@ -69,7 +69,8 @@ sealed interface SuperUserUiEvent {
 private data class SuperUserControls(
     val search: String = "",
     val showSystemApps: Boolean = false,
-    val sortType: SortType = SortType.NAME_ASC,
+    val sortType: SortType = SortType.NAME,
+    val reverseOrder: Boolean = false,
 )
 
 class SuperUserViewModel(
@@ -88,9 +89,10 @@ class SuperUserViewModel(
         SuperUserControls(
             showSystemApps = getBooleanPreference(KEY_SHOW_SYSTEM_APPS, false),
             sortType = SortType.fromPersistKey(
-                getStringPreference(KEY_CURRENT_SORT_TYPE, SortType.NAME_ASC.persistKey)
-                    ?: SortType.NAME_ASC.persistKey
+                getStringPreference(KEY_CURRENT_SORT_TYPE, SortType.NAME.persistKey)
+                    ?: SortType.NAME.persistKey
             ),
+            reverseOrder = getBooleanPreference(KEY_REVERSE_ORDER, false),
         )
     )
     private val mutableEvents = MutableSharedFlow<SuperUserUiEvent>(extraBufferCapacity = 1)
@@ -104,10 +106,12 @@ class SuperUserViewModel(
                 search = local.search,
                 showSystemApps = local.showSystemApps,
                 currentSortType = local.sortType,
+                reverseOrder = local.reverseOrder,
             ),
             search = local.search,
             showSystemApps = local.showSystemApps,
             currentSortType = local.sortType,
+            reverseOrder = local.reverseOrder,
             isRefreshing = source.refreshing,
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, SuperUserUiState())
@@ -151,6 +155,11 @@ class SuperUserViewModel(
                 controls.value = controls.value.copy(sortType = action.sortType)
             }
 
+            is SuperUserUiAction.SetReverseOrder -> {
+                setBooleanPreference(KEY_REVERSE_ORDER, action.enabled)
+                controls.value = controls.value.copy(reverseOrder = action.enabled)
+            }
+
             SuperUserUiAction.StatusChanged -> notifySuperuserStatusChanged()
         }
     }
@@ -177,6 +186,7 @@ class SuperUserViewModel(
         search: String,
         showSystemApps: Boolean,
         currentSortType: SortType,
+        reverseOrder: Boolean,
     ): List<InstalledAppGroup> = groups
         .filter { group ->
             group.apps.any { app ->
@@ -193,17 +203,23 @@ class SuperUserViewModel(
             if (priority != 0) {
                 priority
             } else {
-                when (currentSortType) {
-                    SortType.NAME_ASC -> first.mainApp.label.compareTo(second.mainApp.label, true)
-                    SortType.NAME_DESC -> second.mainApp.label.compareTo(first.mainApp.label, true)
-                    SortType.INSTALL_TIME_NEW ->
-                        second.mainApp.firstInstallTime.compareTo(first.mainApp.firstInstallTime)
+                val base = when (currentSortType) {
+                    SortType.NAME ->
+                        first.mainApp.label.compareTo(second.mainApp.label, true)
 
-                    SortType.INSTALL_TIME_OLD ->
+                    SortType.INSTALL_TIME ->
                         first.mainApp.firstInstallTime.compareTo(second.mainApp.firstInstallTime)
 
-                    else -> first.mainApp.label.compareTo(second.mainApp.label, true)
+                    SortType.UPDATE_TIME ->
+                        first.mainApp.lastUpdateTime.compareTo(second.mainApp.lastUpdateTime)
+
+                    SortType.SIZE ->
+                        first.mainApp.label.compareTo(second.mainApp.label, true)
+
+                    SortType.USAGE_FREQ ->
+                        first.mainApp.label.compareTo(second.mainApp.label, true)
                 }
+                if (reverseOrder) -base else base
             }
         }
 
@@ -217,5 +233,6 @@ class SuperUserViewModel(
     private companion object {
         const val KEY_SHOW_SYSTEM_APPS = "show_system_apps"
         const val KEY_CURRENT_SORT_TYPE = "current_sort_type"
+        const val KEY_REVERSE_ORDER = "reverse_order"
     }
 }

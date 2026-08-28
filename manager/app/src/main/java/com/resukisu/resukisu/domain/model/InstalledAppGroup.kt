@@ -9,6 +9,7 @@ data class InstalledApp(
     val uid: Int,
     val isSystem: Boolean = false,
     val firstInstallTime: Long = 0L,
+    val lastUpdateTime: Long = 0L,
     val profileKey: String = packageName,
     val special: Boolean = false,
 ) {
