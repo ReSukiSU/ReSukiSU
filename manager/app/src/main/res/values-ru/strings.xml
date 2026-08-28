@@ -444,9 +444,6 @@
     <string name="susfs_status_variant">Вариант</string>
     <string name="susfs_status_enabled_features">Включённые фичи</string>
     <string name="susfs_status_no_data">Нет данных</string>
-    <string name="susfs_standard_config_enabled">Сохраненная конфигурация</string>
-    <string name="susfs_standard_config_enabled_desc">Автоматически применять сохраненную конфигурацию SUSFS во время загрузки.</string>
-    <string name="susfs_management_disabled_warning">Встроенное управление SUSFS в Менеджере отключено</string>
     <string name="susfs_standard_logging">Логгирование</string>
     <string name="susfs_standard_logging_desc">Включает лог ядра SUSFS.Включите его перед отправкой отчетов об ошибках,связанных с SUSFS.</string>
     <string name="susfs_standard_avc_log_spoofing">Спуфинг логов AVC</string>

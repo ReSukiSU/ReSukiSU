@@ -441,9 +441,6 @@
     <string name="susfs_status_variant">變體</string>
     <string name="susfs_status_enabled_features">已啟用功能</string>
     <string name="susfs_status_no_data">未有數據</string>
-    <string name="susfs_standard_config_enabled">已保存配置</string>
-    <string name="susfs_standard_config_enabled_desc">開機時自動套用已保存嘅 SUSFS 配置。</string>
-    <string name="susfs_management_disabled_warning">管理器內置 SUSFS 管理已停用。</string>
     <string name="susfs_standard_logging">日誌</string>
     <string name="susfs_standard_logging_desc">啟用 SUSFS 核心日誌。回報與 SUSFS 相關嘅錯誤前請先啟用呢個選項。</string>
     <string name="susfs_standard_avc_log_spoofing">AVC 日誌偽裝</string>

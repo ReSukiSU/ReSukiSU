@@ -456,7 +456,6 @@
     <string name="assets_multiple_select_dialog_title">إختر الأصول التي تود تثبيتها</string>
     <string name="assets_multiple_select_dialog_warning">لم يتم إختيار اي أصول</string>
     <string name="storage_permission_denied">فشل التنزيل: إذن التخزين الخارجي مطلوب</string>
-    <string name="susfs_standard_config_enabled">التكوين المستمر</string>
     <string name="susfs_standard_uname_tab_slot_info">معلومات الحيّز</string>
     <string name="susfs_standard_uname_slot_info_load_failed">فشل تحميل معلومات حيّز الإقلاع</string>
     <string name="susfs_standard_uname_slot_info_empty">لم يتم العثور على معلومات حيّز الإقلاع</string>

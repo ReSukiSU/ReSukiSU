@@ -438,9 +438,6 @@
     <string name="susfs_status_variant">Варіант</string>
     <string name="susfs_status_enabled_features">Увімкнені функції</string>
     <string name="susfs_status_no_data">Немає даних</string>
-    <string name="susfs_standard_config_enabled">Збережена конфігурація</string>
-    <string name="susfs_standard_config_enabled_desc">Автоматично застосовувати збережену конфігурацію SUSFS під час завантаження.</string>
-    <string name="susfs_management_disabled_warning">Вбудоване керування SUSFS у Менеджері вимкнено.</string>
     <string name="susfs_standard_logging">Журнал</string>
     <string name="susfs_standard_logging_desc">Увімкнути журнал ядра SUSFS. Увімкнути перед повідомленням про помилку, пов\'язану з SUSFS.</string>
     <string name="susfs_standard_avc_log_spoofing">Підміна журналу AVC</string>

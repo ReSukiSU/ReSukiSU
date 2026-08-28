@@ -411,9 +411,6 @@
     <string name="susfs_status_variant">Kernel variáns</string>
     <string name="susfs_status_enabled_features">Elérhető és engedélyezett funkciók</string>
     <string name="susfs_status_no_data">Hiányos vagy nem olvasható adat</string>
-    <string name="susfs_standard_config_enabled">Maradandó beállítások</string>
-    <string name="susfs_standard_config_enabled_desc">Minden mentett beállított SuSFS paramétert újra alkalmaz újraindításkor.</string>
-    <string name="susfs_management_disabled_warning">Beépített SuSFS menedzser a root-kezelőben le lett tiltva.</string>
     <string name="susfs_standard_logging">Naplózás</string>
     <string name="susfs_standard_logging_desc">Bekapcsolja a SuSFS kernel naplóbejegyzéseket és gyűjtését. Engedélyezd mielőtt hibajelentést tennél.</string>
     <string name="susfs_standard_uname_tab_slot_info">Slot infók</string>

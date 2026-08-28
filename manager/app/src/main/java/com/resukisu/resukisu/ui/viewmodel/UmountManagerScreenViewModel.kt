@@ -1,5 +1,6 @@
 package com.resukisu.resukisu.ui.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.resukisu.resukisu.R
@@ -30,10 +31,11 @@ sealed interface UmountManagerUiAction {
 }
 
 sealed interface UmountManagerUiEvent {
-    data class Message(val stringResource: Int) : UmountManagerUiEvent
+    data class Message(val message: String) : UmountManagerUiEvent
 }
 
 class UmountManagerScreenViewModel(
+    private val context: Context,
     observeState: ObserveUmountStateUseCase,
     private val refreshPaths: RefreshUmountPathsUseCase,
     private val addPath: AddUmountPathUseCase,
@@ -74,7 +76,7 @@ class UmountManagerScreenViewModel(
     ) {
         viewModelScope.launch {
             val message = if (command().isSuccess) successMessage else R.string.operation_failed
-            mutableEvents.emit(UmountManagerUiEvent.Message(message))
+            mutableEvents.emit(UmountManagerUiEvent.Message(context.getString(message)))
         }
     }
 }

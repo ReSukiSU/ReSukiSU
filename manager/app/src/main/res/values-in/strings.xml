@@ -424,8 +424,6 @@
     <string name="susfs_status_version">Versi SUSFS</string>
     <string name="susfs_status_variant">Varian</string>
     <string name="susfs_status_no_data">Tidak ada data</string>
-    <string name="susfs_standard_config_enabled_desc">Terapkan otomatis konfigurasi SUSFS yang tersimpan saat boot.</string>
-    <string name="susfs_management_disabled_warning">Manajemen SUSFS bawaan Manajer dinonaktifkan.</string>
     <string name="susfs_standard_logging_desc">Mengaktifkan SUSFS log kernel. Aktifkan sebelum melapor bug terkait SUSFS.</string>
     <string name="susfs_standard_avc_log_spoofing_desc">Spoof tcontext \'su\' di log avc. Cegah aplikasi mendeteksi su melalui exploit Android lama.</string>
     <string name="susfs_standard_hide_sus_mnts">Sembunyikan Mount SUS untuk Procs Non-SU</string>

@@ -423,8 +423,6 @@
     <string name="susfs_status_version">SUSFS Sürümü</string>
     <string name="susfs_status_variant">Varyant</string>
     <string name="susfs_status_enabled_features">Etkinleştirilen Özellikler</string>
-    <string name="susfs_standard_config_enabled_desc">Önyükleme sırasında kaydedilmiş SUSFS yapılandırmasını otomatik olarak uygula.</string>
-    <string name="susfs_management_disabled_warning">Manager’daki yerleşik SUSFS yönetimi devre dışı bırakılmıştır.</string>
     <string name="susfs_standard_logging">Günlük Kayıtları</string>
     <string name="susfs_standard_logging_desc">SUSFS çekirdek günlüğünü etkinleştir. SUSFS ile ilgili hataları bildirmeden önce bunu etkinleştirin.</string>
     <string name="susfs_standard_avc_log_spoofing">AVC Günlüğü Sahteciliği</string>
@@ -533,6 +531,5 @@
     <string name="susfs_uid_scheme_unmounted_app">Bağlantısı Kesilmiş Uygulama</string>
     <string name="susfs_uid_scheme_unmounted">Bağlantısı Kesik</string>
     <string name="susfs_status_no_data">Veri Yok</string>
-    <string name="susfs_standard_config_enabled">Kalıcı Yapılandırma</string>
     <string name="susfs_tab_open_redirect">Yönlendirmeyi Aç</string>
 </resources>

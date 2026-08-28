@@ -444,9 +444,6 @@
     <string name="susfs_status_variant">变体</string>
     <string name="susfs_status_enabled_features">支持功能</string>
     <string name="susfs_status_no_data">无数据</string>
-    <string name="susfs_standard_config_enabled">启用持久化配置</string>
-    <string name="susfs_standard_config_enabled_desc">开机时自动应用已保存的 SUSFS 配置。</string>
-    <string name="susfs_management_disabled_warning">管理器内置 SUSFS 管理已被禁用。</string>
     <string name="susfs_standard_logging">日志</string>
     <string name="susfs_standard_logging_desc">启用 SUSFS 内核日志。在反馈 SUSFS 问题前请启用该开关并复现问题，然后携带日志提问。</string>
     <string name="susfs_standard_avc_log_spoofing">AVC 日志欺骗</string>

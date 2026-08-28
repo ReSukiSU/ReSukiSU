@@ -48,7 +48,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -86,7 +85,6 @@ fun UmountManagerScreen() {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val snackBarHost = LocalSnackbarHost.current
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val confirmDialog = rememberConfirmDialog()
 
@@ -104,7 +102,7 @@ fun UmountManagerScreen() {
         viewModel.events.collectLatest { event ->
             when (event) {
                 is UmountManagerUiEvent.Message ->
-                    snackBarHost.showReplacingSnackbar(context.getString(event.stringResource))
+                    snackBarHost.showReplacingSnackbar(event.message)
             }
         }
     }
