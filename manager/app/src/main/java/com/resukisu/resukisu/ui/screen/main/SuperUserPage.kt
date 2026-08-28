@@ -395,10 +395,18 @@ private fun SuperUserDropdown(
 ) {
     val menuItems = remember(
         uiState.showSystemApps,
+        uiState.reverseOrder,
         onBackupAllowlist,
         onRestoreAllowlist,
     ) {
         listOf(
+            SuperUserMenuItem(
+                checked = uiState.reverseOrder,
+                titleRes = R.string.reverse_order,
+                onClick = {
+                    viewModel.dispatch(SuperUserUiAction.SetReverseOrder(!uiState.reverseOrder))
+                }
+            ),
             SuperUserMenuItem(
                 checked = uiState.showSystemApps,
                 titleRes = R.string.show_system_apps,

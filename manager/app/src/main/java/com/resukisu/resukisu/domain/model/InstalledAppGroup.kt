@@ -6,6 +6,7 @@ data class InstalledApp(
     val uid: Int,
     val isSystem: Boolean = false,
     val firstInstallTime: Long = 0L,
+    val lastUpdateTime: Long = 0L,
 )
 
 data class InstalledAppGroup(

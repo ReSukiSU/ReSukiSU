@@ -73,6 +73,7 @@ class SuperUserRepository(
                         uid = applicationInfo.uid,
                         isSystem = applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0,
                         firstInstallTime = info.firstInstallTime,
+                        lastUpdateTime = info.lastUpdateTime,
                     )
                 }.groupBy(InstalledApp::uid).map { (uid, uidApps) ->
                     val sorted = uidApps.sortedBy(InstalledApp::label)
@@ -186,6 +187,7 @@ class SuperUserRepository(
             uid = info?.uid ?: fallbackUid,
             isSystem = info?.flags?.and(ApplicationInfo.FLAG_SYSTEM) != 0,
             firstInstallTime = firstInstallTime,
+            lastUpdateTime = lastUpdateTime,
         )
     }
 }
