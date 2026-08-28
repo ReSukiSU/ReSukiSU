@@ -7,6 +7,7 @@ import com.resukisu.resukisu.domain.model.AllowlistOperationResult
 import com.resukisu.resukisu.domain.model.InstalledAppGroup
 import com.resukisu.resukisu.domain.usecase.BackupAllowlistUseCase
 import com.resukisu.resukisu.domain.usecase.GetBooleanPreferenceUseCase
+import com.resukisu.resukisu.domain.usecase.GetManagerRuntimeInfoUseCase
 import com.resukisu.resukisu.domain.usecase.GetStringPreferenceUseCase
 import com.resukisu.resukisu.domain.usecase.ImportAllowlistUseCase
 import com.resukisu.resukisu.domain.usecase.ObserveSuperUserStateUseCase
@@ -44,6 +45,7 @@ data class SuperUserUiState(
     val showSystemApps: Boolean = false,
     val currentSortType: SortType = SortType.NAME,
     val reverseOrder: Boolean = false,
+    val managerUids: Set<Int> = emptySet(),
     val isRefreshing: Boolean = false,
 )
 
@@ -83,6 +85,7 @@ class SuperUserViewModel(
     private val setBooleanPreference: SetBooleanPreferenceUseCase,
     private val setStringPreference: SetStringPreferenceUseCase,
     private val transliterateText: TransliterateTextUseCase,
+    private val getManagerRuntimeInfo: GetManagerRuntimeInfoUseCase,
 ) : ViewModel() {
     private val sourceState = observeSuperUserState()
     private val controls = MutableStateFlow(
@@ -99,7 +102,18 @@ class SuperUserViewModel(
     private var refreshJob: Job? = null
     val events: SharedFlow<SuperUserUiEvent> = mutableEvents.asSharedFlow()
 
-    val state: StateFlow<SuperUserUiState> = combine(sourceState, controls) { source, local ->
+    private val managerUids = MutableStateFlow<Set<Int>>(emptySet())
+
+    init {
+        viewModelScope.launch {
+            val info = runCatching { getManagerRuntimeInfo() }.getOrNull()
+            managerUids.value = info?.managers?.map { it.uid }?.toSet().orEmpty()
+        }
+    }
+
+    val state: StateFlow<SuperUserUiState> = combine(
+        sourceState, controls, managerUids,
+    ) { source, local, uids ->
         SuperUserUiState(
             appGroupList = buildAppGroupList(
                 groups = source.groups,
@@ -112,6 +126,7 @@ class SuperUserViewModel(
             showSystemApps = local.showSystemApps,
             currentSortType = local.sortType,
             reverseOrder = local.reverseOrder,
+            managerUids = uids,
             isRefreshing = source.refreshing,
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, SuperUserUiState())
