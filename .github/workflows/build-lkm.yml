@@ -26,6 +26,7 @@ jobs:
           - android14-6.1
           - android15-6.6
           - android16-6.12
+          - android17-6.18
         arch:
           - arm64
           - x86_64
@@ -33,6 +34,5 @@ jobs:
     with:
       kmi: ${{ matrix.kmi }}
       arch: ${{ matrix.arch }}
-      ddk_release: '20260313'
       expected_pr_build_size: ${{ inputs.expected_pr_build_size || '' }}
       expected_pr_build_hash: ${{ inputs.expected_pr_build_hash || '' }}
