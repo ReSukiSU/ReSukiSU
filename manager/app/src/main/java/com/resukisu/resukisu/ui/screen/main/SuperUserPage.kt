@@ -92,7 +92,8 @@ import java.util.Locale
 private data class SuperUserMenuItem(
     val checked: Boolean = false,
     val titleRes: Int,
-    val onClick: () -> Unit
+    val onClick: () -> Unit,
+    val closeOnClick: Boolean = true,
 )
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -357,7 +358,8 @@ private fun SuperUserContent(
                 contentType = { _, appGroup -> "${appGroup.uid}-${appGroup.profileKey}" },
             ) { _, appGroup ->
                 AppGroupItem(
-                    appGroup = appGroup
+                    appGroup = appGroup,
+                    isManager = appGroup.uid in uiState.managerUids,
                 ) {
                     navigator.push(Route.AppProfile(appGroup.uid, appGroup.profileKey))
                 }
@@ -390,6 +392,7 @@ private fun SuperUserDropdown(
             SuperUserMenuItem(
                 checked = uiState.reverseOrder,
                 titleRes = R.string.reverse_order,
+                closeOnClick = false,
                 onClick = {
                     viewModel.dispatch(SuperUserUiAction.SetReverseOrder(!uiState.reverseOrder))
                 }
@@ -397,6 +400,7 @@ private fun SuperUserDropdown(
             SuperUserMenuItem(
                 checked = uiState.showSystemApps,
                 titleRes = R.string.show_system_apps,
+                closeOnClick = false,
                 onClick = {
                     viewModel.dispatch(SuperUserUiAction.SetShowSystemApps(!uiState.showSystemApps))
                 }
@@ -443,7 +447,7 @@ private fun SuperUserDropdown(
                 SelectableDropdownMenuItem(
                     selected = menuItem.checked,
                     onClick = {
-                        onDismissRequest()
+                        if (menuItem.closeOnClick) onDismissRequest()
                         menuItem.onClick()
                     },
                     text = { Text(stringResource(menuItem.titleRes)) },
@@ -461,6 +465,7 @@ private fun SuperUserDropdown(
 @Composable
 private fun AppGroupItem(
     appGroup: InstalledAppGroup,
+    isManager: Boolean,
     onClick: () -> Unit,
 ) {
     val mainApp = appGroup.mainApp
@@ -500,6 +505,12 @@ private fun AppGroupItem(
                     LabelText(
                         label = "DEFAULT",
                         containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                }
+                if (isManager) {
+                    LabelText(
+                        label = "MANAGER",
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
                     )
                 }
                 if (appGroup.apps.size > 1) {
