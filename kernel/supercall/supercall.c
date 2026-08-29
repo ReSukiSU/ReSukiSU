@@ -129,8 +129,9 @@ int ksu_handle_sys_reboot(int magic1, int magic2, unsigned int cmd, void __user 
 }
 
 #ifdef CONFIG_KSU_TRACEPOINT_HOOK
-// Reboot hook for installing fd
-static int reboot_handler_pre(struct kprobe *p, struct pt_regs *regs)
+// The original reboot(2) carrier is retained for existing ksud binaries.
+// New userspace uses prctl(2), which Android app seccomp profiles permit.
+static int supercall_handler_pre(struct kprobe *p, struct pt_regs *regs)
 {
     struct pt_regs *real_regs = PT_REAL_REGS(regs);
     int magic1 = (int)PT_REGS_PARM1(real_regs);
@@ -144,8 +145,15 @@ static int reboot_handler_pre(struct kprobe *p, struct pt_regs *regs)
 
 static struct kprobe reboot_kp = {
     .symbol_name = REBOOT_SYMBOL,
-    .pre_handler = reboot_handler_pre,
+    .pre_handler = supercall_handler_pre,
 };
+
+static struct kprobe prctl_kp = {
+    .symbol_name = PRCTL_SYMBOL,
+    .pre_handler = supercall_handler_pre,
+};
+
+static bool prctl_kp_registered;
 #endif
 
 void __init ksu_supercalls_init(void)
@@ -161,12 +169,22 @@ void __init ksu_supercalls_init(void)
     } else {
         pr_info("reboot kprobe registered successfully\n");
     }
+
+    rc = register_kprobe(&prctl_kp);
+    if (rc) {
+        pr_err("prctl kprobe failed: %d\n", rc);
+    } else {
+        pr_info("prctl kprobe registered successfully\n");
+        prctl_kp_registered = true;
+    }
 #endif
 }
 
 void __exit ksu_supercalls_exit(void)
 {
 #ifdef CONFIG_KSU_TRACEPOINT_HOOK
+    if (prctl_kp_registered)
+        unregister_kprobe(&prctl_kp);
     unregister_kprobe(&reboot_kp);
 #endif
     ksu_supercall_cleanup_state();

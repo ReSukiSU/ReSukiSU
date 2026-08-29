@@ -33,8 +33,12 @@ fn init_driver_fd() -> Option<RawFd> {
     if fd.is_none() {
         let mut fd = -1;
         unsafe {
+            // Android app seccomp profiles reject reboot(2), which was the
+            // original KernelSU supercall carrier. prctl(2) is available to
+            // ordinary app processes and has the same four argument slots
+            // needed by the LKM transport.
             libc::syscall(
-                libc::SYS_reboot,
+                libc::SYS_prctl,
                 uapi::KSU_INSTALL_MAGIC1_RUST,
                 uapi::KSU_INSTALL_MAGIC2_RUST,
                 0,

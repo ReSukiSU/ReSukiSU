@@ -21,6 +21,7 @@
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 16, 0)
 #define REBOOT_SYMBOL "__arm64_sys_reboot"
+#define PRCTL_SYMBOL "__arm64_sys_prctl"
 #define SYS_READ_SYMBOL "__arm64_sys_read"
 #define SYS_EXECVE_SYMBOL "__arm64_sys_execve"
 #define SYS_SETNS_SYMBOL __arm64_sys_setns
@@ -29,6 +30,7 @@
 #define SYS_FSTAT_SYMBOL "__arm64_sys_newfstat"
 #else
 #define REBOOT_SYMBOL "sys_reboot"
+#define PRCTL_SYMBOL "sys_prctl"
 #define SYS_READ_SYMBOL "sys_read"
 #define SYS_EXECVE_SYMBOL "sys_execve"
 #define SYS_SETNS_SYMBOL sys_setns
@@ -54,12 +56,14 @@
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 16, 0)
 #define REBOOT_SYMBOL "__x64_sys_reboot"
+#define PRCTL_SYMBOL "__x64_sys_prctl"
 #define SYS_READ_SYMBOL "__x64_sys_read"
 #define SYS_EXECVE_SYMBOL "__x64_sys_execve"
 #define SYS_SETNS_SYMBOL __x64_sys_setns
 #define SYS_FSTAT_SYMBOL "__x64_sys_newfstat"
 #else
 #define REBOOT_SYMBOL "sys_reboot"
+#define PRCTL_SYMBOL "sys_prctl"
 #define SYS_READ_SYMBOL "sys_read"
 #define SYS_EXECVE_SYMBOL "sys_execve"
 #define SYS_SETNS_SYMBOL sys_setns
