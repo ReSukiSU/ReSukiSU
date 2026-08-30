@@ -149,21 +149,18 @@ fun OpenSourceLicenseScreen() {
                 .blurSource(),
             contentPadding = paddingValues,// PaddingValues(horizontal = 16.dp),
             colors = LibraryDefaults.libraryColors(
-                libraryBackgroundColor = if (themeConfig.isEnableBlurExp) Color.Transparent else MaterialTheme.colorScheme.surfaceBright.copy(
-                    alpha = cardConfig.cardAlpha
-                ),
+                libraryBackgroundColor = Color.Transparent,
                 libraryContentColor = MaterialTheme.colorScheme.onSurface,
-                // To maintain the original appearance, explicitly set the license chip colors
-                // to match the old function's default badge colors.
-                licenseChipColors = LibraryDefaults.chipColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = contentColorFor(MaterialTheme.colorScheme.primary)
                 )
             ),
             // v15's TraditionalRow draws an opaque `rowBackground` via drawBehind, which covers
             // renderBackgroundBlur. Set rowBackground to transparent when blur is enabled.
             variantColors = LibraryDefaults.m3VariantColors(
-                rowBackground = if (themeConfig.isEnableBlurExp) Color.Transparent else MaterialTheme.colorScheme.surface,
+                rowBackground = if (themeConfig.isEnableBlurExp) Color.Transparent else MaterialTheme.colorScheme.surfaceBright.copy(
+                    alpha = cardConfig.cardAlpha
+                ),
+                licenseBadgeContainer = MaterialTheme.colorScheme.primary,
+                licenseBadgeContent = contentColorFor(MaterialTheme.colorScheme.primary)
             ),
             // v15 removed `libraryModifier`; use the `libraryRow` slot to wrap the default
             // LibraryRow with the equivalent per-item modifier (padding + clip + blur).
