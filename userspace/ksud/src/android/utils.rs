@@ -5,7 +5,7 @@ use std::{
     fs::{File, OpenOptions, Permissions, create_dir_all, remove_file, set_permissions, write},
     io::{
         ErrorKind::{AlreadyExists, NotFound},
-        Write,
+        Read, Seek, Write,
     },
     path::{Path, PathBuf},
     process::Command,
@@ -163,8 +163,11 @@ pub fn is_safe_mode() -> bool {
     safemode
 }
 
-pub fn get_zip_uncompressed_size(zip_path: &str) -> Result<u64> {
-    let mut zip = zip::ZipArchive::new(std::fs::File::open(zip_path)?)?;
+/// Calculate the total uncompressed size of all entries in an open archive.
+pub fn get_zip_uncompressed_size<R>(zip: &mut zip::ZipArchive<R>) -> Result<u64>
+where
+    R: Read + Seek,
+{
     let total = (0..zip.len())
         .map(|i| zip.by_index(i).map(|f| f.size()))
         .sum::<zip::result::ZipResult<u64>>()?;
