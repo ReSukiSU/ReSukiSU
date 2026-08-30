@@ -181,12 +181,12 @@ class SuperUserViewModel(
         .filter { group ->
             group.apps.any { app ->
                 app.label.contains(search, true) ||
-                        app.packageName.contains(search, true) ||
+                        app.displayIdentifier.contains(search, true) ||
                         transliterateText(app.label).contains(search, true)
             }
         }
         .filter { group ->
-            group.uid == 2000 || showSystemApps || group.apps.any { !it.isSystem }
+            group.isWebViewZygote || group.uid == 2000 || showSystemApps || group.apps.any { !it.isSystem }
         }
         .sortedWith { first, second ->
             val priority = groupPriority(first).compareTo(groupPriority(second))

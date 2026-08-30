@@ -319,28 +319,6 @@ fun SettingsPage(bottomPadding: Dp) {
                             }
 
                             item {
-                                val webViewUmountSummary = when (uiState.webViewZygoteUmountStatus) {
-                                    "unsupported" -> stringResource(id = R.string.feature_status_unsupported_summary)
-                                    "managed" -> stringResource(id = R.string.feature_status_managed_summary)
-                                    else -> stringResource(id = R.string.settings_webview_zygote_umount_summary)
-                                }
-                                SettingsSwitchWidget(
-                                    icon = Icons.TwoTone.Language,
-                                    title = stringResource(id = R.string.settings_webview_zygote_umount),
-                                    description = webViewUmountSummary,
-                                    enabled = uiState.webViewZygoteUmountStatus == "supported",
-                                    checked = uiState.isWebViewZygoteUmountEnabled,
-                                    onCheckedChange = { checked ->
-                                        settingsViewModel.dispatch(
-                                            SettingsUiAction.SetWebViewZygoteUmountEnabled(
-                                                checked
-                                            )
-                                        )
-                                    },
-                                )
-                            }
-
-                            item {
                                 val selinuxHideSummary = when (uiState.selinuxHideStatus) {
                                     "unsupported" -> stringResource(id = R.string.feature_status_unsupported_summary)
                                     "managed" -> stringResource(id = R.string.feature_status_managed_summary)

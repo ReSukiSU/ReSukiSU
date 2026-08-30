@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.resukisu.resukisu.domain.model.AppControlAction
 import com.resukisu.resukisu.domain.model.AppProfile
 import com.resukisu.resukisu.domain.model.InstalledAppGroup
+import com.resukisu.resukisu.domain.model.WEBVIEW_ZYGOTE_UID
 import com.resukisu.resukisu.domain.usecase.ControlAppUseCase
 import com.resukisu.resukisu.domain.usecase.GetAppProfileUseCase
 import com.resukisu.resukisu.domain.usecase.GetAppSepolicyUseCase
@@ -76,7 +77,10 @@ class AppProfileViewModel(
                 mutableState.update { it.copy(isLoading = true) }
                 runCatching {
                     val profile = getProfile(packageName, uid)
-                    val loadedProfile = if (profile.allowSu) {
+                    val isSpecial = uid == WEBVIEW_ZYGOTE_UID
+                    val loadedProfile = if (isSpecial) {
+                        profile.copy(allowSu = false)
+                    } else if (profile.allowSu) {
                         profile.copy(
                             rules = runCatching { getSepolicy(packageName) }
                                 .getOrDefault(profile.rules)
@@ -105,29 +109,37 @@ class AppProfileViewModel(
 
             is AppProfileUiAction.Save -> {
                 val previous = mutableState.value.profile
-                mutableState.update { it.copy(profile = action.profile) }
+                val isSpecial = uid == WEBVIEW_ZYGOTE_UID
+                val profileToSave = if (isSpecial) {
+                    action.profile.copy(allowSu = false)
+                } else {
+                    action.profile
+                }
+                mutableState.update { it.copy(profile = profileToSave) }
                 viewModelScope.launch {
                     saveMutex.withLock {
-                        val sepolicyKey = action.profile.rootTemplate ?: action.profile.name
-                        if (action.profile.allowSu && !action.profile.rootUseDefault &&
-                            action.profile.rules.isNotEmpty() &&
-                            !setSepolicy(sepolicyKey, action.profile.rules)
-                        ) {
-                            rollbackIfCurrent(action.profile, previous)
-                            mutableEvents.emit(AppProfileUiEvent.SepolicyUpdateFailed)
-                            return@withLock
+                        if (!isSpecial) {
+                            val sepolicyKey = profileToSave.rootTemplate ?: profileToSave.name
+                            if (profileToSave.allowSu && !profileToSave.rootUseDefault &&
+                                profileToSave.rules.isNotEmpty() &&
+                                !setSepolicy(sepolicyKey, profileToSave.rules)
+                            ) {
+                                rollbackIfCurrent(profileToSave, previous)
+                                mutableEvents.emit(AppProfileUiEvent.SepolicyUpdateFailed)
+                                return@withLock
+                            }
                         }
-                        runCatching { setProfile(action.profile) }
+                        runCatching { setProfile(profileToSave) }
                             .onSuccess { saved ->
                                 if (saved) {
                                     mutableEvents.tryEmit(AppProfileUiEvent.Saved)
                                 } else {
-                                    rollbackIfCurrent(action.profile, previous)
+                                    rollbackIfCurrent(profileToSave, previous)
                                     mutableEvents.tryEmit(AppProfileUiEvent.Error())
                                 }
                             }
                             .onFailure {
-                                rollbackIfCurrent(action.profile, previous)
+                                rollbackIfCurrent(profileToSave, previous)
                                 mutableEvents.tryEmit(AppProfileUiEvent.Error(it))
                             }
                     }

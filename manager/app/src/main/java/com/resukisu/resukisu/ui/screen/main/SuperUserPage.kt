@@ -363,13 +363,13 @@ private fun SuperUserContent(
             }
             lazySegmentColumn(
                 items = uiState.appGroupList,
-                key = { _, appGroup -> "${appGroup.uid}-${appGroup.mainApp.packageName}" },
+                key = { _, appGroup -> "${appGroup.uid}-${appGroup.profileKey}" },
                 contentType = { _, _ -> "AppGroupItem" }
             ) { _, appGroup ->
                 AppGroupItem(
                     appGroup = appGroup
                 ) {
-                    navigator.push(Route.AppProfile(appGroup.uid, appGroup.mainApp.packageName))
+                    navigator.push(Route.AppProfile(appGroup.uid, appGroup.profileKey))
                 }
             }
 
@@ -477,7 +477,7 @@ private fun AppGroupItem(
         description = if (appGroup.apps.size > 1) {
             stringResource(R.string.group_contains_apps, appGroup.apps.size)
         } else {
-            mainApp.packageName
+            mainApp.displayIdentifier
         },
         descriptionColumnContent = {
             Spacer(modifier = Modifier.height(5.dp))
@@ -525,7 +525,7 @@ private fun AppGroupItem(
         },
         leadingContent = {
             PackageIcon(
-                packageName = mainApp.packageName,
+                packageName = if (appGroup.isWebViewZygote) "android" else mainApp.packageName,
                 contentDescription = mainApp.label,
                 modifier = Modifier
                     .padding(4.dp)

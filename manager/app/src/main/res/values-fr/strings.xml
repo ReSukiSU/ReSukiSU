@@ -535,8 +535,6 @@
     <string name="susfs_backup_import_label">Importer</string>
     <string name="susfs_backup_restore_default">Configuration par défaut</string>
     <string name="susfs_backup_restore_default_desc">Supprime la configuration SuSFS actuelle et restaure la configuration par défaut</string>
-    <string name="susfs_redirect_important_notes">Remarques importantes :\n• Les chemins cible et redirigé doivent exister avant l’ajout d’une entrée\n• les permissions SELinux pour les deux chemins doivent être configurées.\n• La redirection affecte uniquement les processus correspondant au schéma d\'UID sélectionné.</string>
-    <string name="settings_webview_zygote_umount_summary">Empêche les fuites d\'informations du processus WebView, mais peut causer le dysfonctionnement de certains modules. Redémarrer pour appliquer les modifications</string>
-    <string name="settings_webview_zygote_umount">Démontage pour WebView</string>
-    <string name="about_anime_character_sticker"><![CDATA[Les icônes sont régies par un accord de licence spécifique : dessinées par 怡子曰曰, elles sont la propriété intellectuelle de 明风 OuO, et leurs versions vectorisées sont fournies par ce projet.]]></string>
+    <string name="susfs_redirect_important_notes">Remarques importantes :\n• Les chemins cible et redirigé doivent exister avant l’ajout d’une entrée\n• les permissions SELinux pour les deux chemins doivent être configurées.\n• La redirection affecte uniquement les processus correspondant au schéma d\'UID sélectionné.</string>
+    <string name="about_anime_character_sticker"><![CDATA[Les icônes sont régies par un accord de licence spécifique : dessinées par 怡子曰曰, elles sont la propriété intellectuelle de 明风 OuO, et leurs versions vectorisées sont fournies par ce projet.]]></string>
 </resources>

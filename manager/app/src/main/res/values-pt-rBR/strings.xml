@@ -222,8 +222,6 @@
     <string name="home_android_version">Versão do Android</string>
     <string name="home_device_model">Modelo do dispositivo</string>
     <string name="su_not_allowed">Não é permitido conceder privilégios de superusuário a %s</string>
-    <string name="settings_webview_zygote_umount">Desmontar para WebView</string>
-    <string name="settings_webview_zygote_umount_summary">Impede o vazamento de informações do processo WebView, mas pode causar problemas em alguns módulos. Reinicie o sistema para aplicar as alterações</string>
     <string name="feature_status_unsupported_summary">O kernel não suporta essa funcionalidade</string>
     <string name="settings_mode_disable_until_reboot">Desativar até a reinicialização</string>
     <string name="settings_mode_disable_always">Desativar sempre</string>
