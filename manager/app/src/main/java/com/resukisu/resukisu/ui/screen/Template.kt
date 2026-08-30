@@ -403,7 +403,6 @@ private fun TopBar(
                         shapes = MenuDefaults.groupShapes()
                     ) {
                         DropdownMenuItem(
-                            selected = false,
                             text = {
                                 Text(stringResource(id = R.string.app_profile_import_from_clipboard))
                             },
@@ -411,10 +410,8 @@ private fun TopBar(
                                 onImport()
                                 showDropdown = false
                             },
-                            shapes = MenuDefaults.itemShape(index = 0, count = 2)
                         )
                         DropdownMenuItem(
-                            selected = false,
                             text = {
                                 Text(stringResource(id = R.string.app_profile_export_to_clipboard))
                             },
@@ -422,7 +419,6 @@ private fun TopBar(
                                 onExport()
                                 showDropdown = false
                             },
-                            shapes = MenuDefaults.itemShape(index = 1, count = 2)
                         )
                     }
                 }
