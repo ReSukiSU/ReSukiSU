@@ -151,7 +151,6 @@ fun OpenSourceLicenseScreen() {
             colors = LibraryDefaults.libraryColors(
                 libraryBackgroundColor = Color.Transparent,
                 libraryContentColor = MaterialTheme.colorScheme.onSurface,
-                )
             ),
             // v15's TraditionalRow draws an opaque `rowBackground` via drawBehind, which covers
             // renderBackgroundBlur. Set rowBackground to transparent when blur is enabled.
