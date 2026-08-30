@@ -44,7 +44,37 @@ fn dump_process_info(label: &str) {
     );
 }
 
-pub fn run(package_name: &String, kmi: Option<String>, allow_shell: bool) -> Result<()> {
+fn manager_base_apk_path(pm_output: &str) -> Option<String> {
+    let paths = pm_output
+        .lines()
+        .filter_map(|line| line.strip_prefix("package:"));
+    let paths: Vec<_> = paths.collect();
+    paths
+        .iter()
+        .find(|path| path.ends_with("/base.apk"))
+        .or_else(|| paths.first())
+        .map(|path| (*path).to_owned())
+}
+
+fn manager_base_apk(package_name: &str) -> Result<String> {
+    let output = Command::new("pm")
+        .args(["path", package_name])
+        .output()
+        .with_context(|| format!("failed to query manager package {package_name}"))?;
+    if !output.status.success() {
+        anyhow::bail!("pm path {package_name} exited with {}", output.status);
+    }
+
+    let output = String::from_utf8(output.stdout).context("manager package path was not UTF-8")?;
+    manager_base_apk_path(&output).context("manager package has no APK path")
+}
+
+pub fn run(
+    package_name: &String,
+    kmi: Option<String>,
+    allow_shell: bool,
+    register_manager: bool,
+) -> Result<()> {
     utils::daemonize(false)?;
     info!("late-load command triggered!");
     dump_process_info("late-load start");
@@ -88,6 +118,22 @@ pub fn run(package_name: &String, kmi: Option<String>, allow_shell: bool) -> Res
     }
 
     utils::install(None).context("Failed to install ksud")?;
+
+    if register_manager {
+        // Register the manager before its restart below. That restart is the point
+        // at which KernelSU injects the per-process driver fd, avoiding a fallback
+        // supercall from the app's seccomp-confined process.
+        match manager_base_apk(package_name) {
+            Ok(apk) => {
+                if let Err(e) = dynamic_manager::set_apk(&apk) {
+                    warn!("set dynamic manager for {package_name} failed: {e}");
+                } else {
+                    info!("registered dynamic manager {package_name}");
+                }
+            }
+            Err(e) => warn!("find manager APK for {package_name} failed: {e}"),
+        }
+    }
 
     // 5. Handle module updates
     if let Err(e) = handle_updated_modules() {
@@ -152,4 +198,21 @@ pub fn run(package_name: &String, kmi: Option<String>, allow_shell: bool) -> Res
         .status();
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::manager_base_apk_path;
+
+    #[test]
+    fn manager_base_apk_path_prefers_base_apk_over_splits() {
+        let output = concat!(
+            "package:/data/app/example/split_config.arm64_v8a.apk\n",
+            "package:/data/app/example/base.apk\n",
+        );
+        assert_eq!(
+            manager_base_apk_path(output).as_deref(),
+            Some("/data/app/example/base.apk"),
+        );
+    }
 }

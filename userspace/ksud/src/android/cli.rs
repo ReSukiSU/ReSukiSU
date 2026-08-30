@@ -79,6 +79,10 @@ enum Commands {
         /// manager package name
         #[arg(long, default_value_t = String::from("com.resukisu.resukisu"))]
         package_name: String,
+
+        /// Register the installed manager APK before restarting it
+        #[arg(long)]
+        register_manager: bool,
     },
 
     /// Manage auto apply user custom umount configs
@@ -724,15 +728,22 @@ pub fn run() -> Result<()> {
             post_magica,
             kmi,
             package_name,
+            register_manager,
         } => {
             if let Some(port) = magica {
-                return crate::android::late_load::magica::run(port, &package_name, allow_shell)
-                    .map_err(|e| {
-                        error!("Error running magica: {e}");
-                        e
-                    });
+                return crate::android::late_load::magica::run(
+                    port,
+                    &package_name,
+                    allow_shell,
+                    register_manager,
+                )
+                .map_err(|e| {
+                    error!("Error running magica: {e}");
+                    e
+                });
             }
-            let result = crate::android::late_load::run(&package_name, kmi, allow_shell);
+            let result =
+                crate::android::late_load::run(&package_name, kmi, allow_shell, register_manager);
             if post_magica {
                 info!("Restoring adb properties (post-magica cleanup)...");
                 if let Err(e) = crate::android::late_load::magica::disable_adb_root() {
@@ -894,16 +905,7 @@ pub fn run() -> Result<()> {
                     }
                     Ok(())
                 }
-                DynamicManagerOp::SetApk { apk } => {
-                    let sign = apk_sign::get_apk_signature(&apk)?;
-
-                    let bytes = sign.1.as_bytes();
-
-                    let mut hash = [0u8; 64];
-                    hash.copy_from_slice(bytes);
-
-                    dynamic_manager::set(sign.0, hash)
-                }
+                DynamicManagerOp::SetApk { apk } => dynamic_manager::set_apk(&apk),
                 DynamicManagerOp::Clear => dynamic_manager::clear(),
             },
             Kernel::NotifyModuleMounted => {

@@ -3,7 +3,7 @@ use std::fs;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::{android::ksucalls, defs};
+use crate::{android::ksucalls, apk_sign, defs};
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Config {
@@ -74,4 +74,13 @@ pub fn set(size: u32, hash: [u8; 64]) -> Result<()> {
 
     ksucalls::dynamic_manager_set_synchronous(size, hash)?;
     Ok(())
+}
+
+pub fn set_apk(apk: &str) -> Result<()> {
+    let (size, hash) = apk_sign::get_apk_signature(apk)?;
+    let hash: [u8; 64] = hash
+        .as_bytes()
+        .try_into()
+        .map_err(|_| anyhow::anyhow!("dynamic manager signature has an invalid length"))?;
+    set(size, hash)
 }
