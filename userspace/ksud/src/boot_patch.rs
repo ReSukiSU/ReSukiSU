@@ -817,9 +817,6 @@ pub fn patch(args: BootPatchArgs) -> Result<()> {
             if ota {
                 post_ota()?;
             }
-            if ota {
-                post_ota()?;
-            }
         }
 
         #[cfg(target_os = "android")]
