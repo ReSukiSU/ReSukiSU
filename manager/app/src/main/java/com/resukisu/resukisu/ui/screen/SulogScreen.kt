@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.twotone.DeleteSweep
 import androidx.compose.material.icons.twotone.FilterList
 import androidx.compose.material3.AlertDialog
@@ -211,16 +212,14 @@ private fun SulogScreenContent(
 
                                 SulogEventFilter.entries.forEachIndexed { index, filter ->
                                     DropdownMenuItem(
-                                        selected = filter in state.selectedFilters,
                                         text = { Text(sulogFilterLabel(filter)) },
                                         onClick = {
                                             haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
                                             actions.onToggleFilter(filter)
                                         },
-                                        shapes = MenuDefaults.itemShape(
-                                            index = index,
-                                            count = SulogEventFilter.entries.size
-                                        )
+                                        trailingIcon = {
+                                            if (filter in state.selectedFilters) Icon(Icons.Default.Check, contentDescription = null)
+                                        },
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                 }

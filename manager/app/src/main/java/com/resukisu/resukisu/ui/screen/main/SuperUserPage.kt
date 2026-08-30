@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.Article
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.twotone.Archive
 import androidx.compose.material.icons.twotone.ChevronRight
 import androidx.compose.material.icons.twotone.MoreVert
@@ -426,15 +427,13 @@ private fun SuperUserDropdown(
         ) {
             SortType.entries.forEachIndexed { index, sortType ->
                 DropdownMenuItem(
-                    selected = uiState.currentSortType == sortType,
                     text = { Text(stringResource(sortType.displayNameRes)) },
                     onClick = {
                         viewModel.dispatch(SuperUserUiAction.SetSort(sortType))
                     },
-                    shapes = MenuDefaults.itemShape(
-                        index = index,
-                        count = SortType.entries.size,
-                    ),
+                    trailingIcon = {
+                        if (uiState.currentSortType == sortType) Icon(Icons.Default.Check, contentDescription = null)
+                    },
                 )
             }
         }
@@ -446,16 +445,14 @@ private fun SuperUserDropdown(
         ) {
             menuItems.forEachIndexed { index, menuItem ->
                 DropdownMenuItem(
-                    selected = menuItem.checked,
                     text = { Text(stringResource(menuItem.titleRes)) },
                     onClick = {
                         onDismissRequest()
                         menuItem.onClick()
                     },
-                    shapes = MenuDefaults.itemShape(
-                        index = index,
-                        count = menuItems.size,
-                    ),
+                    trailingIcon = {
+                        if (menuItem.checked) Icon(Icons.Default.Check, contentDescription = null)
+                    },
                 )
             }
         }

@@ -54,6 +54,9 @@ import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.m3.chipColors
 import com.mikepenz.aboutlibraries.ui.compose.m3.libraryColors
+import com.mikepenz.aboutlibraries.ui.compose.m3.style.m3VariantColors
+import com.mikepenz.aboutlibraries.ui.compose.style.LibrariesStyle
+import com.mikepenz.aboutlibraries.ui.compose.variant.LibraryRow
 import com.mikepenz.aboutlibraries.util.withJson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -65,6 +68,7 @@ import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
+import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
 import org.koin.compose.koinInject
 
 
@@ -136,6 +140,7 @@ fun OpenSourceLicenseScreen() {
             )
         },
     ) { paddingValues ->
+        val cornerRadius = 16.dp
         LibrariesContainer(
             libraries = libraries,
             modifier = Modifier
@@ -155,8 +160,28 @@ fun OpenSourceLicenseScreen() {
                     contentColor = contentColorFor(MaterialTheme.colorScheme.primary)
                 )
             ),
+            // v15's TraditionalRow draws an opaque `rowBackground` via drawBehind, which covers
+            // renderBackgroundBlur. Set rowBackground to transparent when blur is enabled.
+            variantColors = LibraryDefaults.m3VariantColors(
+                rowBackground = if (themeConfig.isEnableBlurExp) Color.Transparent else MaterialTheme.colorScheme.surface,
+            ),
+            // v15 removed `libraryModifier`; use the `libraryRow` slot to wrap the default
+            // LibraryRow with the equivalent per-item modifier (padding + clip + blur).
+            libraryRow = { _, library, expanded, toggle, style ->
+                LibraryRow(
+                    library = library,
+                    expanded = expanded,
+                    onToggle = toggle,
+                    style = style,
+                    modifier = Modifier
+                        .padding(vertical = 4.dp)
+                        .clip(RoundedCornerShape(cornerRadius))
+                        .renderBackgroundBlur(),
+                )
+            },
             onLibraryClick = { library ->
                 selectedLibrary = library
+                true
             }
         )
 

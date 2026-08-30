@@ -34,6 +34,7 @@ datastore = "1.2.1"
 benchmark = "1.5.0-rc02"
 profileinstaller = "1.4.1"
 koin-bom = "4.2.2"
+material3 = "1.4.0"
 
 [plugins]
 agp-app = { id = "com.android.application", version.ref = "agp" }
@@ -113,4 +114,5 @@ androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profi
 # Core module (required for accessing library data)
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibraries" }
 # Compose UI modules (choose one or both)
-aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" } # Material 3 UI
+aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" } # Material 3 UI

@@ -500,30 +500,26 @@ private fun ModuleDropdown(
             shapes = MenuDefaults.groupShapes(),
         ) {
             DropdownMenuItem(
-                checked = uiState.sortActionFirst,
-                onCheckedChange = { checked ->
+                onClick = {
                     viewModel.dispatch(
-                        ModuleUiAction.Sort(uiState.sortEnabledFirst, checked)
+                        ModuleUiAction.Sort(uiState.sortEnabledFirst, !uiState.sortActionFirst)
                     )
                 },
                 text = { Text(stringResource(R.string.module_sort_action_first)) },
-                shapes = MenuDefaults.itemShape(
-                    index = 0,
-                    count = 2,
-                ),
+                trailingIcon = {
+                    if (uiState.sortActionFirst) Icon(Icons.TwoTone.Check, contentDescription = null)
+                },
             )
             DropdownMenuItem(
-                checked = uiState.sortEnabledFirst,
-                onCheckedChange = { checked ->
+                onClick = {
                     viewModel.dispatch(
-                        ModuleUiAction.Sort(checked, uiState.sortActionFirst)
+                        ModuleUiAction.Sort(!uiState.sortEnabledFirst, uiState.sortActionFirst)
                     )
                 },
                 text = { Text(stringResource(R.string.module_sort_enabled_first)) },
-                shapes = MenuDefaults.itemShape(
-                    index = 1,
-                    count = 2,
-                ),
+                trailingIcon = {
+                    if (uiState.sortEnabledFirst) Icon(Icons.TwoTone.Check, contentDescription = null)
+                },
             )
         }
     }
