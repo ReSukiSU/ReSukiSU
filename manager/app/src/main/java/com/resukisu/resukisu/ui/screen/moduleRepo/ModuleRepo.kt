@@ -33,8 +33,8 @@ import androidx.compose.material.icons.twotone.Extension
 import androidx.compose.material.icons.twotone.MoreVert
 import androidx.compose.material.icons.twotone.Star
 import androidx.compose.material.icons.twotone.WebAsset
+import androidx.compose.material3.CheckableDropdownMenuItem
 import androidx.compose.material3.DropdownMenuGroup
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -304,14 +304,19 @@ private fun ModuleRepoDropdown(
         DropdownMenuGroup(
             shapes = MenuDefaults.groupShapes(),
         ) {
-            DropdownMenuItem(
-                onClick = {
-                    viewModel.dispatch(ModuleRepoUiAction.SetStarsFirst(!uiState.sortStargazerCountFirst))
+            CheckableDropdownMenuItem(
+                checked = uiState.sortStargazerCountFirst,
+                onCheckedChange = {
+                    viewModel.dispatch(ModuleRepoUiAction.SetStarsFirst(it))
                 },
                 text = { Text(stringResource(R.string.module_sort_star_first)) },
-                trailingIcon = {
+                trailingContent = {
                     if (uiState.sortStargazerCountFirst) Icon(Icons.Default.Check, contentDescription = null)
                 },
+                shapes = MenuDefaults.itemShape(
+                    index = 0,
+                    count = 1,
+                ),
             )
         }
     }
