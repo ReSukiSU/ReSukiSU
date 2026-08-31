@@ -57,7 +57,6 @@
     <string name="reboot_download">Перезагрузить в Download</string>
     <string name="reboot_edl">Перезагрузить в EDL</string>
     <string name="about">О приложении</string>
-    <string name="about_anime_character_sticker"><![CDATA[Иконки лицензированы особым образом: рисунок — 怡子曰曰, авторское право принадлежит 明风 OuO, векторизованные иконки предоставлены этим проектом.]]></string>
     <string name="get_source_code">Проверить исходный код</string>
     <string name="get_source_code_detail">Проверить исходные код на GitHub</string>
     <string name="join_telegram_group">Присоединиться к сообществу</string>

@@ -34,7 +34,6 @@
     <string name="reboot_download">Khởi động lại vào Download</string>
     <string name="reboot_edl">Khởi động lại vào EDL</string>
     <string name="about">Thông tin</string>
-    <string name="about_anime_character_sticker"><![CDATA[Các biểu tượng được cấp phép theo một hình thức đặc biệt: hình vẽ của 怡子曰曰, bản quyền thuộc về 明风 OuO, và các biểu tượng vector do dự án này cung cấp.]]></string>
     <string name="get_source_code">Kiểm tra mã nguồn</string>
     <string name="get_source_code_detail">Kiểm tra mã nguồn trên GitHub</string>
     <string name="join_telegram_group">Tham gia cộng đồng</string>
