@@ -172,9 +172,9 @@ base {
     )
 }
 
-configurations.all {
+/*configurations.all {
     exclude(group = "androidx.navigationevent", module = "navigationevent-compose")
-}
+}*/
 
 aboutLibraries {
     library {
@@ -217,14 +217,14 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+    // implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 
-    implementation(libs.androidx.navigation3.runtime)
+    // implementation(libs.androidx.navigation3.runtime)
     implementation(libs.miuix.blur)
     implementation(libs.miuix.nav)
-    implementation(libs.androidx.navigationevent) {
+    /*implementation(libs.androidx.navigationevent) {
         exclude(group = "androidx.navigation", module = "navigationevent-compose")
-    }
+    }*/
 
     implementation(libs.aboutlibraries.core)
     implementation(libs.aboutlibraries.compose.m3)
