@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.Article
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.SelectableDropdownMenuItem
 import androidx.compose.material.icons.twotone.Archive
 import androidx.compose.material.icons.twotone.ChevronRight
 import androidx.compose.material.icons.twotone.MoreVert
@@ -426,14 +427,19 @@ private fun SuperUserDropdown(
             shapes = MenuDefaults.groupShapes(),
         ) {
             SortType.entries.forEachIndexed { index, sortType ->
-                DropdownMenuItem(
-                    text = { Text(stringResource(sortType.displayNameRes)) },
+                SelectableDropdownMenuItem(
+                    selected = uiState.currentSortType == sortType,
                     onClick = {
                         viewModel.dispatch(SuperUserUiAction.SetSort(sortType))
                     },
-                    trailingIcon = {
+                    text = { Text(stringResource(sortType.displayNameRes)) },
+                    trailingContent = {
                         if (uiState.currentSortType == sortType) Icon(Icons.Default.Check, contentDescription = null)
                     },
+                    shapes = MenuDefaults.itemShape(
+                        index = index,
+                        count = SortType.entries.size,
+                    ),
                 )
             }
         }
@@ -444,15 +450,20 @@ private fun SuperUserDropdown(
             shapes = MenuDefaults.groupShapes(),
         ) {
             menuItems.forEachIndexed { index, menuItem ->
-                DropdownMenuItem(
-                    text = { Text(stringResource(menuItem.titleRes)) },
+                SelectableDropdownMenuItem(
+                    selected = menuItem.checked,
                     onClick = {
                         onDismissRequest()
                         menuItem.onClick()
                     },
-                    trailingIcon = {
+                    text = { Text(stringResource(menuItem.titleRes)) },
+                    trailingContent = {
                         if (menuItem.checked) Icon(Icons.Default.Check, contentDescription = null)
                     },
+                    shapes = MenuDefaults.itemShape(
+                        index = index,
+                        count = menuItems.size,
+                    ),
                 )
             }
         }

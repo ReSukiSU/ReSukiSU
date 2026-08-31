@@ -5,12 +5,12 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.DropdownMenuGroup
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.SelectableDropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -84,17 +84,23 @@ fun SettingsDropdownWidget(
                     data.forEachIndexed { index, item ->
                         val isSelected = index == choice
 
-                        // Utilize the selectable variation of DropdownMenuItem
-                        // MenuDefaults.itemShape(index, count) automatically handles the shapes
-                        DropdownMenuItem(
+                        // SelectableDropdownMenuItem handles selected-state color semantics.
+                        // MenuDefaults.itemShape(index, count) provides the per-position corner
+                        // radii for traditional group-shaped menus.
+                        SelectableDropdownMenuItem(
+                            selected = isSelected,
                             onClick = {
                                 onChoiceChange(index)
                                 expanded = false
                             },
                             text = { Text(text = item) },
-                            trailingIcon = {
+                            trailingContent = {
                                 if (isSelected) Icon(Icons.Default.Check, contentDescription = null)
                             },
+                            shapes = MenuDefaults.itemShape(
+                                index = index,
+                                count = data.size
+                            ),
                         )
                     }
                 }
