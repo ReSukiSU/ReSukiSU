@@ -403,6 +403,7 @@ private fun TopBar(
                         shapes = MenuDefaults.groupShapes()
                     ) {
                         DropdownMenuItem(
+                            shape = MenuDefaults.itemShape(0, 2).shape,
                             text = {
                                 Text(stringResource(id = R.string.app_profile_import_from_clipboard))
                             },
@@ -412,6 +413,7 @@ private fun TopBar(
                             },
                         )
                         DropdownMenuItem(
+                            shape = MenuDefaults.itemShape(1, 2).shape,
                             text = {
                                 Text(stringResource(id = R.string.app_profile_export_to_clipboard))
                             },
