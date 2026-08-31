@@ -58,7 +58,7 @@
     <string name="reboot_download">Download moduna yeniden başlat</string>
     <string name="reboot_edl">EDL moduna yeniden başlat</string>
     <string name="about">Hakkında</string>
-    <string name="about_anime_character_sticker"><![CDATA[图标以特别的形式授权，怡子曰曰绘制，版权明风OuO所有。矢量化图标由本项目提供。]]></string>
+    <string name="about_anime_character_sticker"><![CDATA[Simgeler özel bir şekilde lisanslanmıştır: çizim 怡子曰曰, telif hakkı 明风 OuO'ye aittir, vektörleştirilmiş simgeler bu proje tarafından sağlanmıştır.]]></string>
     <string name="get_source_code">Kaynak kodunu görüntüle</string>
     <string name="get_source_code_detail">GitHub üzerinden kaynak kodunu görüntüle</string>
     <string name="join_telegram_group">Topluluğa katıl</string>

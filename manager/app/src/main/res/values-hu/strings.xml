@@ -510,7 +510,7 @@
     <string name="susfs_redirect_uid_schemes_description">UID sémák:\n0: Nem applikáció folyamatok (UID &lt; 10000)\n1: UID 0 root felhatalmazott folyamatok amelyek a KernelSU implementáció tartományán kívül esnek.\n2: Minden nem SU folyamat (elővigyázatosság szükséges)\n3: Leválasztott applikáció folyamatok de UID ≥ 10000 (elővigyázatosság szükséges)\n4: Minden leválasztott folyamat, beleértve a legtöbb init parancs által indított folyamatot (elővigyázatosság szükséges)</string>
     <string name="susfs_redirect_description">UID sémát követő folyamatok által lehívott útvonalak felhasználó által megadott színlelt könyvtárra mutató célútvonalra való reaktív átvezetése.</string>
     <string name="susfs_tab_open_redirect">Reaktív Átvezetés</string>
-    <string name="about_anime_character_sticker"><![CDATA[图标以特别的形式授权，怡子曰曰绘制，版权明风OuO所有。矢量化图标由本项目提供。]]></string>
+    <string name="about_anime_character_sticker"><![CDATA[Az ikonok különleges módon licenceltek: a rajz 怡子曰曰 munkája, a szerzői jog 明风 OuO-t illeti, a vektorizált ikonokat pedig ez a projekt biztosítja.]]></string>
     <string name="module_shortcut_permission_tip_xiaomi">Engedélyezd az applikáció számára a „Parancsikonok létrehozása a kezdőképernyőn” jogosultságot a Xiaomi beállításaiban.</string>
     <string name="module_shortcut_permission_tip_oppo">Engedélyezd a „Parancsikonok létrehozása a kezdőképernyőn” jogosultságot ehhez az applikációhoz az OPPO beállításaiban.</string>
     <string name="module_shortcut_permission_tip_default">Ha a parancsikon létrehozása nem sikerül, engedélyezd az applikáció számára a parancsikonok létrehozását a kezdőképernyőn a rendszerbeállításokban.</string>

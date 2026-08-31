@@ -239,7 +239,7 @@
     <string name="profile_flags">أعلام</string>
     <string name="conflict_with_apatch">تم رصد مدير APatch، كل شيء قد يتوقف عن العمل.</string>
     <string name="module_action_success">تم تنفيذ عمل الإضافة بنجاح.</string>
-    <string name="about_anime_character_sticker"><![CDATA[图标以特别的形式授权，怡子曰曰绘制，版权明风OuO所有。矢量化图标由本项目提供。]]></string>
+    <string name="about_anime_character_sticker"><![CDATA[الأيقونات مرخصة بطريقة خاصة: الرسم من 怡子曰曰، حقوق النشر مملوكة لـ 明风 OuO، والأيقونات المتجهية مقدمة من هذا المشروع.]]></string>
     <string name="metamodule_uninstall_confirm">هل أنت متأكد من رغبتك في إلغاء تثبيت الإضافة %s؟ سيؤثر هذا الإجراء على جميع الإضافات، ولن تعمل بعض الميزات التي توفرها الإضافة المتعددة metamodule (مثل التثبيت)</string>
     <string name="settings_adb_root_summary">قم بتشغيل خدمة adbd بصلاحيات مستخدم روت</string>
     <string name="settings_selinux_hide">أخفي تعديلات SELinux</string>
