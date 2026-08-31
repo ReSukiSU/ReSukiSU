@@ -221,7 +221,7 @@ dependencies {
 
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.miuix.blur)
-    implementation(libs.miuix.navigation)
+    implementation(libs.miuix.nav)
     implementation(libs.androidx.navigationevent) {
         exclude(group = "androidx.navigation", module = "navigationevent-compose")
     }

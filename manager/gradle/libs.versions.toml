@@ -29,7 +29,7 @@ documentfile = "1.1.0"
 ndk = "29.0.14206865"
 foundation = "1.11.2"
 aboutLibraries = "15.1.1"
-miuix = "0.9.3"
+miuix = "0.9.4-rc01"
 datastore = "1.2.1"
 benchmark = "1.5.0-rc02"
 profileinstaller = "1.4.1"
@@ -97,7 +97,7 @@ me-zhanghai-android-appiconloader-coil = { group = "me.zhanghai.android.appiconl
 org-lsposed-hiddenapibypass = { group = "org.lsposed.hiddenapibypass", name = "hiddenapibypass", version.ref = "hiddenapibypass" }
 
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
-miuix-navigation = { group = "top.yukonga.miuix.kmp", name = "miuix-navigation3-ui-android", version.ref = "miuix" }
+miuix-nav = { group = "top.yukonga.miuix.kmp", name = "miuix-nav", version.ref = "miuix" }
 miuix-blur = { group = "top.yukonga.miuix.kmp", name = "miuix-blur-android", version.ref = "miuix" }
 androidx-navigationevent = { module = "androidx.navigationevent:navigationevent", version.ref = "navigationevent" }
 
