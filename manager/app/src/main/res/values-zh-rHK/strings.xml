@@ -58,7 +58,7 @@
     <string name="reboot_download">重新啟動到 Download</string>
     <string name="reboot_edl">重新啟動到 EDL</string>
     <string name="about">關於</string>
-    <string name="about_anime_character_sticker"><![CDATA[有動漫人物貼圖嘅圖片版權為%1$s所有，圖像中嘅知識產權由%2$s 所有。喺使用呢啲檔案之前，除咗必須遵守 %3$s 以外，仲需要向上述兩者要求使用呢啲藝術內容嘅授權。]]></string>
+    <string name="about_anime_character_sticker"><![CDATA[图标以特别的形式授权，怡子曰曰绘制，版权明风OuO所有。矢量化图标由本项目提供。]]></string>
     <string name="get_source_code">檢視原始碼</string>
     <string name="get_source_code_detail">喺 GitHub 上檢視原始碼</string>
     <string name="join_telegram_group">加入社區</string>

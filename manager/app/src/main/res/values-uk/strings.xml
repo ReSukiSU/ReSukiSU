@@ -58,7 +58,7 @@
     <string name="reboot_download">Перезавантажити в режим Download</string>
     <string name="reboot_edl">Перезавантажити в режим EDL</string>
     <string name="about">Про додаток</string>
-    <string name="about_anime_character_sticker"><![CDATA[Зображення файлів з картинкою аніме-персонажа захищені авторськими правами %1$s, а права на торгову марку у зображеннях належать %2$s. Перш ніж використовувати ці файли, окрім дотримання %3$s, вам також необхідно дотримуватись авторизації обох авторів щодо використання цього художнього контенту.]]></string>
+    <string name="about_anime_character_sticker"><![CDATA[图标以特别的形式授权，怡子曰曰绘制，版权明风OuO所有。矢量化图标由本项目提供。]]></string>
     <string name="get_source_code">Переглянути вихідний код</string>
     <string name="get_source_code_detail">Переглянути вихідний код на GitHub</string>
     <string name="join_telegram_group">Приєднатися до спільноти</string>

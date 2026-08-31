@@ -31,7 +31,7 @@
     <string name="reboot_download">Redémarrer en mode téléchargement</string>
     <string name="reboot_edl">Redémarrer en mode EDL</string>
     <string name="about">À propos</string>
-    <string name="about_anime_character_sticker"><![CDATA[Les images des fichiers avec un autocollant de personnage d\'anime sont protégées par %1$s, la propriété intellectuelle des marques dans les images appartient à %2$s. Avant d\'utiliser ces fichiers, en plus de vous conformer à la licence %3$s, vous devez également vous conformer à l\'autorisation des deux auteurs d\'utiliser ces contenus artistiques.]]></string>
+    <string name="about_anime_character_sticker"><![CDATA[图标以特别的形式授权，怡子曰曰绘制，版权明风OuO所有。矢量化图标由本项目提供。]]></string>
     <string name="module_uninstall_confirm">Désinstaller le module %s ?</string>
     <string name="module_uninstall_success">%s a été désinstallé</string>
     <string name="module_uninstall_failed">Échec de la désinstallation : %s</string>

@@ -278,7 +278,7 @@
     <string name="sulog_entry_unknown_event">Event tidak diketahui</string>
     <string name="sulog_search_placeholder">Cari log</string>
     <string name="module_repo">Modul Repo</string>
-    <string name="about_anime_character_sticker"><![CDATA[Gambar pada berkas yang memuat stiker karakter anime dilindungi hak cipta oleh %1$s, sedangkan Hak Kekayaan Intelektual merek yang terdapat dalam gambar dimiliki oleh %2$s. Sebelum menggunakan berkas-berkas ini, selain mematuhi %3$s, Anda juga harus memperoleh izin dari kedua pemegang hak untuk menggunakan konten artistik tersebut.]]></string>
+    <string name="about_anime_character_sticker"><![CDATA[图标以特别的形式授权，怡子曰曰绘制，版权明风OuO所有。矢量化图标由本项目提供。]]></string>
     <string name="get_source_code">Periksa kode sumber</string>
     <string name="get_source_code_detail">Periksa kode sumber di GitHub</string>
     <string name="join_telegram_group">Gabung ke komunitas</string>

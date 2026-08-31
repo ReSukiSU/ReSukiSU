@@ -34,7 +34,7 @@
     <string name="reboot_download">Khởi động lại vào Download</string>
     <string name="reboot_edl">Khởi động lại vào EDL</string>
     <string name="about">Thông tin</string>
-    <string name="about_anime_character_sticker"><![CDATA[Hình ảnh trong các tập tin có hình dán nhân vật anime thuộc bản quyền của %1$s, quyền sở hữu trí tuệ thương hiệu trong các hình ảnh thuộc sở hữu của %2$s. Trước khi sử dụng các tập tin này, ngoài việc tuân thủ quy định của %3$s, bạn cũng cần phải được sự cho phép của hai tác giả để sử dụng các nội dung nghệ thuật này.]]></string>
+    <string name="about_anime_character_sticker"><![CDATA[图标以特别的形式授权，怡子曰曰绘制，版权明风OuO所有。矢量化图标由本项目提供。]]></string>
     <string name="get_source_code">Kiểm tra mã nguồn</string>
     <string name="get_source_code_detail">Kiểm tra mã nguồn trên GitHub</string>
     <string name="join_telegram_group">Tham gia cộng đồng</string>

@@ -192,7 +192,7 @@
     <string name="settings_custom_background">Niestandardowe tło aplikacji</string>
     <string name="sulog_filter_ioctl_grant_root">Udzielono root</string>
     <string name="sulog_event_dropped">Pominięto zdarzenie</string>
-    <string name="about_anime_character_sticker"><![CDATA[Prawa autorskie do obrazów plików zawierających naklejki z postaciami anime należą do %1$s, natomiast prawa własności intelektualnej do przedstawionych marek należą do %2$s. Przed użyciem tych plików, oprócz przestrzegania %3$s, należy również uzyskać zgodę obu właścicieli praw na wykorzystanie tych treści artystycznych.]]></string>
+    <string name="about_anime_character_sticker"><![CDATA[图标以特别的形式授权，怡子曰曰绘制，版权明风OuO所有。矢量化图标由本项目提供。]]></string>
     <string name="open_source_license">Licencja Open Source</string>
     <string name="open_source_license_settings_description">Wyświetl zewnętrzne biblioteki open-source oraz ich licencje</string>
     <string name="settings_custom_background_summary">Wybierz obraz jako tło</string>
