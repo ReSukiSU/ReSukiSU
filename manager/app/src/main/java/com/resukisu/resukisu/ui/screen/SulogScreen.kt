@@ -219,9 +219,6 @@ private fun SulogScreenContent(
                                             actions.onToggleFilter(filter)
                                         },
                                         text = { Text(sulogFilterLabel(filter)) },
-                                        trailingContent = {
-                                            if (filter in state.selectedFilters) Icon(Icons.Default.Check, contentDescription = null)
-                                        },
                                         shapes = MenuDefaults.itemShape(
                                             index = index,
                                             count = SulogEventFilter.entries.size

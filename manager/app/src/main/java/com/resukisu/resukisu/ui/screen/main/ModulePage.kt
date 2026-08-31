@@ -507,9 +507,6 @@ private fun ModuleDropdown(
                     )
                 },
                 text = { Text(stringResource(R.string.module_sort_action_first)) },
-                trailingContent = {
-                    if (uiState.sortActionFirst) Icon(Icons.TwoTone.Check, contentDescription = null)
-                },
                 shapes = MenuDefaults.itemShape(
                     index = 0,
                     count = 2,
@@ -523,9 +520,6 @@ private fun ModuleDropdown(
                     )
                 },
                 text = { Text(stringResource(R.string.module_sort_enabled_first)) },
-                trailingContent = {
-                    if (uiState.sortEnabledFirst) Icon(Icons.TwoTone.Check, contentDescription = null)
-                },
                 shapes = MenuDefaults.itemShape(
                     index = 1,
                     count = 2,

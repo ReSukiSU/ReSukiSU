@@ -310,9 +310,6 @@ private fun ModuleRepoDropdown(
                     viewModel.dispatch(ModuleRepoUiAction.SetStarsFirst(it))
                 },
                 text = { Text(stringResource(R.string.module_sort_star_first)) },
-                trailingContent = {
-                    if (uiState.sortStargazerCountFirst) Icon(Icons.Default.Check, contentDescription = null)
-                },
                 shapes = MenuDefaults.itemShape(
                     index = 0,
                     count = 1,

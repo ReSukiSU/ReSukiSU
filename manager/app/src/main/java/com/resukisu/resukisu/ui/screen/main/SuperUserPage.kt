@@ -433,9 +433,6 @@ private fun SuperUserDropdown(
                         viewModel.dispatch(SuperUserUiAction.SetSort(sortType))
                     },
                     text = { Text(stringResource(sortType.displayNameRes)) },
-                    trailingContent = {
-                        if (uiState.currentSortType == sortType) Icon(Icons.Default.Check, contentDescription = null)
-                    },
                     shapes = MenuDefaults.itemShape(
                         index = index,
                         count = SortType.entries.size,
@@ -457,9 +454,6 @@ private fun SuperUserDropdown(
                         menuItem.onClick()
                     },
                     text = { Text(stringResource(menuItem.titleRes)) },
-                    trailingContent = {
-                        if (menuItem.checked) Icon(Icons.Default.Check, contentDescription = null)
-                    },
                     shapes = MenuDefaults.itemShape(
                         index = index,
                         count = menuItems.size,
