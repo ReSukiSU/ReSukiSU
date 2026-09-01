@@ -44,6 +44,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -164,7 +165,10 @@ fun AppProfileScreen(
         colorScheme.surfaceContainer
     }
 
-    LaunchedEffect(Unit) {
+    // 用 SideEffect（同步）而不是 LaunchedEffect(Unit)（下一帧异步），
+    // 避免首帧显示 expanded TopAppBar、下一帧又折叠成 collapsed，
+    // 导致内容整体跳动，看起来像"闪"。
+    SideEffect {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
     }
     

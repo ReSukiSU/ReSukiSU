@@ -64,18 +64,24 @@ class AppProfileViewModel(
     private val mutableEvents = MutableSharedFlow<AppProfileUiEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<AppProfileUiEvent> = mutableEvents.asSharedFlow()
     private var validationJob: Job? = null
+    private var loadJob: Job? = null
     private val saveMutex = Mutex()
-
-    init {
-        dispatch(AppProfileUiAction.Load)
-    }
 
     fun dispatch(action: AppProfileUiAction) {
         when (action) {
-            AppProfileUiAction.Load -> viewModelScope.launch {
-                // 只标记 isLoading，但保留已有 appGroup/profile 数据，避免 ActivityResumeEffect
-                // 触发的第二次 Load 把已显示的内容清空，导致进入页面时出现闪烁（转圈->内容）
-                mutableState.update { it.copy(isLoading = true) }
+            AppProfileUiAction.Load -> {
+                // 防止并发 Load（ViewModel init 与 ActivityResumeEffect 可能同时触发）。
+                // 如果已有 Load 正在跑，直接复用，避免状态来回抖动造成 UI 闪烁。
+                if (loadJob?.isActive == true) return
+
+                loadJob = viewModelScope.launch {
+                    val existing = mutableState.value
+                    val hasData = existing.appGroup != null && existing.profile != null
+                    // 静默刷新：已有数据的情况下（例如从系统权限页返回时的 resume 刷新）
+                    // 不再把 isLoading 置 true，避免 Loading 状态与现有内容切换产生闪烁。
+                    if (!hasData) {
+                        mutableState.update { it.copy(isLoading = true) }
+                    }
                 runCatching {
                     val profile = getProfile(packageName, uid)
                     val loadedProfile = if (profile.allowSu) {
@@ -102,6 +108,7 @@ class AppProfileViewModel(
                 }.onFailure { error ->
                     mutableState.update { it.copy(isLoading = false) }
                     mutableEvents.tryEmit(AppProfileUiEvent.Error(error))
+                }
                 }
             }
 
