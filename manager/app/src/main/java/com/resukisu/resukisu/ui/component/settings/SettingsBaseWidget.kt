@@ -54,7 +54,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
@@ -140,8 +139,8 @@ fun SettingsBaseWidget(
 
     val interactionSource = remember { MutableInteractionSource() }
 
-    val density = LocalDensity.current
-    val dynamicInternalPadding = (4 * density.fontScale).dp
+    // Material3 1.5 ListItem 已内置足够的上下 padding，避免再叠加 dynamicInternalPadding 导致组件偏高
+    val dynamicInternalPadding = 0.dp
 
     val baseShape = LocalSegmentedItemShape.current
 
