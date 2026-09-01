@@ -73,6 +73,8 @@ class AppProfileViewModel(
     fun dispatch(action: AppProfileUiAction) {
         when (action) {
             AppProfileUiAction.Load -> viewModelScope.launch {
+                // 只标记 isLoading，但保留已有 appGroup/profile 数据，避免 ActivityResumeEffect
+                // 触发的第二次 Load 把已显示的内容清空，导致进入页面时出现闪烁（转圈->内容）
                 mutableState.update { it.copy(isLoading = true) }
                 runCatching {
                     val profile = getProfile(packageName, uid)

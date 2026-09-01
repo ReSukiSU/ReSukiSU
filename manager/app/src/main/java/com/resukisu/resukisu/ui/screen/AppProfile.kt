@@ -145,12 +145,17 @@ fun AppProfileScreen(
     }
 
     val profile = uiState.profile
-    if (appGroup == null || profile == null) {
+    // 用 isLoading 而非 null 判断，避免第二次 Load（ActivityResumeEffect 触发）时
+    // 已有数据被短暂清空，导致 CircularProgressIndicator 一闪而过的闪烁问题
+    if (uiState.isLoading && (appGroup == null || profile == null)) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
         return
     }
+    // 通过 early-return 后，二者必有非空值（首次加载完成后的数据）
+    val nonNullAppGroup = appGroup!!
+    val nonNullProfile = profile!!
 
     val colorScheme = MaterialTheme.colorScheme
     val cardColor = if (cardConfig.isCustomBackgroundEnabled) {
@@ -166,7 +171,7 @@ fun AppProfileScreen(
     Scaffold(
         topBar = {
             TopBar(
-                title = appGroup.mainApp.label,
+                title = nonNullAppGroup.mainApp.label,
                 packageName = packageName,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = cardColor,
@@ -187,18 +192,18 @@ fun AppProfileScreen(
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .blurSource(),
             topPadding = paddingValues.calculateTopPadding(),
-            appGroup = appGroup,
+            appGroup = nonNullAppGroup,
             appIcon = {
                 PackageIcon(
-                    packageName = appGroup.mainApp.packageName,
-                    contentDescription = appGroup.mainApp.label,
+                    packageName = nonNullAppGroup.mainApp.packageName,
+                    contentDescription = nonNullAppGroup.mainApp.label,
                     modifier = Modifier
                         .padding(4.dp)
                         .width(48.dp)
                         .height(48.dp),
                 )
             },
-            profile = profile,
+            profile = nonNullProfile,
             defaultUmountModules = uiState.defaultUmountModules,
             sepolicyValid = uiState.sepolicyValid,
             onValidateSepolicy = {
