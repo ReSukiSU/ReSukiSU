@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
@@ -257,6 +258,7 @@ fun StandardFeaturesTab(
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
+            state = rememberLazyListState(),
             modifier = Modifier
                 .fillMaxSize()
                 .nestedScroll(nestedScrollConnection),
@@ -464,6 +466,7 @@ fun StandardFeaturesTab(
 
                                         else -> {
                                             LazyColumn(
+                                                state = rememberLazyListState(),
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .heightIn(max = 320.dp),
