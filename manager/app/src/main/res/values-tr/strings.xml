@@ -531,4 +531,12 @@
     <string name="susfs_uid_scheme_unmounted">Bağlantısı Kesik</string>
     <string name="susfs_status_no_data">Veri Yok</string>
     <string name="susfs_tab_open_redirect">Yönlendirmeyi Aç</string>
+    <string name="about_anime_character_sticker"><![CDATA[Simgeler özel bir lisans anlaşması kapsamında kullanılmaktadır: 怡子曰曰 tarafından çizilmiş, telif hakkı 明风 OuO\'ya aittir ve vektörleştirilmiş simgeler bu proje tarafından sağlanmaktadır.]]></string>
+    <string name="settings_webview_zygote_umount">WebView bağlamasını kaldır</string>
+    <string name="settings_webview_zygote_umount_summary">WebView işleminden bilgi sızıntılarını önler ancak bazı modüllerin çalışmasını bozabilir. Uygulamak için yeniden başlatın</string>
+    <string name="settings_custom_monospace_font">Yerleşik eş aralıklı yazı tipini kullan</string>
+    <string name="settings_custom_monospace_font_summary">Günlükleri görüntülerken sistemin eş aralıklı yazı tipiyle ilgili sorunları önlemek için yerleşik JetBrains Mono yazı tipini kullanır</string>
+    <string name="susfs_enable_config">SUSFS Yöneticisi</string>
+    <string name="susfs_enable_config_summary">Yerleşik SUSFS yöneticisini etkinleştirir. Üçüncü taraf modüllerle çakışabilir.</string>
+    <string name="susfs_config_disable_warning">Yerleşik SUSFS yöneticisi devre dışı. SUSFS özelliklerini kullanmak için bunu etkinleştirin veya üçüncü taraf bir modül yükleyin.</string>
 </resources>

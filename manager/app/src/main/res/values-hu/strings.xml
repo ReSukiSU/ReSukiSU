@@ -536,4 +536,7 @@
     <string name="susfs_enable_config">SuSFS Menedzser</string>
     <string name="susfs_enable_config_summary">Beépített SuSFS Menedzser engedélyezése vagy letiltása. Valamely harmadik féltől származó modullal összeférhetetlen lehet.</string>
     <string name="susfs_config_disable_warning">Beépített SuSFS Menedzser letiltva. Engedélyezd, vagy telepíts egy harmadik féltől származó modult a SuSFS funkciók használatához.</string>
+    <string name="settings_webview_zygote_umount">WebView leválasztás</string>
+    <string name="settings_webview_zygote_umount_summary">Megakadályozza az információszivárgást a WebView folyamatból, de modulok működését zavarhatja. Az alkalmazáshoz újraindítás szükséges</string>
+    <string name="about_anime_character_sticker"><![CDATA[Az ikonok egy különleges megállapodás keretében kerültek licencelésre: a rajzokat 怡子曰曰 készítette, a szerzői jogok 明风 OuO-t illetik, a vektorizált ikonokat pedig ez a projekt biztosítja.]]></string>
 </resources>

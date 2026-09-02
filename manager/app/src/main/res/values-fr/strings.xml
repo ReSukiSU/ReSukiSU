@@ -25,7 +25,7 @@
     <string name="install">Installer</string>
     <string name="reboot">Redémarrer</string>
     <string name="settings">Paramètres</string>
-    <string name="reboot_userspace">Redémarrer en mode progressif</string>
+    <string name="reboot_userspace">Redémarrer l\'interface utilisateur</string>
     <string name="reboot_recovery">Redémarrer en mode de récupération</string>
     <string name="reboot_bootloader">Redémarrer en mode bootloader</string>
     <string name="reboot_download">Redémarrer en mode téléchargement</string>
@@ -55,14 +55,14 @@
     <string name="profile_umount_modules">Démontage des modules</string>
     <string name="failed_to_update_app_profile">Échec de la modification du profil d\'application de %s</string>
     <string name="settings_umount_modules_default">Démontage des modules par défaut</string>
-    <string name="settings_umount_modules_default_summary">Valeur globale par défaut pour l\'option \"Démontage des modules\" dans les profils d\'application. Lorsque l\'option est activée, les modifications apportées au système par les modules sont supprimées pour les applications qui n\'ont pas de profil défini.</string>
-    <string name="profile_umount_modules_summary">L\'activation de cette option permettra à KernelSU de restaurer tous les fichiers modifiés par les modules pour cette application.</string>
+    <string name="settings_umount_modules_default_summary">Valeur globale par défaut pour l\'option \"Démontage des modules\" dans les profils d\'application. Lorsque l\'option est activée, les modifications apportées au système par les modules sont supprimées pour les applications qui n\'ont pas de profil défini</string>
+    <string name="profile_umount_modules_summary">L\'activation de cette option permettra à KernelSU de restaurer tous les fichiers modifiés par les modules pour cette application</string>
     <string name="profile_selinux_domain">Domaine</string>
     <string name="profile_selinux_rules">Règles</string>
     <string name="module_update">Mettre à jour</string>
     <string name="module_downloading">Téléchargement du module : %s</string>
     <string name="module_start_downloading">Début du téléchargement de : %s</string>
-    <string name="new_version_available">Nouvelle version %s disponible, appuyer ici pour mettre à jour.</string>
+    <string name="new_version_available">Nouvelle version %s disponible, appuyer ici pour mettre à jour</string>
     <string name="launch_app">Lancer</string>
     <string name="force_stop_app" formatted="false">Forcer l\'arrêt</string>
     <string name="restart_app">Relancer l\'application</string>
@@ -165,8 +165,8 @@
     <string name="background_set_success">Arrière-plan appliqué</string>
     <string name="background_removed">Arrière-plan personnalisé supprimé</string>
     <string name="icon_switch_title">Icône alternative</string>
-    <string name="icon_switch_summary">Change l\'icône de l\'application en icône de KernelSU dans le lanceur</string>
-    <string name="icon_switched">Icône changée</string>
+    <string name="icon_switch_summary">Remplace l\'icône de l\'application dans le lanceur par celle de KernelSU</string>
+    <string name="icon_switched">Icône remplacée</string>
     <string name="app_dpi_title">Densité d\'affichage (en PPP)</string>
     <string name="app_dpi_summary">Ajuste la densité d\'affichage de l\'écran pour cette application</string>
     <string name="dpi_size_small">Petite</string>
@@ -220,7 +220,7 @@
     <string name="visit_home_page">Consulter le site</string>
     <string name="license">Licence : %s</string>
     <string name="no_license_text">Aucun texte de licence disponible.</string>
-    <string name="metamodule_uninstall_confirm">Êtes-vous certain(e) de vouloir désinstaller le module %s ? Cette action affectera tous les modules et certaines fonctionnalités fournies par le métamodule (comme le montage de volumes) ne seront plus disponibles.</string>
+    <string name="metamodule_uninstall_confirm">Désinstaller le module %s ? Cette action affectera tous les modules et certaines fonctionnalités fournies par le métamodule (comme le montage de volumes) ne seront plus disponibles.</string>
     <string name="module_version">Version</string>
     <string name="jailbreak_mode">Mode jailbreak</string>
     <string name="home_jailbreak">Jailbreak</string>
@@ -473,7 +473,7 @@
     <string name="susfs_standard_logging">Journalisation</string>
     <string name="susfs_standard_logging_desc">Active le journal du noyau SUSFS. Activer avant de signaler des bugs liés à SUSFS.</string>
     <string name="susfs_standard_avc_log_spoofing">Falsification du journal AVC</string>
-    <string name="susfs_standard_avc_log_spoofing_desc">Falsifie le contexte \"su\" dans le journal AVC. Empêche les applications de détecter les appels \"su\" en exploitant une ancienne faille de sécurité Android.</string>
+    <string name="susfs_standard_avc_log_spoofing_desc">Falsifie le contexte \"su\" dans le journal AVC. Empêche les applications de détecter les appels \"su\" en exploitant une ancienne faille de sécurité d\'Android.</string>
     <string name="susfs_standard_hide_sus_mnts">Masquage des montages SUS pour les processus non-SU</string>
     <string name="susfs_standard_hide_sus_mnts_desc">Masque les points de montage SUS pour les processus non-SU. Contourne les paramètres de démontage du gestionnaire. Le comportement par défaut est de n\'appliquer le masquage que pour les applications figurant dans la liste de démontage.</string>
     <string name="susfs_standard_uname">Uname (nommage du système)</string>
@@ -536,4 +536,7 @@
     <string name="susfs_backup_restore_default">Configuration par défaut</string>
     <string name="susfs_backup_restore_default_desc">Supprime la configuration SuSFS actuelle et restaure la configuration par défaut</string>
     <string name="susfs_redirect_important_notes">Remarques importantes :\n• Les chemins cible et redirigé doivent exister avant l’ajout d’une entrée\n• les permissions SELinux pour les deux chemins doivent être configurées.\n• La redirection affecte uniquement les processus correspondant au schéma d\'UID sélectionné.</string>
+    <string name="settings_webview_zygote_umount_summary">Empêche les fuites d\'informations du processus WebView, mais peut causer le dysfonctionnement de certains modules. Redémarrer pour appliquer les modifications</string>
+    <string name="settings_webview_zygote_umount">Démontage pour WebView</string>
+    <string name="about_anime_character_sticker"><![CDATA[Les icônes sont régies par un accord de licence spécifique : dessinées par 怡子曰曰, elles sont la propriété intellectuelle de 明风 OuO, et leurs versions vectorisées sont fournies par ce projet.]]></string>
 </resources>

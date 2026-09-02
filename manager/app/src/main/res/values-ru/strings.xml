@@ -24,7 +24,7 @@
     <string name="superuser">Рут-доступ</string>
     <string name="sulog">Лог SU</string>
     <string name="sulog_log_files">Файлы логов</string>
-    <string name="sulog_failed_to_load">Не удалось загрузить SU log</string>
+    <string name="sulog_failed_to_load">Не удалось загрузить SU-лог</string>
     <string name="sulog_disabled_title">SU log выключен</string>
     <string name="sulog_unsupported_title">SU log не поддерживается</string>
     <string name="sulog_enable_action">Включить</string>
@@ -32,7 +32,7 @@
     <string name="sulog_clean_title">Очистить логи</string>
     <string name="sulog_filter_sucompat">Классический SU</string>
     <string name="sulog_filter_ioctl_grant_root">Выдать Root</string>
-    <string name="sulog_filter_daemon_restart">Перезапустить демон</string>
+    <string name="sulog_filter_daemon_restart">Перезапуск демона</string>
     <string name="sulog_event_dropped">Событие прервано</string>
     <string name="sulog_drop_count">%s Потерялось</string>
     <string name="sulog_daemon_restart_count">Перезапустить #%s</string>
@@ -106,9 +106,9 @@
     <string name="profile_selinux_context">Контекст SELinux</string>
     <string name="profile_umount_modules">Размонтировать модули</string>
     <string name="failed_to_update_app_profile">Не удалось обновить профиль приложения для %s</string>
-    <string name="debug_version_notice">Вы используете DEBUG сборку менеджера. Если вы не знаете, что это такое, немедленно переключитесь на RELEASE сборку</string>
+    <string name="debug_version_notice">Вы используете DEBUG-сборку менеджера. Если вы не знаете, что это такое, немедленно переключитесь на RELEASE-сборку</string>
     <string name="unofficial_version_notice">Менеджер, который вы используете, не является официальным менеджером %s, и вы можете не иметь возможности получить необходимые разрешения.</string>
-    <string name="conflict_with_apatch">Обнаружен APatch, все может перестать работать.</string>
+    <string name="conflict_with_apatch">Обнаружен APatch, возможны сбои в работе системы.</string>
     <string name="settings_umount_modules_default">Размонтировать модули по умолчанию</string>
     <string name="settings_umount_modules_default_summary">Глобальное значение по умолчанию для \"Размонтировать модули\" в профиле приложения. При включении будут удалены все модификации модулей в системе для приложений, у которых не задан профиль</string>
     <string name="profile_umount_modules_summary">Включение этой опции позволит KernelSU восстанавливать любые измененные модулями файлы для данного приложения.</string>
@@ -391,7 +391,7 @@
     <string name="module_shortcut_updated">Ярлык обновлен.</string>
     <string name="module_shortcut_delete">Удалить ярлык</string>
     <string name="module_shortcut_permission_tip_xiaomi">Пожалуйста, выдайте разрешение \"Создавать ярлыки на рабочем столе\" этому приложению в настройках Xiaomi.</string>
-    <string name="module_shortcut_permission_tip_oppo">Пожалуйста, выдайте разрешение \"Создавать ярлыки на рабочем столе\" этому приложению в настройках OPPO.</string>
+    <string name="module_shortcut_permission_tip_oppo">Пожалуйста, выдайте разрешение \"Создавать ярлыки на рабочем столе\" этому приложению в настройках OPlus (Oppo/realme/OnePlus).</string>
     <string name="module_shortcut_permission_tip_default">Если создание ярлыка не удалось, пожалуйста, выдайте разрешение на создание ярлыков на рабочем столе в системных настройках.</string>
     <string name="download_channel_name">Загрузки модуля</string>
     <string name="download_progress_title">Идет загрузка %s</string>
@@ -531,4 +531,11 @@
     <string name="manager_update_details">Версия: %1$s (%2$d)\nАрхитектура: %3$s</string>
     <string name="settings_check_beta_update">Проверка бета обновлений</string>
     <string name="settings_check_beta_update_summary">Автоматически проверять бета-сборки из главной ветки</string>
+    <string name="settings_custom_monospace_font">Использовать встроенный моноширинный шрифт</string>
+    <string name="settings_custom_monospace_font_summary">Использовать шрифт JetBrains Mono для отображения логов во избежание проблем с системным моноширинным шрифтом</string>
+    <string name="susfs_enable_config">менеджер SUSFS</string>
+    <string name="susfs_enable_config_summary">Включите встроенный менеджер SUSFS. Может конфликтовать со сторонними модулями.</string>
+    <string name="susfs_config_disable_warning">Встроенный менеджер SUSFS отключен. Включите его или установите сторонний модуль для использования функций SUSFS.</string>
+    <string name="settings_webview_zygote_umount">Размонтирование для WebView</string>
+    <string name="settings_webview_zygote_umount_summary">Предотвращает утечку информации из процесса WebView, но может нарушить работу модулей. Перезагрузите для применения</string>
 </resources>

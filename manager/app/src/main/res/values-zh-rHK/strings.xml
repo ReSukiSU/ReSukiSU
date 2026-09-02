@@ -534,4 +534,6 @@
     <string name="susfs_enable_config">SUSFS 管理器</string>
     <string name="susfs_enable_config_summary">啟用內置 SUSFS 管理器，可能與第三方模組衝突。</string>
     <string name="susfs_config_disable_warning">內置 SUSFS 管理器已停用。請啟用它或安裝第三方模組以使用 SUSFS 功能。</string>
+    <string name="settings_webview_zygote_umount">為 WebView 解除掛載</string>
+    <string name="settings_webview_zygote_umount_summary">防止 WebView 程序洩露資訊，但可能會令部分模組失效。重新啟動以套用變更</string>
 </resources>
