@@ -70,15 +70,11 @@ class AppProfileViewModel(
     fun dispatch(action: AppProfileUiAction) {
         when (action) {
             AppProfileUiAction.Load -> {
-                // 防止并发 Load（ViewModel init 与 ActivityResumeEffect 可能同时触发）。
-                // 如果已有 Load 正在跑，直接复用，避免状态来回抖动造成 UI 闪烁。
                 if (loadJob?.isActive == true) return
 
                 loadJob = viewModelScope.launch {
                     val existing = mutableState.value
                     val hasData = existing.appGroup != null && existing.profile != null
-                    // 静默刷新：已有数据的情况下（例如从系统权限页返回时的 resume 刷新）
-                    // 不再把 isLoading 置 true，避免 Loading 状态与现有内容切换产生闪烁。
                     if (!hasData) {
                         mutableState.update { it.copy(isLoading = true) }
                     }
@@ -99,12 +95,14 @@ class AppProfileViewModel(
                             .getOrDefault(profile.umountModules),
                     )
                 }.onSuccess { (group, profile, defaultUmountModules) ->
-                    mutableState.value = AppProfileUiState(
-                        appGroup = group,
-                        profile = profile,
-                        defaultUmountModules = defaultUmountModules,
-                        isLoading = false,
-                    )
+                    mutableState.update {
+                        it.copy(
+                            appGroup = group,
+                            profile = profile,
+                            defaultUmountModules = defaultUmountModules,
+                            isLoading = false,
+                        )
+                    }
                 }.onFailure { error ->
                     mutableState.update { it.copy(isLoading = false) }
                     mutableEvents.tryEmit(AppProfileUiEvent.Error(error))

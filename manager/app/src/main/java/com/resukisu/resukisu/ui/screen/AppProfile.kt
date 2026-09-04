@@ -145,17 +145,12 @@ fun AppProfileScreen(
     }
 
     val profile = uiState.profile
-    // 用 isLoading 而非 null 判断，避免第二次 Load（ActivityResumeEffect 触发）时
-    // 已有数据被短暂清空，导致 CircularProgressIndicator 一闪而过的闪烁问题
     if (uiState.isLoading && (appGroup == null || profile == null)) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
         return
     }
-    // 通过 early-return 后，二者必有非空值（首次加载完成后的数据）
-    val nonNullAppGroup = appGroup!!
-    val nonNullProfile = profile!!
 
     val colorScheme = MaterialTheme.colorScheme
     val cardColor = if (cardConfig.isCustomBackgroundEnabled) {
@@ -164,8 +159,6 @@ fun AppProfileScreen(
         colorScheme.surfaceContainer
     }
 
-    // 仅在首次进入时同步折叠 TopAppBar，避免每次 recomposition 都重置 heightOffset
-    // 与 scroll behavior 冲突，导致 LazyColumn prefetch 时 LayoutNode 状态不一致而崩溃
     val initialized = remember { mutableStateOf(false) }
     if (!initialized.value) {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
@@ -175,7 +168,7 @@ fun AppProfileScreen(
     Scaffold(
         topBar = {
             TopBar(
-                title = nonNullAppGroup.mainApp.label,
+                title = appGroup!!.mainApp.label,
                 packageName = packageName,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = cardColor,
@@ -196,18 +189,18 @@ fun AppProfileScreen(
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .blurSource(),
             topPadding = paddingValues.calculateTopPadding(),
-            appGroup = nonNullAppGroup,
+            appGroup = appGroup!!,
             appIcon = {
                 PackageIcon(
-                    packageName = nonNullAppGroup.mainApp.packageName,
-                    contentDescription = nonNullAppGroup.mainApp.label,
+                    packageName = appGroup!!.mainApp.packageName,
+                    contentDescription = appGroup!!.mainApp.label,
                     modifier = Modifier
                         .padding(4.dp)
                         .width(48.dp)
                         .height(48.dp),
                 )
             },
-            profile = nonNullProfile,
+            profile = profile!!,
             defaultUmountModules = uiState.defaultUmountModules,
             sepolicyValid = uiState.sepolicyValid,
             onValidateSepolicy = {
