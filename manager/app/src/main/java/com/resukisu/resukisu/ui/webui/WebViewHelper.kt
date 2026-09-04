@@ -3,6 +3,7 @@ package com.resukisu.resukisu.ui.webui
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ActivityManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -18,25 +19,15 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.webkit.WebViewAssetLoader
 import com.resukisu.resukisu.R
-import com.resukisu.resukisu.data.AppSettingsRepository
-import com.resukisu.resukisu.data.packageinfo.AppIconDataSource
 import com.resukisu.resukisu.data.packageinfo.InstalledPackageRepository
+import com.resukisu.resukisu.data.shell.KsuCliRepository
 import com.resukisu.resukisu.data.webui.WebUiRepository
-import com.resukisu.resukisu.ui.viewmodel.ModuleUiAction
-import com.resukisu.resukisu.ui.viewmodel.ModuleUiEvent
-import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel
-import com.resukisu.resukisu.ui.viewmodel.SuperUserUiAction
-import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
+import me.zhanghai.android.appiconloader.AppIconLoader
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
-import kotlin.time.Duration.Companion.milliseconds
 
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -44,45 +35,15 @@ internal suspend fun prepareWebView(
     activity: Activity,
     moduleId: String,
     webUIState: WebUIState,
-    moduleViewModel: ModuleViewModel,
-    superUserViewModel: SuperUserViewModel,
-    settingsRepository: AppSettingsRepository,
     packageRepository: InstalledPackageRepository,
-    appIconDataSource: AppIconDataSource,
-    webUiRepository: WebUiRepository,
     colorsCssProvider: () -> String,
 ) {
     withContext(Dispatchers.IO) {
-        val refreshEvent = async(start = CoroutineStart.UNDISPATCHED) {
-            moduleViewModel.events.first { event ->
-                event is ModuleUiEvent.RefreshCompleted || event is ModuleUiEvent.Error
-            }
-        }
-        moduleViewModel.dispatch(ModuleUiAction.Refresh())
-        when (val event = withTimeoutOrNull(30_000L.milliseconds) { refreshEvent.await() }) {
-            is ModuleUiEvent.Error -> {
-                withContext(Dispatchers.Main) {
-                    webUIState.uiEvent = WebUIEvent.Error(
-                        activity.getString(R.string.module_unavailable, event.message),
-                    )
-                }
-                return@withContext
-            }
+        val ksuCliRepository = KsuCliRepository(activity)
+        val webUiRepository = WebUiRepository(ksuCliRepository)
 
-            null -> {
-                withContext(Dispatchers.Main) {
-                    webUIState.uiEvent = WebUIEvent.Error(
-                        activity.getString(R.string.module_unavailable, moduleId),
-                    )
-                }
-                return@withContext
-            }
-
-            else -> Unit
-        }
-
-        val moduleInfo =
-            moduleViewModel.uiState.value.moduleList.find { info -> info.id == moduleId }
+        val modulesJson = webUiRepository.listModules()
+        val moduleInfo = parseModuleList(modulesJson).find { it.id == moduleId }
 
         if (moduleInfo == null) {
             withContext(Dispatchers.Main) {
@@ -101,9 +62,6 @@ internal suspend fun prepareWebView(
         webUIState.moduleName = moduleInfo.name
         webUIState.modDir = "/data/adb/modules/${moduleId}"
 
-        if (packageRepository.packages.value.isEmpty()) {
-            superUserViewModel.dispatch(SuperUserUiAction.Refresh)
-        }
         withContext(Dispatchers.Main) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
                 @Suppress("DEPRECATION")
@@ -118,8 +76,9 @@ internal suspend fun prepareWebView(
             val webView = WebView(activity)
             webView.setBackgroundColor(Color.TRANSPARENT)
 
+            val prefs = activity.getSharedPreferences("settings", Context.MODE_PRIVATE)
             WebView.setWebContentsDebuggingEnabled(
-                settingsRepository.getBoolean("enable_web_debugging", false)
+                prefs.getBoolean("enable_web_debugging", false)
             )
 
             webView.settings.apply {
@@ -150,7 +109,7 @@ internal suspend fun prepareWebView(
                     if (url.scheme.equals("ksu", ignoreCase = true) && url.host.equals("icon", ignoreCase = true)) {
                         val packageName = url.path?.substring(1)
                         if (!packageName.isNullOrEmpty()) {
-                            val icon = appIconDataSource.loadSync(packageName, 512)
+                            val icon = loadIconDirect(activity, packageName, 512)
                             if (icon != null) {
                                 val stream = ByteArrayOutputStream()
                                 icon.compress(Bitmap.CompressFormat.PNG, 100, stream)
@@ -214,4 +173,41 @@ internal suspend fun prepareWebView(
             webUIState.uiEvent = WebUIEvent.WebViewReady
         }
     }
+}
+
+private data class WebUiModuleInfo(
+    val id: String,
+    val name: String,
+    val enabled: Boolean,
+    val remove: Boolean,
+    val hasWebUi: Boolean,
+)
+
+private fun parseModuleList(raw: String): List<WebUiModuleInfo> {
+    val array = org.json.JSONArray(raw)
+    return (0 until array.length()).map { index ->
+        val value = array.getJSONObject(index)
+        WebUiModuleInfo(
+            id = value.getString("id"),
+            name = value.optString("name"),
+            enabled = value.optBoolean("enabled", false),
+            remove = value.optBoolean("remove", false),
+            hasWebUi = value.optBoolean("web", false),
+        )
+    }
+}
+
+private fun loadIconDirect(context: Context, packageName: String, sizePx: Int): Bitmap? {
+    return runCatching {
+        val pm = context.packageManager
+        val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pm.getPackageInfo(packageName, android.content.pm.PackageManager.PackageInfoFlags.of(0))
+        } else {
+            @Suppress("DEPRECATION")
+            pm.getPackageInfo(packageName, 0)
+        }
+        val appInfo = packageInfo.applicationInfo ?: return null
+        val loader = AppIconLoader(sizePx, false, context)
+        loader.loadIcon(appInfo)
+    }.getOrNull()
 }
