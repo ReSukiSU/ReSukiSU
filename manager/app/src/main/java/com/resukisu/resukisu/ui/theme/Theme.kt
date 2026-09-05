@@ -139,6 +139,7 @@ class ThemeConfig(
     var isEnableBlur by mutableStateOf(false)
     var isEnableBlurExp by mutableStateOf(false)
     var isUseBackgroundSeedColor by mutableStateOf(false)
+    var bottomBarStyle by mutableStateOf(BottomBarStyle.MATERIAL3_EXPRESSIVE)
 
     // 主题变化检测
     private var lastDarkModeState: Boolean? = null
@@ -221,6 +222,11 @@ class BackgroundManager(
         settings.putBoolean("enable_blur_exp", enable)
     }
 
+    fun saveBottomBarStyle(style: BottomBarStyle) {
+        config.bottomBarStyle = style
+        settings.putInt("bottom_bar_style", style.ordinal)
+    }
+
     fun saveUseBackgroundSeedColor(enable: Boolean) {
         config.isUseBackgroundSeedColor = enable
         settings.putBoolean("use_background_seed_color", enable)
@@ -283,7 +289,6 @@ class BackgroundManager(
         }
 
         config.backgroundDim = prefs.getFloat("background_dim", 0f).coerceIn(0f, 1f)
-        config.isEnableBlur = prefs.getBoolean("enable_blur", false)
         config.isEnableBlurExp = prefs.getBoolean("enable_blur_exp", false)
         config.isUseBackgroundSeedColor = prefs.getBoolean("use_background_seed_color", false)
         config.isHighContrastMode = prefs.getBoolean("high_contrast_mode", false)
@@ -360,6 +365,7 @@ fun KernelSUTheme(
         themeRepository = themeRepository,
         backgroundManager = backgroundManager,
         cardConfig = cardConfig,
+        settings = settings,
     )
 
     // 创建颜色方案
@@ -409,6 +415,7 @@ private fun ThemeInitializer(
     themeRepository: ThemeRepository,
     backgroundManager: BackgroundManager,
     cardConfig: CardConfig,
+    settings: AppSettingsRepository,
 ) {
     val themeChanged = themeConfig.detectThemeChange(systemIsDark)
     val scope = rememberCoroutineScope()
@@ -441,6 +448,8 @@ private fun ThemeInitializer(
             themeConfig.dynamicPaletteStyle = themeRepository.loadDynamicPaletteStyle(
                 themeConfig.dynamicColorSpec,
             )
+            themeConfig.isEnableBlur = settings.getBoolean("enable_blur", false)
+            themeConfig.bottomBarStyle = BottomBarStyle.fromOrdinal(settings.getInt("bottom_bar_style", 0))
             cardConfig.load()
 
             if (!themeConfig.backgroundImageLoaded && !themeConfig.preventBackgroundRefresh) {
