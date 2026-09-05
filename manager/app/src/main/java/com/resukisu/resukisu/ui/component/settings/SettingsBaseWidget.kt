@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -140,8 +140,14 @@ fun SettingsBaseWidget(
 
     val interactionSource = remember { MutableInteractionSource() }
 
-    val density = LocalDensity.current
-    val dynamicInternalPadding = (4 * density.fontScale).dp
+    /*
+     * Material 3 ListItem uses fixed 56dp/72dp minimum heights that do not shrink with fontScale,
+     * leaving excessive vertical space at smaller system font sizes. Recheck this workaround when
+     * updating Material 3 in case ListItem starts adapting its minimum height internally.
+     */
+    val fontScale = LocalDensity.current.fontScale
+    val defaultMinHeight = if (description == null) 56.dp else 72.dp
+    val adaptiveMinHeight = (defaultMinHeight * fontScale).coerceAtLeast(48.dp)
 
     val baseShape = LocalSegmentedItemShape.current
 
@@ -249,6 +255,7 @@ fun SettingsBaseWidget(
     }
 
     var itemModifier = (if (fillMaxWidth) modifier.fillMaxWidth() else modifier)
+        .heightIn(min = adaptiveMinHeight)
     if (isOnBackground && themeConfig.isEnableBlurExp)
         itemModifier = itemModifier
             .clip(clipShape)
@@ -295,10 +302,6 @@ fun SettingsBaseWidget(
             }
 
             descriptionColumnContent?.invoke(this)
-
-            if (description != null || descriptionColumnContent != null) {
-                Spacer(Modifier.height(dynamicInternalPadding))
-            }
         }
     }
 
@@ -317,10 +320,6 @@ fun SettingsBaseWidget(
         Box(
             modifier = Modifier
                 .alpha(alpha)
-                .padding(
-                    top = dynamicInternalPadding,
-                    bottom = if (description == null && descriptionColumnContent == null) dynamicInternalPadding else 0.dp
-                )
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically

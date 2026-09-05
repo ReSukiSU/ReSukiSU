@@ -81,7 +81,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.resukisu.resukisu.R
@@ -130,8 +129,7 @@ import kotlin.math.roundToInt
 
 
 @SuppressLint(
-    "LocalContextConfigurationRead", "LocalContextResourcesRead", "ObsoleteSdkInt",
-    "RestrictedApi"
+    "LocalContextConfigurationRead", "LocalContextResourcesRead", "ObsoleteSdkInt"
 )
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -352,31 +350,18 @@ fun ThemeSettingsScreen(
 
             item {
                 // Predictive Back Settings
-                val transition = LocalNavAnimatedContentScope.current.transition
-
                 SegmentedColumn(
                     title = stringResource(R.string.predictive_back_settings)
                 ) {
                     item {
                         PredictiveBackAnimationWidget(settingsState) { animation ->
-                            // Hey Google
-                            // Why you keep playing the animation even we are already play completed?
-
-                            // This is very dirty, We are using RestrictedApi, but we don't have other choice
-                            transition.setPlaytimeAfterInitialAndTargetStateEstablished(
-                                transition.targetState,
-                                transition.targetState,
-                                transition.playTimeNanos
-                            )
-
                             settingsViewModel.dispatch(
                                 SettingsUiAction.SetPredictiveBackAnimation(animation)
                             )
                         }
                     }
                     item(
-                        visible = settingsState.predictiveBackAnimation == PredictiveBackAnimation.Scale ||
-                                settingsState.predictiveBackAnimation == PredictiveBackAnimation.AOSP
+                        visible = settingsState.predictiveBackAnimation == PredictiveBackAnimation.Scale
                     ) {
                         PredictiveBackAnimationDirectionWidget(settingsState) { direction ->
                             settingsViewModel.dispatch(

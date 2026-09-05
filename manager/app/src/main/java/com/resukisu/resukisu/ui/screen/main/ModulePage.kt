@@ -63,7 +63,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuGroup
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.CheckableDropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -499,11 +499,11 @@ private fun ModuleDropdown(
         DropdownMenuGroup(
             shapes = MenuDefaults.groupShapes(),
         ) {
-            DropdownMenuItem(
+            CheckableDropdownMenuItem(
                 checked = uiState.sortActionFirst,
-                onCheckedChange = { checked ->
+                onCheckedChange = {
                     viewModel.dispatch(
-                        ModuleUiAction.Sort(uiState.sortEnabledFirst, checked)
+                        ModuleUiAction.Sort(uiState.sortEnabledFirst, it)
                     )
                 },
                 text = { Text(stringResource(R.string.module_sort_action_first)) },
@@ -512,11 +512,11 @@ private fun ModuleDropdown(
                     count = 2,
                 ),
             )
-            DropdownMenuItem(
+            CheckableDropdownMenuItem(
                 checked = uiState.sortEnabledFirst,
-                onCheckedChange = { checked ->
+                onCheckedChange = {
                     viewModel.dispatch(
-                        ModuleUiAction.Sort(checked, uiState.sortActionFirst)
+                        ModuleUiAction.Sort(it, uiState.sortActionFirst)
                     )
                 },
                 text = { Text(stringResource(R.string.module_sort_enabled_first)) },

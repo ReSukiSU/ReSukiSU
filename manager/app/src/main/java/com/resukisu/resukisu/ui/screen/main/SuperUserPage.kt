@@ -23,6 +23,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.Article
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.SelectableDropdownMenuItem
 import androidx.compose.material.icons.twotone.Archive
 import androidx.compose.material.icons.twotone.ChevronRight
 import androidx.compose.material.icons.twotone.MoreVert
@@ -425,12 +427,12 @@ private fun SuperUserDropdown(
             shapes = MenuDefaults.groupShapes(),
         ) {
             SortType.entries.forEachIndexed { index, sortType ->
-                DropdownMenuItem(
+                SelectableDropdownMenuItem(
                     selected = uiState.currentSortType == sortType,
-                    text = { Text(stringResource(sortType.displayNameRes)) },
                     onClick = {
                         viewModel.dispatch(SuperUserUiAction.SetSort(sortType))
                     },
+                    text = { Text(stringResource(sortType.displayNameRes)) },
                     shapes = MenuDefaults.itemShape(
                         index = index,
                         count = SortType.entries.size,
@@ -445,13 +447,13 @@ private fun SuperUserDropdown(
             shapes = MenuDefaults.groupShapes(),
         ) {
             menuItems.forEachIndexed { index, menuItem ->
-                DropdownMenuItem(
+                SelectableDropdownMenuItem(
                     selected = menuItem.checked,
-                    text = { Text(stringResource(menuItem.titleRes)) },
                     onClick = {
                         onDismissRequest()
                         menuItem.onClick()
                     },
+                    text = { Text(stringResource(menuItem.titleRes)) },
                     shapes = MenuDefaults.itemShape(
                         index = index,
                         count = menuItems.size,

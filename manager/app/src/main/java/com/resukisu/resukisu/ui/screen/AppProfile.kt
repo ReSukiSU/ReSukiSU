@@ -145,7 +145,7 @@ fun AppProfileScreen(
     }
 
     val profile = uiState.profile
-    if (appGroup == null || profile == null) {
+    if (uiState.isLoading && (appGroup == null || profile == null)) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
@@ -159,14 +159,16 @@ fun AppProfileScreen(
         colorScheme.surfaceContainer
     }
 
-    LaunchedEffect(Unit) {
+    val initialized = remember { mutableStateOf(false) }
+    if (!initialized.value) {
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
+        initialized.value = true
     }
-    
+
     Scaffold(
         topBar = {
             TopBar(
-                title = appGroup.mainApp.label,
+                title = appGroup!!.mainApp.label,
                 packageName = packageName,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = cardColor,
@@ -187,18 +189,18 @@ fun AppProfileScreen(
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .blurSource(),
             topPadding = paddingValues.calculateTopPadding(),
-            appGroup = appGroup,
+            appGroup = appGroup!!,
             appIcon = {
                 PackageIcon(
-                    packageName = appGroup.mainApp.packageName,
-                    contentDescription = appGroup.mainApp.label,
+                    packageName = appGroup!!.mainApp.packageName,
+                    contentDescription = appGroup!!.mainApp.label,
                     modifier = Modifier
                         .padding(4.dp)
                         .width(48.dp)
                         .height(48.dp),
                 )
             },
-            profile = profile,
+            profile = profile!!,
             defaultUmountModules = uiState.defaultUmountModules,
             sepolicyValid = uiState.sepolicyValid,
             onValidateSepolicy = {

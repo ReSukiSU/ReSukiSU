@@ -64,16 +64,20 @@ class AppProfileViewModel(
     private val mutableEvents = MutableSharedFlow<AppProfileUiEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<AppProfileUiEvent> = mutableEvents.asSharedFlow()
     private var validationJob: Job? = null
+    private var loadJob: Job? = null
     private val saveMutex = Mutex()
-
-    init {
-        dispatch(AppProfileUiAction.Load)
-    }
 
     fun dispatch(action: AppProfileUiAction) {
         when (action) {
-            AppProfileUiAction.Load -> viewModelScope.launch {
-                mutableState.update { it.copy(isLoading = true) }
+            AppProfileUiAction.Load -> {
+                if (loadJob?.isActive == true) return
+
+                loadJob = viewModelScope.launch {
+                    val existing = mutableState.value
+                    val hasData = existing.appGroup != null && existing.profile != null
+                    if (!hasData) {
+                        mutableState.update { it.copy(isLoading = true) }
+                    }
                 runCatching {
                     val profile = getProfile(packageName, uid)
                     val loadedProfile = if (profile.allowSu) {
@@ -91,15 +95,18 @@ class AppProfileViewModel(
                             .getOrDefault(profile.umountModules),
                     )
                 }.onSuccess { (group, profile, defaultUmountModules) ->
-                    mutableState.value = AppProfileUiState(
-                        appGroup = group,
-                        profile = profile,
-                        defaultUmountModules = defaultUmountModules,
-                        isLoading = false,
-                    )
+                    mutableState.update {
+                        it.copy(
+                            appGroup = group,
+                            profile = profile,
+                            defaultUmountModules = defaultUmountModules,
+                            isLoading = false,
+                        )
+                    }
                 }.onFailure { error ->
                     mutableState.update { it.copy(isLoading = false) }
                     mutableEvents.tryEmit(AppProfileUiEvent.Error(error))
+                }
                 }
             }
 

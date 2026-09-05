@@ -27,13 +27,14 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.twotone.Download
 import androidx.compose.material.icons.twotone.Extension
 import androidx.compose.material.icons.twotone.MoreVert
 import androidx.compose.material.icons.twotone.Star
 import androidx.compose.material.icons.twotone.WebAsset
+import androidx.compose.material3.CheckableDropdownMenuItem
 import androidx.compose.material3.DropdownMenuGroup
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -303,10 +304,10 @@ private fun ModuleRepoDropdown(
         DropdownMenuGroup(
             shapes = MenuDefaults.groupShapes(),
         ) {
-            DropdownMenuItem(
+            CheckableDropdownMenuItem(
                 checked = uiState.sortStargazerCountFirst,
-                onCheckedChange = { checked ->
-                    viewModel.dispatch(ModuleRepoUiAction.SetStarsFirst(checked))
+                onCheckedChange = {
+                    viewModel.dispatch(ModuleRepoUiAction.SetStarsFirst(it))
                 },
                 text = { Text(stringResource(R.string.module_sort_star_first)) },
                 shapes = MenuDefaults.itemShape(
