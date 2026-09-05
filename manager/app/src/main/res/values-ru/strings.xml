@@ -538,4 +538,5 @@
     <string name="susfs_config_disable_warning">Встроенный менеджер SUSFS отключен. Включите его или установите сторонний модуль для использования функций SUSFS.</string>
     <string name="settings_webview_zygote_umount">Размонтирование для WebView</string>
     <string name="settings_webview_zygote_umount_summary">Предотвращает утечку информации из процесса WebView, но может нарушить работу модулей. Перезагрузите для применения</string>
+    <string name="about_anime_character_sticker"><![CDATA[Иконки лицензированы по специальному соглашению: нарисованы 怡子日日, авторские права принадлежат 明风OuO, а векторизованные иконки предоставлены этим проектом.]]></string>
 </resources>
