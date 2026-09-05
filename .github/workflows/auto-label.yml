@@ -5,11 +5,13 @@ on:
 jobs:
   label:
     runs-on: ubuntu-latest
+    environment: action
     permissions:
       issues: write
     steps:
       - uses: actions/github-script@v9
         with:
+          github-token: ${{ secrets.GH_TOKEN || github.token }}
           script: |
             const body = context.payload.issue.body || "";
             const expectedLabels = [];
@@ -22,6 +24,25 @@ jobs:
             
             const managedLabels = ["nongki", "gki", "susfs", "tracepoint", "manual"];
             const currentLabels = context.payload.issue.labels.map(l => l.name);
+
+            if (context.payload.issue.state === "open" && currentLabels.length === 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: "请使用 Issue Template 提交问题或功能请求。此 Issue 因未使用模板，现已按 `not planned` 关闭。\n\nPlease use an Issue Template to submit a bug report or feature request. This issue has been closed as `not planned` because no template was used."
+              });
+
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                state: "closed",
+                state_reason: "not_planned"
+              });
+
+              return;
+            }
             
             const labelsToAdd = expectedLabels.filter(l => !currentLabels.includes(l));
             const labelsToRemove = currentLabels.filter(l => managedLabels.includes(l) && !expectedLabels.includes(l));
