@@ -20,6 +20,7 @@ int ksu_handle_stat(int *dfd, struct filename **filename, int *flags);
 #else
 int ksu_handle_faccessat(int *dfd, const char __user **filename_user, int *mode, int *__unused_flags);
 int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
+int ksu_handle_post_execve(int *fd, const char *filename, void *argv, void *envp, int *flags, int *retval);
 #endif // #ifdef CONFIG_KSU_SUSFS
 
 #ifdef CONFIG_KSU_TRACEPOINT_HOOK
@@ -47,12 +48,24 @@ long ksu_handle_execveat_sucompat_internal(const char __user **filename_user, in
 #define ksu_clear_current_proc_unprivillege susfs_clear_current_proc_no_su
 #else // manual hook
 
+// we have a huge number spare TIFs can use
+// https://elixir.bootlin.com/linux/v7.2.2/source/arch/arm64/include/asm/thread_info.h#L90
+// https://elixir.bootlin.com/linux/v7.2.2/source/arch/arm/include/asm/thread_info.h#L154
+// https://elixir.bootlin.com/linux/v7.2.2/source/arch/x86/include/asm/thread_info.h#L103
+// 23 - 31 is spare in arm32  (9 tifs)
+// 32 - 63 is spare in arm64  (32 tifs)
+// 28 - 31 is spare in x86    (4 tifs)
+// 28 - 63 is spare in x86-64 (36 tifs)
+
 // 63 already used as TIF_KSU_DISABLE_ESCAPE_WITH_ROOT (64bit)
 // 31 already used as TIF_KSU_DISABLE_ESCAPE_WITH_ROOT (32bit)
+// TIF_PROC_IN_KSU_EXECVE may reuse in future? because it only useful when current->in_execve=1
 #ifdef CONFIG_64BIT
 #define TIF_PROC_NON_PRIVILEGE 62
+#define TIF_PROC_IN_KSU_EXECVE 61
 #else
 #define TIF_PROC_NON_PRIVILEGE 30
+#define TIF_PROC_IN_KSU_EXECVE 29
 #endif
 
 static inline bool ksu_is_current_proc_unprivillege(void)

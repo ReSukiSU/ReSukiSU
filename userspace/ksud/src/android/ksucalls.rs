@@ -1,7 +1,7 @@
 #![allow(clippy::unreadable_literal)]
 use anyhow::{Result, bail};
 
-use std::{cell::Cell, fs, os::fd::RawFd, sync::OnceLock};
+use std::{cell::Cell, fs, io, os::fd::RawFd, sync::OnceLock};
 
 use crate::{android::uapi, defs::MountInfo};
 
@@ -70,31 +70,47 @@ pub fn setup_sigsys_handler() {
     }
 }
 
+const DRIVER_FD_NAME: &str = "anon_inode:[ksu_driver]";
+const SU_DRIVER_FD_NAME: &str = "anon_inode:[ksu_driver_su]";
+
 // Global driver fd cache
 static DRIVER_FD: OnceLock<RawFd> = OnceLock::new();
 static INFO_CACHE: OnceLock<uapi::ksu_get_info_cmd> = OnceLock::new();
 
-fn scan_driver_fd() -> Option<RawFd> {
-    let fd_dir = fs::read_dir("/proc/self/fd").ok()?;
+fn scan_driver_fd() -> io::Result<Option<RawFd>> {
+    let fd_dir = fs::read_dir("/proc/self/fd")?;
+    let mut driver_fd = None;
 
     for entry in fd_dir.flatten() {
         if let Ok(fd_num) = entry.file_name().to_string_lossy().parse::<i32>() {
             let link_path = format!("/proc/self/fd/{fd_num}");
             if let Ok(target) = fs::read_link(&link_path) {
                 let target_str = target.to_string_lossy();
-                if target_str.contains("[ksu_driver]") {
-                    return Some(fd_num);
+                if target_str == SU_DRIVER_FD_NAME {
+                    return Ok(Some(fd_num));
+                }
+                if target_str == DRIVER_FD_NAME {
+                    driver_fd = Some(fd_num);
                 }
             }
         }
     }
 
-    None
+    Ok(driver_fd)
+}
+
+pub fn claim_inherited_driver_fd() -> io::Result<()> {
+    if DRIVER_FD.get().is_none()
+        && let Some(fd) = scan_driver_fd()?
+    {
+        let _ = DRIVER_FD.set(fd);
+    }
+    Ok(())
 }
 
 // Get cached driver fd
 fn init_driver_fd() -> Option<RawFd> {
-    let fd = scan_driver_fd();
+    let fd = scan_driver_fd().ok().flatten();
     if fd.is_none() {
         let mut fd = -1;
         with_svc_call(|| unsafe {
