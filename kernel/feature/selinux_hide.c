@@ -517,6 +517,8 @@ static int ksu_selinux_hide_enable()
         return -ENOMEM;
     }
 
+    rwlock_init(&fake_state.ss->policy_rwlock);
+
     // In normal android
     // Only set selinux policy once
     // So let's just hardcode to 1 to avoid avdSeqNo detect
