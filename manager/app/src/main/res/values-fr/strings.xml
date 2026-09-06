@@ -377,7 +377,7 @@
     <string name="manager_update_stable">Mise à jour de version stable</string>
     <string name="manager_update_beta">Mise à jour de version bêta</string>
     <string name="manager_update_details">Version : %1$s (%2$d)\nArchitecture : %3$s</string>
-    <string name="settings_check_beta_update">Recherche de mise à jour de version bêta</string>
+    <string name="settings_check_beta_update">Recherche de mises à jour de version bêta du gestionnaire</string>
     <string name="settings_check_beta_update_summary">Recherche automatiquement les versions bêta du gestionnaire depuis la branche principale du dépôt GitHub</string>
     <string name="network_offline">Hors connexion</string>
     <string name="network_retry">Réessayer</string>

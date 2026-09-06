@@ -490,7 +490,7 @@
     <string name="dynamic_manager_clear_confirm_title">Dinamik yöneticiyi temizle</string>
     <string name="dynamic_manager_clear_confirm_message">Dinamik yönetici yapılandırmasını silmek istediğinize emin misiniz?</string>
     <string name="manage_managers">Yöneticileri yönet</string>
-    <string name="home_version_info">Sürüm Bilgisi</string>
+    <string name="home_version_info">Hakkında</string>
     <string name="home_status_info">Durum Bilgisi</string>
     <string name="home_short_info">SüperKullanıcı: %1$d, Modüller: %2$d</string>
     <string name="home_kernel_version">Çekirdek sürücüsü sürümü</string>
