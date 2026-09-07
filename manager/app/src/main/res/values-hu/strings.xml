@@ -353,8 +353,6 @@
     <string name="author">Fejlesztő(k)</string>
     <string name="description">Leírás</string>
     <string name="supported_devices">Támogatott készülékek</string>
-    <string name="require_manager_version">Úgy tűnik a root menedzser verzió %1$d túl alacsony. Jelen esetben a KernelSU implementáció megfelelő működéséhez minimum %2$d verzió szükséges!</string>
-    <string name="require_kernel_version">Úgy tűnik a kernelbe telepített KernelSU implementáció verzió %1$d túl alacsony. Jelen esetben a root menedzser megfelelő működéséhez minimum %2$d verzió szükséges!</string>
     <string name="umount_path_manager">Leválasztandó elérési útvonalak</string>
     <string name="umount_path_manager_summary">Fájlrendszer elérési útvonalak kezelése a leválasztáshoz</string>
     <string name="no_any_umount_path">Nincs megadva elérési útvonal</string>

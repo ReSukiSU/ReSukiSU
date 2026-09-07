@@ -188,7 +188,7 @@ fun SettingsPage(bottomPadding: Dp) {
             )
         ) {
             // 配置卡片
-            if (homeState.systemStatus.isValid) {
+            if (homeState.systemStatus.isFullFeatured) {
                 item {
                     val modeItems = listOf(
                         stringResource(id = R.string.settings_mode_default),
@@ -448,7 +448,7 @@ fun SettingsPage(bottomPadding: Dp) {
                             ) {}
                         }
 
-                        if (homeState.systemStatus.isValid) {
+                        if (homeState.systemStatus.isFullFeatured) {
                             item {
                                 SettingsJumpPageWidget(
                                     icon = Icons.TwoTone.Security,

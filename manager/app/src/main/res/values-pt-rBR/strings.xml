@@ -373,8 +373,6 @@
     <string name="sus_maps_description_text">Oculta os caminhos reais dos mapeamentos de memória em /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap]. Observação: este recurso não suporta a ocultação de mapeamentos de memória anônimos, nem pode ocultar hooks embutidos ou hooks PLT causados pela própria biblioteca injetada</string>
     <string name="sus_maps_warning">Aviso importante: Para aplicações com mecanismos de detecção de injeção bem implementados, este recurso pode não ser eficaz para contornar a detecção</string>
     <string name="sus_maps_debug_info">Primeiro, encontre o PID e o UID do aplicativo de destino usando o comando `ps -enf`. Em seguida, verifique os caminhos relevantes em `/proc/&lt;pid&gt;/maps` e compare os números dos dispositivos com os de `/proc/1/mountinfo` para garantir a consistência. A função de ocultação do mapa só funcionará corretamente se os números dos dispositivos coincidirem</string>
-    <string name="require_manager_version">A versão atual do gerenciador KernelSU, %1$d, é muito antiga para o funcionamento correto do KernelSU. Atualize o gerenciador para a versão %2$d ou superior!</string>
-    <string name="require_kernel_version">A versão atual do KernelSU, %1$d, é muito antiga para o gerenciador funcionar corretamente. Atualize para a versão %2$d ou superior!</string>
     <string name="umount_path_manager">Gestão de Caminhos de Umount</string>
     <string name="umount_path_manager_summary">Gerenciar caminhos de desmontagem do kernel</string>
     <string name="no_any_umount_path">Não existem caminhos de desmontagem</string>

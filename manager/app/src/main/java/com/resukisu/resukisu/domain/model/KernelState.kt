@@ -22,8 +22,7 @@ data class KernelStatus(
     val lkmMode: Boolean? = null,
     val kernelVersion: KernelVersion,
     val isRootAvailable: Boolean = false,
-    val requireNewKernel: Boolean = false,
-    val uapiMismatch: Boolean = false,
+    val isFullFeatured: Boolean = false,
     val isSELinuxPermissive: Boolean = false,
     val isOfficialSignature: Boolean = true,
     val kernelPatchImplementation: KernelPatchImplementation = KernelPatchImplementation.NONE,
@@ -31,10 +30,7 @@ data class KernelStatus(
     val isSafeMode: Boolean = false,
     val isLateLoadMode: Boolean = false,
     val isPrBuild: Boolean = false,
-) {
-    val isValid: Boolean
-        get() = isManager && !requireNewKernel && isRootAvailable
-}
+)
 
 data class KernelFeatureSettings(
     val suEnabled: Boolean,

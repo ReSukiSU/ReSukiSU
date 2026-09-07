@@ -57,6 +57,9 @@ object Natives {
     val isLkmMode: Boolean
         external get
 
+    val isLkmBundled: Boolean
+        external get
+
     val isLateLoadMode: Boolean
         external get
 
@@ -197,12 +200,8 @@ object Natives {
     val managerUAPIVersion: Int
         external get
 
-    fun checkUAPIMismatch(): Boolean {
-        return kernelUAPIVersion != managerUAPIVersion
-    }
-
-    fun requireNewKernel(): Boolean {
-        return (version != -1 && version < MINIMAL_SUPPORTED_KERNEL) || checkUAPIMismatch()
+    fun isFullFeatured(): Boolean {
+        return isManager && kernelUAPIVersion == managerUAPIVersion
     }
 
     @Immutable

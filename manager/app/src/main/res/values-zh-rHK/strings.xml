@@ -417,8 +417,6 @@
     <string name="predictive_back_exit_direction_follow_gesture">跟隨手勢</string>
     <string name="predictive_back_exit_direction_always_right">固定靠右</string>
     <string name="predictive_back_exit_direction_always_left">固定靠左</string>
-    <string name="require_manager_version">當前 KernelSU 管理器版本 %1$d 過低，無法正常運作，請升級至 %2$d 或更高版本！</string>
-    <string name="require_kernel_version">當前 KernelSU 版本 %1$d 過低，管理器無法正常運作，請升級至 %2$d 或更高版本！</string>
     <string name="download_channel_name">模組下載</string>
     <string name="download_progress_title">正在下載 %s</string>
     <string name="download_complete_title">下載完成</string>

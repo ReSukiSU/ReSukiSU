@@ -8,6 +8,6 @@ inline fun KsuIsValid(
     status: KernelStatus,
     content: @Composable () -> Unit
 ) {
-    if (status.isValid)
+    if (status.isFullFeatured)
         content()
 }

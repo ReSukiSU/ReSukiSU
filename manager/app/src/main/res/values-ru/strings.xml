@@ -428,8 +428,6 @@
     <string name="dynamic_palette_style">Стиль палитры</string>
     <string name="dynamic_color_spec">Спецификация цвета</string>
     <string name="predictive_back_animation_aosp">AOSP стиль</string>
-    <string name="require_manager_version">Текущая версия %1$d KernelSU слишком низкая для корректной работы. Пожалуйста обновите менеджер до %2$d и выше</string>
-    <string name="require_kernel_version">Текущая версия %1$d KernelSU слишком низкая для корректной работы. Обновите пожалуйста менеджер до версии %2$d и выше</string>
     <string name="readme">Ридми</string>
     <string name="susfs_tab_status">Статус</string>
     <string name="susfs_tab_standard">Стандарт</string>

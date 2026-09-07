@@ -400,8 +400,6 @@
     <string name="predictive_back_animation_ksu_classic">KernelSU Klasik</string>
     <string name="predictive_back_exit_direction_follow_gesture">Hareketi Takip Et</string>
     <string name="kernel_package">Çekirdek</string>
-    <string name="require_manager_version">KernelSU yöneticisinin mevcut sürümü %1$d, bu KernelSU\'nun düzgün çalışması için çok düşük. Lütfen yöneticiyi %2$d veya daha yüksek bir sürüme yükseltin!</string>
-    <string name="require_kernel_version">Mevcut KernelSU sürümü %1$d yöneticinin düzgün çalışması için çok düşük. Lütfen %2$d veya daha yüksek bir sürüme yükseltin!</string>
     <string name="download_channel_name">Modül İndirmeleri</string>
     <string name="download_progress_title">İndiriliyor %s</string>
     <string name="download_complete_title">İndirildi</string>

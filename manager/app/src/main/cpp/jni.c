@@ -243,6 +243,10 @@ NativeBridgeNP(isPrBuild, jboolean) {
 	return is_pr_build();
 }
 
+NativeBridgeNP(isLkmBundled, jboolean) {
+	return is_lkm_bundled();
+}
+
 NativeBridgeNP(isLateLoadMode, jboolean) {
 	return is_late_load_mode();
 }

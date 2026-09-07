@@ -432,8 +432,6 @@
     <string name="dynamic_manager_clear_confirm_title">Effacement de la configuration du gestionnaire dynamique</string>
     <string name="dynamic_manager_clear_confirm_message">Effacer la configuration du gestionnaire dynamique ?</string>
     <string name="manage_managers">Gestionnaires dynamiques</string>
-    <string name="require_manager_version">La version installée du gestionnaire KernelSU (%1$d) est trop ancienne pour que KernelSU fonctionne correctement. La mise à jour du gestionnaire en version %2$d ou ultérieure est nécessaire !</string>
-    <string name="require_kernel_version">Version de KernelSU (%1$d) obsolète pour garantir un fonctionnement correct du gestionnaire. Mise à jour en version %2$d ou ultérieure requise !</string>
     <string name="umount_path_manager">Gestion des chemins de démontage</string>
     <string name="umount_path_manager_summary">Gère les chemins de démontage du noyau</string>
     <string name="no_any_umount_path">Aucun chemin de démontage existant</string>

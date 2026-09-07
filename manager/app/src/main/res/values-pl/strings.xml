@@ -367,8 +367,6 @@
     <string name="sus_maps_description_text">Ukrywa prawdziwe ścieżki plików map pamięci przed /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap]. Ta funkcja nie wspiera ukrywania anonimowy map pamięci, ani nie może ukryć inline hooków lub PLT haków wywołanych przez wstrzykniętą bibliotekę</string>
     <string name="sus_maps_warning">Dla aplikacji z dobrą implementacją mechanizmu wykrywania wstrzyknięć ta funkcja może nie być skuteczna</string>
     <string name="sus_maps_debug_info">Najpierw znajdź PID oraz UID wybranej aplikacji używając ps -enf, a następnie sprawdź znaczące ścieżki w /proc/&lt;pod&gt;/maps i porównaj liczby urządzenia z tymi, które znajdują się w /proc/1/mountinfo. Funkcja może działać poprawnie tylko, gdy te liczby się zgadzają</string>
-    <string name="require_manager_version">Aktualna wersja menadżera KernelSU %1$d jest zbyt niska aby KernelSU działało poprawnie. Zaktualizuj menadżer do wersji %2$d lub wyższej!</string>
-    <string name="require_kernel_version">Aktualna wersja KernelSU %1$d jest zbyt niska aby menadżer działał poprawnie. Zaktualizuj KernelSU do wersji %2$d lub wyższej!</string>
     <string name="umount_path_manager">Zarządzanie ścieżkami odmontowywania</string>
     <string name="umount_path_manager_summary">Zarządzaj ścieżkami odmontowywania przez jądra</string>
     <string name="no_any_umount_path">Brak ścieżek</string>
