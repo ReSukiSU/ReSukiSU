@@ -187,8 +187,12 @@ fn execute(cli: &Args) -> Result<()> {
     if let Some(path) = &cli.file {
         let file = File::open(path).with_context(|| format!("Failed to open {path}"))?;
         let reader = BufReader::new(file);
-        rp.load_props(reader.lines())
-            .context("Failed to load properties from file")?;
+        if rp
+            .load_props(reader.lines())
+            .context("Failed to load properties from file")?
+        {
+            eprintln!("resetprop: warning: rebuild is needed!");
+        }
         return Ok(());
     }
 
@@ -225,8 +229,12 @@ fn execute(cli: &Args) -> Result<()> {
     match (name, value) {
         // resetprop name value (set)
         (Some(name), Some(value)) => {
-            rp.set(name, value)
-                .with_context(|| format!("Failed to set {name}"))?;
+            if rp
+                .set(name, value)
+                .with_context(|| format!("Failed to set {name}"))?
+            {
+                eprintln!("resetprop: warning: rebuild is needed!");
+            }
         }
 
         // resetprop name (get)
@@ -272,7 +280,8 @@ pub(crate) fn set_property_direct(name: &str, value: &str) -> Result<()> {
     sys_prop::init().context("Failed to initialize system property API")?;
     direct_resetprop()
         .set(name, value)
-        .with_context(|| format!("Failed to set {name}"))
+        .with_context(|| format!("Failed to set {name}"))?;
+    Ok(())
 }
 
 /// Load system.prop file using internal resetprop API.
@@ -292,8 +301,15 @@ pub fn load_system_prop_file(path: &Path) -> Result<()> {
 
     let file = File::open(path).with_context(|| format!("Failed to open {}", path.display()))?;
     let reader = BufReader::new(file);
-    rp.load_props(reader.lines())
-        .with_context(|| format!("Failed to load properties from {}", path.display()))?;
+    if rp
+        .load_props(reader.lines())
+        .with_context(|| format!("Failed to load properties from {}", path.display()))?
+    {
+        log::warn!(
+            "warning: after loaded prop file from {}, rebuild is needed!",
+            path.display()
+        );
+    }
 
     info!("Loaded system.prop from {}", path.display());
     Ok(())
