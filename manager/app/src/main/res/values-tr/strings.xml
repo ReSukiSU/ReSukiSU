@@ -535,4 +535,7 @@
     <string name="susfs_enable_config">SUSFS Yöneticisi</string>
     <string name="susfs_enable_config_summary">Yerleşik SUSFS yöneticisini etkinleştirir. Üçüncü taraf modüllerle çakışabilir.</string>
     <string name="susfs_config_disable_warning">Yerleşik SUSFS yöneticisi devre dışı. SUSFS özelliklerini kullanmak için bunu etkinleştirin veya üçüncü taraf bir modül yükleyin.</string>
+    <string name="require_manager_version">Yönetici güncellemesi gerekiyor</string>
+    <string name="require_kernel_version">Çekirdek güncellemesi gerekiyor. Kurmak için dokunun.</string>
+    <string name="require_kernel_version_gki">Çekirdek güncellemesi gerekiyor</string>
 </resources>
