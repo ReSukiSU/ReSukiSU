@@ -402,4 +402,7 @@
     <string name="download_install">Cài đặt</string>
     <string name="notification_permission_description">Cần có Quyền truy cập vào thông báo để có thể hiện tiến trình tải.</string>
     <string name="notification_permission_denied">Tải thất bại: Cần có Quyền truy cập thông báo</string>
+    <string name="profile_flags">Cờ</string>
+    <string name="background_crop_method_title">Chọn 1 phương thức crop</string>
+    <string name="background_crop_failed">Cắt ảnh thất bại</string>
 </resources>

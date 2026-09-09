@@ -132,10 +132,10 @@
     <string name="home_android_version">Android バージョン</string>
     <string name="home_device_model">デバイスモデル</string>
     <string name="su_not_allowed">「%s」にスーパーユーザー権限を付与することはできません</string>
-    <string name="settings_sucompat">古典 su 命令</string>
-    <string name="settings_sucompat_summary">/system/bin/su 経由での 根源権限（特権）を 許可します（新規 手順/工程 のみ）</string>
-    <string name="settings_kernel_umount">module の umount</string>
-    <string name="settings_kernel_umount_summary">App Profile に基づき、kernel 側で module を umount します （あぷり ぷろふぁいる に もとづき、かーねる がわで もじゅーる を あんまうんと します）</string>
+    <string name="settings_sucompat">従来の su コマンド</string>
+    <string name="settings_sucompat_summary">新規プロセスにおいて、/system/bin/su を経由して root アクセスを許可します。</string>
+    <string name="settings_kernel_umount">モジュールのアンマウント（カーネルレベル）</string>
+    <string name="settings_kernel_umount_summary">アプリ プロファイルに基づいて、カーネルからモジュールをアンマウントします</string>
     <string name="feature_status_unsupported_summary">カーネルはこの機能に対応していません</string>
     <string name="feature_status_managed_summary">この機能はモジュールによって管理されています</string>
     <string name="settings_mode_default">デフォルト</string>
@@ -266,4 +266,20 @@
     <string name="confirm_delete">構成を削除</string>
     <string name="operation_failed">操作が失敗しました</string>
     <string name="group_contains_apps">%d 個のアプリが含まれています</string>
+    <string name="home_seccomp_status">Seccomp のステータス</string>
+    <string name="seccomp_status_not_supported">Not supported</string>
+    <string name="seccomp_status_disabled">Disabled</string>
+    <string name="seccomp_status_strict">Strict</string>
+    <string name="seccomp_status_filter">Filter</string>
+    <string name="seccomp_status_unknown">Unknown</string>
+    <string name="sulog">SU ログ</string>
+    <string name="sulog_log_files">ログファイル</string>
+    <string name="sulog_failed_to_load">SU ログの読み込みに失敗しました</string>
+    <string name="sulog_disabled_title">SU ログは有効になっていません</string>
+    <string name="sulog_unsupported_title">SU ログはサポートされていません</string>
+    <string name="sulog_enable_action">有効化</string>
+    <string name="sulog_filter_title">種類で絞り込む</string>
+    <string name="sulog_clean_title">ログを消去</string>
+    <string name="settings_webview_zygote_umount">WebView のアンマウント</string>
+    <string name="settings_webview_zygote_umount_summary">WebView プロセスからの情報漏洩を防ぎますが、モジュールが動作しなくなる可能性があります。適用するには再起動してください</string>
 </resources>

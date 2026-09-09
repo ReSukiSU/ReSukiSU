@@ -515,7 +515,7 @@
     <string name="dynamic_manager_clear_confirm_title">Очистити динамічний менеджер</string>
     <string name="dynamic_manager_clear_confirm_message">Ви впевнені, що хочете очистити налаштування динамічного менеджера?</string>
     <string name="manage_managers">Керування менеджерами</string>
-    <string name="home_version_info">Про</string>
+    <string name="home_version_info">Інформація про версію</string>
     <string name="home_status_info">Інформація про стан</string>
     <string name="home_short_info">Суперкористувач: %1$d, Модулі: %2$d</string>
     <string name="home_kernel_version">Версія драйвера ядра</string>
