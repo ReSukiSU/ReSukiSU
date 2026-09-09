@@ -15,7 +15,10 @@ class HomeRuntimeRepository(
     private val application: Application,
     private val ksuCliRepository: KsuCliRepository,
 ) {
-    suspend fun getBasicInfo(managerUapiVersion: Int): HomeBasicInfo =
+    suspend fun getBasicInfo(
+        managerUapiVersion: Int,
+        includeSelinuxStatus: Boolean = true,
+    ): HomeBasicInfo =
         withContext(Dispatchers.IO) {
             val uname = runCatching { Os.uname() }.getOrNull()
             HomeBasicInfo(
@@ -27,7 +30,11 @@ class HomeRuntimeRepository(
                     BuildConfig.VERSION_CODE,
                     managerUapiVersion,
                 ),
-                selinuxStatus = runCatching { getSELinuxStatus(application) }.getOrDefault("Unknown"),
+                selinuxStatus = if (includeSelinuxStatus) {
+                    runCatching { getSELinuxStatus(application) }.getOrDefault("Unknown")
+                } else {
+                    ""
+                },
                 seccompStatus = runCatching { Os.prctl(21, 0, 0, 0, 0) }.getOrDefault(-1),
             )
         }

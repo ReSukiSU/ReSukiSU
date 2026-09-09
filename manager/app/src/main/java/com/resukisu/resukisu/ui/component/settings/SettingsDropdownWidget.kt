@@ -81,9 +81,6 @@ fun SettingsDropdownWidget(
                     data.forEachIndexed { index, item ->
                         val isSelected = index == choice
 
-                        // SelectableDropdownMenuItem handles selected-state color semantics.
-                        // MenuDefaults.itemShape(index, count) provides the per-position corner
-                        // radii for traditional group-shaped menus.
                         SelectableDropdownMenuItem(
                             selected = isSelected,
                             onClick = {

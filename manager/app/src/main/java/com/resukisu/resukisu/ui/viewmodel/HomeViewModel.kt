@@ -33,6 +33,8 @@ sealed interface HomeUiAction {
     data object AwaitInitialData : HomeUiAction
     data class Refresh(val showIndicator: Boolean = true) : HomeUiAction
     data class SetSimpleMode(val enabled: Boolean) : HomeUiAction
+    data class SetNavigationBarBadge(val enabled: Boolean) : HomeUiAction
+    data class SetHomeCardIcons(val enabled: Boolean) : HomeUiAction
     data class Reboot(val reason: String) : HomeUiAction
 }
 
@@ -89,7 +91,13 @@ class HomeViewModel(
                         it.copy(systemStatus = kernelStatus, isCoreDataLoaded = true)
                     }
 
-                    val basic = async { getBasicInfo(kernelStatus.managerUAPIVersion) }
+                    val includeSelinuxStatus = !state.value.isInitialDataLoaded
+                    val basic = async {
+                        getBasicInfo(
+                            managerUapiVersion = kernelStatus.managerUAPIVersion,
+                            includeSelinuxStatus = includeSelinuxStatus,
+                        )
+                    }
                     val module = async { getModuleOverview() }
                     val superusers = async { getSuperuserCount() }
                     val managers = async { getManagerRuntimeInfo() }
@@ -106,7 +114,12 @@ class HomeViewModel(
                                 androidVersion = basicInfo.androidVersion,
                                 deviceModel = basicInfo.deviceModel,
                                 managerVersion = basicInfo.managerVersion,
-                                selinuxStatus = basicInfo.selinuxStatus,
+                                // SELinux status is intentionally kept from the initial load. A
+                                // refresh can briefly fail to read the sysfs node and report a
+                                // false "Disabled" state.
+                                selinuxStatus = current.systemInfo.selinuxStatus.ifEmpty {
+                                    basicInfo.selinuxStatus
+                                },
                                 susfsEnabled = susfsInfo.enabled,
                                 susfsVersionSupported = susfsInfo.enabled,
                                 susfsVersion = susfsInfo.version,
@@ -138,11 +151,23 @@ class HomeViewModel(
     fun handleSimpleModeChange(enabled: Boolean) =
         updatePreference(PREF_SIMPLE_MODE, enabled) { it.copy(isSimpleMode = enabled) }
 
+    fun handleNavigationBarBadgeChange(enabled: Boolean) =
+        updatePreference(PREF_SHOW_NAVIGATION_BAR_BADGE, enabled) {
+            it.copy(showNavigationBarBadge = enabled)
+        }
+
+    fun handleHomeCardIconsChange(enabled: Boolean) =
+        updatePreference(PREF_SHOW_HOME_CARD_ICONS, enabled) {
+            it.copy(showHomeCardIcons = enabled)
+        }
+
     fun dispatch(action: HomeUiAction) {
         when (action) {
             HomeUiAction.AwaitInitialData -> viewModelScope.launch { awaitInitialData() }
             is HomeUiAction.Refresh -> refreshData(action.showIndicator)
             is HomeUiAction.SetSimpleMode -> handleSimpleModeChange(action.enabled)
+            is HomeUiAction.SetNavigationBarBadge -> handleNavigationBarBadgeChange(action.enabled)
+            is HomeUiAction.SetHomeCardIcons -> handleHomeCardIconsChange(action.enabled)
             is HomeUiAction.Reboot -> viewModelScope.launch {
                 reboot(action.reason).onFailure {
                     mutableEvents.tryEmit(HomeUiEvent.Error(it.message.orEmpty()))
@@ -189,6 +214,11 @@ class HomeViewModel(
         homeStateRepository.update {
             it.copy(
                 isSimpleMode = getBooleanPreference(PREF_SIMPLE_MODE),
+                showNavigationBarBadge = getBooleanPreference(
+                    PREF_SHOW_NAVIGATION_BAR_BADGE,
+                    true,
+                ),
+                showHomeCardIcons = getBooleanPreference(PREF_SHOW_HOME_CARD_ICONS),
             )
         }
     }
@@ -208,5 +238,7 @@ class HomeViewModel(
         const val PREF_CHECK_UPDATE = "check_update"
         const val PREF_CHECK_BETA_UPDATE = "check_beta_update"
         const val PREF_SIMPLE_MODE = "is_simple_mode"
+        const val PREF_SHOW_NAVIGATION_BAR_BADGE = "show_navigation_bar_badge"
+        const val PREF_SHOW_HOME_CARD_ICONS = "show_home_card_icons"
     }
 }

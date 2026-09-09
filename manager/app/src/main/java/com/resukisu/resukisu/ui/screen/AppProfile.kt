@@ -160,14 +160,6 @@ fun AppProfileScreen(
         colorScheme.surfaceContainer
     }
 
-    // 仅在首次进入时同步折叠 TopAppBar，避免每次 recomposition 都重置 heightOffset
-    // 与 scroll behavior 冲突，导致 LazyColumn prefetch 时 LayoutNode 状态不一致而崩溃
-    val initialized = remember { mutableStateOf(false) }
-    if (!initialized.value) {
-        scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
-        initialized.value = true
-    }
-
     Scaffold(
         topBar = {
             TopBar(

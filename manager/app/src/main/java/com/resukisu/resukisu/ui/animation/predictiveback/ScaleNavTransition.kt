@@ -1,11 +1,8 @@
-// SPDX-License-Identifier: GPL-3.0-only
-// Copyright (C) 2026 ReSukiSU contributors
 package com.resukisu.resukisu.ui.animation.predictiveback
 
 import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.ui.viewmodel.PredictiveBackExitDirection
 import top.yukonga.miuix.kmp.nav.transition.NavGesture
 import top.yukonga.miuix.kmp.nav.transition.NavMotion
@@ -19,11 +16,11 @@ import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 import top.yukonga.miuix.kmp.nav.transition.navDirectionalTransition
 import top.yukonga.miuix.kmp.nav.transition.navGraphicsTransition
 
-private const val SCALE_MIN = 0.85f
-private val ScaleExitDrift = 96.dp
-
 private val ScaleExitMotion = NavMotion(
-    commit = NavSettleSpec.Tween(durationMillis = 450, easing = FastOutExtraSlowIn),
+    commit = NavSettleSpec.Tween(
+        durationMillis = 200,
+        easing = FastOutSlowInEasing,
+    ),
     cancel = NavSettleSpec.Spring(stiffness = 1500f),
     programmatic = NavSettleSpec.Tween(
         durationMillis = 200,
@@ -38,7 +35,8 @@ internal fun scaleNavTransition(exitDirection: PredictiveBackExitDirection): Nav
         scrim = { scope ->
             when {
                 scope.settle?.phase == NavSettlePhase.Commit ->
-                    (1f - (scope.settle?.elapsedMillis ?: 0f) / 450f).coerceIn(0f, 1f)
+                    (1f - (scope.settle?.elapsedMillis ?: 0f) / 200)
+                        .coerceIn(0f, 1f)
 
                 scope.gesture != null -> 1f
                 else -> coverProgress(scope.relativeDepth)
@@ -48,7 +46,6 @@ internal fun scaleNavTransition(exitDirection: PredictiveBackExitDirection): Nav
         val depth = scope.relativeDepth
         val widthPx = scope.layoutSize.width.toFloat()
         val heightPx = scope.layoutSize.height.toFloat()
-        val driftPx = with(scope.density) { ScaleExitDrift.toPx() }
         val gesture = scope.gesture
         val sign = exitDirectionSign(exitDirection, scope)
         val committing = scope.settle?.phase == NavSettlePhase.Commit
@@ -59,11 +56,11 @@ internal fun scaleNavTransition(exitDirection: PredictiveBackExitDirection): Nav
                 val releaseProgress = (1f - gesture.progress).coerceAtLeast(0.01f)
                 val post = (1f - progress / releaseProgress).coerceIn(0f, 1f)
                 val releaseEasedProgress = shapedTopProgress(releaseProgress, gesture)
-                val committedScale = SCALE_MIN + (1f - SCALE_MIN) * releaseEasedProgress
-                committedScale + (SCALE_MIN - committedScale) * post
+                val committedScale = 0.85f + (1f - 0.85f) * releaseEasedProgress
+                committedScale + (0.85f - committedScale) * post
             } else {
                 val easedProgress = shapedTopProgress(progress, gesture)
-                SCALE_MIN + (1f - SCALE_MIN) * easedProgress
+                0.85f + (1f - 0.85f) * easedProgress
             }
             val pivotX = if (gesture?.swipeEdge == NavSwipeEdge.Left) 0.8f else 0.2f
             val pivotY = gesturePivotY(gesture, heightPx)
@@ -78,7 +75,7 @@ internal fun scaleNavTransition(exitDirection: PredictiveBackExitDirection): Nav
             } else if (outgoingCommit) {
                 val releaseProgress = (1f - gesture.progress).coerceAtLeast(0.01f)
                 val post = (1f - progress / releaseProgress).coerceIn(0f, 1f)
-                sign * post * driftPx
+                sign * post * widthPx
             } else {
                 sign * (1f - progress) * widthPx
             }
@@ -94,10 +91,6 @@ internal fun scaleNavTransition(exitDirection: PredictiveBackExitDirection): Nav
                 extent = heightPx,
                 pivotFraction = pivotY,
             )
-            if (outgoingCommit) {
-                val elapsedMillis = scope.settle?.elapsedMillis ?: 0f
-                alpha = (1f - 5f * (elapsedMillis / 450f)).coerceAtLeast(0f)
-            }
         }
     }
     return navDirectionalTransition(

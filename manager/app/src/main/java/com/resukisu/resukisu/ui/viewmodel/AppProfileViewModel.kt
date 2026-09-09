@@ -65,24 +65,16 @@ class AppProfileViewModel(
     private val mutableEvents = MutableSharedFlow<AppProfileUiEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<AppProfileUiEvent> = mutableEvents.asSharedFlow()
     private var validationJob: Job? = null
-    private var loadJob: Job? = null
     private val saveMutex = Mutex()
+
+    init {
+        dispatch(AppProfileUiAction.Load)
+    }
 
     fun dispatch(action: AppProfileUiAction) {
         when (action) {
-            AppProfileUiAction.Load -> {
-                // 防止并发 Load（ViewModel init 与 ActivityResumeEffect 可能同时触发）。
-                // 如果已有 Load 正在跑，直接复用，避免状态来回抖动造成 UI 闪烁。
-                if (loadJob?.isActive == true) return
-
-                loadJob = viewModelScope.launch {
-                    val existing = mutableState.value
-                    val hasData = existing.appGroup != null && existing.profile != null
-                    // 静默刷新：已有数据的情况下（例如从系统权限页返回时的 resume 刷新）
-                    // 不再把 isLoading 置 true，避免 Loading 状态与现有内容切换产生闪烁。
-                    if (!hasData) {
-                        mutableState.update { it.copy(isLoading = true) }
-                    }
+            AppProfileUiAction.Load -> viewModelScope.launch {
+                mutableState.update { it.copy(isLoading = true) }
                 runCatching {
                     val profile = getProfile(packageName, uid)
                     val isSpecial = uid == WEBVIEW_ZYGOTE_UID
@@ -112,7 +104,6 @@ class AppProfileViewModel(
                 }.onFailure { error ->
                     mutableState.update { it.copy(isLoading = false) }
                     mutableEvents.tryEmit(AppProfileUiEvent.Error(error))
-                }
                 }
             }
 

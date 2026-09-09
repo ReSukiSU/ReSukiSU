@@ -674,6 +674,30 @@ private fun CustomizationSettings(
                 }
             )
         }
+
+        item {
+            SettingsSwitchWidget(
+                icon = Icons.TwoTone.Info,
+                title = stringResource(R.string.navigation_bar_badge),
+                description = stringResource(R.string.navigation_bar_badge_summary),
+                checked = homeUiState.showNavigationBarBadge,
+                onCheckedChange = { enabled ->
+                    homeViewModel.dispatch(HomeUiAction.SetNavigationBarBadge(enabled))
+                }
+            )
+        }
+
+        item {
+            SettingsSwitchWidget(
+                icon = Icons.TwoTone.Info,
+                title = stringResource(R.string.home_card_icons),
+                description = stringResource(R.string.home_card_icons_summary),
+                checked = homeUiState.showHomeCardIcons,
+                onCheckedChange = { enabled ->
+                    homeViewModel.dispatch(HomeUiAction.SetHomeCardIcons(enabled))
+                }
+            )
+        }
     }
 }
 

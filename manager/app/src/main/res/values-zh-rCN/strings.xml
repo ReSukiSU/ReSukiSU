@@ -234,6 +234,10 @@
     <string name="settings_custom_monospace_font_summary">使用内置等宽字体显示日志，解决某些 ROM 上字体对齐异常的问题</string>
     <string name="simple_mode">简洁模式</string>
     <string name="simple_mode_summary">开启后将隐藏不必要的卡片</string>
+    <string name="navigation_bar_badge">导航栏角标</string>
+    <string name="navigation_bar_badge_summary">在导航栏展示超级用户 / 模块数量</string>
+    <string name="home_card_icons">主页卡片显示图标</string>
+    <string name="home_card_icons_summary">主页信息卡片添加图标展示</string>
     <string name="theme_mode">主题模式</string>
     <string name="theme_follow_system">跟随系统</string>
     <string name="theme_light">浅色</string>
