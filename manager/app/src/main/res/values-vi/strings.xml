@@ -362,8 +362,6 @@
     <string name="search_modules">Tìm module</string>
     <string name="module_package">Module</string>
     <string name="kernel_package">Kernel</string>
-    <string name="require_manager_version">Phiên bản %1$d của trình quản lý KernelSU đã quá lỗi thời để KernelSU hoạt động đúng cách. Hãy nâng cấp trình quản lý lên phiên bản %2$d hoặc cao hơn!</string>
-    <string name="require_kernel_version">Phiên bản %1$d của KernelSU đã quá cũ để trình quản lý có thể hoạt động bình thường. Hãy cập nhật lên phiên bản %2$d hoặc cao hơn!</string>
     <string name="no_any_umount_path">Không có đường dẫn umount nào tồn tại</string>
     <string name="umount_flags_hint">0=Unmount bình thường, 2=MNT_DETACH</string>
     <string name="changes_take_effect_immediately">Tất cả các thay đổi sẽ có hiệu lực ngay lập tức.</string>

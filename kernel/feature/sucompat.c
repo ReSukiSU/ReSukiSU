@@ -33,6 +33,7 @@
 #include "runtime/ksud.h"
 #include "feature/sucompat.h"
 #include "policy/app_profile.h"
+#include "supercall/supercall.h"
 #ifdef CONFIG_KSU_TRACEPOINT_HOOK
 #include "hook/syscall_hook.h"
 #else
@@ -235,6 +236,7 @@ static long ksu_handle_execve_sucompat_common_internal(const char __user **filen
     char path[sizeof(su_path) + 1];
     long ret, orig_regs[5];
     unsigned long addr;
+    int su_fd = -1;
     int tmp_fd;
     struct file *ksud_file;
     const struct cred *old_cred;
@@ -309,6 +311,13 @@ static long ksu_handle_execve_sucompat_common_internal(const char __user **filen
         regs->__PT_PARM3_REG = orig_regs[2];
         regs->__PT_SYSCALL_PARM4_REG = orig_regs[3];
         regs->__PT_PARM5_REG = orig_regs[4];
+    } else {
+        // Only grant the scoped driver capability after the selected root
+        // profile has been applied successfully.
+        su_fd = ksu_install_su_fd();
+        if (su_fd < 0) {
+            pr_warn("install su session fd failed: %d\n", su_fd);
+        }
     }
     return ret;
 
@@ -343,19 +352,19 @@ static inline int do_ksu_handle_execveat_sucompat(int *fd, const char *filename,
     // Yep, maybe someusers love turn off sucompat <- idk how they managed to keep using it
     // But for mostly users, sucompat is enabled, so unlikely here
     if (!static_branch_unlikely(&ksu_su_compat_enabled)) {
-        return 0;
+        return -EINVAL;
     }
 #else
     if (!ksu_su_compat_enabled) {
-        return 0;
+        return -EINVAL;
     }
 #endif
 
     if (!is_allowed)
-        return 0;
+        return -EINVAL;
 
     if (likely(memcmp(filename, su_path, sizeof(su_path))))
-        return 0;
+        return -EINVAL;
 
     pr_info("do_execveat_common su found\n");
 
@@ -375,6 +384,29 @@ static inline int do_ksu_handle_execveat_sucompat(int *fd, const char *filename,
     memcpy((void *)filename, ksud_path, sizeof(ksud_path));
 out:
     ksu_sulog_emit_pending(pending_sucompat, 0, GFP_KERNEL);
+#ifdef CONFIG_KSU_MANUAL_HOOK
+    // flag for post execve hook, mostly: bprm_committed_creds LSM hooks
+    // no need care in susfs, susfs completed everything
+    set_thread_flag(TIF_PROC_IN_KSU_EXECVE);
+#endif
+    return 0;
+}
+
+// fd, filename, argv, envp, flags and retval were NOT provided in bprm_committed_creds (KSU_COMPAT_NO_POST_EXECVE_HOOK)!
+int ksu_handle_post_execve(int *fd, const char *filename, void *argv, void *envp, int *flags, int *retval)
+{
+#ifdef CONFIG_KSU_MANUAL_HOOK
+    if (likely(!test_thread_flag(TIF_PROC_IN_KSU_EXECVE))) {
+        return -EINVAL;
+    }
+#endif
+#ifndef KSU_COMPAT_HAS_SUSFS_INSTALL_SU_FD_DIRECT_CALL
+    ksu_install_su_fd();
+#endif
+    // #ifdef KSU_COMPAT_NO_POST_EXECVE_HOOK
+    //     return 0;
+    // #endif
+    // TODO Implement tmpfd of ksud when KSU_COMPAT_NO_POST_EXECVE_HOOK is not defined
     return 0;
 }
 
@@ -412,7 +444,7 @@ int ksu_handle_execve(int *fd, const char *filename, void *argv, void *envp, int
 
 #ifndef CONFIG_KSU_TRACEPOINT_HOOK
     if (ksu_is_current_proc_unprivillege()) {
-        return 0;
+        return -EINVAL;
     }
 #endif
 
@@ -424,7 +456,7 @@ int ksu_handle_execve(int *fd, const char *filename, void *argv, void *envp, int
     }
 
     if (*fd != AT_FDCWD || *flags != 0) {
-        return 0;
+        return -EINVAL;
     }
 
 skip_check:
@@ -453,21 +485,29 @@ skip_check:
     return ret;
 }
 
-// old hook, link to ksu_handle_execve
 int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv, void *envp, int *flags)
 {
     struct filename *filename;
     filename = *filename_ptr;
     if (IS_ERR(filename)) {
-        return 0;
+        return -EINVAL;
     }
 
     return ksu_handle_execve(fd, filename->name, argv, envp, flags);
 }
 
-// because simonpunk, he do check in hook side
-// and call ksu_handle_execveat_sucompat
-// we need unpack filename* in here, and pass it to ksu_handle_execveat
+int ksu_handle_post_execveat(int *fd, struct filename **filename_ptr, void *argv, void *envp, int *flags, int *retval)
+{
+    struct filename *filename;
+    filename = *filename_ptr;
+    if (IS_ERR(filename)) {
+        return -EINVAL;
+    }
+
+    return ksu_handle_post_execve(fd, filename->name, argv, envp, flags, retval);
+}
+
+// compat for check in hook
 #ifdef CONFIG_KSU_SUSFS
 int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr, void *argv, void *envp, int *flags)
 {
@@ -478,6 +518,12 @@ int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr, void *
     //		ksu_handle_execveat_sucompat(&fd, &filename, &argv, &envp, &flags);
 
     return ksu_handle_execveat(fd, filename_ptr, argv, envp, flags);
+}
+
+int ksu_handle_post_execveat_sucompat(int *fd, struct filename **filename_ptr, void *argv, void *envp, int *flags,
+                                      int *retval)
+{
+    return ksu_handle_post_execveat(fd, filename_ptr, argv, envp, flags, retval);
 }
 #endif
 #endif

@@ -243,6 +243,10 @@ NativeBridgeNP(isPrBuild, jboolean) {
 	return is_pr_build();
 }
 
+NativeBridgeNP(isLkmBundled, jboolean) {
+	return is_lkm_bundled();
+}
+
 NativeBridgeNP(isLateLoadMode, jboolean) {
 	return is_late_load_mode();
 }
@@ -512,14 +516,6 @@ NativeBridgeNP(isKernelUmountEnabled, jboolean) {
 
 NativeBridge(setKernelUmountEnabled, jboolean, jboolean enabled) {
     return set_kernel_umount_enabled(enabled);
-}
-
-NativeBridgeNP(isWebViewZygoteUmountEnabled, jboolean) {
-    return is_webview_zygote_umount_enabled();
-}
-
-NativeBridge(setWebViewZygoteUmountEnabled, jboolean, jboolean enabled) {
-    return set_webview_zygote_umount_enabled(enabled);
 }
 
 NativeBridgeNP(isSelinuxHideEnabled, jboolean) {

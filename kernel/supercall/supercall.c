@@ -21,15 +21,22 @@
 #include "arch.h"
 #include "klog.h" // IWYU pragma: keep
 
+#define KSU_DRIVER_PERMISSION_SU_SESSION (1UL << 0)
+
+struct ksu_driver_context {
+    unsigned long permissions;
+};
+
 static int anon_ksu_release(struct inode *inode, struct file *filp)
 {
+    kfree(filp->private_data);
     pr_info("ksu fd released\n");
     return 0;
 }
 
 static long anon_ksu_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
-    return ksu_supercall_handle_ioctl(cmd, (void __user *)arg);
+    return ksu_supercall_handle_ioctl(filp, cmd, (void __user *)arg);
 }
 
 static const struct file_operations anon_ksu_fops = {
@@ -39,44 +46,62 @@ static const struct file_operations anon_ksu_fops = {
     .release = anon_ksu_release,
 };
 
-static void ksu_install_fd_to_user(int __user *outp)
+static int ksu_install_fd_with_permissions(unsigned int fd_flags, unsigned long permissions)
 {
-    int fd = ksu_install_fd();
-    pr_info("[%d] install ksu fd: %d\n", current->pid, fd);
-
-    if (copy_to_user(outp, &fd, sizeof(fd))) {
-        pr_err("install ksu fd reply err\n");
-        ksu_close_fd(fd);
-    }
-}
-
-// Install KSU fd to current process
-int ksu_install_fd(void)
-{
+    struct ksu_driver_context *context;
     struct file *filp;
+    const char *name;
     int fd;
 
+    // alloc context
+    context = kzalloc(sizeof(*context), GFP_KERNEL);
+    if (!context)
+        return -ENOMEM;
+
+    context->permissions = permissions;
+    name = permissions & KSU_DRIVER_PERMISSION_SU_SESSION ? "[ksu_driver_su]" : "[ksu_driver]";
+
     // Get unused fd
-    fd = get_unused_fd_flags(O_CLOEXEC);
+    fd = get_unused_fd_flags(fd_flags);
     if (fd < 0) {
-        pr_err("ksu_install_fd: failed to get unused fd\n");
+        pr_err("%s: failed to get unused fd\n", __func__);
+        kfree(context);
         return fd;
     }
 
     // Create anonymous inode file
-    filp = anon_inode_getfile("[ksu_driver]", &anon_ksu_fops, NULL, O_RDWR | O_CLOEXEC);
+    filp = anon_inode_getfile(name, &anon_ksu_fops, context, O_RDWR);
     if (IS_ERR(filp)) {
-        pr_err("ksu_install_fd: failed to create anon inode file\n");
+        pr_err("%s: failed to create anon inode file\n", __func__);
         put_unused_fd(fd);
+        kfree(context);
         return PTR_ERR(filp);
     }
 
     // Install fd
     fd_install(fd, filp);
 
-    pr_info("ksu fd installed: %d for pid %d\n", fd, current->pid);
+    pr_info("ksu fd installed: %d, name: %s, for pid %d\n", fd, name, current->pid);
 
     return fd;
+}
+
+int ksu_install_fd(void)
+{
+    return ksu_install_fd_with_permissions(O_CLOEXEC, 0);
+}
+
+int ksu_install_su_fd(void)
+{
+    // This descriptor must be installed after the exec into ksud.
+    return ksu_install_fd_with_permissions(O_CLOEXEC, KSU_DRIVER_PERMISSION_SU_SESSION);
+}
+
+bool ksu_is_su_session_fd(const struct file *filp)
+{
+    const struct ksu_driver_context *context = filp->private_data;
+
+    return context && (context->permissions & KSU_DRIVER_PERMISSION_SU_SESSION);
 }
 
 #ifdef CONFIG_KSU_TOOLKIT_SUPPORT
@@ -99,7 +124,13 @@ int ksu_handle_sys_reboot(int magic1, int magic2, unsigned int cmd, void __user 
 
     // Check if this is a request to install KSU fd
     if (magic2 == KSU_INSTALL_MAGIC2) {
-        ksu_install_fd_to_user((int __user *)*arg);
+        int fd = ksu_install_fd();
+        pr_info("[%d] install ksu fd: %d\n", current->pid, fd);
+
+        if (copy_to_user((int __user *)*arg, &fd, sizeof(fd))) {
+            pr_err("install ksu fd reply err\n");
+            ksu_close_fd(fd);
+        }
         return 0;
     }
 

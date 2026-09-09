@@ -316,9 +316,6 @@ bool ksu_uid_should_umount(uid_t uid)
         // we should not umount on manager!
         return false;
     }
-    if (unlikely(uid == WEBVIEW_ZYGOTE_UID)) {
-        return ksu_webview_zygote_umount_enabled;
-    }
 #ifdef CONFIG_KSU_DISABLE_POLICY
     return !__ksu_is_allow_uid(uid);
 #else

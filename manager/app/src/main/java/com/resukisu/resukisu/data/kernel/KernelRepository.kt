@@ -24,6 +24,7 @@ class KernelRepository(
         val kernelUapi = if (isManager) Natives.kernelUAPIVersion else null
         val managerUapi = runCatching { Natives.managerUAPIVersion }.getOrDefault(1)
         val fullVersion = runCatching { Natives.getFullVersion() }.getOrDefault("Unknown")
+        val isRootAvailable = runCatching { ksuCliRepository.rootAvailable() }.getOrDefault(false)
         KernelStatus(
             isManager = isManager,
             ksuVersion = ksuVersion,
@@ -32,13 +33,9 @@ class KernelRepository(
             ksuFullVersion = "$fullVersion (${Natives.version}/$kernelUapi)",
             lkmMode = ksuVersion?.let { if (kernelVersion.isGKI()) Natives.isLkmMode else null },
             kernelVersion = kernelVersion,
-            isRootAvailable = runCatching { ksuCliRepository.rootAvailable() }.getOrDefault(false),
-            requireNewKernel = runCatching { isManager && Natives.requireNewKernel() }.getOrDefault(
-                false
-            ),
-            uapiMismatch = runCatching { isManager && Natives.checkUAPIMismatch() }.getOrDefault(
-                false
-            ),
+            isRootAvailable = isRootAvailable,
+            isFullFeatured = isRootAvailable && runCatching { Natives.isFullFeatured() }
+                .getOrDefault(false),
             isSELinuxPermissive = runCatching { isSELinuxPermissive() }.getOrDefault(false),
             isOfficialSignature = runCatching {
                 ksuCliRepository.isOfficialSignature(application.packageResourcePath)
@@ -67,7 +64,6 @@ class KernelRepository(
     suspend fun getFeatureSettings(): KernelFeatureSettings = withContext(Dispatchers.IO) {
         KernelFeatureSettings(
             suEnabled = runCatching { Natives.isSuEnabled() }.getOrDefault(false),
-            webViewZygoteUmountEnabled = runCatching { Natives.isWebViewZygoteUmountEnabled() }.getOrDefault(false),
             kernelUmountEnabled = runCatching { Natives.isKernelUmountEnabled() }.getOrDefault(false),
             suLogEnabled = runCatching { Natives.isSuLogEnabled() }.getOrDefault(false),
             selinuxHideEnabled = runCatching { Natives.isSelinuxHideEnabled() }.getOrDefault(false),
@@ -87,10 +83,6 @@ class KernelRepository(
 
     suspend fun setSuLogEnabled(enabled: Boolean): Boolean = saveFeature {
         Natives.setSuLogEnabled(enabled)
-    }
-
-    suspend fun setWebviewZygoteUmountEnabled(enabled: Boolean): Boolean = saveFeature {
-        Natives.setWebViewZygoteUmountEnabled(enabled)
     }
 
     suspend fun setSelinuxHideEnabled(enabled: Boolean): Int = withContext(Dispatchers.IO) {

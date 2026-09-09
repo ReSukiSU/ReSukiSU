@@ -400,8 +400,6 @@
     <string name="predictive_back_animation_ksu_classic">KernelSU Klasik</string>
     <string name="predictive_back_exit_direction_follow_gesture">Hareketi Takip Et</string>
     <string name="kernel_package">Çekirdek</string>
-    <string name="require_manager_version">KernelSU yöneticisinin mevcut sürümü %1$d, bu KernelSU\'nun düzgün çalışması için çok düşük. Lütfen yöneticiyi %2$d veya daha yüksek bir sürüme yükseltin!</string>
-    <string name="require_kernel_version">Mevcut KernelSU sürümü %1$d yöneticinin düzgün çalışması için çok düşük. Lütfen %2$d veya daha yüksek bir sürüme yükseltin!</string>
     <string name="download_channel_name">Modül İndirmeleri</string>
     <string name="download_progress_title">İndiriliyor %s</string>
     <string name="download_complete_title">İndirildi</string>
@@ -532,8 +530,6 @@
     <string name="susfs_status_no_data">Veri Yok</string>
     <string name="susfs_tab_open_redirect">Yönlendirmeyi Aç</string>
     <string name="about_anime_character_sticker"><![CDATA[Simgeler özel bir lisans anlaşması kapsamında kullanılmaktadır: 怡子曰曰 tarafından çizilmiş, telif hakkı 明风 OuO\'ya aittir ve vektörleştirilmiş simgeler bu proje tarafından sağlanmaktadır.]]></string>
-    <string name="settings_webview_zygote_umount">WebView bağlamasını kaldır</string>
-    <string name="settings_webview_zygote_umount_summary">WebView işleminden bilgi sızıntılarını önler ancak bazı modüllerin çalışmasını bozabilir. Uygulamak için yeniden başlatın</string>
     <string name="settings_custom_monospace_font">Yerleşik eş aralıklı yazı tipini kullan</string>
     <string name="settings_custom_monospace_font_summary">Günlükleri görüntülerken sistemin eş aralıklı yazı tipiyle ilgili sorunları önlemek için yerleşik JetBrains Mono yazı tipini kullanır</string>
     <string name="susfs_enable_config">SUSFS Yöneticisi</string>

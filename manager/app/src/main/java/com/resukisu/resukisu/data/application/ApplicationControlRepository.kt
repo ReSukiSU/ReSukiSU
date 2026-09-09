@@ -10,7 +10,9 @@ class ApplicationControlRepository(
 ) {
     suspend fun ensureManagerInstalled(): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
-            if (Natives.isManager && !Natives.requireNewKernel()) ksuCliRepository.install()
+            if (Natives.isFullFeatured() && ksuCliRepository.rootAvailable()) {
+                ksuCliRepository.install()
+            }
         }
     }
 

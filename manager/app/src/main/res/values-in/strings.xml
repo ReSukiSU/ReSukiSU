@@ -362,8 +362,6 @@
     <string name="sus_maps_description_text">Sembunyikan jalur asli dari pemetaan memori di /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap]. Catatan: Fitur ini tidak mendukung penyembunyian pemetaan memori anonim, serta tidak dapat menyembunyikan inline hook atau PLT hook yang disebabkan oleh library yang diinjeksi itu sendiri</string>
     <string name="sus_maps_warning">Pemberitahuan Penting: Untuk aplikasi dengan mekanisme deteksi injeksi yang dirancang dengan baik, fitur ini mungkin tidak akan efektif untuk melewati deteksi</string>
     <string name="sus_maps_debug_info">Pertama, temukan PID dan UID aplikasi target menggunakan ps -enf, lalu cek jalur yang relevan di /proc//maps dan bandingkan nomor perangkat dengan yang ada di /proc/1/mountinfo untuk memastikan konsistensi. Fungsi penyembunyian pemetaan memori hanya dapat bekerja dengan benar jika nomor perangkat tersebut cocok</string>
-    <string name="require_manager_version">Versi manajer (%1$d) terlalu rendah. Perbarui ke versi %2$d atau lebih tinggi agar KernelSU berjalan normal!</string>
-    <string name="require_kernel_version">Versi KernelSU (%1$d) terlalu rendah. Perbarui ke versi %2$d atau lebih tinggi agar manajer berjalan normal!</string>
     <string name="umount_path_manager">Manajemen Jalur Umount</string>
     <string name="umount_path_manager_summary">Kelola jalur unmount kernel</string>
     <string name="no_any_umount_path">Tidak ada jalur umount yang ditemukan</string>

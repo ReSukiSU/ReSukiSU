@@ -27,7 +27,11 @@ bool is_safe_mode();
 bool is_lkm_mode();
 
 bool is_manager();
+
 bool is_late_load_mode();
+
+bool is_lkm_bundled();
+
 bool is_pr_build();
 
 void get_full_version(char* buff);
@@ -58,11 +62,6 @@ bool set_sulog_enabled(bool enabled);
 // Kernel umount
 bool set_kernel_umount_enabled(bool enabled);
 bool is_kernel_umount_enabled();
-
-// WebView zygote umount
-bool set_webview_zygote_umount_enabled(bool enabled);
-
-bool is_webview_zygote_umount_enabled();
 
 // SELinux hide
 int set_selinux_hide_enabled(bool enabled);

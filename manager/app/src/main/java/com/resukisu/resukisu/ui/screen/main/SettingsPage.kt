@@ -188,7 +188,7 @@ fun SettingsPage(bottomPadding: Dp) {
             )
         ) {
             // 配置卡片
-            if (homeState.systemStatus.isValid) {
+            if (homeState.systemStatus.isFullFeatured) {
                 item {
                     val modeItems = listOf(
                         stringResource(id = R.string.settings_mode_default),
@@ -314,28 +314,6 @@ fun SettingsPage(bottomPadding: Dp) {
                                     checked = uiState.isSuLogEnabled,
                                     onCheckedChange = { enabled ->
                                         settingsViewModel.dispatch(SettingsUiAction.SetSuLog(enabled))
-                                    },
-                                )
-                            }
-
-                            item {
-                                val webViewUmountSummary = when (uiState.webViewZygoteUmountStatus) {
-                                    "unsupported" -> stringResource(id = R.string.feature_status_unsupported_summary)
-                                    "managed" -> stringResource(id = R.string.feature_status_managed_summary)
-                                    else -> stringResource(id = R.string.settings_webview_zygote_umount_summary)
-                                }
-                                SettingsSwitchWidget(
-                                    icon = Icons.TwoTone.Language,
-                                    title = stringResource(id = R.string.settings_webview_zygote_umount),
-                                    description = webViewUmountSummary,
-                                    enabled = uiState.webViewZygoteUmountStatus == "supported",
-                                    checked = uiState.isWebViewZygoteUmountEnabled,
-                                    onCheckedChange = { checked ->
-                                        settingsViewModel.dispatch(
-                                            SettingsUiAction.SetWebViewZygoteUmountEnabled(
-                                                checked
-                                            )
-                                        )
                                     },
                                 )
                             }
@@ -470,7 +448,7 @@ fun SettingsPage(bottomPadding: Dp) {
                             ) {}
                         }
 
-                        if (homeState.systemStatus.isValid) {
+                        if (homeState.systemStatus.isFullFeatured) {
                             item {
                                 SettingsJumpPageWidget(
                                     icon = Icons.TwoTone.Security,

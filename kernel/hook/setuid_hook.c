@@ -93,21 +93,8 @@ static int handle_zygote_next_setresuid(uid_t new_uid)
         goto do_susfs_work;
     }
 
-    // manager NEVER use zygote next!
-
-    // we should not umount for webview zygote
-    if (unlikely(new_uid == WEBVIEW_ZYGOTE_UID)) {
-        if (ksu_webview_zygote_umount_enabled) {
-            susfs_set_current_proc_no_su();
-            susfs_set_current_proc_umounted();
-            susfs_set_current_proc_umounted_for_zygote_next();
-            goto do_susfs_work;
-        }
-        susfs_set_current_proc_no_su();
-        return 0;
-    }
-
     // Check if spawned process is normal user app and needs to be umounted
+    // Now app_profile for webview_zygote is available in KernelSU manager
     if (likely(is_appuid(new_uid) && ksu_uid_should_umount(new_uid))) {
         susfs_set_current_proc_no_su();
         susfs_set_current_proc_umounted();

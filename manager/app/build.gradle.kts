@@ -255,7 +255,5 @@ dependencies {
 
     implementation(libs.lsposed.cxx)
 
-    implementation(libs.com.github.topjohnwu.libsu.core)
-
     implementation(libs.accompanist.drawablepainter)
 }

@@ -461,7 +461,7 @@ enum Profile {
 enum Feature {
     /// Get feature value and support status
     Get {
-        /// Feature ID or name (su_compat, kernel_umount, sulog, adb_root, selinux_hide, webview_zygote_umount)
+        /// Feature ID or name (su_compat, kernel_umount, sulog, adb_root, selinux_hide)
         id: String,
         /// Read from config file
         #[arg(long, default_value_t = false)]
@@ -481,7 +481,7 @@ enum Feature {
 
     /// Check feature status (supported/unsupported/managed)
     Check {
-        /// Feature ID or name (su_compat, kernel_umount, sulog, adb_root, selinux_hide, webview_zygote_umount)
+        /// Feature ID or name (su_compat, kernel_umount, sulog, adb_root, selinux_hide)
         id: String,
     },
 
@@ -571,6 +571,8 @@ pub fn run() -> Result<()> {
             .with_max_level(crate::debug_select!(LevelFilter::Trace, LevelFilter::Info))
             .with_tag("KernelSU"),
     );
+
+    ksucalls::setup_sigsys_handler();
 
     // the kernel executes su with argv[0] = "su" and replace it with us
     let arg0 = std::env::args().next().unwrap_or_default();
@@ -811,6 +813,10 @@ pub fn run() -> Result<()> {
                 println!("uapi_version: {}", info.uapi_version);
                 println!("features: 0x{:x}", info.features);
                 println!("lkm: {}", ksucalls::is_lkm());
+                println!(
+                    "bundled: {}",
+                    (info.flags & uapi::KSU_GET_INFO_FLAG_BUNDLED) != 0
+                );
                 println!("late_load: {}", ksucalls::is_late_load());
                 println!("runtime_mode: {}", ksucalls::runtime_mode());
                 println!(
@@ -871,7 +877,7 @@ pub fn run() -> Result<()> {
             Kernel::Umount { command } => match command {
                 UmountOp::Add { mnt, flags } => ksucalls::umount_list_add(&mnt, flags),
                 UmountOp::Del { mnt } => ksucalls::umount_list_del(&mnt),
-                UmountOp::Wipe => ksucalls::umount_list_wipe().map_err(Into::into),
+                UmountOp::Wipe => ksucalls::umount_list_wipe(),
                 UmountOp::List => {
                     let list = ksucalls::umount_list_list()?;
                     println!("{}", serde_json::to_string(&list)?);

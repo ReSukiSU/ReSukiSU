@@ -367,8 +367,6 @@
     <string name="sus_maps_description_text">Приховати реальні шляхи до файлів відображень пам\'яті у /proc/self/[maps|smaps|smaps_rollup|map_files|mem|pagemap]. Зверніть увагу: ця функція не підтримує приховання анонімних відображень пам\'яті та не може приховати inline-хуки або PLT-хуки, спричинені самою впровадженою бібліотекою</string>
     <string name="sus_maps_warning">Важливе попередження: для додатків з добре реалізованими механізмами виявлення впровадження ця функція може не ефективно обійти виявлення</string>
     <string name="sus_maps_debug_info">Спочатку знайдіть PID та UID цільового додатка за допомогою ps -enf, потім перевірте відповідні шляхи в /proc/&lt;pid&gt;/maps та порівняйте номери пристроїв із /proc/1/mountinfo для забезпечення відповідності. Тільки при збігу номерів пристроїв функція приховання map працюватиме правильно</string>
-    <string name="require_manager_version">Поточна версія менеджера KernelSU %1$d є занадто низькою для коректної роботи KernelSU. Будь ласка, оновіть менеджер до версії %2$d або вище!</string>
-    <string name="require_kernel_version">Поточна версія KernelSU %1$d є занадто низькою для коректної роботи менеджера. Будь ласка, оновіть до версії %2$d або вище!</string>
     <string name="umount_path_manager">Керування шляхами розмонтування</string>
     <string name="umount_path_manager_summary">Керувати шляхами розмонтування ядра</string>
     <string name="no_any_umount_path">Шляхи розмонтування відсутні</string>
@@ -536,7 +534,5 @@
     <string name="susfs_enable_config_summary">Увімкнути вбудований менеджер SUSFS. Може конфліктувати зі сторонніми модулями.</string>
     <string name="susfs_enable_config">Менеджер SUSFS</string>
     <string name="settings_custom_monospace_font">Використовувати вбудований моноширинний шрифт</string>
-    <string name="settings_webview_zygote_umount_summary">Запобігає витоку інформації з процесу WebView, але це може порушити роботу модулів. Перезавантажте, щоб застосувати зміни.</string>
-    <string name="settings_webview_zygote_umount">Розмонтувати WebView</string>
     <string name="about_anime_character_sticker"><![CDATA[Піктограми ліцензовані за спеціальною угодою: намальовані 怡子曰曰, авторські права належать 明风 OuO, а векторизовані піктограми надані цим проєктом.]]></string>
 </resources>

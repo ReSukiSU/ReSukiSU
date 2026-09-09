@@ -13,6 +13,8 @@ import com.resukisu.resukisu.domain.model.AllowlistRestoreResult
 import com.resukisu.resukisu.domain.model.InstalledApp
 import com.resukisu.resukisu.domain.model.InstalledAppGroup
 import com.resukisu.resukisu.domain.model.SuperUserState
+import com.resukisu.resukisu.domain.model.WEBVIEW_ZYGOTE_PROFILE_KEY
+import com.resukisu.resukisu.domain.model.WEBVIEW_ZYGOTE_UID
 import com.topjohnwu.superuser.io.SuFile
 import com.topjohnwu.superuser.io.SuFileInputStream
 import kotlinx.coroutines.CancellationException
@@ -43,7 +45,7 @@ class SuperUserRepository(
     ) { source, profiles ->
         source.copy(
             groups = source.groups.map { group ->
-                val snapshot = profiles[AppProfileKey(group.primaryPackageName, group.uid)]
+                val snapshot = profiles[AppProfileKey(group.profileKey, group.uid)]
                     ?: return@map group
                 group.copy(
                     profile = snapshot.profile,
@@ -64,9 +66,10 @@ class SuperUserRepository(
             val packages = cache.packages.value
             val groups = withContext(Dispatchers.IO) {
                 val packageManager = application.packageManager
-                packages.mapNotNull { info ->
+                val apps = packages.mapNotNull { info ->
                     val applicationInfo = info.applicationInfo ?: return@mapNotNull null
                     if (info.packageName == application.packageName) return@mapNotNull null
+                    if (applicationInfo.uid == WEBVIEW_ZYGOTE_UID) return@mapNotNull null
                     InstalledApp(
                         packageName = info.packageName,
                         label = applicationInfo.loadLabel(packageManager).toString(),
@@ -74,7 +77,8 @@ class SuperUserRepository(
                         isSystem = applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0,
                         firstInstallTime = info.firstInstallTime,
                     )
-                }.groupBy(InstalledApp::uid).map { (uid, uidApps) ->
+                }
+                val normalGroups = apps.groupBy(InstalledApp::uid).map { (uid, uidApps) ->
                     val sorted = uidApps.sortedBy(InstalledApp::label)
                     val primary = sorted.first()
                     val profile = profileRepository.getProfileSnapshot(primary.packageName, uid)
@@ -87,6 +91,29 @@ class SuperUserRepository(
                         shouldUmount = profile.shouldUmount,
                     )
                 }
+                // WebView Zygote is a single system UID, not a per-user package.
+                val webviewProfile = profileRepository.getProfileSnapshot(
+                    WEBVIEW_ZYGOTE_PROFILE_KEY,
+                    WEBVIEW_ZYGOTE_UID,
+                )
+                val webviewGroup = InstalledAppGroup(
+                    uid = WEBVIEW_ZYGOTE_UID,
+                    primaryPackageName = WEBVIEW_ZYGOTE_PROFILE_KEY,
+                    apps = listOf(
+                        InstalledApp(
+                            packageName = WEBVIEW_ZYGOTE_PROFILE_KEY,
+                            label = "WebView Zygote",
+                            uid = WEBVIEW_ZYGOTE_UID,
+                            isSystem = true,
+                            profileKey = WEBVIEW_ZYGOTE_PROFILE_KEY,
+                            special = true,
+                        )
+                    ),
+                    profile = webviewProfile.profile,
+                    userName = profileRepository.getUserName(WEBVIEW_ZYGOTE_UID),
+                    shouldUmount = webviewProfile.shouldUmount,
+                )
+                normalGroups + webviewGroup
             }
             mutableState.value = SuperUserState(
                 groups = groups,
@@ -143,6 +170,22 @@ class SuperUserRepository(
 
     suspend fun getAppGroup(uid: Int, primaryPackageName: String): InstalledAppGroup =
         withContext(Dispatchers.IO) {
+            if (uid == WEBVIEW_ZYGOTE_UID) {
+                return@withContext InstalledAppGroup(
+                    uid = WEBVIEW_ZYGOTE_UID,
+                    primaryPackageName = WEBVIEW_ZYGOTE_PROFILE_KEY,
+                    apps = listOf(
+                        InstalledApp(
+                            packageName = WEBVIEW_ZYGOTE_PROFILE_KEY,
+                            label = "WebView Zygote",
+                            uid = WEBVIEW_ZYGOTE_UID,
+                            isSystem = true,
+                            profileKey = WEBVIEW_ZYGOTE_PROFILE_KEY,
+                            special = true,
+                        )
+                    ),
+                )
+            }
             val packageManager = application.packageManager
             val cached = cache.packages.value
             val packages = (cached.ifEmpty { installedPackages(packageManager) })

@@ -417,8 +417,6 @@
     <string name="predictive_back_exit_direction_follow_gesture">跟隨手勢</string>
     <string name="predictive_back_exit_direction_always_right">固定靠右</string>
     <string name="predictive_back_exit_direction_always_left">固定靠左</string>
-    <string name="require_manager_version">當前 KernelSU 管理器版本 %1$d 過低，無法正常運作，請升級至 %2$d 或更高版本！</string>
-    <string name="require_kernel_version">當前 KernelSU 版本 %1$d 過低，管理器無法正常運作，請升級至 %2$d 或更高版本！</string>
     <string name="download_channel_name">模組下載</string>
     <string name="download_progress_title">正在下載 %s</string>
     <string name="download_complete_title">下載完成</string>
@@ -534,6 +532,4 @@
     <string name="susfs_enable_config">SUSFS 管理器</string>
     <string name="susfs_enable_config_summary">啟用內置 SUSFS 管理器，可能與第三方模組衝突。</string>
     <string name="susfs_config_disable_warning">內置 SUSFS 管理器已停用。請啟用它或安裝第三方模組以使用 SUSFS 功能。</string>
-    <string name="settings_webview_zygote_umount">為 WebView 解除掛載</string>
-    <string name="settings_webview_zygote_umount_summary">防止 WebView 程序洩露資訊，但可能會令部分模組失效。重新啟動以套用變更</string>
 </resources>
