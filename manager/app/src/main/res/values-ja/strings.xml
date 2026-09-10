@@ -280,6 +280,4 @@
     <string name="sulog_enable_action">有効化</string>
     <string name="sulog_filter_title">種類で絞り込む</string>
     <string name="sulog_clean_title">ログを消去</string>
-    <string name="settings_webview_zygote_umount">WebView のアンマウント</string>
-    <string name="settings_webview_zygote_umount_summary">WebView プロセスからの情報漏洩を防ぎますが、モジュールが動作しなくなる可能性があります。適用するには再起動してください</string>
 </resources>
