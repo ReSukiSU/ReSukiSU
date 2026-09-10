@@ -30,19 +30,24 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.twotone.MenuBook
 import androidx.compose.material.icons.twotone.Android
 import androidx.compose.material.icons.twotone.Block
+import androidx.compose.material.icons.twotone.DeveloperBoard
 import androidx.compose.material.icons.twotone.Error
 import androidx.compose.material.icons.twotone.Extension
+import androidx.compose.material.icons.twotone.FilterList
 import androidx.compose.material.icons.twotone.Group
 import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material.icons.twotone.Memory
-import androidx.compose.material.icons.twotone.Policy
 import androidx.compose.material.icons.twotone.PowerSettingsNew
 import androidx.compose.material.icons.twotone.Security
 import androidx.compose.material.icons.twotone.Settings
+import androidx.compose.material.icons.twotone.Smartphone
+import androidx.compose.material.icons.twotone.Tag
 import androidx.compose.material.icons.twotone.TaskAlt
 import androidx.compose.material.icons.twotone.Tune
+import androidx.compose.material.icons.twotone.VolunteerActivism
 import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -361,8 +366,8 @@ fun HomePage(
 
                 // 链接卡片
                 if (!uiState.isSimpleMode) {
-                    DonateCard()
-                    LearnMoreCard()
+                    DonateCard(uiState.showHomeCardIcons)
+                    LearnMoreCard(uiState.showHomeCardIcons)
                 }
 
                 Spacer(Modifier.height(bottomPadding))
@@ -515,7 +520,8 @@ private fun TopBar(
 
                 // 重启按钮
                 var showDropdown by remember { mutableStateOf(false) }
-                KsuIsValid(uiState.systemStatus) { -> if (uiState.systemStatus.isRootAvailable) {
+                KsuIsValid(uiState.systemStatus) {
+                    if (uiState.systemStatus.isRootAvailable) {
                         IconButton(onClick = {
                             showDropdown = true
                         }) {
@@ -664,7 +670,9 @@ private fun StatusCard(
 }
 
 @Composable
-fun LearnMoreCard() {
+fun LearnMoreCard(
+    showIcon: Boolean,
+) {
     val uriHandler = LocalUriHandler.current
     val url = stringResource(R.string.home_learn_kernelsu_url)
 
@@ -675,6 +683,7 @@ fun LearnMoreCard() {
     ) {
         item {
             SettingsBaseWidget(
+                icon = Icons.AutoMirrored.TwoTone.MenuBook.takeIf { showIcon },
                 iconPlaceholder = false,
                 title = stringResource(R.string.home_learn_kernelsu),
                 description = stringResource(R.string.home_click_to_learn_kernelsu),
@@ -687,7 +696,9 @@ fun LearnMoreCard() {
 }
 
 @Composable
-fun DonateCard() {
+fun DonateCard(
+    showIcon: Boolean,
+) {
     val uriHandler = LocalUriHandler.current
     SegmentedColumn(
         modifier = Modifier.fillMaxWidth(),
@@ -696,6 +707,7 @@ fun DonateCard() {
     ) {
         item {
             SettingsBaseWidget(
+                icon = Icons.TwoTone.VolunteerActivism.takeIf { showIcon },
                 iconPlaceholder = false,
                 title = stringResource(R.string.home_support_title),
                 description = stringResource(R.string.home_support_content),
@@ -723,7 +735,7 @@ private fun InfoCard(
     ) {
         item {
             SettingsBaseWidget(
-                icon = Icons.TwoTone.Android.takeIf { showHomeCardIcons },
+                icon = Icons.TwoTone.Smartphone.takeIf { showHomeCardIcons },
                 iconPlaceholder = false,
                 title = stringResource(R.string.home_device_model),
                 description = systemInfo.deviceModel,
@@ -732,7 +744,7 @@ private fun InfoCard(
 
         item {
             SettingsBaseWidget(
-                icon = Icons.TwoTone.Memory.takeIf { showHomeCardIcons },
+                icon = Icons.TwoTone.DeveloperBoard.takeIf { showHomeCardIcons },
                 iconPlaceholder = false,
                 title = stringResource(R.string.home_kernel),
                 description = systemInfo.kernelRelease,
@@ -755,7 +767,7 @@ private fun InfoCard(
             visible = systemStatus.isManager
         ) {
             SettingsBaseWidget(
-                icon = Icons.TwoTone.Security.takeIf { showHomeCardIcons },
+                icon = Icons.TwoTone.Memory.takeIf { showHomeCardIcons },
                 iconPlaceholder = false,
                 title = stringResource(R.string.home_kernel_version),
                 description = systemStatus.ksuFullVersion.orEmpty(),
@@ -764,7 +776,7 @@ private fun InfoCard(
 
         item {
             SettingsBaseWidget(
-                icon = Icons.TwoTone.Info.takeIf { showHomeCardIcons },
+                icon = Icons.TwoTone.Tag.takeIf { showHomeCardIcons },
                 iconPlaceholder = false,
                 title = stringResource(R.string.home_manager_version),
                 description = "${systemInfo.managerVersion.first} (${systemInfo.managerVersion.second}/${systemInfo.managerVersion.third})",
@@ -807,7 +819,7 @@ private fun InfoCard(
             }
 
             SettingsBaseWidget(
-                icon = Icons.TwoTone.Policy.takeIf { showHomeCardIcons },
+                icon = Icons.TwoTone.FilterList.takeIf { showHomeCardIcons },
                 iconPlaceholder = false,
                 title = stringResource(R.string.home_seccomp_status),
                 description = seccompDisplay,
