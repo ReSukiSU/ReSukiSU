@@ -6,6 +6,7 @@
 #include <linux/string.h>
 #include <linux/uaccess.h>
 #include <linux/ptrace.h>
+#include <linux/sched/task_stack.h>
 #include <linux/static_key.h>
 #include <linux/slab.h>
 
