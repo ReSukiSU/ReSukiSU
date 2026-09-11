@@ -401,6 +401,19 @@ int ksu_handle_post_execve(int *fd, const char *filename, void *argv, void *envp
     }
 #endif
 #ifndef KSU_COMPAT_HAS_SUSFS_INSTALL_SU_FD_DIRECT_CALL
+#ifndef CONFIG_KSU_MANUAL_HOOK
+    /*
+     * With CONFIG_KSU_MANUAL_HOOK off, bprm_committed_creds() runs after
+     * *every* execve.  Injecting the su session fd into the Android
+     * framework / zygote processes pollutes the fd table that ART validates
+     * at fork, crashing system_server with "Unsupported st_mode for FD 3".
+     * Skip the core framework images so the inherited fd table stays clean.
+     */
+    if (strcmp(current->comm, "system_server") == 0 ||
+        strncmp(current->comm, "zygote", 6) == 0 ||
+        strncmp(current->comm, "app_process", 11) == 0)
+        return 0;
+#endif
     ksu_install_su_fd();
 #endif
     // #ifdef KSU_COMPAT_NO_POST_EXECVE_HOOK
