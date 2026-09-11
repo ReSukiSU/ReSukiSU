@@ -7,8 +7,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -64,7 +64,7 @@ fun NavigationBar(
         FlexibleBottomAppBar(
             modifier = modifier
                 .windowInsetsPadding(
-                    WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal)
+                    WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
                 )
                 .blurEffect(
                     compensateHorizontalOverscroll = true,
@@ -95,7 +95,7 @@ fun NavigationBar(
         WideNavigationRail(
             modifier = modifier
                 .windowInsetsPadding(
-                    WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal)
+                    WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
                 )
                 .blurEffect(
                     compensateHorizontalOverscroll = true,

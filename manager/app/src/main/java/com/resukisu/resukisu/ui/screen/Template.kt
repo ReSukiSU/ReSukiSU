@@ -1,8 +1,5 @@
 package com.resukisu.resukisu.ui.screen
 
-import org.koin.compose.koinInject
-import com.resukisu.resukisu.ui.theme.CardConfig
-import com.resukisu.resukisu.ui.theme.ThemeConfig
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.widget.Toast
@@ -19,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -67,7 +63,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.getSystemService
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
-import org.koin.compose.viewmodel.koinViewModel
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.domain.model.ProfileTemplate
 import com.resukisu.resukisu.ui.component.NetworkRefreshContent
@@ -77,13 +72,18 @@ import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Navigator
 import com.resukisu.resukisu.ui.navigation.Route
+import com.resukisu.resukisu.ui.theme.CardConfig
+import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.ActivityResumeEffect
+import com.resukisu.resukisu.ui.util.adaptiveScaffoldWindowInsets
+import com.resukisu.resukisu.ui.viewmodel.TemplateUiAction
 import com.resukisu.resukisu.ui.viewmodel.TemplateUiEvent
 import com.resukisu.resukisu.ui.viewmodel.TemplateViewModel
-import com.resukisu.resukisu.ui.viewmodel.TemplateUiAction
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * @author weishu
@@ -203,7 +203,7 @@ fun AppProfileTemplateScreen() {
         },
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
-        contentWindowInsets = WindowInsets.safeDrawing,
+        contentWindowInsets = adaptiveScaffoldWindowInsets(),
     ) { innerPadding ->
         if (uiState.templateList.isEmpty()) {
             LazyColumn(

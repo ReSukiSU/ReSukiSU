@@ -91,6 +91,7 @@ import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.theme.getCardColors
 import com.resukisu.resukisu.ui.theme.getCardElevation
 import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
+import com.resukisu.resukisu.ui.util.adaptiveScaffoldWindowInsets
 import com.resukisu.resukisu.ui.viewmodel.InstallUiEvent
 import com.resukisu.resukisu.ui.viewmodel.InstallViewModel
 import org.koin.compose.koinInject
@@ -263,6 +264,7 @@ fun InstallScreen(
     }
 
     Scaffold(
+        contentWindowInsets = adaptiveScaffoldWindowInsets(),
         topBar = {
             TopBar(
                 onBack = { navigator.pop() },

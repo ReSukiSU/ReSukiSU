@@ -11,7 +11,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -23,7 +29,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.paint
@@ -85,6 +90,7 @@ import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.util.LocalBackgroundBlurAnchor
 import com.resukisu.resukisu.ui.util.LocalBlurState
 import com.resukisu.resukisu.ui.util.LocalPermissionRequestInterface
+import com.resukisu.resukisu.ui.util.LocalPortraitState
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.LocalStretchOverscrollCompensationState
 import com.resukisu.resukisu.ui.util.rememberDeviceCornerRadius
@@ -646,7 +652,7 @@ private fun ManagerNavEntry(
         }
     }
 
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .then(
@@ -655,10 +661,12 @@ private fun ManagerNavEntry(
                 ) else Modifier
             )
     ) {
+        val isPortrait = maxWidth < maxHeight || (maxHeight / maxWidth > 1.4f)
         val surfaceContainer =
             MaterialTheme.colorScheme.surfaceContainer
 
         CompositionLocalProvider(
+            LocalPortraitState provides isPortrait,
             LocalBlurState provides rememberMaterial3BlurBackdrop(
                 enableBlur = useBlur
             ),
@@ -690,7 +698,15 @@ private fun ManagerNavEntry(
                         }
                 )
             }
-            content()
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .windowInsetsPadding(
+                        WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
+                    )
+            ) {
+                content()
+            }
         }
     }
 }

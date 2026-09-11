@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CornerBasedShape
@@ -383,7 +382,6 @@ fun SettingsBaseWidget(
          * which incorrectly exposes the item as disabled and changes its visual state.
          */
         ListItem(
-            headlineContent = headline,
             modifier = itemModifier
                 .clip(baseShape)
                 .then(
@@ -393,10 +391,15 @@ fun SettingsBaseWidget(
                         Modifier
                     }
                 ),
+            enabled = enabled,
+            verticalAlignment = Alignment.CenterVertically,
+            shapes = shapes,
             colors = colors,
             leadingContent = finalLeadingContent,
             supportingContent = supportingContent,
-            trailingContent = trailing
+            trailingContent = trailing,
+            contentPadding = ListItemDefaults.ContentPadding,
+            content = headline,
         )
     }
 }

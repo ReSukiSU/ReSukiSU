@@ -63,6 +63,7 @@ import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.ActivityResumeEffect
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
+import com.resukisu.resukisu.ui.util.adaptiveScaffoldWindowInsets
 import com.resukisu.resukisu.ui.util.showReplacingSnackbar
 import com.resukisu.resukisu.ui.viewmodel.DynamicManagerAppItem
 import com.resukisu.resukisu.ui.viewmodel.DynamicManagerOperation
@@ -151,6 +152,7 @@ fun DynamicManagerScreen() {
     }
 
     Scaffold(
+        contentWindowInsets = adaptiveScaffoldWindowInsets(),
         topBar = {
             SearchAppBar(
                 title = stringResource(R.string.dynamic_manager_title),

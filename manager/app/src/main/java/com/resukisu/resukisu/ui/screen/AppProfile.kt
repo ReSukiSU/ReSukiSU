@@ -13,14 +13,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,9 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -87,6 +82,7 @@ import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
 import com.resukisu.resukisu.ui.util.ActivityResumeEffect
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
+import com.resukisu.resukisu.ui.util.adaptiveScaffoldWindowInsets
 import com.resukisu.resukisu.ui.util.showReplacingSnackbar
 import com.resukisu.resukisu.ui.viewmodel.AppProfileUiAction
 import com.resukisu.resukisu.ui.viewmodel.AppProfileUiEvent
@@ -162,21 +158,35 @@ fun AppProfileScreen(
 
     Scaffold(
         topBar = {
-            TopBar(
-                title = appGroup.mainApp.label,
-                packageName = appGroup.mainApp.displayIdentifier,
+            LargeFlexibleTopAppBar(
+                modifier = Modifier.blurEffect(),
+                title = {
+                    Text(
+                        text = appGroup.mainApp.label,
+                    )
+                },
+                subtitle = {
+                    Text(
+                        text = appGroup.mainApp.displayIdentifier
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = cardColor,
                     scrolledContainerColor = cardColor
                 ),
-                onBack = dropUnlessResumed { navigator.pop() },
+                navigationIcon = {
+                    AppBackButton(
+                        onClick = dropUnlessResumed { navigator.pop() }
+                    )
+                },
+                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 scrollBehavior = scrollBehavior,
             )
         },
         snackbarHost = { SwipeableSnackbarHost(hostState = snackBarHost) },
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
-        contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+        contentWindowInsets = adaptiveScaffoldWindowInsets()
     ) { paddingValues ->
         AppProfileInner(
             modifier = Modifier
@@ -184,6 +194,7 @@ fun AppProfileScreen(
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .blurSource(),
             topPadding = paddingValues.calculateTopPadding(),
+            bottomPadding = paddingValues.calculateBottomPadding(),
             appGroup = appGroup,
             isSpecial = isSpecial,
             appIcon = {
@@ -230,6 +241,7 @@ fun AppProfileScreen(
 private fun AppProfileInner(
     modifier: Modifier = Modifier,
     topPadding: Dp,
+    bottomPadding: Dp = 0.dp,
     appGroup: InstalledAppGroup,
     isSpecial: Boolean = false,
     appIcon: @Composable () -> Unit,
@@ -484,7 +496,11 @@ private fun AppProfileInner(
         }
 
         item {
-            Spacer(modifier = Modifier.height(6.dp + 48.dp + 6.dp /* SnackBar height */))
+            Spacer(
+                modifier = Modifier.height(
+                    bottomPadding + 6.dp + 48.dp + 6.dp /* SnackBar height */
+                )
+            )
         }
     }
 }
@@ -496,39 +512,6 @@ private enum class Mode(@param:StringRes private val res: Int) {
         @Composable get() = stringResource(res)
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun TopBar(
-    title: String,
-    packageName: String,
-    onBack: () -> Unit,
-    colors: TopAppBarColors,
-    scrollBehavior: TopAppBarScrollBehavior? = null,
-) {
-    LargeFlexibleTopAppBar(
-        modifier = Modifier.blurEffect(
-        ),
-        title = {
-            Text(
-                text = title,
-            )
-        },
-        subtitle = {
-            Text(
-                text = packageName
-            )
-        },
-        colors = colors,
-        navigationIcon = {
-            AppBackButton(
-                onClick = onBack
-            )
-        },
-        windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
-        scrollBehavior = scrollBehavior,
-    )
-}
-
 @Composable
 private fun ProfileBox(
     mode: Mode,
@@ -538,6 +521,7 @@ private fun ProfileBox(
     Column {
         SettingsBaseWidget(
             icon = Icons.TwoTone.AccountCircle,
+            iconColor = MaterialTheme.colorScheme.onSurface,
             title = stringResource(R.string.profile),
             description = mode.text,
             isOnBackground = false,

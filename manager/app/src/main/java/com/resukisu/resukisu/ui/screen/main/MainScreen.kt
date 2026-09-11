@@ -2,9 +2,9 @@ package com.resukisu.resukisu.ui.screen.main
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
@@ -39,6 +39,7 @@ import com.resukisu.resukisu.ui.util.LocalBlurState
 import com.resukisu.resukisu.ui.util.LocalHandlePageChange
 import com.resukisu.resukisu.ui.util.LocalPagerPage
 import com.resukisu.resukisu.ui.util.LocalPagerState
+import com.resukisu.resukisu.ui.util.LocalPortraitState
 import com.resukisu.resukisu.ui.util.LocalSelectedPage
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
@@ -119,86 +120,84 @@ fun MainScreen() {
         LocalHandlePageChange provides handlePageChange,
         LocalSelectedPage provides uiSelectedPage
     ) {
-        BoxWithConstraints(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            val isPortrait = maxWidth < maxHeight || (maxHeight / maxWidth > 1.4f)
-            val content = @Composable { paddingBottom: Dp ->
-                HorizontalPager(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    state = pagerState,
-                    userScrollEnabled = userScrollEnabled,
-                    beyondViewportPageCount = 1,
-                ) { pageIndex ->
-                    if (pages.isEmpty()) return@HorizontalPager
+        val content = @Composable { paddingBottom: Dp ->
+            HorizontalPager(
+                modifier = Modifier
+                    .fillMaxSize(),
+                state = pagerState,
+                userScrollEnabled = userScrollEnabled,
+                beyondViewportPageCount = 1,
+            ) { pageIndex ->
+                if (pages.isEmpty()) return@HorizontalPager
 
-                    val snackBarHostState = remember { SnackbarHostState() }
-                    CompositionLocalProvider(
-                        LocalSnackbarHost provides snackBarHostState,
-                        LocalPagerPage provides pageIndex,
-                        LocalBlurState provides rememberMaterial3BlurBackdrop(
-                            enableBlur = themeConfig.isEnableBlur,
-                            pagerState = pagerState,
-                            pagerPage = pageIndex,
-                        ),
-                    ) {
-                        val destination = pages[pageIndex]
-                        destination.direction(paddingBottom)
-                    }
+                val snackBarHostState = remember { SnackbarHostState() }
+                CompositionLocalProvider(
+                    LocalSnackbarHost provides snackBarHostState,
+                    LocalPagerPage provides pageIndex,
+                    LocalBlurState provides rememberMaterial3BlurBackdrop(
+                        enableBlur = themeConfig.isEnableBlur,
+                        pagerState = pagerState,
+                        pagerPage = pageIndex,
+                    ),
+                ) {
+                    val destination = pages[pageIndex]
+                    destination.direction(paddingBottom)
                 }
             }
+        }
 
-            if (isPortrait) {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    bottomBar = {
-                        NavigationBar(
-                            destinations = pages,
-                            isBottomBar = true,
-                        )
-                    },
-                    containerColor = Color.Transparent,
-                ) { innerPadding ->
-                    Box(
-                        modifier = Modifier.blurSource()
-                    ) {
-                        content(innerPadding.calculateBottomPadding())
-                    }
-                }
-            } else {
-                var navWidth by remember { mutableIntStateOf(0) }
-                val density = LocalDensity.current
-
-                Box(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .blurSource()
-                    ) {
-                        Spacer(
-                            modifier = Modifier.width(
-                                with(density) { navWidth.toDp() }
-                            )
-                        )
-
-                        Box(Modifier.weight(1f)) {
-                            content(0.dp)
-                        }
-                    }
-
+        if (LocalPortraitState.current) {
+            Scaffold(
+                // The child pages own their top-bar insets. The outer scaffold only reserves the
+                // measured bottom navigation bar height for the pager content.
+                contentWindowInsets = WindowInsets(),
+                modifier = Modifier.fillMaxSize(),
+                bottomBar = {
                     NavigationBar(
-                        modifier = Modifier
-                            .align(Alignment.CenterStart)
-                            .onSizeChanged {
-                                navWidth = it.width
-                            },
                         destinations = pages,
-                        isBottomBar = false,
+                        isBottomBar = true,
                     )
+                },
+                containerColor = Color.Transparent,
+            ) { innerPadding ->
+                Box(
+                    modifier = Modifier.blurSource()
+                ) {
+                    content(innerPadding.calculateBottomPadding())
                 }
+            }
+        } else {
+            var navWidth by remember { mutableIntStateOf(0) }
+            val density = LocalDensity.current
+
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .blurSource()
+                ) {
+                    Spacer(
+                        modifier = Modifier.width(
+                            with(density) { navWidth.toDp() }
+                        )
+                    )
+
+                    Box(Modifier.weight(1f)) {
+                        content(0.dp)
+                    }
+                }
+
+                NavigationBar(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .onSizeChanged {
+                            navWidth = it.width
+                        },
+                    destinations = pages,
+                    isBottomBar = false,
+                )
             }
         }
     }

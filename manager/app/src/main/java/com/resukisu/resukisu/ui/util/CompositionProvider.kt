@@ -18,6 +18,7 @@ val LocalBlurState = compositionLocalOf<LayerBackdrop?> {
 }
 
 val LocalPagerState = compositionLocalOf<PagerState> { error("No pager state") }
+val LocalPortraitState = compositionLocalOf<Boolean> { error("No portrait state") }
 val LocalPagerPage = staticCompositionLocalOf<Int?> { null }
 val LocalHandlePageChange = compositionLocalOf<(Int) -> Unit> { error("No handle page change") }
 val LocalSelectedPage = compositionLocalOf<Int> { error("No selected page") }

@@ -56,8 +56,6 @@ import com.mikepenz.aboutlibraries.ui.compose.m3.libraryColors
 import com.mikepenz.aboutlibraries.ui.compose.m3.style.m3VariantColors
 import com.mikepenz.aboutlibraries.ui.compose.variant.LibraryRow
 import com.mikepenz.aboutlibraries.util.withJson
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.WarningCard
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
@@ -67,6 +65,9 @@ import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
+import com.resukisu.resukisu.ui.util.adaptiveScaffoldWindowInsets
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 
 
@@ -98,6 +99,7 @@ fun OpenSourceLicenseScreen() {
     var selectedLibrary by remember { mutableStateOf<Library?>(null) }
 
     Scaffold(
+        contentWindowInsets = adaptiveScaffoldWindowInsets(),
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
