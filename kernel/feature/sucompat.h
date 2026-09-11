@@ -43,6 +43,9 @@ long ksu_handle_execveat_sucompat_internal(const char __user **filename_user, in
 #elif defined(CONFIG_KSU_SUSFS) // susfs
 #include <linux/susfs_def.h>
 
+// sync with manual hook
+#define TIF_PROC_IN_KSU_EXECVE 61
+
 #define ksu_is_current_proc_unprivillege susfs_is_current_proc_no_su
 #define ksu_set_current_proc_unprivillege susfs_set_current_proc_no_su
 #define ksu_clear_current_proc_unprivillege susfs_clear_current_proc_no_su

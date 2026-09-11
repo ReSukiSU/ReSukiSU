@@ -384,36 +384,18 @@ static inline int do_ksu_handle_execveat_sucompat(int *fd, const char *filename,
     memcpy((void *)filename, ksud_path, sizeof(ksud_path));
 out:
     ksu_sulog_emit_pending(pending_sucompat, 0, GFP_KERNEL);
-#ifdef CONFIG_KSU_MANUAL_HOOK
-    // flag for post execve hook, mostly: bprm_committed_creds LSM hooks
-    // no need care in susfs, susfs completed everything
+    // always flag that, to avoid old version of susfs hang in boot
     set_thread_flag(TIF_PROC_IN_KSU_EXECVE);
-#endif
     return 0;
 }
 
 // fd, filename, argv, envp, flags and retval were NOT provided in bprm_committed_creds (KSU_COMPAT_NO_POST_EXECVE_HOOK)!
 int ksu_handle_post_execve(int *fd, const char *filename, void *argv, void *envp, int *flags, int *retval)
 {
-#ifdef CONFIG_KSU_MANUAL_HOOK
     if (likely(!test_thread_flag(TIF_PROC_IN_KSU_EXECVE))) {
         return -EINVAL;
     }
-#endif
 #ifndef KSU_COMPAT_HAS_SUSFS_INSTALL_SU_FD_DIRECT_CALL
-#ifndef CONFIG_KSU_MANUAL_HOOK
-    /*
-     * With CONFIG_KSU_MANUAL_HOOK off, bprm_committed_creds() runs after
-     * *every* execve.  Injecting the su session fd into the Android
-     * framework / zygote processes pollutes the fd table that ART validates
-     * at fork, crashing system_server with "Unsupported st_mode for FD 3".
-     * Skip the core framework images so the inherited fd table stays clean.
-     */
-    if (strcmp(current->comm, "system_server") == 0 ||
-        strncmp(current->comm, "zygote", 6) == 0 ||
-        strncmp(current->comm, "app_process", 11) == 0)
-        return 0;
-#endif
     ksu_install_su_fd();
 #endif
     // #ifdef KSU_COMPAT_NO_POST_EXECVE_HOOK
