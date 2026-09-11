@@ -35,6 +35,14 @@ perform_cleanup() {
 	if [ -d "$GKI_ROOT/KernelSU" ]; then
 		rm -rf "$GKI_ROOT/KernelSU" && echo "[-] KernelSU directory deleted."
 	fi
+	if [ -f "$GKI_ROOT/.gitmodules" ] && grep -q 'KernelSU' "$GKI_ROOT/.gitmodules"; then
+		echo "[!] KernelSU has been added as a submodule."
+		echo "[!] Please remove it manually."
+		echo "[!] You can run the following commands:"
+		echo "--- git submodule deinit -f KernelSU"
+		echo "--- git rm -f KernelSU"
+		echo "--- git commit -m 'Remove KernelSU submodule'"
+	fi
 }
 
 # Sets up or update KernelSU environment
@@ -69,6 +77,12 @@ setup_kernelsu() {
 # Setup KernelSU as submodule
 setup_submodule() {
 	cd "$GKI_ROOT"
+
+	if [ ! -d "$GKI_ROOT/KernelSU" ]; then
+		echo '[!] KernelSU directory does not exist. Please run the script without --submodule first.'
+		exit 127
+	fi
+
     if [ ! -d "$GKI_ROOT/.git" ]; then
         echo '[!] GKI_ROOT is not a git repository. Skipping submodule setup.'
         return 0
