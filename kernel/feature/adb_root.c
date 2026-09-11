@@ -6,7 +6,12 @@
 #include <linux/string.h>
 #include <linux/uaccess.h>
 #include <linux/ptrace.h>
+
+// https://github.com/torvalds/linux/commit/68db0cf10678630d286f4bbbbdfa102951a35faa
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
 #include <linux/sched/task_stack.h>
+#endif
+
 #include <linux/static_key.h>
 #include <linux/slab.h>
 
