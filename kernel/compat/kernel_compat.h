@@ -279,7 +279,20 @@ extern void ksu_run_in_init_if_possible(void (*callback)(void *), void *data);
 #if defined(CONFIG_KEYS) && (LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0) || defined(KSU_COMPAT_IS_HISI_LEGACY) ||    \
                              defined(KSU_COMPAT_IS_HISI_LEGACY_HM2))
 #define KSU_COMPAT_REQUIRE_SESSION_KEYRING
+#include <linux/key.h>
+
+extern struct key *init_session_keyring;
 extern void setup_ksu_cred_session_keyring(void);
+
+static inline struct key *ksu_get_session_keyring(const struct cred *cred)
+{
+// https://github.com/torvalds/linux/commit/3a50597de8635cd05133bd12c95681c82fe7b878
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0)
+    return rcu_dereference(cred->session_keyring);
+#else
+    return rcu_dereference(current->cred->tgcred->session_keyring);
+#endif
+}
 #endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 3, 0) || defined(KSU_HAS_MODERN_STATIC_KEY_INTERFACE)

@@ -142,6 +142,10 @@ void setup_ksu_cred(void)
 {
     setup_ksu_cred_selinux();
 #ifdef KSU_COMPAT_REQUIRE_SESSION_KEYRING
+    if (init_session_keyring == NULL) {
+        init_session_keyring = ksu_get_session_keyring(current_cred());
+    }
+
     setup_ksu_cred_session_keyring();
 #endif
 }

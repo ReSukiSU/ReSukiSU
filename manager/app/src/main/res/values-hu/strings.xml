@@ -535,4 +535,7 @@
     <string name="susfs_enable_config_summary">Beépített SuSFS Menedzser engedélyezése vagy letiltása. Valamely harmadik féltől származó modullal összeférhetetlen lehet.</string>
     <string name="susfs_config_disable_warning">Beépített SuSFS Menedzser letiltva. Engedélyezd, vagy telepíts egy harmadik féltől származó modult a SuSFS funkciók használatához.</string>
     <string name="about_anime_character_sticker"><![CDATA[Az ikonok egy különleges megállapodás keretében kerültek licencelésre: a rajzokat 怡子曰曰 készítette, a szerzői jogok 明风 OuO-t illetik, a vektorizált ikonokat pedig ez a projekt biztosítja.]]></string>
+    <string name="require_manager_version">Root menedzser frissítése szükséges</string>
+    <string name="require_kernel_version">Kernel frissítése szükséges. Kattints a telepítéshez.</string>
+    <string name="require_kernel_version_gki">Kernel frissítése szükséges</string>
 </resources>
