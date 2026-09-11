@@ -70,5 +70,5 @@ lto = true
 codegen-units = 1
 
 [build-dependencies]
-bindgen = "0.72.1"
+bindgen = "0.73.1"
 cc = "1"
