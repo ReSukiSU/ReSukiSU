@@ -538,4 +538,8 @@
     <string name="require_manager_version">Root menedzser frissítése szükséges</string>
     <string name="require_kernel_version">Kernel frissítése szükséges. Kattints a telepítéshez.</string>
     <string name="require_kernel_version_gki">Kernel frissítése szükséges</string>
+    <string name="navigation_bar_badge">Bélyegek a navigációs sávon</string>
+    <string name="navigation_bar_badge_summary">Superuser folyamatok és modulok számának megjelenítése a navigációs sávon</string>
+    <string name="home_card_icons">Ikonok megjelenítése a kezdőlap kártyáin</string>
+    <string name="home_card_icons_summary">Kezdőlap kártyáinak ikonosítása</string>
 </resources>
