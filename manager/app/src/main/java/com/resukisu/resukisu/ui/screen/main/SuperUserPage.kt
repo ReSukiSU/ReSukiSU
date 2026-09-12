@@ -73,7 +73,6 @@ import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.LabelText
-import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.adaptiveScaffoldWindowInsets
 import com.resukisu.resukisu.ui.util.showReplacingSnackbar
@@ -290,8 +289,7 @@ private fun SuperUserContent(
     if (uiState.appGroupList.isEmpty()) {
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .blurSource(),
+                .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             if (uiState.isRefreshing && uiState.search.isEmpty()) {
@@ -330,8 +328,7 @@ private fun SuperUserContent(
         onRefresh = { viewModel.dispatch(SuperUserUiAction.Refresh) },
         isRefreshing = uiState.isRefreshing,
         modifier = Modifier
-            .fillMaxSize()
-            .blurSource(),
+            .fillMaxSize(),
         indicator = {
             PullToRefreshDefaults.LoadingIndicator(
                 modifier = Modifier
