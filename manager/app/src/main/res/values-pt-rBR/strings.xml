@@ -310,10 +310,6 @@
     <string name="kernel_flashing">Instalando o kernel</string>
     <string name="warning_of_meta_module_title">Módulo Meta necessário</string>
     <string name="warning_of_meta_module_summary">Este módulo deseja montar /system, o que é gerenciado pelo metamódulo. Sem ele, o módulo pode não funcionar</string>
-    <string name="sort_name_desc">Nome em ordem decrescente</string>
-    <string name="sort_install_time_new">Tempo de instalação (Novo)</string>
-    <string name="sort_install_time_old">Tempo de instalação (Antigo)</string>
-    <string name="sort_size_asc">Ordem decrescente de tamanho</string>
     <string name="sort_usage_freq">Frequência de utilização</string>
     <string name="no_apps_in_category">Não há candidaturas nesta categoria</string>
     <string name="persistent">Persistente</string>
@@ -533,5 +529,4 @@
     <string name="manager_update_details">Versão: %1$s (%2$d)\nArquitetura: %3$s</string>
     <string name="settings_check_beta_update">Confira as atualizações beta</string>
     <string name="settings_check_beta_update_summary">Verificação automática de versões beta a partir da ramificação principal</string>
-    <string name="sort_size_desc">Ordem decrescente de tamanho</string>
 </resources>

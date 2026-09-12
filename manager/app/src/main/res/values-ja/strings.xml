@@ -200,11 +200,6 @@
     <string name="kernel_flashing">カーネルをフラッシュ中</string>
     <string name="warning_of_meta_module_title">メタモジュールが必要です</string>
     <string name="warning_of_meta_module_summary">このモジュールは /system をマウントしようとしますが、メタモジュールがそれを処理します。そうでなければ動作しない可能性があります</string>
-    <string name="sort_name_desc">名前の降順</string>
-    <string name="sort_install_time_new">インストール日時 (新しい)</string>
-    <string name="sort_install_time_old">インストール日時 (古い)</string>
-    <string name="sort_size_desc">サイズの降順</string>
-    <string name="sort_size_asc">サイズの昇順</string>
     <string name="sort_usage_freq">使用頻度</string>
     <string name="no_apps_in_category">このカテゴリーにアプリはありません</string>
     <string name="susfs_config_title">SuSFS の構成</string>

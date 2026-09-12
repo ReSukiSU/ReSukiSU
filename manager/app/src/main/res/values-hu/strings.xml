@@ -278,11 +278,6 @@
     <string name="kernel_flashing">Kernel telepítés</string>
     <string name="warning_of_meta_module_title">Metamodul szükséges</string>
     <string name="warning_of_meta_module_summary">Ez a modul adatot akar csatolni a fájlrendszer /system névterébe, ehhez metamodul szükséges. Másképp a megfelelő működés nem garantált</string>
-    <string name="sort_name_desc">ABC sorrendben csökkenő</string>
-    <string name="sort_install_time_new">Telepítés ideje szerint (újabbak előre)</string>
-    <string name="sort_install_time_old">Telepítés ideje szerint (régebbiek előre)</string>
-    <string name="sort_size_desc">Tárhelyben elfoglalt méretük szerint csökkenő</string>
-    <string name="sort_size_asc">Tárhelyben elfoglalt méretük szerint növekvő</string>
     <string name="sort_usage_freq">Leggyakrabban használtak</string>
     <string name="no_apps_in_category">Ebben a kategóriában applikáció nem található</string>
     <string name="sulog_search_placeholder">Keresés naplóban</string>
