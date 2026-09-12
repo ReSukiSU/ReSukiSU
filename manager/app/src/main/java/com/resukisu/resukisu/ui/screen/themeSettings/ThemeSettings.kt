@@ -505,25 +505,27 @@ private fun AppearanceSettings(
             )
         }
 
-        item {
-            // 动态颜色开关
-            SettingsSwitchWidget(
-                icon = Icons.TwoTone.ColorLens,
-                title = stringResource(R.string.dynamic_color_title),
-                description = stringResource(R.string.dynamic_color_summary),
-                checked = state.useDynamicColor,
-                onCheckedChange = { enabled ->
-                    viewModel.dispatch(SettingsUiAction.SetDynamicColor(enabled))
-                }
-            )
-        }
-
-        item(
-            visible = !state.useDynamicColor,
-            topPadding = 1.dp,
+        expandableItem(
+            expanded = !state.useDynamicColor,
+            topContent = {
+                SettingsSwitchWidget(
+                    icon = Icons.TwoTone.ColorLens,
+                    title = stringResource(R.string.dynamic_color_title),
+                    description = stringResource(R.string.dynamic_color_summary),
+                    checked = state.useDynamicColor,
+                    onCheckedChange = { enabled ->
+                        viewModel.dispatch(SettingsUiAction.SetDynamicColor(enabled))
+                    }
+                )
+            }
         ) {
-            // 主题色选择
-            ThemeColorSelection(viewModel = viewModel)
+            item(
+                visible = !state.useDynamicColor,
+                topPadding = 1.dp,
+            ) {
+                // 主题色选择
+                ThemeColorSelection(viewModel = viewModel)
+            }
         }
 
         item {
@@ -560,7 +562,9 @@ private fun AppearanceSettings(
             )
         }
 
-        item {
+        item(
+            forceFlatBottom = true,
+        ) {
             SettingsBaseWidget(
                 icon = Icons.TwoTone.FormatSize,
                 title = stringResource(R.string.app_dpi_title),
@@ -577,6 +581,7 @@ private fun AppearanceSettings(
 
         item(
             topPadding = 1.dp,
+            forceFlatTop = true,
         ) { shape ->
             Surface(
                 modifier = Modifier
@@ -585,7 +590,6 @@ private fun AppearanceSettings(
                 color = if (themeConfig.isEnableBlurExp) Color.Transparent else MaterialTheme.colorScheme.surfaceBright.copy(
                     alpha = cardConfig.cardAlpha
                 ),
-                shape = shape
             ) {
                 Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                     DpiSliderControls(

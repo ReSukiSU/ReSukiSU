@@ -30,7 +30,6 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,21 +49,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.entity.Library
-import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults
-import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
-import com.mikepenz.aboutlibraries.ui.compose.m3.libraryColors
-import com.mikepenz.aboutlibraries.ui.compose.m3.style.m3VariantColors
-import com.mikepenz.aboutlibraries.ui.compose.variant.LibraryRow
+import com.mikepenz.aboutlibraries.ui.compose.util.author
 import com.mikepenz.aboutlibraries.util.withJson
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.WarningCard
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
+import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
+import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
+import com.resukisu.resukisu.ui.screen.LabelText
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
-import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
 import com.resukisu.resukisu.ui.util.adaptiveScaffoldWindowInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -90,7 +87,7 @@ fun OpenSourceLicenseScreen() {
 
     // from https://github.com/mikepenz/AboutLibraries#setup
     val context = LocalContext.current
-    val libraries by produceState<Libs?>(initialValue = null, context) {
+    val libraries by produceState(initialValue = Libs(emptyList(), emptySet()), context) {
         value = withContext(Dispatchers.IO) {
             Libs.Builder().withJson(context, R.raw.aboutlibraries).build()
         }
@@ -107,8 +104,7 @@ fun OpenSourceLicenseScreen() {
         contentColor = MaterialTheme.colorScheme.onSurface,
         topBar = {
             LargeFlexibleTopAppBar(
-                modifier = Modifier.blurEffect(
-                ),
+                modifier = Modifier.blurEffect(),
                 windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
                 title = { Text(text = stringResource(id = R.string.open_source_license)) },
                 scrollBehavior = scrollBehavior,
@@ -137,43 +133,34 @@ fun OpenSourceLicenseScreen() {
             )
         },
     ) { paddingValues ->
-        val cornerRadius = 16.dp
-        LibrariesContainer(
-            libraries = libraries,
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp)
                 .blurSource(),
-            contentPadding = paddingValues,// PaddingValues(horizontal = 16.dp),
-            colors = LibraryDefaults.libraryColors(
-                libraryBackgroundColor = Color.Transparent,
-                libraryContentColor = MaterialTheme.colorScheme.onSurface,
-            ),
-            variantColors = LibraryDefaults.m3VariantColors(
-                rowBackground = if (themeConfig.isEnableBlurExp) Color.Transparent else MaterialTheme.colorScheme.surfaceBright.copy(
-                    alpha = cardConfig.cardAlpha
-                ),
-                licenseBadgeContainer = MaterialTheme.colorScheme.primary,
-                licenseBadgeContent = contentColorFor(MaterialTheme.colorScheme.primary)
-            ),
-            libraryRow = { _, library, expanded, toggle, style ->
-                LibraryRow(
-                    library = library,
-                    expanded = expanded,
-                    onToggle = toggle,
-                    style = style,
-                    modifier = Modifier
-                        .padding(vertical = 4.dp)
-                        .clip(RoundedCornerShape(cornerRadius))
-                        .renderBackgroundBlur(),
-                )
-            },
-            onLibraryClick = { library ->
-                selectedLibrary = library
-                true
+            contentPadding = paddingValues
+        ) {
+            lazySegmentColumn(libraries.libraries) { _, lib ->
+                SettingsBaseWidget(
+                    iconPlaceholder = false,
+                    title = lib.name,
+                    description = lib.author,
+                    descriptionColumnContent = {
+                        Row {
+                            lib.licenses.forEach {
+                                LabelText(it.name)
+                            }
+                        }
+                    },
+                    onClick = {
+                        selectedLibrary = lib
+                    }
+                ) {
+                    lib.artifactVersion?.let {
+                        Text(it)
+                    }
+                }
             }
-        )
-
+        }
         if (selectedLibrary != null) {
             val library = selectedLibrary!!
             val uriHandler = LocalUriHandler.current

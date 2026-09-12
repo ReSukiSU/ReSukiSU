@@ -47,7 +47,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -59,7 +61,9 @@ import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.ui.component.settings.material3internal.rememberAnimatedShape
 import com.resukisu.resukisu.ui.theme.CardConfig
@@ -247,6 +251,32 @@ fun SettingsBaseWidget(
         )
     } else RectangleShape
 
+    val safeClickShape = if (onClick != null || onLongClick != null) {
+        remember(clickShape) {
+            object : Shape {
+                override fun createOutline(
+                    size: Size,
+                    layoutDirection: LayoutDirection,
+                    density: Density,
+                ): Outline = clickShape.createOutline(size, layoutDirection, density)
+            }
+        }
+    } else {
+        RectangleShape
+    }
+    val listItemShapes = if (onClick != null || onLongClick != null) {
+        ListItemDefaults.shapes(
+            shape = safeClickShape,
+            selectedShape = safeClickShape,
+            pressedShape = safeClickShape,
+            focusedShape = safeClickShape,
+            hoveredShape = safeClickShape,
+            draggedShape = safeClickShape,
+        )
+    } else {
+        shapes
+    }
+
     val clipShape = if (onClick != null || onLongClick != null) {
         clickShape
     } else {
@@ -365,7 +395,7 @@ fun SettingsBaseWidget(
             } else null,
             enabled = enabled,
             colors = colors,
-            shapes = shapes,
+            shapes = listItemShapes,
             verticalAlignment = Alignment.CenterVertically,
             leadingContent = finalLeadingContent,
             supportingContent = supportingContent,
