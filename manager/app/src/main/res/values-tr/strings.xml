@@ -261,7 +261,6 @@
     <string name="kernel_flashing">Çekirdek Yükleniyor</string>
     <string name="warning_of_meta_module_title">Meta modül gerektirir</string>
     <string name="warning_of_meta_module_summary">Bu modül, meta modül tarafından yönetilen /system bölümünü bağlamak istiyor. Bu modül meta modül olmadan çalışmayabilir</string>
-    <string name="sort_name_asc">İsme göre artan sırada</string>
     <string name="sort_name_desc">İsme göre azalan sırada</string>
     <string name="sort_install_time_new">Kurulum zamanı (yeni)</string>
     <string name="sort_install_time_old">Kurulum zamanı (eski)</string>

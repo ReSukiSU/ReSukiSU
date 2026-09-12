@@ -310,7 +310,6 @@
     <string name="kernel_flashing">Instalando o kernel</string>
     <string name="warning_of_meta_module_title">Módulo Meta necessário</string>
     <string name="warning_of_meta_module_summary">Este módulo deseja montar /system, o que é gerenciado pelo metamódulo. Sem ele, o módulo pode não funcionar</string>
-    <string name="sort_name_asc">Ordem crescente de nomes</string>
     <string name="sort_name_desc">Nome em ordem decrescente</string>
     <string name="sort_install_time_new">Tempo de instalação (Novo)</string>
     <string name="sort_install_time_old">Tempo de instalação (Antigo)</string>

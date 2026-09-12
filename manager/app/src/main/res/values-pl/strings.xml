@@ -303,7 +303,6 @@
     <string name="module_failed_count">%d nie udało się zainstalować nowego modułu</string>
     <string name="warning_of_meta_module_title">Wymagany meta moduł</string>
     <string name="warning_of_meta_module_summary">Ten moduł montuje /system i wymaga meta modułu, aby działać poprawnie</string>
-    <string name="sort_name_asc">Alfabetycznie (A-Z)</string>
     <string name="sort_name_desc">Alfabetycznie (Z-A)</string>
     <string name="sort_install_time_new">Czas instalacji (Nowe)</string>
     <string name="sort_install_time_old">Czas instalacji (Stare)</string>

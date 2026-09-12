@@ -200,7 +200,6 @@
     <string name="kernel_flashing">カーネルをフラッシュ中</string>
     <string name="warning_of_meta_module_title">メタモジュールが必要です</string>
     <string name="warning_of_meta_module_summary">このモジュールは /system をマウントしようとしますが、メタモジュールがそれを処理します。そうでなければ動作しない可能性があります</string>
-    <string name="sort_name_asc">名前の昇順</string>
     <string name="sort_name_desc">名前の降順</string>
     <string name="sort_install_time_new">インストール日時 (新しい)</string>
     <string name="sort_install_time_old">インストール日時 (古い)</string>

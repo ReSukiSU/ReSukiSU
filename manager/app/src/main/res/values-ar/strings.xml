@@ -287,7 +287,6 @@
     <string name="module_unavailable">الإضافة %s معطلّة، او بإنتظار الإزالة</string>
     <string name="settings_background_dim">تعديل ظلمة الخلفية</string>
     <string name="warning_of_meta_module_title">تحتاج لـ Metamodule</string>
-    <string name="sort_name_asc">ترتيب اسماء تصاعدي</string>
     <string name="sort_name_desc">الاسم تنازليًا</string>
     <string name="sort_install_time_new">وقت التثبيت (جديد)</string>
     <string name="sort_install_time_old">وقت التثبيت (قديم)</string>

@@ -303,7 +303,6 @@
     <string name="kernel_flashing">Прошивка ядра</string>
     <string name="warning_of_meta_module_title">Потрібен метамодуль</string>
     <string name="warning_of_meta_module_summary">Цей модуль хоче монтувати /system; цим займатиметься метамодуль. Без нього модуль може не працювати</string>
-    <string name="sort_name_asc">Назва за зростанням</string>
     <string name="sort_name_desc">Назва за спаданням</string>
     <string name="sort_install_time_new">Час встановлення (нові)</string>
     <string name="sort_install_time_old">Час встановлення (старі)</string>

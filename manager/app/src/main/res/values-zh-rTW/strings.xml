@@ -297,7 +297,6 @@
     <string name="kernel_flashing">正在刷寫內核</string>
     <string name="warning_of_meta_module_title">需要元模組</string>
     <string name="warning_of_meta_module_summary">這個模組需要元模組掛載 /system。否則，它將無法運作</string>
-    <string name="sort_name_asc">名稱遞增</string>
     <string name="sort_name_desc">名稱遞減</string>
     <string name="sort_install_time_new">安裝時間（新）</string>
     <string name="sort_install_time_old">安裝時間（舊）</string>

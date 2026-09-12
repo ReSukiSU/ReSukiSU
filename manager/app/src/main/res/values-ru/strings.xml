@@ -284,7 +284,6 @@
     <string name="kernel_flashing">Прошить ядро</string>
     <string name="warning_of_meta_module_title">Требуется мета-модуль</string>
     <string name="warning_of_meta_module_summary">Этот модуль пытается смонтировать /system, что обрабатывается мета-модулем. Без него модуль может не работать</string>
-    <string name="sort_name_asc">Название (по возрастанию)</string>
     <string name="sort_name_desc">Название (по убыванию)</string>
     <string name="sort_install_time_new">Время установки (новые)</string>
     <string name="sort_install_time_old">Время установки (старые)</string>

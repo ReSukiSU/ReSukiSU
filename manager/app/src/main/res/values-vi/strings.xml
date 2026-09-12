@@ -204,7 +204,6 @@
     <string name="module_failed_count">Cài đặt module %d thất bại</string>
     <string name="warning_of_meta_module_title">Yêu cầu Meta-module</string>
     <string name="warning_of_meta_module_summary">Module này muốn mount /system, Meta-module sẽ xử lý việc đó. Nếu không, nó có thể không hoạt động</string>
-    <string name="sort_name_asc">Tên (Tăng dần)</string>
     <string name="sort_name_desc">Tên (Giảm dần)</string>
     <string name="sort_install_time_new">Thời gian cài đặt (Mới)</string>
     <string name="sort_install_time_old">Thời gian cài đặt (Cũ)</string>
