@@ -538,4 +538,8 @@
     <string name="require_kernel_version_gki">Потрібне оновлення ядра</string>
     <string name="require_manager_version">Потрібне оновлення менеджера</string>
     <string name="require_kernel_version">Потрібне оновлення ядра. Натисніть, щоб встановити.</string>
+    <string name="navigation_bar_badge">Позначки на панелі навігації</string>
+    <string name="navigation_bar_badge_summary">Показувати кількість прав суперкористувача / модулів на панелі навігації</string>
+    <string name="home_card_icons">Показувати іконки на картках головного екрана</string>
+    <string name="home_card_icons_summary">Додати іконки до інформаційних карток на головному екрані</string>
 </resources>
