@@ -58,6 +58,7 @@ mod android {
 
     pub const DYNAMIC_MANAGER: &str = concatcp!(WORKING_DIR, ".dynamic_manager");
     pub const SUSFS_CONFIG: &str = concatcp!(WORKING_DIR, ".susfs.json");
+    pub const UAPI_MISMATCH: &str = concatcp!(WORKING_DIR, ".uapi_mismatched");
 
     #[derive(Serialize)]
     pub struct MountInfo {

@@ -1,7 +1,12 @@
 #![allow(clippy::unreadable_literal)]
 use anyhow::{Result, bail};
 
-use std::{cell::Cell, fs, io, os::fd::RawFd, sync::OnceLock};
+use std::{
+    cell::Cell,
+    fs, io,
+    os::{fd::RawFd, unix::fs::PermissionsExt},
+    sync::OnceLock,
+};
 
 use crate::{android::uapi, defs::MountInfo};
 
@@ -198,10 +203,16 @@ pub fn ensure_uapi_version_matched() -> anyhow::Result<()> {
     let kernel_uapi = get_info().uapi_version;
     let userspace_uapi = uapi_version();
     if kernel_uapi != userspace_uapi {
+        let _ = std::fs::File::create_new(crate::defs::UAPI_MISMATCH);
         bail!(
             "UAPI version mismatch: kernel={kernel_uapi}, ksud={userspace_uapi}. Please update KernelSU!"
         );
     }
+    let _ = std::fs::set_permissions(
+        crate::defs::UAPI_MISMATCH,
+        std::fs::Permissions::from_mode(0o660),
+    );
+    let _ = std::fs::remove_file(crate::defs::UAPI_MISMATCH);
     Ok(())
 }
 
