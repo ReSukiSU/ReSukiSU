@@ -307,12 +307,6 @@
     <string name="module_unavailable">Module %s désactivé ou en attente de suppression</string>
     <string name="warning_of_meta_module_title">Métamodule requis</string>
     <string name="warning_of_meta_module_summary">Ce module tente de monter le volume /system, montage géré par métamodule. Sans métamodule, ce module risque de ne pas fonctionner</string>
-    <string name="sort_name_asc">Par nom</string>
-    <string name="sort_name_desc">Par nom (décroissant)</string>
-    <string name="sort_install_time_new">Par date d\'installation (décroissant)</string>
-    <string name="sort_install_time_old">Par date d\'installation</string>
-    <string name="sort_size_desc">Par taille (décroissant)</string>
-    <string name="sort_size_asc">Par taille</string>
     <string name="sort_usage_freq">Par fréquence d\'utilisation</string>
     <string name="no_apps_in_category">Aucune application dans cette catégorie</string>
     <string name="persistent">Persistante</string>

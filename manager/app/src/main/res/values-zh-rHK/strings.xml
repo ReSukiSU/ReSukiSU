@@ -266,12 +266,6 @@
     <string name="kernel_flashing">核心刷寫</string>
     <string name="warning_of_meta_module_title">需要元模組</string>
     <string name="warning_of_meta_module_summary">此模組想掛載 /system，此操作由 meta 模組處理。若缺少它，模組可能無法正常運作</string>
-    <string name="sort_name_asc">名稱升序</string>
-    <string name="sort_name_desc">名稱降序</string>
-    <string name="sort_install_time_new">安裝時間（新）</string>
-    <string name="sort_install_time_old">安裝時間（舊）</string>
-    <string name="sort_size_desc">大小降序</string>
-    <string name="sort_size_asc">大小升序</string>
     <string name="sort_usage_freq">使用頻率</string>
     <string name="no_apps_in_category">此分類中冇應用程式</string>
     <string name="persistent">持久</string>

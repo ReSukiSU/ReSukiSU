@@ -287,12 +287,6 @@
     <string name="module_unavailable">الإضافة %s معطلّة، او بإنتظار الإزالة</string>
     <string name="settings_background_dim">تعديل ظلمة الخلفية</string>
     <string name="warning_of_meta_module_title">تحتاج لـ Metamodule</string>
-    <string name="sort_name_asc">ترتيب اسماء تصاعدي</string>
-    <string name="sort_name_desc">الاسم تنازليًا</string>
-    <string name="sort_install_time_new">وقت التثبيت (جديد)</string>
-    <string name="sort_install_time_old">وقت التثبيت (قديم)</string>
-    <string name="sort_size_desc">ترتيب تنازلي حسب الحجم</string>
-    <string name="sort_size_asc">ترتيب تصاعدي حسب الحجم</string>
     <string name="sort_usage_freq">تكرار الاستخدام</string>
     <string name="no_apps_in_category">لا يوجد تطبيق في هذه الفئة</string>
     <string name="persistent">مستمر</string>
