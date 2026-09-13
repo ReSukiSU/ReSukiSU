@@ -380,7 +380,7 @@
     <string name="sus_maps_warning">重要提示：对于具备完善注入检测机制的应用，此功能可能无法有效绕过检测</string>
     <string name="sus_maps_debug_info">首先通过 ps -enf 查找目标应用的 PID 和 UID，然后检查 /proc/&lt;pid&gt;/maps 中的相关路径，并与 /proc/1/mountinfo 中的设备号进行比对以确保一致性。只有当设备号一致时，隐藏映射才能正常工作</string>
     <string name="require_manager_version">需要更新管理器</string>
-    <string name="require_kernel_version">需要更新内核，点击此处安装</string>
+    <string name="require_kernel_version">需要更新内核，点击此处安装。</string>
     <string name="require_kernel_version_gki">需要更新内核</string>
     <string name="umount_path_manager">Umount 路径管理</string>
     <string name="umount_path_manager_summary">管理内核卸载路径</string>
