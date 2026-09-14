@@ -541,4 +541,6 @@
     <string name="sort_size">Розмір</string>
     <string name="reverse_order">Зворотний порядок</string>
     <string name="sort_name">Ім\'я</string>
+    <string name="enable_floating_bottom_bar">Плаваюча нижня панель</string>
+    <string name="enable_floating_bottom_bar_summary">Використовувати плаваючу нижню панель у стилі Apple.</string>
 </resources>

@@ -541,4 +541,6 @@
     <string name="sort_update_time">Legutóbbi frissítés ideje szerint</string>
     <string name="sort_install_time">Telepítés ideje szerint</string>
     <string name="sort_name">Név szerint</string>
+    <string name="enable_floating_bottom_bar">Lebegő alsó sáv</string>
+    <string name="enable_floating_bottom_bar_summary">Apple iOS stílusú lebegő alsó sáv használata.</string>
 </resources>
