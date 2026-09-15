@@ -173,6 +173,13 @@
     <string name="install_only_support_ko_file">Only .ko files are supported</string>
     <string name="select_file_tip">%1$s partition image is recommended</string>
     <string name="select_kmi">Select KMI</string>
+    <string name="advanced_options">Advanced Options</string>
+    <string name="allow_shell">Always grant Root to Shell</string>
+    <string name="allow_shell_summary">Always allow adb shell to call SU command. Do not enable this unless absolutely necessary.</string>
+    <string name="enable_adb">Force enable adb on boot</string>
+    <string name="enable_adb_summary">Force enable USB debugging and disable adb authentication. Do not enable this unless absolutely necessary.</string>
+    <string name="install_force_backup">Backup as stock image</string>
+    <string name="install_force_backup_summary">Please make sure your selected boot image is a stock image</string>
     <string name="settings_uninstall">Uninstall</string>
     <string name="settings_uninstall_temporary">Uninstall temporarily</string>
     <string name="settings_uninstall_permanent">Uninstall permanently</string>

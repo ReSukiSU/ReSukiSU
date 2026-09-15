@@ -6,6 +6,9 @@ sealed interface FlashOperation {
         val lkm: LkmSelection = LkmSelection.KmiNone,
         val ota: Boolean,
         val partition: String?,
+        val allowShell: Boolean = false,
+        val enableAdb: Boolean = false,
+        val forceBackup: Boolean = false,
     ) : FlashOperation
 
     data class Module(val uri: String) : FlashOperation
