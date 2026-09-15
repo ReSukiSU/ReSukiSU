@@ -99,7 +99,7 @@ def get_caption():
         commit_line=commit_line,
         run_url=RUN_URL,
     )
-    if BRANCH != "main":
+    if BRANCH != "main" and GITHUB_REF_TYPE != "tag":
         msg += "\n⚠️⚠️<b>DEV VERSION, PLEASE BACKUP BEFORE INSTALLATION</b>⚠️⚠️"
         msg += "\n⚠️⚠️<b>测试版，安装前请备份</b>⚠️⚠️"
     return msg
@@ -113,7 +113,7 @@ def get_caption_for_debug():
         commit_line=commit_line,
         run_url=RUN_URL,
     )
-    if BRANCH != "main":
+    if BRANCH != "main" and GITHUB_REF_TYPE != "tag":
         msg += "\n⚠️⚠️<b>DEV VERSION, PLEASE BACKUP BEFORE INSTALLATION</b>⚠️⚠️"
         msg += "\n⚠️⚠️<b>测试版，安装前请备份</b>⚠️⚠️"
     return msg

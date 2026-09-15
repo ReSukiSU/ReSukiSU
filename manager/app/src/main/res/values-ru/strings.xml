@@ -57,8 +57,8 @@
     <string name="reboot_download">Перезагрузить в Download</string>
     <string name="reboot_edl">Перезагрузить в EDL</string>
     <string name="about">О приложении</string>
-    <string name="get_source_code">Проверить исходный код</string>
-    <string name="get_source_code_detail">Проверить исходный код на GitHub</string>
+    <string name="get_source_code">Изучить исходный код</string>
+    <string name="get_source_code_detail">Изучить исходный код на GitHub</string>
     <string name="join_telegram_group">Присоединиться к сообществу</string>
     <string name="join_telegram_group_detail">Присоединиться к нашему Telegram-сообществу</string>
     <string name="open_source_license">Open Source лицензия</string>
@@ -147,7 +147,7 @@
     <string name="affected_applications">Затрагиваемые приложения</string>
     <string name="module_changelog_failed">Не удалось получить список изменений: %s</string>
     <string name="grant_root_failed">Не удалось выдать root!</string>
-    <string name="home_pr_build_warning">Это debug-сборка из PR. НЕ используйте в продакшене!</string>
+    <string name="home_pr_build_warning">Это debug-сборка из PR. Не рекомендуется для публичного релиза</string>
     <string name="action">Действие</string>
     <string name="close">Закрыть</string>
     <string name="direct_install">Прямая установка (Рекомендуется)</string>
@@ -219,7 +219,7 @@
     <string name="dynamic_color_summary">Использовать акцентные цвета системы</string>
     <string name="choose_theme_color">Выберите цвет темы</string>
     <string name="horizon_kernel">Установка AnyKernel3</string>
-    <string name="horizon_kernel_summary">Прошить файл ядра AnyKernel3</string>
+    <string name="horizon_kernel_summary">Прошить архив AnyKernel3</string>
     <string name="root_required">Требуется root-права</string>
     <string name="failed_reboot">Не удалось перезагрузиться</string>
     <string name="custom_settings">Персонализация</string>
@@ -422,7 +422,7 @@
     <string name="dynamic_palette_style">Стиль палитры</string>
     <string name="dynamic_color_spec">Спецификация цвета</string>
     <string name="predictive_back_animation_aosp">AOSP</string>
-    <string name="readme">Ридми</string>
+    <string name="readme">Прочти меня</string>
     <string name="susfs_tab_status">Статус</string>
     <string name="susfs_tab_standard">Стандарт</string>
     <string name="susfs_tab_sus_path">SUS путь</string>
@@ -522,7 +522,7 @@
     <string name="manager_update_beta">Бета обновление</string>
     <string name="manager_update_details">Версия: %1$s (%2$d)\nАрхитектура: %3$s</string>
     <string name="settings_check_beta_update">Проверка бета обновлений</string>
-    <string name="settings_check_beta_update_summary">Автоматически проверять бета-сборки из главной ветки</string>
+    <string name="settings_check_beta_update_summary">Автоматически проверять бета-сборки из основной ветки</string>
     <string name="settings_custom_monospace_font">Использовать встроенный моноширинный шрифт</string>
     <string name="settings_custom_monospace_font_summary">Использовать шрифт JetBrains Mono для отображения логов во избежание проблем с системным моноширинным шрифтом</string>
     <string name="susfs_enable_config">менеджер SUSFS</string>
@@ -532,4 +532,8 @@
     <string name="require_manager_version">Требуется обновление менеджера</string>
     <string name="require_kernel_version">Требуется обновление ядра. Нажмите, чтобы установить.</string>
     <string name="require_kernel_version_gki">Требуется обновление ядра</string>
+    <string name="home_card_icons_summary">Добавить иконки на информационные карточки главного экрана</string>
+    <string name="home_card_icons">Показывать иконки на карточках главного экрана</string>
+    <string name="navigation_bar_badge_summary">Показывать количество суперпользователь/модуль в панели навигации</string>
+    <string name="navigation_bar_badge">Значки панели навигации</string>
 </resources>

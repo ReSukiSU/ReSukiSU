@@ -38,7 +38,7 @@ dependencies = [
 [[package]]
 name = "kernlog"
 version = "0.3.1"
-source = "git+https://github.com/kstep/kernlog.rs#68caa7bf1e27baea35b00ebba786cafae0bca90f"
+source = "git+https://github.com/ReSukiSU/kernlog.rs#68caa7bf1e27baea35b00ebba786cafae0bca90f"
 dependencies = [
  "libc",
  "log",
@@ -102,7 +102,7 @@ dependencies = [
 [[package]]
 name = "rustix"
 version = "0.38.34"
-source = "git+https://github.com/Kernel-SU/rustix.git?rev=4a53fbc#4a53fbc7cb7a07cabe87125cc21dbc27db316259"
+source = "git+https://github.com/ReSukiSU/rustix.git?rev=4a53fbc#4a53fbc7cb7a07cabe87125cc21dbc27db316259"
 dependencies = [
  "bitflags",
  "errno",
