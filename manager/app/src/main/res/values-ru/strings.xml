@@ -187,7 +187,7 @@
     <string name="settings_custom_background">Пользовательский фон приложения</string>
     <string name="settings_custom_background_summary">Выберите изображение в качестве фона</string>
     <string name="settings_config_enable_blur">Включить блюр</string>
-    <string name="settings_config_enable_blur_summary">Включить процесс боюра для этого приложения</string>
+    <string name="settings_config_enable_blur_summary">Использовать блюр для приложения</string>
     <string name="settings_exp_draw_background_to_blur">Нарисовать кастомный фон для блюра</string>
     <string name="settings_exp_draw_background_to_blur_description">Экспериментальная функция, используйте на ваш страх и риск</string>
     <string name="settings_config_use_custom_background_seed_color">Выбрать цвет с кастомного фона</string>
