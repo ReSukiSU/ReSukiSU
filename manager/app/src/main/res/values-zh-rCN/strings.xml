@@ -208,6 +208,8 @@
     <string name="background_crop_rotation_angle">旋转角度</string>
     <string name="settings_config_enable_blur">启用模糊</string>
     <string name="settings_config_enable_blur_summary">对此 App 启用模糊处理</string>
+    <string name="enable_floating_bottom_bar">悬浮底栏</string>
+    <string name="enable_floating_bottom_bar_summary">使用 Apple 风格的悬浮底栏</string>
     <string name="settings_exp_draw_background_to_blur">将自定义背景渲染到模糊</string>
     <string name="settings_exp_draw_background_to_blur_description">实验性功能，后果自负</string>
     <string name="settings_config_use_custom_background_seed_color">从自定义背景图片中取色</string>
@@ -378,7 +380,7 @@
     <string name="sus_maps_warning">重要提示：对于具备完善注入检测机制的应用，此功能可能无法有效绕过检测</string>
     <string name="sus_maps_debug_info">首先通过 ps -enf 查找目标应用的 PID 和 UID，然后检查 /proc/&lt;pid&gt;/maps 中的相关路径，并与 /proc/1/mountinfo 中的设备号进行比对以确保一致性。只有当设备号一致时，隐藏映射才能正常工作</string>
     <string name="require_manager_version">需要更新管理器</string>
-    <string name="require_kernel_version">需要更新内核，点击此处安装</string>
+    <string name="require_kernel_version">需要更新内核，点击此处安装。</string>
     <string name="require_kernel_version_gki">需要更新内核</string>
     <string name="umount_path_manager">Umount 路径管理</string>
     <string name="umount_path_manager_summary">管理内核卸载路径</string>

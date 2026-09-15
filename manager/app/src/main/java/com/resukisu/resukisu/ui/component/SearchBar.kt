@@ -478,10 +478,10 @@ fun SearchAppBar(
             windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor =
-                    if (themeConfig.isEnableBlurExp) Color.Transparent
+                    if (themeConfig.isEnableBlur) Color.Transparent
                     else MaterialTheme.colorScheme.surfaceContainer.copy(alpha = cardConfig.cardAlpha),
                 scrolledContainerColor =
-                    if (themeConfig.isEnableBlurExp) Color.Transparent
+                    if (themeConfig.isEnableBlur) Color.Transparent
                     else MaterialTheme.colorScheme.surfaceContainer.copy(alpha = cardConfig.cardAlpha),
             ),
         )

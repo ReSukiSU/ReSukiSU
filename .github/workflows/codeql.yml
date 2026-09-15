@@ -75,9 +75,6 @@ jobs:
           build-scan-publish: false
           cache-read-only: true
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v4
-
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 

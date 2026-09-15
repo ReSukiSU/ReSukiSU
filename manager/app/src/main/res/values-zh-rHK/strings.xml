@@ -392,6 +392,8 @@
     <string name="background_crop_rotation_angle">旋轉角度</string>
     <string name="settings_config_enable_blur">啟用模糊</string>
     <string name="settings_config_enable_blur_summary">為此應用程式啟用模糊處理</string>
+    <string name="enable_floating_bottom_bar">懸浮底部欄</string>
+    <string name="enable_floating_bottom_bar_summary">使用 Apple 風格懸浮底部欄</string>
     <string name="settings_exp_draw_background_to_blur">繪製自訂背景以實現模糊效果</string>
     <string name="settings_exp_draw_background_to_blur_description">實驗性功能，使用風險自負</string>
     <string name="settings_config_use_custom_background_seed_color">從自訂背景選取顏色</string>

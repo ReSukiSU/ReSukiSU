@@ -255,7 +255,6 @@ class SettingsPlatformRepository(
         cardConfig.save()
         themeConfig.preventBackgroundRefresh = false
         backgroundManager.saveBackgroundDim(0f)
-        backgroundManager.saveEnableBlur(false)
         backgroundManager.saveEnableBlurExp(false)
         backgroundManager.saveUseBackgroundSeedColor(false)
         backgroundManager.saveEnableHighContrastMode(false)
