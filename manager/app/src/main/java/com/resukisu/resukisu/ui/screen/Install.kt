@@ -9,12 +9,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -95,14 +90,98 @@ fun InstallScreen(
     var tempKernelUri by remember { mutableStateOf<Uri?>(null) }
 
     var advancedOptionsShown by remember { mutableStateOf(false) }
+    var lkmSectionExpanded by remember { mutableStateOf(true) }
     var allowShell by remember { mutableStateOf(false) }
     var enableAdb by remember { mutableStateOf(false) }
     var forceBackup by remember { mutableStateOf(false) }
 
     val isGKI = environment.isGki
     val isAbDevice = environment.isAbDevice
+    val rootAvailable = environment.rootAvailable
     val summary = stringResource(R.string.horizon_kernel_summary)
     val failedReboot = stringResource(R.string.failed_reboot)
+    val selectFileTip = stringResource(id = R.string.select_file_tip, environment.defaultPartition)
+
+    var currentSelectingMethod by remember { mutableStateOf<InstallMethod?>(null) }
+
+    val selectImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            it.data?.data?.let { uri ->
+                val option = when (currentSelectingMethod) {
+                    is InstallMethod.SelectFile -> InstallMethod.SelectFile(
+                        uri,
+                        summary = selectFileTip
+                    )
+
+                    is InstallMethod.HorizonKernel -> InstallMethod.HorizonKernel(
+                        uri,
+                        summary = summary
+                    )
+
+                    else -> null
+                }
+                option?.let { opt ->
+                    if (opt is InstallMethod.HorizonKernel && opt.uri != null) {
+                        if (isAbDevice) {
+                            tempKernelUri = opt.uri
+                            showSlotSelectionDialog = true
+                        } else {
+                            installMethod = opt
+                        }
+                    } else {
+                        installMethod = opt
+                    }
+                }
+            }
+        }
+    }
+
+    val confirmDialog = rememberConfirmDialog(
+        onConfirm = {
+            installMethod = InstallMethod.DirectInstallToInactiveSlot
+        },
+        onDismiss = null
+    )
+
+    val dialogTitle = stringResource(id = android.R.string.dialog_alert_title)
+    val dialogContent = stringResource(id = R.string.install_inactive_slot_warning)
+
+    val onMethodClick = { option: InstallMethod ->
+        currentSelectingMethod = option
+        when (option) {
+            is InstallMethod.SelectFile, is InstallMethod.HorizonKernel -> {
+                selectImageLauncher.launch(Intent(Intent.ACTION_GET_CONTENT).apply {
+                    type = "application/*"
+                    putExtra(
+                        Intent.EXTRA_MIME_TYPES,
+                        arrayOf("application/octet-stream", "application/zip")
+                    )
+                })
+            }
+
+            is InstallMethod.DirectInstall -> {
+                installMethod = option
+            }
+
+            is InstallMethod.DirectInstallToInactiveSlot -> {
+                confirmDialog.showConfirm(dialogTitle, dialogContent)
+            }
+        }
+    }
+
+    val lkmMethods = remember(rootAvailable, isAbDevice, selectFileTip) {
+        buildList {
+            add(InstallMethod.SelectFile(summary = selectFileTip))
+            if (rootAvailable) {
+                add(InstallMethod.DirectInstall)
+                if (isAbDevice) {
+                    add(InstallMethod.DirectInstallToInactiveSlot)
+                }
+            }
+        }
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
@@ -279,34 +358,6 @@ fun InstallScreen(
                         androidx.compose.material3.CircularProgressIndicator()
                     }
                 } else {
-                    SelectInstallMethod(
-                        isGKI = isGKI,
-                        rootAvailable = environment.rootAvailable,
-                        isAbDevice = environment.isAbDevice,
-                        defaultPartitionName = environment.defaultPartition,
-                        onSelected = { method ->
-                            if (method is InstallMethod.HorizonKernel && method.uri != null) {
-                                if (isAbDevice) {
-                                    tempKernelUri = method.uri
-                                    showSlotSelectionDialog = true
-                                } else {
-                                    installMethod = method
-                                }
-                            } else {
-                                installMethod = method
-                            }
-                        },
-                        selectedMethod = installMethod,
-                    )
-                }
-            }
-
-            if (!installState.loading) item {
-                AnimatedVisibility(
-                    visible = installMethod is InstallMethod.DirectInstall || installMethod is InstallMethod.DirectInstallToInactiveSlot,
-                    enter = fadeIn() + expandVertically(),
-                    exit = shrinkVertically() + fadeOut()
-                ) {
                     val isOta = installMethod is InstallMethod.DirectInstallToInactiveSlot
                     val suffix = if (isOta) {
                         environment.inactiveSlotSuffix
@@ -325,113 +376,166 @@ fun InstallScreen(
                         partitions.indexOf(defaultPartition).takeIf { it >= 0 } ?: 0
                     if (!hasCustomSelected) partitionSelectionIndex = defaultIndex
 
-                    if (displayPartitions.isNotEmpty()) {
+                    val canSelectPartition =
+                        installMethod is InstallMethod.DirectInstall || installMethod is InstallMethod.DirectInstallToInactiveSlot
+
+                    Column {
+                        // Part 1: Flash LKM image (expandable)
                         SegmentedColumn {
-                            item {
-                                SettingsChooseWidget(
-                                    icon = Icons.TwoTone.AutoFixHigh,
-                                    items = displayPartitions,
-                                    selectedIndex = partitionSelectionIndex,
-                                    title = "${stringResource(R.string.install_select_partition)} (${suffix})",
-                                    onSelectedIndexChange = { index ->
-                                        hasCustomSelected = true
-                                        partitionSelectionIndex = index
-                                    },
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (!installState.loading) item {
-                SegmentedColumn {
-                    val isGki = isGKI
-                    val canForceBackup = installMethod is InstallMethod.SelectFile
-
-                    if (isGki) {
-                        item {
-                            SettingsBaseWidget(
-                                icon = Icons.AutoMirrored.TwoTone.Input,
-                                title = stringResource(id = R.string.install_upload_lkm_file),
-                                description = (lkmSelection as? LkmSelection.LkmUri)?.let {
-                                    stringResource(
-                                        id = R.string.selected_lkm,
-                                        it.uri.toUri().lastPathSegment ?: "(file)"
+                            val lkmRotation by animateFloatAsState(
+                                targetValue = if (lkmSectionExpanded) 180f else 0f,
+                                label = "LkmSectionRotation"
+                            )
+                            expandableItem(
+                                expanded = lkmSectionExpanded,
+                                topContent = {
+                                    SettingsBaseWidget(
+                                        title = stringResource(R.string.Lkm_install_methods),
+                                        onClick = { lkmSectionExpanded = !lkmSectionExpanded },
+                                        trailingContent = {
+                                            Icon(
+                                                imageVector = Icons.TwoTone.ExpandMore,
+                                                contentDescription = null,
+                                                modifier = Modifier.graphicsLayer { rotationZ = lkmRotation }
+                                            )
+                                        },
                                     )
                                 },
-                                onClick = { onLkmUpload() },
-                            )
-                        }
-                    }
+                                bottomContent = {
+                                    lkmMethods.forEach { method ->
+                                        val selected = method.javaClass == installMethod?.javaClass
+                                        item(key = method.javaClass) {
+                                            SettingsBaseWidget(
+                                                title = stringResource(id = method.label),
+                                                description = method.summary,
+                                                selected = selected,
+                                                onClick = { onMethodClick(method) },
+                                                leadingContent = {
+                                                    RadioButton(
+                                                        selected = selected,
+                                                        onClick = null,
+                                                    )
+                                                },
+                                            )
+                                        }
+                                    }
 
-                    if (canForceBackup) {
-                        item {
-                            SettingsSwitchWidget(
-                                title = stringResource(id = R.string.install_force_backup),
-                                description = stringResource(id = R.string.install_force_backup_summary),
-                                checked = forceBackup,
-                                onCheckedChange = { forceBackup = it },
-                            )
-                        }
-                    }
+                                    item(visible = canSelectPartition && displayPartitions.isNotEmpty()) {
+                                        SettingsChooseWidget(
+                                            icon = Icons.TwoTone.AutoFixHigh,
+                                            items = displayPartitions,
+                                            selectedIndex = partitionSelectionIndex,
+                                            title = "${stringResource(R.string.install_select_partition)} (${suffix})",
+                                            onSelectedIndexChange = { index ->
+                                                hasCustomSelected = true
+                                                partitionSelectionIndex = index
+                                            },
+                                        )
+                                    }
 
-                    (installMethod as? InstallMethod.HorizonKernel)?.slot?.let { slot ->
-                        item {
-                            SettingsBaseWidget(
-                                title = stringResource(
-                                    id = R.string.selected_slot,
-                                    if (slot == "a") stringResource(id = R.string.slot_a)
-                                    else stringResource(id = R.string.slot_b)
-                                ),
-                                onClick = null,
-                            )
-                        }
-                    }
-                }
-            }
+                                    item(visible = isGKI) {
+                                        SettingsBaseWidget(
+                                            icon = Icons.AutoMirrored.TwoTone.Input,
+                                            title = stringResource(id = R.string.install_upload_lkm_file),
+                                            description = (lkmSelection as? LkmSelection.LkmUri)?.let {
+                                                stringResource(
+                                                    id = R.string.selected_lkm,
+                                                    it.uri.toUri().lastPathSegment ?: "(file)"
+                                                )
+                                            },
+                                            onClick = { onLkmUpload() },
+                                        )
+                                    }
 
-            if (!installState.loading) item {
-                SegmentedColumn {
-                    expandableItem(
-                        expanded = advancedOptionsShown,
-                        topContent = {
-                            val rotation by animateFloatAsState(
-                                targetValue = if (advancedOptionsShown) 180f else 0f,
-                                label = "ExpandRotation"
-                            )
-                            SettingsBaseWidget(
-                                icon = Icons.TwoTone.Settings,
-                                title = stringResource(R.string.advanced_options),
-                                onClick = { advancedOptionsShown = !advancedOptionsShown },
-                                trailingContent = {
-                                    Icon(
-                                        imageVector = Icons.TwoTone.ExpandMore,
-                                        contentDescription = null,
-                                        modifier = Modifier.graphicsLayer { rotationZ = rotation }
+                                    val advRotation by animateFloatAsState(
+                                        targetValue = if (advancedOptionsShown) 180f else 0f,
+                                        label = "AdvRotation"
                                     )
-                                },
+                                    expandableItem(
+                                        expanded = advancedOptionsShown,
+                                        topContent = {
+                                            SettingsBaseWidget(
+                                                icon = Icons.TwoTone.Settings,
+                                                title = stringResource(R.string.advanced_options),
+                                                onClick = { advancedOptionsShown = !advancedOptionsShown },
+                                                trailingContent = {
+                                                    Icon(
+                                                        imageVector = Icons.TwoTone.ExpandMore,
+                                                        contentDescription = null,
+                                                        modifier = Modifier.graphicsLayer { rotationZ = advRotation }
+                                                    )
+                                                },
+                                            )
+                                        },
+                                        bottomContent = {
+                                            item {
+                                                SettingsSwitchWidget(
+                                                    title = stringResource(id = R.string.allow_shell),
+                                                    description = stringResource(id = R.string.allow_shell_summary),
+                                                    checked = allowShell,
+                                                    onCheckedChange = { allowShell = it },
+                                                )
+                                            }
+                                            item {
+                                                SettingsSwitchWidget(
+                                                    title = stringResource(id = R.string.enable_adb),
+                                                    description = stringResource(id = R.string.enable_adb_summary),
+                                                    checked = enableAdb,
+                                                    onCheckedChange = { enableAdb = it },
+                                                )
+                                            }
+                                            item(visible = installMethod is InstallMethod.SelectFile) {
+                                                SettingsSwitchWidget(
+                                                    title = stringResource(id = R.string.install_force_backup),
+                                                    description = stringResource(id = R.string.install_force_backup_summary),
+                                                    checked = forceBackup,
+                                                    onCheckedChange = { forceBackup = it },
+                                                )
+                                            }
+                                        }
+                                    )
+                                }
                             )
-                        },
-                        bottomContent = {
-                            item {
-                                SettingsSwitchWidget(
-                                    title = stringResource(id = R.string.allow_shell),
-                                    description = stringResource(id = R.string.allow_shell_summary),
-                                    checked = allowShell,
-                                    onCheckedChange = { allowShell = it },
-                                )
-                            }
-                            item {
-                                SettingsSwitchWidget(
-                                    title = stringResource(id = R.string.enable_adb),
-                                    description = stringResource(id = R.string.enable_adb_summary),
-                                    checked = enableAdb,
-                                    onCheckedChange = { enableAdb = it },
-                                )
+                        }
+
+                        // Part 2: Flash AnyKernel3
+                        if (rootAvailable) {
+                            SegmentedColumn {
+                                val horizonSelected =
+                                    installMethod is InstallMethod.HorizonKernel
+                                item {
+                                    SettingsBaseWidget(
+                                        title = stringResource(R.string.GKI_install_methods),
+                                        description = stringResource(R.string.horizon_kernel_summary),
+                                        selected = horizonSelected,
+                                        onClick = {
+                                            onMethodClick(
+                                                InstallMethod.HorizonKernel(summary = summary)
+                                            )
+                                        },
+                                        leadingContent = {
+                                            RadioButton(
+                                                selected = horizonSelected,
+                                                onClick = null,
+                                            )
+                                        },
+                                    )
+                                }
+                                (installMethod as? InstallMethod.HorizonKernel)?.slot?.let { slot ->
+                                    item {
+                                        SettingsBaseWidget(
+                                            title = stringResource(
+                                                id = R.string.selected_slot,
+                                                if (slot == "a") stringResource(id = R.string.slot_a)
+                                                else stringResource(id = R.string.slot_b)
+                                            ),
+                                            onClick = null,
+                                        )
+                                    }
+                                }
                             }
                         }
-                    )
+                    }
                 }
             }
 
@@ -487,114 +591,6 @@ sealed class InstallMethod {
 
     abstract val label: Int
     open val summary: String? = null
-}
-
-@Composable
-private fun SelectInstallMethod(
-    isGKI: Boolean = false,
-    rootAvailable: Boolean,
-    isAbDevice: Boolean,
-    defaultPartitionName: String,
-    onSelected: (InstallMethod) -> Unit = {},
-    selectedMethod: InstallMethod? = null
-) {
-    val horizonKernelSummary = stringResource(R.string.horizon_kernel_summary)
-    val selectFileTip = stringResource(
-        id = R.string.select_file_tip, defaultPartitionName
-    )
-
-    val radioOptions = remember(rootAvailable, isAbDevice, selectFileTip, horizonKernelSummary) {
-        buildList {
-            add(InstallMethod.SelectFile(summary = selectFileTip))
-            if (rootAvailable) {
-                add(InstallMethod.DirectInstall)
-                if (isAbDevice) {
-                    add(InstallMethod.DirectInstallToInactiveSlot)
-                }
-                add(InstallMethod.HorizonKernel(summary = horizonKernelSummary))
-            }
-        }
-    }
-
-    var currentSelectingMethod by remember { mutableStateOf<InstallMethod?>(null) }
-
-    val selectImageLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) {
-        if (it.resultCode == Activity.RESULT_OK) {
-            it.data?.data?.let { uri ->
-                val option = when (currentSelectingMethod) {
-                    is InstallMethod.SelectFile -> InstallMethod.SelectFile(
-                        uri,
-                        summary = selectFileTip
-                    )
-
-                    is InstallMethod.HorizonKernel -> InstallMethod.HorizonKernel(
-                        uri,
-                        summary = horizonKernelSummary
-                    )
-
-                    else -> null
-                }
-                option?.let { opt ->
-                    onSelected(opt)
-                }
-            }
-        }
-    }
-
-    val confirmDialog = rememberConfirmDialog(
-        onConfirm = {
-            onSelected(InstallMethod.DirectInstallToInactiveSlot)
-        },
-        onDismiss = null
-    )
-
-    val dialogTitle = stringResource(id = android.R.string.dialog_alert_title)
-    val dialogContent = stringResource(id = R.string.install_inactive_slot_warning)
-
-    val onClick = { option: InstallMethod ->
-        currentSelectingMethod = option
-        when (option) {
-            is InstallMethod.SelectFile, is InstallMethod.HorizonKernel -> {
-                selectImageLauncher.launch(Intent(Intent.ACTION_GET_CONTENT).apply {
-                    type = "application/*"
-                    putExtra(
-                        Intent.EXTRA_MIME_TYPES,
-                        arrayOf("application/octet-stream", "application/zip")
-                    )
-                })
-            }
-
-            is InstallMethod.DirectInstall -> {
-                onSelected(option)
-            }
-
-            is InstallMethod.DirectInstallToInactiveSlot -> {
-                confirmDialog.showConfirm(dialogTitle, dialogContent)
-            }
-        }
-    }
-
-    SegmentedColumn {
-        radioOptions.forEach { option ->
-            item(key = option.javaClass) {
-                val selected = option.javaClass == selectedMethod?.javaClass
-                SettingsBaseWidget(
-                    title = stringResource(id = option.label),
-                    description = option.summary,
-                    selected = selected,
-                    onClick = { onClick(option) },
-                    leadingContent = {
-                        RadioButton(
-                            selected = selected,
-                            onClick = null,
-                        )
-                    },
-                )
-            }
-        }
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
