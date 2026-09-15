@@ -379,13 +379,18 @@ fun InstallScreen(
                     val canSelectPartition =
                         installMethod is InstallMethod.DirectInstall || installMethod is InstallMethod.DirectInstallToInactiveSlot
 
+                    val lkmRotation by animateFloatAsState(
+                        targetValue = if (lkmSectionExpanded) 180f else 0f,
+                        label = "LkmSectionRotation"
+                    )
+                    val advRotation by animateFloatAsState(
+                        targetValue = if (advancedOptionsShown) 180f else 0f,
+                        label = "AdvRotation"
+                    )
+
                     Column {
                         // Part 1: Flash LKM image (expandable)
                         SegmentedColumn {
-                            val lkmRotation by animateFloatAsState(
-                                targetValue = if (lkmSectionExpanded) 180f else 0f,
-                                label = "LkmSectionRotation"
-                            )
                             expandableItem(
                                 expanded = lkmSectionExpanded,
                                 topContent = {
@@ -447,10 +452,6 @@ fun InstallScreen(
                                         )
                                     }
 
-                                    val advRotation by animateFloatAsState(
-                                        targetValue = if (advancedOptionsShown) 180f else 0f,
-                                        label = "AdvRotation"
-                                    )
                                     expandableItem(
                                         expanded = advancedOptionsShown,
                                         topContent = {
