@@ -197,6 +197,8 @@
     <string name="settings_custom_background_summary">選擇一張圖片作為應用程式背景</string>
     <string name="settings_config_enable_blur">啟用模糊</string>
     <string name="settings_config_enable_blur_summary">對這個 App 啟用模糊處理</string>
+    <string name="enable_floating_bottom_bar">浮動底欄</string>
+    <string name="enable_floating_bottom_bar_summary">使用 Apple 風格的浮動底欄</string>
     <string name="settings_exp_draw_background_to_blur">模糊渲染自定義背景</string>
     <string name="settings_exp_draw_background_to_blur_description">實驗性功能，請自行承擔風險</string>
     <string name="settings_config_use_custom_background_seed_color">從自定義背景影像中取色</string>
