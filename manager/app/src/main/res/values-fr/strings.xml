@@ -541,4 +541,6 @@
     <string name="require_manager_version">Mise à jour du gestionnaire requise</string>
     <string name="require_kernel_version">Mise à jour du noyau requise. Appuyer ici pour installer.</string>
     <string name="require_kernel_version_gki">Mise à jour du noyau requise</string>
+    <string name="enable_floating_bottom_bar">Bar de navigation flottante</string>
+    <string name="enable_floating_bottom_bar_summary">Barre de navigation flottante dans le style de celle d\'appel.</string>
 </resources>

@@ -12,8 +12,8 @@
     <string name="home_manager_version">Версия менеджера</string>
     <string name="home_selinux_status">Состояние SELinux</string>
     <string name="selinux_status_disabled">Отключен</string>
-    <string name="selinux_status_enforcing">Блокирующий</string>
-    <string name="selinux_status_permissive">Предупреждающий</string>
+    <string name="selinux_status_enforcing">Принудительный</string>
+    <string name="selinux_status_permissive">Разрешающий</string>
     <string name="home_seccomp_status">Статус Seccomp</string>
     <string name="seccomp_status_not_supported">Не поддерживается</string>
     <string name="seccomp_status_disabled">Отключено</string>
@@ -81,7 +81,7 @@
     <string name="jailbreak_flash_warning">Вы находитесь в **режиме Jailbreak**. Прошивка раздела на устройстве с **заблокированным загрузчиком** нарушит защиту AVB (Android Verified Boot) и может привести к тому, что устройство **не загрузится**.\n\nПеред тем как продолжить, убедитесь, что ваш загрузчик разблокирован!</string>
     <string name="jailbreak_flash_warning_countdown">Продолжить (%1$d)</string>
     <string name="settings_auto_jailbreak">Автоматический Jailbreak</string>
-    <string name="settings_auto_jailbreak_summary">Автоматически повышать права через Magica, если при загрузке обнаружен предупреждающий режим SELinux. Требуется разрешение на автозапуск приложения.</string>
+    <string name="settings_auto_jailbreak_summary">Автоматически повышать права через Magica, если при загрузке обнаружен разрешающий режим SELinux. Требуется разрешение на автозапуск приложения.</string>
     <string name="settings_adb_root_summary">Запустить сервис adbd с Root правами</string>
     <string name="settings_selinux_hide">Скрыть модификации SELinux</string>
     <string name="settings_selinux_hide_summary">Предотвратить обнаружение приложениями изменений SELinux</string>
@@ -325,7 +325,7 @@
     <string name="home_meta_module_implement">Реализация мета-модуля</string>
     <string name="sus_loop_paths_description_title">Конфигурация путей монтирования loop</string>
     <string name="sus_loop_paths_description_text">Пути цикла повторно отмечены как SUS_PATH в каждом пользовательском приложении, не являющемся root, или изолированном запуске службы. Это помогает решить проблемы, в которых добавленные пути могут иметь сброс статуса inode или повторно созданные inode в ядре.</string>
-    <string name="home_hook_type">Типы хуков</string>
+    <string name="home_hook_type">Тип хука</string>
     <string name="confirm_installation">Подтвердите установку</string>
     <string name="confirm_multiple_installation">Подтвердите установку (%d файлов)</string>
     <string name="install_confirm">Установить</string>
@@ -536,4 +536,11 @@
     <string name="home_card_icons">Показывать иконки на карточках главного экрана</string>
     <string name="navigation_bar_badge_summary">Показывать количество суперпользователь/модуль в панели навигации</string>
     <string name="navigation_bar_badge">Значки панели навигации</string>
+    <string name="sort_name">Имя</string>
+    <string name="sort_install_time">Время установки</string>
+    <string name="sort_update_time">Время обновления</string>
+    <string name="sort_size">Размер</string>
+    <string name="reverse_order">Обратный порядок</string>
+    <string name="enable_floating_bottom_bar">Плавающая нижняя панель</string>
+    <string name="enable_floating_bottom_bar_summary">Использовать Apple-стиль для плавающей нижней панели</string>
 </resources>
