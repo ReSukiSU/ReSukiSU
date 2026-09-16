@@ -18,7 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.ui.component.liquid.lens
 import com.resukisu.resukisu.ui.component.liquid.vibrancy
@@ -155,8 +157,17 @@ fun transparentTopAppBarColors(): TopAppBarColors = TopAppBarDefaults.topAppBarC
  * Window insets for the pill design, topping [base] up so the trailing action pill lands on the
  * [ScreenEdgePadding] gutter. The leading pill gets its own [TopBarIconEdgeInset] instead, so that
  * the title still starts on the gutter on screens with no navigation icon.
+ *
+ * [WindowInsets] sides are physical rather than directional, so the inset follows the layout
+ * direction by hand — the actions row moves to the physical left under RTL.
  */
 @Composable
 fun pillTopAppBarWindowInsets(
     base: WindowInsets = TopAppBarDefaults.windowInsets
-): WindowInsets = base.add(WindowInsets(right = TopBarIconEdgeInset))
+): WindowInsets = base.add(
+    if (LocalLayoutDirection.current == LayoutDirection.Ltr) {
+        WindowInsets(right = TopBarIconEdgeInset)
+    } else {
+        WindowInsets(left = TopBarIconEdgeInset)
+    }
+)
