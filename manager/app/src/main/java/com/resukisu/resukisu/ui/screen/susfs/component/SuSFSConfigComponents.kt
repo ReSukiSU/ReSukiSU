@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
+import com.resukisu.resukisu.ui.theme.ScreenEdgePadding
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
 import org.koin.compose.koinInject
@@ -51,7 +52,7 @@ internal fun SuSFSDescriptionCard(
     val themeConfig: ThemeConfig = koinInject()
     Surface(
         modifier = modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = ScreenEdgePadding, vertical = 8.dp)
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .renderBackgroundBlur(MaterialTheme.colorScheme.primaryContainer),
