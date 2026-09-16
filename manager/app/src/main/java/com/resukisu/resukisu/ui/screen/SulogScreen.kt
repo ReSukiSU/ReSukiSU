@@ -27,7 +27,6 @@ import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
@@ -74,6 +73,7 @@ import com.resukisu.resukisu.domain.model.SulogEventType
 import com.resukisu.resukisu.domain.model.SulogFile
 import com.resukisu.resukisu.domain.model.toSulogDisplayName
 import com.resukisu.resukisu.ui.component.SearchAppBar
+import com.resukisu.resukisu.ui.component.TopBarIconPill
 import com.resukisu.resukisu.ui.component.WarningCard
 import com.resukisu.resukisu.ui.component.rememberSearchAppBarScrollBehavior
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
@@ -81,6 +81,7 @@ import com.resukisu.resukisu.ui.component.settings.SettingsChooseWidget
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.theme.CardConfig
+import com.resukisu.resukisu.ui.theme.ScreenEdgePadding
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.ActivityResumeEffect
 import com.resukisu.resukisu.ui.util.LocalBlurState
@@ -143,12 +144,7 @@ private fun SulogScreenContent(
 ) {
     val cardConfig: CardConfig = koinInject()
     val scrollBehavior = rememberSearchAppBarScrollBehavior(
-        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
-            rememberTopAppBarState(
-                initialHeightOffset = -154f,
-                initialHeightOffsetLimit = -154f // from debugger
-            )
-        )
+        TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     )
     val pullToRefreshState = rememberPullToRefreshState()
     val listState = rememberLazyListState()
@@ -182,13 +178,13 @@ private fun SulogScreenContent(
                 },
                 onBackClick = actions.onBack,
                 dropdownContent = {
-                    IconButton(onClick = actions.onCleanFile) {
+                    TopBarIconPill(onClick = actions.onCleanFile) {
                         Icon(
                             imageVector = Icons.TwoTone.DeleteSweep,
                             contentDescription = stringResource(R.string.sulog_clean_title),
                         )
                     }
-                    IconButton(onClick = { showFilterMenu = true }) {
+                    TopBarIconPill(onClick = { showFilterMenu = true }) {
                         Icon(
                             imageVector = Icons.TwoTone.FilterList,
                             contentDescription = stringResource(R.string.sulog_filter_title),
@@ -277,7 +273,7 @@ private fun SulogScreenContent(
                         Box(
                             modifier = Modifier
                                 .padding(bottom = 16.dp)
-                                .padding(horizontal = 16.dp)
+                                .padding(horizontal = ScreenEdgePadding)
                         ) {
                             Column(
                                 modifier = Modifier
@@ -642,7 +638,7 @@ private fun SulogStatusSection(
     actions: SulogActions,
 ) {
     Column(
-        modifier = Modifier.padding(horizontal = 16.dp),
+        modifier = Modifier.padding(horizontal = ScreenEdgePadding),
     ) {
         when (state.sulogStatus) {
             "unsupported" -> {

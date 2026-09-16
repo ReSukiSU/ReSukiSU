@@ -3,8 +3,6 @@ package com.resukisu.resukisu.ui.screen
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,10 +15,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
@@ -51,12 +48,15 @@ import com.resukisu.resukisu.domain.model.ProfileTemplate
 import com.resukisu.resukisu.toRawFlags
 import com.resukisu.resukisu.toRootProfileFlags
 import com.resukisu.resukisu.ui.component.NetworkRefreshContent
+import com.resukisu.resukisu.ui.component.TopBarIconPill
+import com.resukisu.resukisu.ui.component.TopBarTitlePill
+import com.resukisu.resukisu.ui.component.pillTopAppBarWindowInsets
 import com.resukisu.resukisu.ui.component.profile.rootProfileConfig
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsTextFieldWidget
+import com.resukisu.resukisu.ui.component.transparentTopAppBarColors
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
-import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.adaptiveScaffoldWindowInsets
 import com.resukisu.resukisu.ui.viewmodel.TemplateEditorUiAction
@@ -88,11 +88,8 @@ fun TemplateEditorScreen(
     val saveTemplateFailed = stringResource(id = R.string.app_profile_template_save_failed)
 
     val scrollBehavior =
-        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+        TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
-    LaunchedEffect(Unit) {
-        scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
-    }
     LaunchedEffect(viewModel) {
         viewModel.events.collectLatest { event ->
             when (event) {
@@ -296,20 +293,21 @@ private fun TopBar(
     onSave: () -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior
 ) {
-    LargeFlexibleTopAppBar(
-        modifier = Modifier.blurEffect(),
+    TopAppBar(
         title = {
-            Text(
-                text = title
-            )
+            TopBarTitlePill {
+                Text(
+                    text = title
+                )
+            }
         },
-        subtitle = if (summary.isNotEmpty()) {
-            {
+        subtitle = {
+            if (summary.isNotEmpty()) {
                 Text(
                     text = summary,
                 )
             }
-        } else null,
+        },
         navigationIcon = {
             AppBackButton(
                 onClick = onBack
@@ -317,26 +315,23 @@ private fun TopBar(
         },
         actions = {
             if (readOnly) {
-                return@LargeFlexibleTopAppBar
+                return@TopAppBar
             }
-            IconButton(onClick = onDelete) {
+            TopBarIconPill(onClick = onDelete) {
                 Icon(
                     Icons.TwoTone.DeleteForever,
                     contentDescription = stringResource(id = R.string.app_profile_template_delete)
                 )
             }
-            IconButton(onClick = onSave) {
+            TopBarIconPill(onClick = onSave) {
                 Icon(
                     imageVector = Icons.TwoTone.Save,
                     contentDescription = stringResource(id = R.string.app_profile_template_save)
                 )
             }
         },
-        colors = TopAppBarDefaults.topAppBarColors().copy(
-            containerColor = Color.Transparent,
-            scrolledContainerColor = Color.Transparent,
-        ),
-        windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
+        colors = transparentTopAppBarColors(),
+        windowInsets = pillTopAppBarWindowInsets(),
         scrollBehavior = scrollBehavior
     )
 }
