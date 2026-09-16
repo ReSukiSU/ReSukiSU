@@ -390,6 +390,7 @@ fun InstallScreen(
 
                     Column {
                         // Part 1: Flash LKM image (expandable)
+                        if (isGKI) {
                         SegmentedColumn {
                             expandableItem(
                                 expanded = lkmSectionExpanded,
@@ -497,6 +498,7 @@ fun InstallScreen(
                                     )
                                 }
                             )
+                        }
                         }
 
                         // Part 2: Flash AnyKernel3
