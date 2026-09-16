@@ -554,4 +554,8 @@
     <string name="settings_check_beta_update_summary">Auto-check beta builds from the main branch</string>
     <string name="enable_floating_bottom_bar">Floating bottom bar</string>
     <string name="enable_floating_bottom_bar_summary">Use Apple style floating bottom bar.</string>
+    <string name="ak3_select_zip">Select an AnyKernel3 zip file to flash</string>
+    <string name="install_upload_lkm_file_summary">Use a custom .ko file instead of the built-in LKM</string>
+    <string name="skip_ksud">Do not install ksud</string>
+    <string name="skip_ksud_summary">Cancel ksud installation. Do not enable this unless absolutely necessary.</string>
 </resources>
