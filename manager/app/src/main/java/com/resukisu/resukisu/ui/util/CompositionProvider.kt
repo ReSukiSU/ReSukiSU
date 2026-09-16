@@ -13,9 +13,8 @@ val LocalSnackbarHost = compositionLocalOf<SnackbarHostState> {
     error("CompositionLocal LocalSnackbarController not present")
 }
 
-val LocalBlurState = compositionLocalOf<LayerBackdrop?> {
-    error("CompositionLocal LocalBlurState not present")
-}
+// Defaults to null so surfaces outside NavContainer (the crop activity, previews) simply skip blur.
+val LocalBlurState = compositionLocalOf<LayerBackdrop?> { null }
 
 val LocalPagerState = compositionLocalOf<PagerState> { error("No pager state") }
 val LocalPortraitState = compositionLocalOf<Boolean> { error("No portrait state") }
