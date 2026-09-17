@@ -1,4 +1,4 @@
-﻿package com.resukisu.resukisu.ui.screen
+package com.resukisu.resukisu.ui.screen
 
 import android.app.Activity
 import android.content.Context
@@ -11,6 +11,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -46,6 +48,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,6 +79,7 @@ import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.adaptiveScaffoldWindowInsets
 import com.resukisu.resukisu.ui.viewmodel.InstallUiEvent
 import com.resukisu.resukisu.ui.viewmodel.InstallViewModel
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,6 +94,7 @@ fun InstallScreen(
     var lkmInstallMethod by remember { mutableStateOf<InstallMethod?>(null) }
     var ak3InstallMethod by remember { mutableStateOf<InstallMethod?>(null) }
     var lkmSelection by remember { mutableStateOf<LkmSelection>(LkmSelection.KmiNone) }
+    var lkmFileName by remember { mutableStateOf<String?>(null) }
     var showSlotSelectionDialog by remember { mutableStateOf(false) }
     var tempKernelUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -101,7 +106,8 @@ fun InstallScreen(
     var ak3AdvancedOptionsShown by remember { mutableStateOf(false) }
     var skipKsud by remember { mutableStateOf(false) }
 
-    var selectedTab by remember { mutableIntStateOf(0) }
+    val pagerState = rememberPagerState(pageCount = { 2 })
+    val scope = rememberCoroutineScope()
 
     val isGKI = environment.isGki
     val isAbDevice = environment.isAbDevice
@@ -111,7 +117,7 @@ fun InstallScreen(
     val selectFileTip = stringResource(id = R.string.select_file_tip, environment.defaultPartition)
 
     LaunchedEffect(isGKI) {
-        if (!isGKI) selectedTab = 0
+        if (!isGKI) pagerState.scrollToPage(0)
     }
 
     var currentSelectingMethod by remember { mutableStateOf<InstallMethod?>(null) }
@@ -232,7 +238,7 @@ fun InstallScreen(
     val navigator = LocalNavigator.current
 
     val onInstall = {
-        val current = if (selectedTab == 0) lkmInstallMethod else ak3InstallMethod
+        val current = if (pagerState.currentPage == 0) lkmInstallMethod else ak3InstallMethod
         current?.let { method ->
             when (method) {
                 is InstallMethod.HorizonKernel -> {
@@ -298,8 +304,8 @@ fun InstallScreen(
     }
 
     val onClickNext = {
-        val current = if (selectedTab == 0) lkmInstallMethod else ak3InstallMethod
-        if (isGKI && selectedTab == 0 && lkmSelection == LkmSelection.KmiNone && currentKmi.isBlank() && current !is InstallMethod.HorizonKernel) {
+        val current = if (pagerState.currentPage == 0) lkmInstallMethod else ak3InstallMethod
+        if (isGKI && pagerState.currentPage == 0 && lkmSelection == LkmSelection.KmiNone && currentKmi.isBlank() && current !is InstallMethod.HorizonKernel) {
             selectKmiDialog.show()
         } else {
             onInstall()
@@ -315,8 +321,10 @@ fun InstallScreen(
                 val isKo = isKoFile(context, uri)
                 if (isKo) {
                     lkmSelection = LkmSelection.LkmUri(uri.toString())
+                    lkmFileName = getDisplayName(context, uri)
                 } else {
                     lkmSelection = LkmSelection.KmiNone
+                    lkmFileName = null
                     Toast.makeText(
                         context,
                         installOnlySupportKoFile,
@@ -349,31 +357,34 @@ fun InstallScreen(
         scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
     }
 
-    val isLkmTab = selectedTab == 0
-
     Scaffold(
         contentWindowInsets = adaptiveScaffoldWindowInsets(),
         topBar = {
             TopBar(
                 onBack = { navigator.pop() },
                 scrollBehavior = scrollBehavior,
-                selectedTab = selectedTab,
-                onTabSelected = { selectedTab = it }
+                selectedTab = pagerState.currentPage,
+                onTabSelected = { scope.launch { pagerState.animateScrollToPage(it) } }
             )
         },
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface
     ) { innerPadding ->
-        LazyColumn(
+        HorizontalPager(
+            state = pagerState,
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .blurSource()
-                .padding(top = 12.dp)
-        ) {
-            item {
-                Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
-            }
+        ) { page ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .padding(top = 12.dp)
+            ) {
+                item {
+                    Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+                }
 
             if (installState.loading) {
                 item {
@@ -388,7 +399,7 @@ fun InstallScreen(
                 }
             } else {
                 item {
-                    if (isLkmTab) {
+                    if (page == 0) {
                         val isOta = lkmInstallMethod is InstallMethod.DirectInstallToInactiveSlot
                         val suffix = if (isOta) {
                             environment.inactiveSlotSuffix
@@ -464,11 +475,28 @@ fun InstallScreen(
                                 },
                                 bottomContent = {
                                     item {
+                                        val hasLkmUri = lkmSelection is LkmSelection.LkmUri
                                         SettingsBaseWidget(
                                             icon = Icons.TwoTone.FileOpen,
                                             title = stringResource(id = R.string.install_upload_lkm_file),
-                                            description = stringResource(id = R.string.install_upload_lkm_file_summary),
-                                            onClick = { onLkmUpload() },
+                                            description = if (!hasLkmUri) stringResource(id = R.string.install_upload_lkm_file_summary) else null,
+                                            selected = hasLkmUri,
+                                            onClick = {
+                                                if (hasLkmUri) {
+                                                    lkmSelection = LkmSelection.KmiNone
+                                                    lkmFileName = null
+                                                } else {
+                                                    onLkmUpload()
+                                                }
+                                            },
+                                            descriptionColumnContent = if (hasLkmUri) {
+                                                {
+                                                    Text(
+                                                        text = lkmFileName ?: "",
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                    )
+                                                }
+                                            } else null,
                                         )
                                     }
                                     item {
@@ -591,7 +619,7 @@ fun InstallScreen(
             }
 
             if (!installState.loading) item {
-                val currentMethod = if (isLkmTab) lkmInstallMethod else ak3InstallMethod
+                val currentMethod = if (pagerState.currentPage == 0) lkmInstallMethod else ak3InstallMethod
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -611,7 +639,8 @@ fun InstallScreen(
             }
 
             item {
-                Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding()))
+                    Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding()))
+                }
             }
         }
     }
@@ -732,6 +761,25 @@ private fun isKoFile(context: Context, uri: Uri): Boolean {
         } ?: false
     } catch (_: Throwable) {
         false
+    }
+}
+
+private fun getDisplayName(context: Context, uri: Uri): String {
+    return try {
+        context.contentResolver.query(
+            uri,
+            arrayOf(OpenableColumns.DISPLAY_NAME),
+            null, null, null
+        )?.use { cursor ->
+            val idx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (idx != -1 && cursor.moveToFirst()) {
+                cursor.getString(idx) ?: uri.lastPathSegment ?: uri.toString()
+            } else {
+                uri.lastPathSegment ?: uri.toString()
+            }
+        } ?: uri.lastPathSegment ?: uri.toString()
+    } catch (_: Throwable) {
+        uri.lastPathSegment ?: uri.toString()
     }
 }
 
