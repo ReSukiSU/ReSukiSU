@@ -37,7 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -720,7 +720,7 @@ private fun TopBar(
             scrollBehavior = scrollBehavior
         )
 
-        TabRow(
+        PrimaryTabRow(
             selectedTabIndex = selectedTab.coerceAtMost(1),
             containerColor = Color.Transparent,
             modifier = Modifier.fillMaxWidth()
@@ -728,11 +728,13 @@ private fun TopBar(
             Tab(
                     selected = selectedTab == 0,
                     onClick = { onTabSelected(0) },
+                    unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     text = { Text(stringResource(R.string.Lkm_install_methods)) }
             )
             Tab(
                 selected = selectedTab == 1,
                 onClick = { onTabSelected(1) },
+                unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 text = { Text(stringResource(R.string.GKI_install_methods)) }
             )
         }
