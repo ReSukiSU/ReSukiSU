@@ -321,7 +321,7 @@ fun InstallScreen(
                 val isKo = isKoFile(context, uri)
                 if (isKo) {
                     lkmSelection = LkmSelection.LkmUri(uri.toString())
-                    lkmFileName = getDisplayName(context, uri)
+                    lkmFileName = uri.toString()
                 } else {
                     lkmSelection = LkmSelection.KmiNone
                     lkmFileName = null
@@ -761,25 +761,6 @@ private fun isKoFile(context: Context, uri: Uri): Boolean {
         } ?: false
     } catch (_: Throwable) {
         false
-    }
-}
-
-private fun getDisplayName(context: Context, uri: Uri): String {
-    return try {
-        context.contentResolver.query(
-            uri,
-            arrayOf(OpenableColumns.DISPLAY_NAME),
-            null, null, null
-        )?.use { cursor ->
-            val idx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-            if (idx != -1 && cursor.moveToFirst()) {
-                cursor.getString(idx) ?: uri.lastPathSegment ?: uri.toString()
-            } else {
-                uri.lastPathSegment ?: uri.toString()
-            }
-        } ?: uri.lastPathSegment ?: uri.toString()
-    } catch (_: Throwable) {
-        uri.lastPathSegment ?: uri.toString()
     }
 }
 
