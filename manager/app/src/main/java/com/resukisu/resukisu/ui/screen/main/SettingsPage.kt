@@ -296,7 +296,8 @@ fun SettingsPage(bottomPadding: Dp) {
                                     icon = Icons.TwoTone.RestartAlt,
                                     title = stringResource(id = R.string.settings_soft_reboot),
                                     description = stringResource(id = R.string.settings_soft_reboot_summary),
-                                    enabled = !homeState.systemStatus.isLateLoadMode,
+                                    enabled = homeState.systemStatus.isFullFeatured &&
+                                        !homeState.systemStatus.isLateLoadMode,
                                     checked = homeState.systemStatus.isLateLoadMode || uiState.useSoftReboot,
                                     onCheckedChange = { enabled ->
                                         settingsViewModel.dispatch(

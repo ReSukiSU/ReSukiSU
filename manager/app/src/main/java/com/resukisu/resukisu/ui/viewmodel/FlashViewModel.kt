@@ -6,7 +6,6 @@ import com.resukisu.resukisu.domain.model.FlashOperation
 import com.resukisu.resukisu.domain.model.FlashOperationUpdate
 import com.resukisu.resukisu.domain.usecase.CheckFlashModuleMountUseCase
 import com.resukisu.resukisu.domain.usecase.ExecuteFlashOperationUseCase
-import com.resukisu.resukisu.domain.usecase.IsSoftRebootPreferredUseCase
 import com.resukisu.resukisu.domain.usecase.RebootUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -64,7 +63,6 @@ sealed interface FlashUiEvent {
 
 class FlashViewModel(
     private val reboot: RebootUseCase,
-    private val isSoftRebootPreferred: IsSoftRebootPreferredUseCase,
     private val executeFlashOperation: ExecuteFlashOperationUseCase? = null,
     private val checkFlashModuleMount: CheckFlashModuleMountUseCase? = null,
 ) : ViewModel() {
@@ -171,8 +169,7 @@ class FlashViewModel(
             }
 
             FlashUiAction.Reboot -> viewModelScope.launch {
-                val reason = if (isSoftRebootPreferred()) "soft_reboot" else ""
-                reboot(reason).onFailure {
+                reboot().onFailure {
                     mutableEvents.tryEmit(FlashUiEvent.Error(it.message.orEmpty()))
                 }
             }
