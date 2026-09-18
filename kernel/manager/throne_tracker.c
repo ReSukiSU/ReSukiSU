@@ -1,3 +1,5 @@
+#include "ksu.h"
+#include "linux/cred.h"
 #include <linux/err.h>
 #include <linux/fs.h>
 #include <linux/list.h>
@@ -190,7 +192,7 @@ void search_manager(const char *path, int depth, struct list_head *uid_data)
             // make sure to clean buffer on every iteration
             memset(candidate_path, 0, DATA_PATH_LEN);
 
-            file = filp_open(pos->dirpath, O_RDONLY | O_NOFOLLOW, 0);
+            file = ksu_filp_open_nonotify(pos->dirpath, O_RDONLY | O_NOFOLLOW);
             if (IS_ERR(file)) {
                 pr_err("Failed to open directory: %s, err: %ld\n", pos->dirpath, PTR_ERR(file));
                 goto skip_iterate;
@@ -297,6 +299,8 @@ void do_track_throne(void *data)
         return;
     }
     INIT_LIST_HEAD(&uid_list);
+
+    const struct cred *old_cred = override_creds(ksu_cred);
 
     if (flags & TRACK_THRONE_FROM_RENAMEAT) {
         fp = filp_open(SYSTEM_PACKAGES_LIST_TMP_PATH, O_RDONLY, 0);
@@ -420,6 +424,7 @@ out:
         bitmap_free(curr_app_id_map);
     if (diff_map)
         bitmap_free(diff_map);
+    revert_creds(old_cred);
 }
 
 void track_throne(unsigned int flags)

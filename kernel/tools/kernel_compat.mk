@@ -40,7 +40,7 @@ ccflags-y += -DKSU_OPTIONAL_SELINUX_CRED
 endif
 
 # seccomp_types.h was added in 6.7
-ifeq ($(shell grep -q "atomic_t\s\+filter_count" $(srctree)/include/linux/seccomp.h $(srctree)/include/linux/seccomp_types.h; echo $$?),0)
+ifeq ($(shell grep -q "atomic_t\s\+filter_count" $(srctree)/include/linux/seccomp.h $(srctree)/include/linux/seccomp_types.h 2>/dev/null; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: seccomp_filter_count found)
 ccflags-y += -DKSU_OPTIONAL_SECCOMP_FILTER_CNT
 endif
@@ -77,9 +77,9 @@ $(info -- $(REPO_NAME)/compat: file_inode() found)
 ccflags-y += -DKSU_UL_HAS_FILE_INODE
 endif
 
-ifneq ($(shell grep -q __flush_dcache_area $(srctree)/arch/arm64/include/asm/cacheflush.h; echo $$?),0)
-$(info -- $(REPO_NAME)/compat: new dcahce flush found)
-ccflags-y += -DKSU_HAS_NEW_DCACHE_FLUSH
+ifneq ($(shell grep -q __flush_dcache_area $(srctree)/arch/arm64/include/asm/cacheflush.h 2>/dev/null; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: __flush_dcache_area not found)
+ccflags-y += -DKSU_FLUSH_DCACHE_AREA_NOT_FOUND
 endif
 
 # Checks Samsung
@@ -110,7 +110,7 @@ endif
 # Function ns_get_path check
 # for kernel 3.19-
 # https://github.com/torvalds/linux/commit/e149ed2b805fefdccf7ccdfc19eca22fdd4514ac
-ifeq ($(shell grep -q "ns_get_path" $(srctree)/fs/nsfs.c; echo $$?),0)
+ifeq ($(shell grep -q "ns_get_path" $(srctree)/fs/nsfs.c 2>/dev/null; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: ns_get_path found)
 ccflags-y += -DKSU_COMPAT_HAS_NS_GET_PATH
 endif
@@ -221,12 +221,12 @@ $(info -- $(REPO_NAME)/compat: found sidtab as reference)
 ccflags-y += -DKSU_COMPAT_SIDTAB_AS_REFERENCE
 endif
 
-ifeq ($(shell grep -q "hlist_head" $(srctree)/include/linux/lsm_hooks.h; echo $$?),0)
+ifeq ($(shell grep -q "hlist_head" $(srctree)/include/linux/lsm_hooks.h 2>/dev/null; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: found hlist in security_hook_list)
 ccflags-y += -DKSU_COMPAT_HLIST_FOR_SECURITY_HOOK_LIST
 endif
 
-ifeq ($(shell grep -F -q "int (*setprocattr)(const char *name, void *value, size_t size);" $(srctree)/include/linux/lsm_hooks.h; echo $$?),0)
+ifeq ($(shell grep -F -q "int (*setprocattr)(const char *name, void *value, size_t size);" $(srctree)/include/linux/lsm_hooks.h 2>/dev/null; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: found new setprocattr prototype)
 ccflags-y += -DKSU_COMPAT_SETPROCATTR_USE_NEW_PROTOTYPE
 endif
@@ -273,7 +273,7 @@ endif
 
 # https://github.com/torvalds/linux/commit/e20b043a6902ecb61c2c84355c3bae5149f391db
 # https://github.com/torvalds/linux/commit/b1d9e6b0646d0e5ee5d9050bd236b6c65d66faef
-ifeq ($(shell grep -q "security_add_hooks" $(srctree)/include/linux/lsm_hooks.h; echo $$?),0)
+ifeq ($(shell grep -q "security_add_hooks" $(srctree)/include/linux/lsm_hooks.h 2>/dev/null; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: found security_add_hooks)
 ccflags-y += -DKSU_COMPAT_HAS_LIST_OF_LSM_HOOKS
 endif
@@ -317,4 +317,10 @@ endif
 ifeq ($(shell grep -q -F "key_need_perm" $(srctree)/include/linux/key.h; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: key need perm as enum found)
 ccflags-y += -DKSU_COMPAT_KEY_NEED_PERM_AS_ENUM
+endif
+
+# https://github.com/torvalds/linux/commit/765927b2d508712d320c8934db963bbe14c3fcec
+ifeq ($(shell grep -q "struct file .dentry_open.const struct path .path, int flags," $(srctree)/fs/open.c; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: modern dentry_open found)
+ccflags-y += -DKSU_COMPAT_HAS_MODERN_DENTRY_OPEN
 endif

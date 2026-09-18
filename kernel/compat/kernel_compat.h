@@ -1,6 +1,8 @@
 #ifndef __KSU_H_KERNEL_COMPAT
 #define __KSU_H_KERNEL_COMPAT
 
+#include <linux/namei.h>
+#include <linux/cred.h>
 #include <linux/fs.h>
 #include <linux/version.h>
 #include <linux/fdtable.h>
@@ -367,6 +369,29 @@ static inline int ksu_close_fd(unsigned int fd)
 #else
     return __close_fd(current->files, fd);
 #endif
+}
+
+static inline struct file *ksu_filp_open_nonotify(const char *path, int flags)
+{
+    struct path p;
+    struct file *f;
+    int ret;
+    ret = kern_path(path, 0, &p);
+    if (ret) {
+        return ERR_PTR(ret);
+    }
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 18, 0)
+    f = dentry_open_nonotify(&p, flags, current_cred());
+    // https://github.com/torvalds/linux/commit/765927b2d508712d320c8934db963bbe14c3fcec
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 6, 0) || defined(KSU_COMPAT_HAS_MODERN_DENTRY_OPEN)
+    f = dentry_open(&p, flags | __FMODE_NONOTIFY, current_cred());
+#else
+    f = dentry_open(p.dentry, p.mnt, flags | __FMODE_NONOTIFY, current_cred());
+#endif
+
+    path_put(&p);
+    return f;
 }
 
 #endif
