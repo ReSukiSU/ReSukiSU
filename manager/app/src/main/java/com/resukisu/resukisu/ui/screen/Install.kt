@@ -442,21 +442,6 @@ fun InstallScreen(
                         }
 
                         SegmentedColumn {
-                            item(visible = canSelectPartition && displayPartitions.isNotEmpty()) {
-                                SettingsChooseWidget(
-                                    icon = Icons.TwoTone.AutoFixHigh,
-                                    items = displayPartitions,
-                                    selectedIndex = partitionSelectionIndex,
-                                    title = "${stringResource(R.string.install_select_partition)} ($suffix)",
-                                    onSelectedIndexChange = { index ->
-                                        hasCustomSelected = true
-                                        partitionSelectionIndex = index
-                                    },
-                                )
-                            }
-                        }
-
-                        SegmentedColumn {
                             expandableItem(
                                 expanded = advancedOptionsShown,
                                 topContent = {
@@ -476,6 +461,19 @@ fun InstallScreen(
                                 bottomContent = {
                                     item {
                                         val hasLkmUri = lkmSelection is LkmSelection.LkmUri
+                                        if (canSelectPartition && displayPartitions.isNotEmpty()) {
+                                            SettingsChooseWidget(
+                                                icon = Icons.TwoTone.AutoFixHigh,
+                                                items = displayPartitions,
+                                                selectedIndex = partitionSelectionIndex,
+                                                title = "${stringResource(R.string.install_select_partition)} ($suffix)",
+                                                onSelectedIndexChange = { index ->
+                                                    hasCustomSelected = true
+                                                    partitionSelectionIndex = index
+                                                },
+                                            )
+                                        }
+
                                         SettingsBaseWidget(
                                             icon = Icons.TwoTone.FileOpen,
                                             title = stringResource(id = R.string.install_upload_lkm_file),
