@@ -619,7 +619,7 @@ fun NavContainer(
                     backgroundRenderState = backgroundRenderState,
                     useBlur = useBlur,
                 ) {
-                    KernelFlashScreen(key.kernelUri, key.selectedSlot)
+                    KernelFlashScreen(key.kernelUri, key.selectedSlot, key.skipKsud)
                 }
             }
         }
@@ -718,6 +718,9 @@ private fun Route.Flash.toFlashIt(): FlashIt = when (type) {
         kmi = kmi,
         ota = ota,
         partition = partition,
+        allowShell = allowShell,
+        enableAdb = enableAdb,
+        forceBackup = forceBackup,
     )
 
     Route.Flash.TYPE_MODULE -> FlashIt.FlashModule(uris.firstOrNull().orEmpty())

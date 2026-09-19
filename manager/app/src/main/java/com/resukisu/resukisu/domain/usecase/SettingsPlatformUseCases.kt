@@ -19,3 +19,7 @@ class UpdatePlatformSettingUseCase(private val repository: SettingsPlatformRepos
 class GetPlatformFeatureStatusUseCase(private val repository: SettingsPlatformRepository) {
     suspend operator fun invoke() = repository.getFeatureStatus()
 }
+
+class IsSoftRebootPreferredUseCase(private val repository: SettingsPlatformRepository) {
+    operator fun invoke() = repository.isSoftRebootPreferred()
+}

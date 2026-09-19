@@ -84,6 +84,8 @@
     <string name="jailbreak_flash_warning_countdown">继续 (%1$d)</string>
     <string name="settings_auto_jailbreak">自动越狱</string>
     <string name="settings_auto_jailbreak_summary">开机检测到 Permissive SELinux 时自动使用 Magica 提权。需要授予本应用自启动权限。</string>
+    <string name="settings_soft_reboot">使用软重启代替重启</string>
+    <string name="settings_soft_reboot_summary">安装、更新或开关模块时使用软重启代替完整重启</string>
     <string name="settings_adb_root_summary">以 root 权限运行 adbd 守护进程</string>
     <string name="settings_selinux_hide">隐藏 SELinux 修改</string>
     <string name="settings_selinux_hide_summary">阻止应用检测 SELinux 修改</string>
@@ -543,4 +545,15 @@
     <string name="susfs_enable_config">SUSFS管理器</string>
     <string name="susfs_enable_config_summary">启用内置SUSFS管理器。这可能与第三方模块冲突。</string>
     <string name="susfs_config_disable_warning">内置SUSFS管理器已关闭。启用它或安装第三方模块来使用SUSFS功能。</string>
+    <string name="ak3_select_zip">选择一个要刷写的 AnyKernel3 zip 文件</string>
+    <string name="install_upload_lkm_file_summary">使用自定义 .ko 文件代替内置 LKM</string>
+    <string name="skip_ksud">不要安装 ksud</string>
+    <string name="skip_ksud_summary">取消安装 ksud，非必要请勿开启！</string>
+    <string name="advanced_options">高级选项</string>
+    <string name="allow_shell">总是给 shell 授予 Root 权限</string>
+    <string name="allow_shell_summary">总是允许 adb shell 调用 SU 命令，非必要请勿开启！</string>
+    <string name="enable_adb">启动时强制启用 ADB 调试</string>
+    <string name="enable_adb_summary">强制允许 USB 调试并取消 adb 认证，非必要请勿开启！</string>
+    <string name="install_force_backup">备份为原厂镜像</string>
+    <string name="install_force_backup_summary">请确保你选择的 boot 镜像是原厂镜像</string>
 </resources>

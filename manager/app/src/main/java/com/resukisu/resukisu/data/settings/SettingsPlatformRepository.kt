@@ -6,6 +6,9 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import com.materialkolor.PaletteStyle
+import com.materialkolor.dynamiccolor.ColorSpec
+import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.data.AppSettingsRepository
 import com.resukisu.resukisu.data.shell.KsuCliRepository
 import com.resukisu.resukisu.data.theme.ThemeRepository
@@ -80,6 +83,7 @@ class SettingsPlatformRepository(
             checkModuleUpdate = loadModuleUpdatePreference(),
             autoJailbreakEnabled = settings.getBoolean("auto_jailbreak", false),
             useBuiltinMonoFont = themeConfig.useBuiltinMonoFont,
+            useSoftReboot = settings.getBoolean("use_soft_reboot", false),
         )
     }
 
@@ -186,6 +190,9 @@ class SettingsPlatformRepository(
                 settings.putBoolean("use_builtin_monospace_font", setting.enabled)
                 themeConfig.useBuiltinMonoFont = setting.enabled
             }
+
+            is PlatformSetting.UseSoftReboot ->
+                settings.putBoolean("use_soft_reboot", setting.enabled)
         }
         Result.success(load())
     } catch (error: CancellationException) {
@@ -193,6 +200,10 @@ class SettingsPlatformRepository(
     } catch (error: Exception) {
         Result.failure(error)
     }
+
+    fun isSoftRebootPreferred(): Boolean =
+        Natives.isFullFeatured() &&
+            (Natives.isLateLoadMode || settings.getBoolean("use_soft_reboot", false))
 
     suspend fun getFeatureStatus(): PlatformFeatureStatus = withContext(Dispatchers.IO) {
         PlatformFeatureStatus(

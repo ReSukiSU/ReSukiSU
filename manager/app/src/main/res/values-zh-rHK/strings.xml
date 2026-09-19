@@ -83,6 +83,8 @@
     <string name="jailbreak_flash_warning_countdown">繼續 (%1$d)</string>
     <string name="settings_auto_jailbreak">自動越獄</string>
     <string name="settings_auto_jailbreak_summary">開機檢測到 Permissive SELinux 時自動使用 Magica 提權。需要授予本應用程式自啟動權限。</string>
+    <string name="settings_soft_reboot">使用軟重啟代替重啟</string>
+    <string name="settings_soft_reboot_summary">安裝、更新或開關模組時使用軟重啟代替完整重啟</string>
     <string name="settings_adb_root_summary">以 root 權限運行守護 adbd 進程</string>
     <string name="reboot_to_apply">重新啟動生效</string>
     <string name="module_magisk_conflict">因同 Magisk 有衝突，所有模組唔可用！</string>
@@ -528,4 +530,15 @@
     <string name="susfs_enable_config">SUSFS 管理器</string>
     <string name="susfs_enable_config_summary">啟用內置 SUSFS 管理器，可能與第三方模組衝突。</string>
     <string name="susfs_config_disable_warning">內置 SUSFS 管理器已停用。請啟用它或安裝第三方模組以使用 SUSFS 功能。</string>
+    <string name="ak3_select_zip">選擇一個要刷寫的 AnyKernel3 zip 檔案</string>
+    <string name="install_upload_lkm_file_summary">使用自訂 .ko 檔案代替內建 LKM</string>
+    <string name="skip_ksud">不要安裝 ksud</string>
+    <string name="skip_ksud_summary">取消安裝 ksud，非必要請勿啟用</string>
+    <string name="advanced_options">進階選項</string>
+    <string name="allow_shell">保持向 Shell 授予 Root 權限</string>
+    <string name="allow_shell_summary">保持允許 adb shell 調用 su，非必要請勿啟用</string>
+    <string name="enable_adb">開機時強制開啟 ADB 調試</string>
+    <string name="enable_adb_summary">強制開啟 USB 偵錯並停用 adb 驗證，非必要請勿啟用</string>
+    <string name="install_force_backup">備份為原廠映像</string>
+    <string name="install_force_backup_summary">請確保你選擇的 boot 映像是原廠映像</string>
 </resources>

@@ -39,6 +39,7 @@ import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material.icons.twotone.Policy
 import androidx.compose.material.icons.twotone.RemoveCircle
 import androidx.compose.material.icons.twotone.RemoveModerator
+import androidx.compose.material.icons.twotone.RestartAlt
 import androidx.compose.material.icons.twotone.Save
 import androidx.compose.material.icons.twotone.Science
 import androidx.compose.material.icons.twotone.Security
@@ -290,6 +291,23 @@ fun SettingsPage(bottomPadding: Dp) {
                                 )
                             }
 
+                            item {
+                                SettingsSwitchWidget(
+                                    icon = Icons.TwoTone.RestartAlt,
+                                    title = stringResource(id = R.string.settings_soft_reboot),
+                                    description = stringResource(id = R.string.settings_soft_reboot_summary),
+                                    enabled = homeState.systemStatus.isFullFeatured &&
+                                        !homeState.systemStatus.isLateLoadMode,
+                                    checked = homeState.systemStatus.isLateLoadMode || uiState.useSoftReboot,
+                                    onCheckedChange = { enabled ->
+                                        settingsViewModel.dispatch(
+                                            SettingsUiAction.SetUseSoftReboot(
+                                                enabled
+                                            )
+                                        )
+                                    },
+                                )
+                            }
 
                             item {
                                 val sulogSummary = when (uiState.sulogStatus) {

@@ -2,6 +2,7 @@ package com.resukisu.resukisu.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.resukisu.resukisu.data.count.CountRepository
 import com.resukisu.resukisu.data.module.ModuleRepository
 import com.resukisu.resukisu.data.packageinfo.SuperUserRepository
 import com.resukisu.resukisu.data.shell.KsuCliRepository
@@ -50,6 +51,7 @@ class HomeViewModel(
     val homeStateRepository: HomeStateRepository,
     superUserRepository: SuperUserRepository,
     moduleRepository: ModuleRepository,
+    private val countRepository: CountRepository,
     private val ksuCliRepository: KsuCliRepository,
     private val checkManagerUpdate: CheckManagerUpdateUseCase,
     private val getKernelStatus: GetKernelStatusUseCase,
@@ -65,11 +67,22 @@ class HomeViewModel(
         homeStateRepository.state,
         superUserRepository.state,
         moduleRepository.installedModules,
-    ) { homeState, superUserState, moduleState ->
+        countRepository.state,
+    ) { homeState, superUserState, moduleState, countState ->
+        val superuserCount = if (superUserState.groups.isNotEmpty()) {
+            superUserState.groups.filter { it.allowSu }.size
+        } else {
+            countState.superuserCount
+        }
+        val moduleCount = if (moduleState.modules.isNotEmpty()) {
+            moduleState.modules.size
+        } else {
+            countState.moduleCount
+        }
         homeState.copy(
             systemInfo = homeState.systemInfo.copy(
-                moduleCount = moduleState.modules.size,
-                superuserCount = superUserState.groups.filter { it.allowSu }.size,
+                moduleCount = moduleCount,
+                superuserCount = superuserCount,
                 zygiskImplement = ksuCliRepository.getZygiskImplement(),
                 metaModuleImplement = ksuCliRepository.getMetaModuleImplement(),
             )
@@ -88,8 +101,8 @@ class HomeViewModel(
     private var updateJob: Job? = null
 
     init {
-        // Every navigation-scoped instance publishes persisted toggles to the shared state source.
         applyUserSettings()
+        viewModelScope.launch { countRepository.refresh() }
     }
 
     suspend fun awaitInitialData() {
