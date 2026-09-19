@@ -5,6 +5,7 @@ import com.resukisu.resukisu.BuildConfig
 import com.resukisu.resukisu.data.AppSettingsRepository
 import com.resukisu.resukisu.data.application.ApplicationControlRepository
 import com.resukisu.resukisu.data.application.DynamicManagerRepository
+import com.resukisu.resukisu.data.count.CountRepository
 import com.resukisu.resukisu.data.download.DownloadRepository
 import com.resukisu.resukisu.data.file.ModuleFileRepository
 import com.resukisu.resukisu.data.flash.FlashRepository
@@ -218,6 +219,7 @@ val coreModule = module {
 
 val repositoryModule = module {
     single { KsuCliRepository(androidApplication()) }
+    singleOf(::CountRepository)
     singleOf(::InstalledPackageCache)
     singleOf(::AppIconDataSource)
     singleOf(::RootServiceRepository)
