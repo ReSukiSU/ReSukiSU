@@ -459,20 +459,20 @@ fun InstallScreen(
                                     )
                                 },
                                 bottomContent = {
+                                    item(visible = canSelectPartition && displayPartitions.isNotEmpty()) {
+                                        SettingsChooseWidget(
+                                            icon = Icons.TwoTone.AutoFixHigh,
+                                            items = displayPartitions,
+                                            selectedIndex = partitionSelectionIndex,
+                                            title = "${stringResource(R.string.install_select_partition)} ($suffix)",
+                                            onSelectedIndexChange = { index ->
+                                                hasCustomSelected = true
+                                                partitionSelectionIndex = index
+                                            },
+                                        )
+                                    }
                                     item {
                                         val hasLkmUri = lkmSelection is LkmSelection.LkmUri
-                                        if (canSelectPartition && displayPartitions.isNotEmpty()) {
-                                            SettingsChooseWidget(
-                                                icon = Icons.TwoTone.AutoFixHigh,
-                                                items = displayPartitions,
-                                                selectedIndex = partitionSelectionIndex,
-                                                title = "${stringResource(R.string.install_select_partition)} ($suffix)",
-                                                onSelectedIndexChange = { index ->
-                                                    hasCustomSelected = true
-                                                    partitionSelectionIndex = index
-                                                },
-                                            )
-                                        }
 
                                         SettingsBaseWidget(
                                             icon = Icons.TwoTone.FileOpen,
@@ -525,21 +525,19 @@ fun InstallScreen(
                                             },
                                         )
                                     }
-                                    if (lkmInstallMethod is InstallMethod.SelectFile) {
-                                        item {
-                                            SettingsBaseWidget(
-                                                iconPlaceholder = false,
-                                                title = stringResource(id = R.string.install_force_backup),
-                                                description = stringResource(id = R.string.install_force_backup_summary),
-                                                onClick = { forceBackup = !forceBackup },
-                                                leadingContent = {
-                                                    Checkbox(
-                                                        checked = forceBackup,
-                                                        onCheckedChange = null,
-                                                    )
-                                                },
-                                            )
-                                        }
+                                    item(visible = lkmInstallMethod is InstallMethod.SelectFile) {
+                                        SettingsBaseWidget(
+                                            iconPlaceholder = false,
+                                            title = stringResource(id = R.string.install_force_backup),
+                                            description = stringResource(id = R.string.install_force_backup_summary),
+                                            onClick = { forceBackup = !forceBackup },
+                                            leadingContent = {
+                                                Checkbox(
+                                                    checked = forceBackup,
+                                                    onCheckedChange = null,
+                                                )
+                                            },
+                                        )
                                     }
                                 }
                             )
