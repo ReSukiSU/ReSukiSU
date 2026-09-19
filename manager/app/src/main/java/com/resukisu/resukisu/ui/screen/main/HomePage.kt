@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -54,12 +52,11 @@ import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
@@ -91,17 +88,19 @@ import com.resukisu.resukisu.domain.usecase.EnqueueManagerUpdateUseCase
 import com.resukisu.resukisu.magica.MagicaService
 import com.resukisu.resukisu.ui.component.KsuIsValid
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
+import com.resukisu.resukisu.ui.component.TopBarIconPill
+import com.resukisu.resukisu.ui.component.TopBarTitlePill
 import com.resukisu.resukisu.ui.component.WarningCard
+import com.resukisu.resukisu.ui.component.pillTopAppBarWindowInsets
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.rememberLoadingDialog
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
+import com.resukisu.resukisu.ui.component.transparentTopAppBarColors
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.LabelText
-import com.resukisu.resukisu.ui.theme.CardConfig
-import com.resukisu.resukisu.ui.theme.ThemeConfig
-import com.resukisu.resukisu.ui.theme.blurEffect
+import com.resukisu.resukisu.ui.theme.ScreenEdgePadding
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.LocalPermissionRequestInterface
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
@@ -150,7 +149,7 @@ fun HomePage(
     if (!uiState.isInitialDataLoaded) return
 
     val topAppBarState = rememberTopAppBarState()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
     val scrollState = rememberScrollState()
     val navigator = LocalNavigator.current
     val loadingDialog = rememberLoadingDialog()
@@ -182,8 +181,8 @@ fun HomePage(
                 .verticalScroll(scrollState)
                 .padding(
                     top = innerPadding.calculateTopPadding() + 2.dp,
-                    start = 16.dp,
-                    end = 16.dp
+                    start = ScreenEdgePadding,
+                    end = ScreenEdgePadding
                 ),
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
@@ -479,34 +478,22 @@ private fun TopBar(
     onReboot: (String) -> Unit,
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
-    val themeConfig: ThemeConfig = koinInject()
-    val cardConfig: CardConfig = koinInject()
     val navigator = LocalNavigator.current
 
-    LargeFlexibleTopAppBar(
-        modifier = Modifier.blurEffect(),
+    TopAppBar(
         title = {
-            Text(
-                text = stringResource(R.string.app_name)
-            )
+            TopBarTitlePill {
+                Text(
+                    text = stringResource(R.string.app_name)
+                )
+            }
         },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor =
-                if (themeConfig.isEnableBlur)
-                    Color.Transparent
-                else
-                    MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
-            scrolledContainerColor =
-                if (themeConfig.isEnableBlur)
-                    Color.Transparent
-                else
-                    MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
-        ),
+        colors = transparentTopAppBarColors(),
         actions = {
             if (uiState.isCoreDataLoaded) {
                 // SuSFS 配置按钮
                 if (uiState.systemInfo.susfsVersionSupported) {
-                    IconButton(onClick = {
+                    TopBarIconPill(onClick = {
                         navigator.push(Route.SuSFSConfig)
                     }) {
                         Icon(
@@ -520,7 +507,7 @@ private fun TopBar(
                 var showDropdown by remember { mutableStateOf(false) }
                 KsuIsValid(uiState.systemStatus) {
                     if (uiState.systemStatus.isRootAvailable) {
-                        IconButton(onClick = {
+                        TopBarIconPill(onClick = {
                             showDropdown = true
                         }) {
                             Icon(
@@ -558,7 +545,7 @@ private fun TopBar(
                 }
             }
         },
-        windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
+        windowInsets = pillTopAppBarWindowInsets(),
         scrollBehavior = scrollBehavior
     )
 }

@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,13 +20,13 @@ import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -52,16 +50,19 @@ import androidx.core.content.ContextCompat
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.resukisu.resukisu.BuildConfig
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.component.TopBarTitlePill
 import com.resukisu.resukisu.ui.component.WarningCard
+import com.resukisu.resukisu.ui.component.pillTopAppBarWindowInsets
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SegmentedColumn
 import com.resukisu.resukisu.ui.component.settings.SettingsJumpPageWidget
+import com.resukisu.resukisu.ui.component.transparentTopAppBarColors
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.navigation.Navigator
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.theme.CardConfig
+import com.resukisu.resukisu.ui.theme.ScreenEdgePadding
 import com.resukisu.resukisu.ui.theme.ThemeConfig
-import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
 import com.resukisu.resukisu.ui.util.adaptiveScaffoldWindowInsets
@@ -71,24 +72,20 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AboutScreen() {
-    val themeConfig: ThemeConfig = koinInject()
     val cardConfig: CardConfig = koinInject()
     val navigator = LocalNavigator.current
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
-        rememberTopAppBarState(
-            initialHeightOffset = -154f,
-            initialHeightOffsetLimit = -154f // from debugger
-        )
-    )
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
         contentWindowInsets = adaptiveScaffoldWindowInsets(),
         topBar = {
-            LargeFlexibleTopAppBar(
-                modifier = Modifier.blurEffect(
-                ),
-                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
-                title = { Text(text = stringResource(id = R.string.about)) },
+            TopAppBar(
+                windowInsets = pillTopAppBarWindowInsets(),
+                title = {
+                    TopBarTitlePill {
+                        Text(text = stringResource(id = R.string.about))
+                    }
+                },
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     AppBackButton(
@@ -97,18 +94,7 @@ fun AboutScreen() {
                         }
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor =
-                        if (themeConfig.isEnableBlur)
-                            Color.Transparent
-                        else
-                            MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
-                    scrolledContainerColor =
-                        if (themeConfig.isEnableBlur)
-                            Color.Transparent
-                        else
-                            MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
-                ),
+                colors = transparentTopAppBarColors(),
             )
         },
         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -129,7 +115,7 @@ fun AboutScreen() {
             item {
                 Box(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp)
+                        .padding(horizontal = ScreenEdgePadding)
                         .padding(top = 8.dp, bottom = 12.dp)
                 ) {
                     StatusCard()
@@ -139,7 +125,7 @@ fun AboutScreen() {
             item {
                 WarningCard(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp)
+                        .padding(horizontal = ScreenEdgePadding)
                         .padding(top = 8.dp, bottom = 12.dp),
                     color = MaterialTheme.colorScheme.outlineVariant.copy(
                         alpha = cardConfig.cardAlpha

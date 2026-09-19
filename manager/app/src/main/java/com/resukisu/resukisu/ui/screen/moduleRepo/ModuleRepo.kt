@@ -37,7 +37,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.RadioButton
@@ -89,6 +88,7 @@ import com.resukisu.resukisu.ui.component.DialogHandle
 import com.resukisu.resukisu.ui.component.NetworkRefreshContent
 import com.resukisu.resukisu.ui.component.SearchAppBar
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
+import com.resukisu.resukisu.ui.component.TopBarIconPill
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.rememberCustomDialog
 import com.resukisu.resukisu.ui.component.rememberSearchAppBarScrollBehavior
@@ -97,6 +97,7 @@ import com.resukisu.resukisu.ui.navigation.Navigator
 import com.resukisu.resukisu.ui.navigation.Route
 import com.resukisu.resukisu.ui.screen.LabelText
 import com.resukisu.resukisu.ui.theme.CardConfig
+import com.resukisu.resukisu.ui.theme.ScreenEdgePadding
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
@@ -132,7 +133,7 @@ fun ModuleRepoScreen() {
     val snackBarHost = LocalSnackbarHost.current
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = rememberSearchAppBarScrollBehavior(
-        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
+        TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
     )
     val currentModuleForChooseDialog = remember { mutableStateOf<CatalogModule?>(null) }
     val chooseDialog = rememberCustomDialog({ dismiss ->
@@ -149,7 +150,6 @@ fun ModuleRepoScreen() {
     val refreshModules = { viewModel.dispatch(ModuleRepoUiAction.Refresh) }
 
     LaunchedEffect(Unit) {
-        scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
 
     }
 
@@ -168,7 +168,7 @@ fun ModuleRepoScreen() {
                     viewModel.dispatch(ModuleRepoUiAction.Search(query))
                 },
                 dropdownContent = {
-                    IconButton(
+                    TopBarIconPill(
                         onClick = { showDropdown = true },
                     ) {
                         Icon(
@@ -254,9 +254,9 @@ fun ModuleRepoScreen() {
                     modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
                     contentPadding = remember {
                         PaddingValues(
-                            start = 16.dp,
+                            start = ScreenEdgePadding,
                             top = 0.dp,
-                            end = 16.dp,
+                            end = ScreenEdgePadding,
                             bottom = 0.dp
                         )
                     }
@@ -344,7 +344,7 @@ fun OnlineModuleItem(
     ) {
         Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = ScreenEdgePadding)
                 .padding(top = 12.dp)
         ) {
             Row(

@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -23,16 +21,15 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -52,38 +49,27 @@ import com.mikepenz.aboutlibraries.entity.Library
 import com.mikepenz.aboutlibraries.ui.compose.util.author
 import com.mikepenz.aboutlibraries.util.withJson
 import com.resukisu.resukisu.R
+import com.resukisu.resukisu.ui.component.TopBarTitlePill
 import com.resukisu.resukisu.ui.component.WarningCard
+import com.resukisu.resukisu.ui.component.pillTopAppBarWindowInsets
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
+import com.resukisu.resukisu.ui.component.transparentTopAppBarColors
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
 import com.resukisu.resukisu.ui.screen.LabelText
-import com.resukisu.resukisu.ui.theme.CardConfig
-import com.resukisu.resukisu.ui.theme.ThemeConfig
-import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.adaptiveScaffoldWindowInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.koin.compose.koinInject
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun OpenSourceLicenseScreen() {
-    val themeConfig: ThemeConfig = koinInject()
-    val cardConfig: CardConfig = koinInject()
     val navigator = LocalNavigator.current
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
-        rememberTopAppBarState(
-            initialHeightOffset = -154f,
-            initialHeightOffsetLimit = -154f // from debugger
-        )
-    )
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
-    LaunchedEffect(Unit) {
-        scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
-    }
 
     // from https://github.com/mikepenz/AboutLibraries#setup
     val context = LocalContext.current
@@ -103,33 +89,21 @@ fun OpenSourceLicenseScreen() {
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
         topBar = {
-            LargeFlexibleTopAppBar(
-                modifier = Modifier.blurEffect(),
-                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
-                title = { Text(text = stringResource(id = R.string.open_source_license)) },
+            TopAppBar(
+                windowInsets = pillTopAppBarWindowInsets(),
+                title = {
+                    TopBarTitlePill {
+                        Text(text = stringResource(id = R.string.open_source_license))
+                    }
+                },
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     AppBackButton(
                         onClick = { navigator.pop() },
-                        icon = Icons.AutoMirrored.TwoTone.ArrowBack,
-                        modifier = Modifier.size(36.dp),
-                        containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                            alpha = 0.1f
-                        )
+                        icon = Icons.AutoMirrored.TwoTone.ArrowBack
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor =
-                        if (themeConfig.isEnableBlur)
-                            Color.Transparent
-                        else
-                            MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
-                    scrolledContainerColor =
-                        if (themeConfig.isEnableBlur)
-                            Color.Transparent
-                        else
-                            MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
-                ),
+                colors = transparentTopAppBarColors(),
             )
         },
     ) { paddingValues ->
