@@ -52,7 +52,9 @@ import androidx.compose.material.icons.twotone.Palette
 import androidx.compose.material.icons.twotone.Pin
 import androidx.compose.material.icons.twotone.Style
 import androidx.compose.material.icons.twotone.SwapHoriz
+import androidx.compose.material.icons.twotone.Swipe
 import androidx.compose.material.icons.twotone.Translate
+import androidx.compose.material.icons.twotone.ViewCarousel
 import androidx.compose.material.icons.twotone.Wallpaper
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -375,6 +377,43 @@ fun ThemeSettingsScreen(
                                 SettingsUiAction.SetPredictiveBackExitDirection(direction)
                             )
                         }
+                    }
+                }
+            }
+
+            item {
+                SegmentedColumn(
+                    title = stringResource(R.string.settings_pager_gesture_mode)
+                ) {
+                    item {
+                        SettingsSwitchWidget(
+                            icon = Icons.TwoTone.Swipe,
+                            title = stringResource(R.string.settings_enable_swipe_dismiss),
+                            description = stringResource(R.string.settings_enable_swipe_dismiss_summary),
+                            checked = settingsState.enableSwipeDismiss,
+                            onCheckedChange = { enabled ->
+                                settingsViewModel.dispatch(
+                                    SettingsUiAction.SetSwipeDismiss(enabled)
+                                )
+                            }
+                        )
+                    }
+                    item {
+                        SettingsChooseWidget(
+                            icon = Icons.TwoTone.ViewCarousel,
+                            title = stringResource(R.string.settings_pager_gesture_mode),
+                            items = listOf(
+                                stringResource(R.string.settings_pager_gesture_native),
+                                stringResource(R.string.settings_pager_gesture_cross_axis),
+                                stringResource(R.string.settings_pager_gesture_ios_like),
+                            ),
+                            selectedIndex = settingsState.pagerInterceptionMode.coerceIn(0, 2),
+                            onSelectedIndexChange = { index ->
+                                settingsViewModel.dispatch(
+                                    SettingsUiAction.SetPagerInterceptionMode(index)
+                                )
+                            }
+                        )
                     }
                 }
             }

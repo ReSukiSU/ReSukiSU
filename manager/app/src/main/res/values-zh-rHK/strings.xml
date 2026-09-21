@@ -413,6 +413,12 @@
     <string name="predictive_back_exit_direction_follow_gesture">跟隨手勢</string>
     <string name="predictive_back_exit_direction_always_right">固定靠右</string>
     <string name="predictive_back_exit_direction_always_left">固定靠左</string>
+    <string name="settings_enable_swipe_dismiss">橫移返回手勢</string>
+    <string name="settings_enable_swipe_dismiss_summary">從螢幕邊緣橫移返回上一頁</string>
+    <string name="settings_pager_gesture_mode">頁面切換手勢</string>
+    <string name="settings_pager_gesture_native">預設</string>
+    <string name="settings_pager_gesture_cross_axis">跨軸攔截</string>
+    <string name="settings_pager_gesture_ios_like">iOS 風格</string>
     <string name="download_channel_name">模組下載</string>
     <string name="download_progress_title">正在下載 %s</string>
     <string name="download_complete_title">下載完成</string>

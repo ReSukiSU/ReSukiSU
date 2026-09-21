@@ -80,6 +80,8 @@ class SettingsPlatformRepository(
             checkModuleUpdate = loadModuleUpdatePreference(),
             autoJailbreakEnabled = settings.getBoolean("auto_jailbreak", false),
             useBuiltinMonoFont = themeConfig.useBuiltinMonoFont,
+            enableSwipeDismiss = settings.getBoolean("enable_swipe_dismiss", true),
+            pagerInterceptionMode = settings.getInt("pager_interception_mode", 1).coerceIn(0, 2),
         )
     }
 
@@ -186,6 +188,12 @@ class SettingsPlatformRepository(
                 settings.putBoolean("use_builtin_monospace_font", setting.enabled)
                 themeConfig.useBuiltinMonoFont = setting.enabled
             }
+
+            is PlatformSetting.SwipeDismiss ->
+                settings.putBoolean("enable_swipe_dismiss", setting.enabled)
+
+            is PlatformSetting.PagerInterceptionMode ->
+                settings.putInt("pager_interception_mode", setting.value.coerceIn(0, 2))
         }
         Result.success(load())
     } catch (error: CancellationException) {
