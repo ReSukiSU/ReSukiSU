@@ -33,6 +33,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -394,7 +395,7 @@ fun InstallScreen(
                             .height(240.dp),
                         contentAlignment = Alignment.Center,
                     ) {
-                        androidx.compose.material3.CircularProgressIndicator()
+                        LoadingIndicator()
                     }
                 }
             } else {
@@ -497,9 +498,25 @@ fun InstallScreen(
                                             } else null,
                                         )
                                     }
+                                    item(visible = lkmInstallMethod is InstallMethod.SelectFile) {
+                                        SettingsBaseWidget(
+                                            iconPlaceholder = false,
+                                            selected = forceBackup,
+                                            title = stringResource(id = R.string.install_force_backup),
+                                            description = stringResource(id = R.string.install_force_backup_summary),
+                                            onClick = { forceBackup = !forceBackup },
+                                            leadingContent = {
+                                                Checkbox(
+                                                    checked = forceBackup,
+                                                    onCheckedChange = null,
+                                                )
+                                            },
+                                        )
+                                    }
                                     item {
                                         SettingsBaseWidget(
                                             iconPlaceholder = false,
+                                            selected = allowShell,
                                             title = stringResource(id = R.string.allow_shell),
                                             description = stringResource(id = R.string.allow_shell_summary),
                                             onClick = { allowShell = !allowShell },
@@ -514,26 +531,13 @@ fun InstallScreen(
                                     item {
                                         SettingsBaseWidget(
                                             iconPlaceholder = false,
+                                            selected = enableAdb,
                                             title = stringResource(id = R.string.enable_adb),
                                             description = stringResource(id = R.string.enable_adb_summary),
                                             onClick = { enableAdb = !enableAdb },
                                             leadingContent = {
                                                 Checkbox(
                                                     checked = enableAdb,
-                                                    onCheckedChange = null,
-                                                )
-                                            },
-                                        )
-                                    }
-                                    item(visible = lkmInstallMethod is InstallMethod.SelectFile) {
-                                        SettingsBaseWidget(
-                                            iconPlaceholder = false,
-                                            title = stringResource(id = R.string.install_force_backup),
-                                            description = stringResource(id = R.string.install_force_backup_summary),
-                                            onClick = { forceBackup = !forceBackup },
-                                            leadingContent = {
-                                                Checkbox(
-                                                    checked = forceBackup,
                                                     onCheckedChange = null,
                                                 )
                                             },
