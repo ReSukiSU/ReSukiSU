@@ -711,7 +711,7 @@ private fun ManagerNavEntry(
     }
 }
 
-private fun Route.Flash.toFlashIt(): FlashIt = when (type) {
+private fun Route.Flash.toFlashIt(): FlashIt = when (flashType) {
     Route.Flash.TYPE_BOOT -> FlashIt.FlashBoot(
         boot = bootUri,
         lkmUri = lkmUri,
