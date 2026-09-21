@@ -13,6 +13,7 @@
 
 #include "klog.h" // IWYU pragma: keep
 #include "kernel_compat.h"
+#include "ksu.h"
 
 ssize_t ksu_kernel_read_compat(struct file *p, void *buf, size_t count, loff_t *pos)
 {
@@ -196,9 +197,6 @@ put_task:
 #endif
 }
 
-#ifdef KSU_COMPAT_REQUIRE_SESSION_KEYRING
-#include "ksu.h"
-
 struct key *init_session_keyring = NULL;
 extern int install_session_keyring_to_cred(struct cred *, struct key *);
 
@@ -218,5 +216,3 @@ void setup_ksu_cred_session_keyring(void)
 
     pr_info("kernel_compat: %s: install init_session_keyring to ksu_cred\n", __func__);
 }
-
-#endif

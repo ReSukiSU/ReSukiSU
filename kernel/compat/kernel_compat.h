@@ -5,7 +5,7 @@
 #include <linux/version.h>
 #include <linux/fdtable.h>
 #include "ss/policydb.h"
-#include "linux/key.h"
+#include <linux/key.h>
 
 /*
  * Leagcy Huawei Hisi Devices info Start
@@ -276,11 +276,6 @@ static inline u64 ksu_ktime_get_ns(void)
 
 extern void ksu_run_in_init_if_possible(void (*callback)(void *), void *data);
 
-#if defined(CONFIG_KEYS) && (LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0) || defined(KSU_COMPAT_IS_HISI_LEGACY) ||    \
-                             defined(KSU_COMPAT_IS_HISI_LEGACY_HM2))
-#define KSU_COMPAT_REQUIRE_SESSION_KEYRING
-#include <linux/key.h>
-
 extern struct key *init_session_keyring;
 extern void setup_ksu_cred_session_keyring(void);
 
@@ -293,7 +288,6 @@ static inline struct key *ksu_get_session_keyring(const struct cred *cred)
     return rcu_dereference(current->cred->tgcred->session_keyring);
 #endif
 }
-#endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 3, 0) || defined(KSU_HAS_MODERN_STATIC_KEY_INTERFACE)
 #define KSU_COMPAT_USE_STATIC_KEY

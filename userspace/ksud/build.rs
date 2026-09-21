@@ -1,8 +1,7 @@
 use std::{
     env,
     ffi::OsString,
-    fs::{self, File},
-    io::{self, Write},
+    fs, io,
     path::{Path, PathBuf},
     process::Command,
 };
@@ -354,17 +353,14 @@ fn main() {
             (0, "0.0.0".to_string())
         }
     };
+
     let out_dir = env::var("OUT_DIR").expect("Failed to get $OUT_DIR");
     let out_dir = Path::new(&out_dir);
-    File::create(Path::new(out_dir).join("VERSION_CODE"))
-        .expect("Failed to create VERSION_CODE")
-        .write_all(code.to_string().as_bytes())
-        .expect("Failed to write VERSION_CODE");
-
-    File::create(Path::new(out_dir).join("VERSION_NAME"))
-        .expect("Failed to create VERSION_NAME")
-        .write_all(name.trim().as_bytes())
-        .expect("Failed to write VERSION_NAME");
+    if env::var("KSU_PACKAGE_NAME").is_err() {
+        println!("cargo:rustc-env=KSU_PACKAGE_NAME=com.resukisu.resukisu");
+    }
+    println!("cargo:rustc-env=VERSION_CODE={code}");
+    println!("cargo:rustc-env=VERSION_NAME={name}");
 
     let target_os = env::var("CARGO_CFG_TARGET_OS").expect("CARGO_CFG_TARGET_OS not set");
     if target_os == "android" {

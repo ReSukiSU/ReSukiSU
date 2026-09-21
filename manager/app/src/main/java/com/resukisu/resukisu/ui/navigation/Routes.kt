@@ -74,7 +74,7 @@ sealed interface Route : NavKey, Parcelable {
     @Parcelize
     @Serializable
     data class Flash(
-        val type: String,
+        val flashType: String,
         val uris: List<String> = emptyList(),
         val currentIndex: Int = 0,
         val bootUri: String? = null,
@@ -104,7 +104,7 @@ sealed interface Route : NavKey, Parcelable {
                 enableAdb: Boolean = false,
                 forceBackup: Boolean = false,
             ) = Flash(
-                type = TYPE_BOOT,
+                flashType = TYPE_BOOT,
                 bootUri = bootUri,
                 lkmUri = lkmUri,
                 kmi = kmi,

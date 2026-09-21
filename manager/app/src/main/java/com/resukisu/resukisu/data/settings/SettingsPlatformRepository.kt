@@ -299,8 +299,8 @@ class SettingsPlatformRepository(
 
     private fun toggleLauncherIcon(useAlt: Boolean) {
         val packageName = application.packageName
-        val main = ComponentName(packageName, "$packageName.ui.MainActivity")
-        val alias = ComponentName(packageName, "$packageName.ui.MainActivityAlias")
+        val main = ComponentName(packageName, "com.resukisu.resukisu.ui.MainActivity")
+        val alias = ComponentName(packageName, "com.resukisu.resukisu.ui.MainActivityAlias")
         application.packageManager.setComponentEnabledSetting(
             if (useAlt) alias else main,
             PackageManager.COMPONENT_ENABLED_STATE_ENABLED,

@@ -163,27 +163,36 @@ bool ksu_has_manager(void)
 int ksu_handle_get_managers_cmd(struct ksu_get_managers_cmd __user *arg, struct ksu_get_managers_cmd *cmd)
 {
     struct ksu_manager_node *pos;
-    int count = 0;
+    struct ksu_manager_entry *entries;
     u16 max_allowed = cmd->count;
+    int count = 0;
+    int copy_count;
+
+    entries = kcalloc(max_allowed, sizeof(*entries), GFP_KERNEL);
+    if (!entries && max_allowed)
+        return -ENOMEM;
 
     rcu_read_lock();
     list_for_each_entry_rcu (pos, &ksu_manager_appid_list, list) {
         if (count < max_allowed) {
-            struct ksu_manager_entry entry = { .uid = pos->appid, .signature_index = pos->signature_index };
-
-            void __user *dest = (void __user *)((char *)arg + sizeof(struct ksu_get_managers_cmd) +
-                                                (count * sizeof(struct ksu_manager_entry)));
-
-            if (copy_to_user(dest, &entry, sizeof(entry))) {
-                rcu_read_unlock();
-                return -EFAULT;
-            }
+            entries[count].uid = pos->appid;
+            entries[count].signature_index = pos->signature_index;
         }
+
         count++;
     }
     rcu_read_unlock();
 
     cmd->total_count = count;
+
+    copy_count = min_t(int, count, max_allowed);
+
+    if (copy_count && copy_to_user((char __user *)arg + sizeof(*cmd), entries, copy_count * sizeof(*entries))) {
+        kfree(entries);
+        return -EFAULT;
+    }
+
+    kfree(entries);
     return 0;
 }
 

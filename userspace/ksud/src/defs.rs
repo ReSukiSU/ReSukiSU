@@ -54,6 +54,10 @@ mod android {
     pub const KSU_BACKUP_DIR: &str = WORKING_DIR;
     pub const KSU_BACKUP_FILE_PREFIX: &str = "ksu_backup_";
     pub const BACKUP_FILENAME: &str = "stock_image.sha1";
+    pub const KSU_TEMP_BACKUP_DIR_NAME: &str = "boot_backup";
+
+    pub const DEFAULT_PACKAGE_NAME: &str = env!("KSU_PACKAGE_NAME");
+
     pub const UMOUNT_CONFIG_PATH: &str = concatcp!(WORKING_DIR, ".umount");
 
     pub const DYNAMIC_MANAGER: &str = concatcp!(WORKING_DIR, ".dynamic_manager");
@@ -66,12 +70,11 @@ mod android {
     }
 }
 
-pub const VERSION_CODE: &str = include_str!(concat!(env!("OUT_DIR"), "/VERSION_CODE"));
-pub const VERSION_NAME: &str = include_str!(concat!(env!("OUT_DIR"), "/VERSION_NAME"));
+pub const VERSION_CODE: &str = env!("VERSION_CODE");
+pub const VERSION_NAME: &str = env!("VERSION_NAME");
 #[cfg(target_os = "android")]
 pub const FULL_VERSION: &str = const_format::formatcp!(
-    "{} (uapi: {})",
-    VERSION_NAME,
+    "{VERSION_NAME} (uapi: {})",
     crate::android::uapi::KERNEL_SU_UAPI_VERSION
 );
 

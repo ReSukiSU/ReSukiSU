@@ -309,6 +309,12 @@ endif
 
 # https://github.com/torvalds/linux/commit/a721f7b8c3548e943e514a957f2a37f4763b9888
 ifeq ($(shell grep -q -F "void security_bprm_committed_creds(const struct linux_binprm *bprm)" $(srctree)/security/security.c; echo $$?),0)
-$(info -- $(REPO_NAME)/compat constify bprm parameter in security_bprm_committed_creds found)
+$(info -- $(REPO_NAME)/compat: constify bprm parameter in security_bprm_committed_creds found)
 ccflags-y += -DKSU_COMPAT_CONSTIFY_BPRM_PARAMETER_IN_SECURITY_BPRM_COMMITTED_CREDS
+endif
+
+# https://github.com/torvalds/linux/commit/8c0637e950d68933a67f7438f779d79b049b5e5c
+ifeq ($(shell grep -q -F "key_need_perm" $(srctree)/include/linux/key.h; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: key need perm as enum found)
+ccflags-y += -DKSU_COMPAT_KEY_NEED_PERM_AS_ENUM
 endif
