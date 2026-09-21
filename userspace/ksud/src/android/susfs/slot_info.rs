@@ -1,7 +1,4 @@
-use std::{
-    path::{Path, PathBuf},
-    sync::mpsc::channel,
-};
+use std::path::{Path, PathBuf};
 
 use android_bootimg::parser::BootImage;
 use anyhow::{Context, Result, bail};
@@ -21,11 +18,9 @@ struct SlotInfo {
 pub fn show_slot_info_json() -> Result<()> {
     log::debug!("Starting slot_info enumeration from /dev/block/by-name");
 
-    let (send, recv) = channel::<SlotInfo>();
     let mut jobs = Vec::<std::thread::JoinHandle<_>>::new();
 
     for (slot_name, slot_path) in list_boot_slots() {
-        let send = send.clone();
         jobs.push(
             std::thread::Builder::new()
                 .name(format!("analyze_{slot_name}"))
@@ -36,14 +31,15 @@ pub fn show_slot_info_json() -> Result<()> {
                         Ok((uname, build_time)) => {
                             log::info!("Successfully extracted info from {}", slot_name);
                             log::debug!("  build_time: {}", build_time);
-                            let _ = send.send(SlotInfo {
+                            Some(SlotInfo {
                                 slot_name,
                                 uname,
                                 build_time,
-                            });
+                            })
                         }
                         Err(e) => {
                             log::warn!("Failed to extract info from {}: {}", slot_name, e);
+                            None
                         }
                     }
                 })?,
@@ -52,8 +48,12 @@ pub fn show_slot_info_json() -> Result<()> {
 
     let mut result = Vec::new();
     for job in jobs {
-        job.join().unwrap();
-        result.push(recv.recv()?);
+        if let Some(info) = job
+            .join()
+            .map_err(|_| anyhow::anyhow!("slot info worker thread panicked"))?
+        {
+            result.push(info);
+        }
     }
 
     println!("{}", serde_json::to_string(&result)?);
