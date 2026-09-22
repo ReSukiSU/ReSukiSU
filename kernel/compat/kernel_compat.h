@@ -57,15 +57,58 @@ static_assert(1 == 0, "Unsupported architecture!");
 #define __ksyscall_concat(a, b) a##b
 #define __ksyscall_exp(func, arg) __ksyscall_concat(func, arg)
 #define ksyscall(...) __ksyscall_exp(ksyscall_, __ksyscall_count_args(__VA_ARGS__))(__VA_ARGS__)
+#else
+#define KSU_SYS_PREFIX(name) sys_##name
+
+#define ksyscall_0(name)                                                                                               \
+    ({                                                                                                                 \
+        extern typeof(KSU_SYS_PREFIX(name)) KSU_SYS_PREFIX(name);                                                      \
+        (long)KSU_SYS_PREFIX(name)();                                                                                  \
+    })
+
+#define ksyscall_1(name, a)                                                                                            \
+    ({                                                                                                                 \
+        extern typeof(KSU_SYS_PREFIX(name)) KSU_SYS_PREFIX(name);                                                      \
+        (long)KSU_SYS_PREFIX(name)(a);                                                                                 \
+    })
+
+#define ksyscall_2(name, a, b)                                                                                         \
+    ({                                                                                                                 \
+        extern typeof(KSU_SYS_PREFIX(name)) KSU_SYS_PREFIX(name);                                                      \
+        (long)KSU_SYS_PREFIX(name)(a, b);                                                                              \
+    })
+
+#define ksyscall_3(name, a, b, c)                                                                                      \
+    ({                                                                                                                 \
+        extern typeof(KSU_SYS_PREFIX(name)) KSU_SYS_PREFIX(name);                                                      \
+        (long)KSU_SYS_PREFIX(name)(a, b, c);                                                                           \
+    })
+
+#define ksyscall_4(name, a, b, c, d)                                                                                   \
+    ({                                                                                                                 \
+        extern typeof(KSU_SYS_PREFIX(name)) KSU_SYS_PREFIX(name);                                                      \
+        (long)KSU_SYS_PREFIX(name)(a, b, c, d);                                                                        \
+    })
+
+#define ksyscall_5(name, a, b, c, d, e)                                                                                \
+    ({                                                                                                                 \
+        extern typeof(KSU_SYS_PREFIX(name)) KSU_SYS_PREFIX(name);                                                      \
+        (long)KSU_SYS_PREFIX(name)(a, b, c, d, e);                                                                     \
+    })
+
+#define ksyscall_6(name, a, b, c, d, e, f)                                                                             \
+    ({                                                                                                                 \
+        extern typeof(KSU_SYS_PREFIX(name)) KSU_SYS_PREFIX(name);                                                      \
+        (long)KSU_SYS_PREFIX(name)(a, b, c, d, e, f);                                                                  \
+    })
+#endif
 
 #define ksu_close_fd(fd) ({ ksyscall(close, fd); })
 #define ksu_sys_setns(fd, flags) ({ ksyscall(setns, fd, flags); })
 #define ksu_sys_umount(mnt, flags) ({ ksyscall(umount, mnt, flags); })
-#else
-#define ksu_close_fd sys_close
-#define ksu_sys_setns sys_setns
-#define ksys_unshare sys_unshare
-#define ksu_sys_umount(mnt, flags) ({ sys_umount((char __user *)mnt, flags); })
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 19, 0)
+#define ksys_unshare(flags) ({ ksyscall(unshare, flags); })
 #endif
 
 /*
