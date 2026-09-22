@@ -62,12 +62,31 @@ static void ksu_umount_mnt(const char *mnt, struct path *path, int flags)
     }
 }
 #else
-#define ksu_umount_mnt(mnt, __unused, flags)                                                                           \
-    ({                                                                                                                 \
-        path_put(__unused);                                                                                            \
-        ksu_sys_umount(mnt, flags);                                                                                    \
-    })
+static void ksu_umount_mnt(const char *mnt, struct path *path, int flags)
+{
+    long err;
+    mm_segment_t old_fs;
 
+    path_put(path);
+
+    /*
+     * mnt is a kernel pointer, but umount(2) runs it through
+     * getname() -> strncpy_from_user() -> access_ok(), which rejects it
+     * while addr_limit is USER_DS and returns -EFAULT before the mount is
+     * touched. That holds for both ksyscall() forms: the pt_regs wrapper
+     * on >= 4.19 and the direct sys_umount() call below it.
+     * This branch is only built for < 5.9 without path_umount(), where
+     * set_fs() still exists.
+     */
+    old_fs = get_fs();
+    set_fs(KERNEL_DS);
+    err = ksu_sys_umount((char __user *)mnt, flags);
+    set_fs(old_fs);
+
+    if (err) {
+        pr_info("umount %s failed: %ld\n", mnt, err);
+    }
+}
 #endif
 
 void try_umount(const char *mnt, int flags)
