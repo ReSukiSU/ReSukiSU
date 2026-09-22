@@ -432,7 +432,7 @@ fun NavContainer(
                     backgroundRenderState = backgroundRenderState,
                     useBlur = useBlur,
                 ) {
-                    MainScreen()
+                    MainScreen(pagerInterceptionMode = settings.pagerInterceptionMode)
                 }
             }
             entry<Route.AppProfileTemplate>(swipeDismiss = swipeBackDirection) {
@@ -535,7 +535,7 @@ fun NavContainer(
                     backgroundRenderState = backgroundRenderState,
                     useBlur = useBlur,
                 ) {
-                    MainScreen()
+                    MainScreen(pagerInterceptionMode = settings.pagerInterceptionMode)
                 }
             }
             entry<Route.SuperUser>(swipeDismiss = NavSwipeDirection.None) {
@@ -546,7 +546,7 @@ fun NavContainer(
                     backgroundRenderState = backgroundRenderState,
                     useBlur = useBlur,
                 ) {
-                    MainScreen()
+                    MainScreen(pagerInterceptionMode = settings.pagerInterceptionMode)
                 }
             }
             entry<Route.Module>(swipeDismiss = NavSwipeDirection.None) {
@@ -557,7 +557,7 @@ fun NavContainer(
                     backgroundRenderState = backgroundRenderState,
                     useBlur = useBlur,
                 ) {
-                    MainScreen()
+                    MainScreen(pagerInterceptionMode = settings.pagerInterceptionMode)
                 }
             }
             entry<Route.Settings>(swipeDismiss = NavSwipeDirection.None) {
@@ -568,7 +568,7 @@ fun NavContainer(
                     backgroundRenderState = backgroundRenderState,
                     useBlur = useBlur,
                 ) {
-                    MainScreen()
+                    MainScreen(pagerInterceptionMode = settings.pagerInterceptionMode)
                 }
             }
             entry<Route.ThemeSettings>(swipeDismiss = swipeBackDirection) {
