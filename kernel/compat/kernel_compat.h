@@ -1,11 +1,117 @@
 #ifndef __KSU_H_KERNEL_COMPAT
 #define __KSU_H_KERNEL_COMPAT
 
+#include <linux/namei.h>
+#include <linux/cred.h>
 #include <linux/fs.h>
+#include <linux/err.h>
 #include <linux/version.h>
 #include <linux/fdtable.h>
 #include "ss/policydb.h"
 #include <linux/key.h>
+#include <linux/ptrace.h>
+#include <linux/syscalls.h>
+#include "arch.h"
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 19, 0)
+#if defined(__aarch64__)
+#define KSU_SYS_PREFIX(name) __arm64_sys_##name
+#elif defined(__x86_64__)
+#define KSU_SYS_PREFIX(name) __x64_sys_##name
+#elif defined(__arm__)
+#define KSU_SYS_PREFIX(name) sys_##name
+#else // wire up your arch here.
+static_assert(1 == 0, "Unsupported architecture!");
+#define KSU_SYS_PREFIX(name) sys_##name
+#endif
+
+/**
+ * ksyscall: call syscalls from kernelspace
+ * - tries to copy unistd's syscall()
+ *
+ * usage: ksyscall(close, fd);
+ */
+#define __ksyscall(name, a, b, c, d, e, f)                                                                             \
+    ({                                                                                                                 \
+        extern long KSU_SYS_PREFIX(name)(const struct pt_regs *);                                                      \
+        struct pt_regs __ksu_regs = { 0 };                                                                             \
+        PT_REGS_PARM1(&__ksu_regs) = (unsigned long)(a);                                                               \
+        PT_REGS_PARM2(&__ksu_regs) = (unsigned long)(b);                                                               \
+        PT_REGS_PARM3(&__ksu_regs) = (unsigned long)(c);                                                               \
+        PT_REGS_SYSCALL_PARM4(&__ksu_regs) = (unsigned long)(d);                                                       \
+        PT_REGS_PARM5(&__ksu_regs) = (unsigned long)(e);                                                               \
+        PT_REGS_PARM6(&__ksu_regs) = (unsigned long)(f);                                                               \
+        (long)KSU_SYS_PREFIX(name)(&__ksu_regs);                                                                       \
+    })
+
+// https://elixir.bootlin.com/musl/v1.2.6/source/src/internal/syscall.h#L45
+#define ksyscall_0(name) __ksyscall(name, 0, 0, 0, 0, 0, 0)
+#define ksyscall_1(name, a) __ksyscall(name, a, 0, 0, 0, 0, 0)
+#define ksyscall_2(name, a, b) __ksyscall(name, a, b, 0, 0, 0, 0)
+#define ksyscall_3(name, a, b, c) __ksyscall(name, a, b, c, 0, 0, 0)
+#define ksyscall_4(name, a, b, c, d) __ksyscall(name, a, b, c, d, 0, 0)
+#define ksyscall_5(name, a, b, c, d, e) __ksyscall(name, a, b, c, d, e, 0)
+#define ksyscall_6(name, a, b, c, d, e, f) __ksyscall(name, a, b, c, d, e, f)
+
+#else
+#define KSU_SYS_PREFIX(name) sys_##name
+
+#define ksyscall_0(name)                                                                                               \
+    ({                                                                                                                 \
+        extern typeof(KSU_SYS_PREFIX(name)) KSU_SYS_PREFIX(name);                                                      \
+        (long)KSU_SYS_PREFIX(name)();                                                                                  \
+    })
+
+#define ksyscall_1(name, a)                                                                                            \
+    ({                                                                                                                 \
+        extern typeof(KSU_SYS_PREFIX(name)) KSU_SYS_PREFIX(name);                                                      \
+        (long)KSU_SYS_PREFIX(name)(a);                                                                                 \
+    })
+
+#define ksyscall_2(name, a, b)                                                                                         \
+    ({                                                                                                                 \
+        extern typeof(KSU_SYS_PREFIX(name)) KSU_SYS_PREFIX(name);                                                      \
+        (long)KSU_SYS_PREFIX(name)(a, b);                                                                              \
+    })
+
+#define ksyscall_3(name, a, b, c)                                                                                      \
+    ({                                                                                                                 \
+        extern typeof(KSU_SYS_PREFIX(name)) KSU_SYS_PREFIX(name);                                                      \
+        (long)KSU_SYS_PREFIX(name)(a, b, c);                                                                           \
+    })
+
+#define ksyscall_4(name, a, b, c, d)                                                                                   \
+    ({                                                                                                                 \
+        extern typeof(KSU_SYS_PREFIX(name)) KSU_SYS_PREFIX(name);                                                      \
+        (long)KSU_SYS_PREFIX(name)(a, b, c, d);                                                                        \
+    })
+
+#define ksyscall_5(name, a, b, c, d, e)                                                                                \
+    ({                                                                                                                 \
+        extern typeof(KSU_SYS_PREFIX(name)) KSU_SYS_PREFIX(name);                                                      \
+        (long)KSU_SYS_PREFIX(name)(a, b, c, d, e);                                                                     \
+    })
+
+#define ksyscall_6(name, a, b, c, d, e, f)                                                                             \
+    ({                                                                                                                 \
+        extern typeof(KSU_SYS_PREFIX(name)) KSU_SYS_PREFIX(name);                                                      \
+        (long)KSU_SYS_PREFIX(name)(a, b, c, d, e, f);                                                                  \
+    })
+#endif
+
+#define __ksyscall_arg_n(_1, _2, _3, _4, _5, _6, _7, N, ...) N
+#define __ksyscall_count_args(...) __ksyscall_arg_n(__VA_ARGS__, 6, 5, 4, 3, 2, 1, 0)
+#define __ksyscall_concat(a, b) a##b
+#define __ksyscall_exp(func, arg) __ksyscall_concat(func, arg)
+#define ksyscall(...) __ksyscall_exp(ksyscall_, __ksyscall_count_args(__VA_ARGS__))(__VA_ARGS__)
+
+#define ksu_close_fd(fd) ({ ksyscall(close, fd); })
+#define ksu_sys_setns(fd, flags) ({ ksyscall(setns, fd, flags); })
+#define ksu_sys_umount(mnt, flags) ({ ksyscall(umount, (char __user *)mnt, flags); })
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 19, 0)
+#define ksys_unshare(flags) ({ ksyscall(unshare, flags); })
+#endif
 
 /*
  * Leagcy Huawei Hisi Devices info Start
@@ -93,25 +199,6 @@ static inline struct task_security_struct *selinux_cred(const struct cred *cred)
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 12, 0)
 extern void *ksu_compat_kvrealloc(const void *p, size_t oldsize, size_t newsize, gfp_t flags);
-#endif
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 19, 0)
-// kernel below 4.19 maybe not have 3 helper, but impl that is very easy
-// copy from https://github.com/torvalds/linux/commit/c42b65e363ce97a828f81b59033c3558f8fa7f70
-__weak unsigned long *bitmap_alloc(unsigned int nbits, gfp_t flags)
-{
-    return kmalloc_array(BITS_TO_LONGS(nbits), sizeof(unsigned long), flags);
-}
-
-__weak unsigned long *bitmap_zalloc(unsigned int nbits, gfp_t flags)
-{
-    return bitmap_alloc(nbits, flags | __GFP_ZERO);
-}
-
-__weak void bitmap_free(const unsigned long *bitmap)
-{
-    kfree(bitmap);
-}
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 15, 0)
@@ -360,13 +447,27 @@ static inline char *sym_name(struct policydb *p, unsigned int sym_num, unsigned 
 }
 #endif
 
-static inline int ksu_close_fd(unsigned int fd)
+static inline struct file *ksu_filp_open_nonotify(const char *path, int flags)
 {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
-    return close_fd(fd);
+    struct path p;
+    struct file *f;
+    int ret;
+    ret = kern_path(path, (flags & O_NOFOLLOW) ? 0 : LOOKUP_FOLLOW, &p);
+    if (ret) {
+        return ERR_PTR(ret);
+    }
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 14, 0)
+    f = dentry_open_nonotify(&p, flags, current_cred());
+    // https://github.com/torvalds/linux/commit/765927b2d508712d320c8934db963bbe14c3fcec
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 6, 0) || defined(KSU_COMPAT_HAS_MODERN_DENTRY_OPEN)
+    f = dentry_open(&p, flags | __FMODE_NONOTIFY, current_cred());
 #else
-    return __close_fd(current->files, fd);
+    f = dentry_open(p.dentry, p.mnt, flags | __FMODE_NONOTIFY, current_cred());
 #endif
+
+    path_put(&p);
+    return f;
 }
 
 #endif
