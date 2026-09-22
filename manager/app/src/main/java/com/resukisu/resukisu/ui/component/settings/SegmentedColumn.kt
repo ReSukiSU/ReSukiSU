@@ -41,11 +41,11 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.zIndex
+import com.resukisu.resukisu.ui.theme.ScreenEdgePadding
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
 
-private const val PADDING_HORIZONTAL = 16
 private const val PADDING_VERTICAL = 8
 
 private const val bouncyStiffness = 800f
@@ -150,7 +150,7 @@ fun SegmentedColumn(
     modifier: Modifier = Modifier,
     title: String = "",
     contentPadding: PaddingValues = PaddingValues(
-        horizontal = PADDING_HORIZONTAL.dp,
+        horizontal = ScreenEdgePadding,
         vertical = PADDING_VERTICAL.dp
     ),
     content: SegmentedColumnScope.() -> Unit
@@ -168,7 +168,7 @@ fun SegmentedColumn(
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(
-                    start = PADDING_HORIZONTAL.dp,
+                    start = ScreenEdgePadding,
                     top = PADDING_VERTICAL.dp,
                     bottom = 8.dp
                 )

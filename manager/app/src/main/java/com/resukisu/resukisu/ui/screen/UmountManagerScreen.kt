@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,13 +23,13 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
@@ -55,15 +53,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.ConfirmResult
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
+import com.resukisu.resukisu.ui.component.TopBarTitlePill
 import com.resukisu.resukisu.ui.component.WarningCard
+import com.resukisu.resukisu.ui.component.pillTopAppBarWindowInsets
 import com.resukisu.resukisu.ui.component.rememberConfirmDialog
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.component.settings.SettingsBaseWidget
 import com.resukisu.resukisu.ui.component.settings.lazySegmentColumn
+import com.resukisu.resukisu.ui.component.transparentTopAppBarColors
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
-import com.resukisu.resukisu.ui.theme.CardConfig
-import com.resukisu.resukisu.ui.theme.ThemeConfig
-import com.resukisu.resukisu.ui.theme.blurEffect
+import com.resukisu.resukisu.ui.theme.ScreenEdgePadding
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.ActivityResumeEffect
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
@@ -74,17 +73,14 @@ import com.resukisu.resukisu.ui.viewmodel.UmountManagerUiAction
 import com.resukisu.resukisu.ui.viewmodel.UmountManagerUiEvent
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun UmountManagerScreen() {
-    val themeConfig: ThemeConfig = koinInject()
-    val cardConfig: CardConfig = koinInject()
     val viewModel = koinViewModel<UmountManagerScreenViewModel>()
     val uiState by viewModel.state.collectAsStateWithLifecycle()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val snackBarHost = LocalSnackbarHost.current
     val scope = rememberCoroutineScope()
     val confirmDialog = rememberConfirmDialog()
@@ -94,10 +90,6 @@ fun UmountManagerScreen() {
 
     val confirmDelete = stringResource(R.string.confirm_delete)
 
-    LaunchedEffect(Unit) {
-        scrollBehavior.state.heightOffset =
-            scrollBehavior.state.heightOffsetLimit
-    }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collectLatest { event ->
@@ -115,10 +107,12 @@ fun UmountManagerScreen() {
     Scaffold(
         contentWindowInsets = adaptiveScaffoldWindowInsets(),
         topBar = {
-            LargeFlexibleTopAppBar(
-                modifier = Modifier
-                    .blurEffect(),
-                title = { Text(stringResource(R.string.umount_path_manager)) },
+            TopAppBar(
+                title = {
+                    TopBarTitlePill {
+                        Text(stringResource(R.string.umount_path_manager))
+                    }
+                },
                 navigationIcon = {
                     val navigator = LocalNavigator.current
                     AppBackButton(
@@ -127,21 +121,9 @@ fun UmountManagerScreen() {
                         }
                     )
                 },
-                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
+                windowInsets = pillTopAppBarWindowInsets(),
                 scrollBehavior = scrollBehavior,
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor =
-                        if (themeConfig.isEnableBlur)
-                            Color.Transparent
-                        else
-                            MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
-                    scrolledContainerColor =
-                        if (themeConfig.isEnableBlur)
-                            Color.Transparent
-                        else
-                            MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
-                )
-            )
+                colors = transparentTopAppBarColors())
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -197,7 +179,7 @@ fun UmountManagerScreen() {
                 ) {
                     item {
                         WarningCard(
-                            modifier = Modifier.padding(horizontal = 16.dp),
+                            modifier = Modifier.padding(horizontal = ScreenEdgePadding),
                             message = stringResource(R.string.changes_take_effect_immediately),
                             shape = RoundedCornerShape(16.dp),
                             color = MaterialTheme.colorScheme.primaryContainer,
@@ -208,7 +190,7 @@ fun UmountManagerScreen() {
                     if (uiState.umountPaths.isEmpty()) {
                         item {
                             WarningCard(
-                                modifier = Modifier.padding(horizontal = 16.dp),
+                                modifier = Modifier.padding(horizontal = ScreenEdgePadding),
                                 message = stringResource(R.string.no_any_umount_path),
                                 shape = RoundedCornerShape(16.dp),
                                 color = MaterialTheme.colorScheme.secondaryContainer,

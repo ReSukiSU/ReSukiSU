@@ -5,8 +5,6 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,11 +17,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -42,12 +39,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.KeyEventBlocker
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
+import com.resukisu.resukisu.ui.component.TopBarIconPill
+import com.resukisu.resukisu.ui.component.TopBarTitlePill
+import com.resukisu.resukisu.ui.component.pillTopAppBarWindowInsets
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
+import com.resukisu.resukisu.ui.component.transparentTopAppBarColors
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
-import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.MonospaceFontFamily
-import com.resukisu.resukisu.ui.theme.ThemeConfig
-import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.blurSource
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.adaptiveScaffoldWindowInsets
@@ -56,7 +54,6 @@ import com.resukisu.resukisu.ui.viewmodel.ExecuteModuleActionUiAction
 import com.resukisu.resukisu.ui.viewmodel.ExecuteModuleActionUiEvent
 import com.resukisu.resukisu.ui.viewmodel.ExecuteModuleActionViewModel
 import kotlinx.coroutines.flow.collectLatest
-import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -74,11 +71,8 @@ fun ExecuteModuleActionScreen(moduleId: String) {
     val context = LocalContext.current
     val activity = LocalActivity.current
     val navigator = LocalNavigator.current
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    LaunchedEffect(Unit) {
-        scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
-    }
 
     BackHandler(enabled = moduleActionState.running) {
         // Disable back button if action is running
@@ -183,12 +177,12 @@ private fun TopBar(
     onSave: () -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    val themeConfig: ThemeConfig = koinInject()
-    val cardConfig: CardConfig = koinInject()
-    LargeFlexibleTopAppBar(
-        modifier = Modifier.blurEffect(
-        ),
-        title = { Text(stringResource(R.string.action)) },
+    TopAppBar(
+        title = {
+            TopBarTitlePill {
+                Text(stringResource(R.string.action))
+            }
+        },
         scrollBehavior = scrollBehavior,
         navigationIcon = {
             AppBackButton(
@@ -196,7 +190,7 @@ private fun TopBar(
             )
         },
         actions = {
-            IconButton(
+            TopBarIconPill(
                 onClick = onSave,
                 enabled = !isActionRunning
             ) {
@@ -206,18 +200,7 @@ private fun TopBar(
                 )
             }
         },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor =
-                if (themeConfig.isEnableBlur)
-                    Color.Transparent
-                else
-                    MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
-            scrolledContainerColor =
-                if (themeConfig.isEnableBlur)
-                    Color.Transparent
-                else
-                    MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha),
-        ),
-        windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp))
+        colors = transparentTopAppBarColors(),
+        windowInsets = pillTopAppBarWindowInsets()
     )
 }

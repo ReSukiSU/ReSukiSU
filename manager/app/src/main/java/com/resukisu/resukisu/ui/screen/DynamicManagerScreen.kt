@@ -81,7 +81,7 @@ fun DynamicManagerScreen() {
     val viewModel = koinViewModel<DynamicManagerViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollBehavior = rememberSearchAppBarScrollBehavior(
-        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+        TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     )
     val pullToRefreshState = rememberPullToRefreshState()
     val snackbarHost = LocalSnackbarHost.current
@@ -133,7 +133,6 @@ fun DynamicManagerScreen() {
     }
 
     LaunchedEffect(Unit) {
-        scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
         viewModel.events.collectLatest { event ->
             when (event) {
                 is DynamicManagerUiEvent.OperationCompleted -> {

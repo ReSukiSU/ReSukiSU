@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.twotone.CheckCircle
 import androidx.compose.material.icons.twotone.Error
 import androidx.compose.material.icons.twotone.Refresh
@@ -29,7 +28,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -56,8 +54,12 @@ import com.resukisu.resukisu.R
 import com.resukisu.resukisu.domain.model.FlashProgress
 import com.resukisu.resukisu.ui.component.KeyEventBlocker
 import com.resukisu.resukisu.ui.component.SwipeableSnackbarHost
+import com.resukisu.resukisu.ui.component.TopBarIconPill
+import com.resukisu.resukisu.ui.component.TopBarTitlePill
+import com.resukisu.resukisu.ui.component.pillTopAppBarWindowInsets
+import com.resukisu.resukisu.ui.component.settings.AppBackButton
+import com.resukisu.resukisu.ui.component.transparentTopAppBarColors
 import com.resukisu.resukisu.ui.navigation.LocalNavigator
-import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.MonospaceFontFamily
 import com.resukisu.resukisu.ui.util.LocalSnackbarHost
 import com.resukisu.resukisu.ui.util.adaptiveScaffoldWindowInsets
@@ -68,7 +70,6 @@ import com.resukisu.resukisu.ui.viewmodel.KernelFlashViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import java.io.File
 import java.text.SimpleDateFormat
@@ -346,50 +347,35 @@ private fun TopBar(
     onSave: () -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
-    val cardConfig: CardConfig = koinInject()
     val statusColor = when {
         flashState.error.isNotEmpty() -> MaterialTheme.colorScheme.error
         flashState.isCompleted -> MaterialTheme.colorScheme.tertiary
         else -> MaterialTheme.colorScheme.primary
     }
 
-    val colorScheme = MaterialTheme.colorScheme
-    val cardColor = if (cardConfig.isCustomBackgroundEnabled) {
-        colorScheme.surfaceContainerLow
-    } else {
-        colorScheme.background
-    }
-    val cardAlpha = cardConfig.cardAlpha
 
     TopAppBar(
         title = {
-            Text(
-                text = stringResource(
-                    when {
-                        flashState.error.isNotEmpty() -> R.string.flash_failed
-                        flashState.isCompleted -> R.string.flash_success
-                        else -> R.string.kernel_flashing
-                    }
-                ),
-                style = MaterialTheme.typography.titleLarge,
-                color = statusColor
-            )
-        },
-        navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.TwoTone.ArrowBack,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface
+            TopBarTitlePill {
+                Text(
+                    text = stringResource(
+                        when {
+                            flashState.error.isNotEmpty() -> R.string.flash_failed
+                            flashState.isCompleted -> R.string.flash_success
+                            else -> R.string.kernel_flashing
+                        }
+                    ),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = statusColor
                 )
             }
         },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = cardColor.copy(alpha = cardAlpha),
-            scrolledContainerColor = cardColor.copy(alpha = cardAlpha)
-        ),
+        navigationIcon = {
+            AppBackButton(onClick = onBack)
+        },
+        colors = transparentTopAppBarColors(),
         actions = {
-            IconButton(onClick = onSave) {
+            TopBarIconPill(onClick = onSave) {
                 Icon(
                     imageVector = Icons.TwoTone.Save,
                     contentDescription = stringResource(id = R.string.save_log),
@@ -397,7 +383,7 @@ private fun TopBar(
                 )
             }
         },
-        windowInsets = adaptiveScaffoldWindowInsets(includeBottom = false),
+        windowInsets = pillTopAppBarWindowInsets(adaptiveScaffoldWindowInsets(includeBottom = false)),
         scrollBehavior = scrollBehavior
     )
 }

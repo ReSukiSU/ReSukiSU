@@ -19,8 +19,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,8 +34,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
@@ -45,6 +41,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.rememberTopAppBarState
@@ -71,7 +68,13 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.PopupPositionProvider
 import com.resukisu.resukisu.R
 import com.resukisu.resukisu.ui.component.KeyPointSlider
+import com.resukisu.resukisu.ui.component.TopBarIconEdgeInset
+import com.resukisu.resukisu.ui.component.TopBarIconPill
+import com.resukisu.resukisu.ui.component.TopBarTitlePill
+import com.resukisu.resukisu.ui.component.pillTopAppBarWindowInsets
+import com.resukisu.resukisu.ui.component.transparentTopAppBarColors
 import com.resukisu.resukisu.ui.theme.KernelSUTheme
+import com.resukisu.resukisu.ui.theme.ScreenEdgePadding
 import com.resukisu.resukisu.ui.util.adaptiveScaffoldWindowInsets
 import com.yalantis.ucrop.UCrop
 import com.yalantis.ucrop.callback.BitmapCropCallback
@@ -189,7 +192,7 @@ private fun BackgroundCropScreen(
     var rotationAngle by remember { mutableFloatStateOf(0f) }
     var cropViewReloadToken by remember { mutableIntStateOf(0) }
     val topAppBarState = rememberTopAppBarState()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topAppBarState)
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
 
     val primaryColor = MaterialTheme.colorScheme.primary.toArgb()
     val onSurfaceColor = MaterialTheme.colorScheme.onSurface.toArgb()
@@ -217,7 +220,6 @@ private fun BackgroundCropScreen(
     }
 
     SideEffect {
-        topAppBarState.heightOffset = topAppBarState.heightOffsetLimit
         topAppBarState.contentOffset = 0f
     }
 
@@ -255,10 +257,15 @@ private fun BackgroundCropScreen(
     Scaffold(
         contentWindowInsets = adaptiveScaffoldWindowInsets(),
         topBar = {
-            LargeFlexibleTopAppBar(
-                title = { Text(stringResource(R.string.background_crop_title)) },
+            TopAppBar(
+                title = {
+                    TopBarTitlePill {
+                        Text(stringResource(R.string.background_crop_title))
+                    }
+                },
                 navigationIcon = {
                     CropTooltipIconButton(
+                        modifier = Modifier.padding(start = TopBarIconEdgeInset),
                         tooltip = stringResource(R.string.cancel),
                         enabled = !isCropping,
                         onClick = onCancel
@@ -287,11 +294,8 @@ private fun BackgroundCropScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
-                ),
-                windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
+                colors = transparentTopAppBarColors(),
+                windowInsets = pillTopAppBarWindowInsets(),
                 scrollBehavior = scrollBehavior
             )
         },
@@ -306,7 +310,7 @@ private fun BackgroundCropScreen(
                         .fillMaxWidth()
                         .wrapContentHeight()
                         .navigationBarsPadding()
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .padding(horizontal = ScreenEdgePadding, vertical = 12.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -475,6 +479,7 @@ private fun CropTooltipIconButton(
     tooltip: String,
     enabled: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     icon: @Composable () -> Unit
 ) {
     TooltipBox(
@@ -486,8 +491,9 @@ private fun CropTooltipIconButton(
         },
         state = rememberTooltipState()
     ) {
-        IconButton(
+        TopBarIconPill(
             onClick = onClick,
+            modifier = modifier,
             enabled = enabled
         ) {
             icon()

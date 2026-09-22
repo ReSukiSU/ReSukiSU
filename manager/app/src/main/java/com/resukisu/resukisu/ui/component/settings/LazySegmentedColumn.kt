@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.resukisu.resukisu.ui.theme.ScreenEdgePadding
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 inline fun <T> LazyListScope.lazySegmentColumn(
@@ -60,7 +61,7 @@ inline fun <T> LazyListScope.lazySegmentColumn(
 
         val topPadding = if (isFirst) 0.dp else ListItemDefaults.SegmentedGap
 
-        val horizontalPadding = if (noHorizontalPadding) 0.dp else 16.dp
+        val horizontalPadding = if (noHorizontalPadding) 0.dp else ScreenEdgePadding
 
         Box(
             modifier = Modifier
