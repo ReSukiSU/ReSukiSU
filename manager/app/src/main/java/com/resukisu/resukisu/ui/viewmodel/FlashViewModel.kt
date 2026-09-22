@@ -48,7 +48,9 @@ sealed interface FlashUiAction {
         val verifiedModule: String? = null,
     ) : FlashUiAction
 
-    data object Reboot : FlashUiAction
+    data class Reboot(
+        val allowSoftReboot: Boolean
+    ) : FlashUiAction
 }
 
 sealed interface FlashUiEvent {

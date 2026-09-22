@@ -466,7 +466,11 @@ fun FlashScreen(flashIt: FlashIt) {
             if (showFloatAction) {
                 ExtendedFloatingActionButton(
                     onClick = {
-                        flashViewModel.dispatch(FlashUiAction.Reboot)
+                        flashViewModel.dispatch(
+                            FlashUiAction.Reboot(
+                                allowSoftReboot = flashIt is FlashIt.FlashModule || flashIt is FlashIt.FlashModules || flashIt is FlashIt.FlashModuleUpdate
+                            )
+                        )
                     },
                     icon = {
                         Icon(
