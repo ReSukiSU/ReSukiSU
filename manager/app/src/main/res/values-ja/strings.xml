@@ -113,7 +113,6 @@
     <string name="flashing">フラッシュ</string>
     <string name="flash_success">フラッシュが成功しました</string>
     <string name="flash_failed">フラッシュに失敗しました</string>
-    <string name="selected_lkm">選択された LKM: %s</string>
     <string name="save_log">ログを保存</string>
     <string name="log_saved">保存されたログ</string>
     <string name="unknown_module">不明なモジュール</string>

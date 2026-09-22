@@ -106,7 +106,6 @@
     <string name="flashing">Flashage en cours</string>
     <string name="flash_success">Flashage réussi</string>
     <string name="flash_failed">Échec du flashage</string>
-    <string name="selected_lkm">LKM sélectionné : %s</string>
     <string name="save_log">Enregistrer les journaux</string>
     <string name="log_saved">Journaux enregistrés</string>
     <string name="unknown_module">Module inconnu</string>

@@ -103,7 +103,6 @@
     <string name="flashing">Instalē</string>
     <string name="flash_success">Instalēts veiksmīgi</string>
     <string name="flash_failed">Instalēšana neizdevās</string>
-    <string name="selected_lkm">Izvēlētais lkm: %s</string>
     <string name="save_log">Išsaugoti Žurnalus</string>
     <string name="settings_sucompat">Pārvirzīt su bināro failu</string>
     <string name="settings_sucompat_summary">Pārvirzīt /system/bin/su uz ksud lietotnēm, kurām piešķirta Superuser atļauja lietotnes profilā; efektīva tikai jauniem procesiem.</string>

@@ -121,7 +121,6 @@
     <string name="flashing">플래시 중</string>
     <string name="flash_success">플래시 성공</string>
     <string name="flash_failed">플래시 실패</string>
-    <string name="selected_lkm">선택된 LKM: %s</string>
     <string name="save_log">로그 저장</string>
     <string name="log_saved">로그 저장됨</string>
     <string name="unknown_module">unknown module</string>

@@ -121,7 +121,6 @@
     <string name="flashing">Đang Flash...</string>
     <string name="flash_success">Flash thành công</string>
     <string name="flash_failed">Flash thất bại</string>
-    <string name="selected_lkm">Đã chọn LKM: %s</string>
     <string name="save_log">Lưu nhật ký</string>
     <string name="log_saved">Nhật ký đã được lưu</string>
     <string name="unknown_module">Module không xác định</string>

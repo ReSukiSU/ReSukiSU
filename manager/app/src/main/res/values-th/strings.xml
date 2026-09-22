@@ -108,7 +108,6 @@
     <string name="flashing">กำลังแฟลช</string>
     <string name="flash_success">แฟลชสำเร็จ</string>
     <string name="flash_failed">แฟลชล้มเหลว</string>
-    <string name="selected_lkm">เลือก LKM: %s</string>
     <string name="save_log">บันทึกบันทึก</string>
     <string name="log_saved">บันทึก Log แล้ว</string>
     <string name="settings_sucompat">เปลี่ยนเส้นทางไบนารี su</string>

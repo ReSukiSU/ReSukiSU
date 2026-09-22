@@ -107,7 +107,6 @@
     <string name="settings_uninstall_temporary_message">Hapus sementara KernelSU, kembalikan ke kondisi awal setelah mulai ulang</string>
     <string name="settings_uninstall_permanent_message">Hapus permanen KernelSU (root dan modul)</string>
     <string name="settings_restore_stock_image_message">Pulihkan image bawaan ROM (jika cadangan tersedia), umumnya dilakukan sebelum OTA; jika ingin menghapus KernelSU, gunakan fungsi \"Hapus permanen\"</string>
-    <string name="selected_lkm">LKM yang dipilih: %s</string>
     <string name="save_log">Simpan Log</string>
     <string name="log_saved">Log disimpan</string>
     <string name="unknown_module">Modul tidak dikenal</string>

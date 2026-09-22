@@ -171,7 +171,6 @@
     <string name="flashing">刷寫中</string>
     <string name="flash_success">刷寫完成</string>
     <string name="flash_failed">刷寫失敗</string>
-    <string name="selected_lkm">已選擇嘅 LKM：%s</string>
     <string name="save_log">儲存日誌</string>
     <string name="log_saved">日誌已儲存</string>
     <string name="unknown_module">未知模組</string>

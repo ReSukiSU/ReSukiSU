@@ -105,7 +105,6 @@
     <string name="flashing">Flashando</string>
     <string name="flash_success">Flash bem-sucedido</string>
     <string name="flash_failed">Flash falhou</string>
-    <string name="selected_lkm">LKM selecionado: %s</string>
     <string name="save_log">Salvar registros</string>
     <string name="log_saved">Registros salvos</string>
     <string name="settings_sucompat">Redirecionar binário su</string>

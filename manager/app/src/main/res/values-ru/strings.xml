@@ -170,7 +170,6 @@
     <string name="flashing">Прошивка</string>
     <string name="flash_success">Установка выполнена</string>
     <string name="flash_failed">Установка не выполнена</string>
-    <string name="selected_lkm">Выбран LKM: %s</string>
     <string name="save_log">Сохранить логи</string>
     <string name="log_saved">Логи сохранены</string>
     <string name="unknown_module">Неизвестный модуль</string>

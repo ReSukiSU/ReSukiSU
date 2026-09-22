@@ -164,7 +164,6 @@
     <string name="flashing">Kuruluyor</string>
     <string name="flash_success">Başarıyla kuruldu</string>
     <string name="flash_failed">Kurulum başarısız</string>
-    <string name="selected_lkm">Seçilen LKM: %s</string>
     <string name="save_log">Günlükleri kaydet</string>
     <string name="log_saved">Günlükler kaydedildi</string>
     <string name="unknown_module">Bilinmeyen modül</string>

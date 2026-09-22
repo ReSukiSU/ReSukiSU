@@ -100,7 +100,6 @@
     <string name="flashing">Installazione</string>
     <string name="flash_success">Installazione completata</string>
     <string name="flash_failed">Installazione fallita</string>
-    <string name="selected_lkm">LKM selezionato: %s</string>
     <string name="save_log">Salva Registri</string>
     <string name="settings_sucompat">Reindirizza binario su</string>
     <string name="settings_sucompat_summary">Consente alle app con autorizzazione Superuser nel profilo app di ottenere una shell superuser eseguendo /system/bin/su; efficace solo per i nuovi processi.</string>
