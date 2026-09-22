@@ -120,6 +120,7 @@ fun StandardFeaturesTab(
         slotInfoLoadFailed = false
         try {
             val loadedSlotInfos = awaitSuSFSSlotInfo(configHelper)
+                ?.sortedBy { it.slotName }
             if (loadedSlotInfos == null) {
                 slotInfoLoadFailed = true
             } else {
