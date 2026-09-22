@@ -172,8 +172,9 @@ class FlashViewModel(
                 )
             }
 
-            FlashUiAction.Reboot -> viewModelScope.launch {
-                val reason = if (isSoftRebootPreferred()) "soft_reboot" else ""
+            is FlashUiAction.Reboot -> viewModelScope.launch {
+                val reason =
+                    if (isSoftRebootPreferred() && action.allowSoftReboot) "soft_reboot" else ""
                 reboot(reason).onFailure {
                     mutableEvents.tryEmit(FlashUiEvent.Error(it.message.orEmpty()))
                 }
