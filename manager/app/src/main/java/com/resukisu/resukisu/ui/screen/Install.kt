@@ -341,7 +341,7 @@ private fun LKMInstallPage(
                             partition = availablePartitions.getOrNull(partitionSelectionIndex),
                             allowShell = allowShell,
                             enableAdb = enableAdb,
-                            forceBackup = forceBackup,
+                            forceBackup = if (method is InstallMethod.SelectFile) forceBackup else false,
                         )
                     )
                 }
