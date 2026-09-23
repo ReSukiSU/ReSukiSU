@@ -46,13 +46,20 @@ jobs:
         run: |
           mv ksuinit-aarch64/ksuinit ./userspace/ksud/bin/aarch64/
           mv ksuinit-x86_64/ksuinit ./userspace/ksud/bin/x86_64/
+          mv ksuinit-riscv64/ksuinit ./userspace/ksud/bin/riscv64/
 
       - name: Setup Rust toolchain
+        if: ${{ inputs.target != 'riscv64-linux-android' }}
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: nightly
           targets: ${{ inputs.target }}
           components: rust-src
+      
+      - name: Setup Rust toolchain
+        if: ${{ inputs.target == 'riscv64-linux-android' }}
+        run: |
+          rustup toolchain install nightly-2026-09-23 --profile minimal --component rust-src
 
       - uses: Swatinem/rust-cache@v2
         if: github.event_name != 'pull_request'
@@ -62,6 +69,7 @@ jobs:
           cache-targets: true
 
       - name: Setup cargo-ndk
+        if: ${{ inputs.target != 'riscv64-linux-android' }}
         run: cargo install cargo-ndk --locked
 
       - name: Assemble LKM bootstrap
@@ -78,8 +86,14 @@ jobs:
             export KSU_PACKAGE_NAME="com.resukisu.resukisu.dev"
           fi
 
-          cd userspace/ksud/
-          cargo ndk b -P 26 -t ${{ inputs.target }} -r -Z build-std-features="optimize_for_size" -Z trim-paths
+          if [ "${{ inputs.target }}" == "riscv64-linux-android" ]; then
+            source .github/scripts/setup-rust-build.sh riscv64-linux-android 35
+            cd userspace/ksud/ 
+            cargo +nightly-2026-09-23 build -Z build-std=std,panic_abort --target "$TRIPLE" --release --manifest-path ./Cargo.toml
+          else
+            cd userspace/ksud/
+            cargo ndk b -P 26 -t ${{ inputs.target }} -r -Z build-std-features="optimize_for_size" -Z trim-paths
+          fi
 
       - name: Upload ksud artifact
         uses: actions/upload-artifact@v7
