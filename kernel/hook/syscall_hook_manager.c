@@ -17,6 +17,7 @@
 
 // clang-format off
 #ifdef CONFIG_COMPAT
+#if defined(__aarch64__)
     // https://github.com/torvalds/linux/commit/7fe33e9f662c0a2f5110be4afff0a24e0c123540
     #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 0) || defined(KSU_COMPAT_HAS_NR_COMPAT32_SYSCALLS)
         #include <asm/unistd_compat_32.h>
@@ -38,6 +39,15 @@
         #undef __SYSCALL
         #include <asm/unistd.h>
     #endif
+#elif defined(__x86_64__)
+    // x86_64 does not provide the arm64-specific unistd32.h header. Compat
+    // syscall hooks are stubs on x86_64, so native numbers are sufficient.
+    #define __COMPAT__NR_setresuid __NR_setresuid
+    #define __COMPAT__NR_execve __NR_execve
+    #define __COMPAT__NR_execveat __NR_execveat
+    #define __COMPAT__NR_fstatat64 __NR_newfstatat
+    #define __COMPAT__NR_faccessat __NR_faccessat
+#endif
 #endif
 // clang-format on
 
