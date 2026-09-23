@@ -24,39 +24,6 @@
 
 #include "compat/kernel_compat.h"
 
-static inline long ksu_event_call_original(int orig_nr, const struct pt_regs *regs)
-{
-#if defined(__aarch64__) && defined(CONFIG_COMPAT)
-    if (is_compat_task())
-        return ksu_compat_syscall_table[orig_nr](regs);
-#endif
-    return ksu_syscall_table[orig_nr](regs);
-}
-
-static inline const char __user *ksu_event_user_ptr(const struct pt_regs *regs, unsigned int arg)
-{
-#if defined(__aarch64__) && defined(CONFIG_COMPAT)
-    if (is_compat_task()) {
-        switch (arg) {
-        case 1:
-            return (const char __user *)KSU_COMPAT_PTR(regs, 1);
-        case 2:
-            return (const char __user *)KSU_COMPAT_PTR(regs, 2);
-        case 3:
-            return (const char __user *)KSU_COMPAT_PTR(regs, 3);
-        }
-    }
-#endif
-    switch (arg) {
-    case 1:
-        return (const char __user *)PT_REGS_PARM1(regs);
-    case 2:
-        return (const char __user *)PT_REGS_PARM2(regs);
-    default:
-        return (const char __user *)PT_REGS_PARM3(regs);
-    }
-}
-
 static int ksu_handle_init_mark_tracker(const char __user **filename_user)
 {
     char path[64];
@@ -67,12 +34,7 @@ static int ksu_handle_init_mark_tracker(const char __user **filename_user)
     if (unlikely(!filename_user))
         return 0;
 
-    const char __user *filename = *filename_user;
-#if defined(__aarch64__) && defined(CONFIG_COMPAT)
-    if (is_compat_task())
-        filename = (const char __user *)compat_ptr((compat_uptr_t)(unsigned long)filename);
-#endif
-    addr = untagged_addr((unsigned long)filename);
+    addr = untagged_addr((unsigned long)ksu_task_user_ptr((unsigned long)*filename_user));
     fn = (const char __user *)addr;
     ret = strncpy_from_user(path, fn, sizeof(path));
     if (ret < 0)
@@ -94,7 +56,7 @@ static int ksu_handle_init_mark_tracker(const char __user **filename_user)
 long __nocfi ksu_hook_newfstatat(int orig_nr, const struct pt_regs *regs)
 {
     if (!static_branch_unlikely(&ksu_su_compat_enabled))
-        return ksu_event_call_original(orig_nr, regs);
+        return ksu_call_original_syscall(orig_nr, regs);
 
     return ksu_handle_stat_sucompat_internal(orig_nr, (struct pt_regs *)regs);
 }
@@ -102,7 +64,7 @@ long __nocfi ksu_hook_newfstatat(int orig_nr, const struct pt_regs *regs)
 long __nocfi ksu_hook_faccessat(int orig_nr, const struct pt_regs *regs)
 {
     if (!static_branch_unlikely(&ksu_su_compat_enabled))
-        return ksu_event_call_original(orig_nr, regs);
+        return ksu_call_original_syscall(orig_nr, regs);
 
     return ksu_handle_faccessat_sucompat_internal(orig_nr, (struct pt_regs *)regs);
 }
@@ -114,18 +76,13 @@ extern struct static_key_true ksud_execve_key;
 
 static long __nocfi ksu_hook_execve_common(int orig_nr, const struct pt_regs *regs, bool execveat)
 {
-    const char __user **filename_user =
-        execveat ? (const char __user **)&PT_REGS_PARM2(regs) : (const char __user **)&PT_REGS_PARM1(regs);
-    const char __user *filename = ksu_event_user_ptr(regs, execveat ? 2 : 1);
-    const char __user *const __user *argv_user;
-#if defined(__aarch64__) && defined(CONFIG_COMPAT)
-    if (is_compat_task())
-        argv_user = (const char __user *const __user *)compat_ptr(
-            (compat_uptr_t)(unsigned long)(execveat ? KSU_COMPAT_PARM3(regs) : KSU_COMPAT_PARM2(regs)));
-    else
-#endif
-        argv_user = execveat ? (const char __user *const __user *)PT_REGS_PARM3(regs) :
-                               (const char __user *const __user *)PT_REGS_PARM2(regs);
+    const char __user **filename_user = execveat ? (const char __user **)&PT_REGS_NATIVE_PARM2(regs) :
+                                                   (const char __user **)&PT_REGS_NATIVE_PARM1(regs);
+    const char __user *filename =
+        execveat ? (const char __user *)PT_REGS_USER_PTR(regs, 2) : (const char __user *)PT_REGS_USER_PTR(regs, 1);
+    const char __user *const __user *argv_user = execveat ?
+                                                     (const char __user *const __user *)PT_REGS_USER_PTR(regs, 3) :
+                                                     (const char __user *const __user *)PT_REGS_USER_PTR(regs, 2);
     bool current_is_init = is_init(current_cred());
     struct ksu_sulog_pending_event *pending_root_execve = NULL;
     long ret;
@@ -155,7 +112,7 @@ static long __nocfi ksu_hook_execve_common(int orig_nr, const struct pt_regs *re
         return ret;
     }
 
-    ret = ksu_event_call_original(orig_nr, regs);
+    ret = ksu_call_original_syscall(orig_nr, regs);
     ksu_sulog_emit_pending(pending_root_execve, ret, GFP_KERNEL);
     return ret;
 }
@@ -173,7 +130,7 @@ long __nocfi ksu_hook_execveat(int orig_nr, const struct pt_regs *regs)
 long __nocfi ksu_hook_setresuid(int orig_nr, const struct pt_regs *regs)
 {
     uid_t old_uid = ksu_get_uid_t(current_uid());
-    long ret = ksu_event_call_original(orig_nr, regs);
+    long ret = ksu_call_original_syscall(orig_nr, regs);
 
     if (ret < 0)
         return ret;

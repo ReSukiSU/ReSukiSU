@@ -34,35 +34,7 @@
 #include <linux/vmalloc.h>
 #include <linux/stat.h>
 
-// clang-format off
-#ifdef CONFIG_COMPAT
-#if defined(__aarch64__)
-    // https://github.com/torvalds/linux/commit/7fe33e9f662c0a2f5110be4afff0a24e0c123540
-    #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 0) || defined(KSU_COMPAT_HAS_NR_COMPAT32_SYSCALLS)
-        #include <asm/unistd_compat_32.h>
-        #define __COMPAT__NR_read __NR_compat32_read
-        #define __COMPAT__NR_fstat64 __NR_compat32_fstat64
-    #else
-        // gen compat syscall
-        // e.g.
-        // _NR_execve -> __COMPAT__NR_execve
-        #define __SYSCALL(nr, sym) __COMPAT##nr = (nr),
-
-        enum ksu_compat_syscall_nr {
-        #include <asm/unistd32.h>
-        };
-
-        #undef __SYSCALL
-        #include <asm/unistd.h>
-    #endif
-#elif defined(__x86_64__)
-    // x86_64 does not provide the arm64-specific unistd32.h header. Compat
-    // syscall hooks are stubs on x86_64, so native numbers are sufficient.
-    #define __COMPAT__NR_read __NR_read
-    #define __COMPAT__NR_fstat64 __NR_fstat
-#endif
-#endif
-// clang-format on
+#include "compat/syscall_nr.h"
 
 #include "arch.h"
 #include "klog.h" // IWYU pragma: keep
@@ -117,8 +89,8 @@ static void stop_execve_hook(void);
         ksu_syscall_table_unhook(__NR_read);
         ksu_syscall_table_unhook(__NR_fstat);
         #ifdef CONFIG_COMPAT
-            ksu_compat_syscall_table_unhook(__COMPAT__NR_read);
-            ksu_compat_syscall_table_unhook(__COMPAT__NR_fstat64);
+            ksu_compat_syscall_table_unhook(ksu_compat_syscalls.read);
+            ksu_compat_syscall_table_unhook(ksu_compat_syscalls.fstat64);
         #endif
         pr_info("unregister init_rc syscall hook\n");
         pr_info("stop init_rc_hook!\n");
@@ -1010,46 +982,32 @@ static void ksu_execve_hook_ksud_common(const char __user *filename_user, struct
 
 void ksu_execve_hook_ksud(const struct pt_regs *regs)
 {
-    const char __user *filename_user;
+    const char __user *filename_user = (const char __user *)PT_REGS_USER_PTR(regs, 1);
     struct user_arg_ptr argv;
 
-#if defined(__aarch64__) && defined(CONFIG_COMPAT)
-    if (is_compat_task()) {
-        filename_user = (const char __user *)KSU_COMPAT_PTR(regs, 1);
-        argv.is_compat = true;
-        argv.ptr.compat = (const compat_uptr_t __user *)KSU_COMPAT_PTR(regs, 2);
-    } else
-#endif
-    {
-        filename_user = (const char __user *)PT_REGS_PARM1(regs);
 #ifdef CONFIG_COMPAT
-        argv.is_compat = false;
+    argv.is_compat = is_compat_task();
+    if (argv.is_compat)
+        argv.ptr.compat = (const compat_uptr_t __user *)PT_REGS_USER_PTR(regs, 2);
+    else
 #endif
-        argv.ptr.native = (const char __user *const __user *)PT_REGS_PARM2(regs);
-    }
+        argv.ptr.native = (const char __user *const __user *)PT_REGS_USER_PTR(regs, 2);
 
     ksu_execve_hook_ksud_common(filename_user, argv);
 }
 
 void ksu_execveat_hook_ksud(const struct pt_regs *regs)
 {
-    const char __user *filename_user;
+    const char __user *filename_user = (const char __user *)PT_REGS_USER_PTR(regs, 2);
     struct user_arg_ptr argv;
 
-#if defined(__aarch64__) && defined(CONFIG_COMPAT)
-    if (is_compat_task()) {
-        filename_user = (const char __user *)KSU_COMPAT_PTR(regs, 2);
-        argv.is_compat = true;
-        argv.ptr.compat = (const compat_uptr_t __user *)KSU_COMPAT_PTR(regs, 3);
-    } else
-#endif
-    {
-        filename_user = (const char __user *)PT_REGS_PARM2(regs);
 #ifdef CONFIG_COMPAT
-        argv.is_compat = false;
+    argv.is_compat = is_compat_task();
+    if (argv.is_compat)
+        argv.ptr.compat = (const compat_uptr_t __user *)PT_REGS_USER_PTR(regs, 3);
+    else
 #endif
-        argv.ptr.native = (const char __user *const __user *)PT_REGS_PARM3(regs);
-    }
+        argv.ptr.native = (const char __user *const __user *)PT_REGS_USER_PTR(regs, 3);
 
     ksu_execve_hook_ksud_common(filename_user, argv);
 }
@@ -1060,22 +1018,9 @@ static long (*orig_compat_sys_read)(const struct pt_regs *regs);
 #endif
 static long ksu_sys_read(const struct pt_regs *regs)
 {
-    unsigned int fd;
-    char __user *buf;
-    size_t count;
-
-#if defined(__aarch64__) && defined(CONFIG_COMPAT)
-    if (is_compat_task()) {
-        fd = KSU_COMPAT_PARM1(regs);
-        buf = (char __user *)KSU_COMPAT_PTR(regs, 2);
-        count = (size_t)KSU_COMPAT_PARM3(regs);
-    } else
-#endif
-    {
-        fd = PT_REGS_PARM1(regs);
-        buf = (char __user *)PT_REGS_PARM2(regs);
-        count = PT_REGS_PARM3(regs);
-    }
+    unsigned int fd = PT_REGS_PARM1(regs);
+    char __user *buf = (char __user *)PT_REGS_USER_PTR(regs, 2);
+    size_t count = PT_REGS_PARM3(regs);
 
     ksu_handle_sys_read(fd, &buf, &count);
 
@@ -1097,21 +1042,10 @@ static long (*orig_sys_fstat64)(const struct pt_regs *regs);
 #endif
 static long ksu_sys_fstat(const struct pt_regs *regs)
 {
-    unsigned int fd;
-    void __user *statbuf;
+    unsigned int fd = PT_REGS_PARM1(regs);
+    void __user *statbuf = PT_REGS_USER_PTR(regs, 2);
     bool is_rc = false;
     long ret;
-
-#if defined(__aarch64__) && defined(CONFIG_COMPAT)
-    if (is_compat_task()) {
-        fd = KSU_COMPAT_PARM1(regs);
-        statbuf = KSU_COMPAT_PTR(regs, 2);
-    } else
-#endif
-    {
-        fd = PT_REGS_PARM1(regs);
-        statbuf = (void __user *)PT_REGS_PARM2(regs);
-    }
 
     struct file *file = fget(fd);
     if (file) {
@@ -1163,8 +1097,8 @@ static long ksu_sys_fstat(const struct pt_regs *regs)
 
 static int input_handle_event_handler_pre(struct kprobe *p, struct pt_regs *regs)
 {
-    unsigned int *type = (unsigned int *)&PT_REGS_PARM2(regs);
-    unsigned int *code = (unsigned int *)&PT_REGS_PARM3(regs);
+    unsigned int *type = (unsigned int *)&PT_REGS_NATIVE_PARM2(regs);
+    unsigned int *code = (unsigned int *)&PT_REGS_NATIVE_PARM3(regs);
     int *value = (int *)&PT_REGS_CCALL_PARM4(regs);
     return ksu_handle_input_handle_event(type, code, value);
 }
@@ -1200,8 +1134,8 @@ void __init ksu_ksud_init(void)
     ksu_syscall_table_hook(__NR_fstat, ksu_sys_fstat, &orig_sys_fstat);
 
 #ifdef CONFIG_COMPAT
-    ksu_compat_syscall_table_hook(__COMPAT__NR_read, ksu_sys_read, &orig_compat_sys_read);
-    ksu_compat_syscall_table_hook(__COMPAT__NR_fstat64, ksu_sys_fstat, &orig_sys_fstat64);
+    ksu_compat_syscall_table_hook(ksu_compat_syscalls.read, ksu_sys_read, &orig_compat_sys_read);
+    ksu_compat_syscall_table_hook(ksu_compat_syscalls.fstat64, ksu_sys_fstat, &orig_sys_fstat64);
 #endif
 
     ret = register_kprobe(&input_event_kp);

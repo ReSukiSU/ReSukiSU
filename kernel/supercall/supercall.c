@@ -167,9 +167,10 @@ static int reboot_handler_pre(struct kprobe *p, struct pt_regs *regs)
     int magic1 = (int)PT_REGS_PARM1(real_regs);
     int magic2 = (int)PT_REGS_PARM2(real_regs);
     int cmd = (int)PT_REGS_PARM3(real_regs);
-    void __user **arg = (void __user **)&PT_REGS_SYSCALL_PARM4(real_regs);
+    void __user *arg = ksu_task_user_ptr(PT_REGS_SYSCALL_PARM4(real_regs));
 
-    ksu_handle_sys_reboot(magic1, magic2, cmd, arg);
+    ksu_handle_sys_reboot(magic1, magic2, cmd, &arg);
+    PT_REGS_NATIVE_SYSCALL_PARM4(real_regs) = (unsigned long)arg;
     return 0;
 }
 

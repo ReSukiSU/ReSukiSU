@@ -35,12 +35,12 @@ static_assert(1 == 0, "Unsupported architecture!");
     ({                                                                                                                 \
         extern long KSU_SYS_PREFIX(name)(const struct pt_regs *);                                                      \
         struct pt_regs __ksu_regs = { 0 };                                                                             \
-        PT_REGS_PARM1(&__ksu_regs) = (unsigned long)(a);                                                               \
-        PT_REGS_PARM2(&__ksu_regs) = (unsigned long)(b);                                                               \
-        PT_REGS_PARM3(&__ksu_regs) = (unsigned long)(c);                                                               \
-        PT_REGS_SYSCALL_PARM4(&__ksu_regs) = (unsigned long)(d);                                                       \
-        PT_REGS_PARM5(&__ksu_regs) = (unsigned long)(e);                                                               \
-        PT_REGS_PARM6(&__ksu_regs) = (unsigned long)(f);                                                               \
+        PT_REGS_NATIVE_PARM1(&__ksu_regs) = (unsigned long)(a);                                                        \
+        PT_REGS_NATIVE_PARM2(&__ksu_regs) = (unsigned long)(b);                                                        \
+        PT_REGS_NATIVE_PARM3(&__ksu_regs) = (unsigned long)(c);                                                        \
+        PT_REGS_NATIVE_SYSCALL_PARM4(&__ksu_regs) = (unsigned long)(d);                                                \
+        PT_REGS_NATIVE_PARM5(&__ksu_regs) = (unsigned long)(e);                                                        \
+        PT_REGS_NATIVE_PARM6(&__ksu_regs) = (unsigned long)(f);                                                        \
         (long)KSU_SYS_PREFIX(name)(&__ksu_regs);                                                                       \
     })
 

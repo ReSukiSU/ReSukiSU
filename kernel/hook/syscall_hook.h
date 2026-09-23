@@ -23,8 +23,11 @@ extern int ksu_compat_dispatcher_nr;
 // Syscall hook handler type.
 // orig_nr: the original syscall number before redirection
 // regs: the original pt_regs from userspace
-// Handler is responsible for calling ksu_syscall_table[orig_nr](regs) if needed.
+// Handler is responsible for calling ksu_call_original_syscall() if needed.
 typedef long (*ksu_syscall_hook_fn)(int orig_nr, const struct pt_regs *regs);
+
+long ksu_call_original_syscall(int orig_nr, const struct pt_regs *regs);
+long ksu_call_execveat(const struct pt_regs *regs);
 
 // --- Dispatcher-based hook API (register/unregister) ---
 // Register a handler into the dispatcher's routing table for syscall @nr.

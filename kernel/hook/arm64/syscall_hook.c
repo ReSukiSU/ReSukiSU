@@ -10,6 +10,7 @@
 #include "infra/symbol_resolver.h"
 #include "../patch_memory.h"
 #include "arch.h"
+#include "compat/syscall_nr.h"
 #include "klog.h" // IWYU pragma: keep
 
 // https://github.com/torvalds/linux/commit/7fe33e9f662c0a2f5110be4afff0a24e0c123540
@@ -23,6 +24,24 @@ int ksu_dispatcher_nr = -1;
 syscall_fn_t *ksu_compat_syscall_table = NULL;
 int ksu_compat_dispatcher_nr = -1;
 #endif
+
+long __nocfi ksu_call_original_syscall(int orig_nr, const struct pt_regs *regs)
+{
+#ifdef CONFIG_COMPAT
+    if (is_compat_task())
+        return ksu_compat_syscall_table[orig_nr](regs);
+#endif
+    return ksu_syscall_table[orig_nr](regs);
+}
+
+long ksu_call_execveat(const struct pt_regs *regs)
+{
+#ifdef CONFIG_COMPAT
+    if (is_compat_task())
+        return ksu_call_original_syscall(ksu_compat_syscalls.execveat, regs);
+#endif
+    return ksu_call_original_syscall(__NR_execveat, regs);
+}
 
 // Hook registration table — read with READ_ONCE from tracepoint/dispatcher
 // context, written with WRITE_ONCE from init/exit context.
@@ -316,7 +335,7 @@ compat:
         return -ENOSYS;
 
     /* arm32 uses r7 for the syscall number; x8 is an ordinary argument. */
-    orig_nr = (int)(u32)regs->regs[7];
+    orig_nr = (int)(u32)PT_REGS_ORIG_SYSCALL(regs);
 
     if (regs->syscallno == orig_nr)
         return -ENOSYS;

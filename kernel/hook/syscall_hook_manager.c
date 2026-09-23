@@ -15,41 +15,7 @@
 #include <linux/compat.h>
 #endif
 
-// clang-format off
-#ifdef CONFIG_COMPAT
-#if defined(__aarch64__)
-    // https://github.com/torvalds/linux/commit/7fe33e9f662c0a2f5110be4afff0a24e0c123540
-    #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 0) || defined(KSU_COMPAT_HAS_NR_COMPAT32_SYSCALLS)
-        #include <asm/unistd_compat_32.h>
-        #define __COMPAT__NR_setresuid __NR_compat32_setresuid
-        #define __COMPAT__NR_execve __NR_compat32_execve
-        #define __COMPAT__NR_execveat __NR_compat32_execveat
-        #define __COMPAT__NR_fstatat64 __NR_compat32_fstatat64
-        #define __COMPAT__NR_faccessat __NR_compat32_faccessat
-    #else
-        // gen compat syscall
-        // e.g.
-        // _NR_execve -> __COMPAT__NR_execve
-        #define __SYSCALL(nr, sym) __COMPAT##nr = (nr),
-
-        enum ksu_compat_syscall_nr {
-        #include <asm/unistd32.h>
-        };
-
-        #undef __SYSCALL
-        #include <asm/unistd.h>
-    #endif
-#elif defined(__x86_64__)
-    // x86_64 does not provide the arm64-specific unistd32.h header. Compat
-    // syscall hooks are stubs on x86_64, so native numbers are sufficient.
-    #define __COMPAT__NR_setresuid __NR_setresuid
-    #define __COMPAT__NR_execve __NR_execve
-    #define __COMPAT__NR_execveat __NR_execveat
-    #define __COMPAT__NR_fstatat64 __NR_newfstatat
-    #define __COMPAT__NR_faccessat __NR_faccessat
-#endif
-#endif
-// clang-format on
+#include "compat/syscall_nr.h"
 
 #include "arch.h"
 #include "klog.h" // IWYU pragma: keep
@@ -173,7 +139,7 @@ aarch64_compat:
         struct pt_regs *current_regs = task_pt_regs(current);
 
         /* arm32 syscall numbers are passed in r7, not arm64 x8. */
-        current_regs->regs[7] = (u32)id;
+        PT_REGS_ORIG_SYSCALL(current_regs) = (u32)id;
         current_regs->syscallno = ksu_compat_dispatcher_nr;
     }
 #endif
@@ -198,11 +164,11 @@ void __init ksu_syscall_hook_manager_init(void)
     ksu_register_syscall_hook(__NR_faccessat, ksu_hook_faccessat);
 
 #ifdef CONFIG_COMPAT
-    ksu_register_compat_syscall_hook(__COMPAT__NR_setresuid, ksu_hook_setresuid);
-    ksu_register_compat_syscall_hook(__COMPAT__NR_execve, ksu_hook_execve);
-    ksu_register_compat_syscall_hook(__COMPAT__NR_execveat, ksu_hook_execveat);
-    ksu_register_compat_syscall_hook(__COMPAT__NR_fstatat64, ksu_hook_newfstatat);
-    ksu_register_compat_syscall_hook(__COMPAT__NR_faccessat, ksu_hook_faccessat);
+    ksu_register_compat_syscall_hook(ksu_compat_syscalls.setresuid, ksu_hook_setresuid);
+    ksu_register_compat_syscall_hook(ksu_compat_syscalls.execve, ksu_hook_execve);
+    ksu_register_compat_syscall_hook(ksu_compat_syscalls.execveat, ksu_hook_execveat);
+    ksu_register_compat_syscall_hook(ksu_compat_syscalls.fstatat64, ksu_hook_newfstatat);
+    ksu_register_compat_syscall_hook(ksu_compat_syscalls.faccessat, ksu_hook_faccessat);
 #endif
 
 #ifdef CONFIG_HAVE_SYSCALL_TRACEPOINTS
@@ -242,11 +208,11 @@ void __exit ksu_syscall_hook_manager_exit(void)
     ksu_unregister_syscall_hook(__NR_faccessat);
 
 #ifdef CONFIG_COMPAT
-    ksu_unregister_compat_syscall_hook(__COMPAT__NR_setresuid);
-    ksu_unregister_compat_syscall_hook(__COMPAT__NR_execve);
-    ksu_unregister_compat_syscall_hook(__COMPAT__NR_execveat);
-    ksu_unregister_compat_syscall_hook(__COMPAT__NR_fstatat64);
-    ksu_unregister_compat_syscall_hook(__COMPAT__NR_faccessat);
+    ksu_unregister_compat_syscall_hook(ksu_compat_syscalls.setresuid);
+    ksu_unregister_compat_syscall_hook(ksu_compat_syscalls.execve);
+    ksu_unregister_compat_syscall_hook(ksu_compat_syscalls.execveat);
+    ksu_unregister_compat_syscall_hook(ksu_compat_syscalls.fstatat64);
+    ksu_unregister_compat_syscall_hook(ksu_compat_syscalls.faccessat);
 #endif
 
     ksu_syscall_hook_exit();
