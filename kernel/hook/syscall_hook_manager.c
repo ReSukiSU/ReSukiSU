@@ -164,8 +164,8 @@ static void ksu_sys_enter_handler(void *data, struct pt_regs *regs, long id)
     }
 
     return;
+#if defined(__aarch64__) && defined(CONFIG_COMPAT)
 aarch64_compat:
-#ifdef CONFIG_COMPAT
     if (ksu_compat_dispatcher_nr < 0)
         return;
 
@@ -176,8 +176,6 @@ aarch64_compat:
         current_regs->regs[7] = (u32)id;
         current_regs->syscallno = ksu_compat_dispatcher_nr;
     }
-#else
-    return;
 #endif
 }
 #endif
