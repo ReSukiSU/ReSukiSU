@@ -112,6 +112,10 @@ endif
 else
 KERNEL_TYPE := GKI 2.0
 endif
+
+ifneq ($(shell test $(VERSION) -ge 4; echo $$?),0)
+KERNEL_TYPE := Non-GKI (Legacy)
+endif
 $(info -- KERNEL_VERSION: $(KERNEL_VERSION))
 $(info -- KERNEL_TYPE: $(KERNEL_TYPE))
 

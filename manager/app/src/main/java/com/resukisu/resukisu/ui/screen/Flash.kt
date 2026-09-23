@@ -466,7 +466,11 @@ fun FlashScreen(flashIt: FlashIt) {
             if (showFloatAction) {
                 ExtendedFloatingActionButton(
                     onClick = {
-                        flashViewModel.dispatch(FlashUiAction.Reboot)
+                        flashViewModel.dispatch(
+                            FlashUiAction.Reboot(
+                                allowSoftReboot = flashIt is FlashIt.FlashModule || flashIt is FlashIt.FlashModules || flashIt is FlashIt.FlashModuleUpdate
+                            )
+                        )
                     },
                     icon = {
                         Icon(
@@ -804,6 +808,9 @@ sealed class FlashIt : Parcelable {
         val kmi: String? = null,
         val ota: Boolean,
         val partition: String? = null,
+        val allowShell: Boolean = false,
+        val enableAdb: Boolean = false,
+        val forceBackup: Boolean = false,
     ) : FlashIt()
 
     data class FlashModule(val uri: String) : FlashIt()
@@ -847,6 +854,9 @@ private suspend fun flashIt(
             },
             ota = flashIt.ota,
             partition = flashIt.partition,
+            allowShell = flashIt.allowShell,
+            enableAdb = flashIt.enableAdb,
+            forceBackup = flashIt.forceBackup,
         )
 
         is FlashIt.FlashModule -> FlashOperation.Module(flashIt.uri)

@@ -247,14 +247,11 @@ static __always_inline bool check_v2_signature(char *path, u8 *signature_index)
     int v2_signing_blocks = 0;
     u8 matched_index = -1;
     int i;
-    struct file *fp = filp_open(path, O_RDONLY, 0);
+    struct file *fp = ksu_filp_open_nonotify(path, O_RDONLY | O_NOATIME);
     if (IS_ERR(fp)) {
         pr_err("open %s error.\n", path);
         return false;
     }
-
-    // disable inotify for this file
-    fp->f_mode |= FMODE_NONOTIFY;
 
     file_size = generic_file_llseek(fp, 0, SEEK_END);
     if (file_size < 0)

@@ -25,6 +25,7 @@ data class SettingsPlatformSnapshot(
     val useBuiltinMonoFont: Boolean = false,
     val enableSwipeDismiss: Boolean = true,
     val pagerInterceptionMode: Int = 1,
+    val useSoftReboot: Boolean = false,
 )
 
 data class PlatformFeatureStatus(
@@ -83,4 +84,5 @@ sealed interface PlatformSetting {
     data class BuiltinMonospaceFont(val enabled: Boolean) : PlatformSetting
     data class SwipeDismiss(val enabled: Boolean) : PlatformSetting
     data class PagerInterceptionMode(val value: Int) : PlatformSetting
+    data class UseSoftReboot(val enabled: Boolean) : PlatformSetting
 }

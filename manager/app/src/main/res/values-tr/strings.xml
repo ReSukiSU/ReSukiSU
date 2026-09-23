@@ -164,7 +164,6 @@
     <string name="flashing">Kuruluyor</string>
     <string name="flash_success">Başarıyla kuruldu</string>
     <string name="flash_failed">Kurulum başarısız</string>
-    <string name="selected_lkm">Seçilen LKM: %s</string>
     <string name="save_log">Günlükleri kaydet</string>
     <string name="log_saved">Günlükler kaydedildi</string>
     <string name="unknown_module">Bilinmeyen modül</string>
@@ -532,4 +531,15 @@
     <string name="require_manager_version">Yönetici güncellemesi gerekiyor</string>
     <string name="require_kernel_version">Çekirdek güncellemesi gerekiyor. Kurmak için dokunun.</string>
     <string name="require_kernel_version_gki">Çekirdek güncellemesi gerekiyor</string>
+    <string name="navigation_bar_badge">Gezinme çubuğu rozetleri</string>
+    <string name="navigation_bar_badge_summary">Gezinme çubuğunda süper kullanıcı ve modül sayılarını göster</string>
+    <string name="home_card_icons">Ana sayfa kartlarında simgeleri göster</string>
+    <string name="home_card_icons_summary">Ana sayfadaki bilgi kartlarına simgeler ekle</string>
+    <string name="sort_name">İsim</string>
+    <string name="sort_install_time">Yükleme zamanı</string>
+    <string name="sort_update_time">Güncelleme zamanı</string>
+    <string name="sort_size">Boyut</string>
+    <string name="reverse_order">Ters sırala</string>
+    <string name="enable_floating_bottom_bar">Yüzen alt çubuk</string>
+    <string name="enable_floating_bottom_bar_summary">Apple tarzı yüzen alt çubuğu kullan.</string>
 </resources>

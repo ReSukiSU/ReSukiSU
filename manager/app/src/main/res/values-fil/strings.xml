@@ -7,9 +7,9 @@
     <string name="home_unsupported">Hindi Suportado</string>
     <string name="home_unsupported_reason">Sinusuportahan lang ng KernelSU ang mga kernel ng GKI ngayon</string>
     <string name="home_manager_version">Bersyon ng Manager</string>
-    <string name="home_selinux_status">Katayuan ng SELinux</string>
-    <string name="selinux_status_disabled">Hindi pinagana</string>
-    <string name="selinux_status_enforcing">Enforcing</string>
+    <string name="home_selinux_status">Estado ng SELinux</string>
+    <string name="selinux_status_disabled">Nakapatay</string>
+    <string name="selinux_status_enforcing">Pinapatakbo</string>
     <string name="selinux_status_permissive">Permissive</string>
     <string name="unknown">Hindi matukoy</string>
     <string name="superuser">Superuser</string>
@@ -63,4 +63,6 @@
     <string name="save_log">I-save ang mga Log</string>
     <string name="settings_sucompat">Klasikong su command</string>
     <string name="settings_sucompat_summary">Payagan ang root access gamit ang /system/bin/su, sa mga bagong proseso.</string>
+    <string name="home_kernel">Bersyon ng Kernel</string>
+    <string name="home_susfs_version">Bersyon ng SuSFS</string>
 </resources>

@@ -84,6 +84,8 @@
     <string name="jailbreak_flash_warning_countdown">Continue (%1$d)</string>
     <string name="settings_auto_jailbreak">Auto jailbreak</string>
     <string name="settings_auto_jailbreak_summary">Automatically use Magica to escalate privileges when Permissive SELinux is detected at boot. Requires granting autostart permission to this app.</string>
+    <string name="settings_soft_reboot">Soft restart instead of reboot</string>
+    <string name="settings_soft_reboot_summary">Use soft restart instead of a full reboot when installing, updating, or toggling modules.</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_adb_root_summary">Run adbd daemon with root privileges</string>
     <string name="settings_selinux_hide">Hide SELinux modification</string>
@@ -172,6 +174,13 @@
     <string name="install_only_support_ko_file">Only .ko files are supported</string>
     <string name="select_file_tip">%1$s partition image is recommended</string>
     <string name="select_kmi">Select KMI</string>
+    <string name="advanced_options">Advanced Options</string>
+    <string name="allow_shell">Always grant Root to Shell</string>
+    <string name="allow_shell_summary">Always allow adb shell to call SU command. Do not enable this unless absolutely necessary.</string>
+    <string name="enable_adb">Force enable adb on boot</string>
+    <string name="enable_adb_summary">Force enable USB debugging and disable adb authentication. Do not enable this unless absolutely necessary.</string>
+    <string name="install_force_backup">Backup as stock image</string>
+    <string name="install_force_backup_summary">Please make sure your selected boot image is a stock image</string>
     <string name="settings_uninstall">Uninstall</string>
     <string name="settings_uninstall_temporary">Uninstall temporarily</string>
     <string name="settings_uninstall_permanent">Uninstall permanently</string>
@@ -182,7 +191,6 @@
     <string name="flashing">Flashing</string>
     <string name="flash_success">Flash success</string>
     <string name="flash_failed">Flash failed</string>
-    <string name="selected_lkm">Selected LKM: %s</string>
     <string name="save_log">Save logs</string>
     <string name="log_saved">Logs saved</string>
     <string name="unknown_module">Unknown module</string>
@@ -552,4 +560,8 @@
     <string name="settings_check_beta_update_summary">Auto-check beta builds from the main branch</string>
     <string name="enable_floating_bottom_bar">Floating bottom bar</string>
     <string name="enable_floating_bottom_bar_summary">Use Apple style floating bottom bar.</string>
+    <string name="ak3_select_zip">Select an AnyKernel3 zip file to flash</string>
+    <string name="install_upload_lkm_file_summary">Use a custom .ko file instead of the built-in LKM</string>
+    <string name="skip_ksud">Do not install ksud</string>
+    <string name="skip_ksud_summary">Cancel ksud installation. Do not enable this unless absolutely necessary.</string>
 </resources>

@@ -3,6 +3,8 @@ package com.resukisu.resukisu.ui.component
 import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.AnimationState
@@ -49,6 +51,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -56,6 +59,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -80,11 +84,17 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.currentStateAsState
 import com.resukisu.resukisu.ui.component.settings.AppBackButton
 import com.resukisu.resukisu.ui.theme.CardConfig
 import com.resukisu.resukisu.ui.theme.ThemeConfig
 import com.resukisu.resukisu.ui.theme.blurEffect
 import com.resukisu.resukisu.ui.theme.renderBackgroundBlur
+import com.resukisu.resukisu.ui.util.LocalPagerPage
+import com.resukisu.resukisu.ui.util.LocalSelectedPage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -101,6 +111,8 @@ class SearchAppBarScrollBehavior internal constructor(
 ) : TopAppBarScrollBehavior {
     private var searchBarHeightOffset by mutableFloatStateOf(0f)
     private var lastSearchBarScrollDelta = 0f
+    private var isUserScrollInProgress = false
+    private var ignoreCurrentScroll = false
 
     val searchBarExpandedFraction: Float
         get() = (1f + searchBarHeightOffset / searchBarHeight).coerceIn(0f, 1f)
@@ -113,7 +125,23 @@ class SearchAppBarScrollBehavior internal constructor(
         get() = topAppBarScrollBehavior.flingAnimationSpec
 
     fun expandSearchBar() {
+        ignoreCurrentScroll = isUserScrollInProgress
         searchBarHeightOffset = 0f
+        lastSearchBarScrollDelta = 0f
+    }
+
+    fun collapseSearchBar() {
+        searchBarHeightOffset = -searchBarHeight
+        lastSearchBarScrollDelta = 0f
+        isUserScrollInProgress = false
+        ignoreCurrentScroll = false
+    }
+
+    fun reset() {
+        searchBarHeightOffset = 0f
+        lastSearchBarScrollDelta = 0f
+        isUserScrollInProgress = false
+        ignoreCurrentScroll = false
     }
 
     private fun consumeSearchBarScroll(delta: Float): Float {
@@ -142,7 +170,10 @@ class SearchAppBarScrollBehavior internal constructor(
     override val nestedScrollConnection: NestedScrollConnection =
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                if (available.y >= 0f) {
+                if (source == NestedScrollSource.UserInput) {
+                    isUserScrollInProgress = true
+                }
+                if (ignoreCurrentScroll || available.y >= 0f) {
                     return topAppBarScrollBehavior.nestedScrollConnection.onPreScroll(
                         available,
                         source,
@@ -173,7 +204,7 @@ class SearchAppBarScrollBehavior internal constructor(
                         source,
                     )
 
-                if (available.y <= 0f) return topAppBarConsumed
+                if (ignoreCurrentScroll || available.y <= 0f) return topAppBarConsumed
 
                 val remainingY = available.y - topAppBarConsumed.y
                 val searchBarConsumed = consumeSearchBarScroll(remainingY)
@@ -181,6 +212,9 @@ class SearchAppBarScrollBehavior internal constructor(
             }
 
             override suspend fun onPreFling(available: Velocity): Velocity {
+                if (ignoreCurrentScroll) {
+                    return topAppBarScrollBehavior.nestedScrollConnection.onPreFling(available)
+                }
                 if (available.y < 0f && searchBarHeightOffset > -searchBarHeight) {
                     animateSearchBarTo(
                         targetOffset = -searchBarHeight,
@@ -196,6 +230,15 @@ class SearchAppBarScrollBehavior internal constructor(
                 consumed: Velocity,
                 available: Velocity,
             ): Velocity {
+                isUserScrollInProgress = false
+                if (ignoreCurrentScroll) {
+                    ignoreCurrentScroll = false
+                    return topAppBarScrollBehavior.nestedScrollConnection.onPostFling(
+                        consumed,
+                        available,
+                    )
+                }
+
                 if (searchBarHeightOffset > -searchBarHeight && searchBarHeightOffset < 0f) {
                     val shouldExpand =
                         available.y > 0f ||
@@ -280,6 +323,7 @@ private fun CompactSearchBar(
     val themeConfig: ThemeConfig = koinInject()
     val cardConfig: CardConfig = koinInject()
     val focusManager = LocalFocusManager.current
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
     val pressed by interactionSource.collectIsPressedAsState()
@@ -300,7 +344,9 @@ private fun CompactSearchBar(
     LaunchedEffect(allowFocus) {
         if (allowFocus && hasFocusReassignBug) {
             delay(100.milliseconds)
-            focusRequester.requestFocus()
+            if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                focusRequester.requestFocus()
+            }
         }
     }
 
@@ -308,7 +354,9 @@ private fun CompactSearchBar(
         if (requestFocus) {
             allowFocus = true
             delay(100.milliseconds)
-            focusRequester.requestFocus()
+            if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                focusRequester.requestFocus()
+            }
             onFocusRequestHandled()
         }
     }
@@ -417,21 +465,67 @@ fun SearchAppBar(
     val textFieldState = rememberTextFieldState(initialText = searchText)
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
+    val pagerPage = LocalPagerPage.current
+    val isCurrentPage = pagerPage == null || pagerPage == LocalSelectedPage.current
+    val currentIsCurrentPage by rememberUpdatedState(isCurrentPage)
+    val isPageActive = isCurrentPage && lifecycleState.isAtLeast(Lifecycle.State.RESUMED)
     val searchAppBarScrollBehavior = scrollBehavior as? SearchAppBarScrollBehavior
     val searchBarExpansionFraction =
         searchAppBarScrollBehavior?.searchBarExpandedFraction ?: 1f
     val isSearchBarCollapsing = searchBarExpansionFraction < 0.99f
     val isSearchBarCollapsed = searchBarExpansionFraction <= 0.01f
     var requestSearchFocus by remember { mutableStateOf(false) }
-
-    LaunchedEffect(textFieldState.text) {
-        onSearchTextChange(textFieldState.text.toString())
+    val currentOnSearchTextChange by rememberUpdatedState(onSearchTextChange)
+    val resetSearch by rememberUpdatedState {
+        requestSearchFocus = false
+        textFieldState.clearText()
+        focusManager.clearFocus(force = true)
+        keyboardController?.hide()
+        currentOnSearchTextChange("")
     }
 
-    LaunchedEffect(isSearchBarCollapsing) {
-        if (isSearchBarCollapsing) {
-            focusManager.clearFocus()
+    LaunchedEffect(textFieldState.text) {
+        currentOnSearchTextChange(textFieldState.text.toString())
+    }
+
+    LaunchedEffect(isPageActive) {
+        if (!isPageActive && scrollBehavior?.state?.collapsedFraction?.toDouble() == 1.0) {
+            searchAppBarScrollBehavior?.collapseSearchBar()
+        }
+    }
+
+    LaunchedEffect(isSearchBarCollapsing, isPageActive) {
+        if (isSearchBarCollapsing && isPageActive) {
+            requestSearchFocus = false
+            focusManager.clearFocus(force = true)
             keyboardController?.hide()
+        }
+    }
+
+    DisposableEffect(isPageActive) {
+        onDispose {
+            if (!isPageActive) resetSearch()
+        }
+    }
+
+    DisposableEffect(isPageActive, searchAppBarScrollBehavior) {
+        onDispose {
+            if (isPageActive) searchAppBarScrollBehavior?.reset()
+        }
+    }
+
+    DisposableEffect(lifecycleOwner, searchAppBarScrollBehavior) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_PAUSE && currentIsCurrentPage) {
+                resetSearch()
+                searchAppBarScrollBehavior?.reset()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 
@@ -486,7 +580,10 @@ fun SearchAppBar(
             ),
         )
 
-        Box(
+        AnimatedVisibility(
+            visible = !isSearchBarCollapsed,
+            enter = EnterTransition.None,
+            exit = ExitTransition.None,
             modifier = Modifier
                 .fillMaxWidth()
                 .alpha(searchBarExpansionFraction)

@@ -614,7 +614,7 @@ pub fn run() -> Result<()> {
             UmountConfigOp::Clear => umount_config::wipe_umount(),
             UmountConfigOp::List => umount_config::list_umount(),
         },
-        Commands::SoftReboot => init_event::soft_reboot(),
+        Commands::SoftReboot => crate::android::soft_reboot::soft_reboot(),
         Commands::Insmod { module, params } => debug::insmod(&module, &params),
         Commands::Module { command } => {
             utils::switch_mnt_ns(1)?;

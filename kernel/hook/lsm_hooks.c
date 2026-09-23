@@ -214,8 +214,8 @@ static inline void set_selinux_ops()
 }
 
 #define ASSIGN_ORIG_AND_HOOK(TARGET, HANDLER, ARGS_DECL, ARGS_CALL)                                                    \
-    orig_##TARGET = ops->TARGET;                                                                                       \
-    ops->TARGET = hook_##TARGET;
+    orig_##TARGET = (typeof(orig_##TARGET))ops->TARGET;                                                                \
+    ops->TARGET = (typeof(ops->TARGET))hook_##TARGET;
 
 static int ksu_register_lsm_hook(void *data)
 {

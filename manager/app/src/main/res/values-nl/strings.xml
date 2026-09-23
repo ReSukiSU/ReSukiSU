@@ -99,7 +99,6 @@
     <string name="flashing">Knipperen</string>
     <string name="flash_success">Flash-succes</string>
     <string name="flash_failed">Flash is mislukt</string>
-    <string name="selected_lkm">Geselecteerde LKM: %s</string>
     <string name="save_log">Logboeken Opslaan</string>
     <string name="log_saved">Logs opgeslagen</string>
     <string name="settings_sucompat">su binary omleiden</string>

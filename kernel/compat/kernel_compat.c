@@ -216,3 +216,24 @@ void setup_ksu_cred_session_keyring(void)
 
     pr_info("kernel_compat: %s: install init_session_keyring to ksu_cred\n", __func__);
 }
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 9, 0)
+__weak int path_umount(struct path *path, int flags)
+{
+    char buf[256];
+    int ret = -ENOENT;
+
+    char *usermnt = d_path(path, buf, sizeof(buf) - 1);
+    if (IS_ERR(usermnt) || usermnt == buf)
+        goto out;
+
+    mm_segment_t old_fs = get_fs();
+    set_fs(KERNEL_DS);
+    ret = ksu_sys_umount((char __user *)usermnt, flags);
+    set_fs(old_fs);
+
+out: // release ref here! user_path_at increases it then only cleans for itself
+    path_put(path);
+    return ret;
+}
+#endif // < 5.9

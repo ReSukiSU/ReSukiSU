@@ -99,7 +99,6 @@
     <string name="flashing">Schreibt</string>
     <string name="flash_success">Schreiben erfolgreich</string>
     <string name="flash_failed">Schreiben fehlgeschlagen</string>
-    <string name="selected_lkm">Wähle LKM: %s</string>
     <string name="save_log">Protokolle Speichern</string>
     <string name="log_saved">Protokolle gespeichert</string>
     <string name="unknown_module">unbekannter Modul</string>

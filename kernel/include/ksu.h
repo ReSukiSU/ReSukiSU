@@ -1,6 +1,7 @@
 #ifndef __KSU_H_KSU
 #define __KSU_H_KSU
 
+#include <linux/version.h>
 #include <linux/types.h>
 #include <linux/cred.h>
 #include <linux/workqueue.h>

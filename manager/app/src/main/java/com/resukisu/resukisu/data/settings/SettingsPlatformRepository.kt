@@ -6,6 +6,9 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import com.materialkolor.PaletteStyle
+import com.materialkolor.dynamiccolor.ColorSpec
+import com.resukisu.resukisu.Natives
 import com.resukisu.resukisu.data.AppSettingsRepository
 import com.resukisu.resukisu.data.shell.KsuCliRepository
 import com.resukisu.resukisu.data.theme.ThemeRepository
@@ -82,6 +85,7 @@ class SettingsPlatformRepository(
             useBuiltinMonoFont = themeConfig.useBuiltinMonoFont,
             enableSwipeDismiss = settings.getBoolean("enable_swipe_dismiss", true),
             pagerInterceptionMode = settings.getInt("pager_interception_mode", 1).coerceIn(0, 2),
+            useSoftReboot = settings.getBoolean("use_soft_reboot", false),
         )
     }
 
@@ -194,6 +198,8 @@ class SettingsPlatformRepository(
 
             is PlatformSetting.PagerInterceptionMode ->
                 settings.putInt("pager_interception_mode", setting.value.coerceIn(0, 2))
+            is PlatformSetting.UseSoftReboot ->
+                settings.putBoolean("use_soft_reboot", setting.enabled)
         }
         Result.success(load())
     } catch (error: CancellationException) {
@@ -201,6 +207,10 @@ class SettingsPlatformRepository(
     } catch (error: Exception) {
         Result.failure(error)
     }
+
+    fun isSoftRebootPreferred(): Boolean =
+        Natives.isFullFeatured() &&
+            (Natives.isLateLoadMode || settings.getBoolean("use_soft_reboot", false))
 
     suspend fun getFeatureStatus(): PlatformFeatureStatus = withContext(Dispatchers.IO) {
         PlatformFeatureStatus(

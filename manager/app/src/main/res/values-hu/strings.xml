@@ -101,7 +101,6 @@
     <string name="flashing">Telepítés</string>
     <string name="flash_success">Sikeres telepítés</string>
     <string name="flash_failed">Sikertelen telepítés</string>
-    <string name="selected_lkm">Kiválasztott LKM: %s</string>
     <string name="save_log">Napló mentése logfájlba</string>
     <string name="log_saved">Napló elmentve</string>
     <string name="settings_sucompat">SU bináris átirányítása</string>

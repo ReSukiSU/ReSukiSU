@@ -105,7 +105,6 @@
     <string name="flashing">Välgutamine</string>
     <string name="flash_success">Välgutamine õnnestus</string>
     <string name="flash_failed">Välgutamine ebaõnnestus</string>
-    <string name="selected_lkm">Valitud LKM: %s</string>
     <string name="save_log">Salvesta Logid</string>
     <string name="settings_sucompat">Suuna su binaarfail ümber</string>
     <string name="settings_sucompat_summary">Võimaldab rakendustel, kellele on antud Superuser luba rakenduse profiilis, saada superuser shell, käivitades /system/bin/su; kehtib ainult uute protsesside puhul.</string>

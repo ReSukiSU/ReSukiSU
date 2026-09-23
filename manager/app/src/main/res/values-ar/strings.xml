@@ -133,7 +133,6 @@
     <string name="flashing">تركيب</string>
     <string name="flash_success">نجح التركيب</string>
     <string name="flash_failed">فشل التركيب</string>
-    <string name="selected_lkm">LKM المحددة: %s</string>
     <string name="save_log">حفظ السجلات</string>
     <string name="log_saved">السجلات محفوظة</string>
     <string name="unknown_module">وحدة غير معروفة</string>

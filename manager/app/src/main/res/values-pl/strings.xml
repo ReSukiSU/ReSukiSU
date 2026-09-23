@@ -106,7 +106,6 @@
     <string name="flashing">Flashowanie</string>
     <string name="flash_success">Flashowanie ukończone pomyślnie</string>
     <string name="flash_failed">Flashowanie nieudane</string>
-    <string name="selected_lkm">Wybrano LKM: %s</string>
     <string name="save_log">Zapisz dzienniki</string>
     <string name="log_saved">Dzienniki zapisane</string>
     <string name="settings_sucompat">Przekieruj binarkę su</string>

@@ -10,7 +10,7 @@
     <string name="home_kernel">カーネル バージョン</string>
     <string name="home_susfs_version">SuSFS バージョン</string>
     <string name="home_manager_version">マネージャー バージョン</string>
-    <string name="home_selinux_status">SELinux のステータス</string>
+    <string name="home_selinux_status">SELinux の状態</string>
     <string name="selinux_status_disabled">無効</string>
     <string name="selinux_status_enforcing">Enforcing</string>
     <string name="selinux_status_permissive">Permissive</string>
@@ -113,7 +113,6 @@
     <string name="flashing">フラッシュ</string>
     <string name="flash_success">フラッシュが成功しました</string>
     <string name="flash_failed">フラッシュに失敗しました</string>
-    <string name="selected_lkm">選択された LKM: %s</string>
     <string name="save_log">ログを保存</string>
     <string name="log_saved">保存されたログ</string>
     <string name="unknown_module">不明なモジュール</string>
@@ -274,4 +273,6 @@
     <string name="sulog_enable_action">有効化</string>
     <string name="sulog_filter_title">種類で絞り込む</string>
     <string name="sulog_clean_title">ログを消去</string>
+    <string name="sulog_filter_ioctl_grant_root">Root権限の付与</string>
+    <string name="sulog_filter_daemon_restart">デーモンの再起動</string>
 </resources>

@@ -131,9 +131,9 @@ class SegmentedColumnScope {
         bottomContent()
 
         if (!previousInsideBody) {
-            val lastGroupIndex = items.lastIndex
-            if (lastGroupIndex >= headerIndex) {
-                items[lastGroupIndex] = items[lastGroupIndex].copy(forceFlatBottom = false)
+            val lastVisibleIndex = items.indexOfLast { it.visible }
+            if (lastVisibleIndex >= headerIndex) {
+                items[lastVisibleIndex] = items[lastVisibleIndex].copy(forceFlatBottom = false)
             }
         }
 
