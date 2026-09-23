@@ -119,14 +119,13 @@ static int handle_zygote_next_setresuid(uid_t new_uid)
     susfs_set_current_proc_no_su();
     return 0;
 
-do_susfs_work:
-    {
-        // Do not umount here as we are in init namespace now
+do_susfs_work: {
+    // Do not umount here as we are in init namespace now
 
-        // Handle extra susfs work
-        if (!work_pending(&susfs_extra_works))
-            schedule_work(&susfs_extra_works);
-    }
+    // Handle extra susfs work
+    if (!work_pending(&susfs_extra_works))
+        schedule_work(&susfs_extra_works);
+}
 
     return 0;
 }
