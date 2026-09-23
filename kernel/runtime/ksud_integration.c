@@ -649,7 +649,7 @@ static __always_inline void ksu_common_newfstat_ret(unsigned long fd_long, void 
     pr_info("%s: stat init.rc \n", __func__);
     load_module_rc_once();
 
-    uintptr_t statbuf_ptr_local = (uintptr_t) * (void **)statbuf_ptr;
+    uintptr_t statbuf_ptr_local = (uintptr_t)*(void **)statbuf_ptr;
     void __user *statbuf = (void __user *)statbuf_ptr_local;
     if (!statbuf)
         return;

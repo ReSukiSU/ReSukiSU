@@ -329,7 +329,8 @@ static long ksu_handle_execve_sucompat_common_internal(const char __user **filen
 
     fd_install(tmp_fd, ksud_file);
 
-    pending_sucompat = ksu_sulog_capture_sucompat_tracepoint(ksu_sucompat_filename(*filename_user), argv_user, GFP_KERNEL);
+    pending_sucompat =
+        ksu_sulog_capture_sucompat_tracepoint(ksu_sucompat_filename(*filename_user), argv_user, GFP_KERNEL);
     // execve(file, argv, environ)
     // execveat(fd, file, argv, environ, flags)
     orig_regs[0] = regs->__PT_PARM1_REG;
@@ -381,10 +382,8 @@ long ksu_handle_execve_sucompat_internal(const char __user **filename_user, int 
 #endif
         argv_user = (const char __user *const __user *)PT_REGS_PARM2(regs);
 
-    return ksu_handle_execve_sucompat_common_internal(filename_user,
-                                                      argv_user,
-                                                       ksu_execve_arg3(regs),
-                                                       false, orig_nr, regs);
+    return ksu_handle_execve_sucompat_common_internal(filename_user, argv_user, ksu_execve_arg3(regs), false, orig_nr,
+                                                      regs);
 }
 
 long ksu_handle_execveat_sucompat_internal(const char __user **filename_user, int orig_nr, struct pt_regs *regs)
@@ -397,10 +396,8 @@ long ksu_handle_execveat_sucompat_internal(const char __user **filename_user, in
 #endif
         argv_user = (const char __user *const __user *)PT_REGS_PARM3(regs);
 
-    return ksu_handle_execve_sucompat_common_internal(filename_user,
-                                                      argv_user,
-                                                      ksu_execveat_arg4(regs),
-                                                      true, orig_nr, regs);
+    return ksu_handle_execve_sucompat_common_internal(filename_user, argv_user, ksu_execveat_arg4(regs), true, orig_nr,
+                                                      regs);
 }
 #endif
 

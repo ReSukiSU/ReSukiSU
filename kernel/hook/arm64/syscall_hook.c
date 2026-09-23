@@ -286,10 +286,10 @@ static long __nocfi ksu_syscall_dispatcher(const struct pt_regs *regs)
 {
     int orig_nr;
 
- #ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT
     if (is_compat_task())
         goto compat;
- #endif
+#endif
 
     if (regs->syscallno != ksu_dispatcher_nr)
         return -ENOSYS;
@@ -426,17 +426,17 @@ void __init ksu_syscall_hook_init(void)
     // Find one ni_syscall slot for the dispatcher
     if (ksu_find_ni_syscall_slots(&ni_slot, 1) < 1) {
         pr_err("failed to find ni_syscall slot for dispatcher\n");
- #ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT
         goto init_compat_dispatcher;
- #else
+#else
         return;
- #endif
+#endif
     }
 
     ksu_dispatcher_nr = ni_slot;
     ksu_syscall_table_hook(ksu_dispatcher_nr, (syscall_fn_t)ksu_syscall_dispatcher, NULL);
     pr_info("dispatcher installed at slot %d\n", ksu_dispatcher_nr);
- #ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT
 init_compat_dispatcher:
     memset(compat_syscall_hooks, 0, sizeof(compat_syscall_hooks));
 
@@ -455,7 +455,7 @@ init_compat_dispatcher:
     ksu_compat_dispatcher_nr = ni_slot;
     ksu_compat_syscall_table_hook(ksu_compat_dispatcher_nr, (syscall_fn_t)ksu_syscall_dispatcher, NULL);
     pr_info("compat dispatcher installed at slot %d\n", ksu_compat_dispatcher_nr);
- #endif
+#endif
 }
 
 void __exit ksu_syscall_hook_exit(void)

@@ -120,8 +120,8 @@ static long __nocfi ksu_hook_execve_common(int orig_nr, const struct pt_regs *re
     const char __user *const __user *argv_user;
 #if defined(__aarch64__) && defined(CONFIG_COMPAT)
     if (is_compat_task())
-        argv_user = (const char __user *const __user *)compat_ptr((compat_uptr_t)(unsigned long)
-                                                                    (execveat ? KSU_COMPAT_PARM3(regs) : KSU_COMPAT_PARM2(regs)));
+        argv_user = (const char __user *const __user *)compat_ptr(
+            (compat_uptr_t)(unsigned long)(execveat ? KSU_COMPAT_PARM3(regs) : KSU_COMPAT_PARM2(regs)));
     else
 #endif
         argv_user = execveat ? (const char __user *const __user *)PT_REGS_PARM3(regs) :
