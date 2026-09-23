@@ -978,9 +978,8 @@ bool ksu_is_safe_mode()
 }
 
 #ifdef CONFIG_KSU_TRACEPOINT_HOOK
-static void ksu_execve_hook_ksud_common(const char __user *filename_user, const char __user *const __user *argv_user)
+static void ksu_execve_hook_ksud_common(const char __user *filename_user, struct user_arg_ptr argv)
 {
-    struct user_arg_ptr argv = { .ptr.native = argv_user };
     char path[32];
     long ret;
     unsigned long addr;
@@ -1004,18 +1003,48 @@ static void ksu_execve_hook_ksud_common(const char __user *filename_user, const 
 
 void ksu_execve_hook_ksud(const struct pt_regs *regs)
 {
-    const char __user *filename_user = (const char __user *)PT_REGS_PARM1(regs);
-    const char __user *const __user *argv_user = (const char __user *const __user *)PT_REGS_PARM2(regs);
+    const char __user *filename_user;
+    struct user_arg_ptr argv;
 
-    ksu_execve_hook_ksud_common(filename_user, argv_user);
+#if defined(__aarch64__) && defined(CONFIG_COMPAT)
+    if (is_compat_task()) {
+        filename_user = (const char __user *)KSU_COMPAT_PTR(regs, 1);
+        argv.is_compat = true;
+        argv.ptr.compat = (const compat_uptr_t __user *)KSU_COMPAT_PTR(regs, 2);
+    } else
+#endif
+    {
+        filename_user = (const char __user *)PT_REGS_PARM1(regs);
+#ifdef CONFIG_COMPAT
+        argv.is_compat = false;
+#endif
+        argv.ptr.native = (const char __user *const __user *)PT_REGS_PARM2(regs);
+    }
+
+    ksu_execve_hook_ksud_common(filename_user, argv);
 }
 
 void ksu_execveat_hook_ksud(const struct pt_regs *regs)
 {
-    const char __user *filename_user = (const char __user *)PT_REGS_PARM2(regs);
-    const char __user *const __user *argv_user = (const char __user *const __user *)PT_REGS_PARM3(regs);
+    const char __user *filename_user;
+    struct user_arg_ptr argv;
 
-    ksu_execve_hook_ksud_common(filename_user, argv_user);
+#if defined(__aarch64__) && defined(CONFIG_COMPAT)
+    if (is_compat_task()) {
+        filename_user = (const char __user *)KSU_COMPAT_PTR(regs, 2);
+        argv.is_compat = true;
+        argv.ptr.compat = (const compat_uptr_t __user *)KSU_COMPAT_PTR(regs, 3);
+    } else
+#endif
+    {
+        filename_user = (const char __user *)PT_REGS_PARM2(regs);
+#ifdef CONFIG_COMPAT
+        argv.is_compat = false;
+#endif
+        argv.ptr.native = (const char __user *const __user *)PT_REGS_PARM3(regs);
+    }
+
+    ksu_execve_hook_ksud_common(filename_user, argv);
 }
 
 static long (*orig_sys_read)(const struct pt_regs *regs);
@@ -1024,11 +1053,24 @@ static long (*orig_compat_sys_read)(const struct pt_regs *regs);
 #endif
 static long ksu_sys_read(const struct pt_regs *regs)
 {
-    unsigned int fd = PT_REGS_PARM1(regs);
-    char __user **buf_ptr = (char __user **)&PT_REGS_PARM2(regs);
-    size_t *count_ptr = (size_t *)&PT_REGS_PARM3(regs);
+    unsigned int fd;
+    char __user *buf;
+    size_t count;
 
-    ksu_handle_sys_read(fd, buf_ptr, count_ptr);
+#if defined(__aarch64__) && defined(CONFIG_COMPAT)
+    if (is_compat_task()) {
+        fd = KSU_COMPAT_PARM1(regs);
+        buf = (char __user *)KSU_COMPAT_PTR(regs, 2);
+        count = (size_t)KSU_COMPAT_PARM3(regs);
+    } else
+#endif
+    {
+        fd = PT_REGS_PARM1(regs);
+        buf = (char __user *)PT_REGS_PARM2(regs);
+        count = PT_REGS_PARM3(regs);
+    }
+
+    ksu_handle_sys_read(fd, &buf, &count);
 
 #if defined(__aarch64__) && defined(CONFIG_COMPAT)
     if (is_compat_task()) {
@@ -1048,10 +1090,21 @@ static long (*orig_sys_fstat64)(const struct pt_regs *regs);
 #endif
 static long ksu_sys_fstat(const struct pt_regs *regs)
 {
-    unsigned int fd = PT_REGS_PARM1(regs);
-    void __user *statbuf = (void __user *)PT_REGS_PARM2(regs);
+    unsigned int fd;
+    void __user *statbuf;
     bool is_rc = false;
     long ret;
+
+#if defined(__aarch64__) && defined(CONFIG_COMPAT)
+    if (is_compat_task()) {
+        fd = KSU_COMPAT_PARM1(regs);
+        statbuf = KSU_COMPAT_PTR(regs, 2);
+    } else
+#endif
+    {
+        fd = PT_REGS_PARM1(regs);
+        statbuf = (void __user *)PT_REGS_PARM2(regs);
+    }
 
     struct file *file = fget(fd);
     if (file) {
@@ -1074,13 +1127,21 @@ static long ksu_sys_fstat(const struct pt_regs *regs)
 #endif
 
     if (is_rc) {
-        void __user *st_size_ptr = statbuf + offsetof(struct stat, st_size);
-        long size, new_size;
+        void __user *st_size_ptr;
+        long long size, new_size;
         size_t extra = ksu_rc_len + module_rc_len;
-        if (!copy_from_user_nofault(&size, st_size_ptr, sizeof(long))) {
+#if defined(__aarch64__) && defined(CONFIG_COMPAT)
+        if (is_compat_task()) {
+            st_size_ptr = statbuf + offsetof(struct stat64, st_size);
+        } else
+#endif
+        {
+            st_size_ptr = statbuf + offsetof(struct stat, st_size);
+        }
+        if (!copy_from_user_nofault(&size, st_size_ptr, sizeof(size))) {
             new_size = size + extra;
-            pr_info("adding rc len: %ld -> %ld", size, new_size);
-            if (!copy_to_user_nofault(st_size_ptr, &new_size, sizeof(long))) {
+            pr_info("adding rc len: %lld -> %lld", size, new_size);
+            if (!copy_to_user_nofault(st_size_ptr, &new_size, sizeof(size))) {
                 pr_info("added rc len");
             } else {
                 pr_err("add rc len failed: statbuf 0x%lx", (unsigned long)st_size_ptr);

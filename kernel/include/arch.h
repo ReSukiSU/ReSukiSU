@@ -90,6 +90,21 @@
 #define PT_REGS_IP(x) (__PT_REGS_CAST(x)->__PT_IP_REG)
 #define PT_REGS_ORIG_SYSCALL(x) (__PT_REGS_CAST(x)->__PT_ORIG_SYSCALL_REG)
 
+/*
+ * AArch32 processes use r7 for the syscall number and pass 32-bit user
+ * pointers in the low half of the arm64 pt_regs slots.  Do not use the native
+ * arm64 syscall accessors for these values.
+ */
+#if defined(__aarch64__) && defined(CONFIG_COMPAT)
+#include <linux/compat.h>
+#define KSU_COMPAT_PARM1(x) ((u32)((x)->regs[0]))
+#define KSU_COMPAT_PARM2(x) ((u32)((x)->regs[1]))
+#define KSU_COMPAT_PARM3(x) ((u32)((x)->regs[2]))
+#define KSU_COMPAT_PARM4(x) ((u32)((x)->regs[3]))
+#define KSU_COMPAT_PARM5(x) ((u32)((x)->regs[4]))
+#define KSU_COMPAT_PTR(x, n) (compat_ptr((compat_uptr_t)KSU_COMPAT_PARM##n(x)))
+#endif
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 16, 0)
 #define PT_REAL_REGS(regs) ((struct pt_regs *)PT_REGS_PARM1(regs))
 #else

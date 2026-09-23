@@ -11,7 +11,7 @@
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
 #include <linux/sched/task_stack.h>
 #endif
-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 7, 0)
+#ifdef CONFIG_COMPAT
 #include <linux/compat.h>
 #endif
 
@@ -22,6 +22,7 @@
         #include <asm/unistd_compat_32.h>
         #define __COMPAT__NR_setresuid __NR_compat32_setresuid
         #define __COMPAT__NR_execve __NR_compat32_execve
+        #define __COMPAT__NR_execveat __NR_compat32_execveat
         #define __COMPAT__NR_fstatat64 __NR_compat32_fstatat64
         #define __COMPAT__NR_faccessat __NR_compat32_faccessat
     #else
@@ -127,8 +128,10 @@ static void ksu_sys_enter_handler(void *data, struct pt_regs *regs, long id)
     if (unlikely(in_compat_syscall()))
         return;
 #elif defined(__aarch64__)
+#ifdef CONFIG_COMPAT
     if (unlikely(is_compat_task()))
         goto aarch64_compat;
+#endif
 #else
 #error Unsupported arch
 #endif
@@ -159,7 +162,8 @@ aarch64_compat:
     if (ksu_has_compat_syscall_hook(id)) {
         struct pt_regs *current_regs = task_pt_regs(current);
 
-        PT_REGS_ORIG_SYSCALL(current_regs) = id;
+        /* arm32 syscall numbers are passed in r7, not arm64 x8. */
+        current_regs->regs[7] = (u32)id;
         current_regs->syscallno = ksu_compat_dispatcher_nr;
     }
 #else
@@ -188,6 +192,7 @@ void __init ksu_syscall_hook_manager_init(void)
 #ifdef CONFIG_COMPAT
     ksu_register_compat_syscall_hook(__COMPAT__NR_setresuid, ksu_hook_setresuid);
     ksu_register_compat_syscall_hook(__COMPAT__NR_execve, ksu_hook_execve);
+    ksu_register_compat_syscall_hook(__COMPAT__NR_execveat, ksu_hook_execveat);
     ksu_register_compat_syscall_hook(__COMPAT__NR_fstatat64, ksu_hook_newfstatat);
     ksu_register_compat_syscall_hook(__COMPAT__NR_faccessat, ksu_hook_faccessat);
 #endif
@@ -231,6 +236,7 @@ void __exit ksu_syscall_hook_manager_exit(void)
 #ifdef CONFIG_COMPAT
     ksu_unregister_compat_syscall_hook(__COMPAT__NR_setresuid);
     ksu_unregister_compat_syscall_hook(__COMPAT__NR_execve);
+    ksu_unregister_compat_syscall_hook(__COMPAT__NR_execveat);
     ksu_unregister_compat_syscall_hook(__COMPAT__NR_fstatat64);
     ksu_unregister_compat_syscall_hook(__COMPAT__NR_faccessat);
 #endif

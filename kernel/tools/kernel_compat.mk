@@ -118,6 +118,12 @@ $(info -- $(REPO_NAME)/compat: modern dentry_open found)
 ccflags-y += -DKSU_COMPAT_HAS_MODERN_DENTRY_OPEN
 endif
 
+# Linux 6.11 renamed the arm64 compat syscall count and table declarations.
+ifeq ($(shell grep -q "__NR_compat32_syscalls" $(srctree)/arch/arm64/kernel/sys32.c; echo $$?),0)
+$(info -- $(REPO_NAME)/compat: found __NR_compat32_syscalls)
+ccflags-y += -DKSU_COMPAT_HAS_NR_COMPAT32_SYSCALLS
+endif
+
 # UL, look for "ext4_unregister_sysfs" on fs/ext4
 ifeq ($(shell grep -q "^extern void ext4_unregister_sysfs" $(srctree)/fs/ext4/ext4.h 2>/dev/null; echo $$?),0)
 $(info -- $(REPO_NAME)/compat: ext4_unregister_sysfs found)

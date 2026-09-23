@@ -257,7 +257,7 @@ static int __init ksu_compat_find_ni_syscall_slots(int *out_slots, int max_slots
     unsigned long ni_syscall;
     int i, count = 0;
 
-    if (!ksu_syscall_table || max_slots <= 0)
+    if (!ksu_compat_syscall_table || max_slots <= 0)
         return 0;
 
     ni_syscall = (unsigned long)ksu_resolve_symbol_for_functable_hook("__arm64_sys_ni_syscall");
@@ -278,15 +278,18 @@ static int __init ksu_compat_find_ni_syscall_slots(int *out_slots, int max_slots
 }
 #endif
 
-// Unified dispatcher: reads original NR from x8, dispatches to handler.
+// Unified dispatcher: native calls read the original NR from x8; compat calls
+// read it from arm32 r7 (pt_regs.regs[7]).
 // Validates that syscallno matches our dispatcher slot (i.e. we redirected it),
 // otherwise it's a spurious call — return -ENOSYS.
 static long __nocfi ksu_syscall_dispatcher(const struct pt_regs *regs)
 {
     int orig_nr;
 
+ #ifdef CONFIG_COMPAT
     if (is_compat_task())
         goto compat;
+ #endif
 
     if (regs->syscallno != ksu_dispatcher_nr)
         return -ENOSYS;
@@ -312,14 +315,14 @@ compat:
     if (regs->syscallno != ksu_compat_dispatcher_nr)
         return -ENOSYS;
 
-    orig_nr = (int)PT_REGS_ORIG_SYSCALL(regs);
+    /* arm32 uses r7 for the syscall number; x8 is an ordinary argument. */
+    orig_nr = (int)(u32)regs->regs[7];
 
     if (regs->syscallno == orig_nr)
         return -ENOSYS;
 
     // Restore registers to original state before dispatching
     ((struct pt_regs *)regs)->syscallno = orig_nr;
-    PT_REGS_ORIG_SYSCALL((struct pt_regs *)regs) = orig_nr;
 
     if (likely(orig_nr >= 0 && orig_nr < __NR_compat_syscalls)) {
         ksu_syscall_hook_fn fn = READ_ONCE(compat_syscall_hooks[orig_nr]);
@@ -329,7 +332,7 @@ compat:
 
     return -ENOSYS;
 #else
-    return;
+    return -ENOSYS;
 #endif
 }
 
@@ -412,18 +415,28 @@ void __init ksu_syscall_hook_init(void)
     ksu_syscall_table = (syscall_fn_t *)ksu_resolve_symbol_for_functable_hook("sys_call_table");
     pr_info("sys_call_table=0x%lx", (unsigned long)ksu_syscall_table);
 
-    if (!ksu_syscall_table)
+    if (!ksu_syscall_table) {
+#ifdef CONFIG_COMPAT
         goto init_compat_dispatcher;
+#else
+        return;
+#endif
+    }
 
     // Find one ni_syscall slot for the dispatcher
     if (ksu_find_ni_syscall_slots(&ni_slot, 1) < 1) {
         pr_err("failed to find ni_syscall slot for dispatcher\n");
+ #ifdef CONFIG_COMPAT
         goto init_compat_dispatcher;
+ #else
+        return;
+ #endif
     }
 
     ksu_dispatcher_nr = ni_slot;
     ksu_syscall_table_hook(ksu_dispatcher_nr, (syscall_fn_t)ksu_syscall_dispatcher, NULL);
     pr_info("dispatcher installed at slot %d\n", ksu_dispatcher_nr);
+ #ifdef CONFIG_COMPAT
 init_compat_dispatcher:
     memset(compat_syscall_hooks, 0, sizeof(compat_syscall_hooks));
 
@@ -442,6 +455,7 @@ init_compat_dispatcher:
     ksu_compat_dispatcher_nr = ni_slot;
     ksu_compat_syscall_table_hook(ksu_compat_dispatcher_nr, (syscall_fn_t)ksu_syscall_dispatcher, NULL);
     pr_info("compat dispatcher installed at slot %d\n", ksu_compat_dispatcher_nr);
+ #endif
 }
 
 void __exit ksu_syscall_hook_exit(void)
