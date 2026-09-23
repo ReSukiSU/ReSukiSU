@@ -21,6 +21,7 @@ def detect_arch_from_filename(apk_path: Path) -> Optional[str]:
         r'armv7|armeabi': 'armeabi-v7a',
         r'x86_64|amd64': 'x86_64',
         r'x86|i686': 'x86',
+        r'riscv64': 'riscv64',
     }
     
     for pattern, arch in arch_patterns.items():

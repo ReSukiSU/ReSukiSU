@@ -18,6 +18,8 @@
 #define KSU_SYS_PREFIX(name) __arm64_sys_##name
 #elif defined(__x86_64__)
 #define KSU_SYS_PREFIX(name) __x64_sys_##name
+#elif defined(__riscv)
+#define KSU_SYS_PREFIX(name) __riscv_sys_##name
 #elif defined(__arm__)
 #define KSU_SYS_PREFIX(name) sys_##name
 #else // wire up your arch here.

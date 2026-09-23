@@ -63,6 +63,9 @@ prop-rs-android = { git = "https://github.com/ReSukiSU/ksu_props", rev = "ddb6ee
 [target.'cfg(not(target_os = "android"))'.dependencies]
 env_logger = { version = "0.11.10", default-features = false }
 
+[patch.crates-io]
+libc = { git = "https://github.com/rust-lang/libc", rev = "1a661633f11a261ff9c00b40875ef72f1cbec818" }
+
 [profile.release]
 strip = true
 opt-level = "z"
