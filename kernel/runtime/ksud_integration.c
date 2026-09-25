@@ -34,7 +34,7 @@
 #include <linux/vmalloc.h>
 #include <linux/stat.h>
 
-#include "compat/syscall_nr.h"
+#include "compat/syscall_no.h"
 
 #include "arch.h"
 #include "klog.h" // IWYU pragma: keep
@@ -89,8 +89,8 @@ static void stop_execve_hook(void);
         ksu_syscall_table_unhook(__NR_read);
         ksu_syscall_table_unhook(__NR_fstat);
         #ifdef CONFIG_COMPAT
-            ksu_compat_syscall_table_unhook(ksu_compat_syscalls.read);
-            ksu_compat_syscall_table_unhook(ksu_compat_syscalls.fstat64);
+            ksu_compat_syscall_table_unhook(ksu_get_compat_syscall_no(read));
+            ksu_compat_syscall_table_unhook(ksu_get_compat_syscall_no(fstat64));
         #endif
         pr_info("unregister init_rc syscall hook\n");
         pr_info("stop init_rc_hook!\n");
@@ -1134,8 +1134,8 @@ void __init ksu_ksud_init(void)
     ksu_syscall_table_hook(__NR_fstat, ksu_sys_fstat, &orig_sys_fstat);
 
 #ifdef CONFIG_COMPAT
-    ksu_compat_syscall_table_hook(ksu_compat_syscalls.read, ksu_sys_read, &orig_compat_sys_read);
-    ksu_compat_syscall_table_hook(ksu_compat_syscalls.fstat64, ksu_sys_fstat, &orig_sys_fstat64);
+    ksu_compat_syscall_table_hook(ksu_get_compat_syscall_no(read), ksu_sys_read, &orig_compat_sys_read);
+    ksu_compat_syscall_table_hook(ksu_get_compat_syscall_no(fstat64), ksu_sys_fstat, &orig_sys_fstat64);
 #endif
 
     ret = register_kprobe(&input_event_kp);

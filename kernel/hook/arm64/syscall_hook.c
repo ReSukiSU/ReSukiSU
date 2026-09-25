@@ -10,7 +10,6 @@
 #include "infra/symbol_resolver.h"
 #include "../patch_memory.h"
 #include "arch.h"
-#include "compat/syscall_nr.h"
 #include "klog.h" // IWYU pragma: keep
 
 // https://github.com/torvalds/linux/commit/7fe33e9f662c0a2f5110be4afff0a24e0c123540
@@ -25,22 +24,13 @@ syscall_fn_t *ksu_compat_syscall_table = NULL;
 int ksu_compat_dispatcher_nr = -1;
 #endif
 
-long __nocfi ksu_call_original_syscall(int orig_nr, const struct pt_regs *regs)
+long __nocfi ksu_call_syscall(int nr, const struct pt_regs *regs)
 {
 #ifdef CONFIG_COMPAT
     if (is_compat_task())
-        return ksu_compat_syscall_table[orig_nr](regs);
+        return ksu_compat_syscall_table[nr](regs);
 #endif
-    return ksu_syscall_table[orig_nr](regs);
-}
-
-long ksu_call_execveat(const struct pt_regs *regs)
-{
-#ifdef CONFIG_COMPAT
-    if (is_compat_task())
-        return ksu_call_original_syscall(ksu_compat_syscalls.execveat, regs);
-#endif
-    return ksu_call_original_syscall(__NR_execveat, regs);
+    return ksu_syscall_table[nr](regs);
 }
 
 // Hook registration table — read with READ_ONCE from tracepoint/dispatcher

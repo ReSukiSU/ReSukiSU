@@ -14,14 +14,9 @@
 sys_call_ptr_t *ksu_syscall_table = NULL;
 int ksu_dispatcher_nr = -1;
 
-long __nocfi ksu_call_original_syscall(int orig_nr, const struct pt_regs *regs)
+long ksu_call_syscall(int nr, const struct pt_regs *regs)
 {
-    return ksu_syscall_table[orig_nr](regs);
-}
-
-long ksu_call_execveat(const struct pt_regs *regs)
-{
-    return ksu_call_original_syscall(__NR_execveat, regs);
+    return ksu_syscall_table[nr](regs);
 }
 
 #ifndef __NR_syscalls

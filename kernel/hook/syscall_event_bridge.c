@@ -56,7 +56,7 @@ static int ksu_handle_init_mark_tracker(const char __user **filename_user)
 long __nocfi ksu_hook_newfstatat(int orig_nr, const struct pt_regs *regs)
 {
     if (!static_branch_unlikely(&ksu_su_compat_enabled))
-        return ksu_call_original_syscall(orig_nr, regs);
+        return ksu_call_syscall(orig_nr, regs);
 
     return ksu_handle_stat_sucompat_internal(orig_nr, (struct pt_regs *)regs);
 }
@@ -64,7 +64,7 @@ long __nocfi ksu_hook_newfstatat(int orig_nr, const struct pt_regs *regs)
 long __nocfi ksu_hook_faccessat(int orig_nr, const struct pt_regs *regs)
 {
     if (!static_branch_unlikely(&ksu_su_compat_enabled))
-        return ksu_call_original_syscall(orig_nr, regs);
+        return ksu_call_syscall(orig_nr, regs);
 
     return ksu_handle_faccessat_sucompat_internal(orig_nr, (struct pt_regs *)regs);
 }
@@ -112,7 +112,7 @@ static long __nocfi ksu_hook_execve_common(int orig_nr, const struct pt_regs *re
         return ret;
     }
 
-    ret = ksu_call_original_syscall(orig_nr, regs);
+    ret = ksu_call_syscall(orig_nr, regs);
     ksu_sulog_emit_pending(pending_root_execve, ret, GFP_KERNEL);
     return ret;
 }
@@ -130,7 +130,7 @@ long __nocfi ksu_hook_execveat(int orig_nr, const struct pt_regs *regs)
 long __nocfi ksu_hook_setresuid(int orig_nr, const struct pt_regs *regs)
 {
     uid_t old_uid = ksu_get_uid_t(current_uid());
-    long ret = ksu_call_original_syscall(orig_nr, regs);
+    long ret = ksu_call_syscall(orig_nr, regs);
 
     if (ret < 0)
         return ret;

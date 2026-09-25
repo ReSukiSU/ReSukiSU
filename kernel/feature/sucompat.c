@@ -44,6 +44,7 @@
 #endif
 #include "sulog/event.h"
 #include "compat/kernel_compat.h"
+#include "compat/syscall_no.h"
 #include "ksu.h"
 
 #define SU_PATH "/system/bin/su"
@@ -181,7 +182,7 @@ long ksu_handle_faccessat_sucompat_internal(int orig_nr, struct pt_regs *regs)
             pr_info("faccessat su->ksud!\n");
             orig_filename = *filename_user;
             *filename_user = ksud_user_path();
-            ret = ksu_call_original_syscall(orig_nr, regs);
+            ret = ksu_call_syscall(orig_nr, regs);
             revert_creds(old_cred);
             *filename_user = orig_filename;
             return ret;
@@ -191,7 +192,7 @@ long ksu_handle_faccessat_sucompat_internal(int orig_nr, struct pt_regs *regs)
     }
 
 do_orig_facessat:
-    return ksu_call_original_syscall(orig_nr, regs);
+    return ksu_call_syscall(orig_nr, regs);
 }
 
 long ksu_handle_stat_sucompat_internal(int orig_nr, struct pt_regs *regs)
@@ -216,7 +217,7 @@ long ksu_handle_stat_sucompat_internal(int orig_nr, struct pt_regs *regs)
             pr_info("newfstatat su->ksud!\n");
             orig_filename = *filename_user;
             *filename_user = ksud_user_path();
-            ret = ksu_call_original_syscall(orig_nr, regs);
+            ret = ksu_call_syscall(orig_nr, regs);
             revert_creds(old_cred);
             *filename_user = orig_filename;
             return ret;
@@ -226,7 +227,7 @@ long ksu_handle_stat_sucompat_internal(int orig_nr, struct pt_regs *regs)
     }
 
 do_orig_stat:
-    return ksu_call_original_syscall(orig_nr, regs);
+    return ksu_call_syscall(orig_nr, regs);
 }
 
 // ensure call from tracepoint
@@ -307,7 +308,12 @@ static long ksu_handle_execve_sucompat_common_internal(const char __user **filen
     }
     ksu_sulog_emit_pending(pending_sucompat, ret, GFP_KERNEL);
 
-    ret = ksu_call_execveat(regs);
+#ifdef CONFIG_COMPAT
+    if (is_compat_task())
+        ret = ksu_call_syscall(ksu_get_compat_syscall_no(execveat), regs);
+    else
+#endif
+        ret = ksu_call_syscall(__NR_execveat, regs);
     if (ret < 0) {
         ksu_close_fd(tmp_fd);
         PT_REGS_NATIVE_PARM1(regs) = orig_regs[0];
@@ -326,7 +332,7 @@ static long ksu_handle_execve_sucompat_common_internal(const char __user **filen
     return ret;
 
 do_orig_execve:
-    return ksu_call_original_syscall(orig_nr, regs);
+    return ksu_call_syscall(orig_nr, regs);
 }
 
 long ksu_handle_execve_sucompat_internal(const char __user **filename_user, int orig_nr, struct pt_regs *regs)
