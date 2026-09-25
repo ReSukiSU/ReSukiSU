@@ -33,7 +33,9 @@ try:
             msg = commit['message'].strip()
             if len(msg) > 200:
                 msg = msg[:197] + '...'
-            msg += ' by ' + commit['author']['username'] + '\n------' if i > 1 else ''
+            msg += ' by ' + commit['author']['username']
+            if i > 1:
+                msg += '\n------'
             if len(msg) + 1 + len(commit_message) > 600:
                 commit_message = f'{commit_message}\n(other {i} commits)'
                 break
