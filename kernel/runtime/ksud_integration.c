@@ -1070,16 +1070,19 @@ static long ksu_sys_fstat(const struct pt_regs *regs)
     if (is_rc) {
         void __user *st_size_ptr;
         long long size, new_size;
+        size_t st_size_size;
         size_t extra = ksu_rc_len + module_rc_len;
 #if defined(__aarch64__) && defined(CONFIG_COMPAT)
         if (is_compat_task()) {
             st_size_ptr = statbuf + offsetof(struct stat64, st_size);
+            st_size_size = sizeof_field(struct stat64, st_size);
         } else
 #endif
         {
             st_size_ptr = statbuf + offsetof(struct stat, st_size);
+            st_size_size = sizeof_field(struct stat, st_size);
         }
-        if (!copy_from_user_nofault(&size, st_size_ptr, sizeof(size))) {
+        if (!copy_from_user_nofault(&size, st_size_ptr, st_size_size)) {
             new_size = size + extra;
             pr_info("adding rc len: %lld -> %lld", size, new_size);
             if (!copy_to_user_nofault(st_size_ptr, &new_size, sizeof(size))) {

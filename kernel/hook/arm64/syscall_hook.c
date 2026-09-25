@@ -14,7 +14,10 @@
 
 // https://github.com/torvalds/linux/commit/7fe33e9f662c0a2f5110be4afff0a24e0c123540
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 0) || defined(KSU_COMPAT_HAS_NR_COMPAT32_SYSCALLS)
+#include <asm/unistd_compat_32.h>
 #define __NR_compat_syscalls __NR_compat32_syscalls
+#else
+#include <asm/unistd.h>
 #endif
 
 syscall_fn_t *ksu_syscall_table = NULL;
