@@ -208,7 +208,7 @@ void __exit ksu_syscall_hook_manager_exit(void)
     ksu_unregister_syscall_hook(__NR_faccessat);
 
 #ifdef CONFIG_COMPAT
-    ksu_unregister_compat_syscall_hook(ksu_get_compat_syscall_no(setresuid));
+    ksu_unregister_compat_syscall_hook(ksu_get_compat_syscall_no(setresuid32));
     ksu_unregister_compat_syscall_hook(ksu_get_compat_syscall_no(execve));
     ksu_unregister_compat_syscall_hook(ksu_get_compat_syscall_no(execveat));
     ksu_unregister_compat_syscall_hook(ksu_get_compat_syscall_no(fstatat64));
