@@ -16,6 +16,13 @@ int ksu_dispatcher_nr = -1;
 
 long ksu_call_syscall(int nr, const struct pt_regs *regs)
 {
+#ifdef CONFIG_COMPAT
+    if (unlikely(is_compat_task())) {
+        pr_err("compat but hooked! Please report this as a issue");
+        return -EOPNOTSUPP;
+    }
+#endif
+
     return ksu_syscall_table[nr](regs);
 }
 

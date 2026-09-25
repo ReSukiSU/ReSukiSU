@@ -27,10 +27,14 @@
             #define ksu_get_syscall_no(name) (is_compat_task() ? __COMPAT__NR_##name : __NR_##name)
             #define ksu_get_compat_syscall_no(name) __COMPAT__NR_##name
         #endif // 6.11-
-    #elif defined(__x86_64__)
-        #include <asm/unistd_32_ia32.h>
-        #define ksu_get_syscall_no(name) (in_compat_syscall() ? __NR_ia32_##name : __NR_##name)
-        #define ksu_get_compat_syscall_no(name) __NR_ia32_##name
+    #else
+        #define ksu_get_syscall_no(name) __NR_##name
+        #define ksu_get_compat_syscall_no(name) \
+                ({ \
+                    BUILD_BUG_ON_MSG(1, \
+                        "ksu_get_compat_syscall_no() requires arm64"); \
+                    0; \
+                })
     #endif // !__aarch64__ && !__x86_64__
 #else
     #define ksu_get_syscall_no(name) __NR_##name

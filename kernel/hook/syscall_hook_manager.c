@@ -163,7 +163,7 @@ void __init ksu_syscall_hook_manager_init(void)
     ksu_register_syscall_hook(__NR_newfstatat, ksu_hook_newfstatat);
     ksu_register_syscall_hook(__NR_faccessat, ksu_hook_faccessat);
 
-#ifdef CONFIG_COMPAT
+#if defined(CONFIG_COMPAT) && defined(__aarch64__)
     ksu_register_compat_syscall_hook(ksu_get_compat_syscall_no(setresuid32), ksu_hook_setresuid);
     ksu_register_compat_syscall_hook(ksu_get_compat_syscall_no(execve), ksu_hook_execve);
     ksu_register_compat_syscall_hook(ksu_get_compat_syscall_no(execveat), ksu_hook_execveat);
@@ -207,7 +207,7 @@ void __exit ksu_syscall_hook_manager_exit(void)
     ksu_unregister_syscall_hook(__NR_newfstatat);
     ksu_unregister_syscall_hook(__NR_faccessat);
 
-#ifdef CONFIG_COMPAT
+#if defined(CONFIG_COMPAT) && defined(__aarch64__)
     ksu_unregister_compat_syscall_hook(ksu_get_compat_syscall_no(setresuid32));
     ksu_unregister_compat_syscall_hook(ksu_get_compat_syscall_no(execve));
     ksu_unregister_compat_syscall_hook(ksu_get_compat_syscall_no(execveat));
