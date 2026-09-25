@@ -2,6 +2,7 @@
 #define KSU_SYSCALL_NO_H
 
 #include <asm/syscall.h>
+#include <linux/version.h>
 
 // clang-format off
 #ifdef CONFIG_COMPAT
@@ -33,7 +34,12 @@
     #endif // !__aarch64__ && !__x86_64__
 #else
     #define ksu_get_syscall_no(name) __NR_##name
-    #define ksu_get_compat_syscall_no(name) CALL ksu_get_compat_syscall_no when CONFIG_COMPAT is NOT enabled is MISTAKE
+    #define ksu_get_compat_syscall_no(name) \
+        ({ \
+            BUILD_BUG_ON_MSG(1, \
+                "ksu_get_compat_syscall_no() requires CONFIG_COMPAT"); \
+            0; \
+        })
 #endif // !CONFIG_COMPAT
 
 #endif // #ifndef KSU_SYSCALL_NO_H
