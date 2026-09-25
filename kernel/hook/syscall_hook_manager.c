@@ -99,18 +99,19 @@ static struct kretprobe *syscall_unregfunc_rp = NULL;
 // sys_enter handler: redirect hooked syscalls to the dispatcher
 static void ksu_sys_enter_handler(void *data, struct pt_regs *regs, long id)
 {
-// we need handle arm64 kernel with arm32 userspace
-#if defined(__x86_64__)
-    if (unlikely(in_compat_syscall()))
-        return;
-#elif defined(__aarch64__)
+    // clang-format off
 #ifdef CONFIG_COMPAT
-    if (unlikely(is_compat_task()))
-        goto aarch64_compat;
+    #if defined(__x86_64__)
+        if (unlikely(in_compat_syscall()))
+            goto compat;
+    #elif defined(__aarch64__)
+        if (unlikely(is_compat_task()))
+            goto compat;
+    #else
+        #error Unsupported arch
+    #endif
 #endif
-#else
-#error Unsupported arch
-#endif
+    // clang-format on
 
     if (ksu_dispatcher_nr < 0)
         return;
@@ -126,21 +127,30 @@ static void ksu_sys_enter_handler(void *data, struct pt_regs *regs, long id)
 #elif defined(__aarch64__)
         PT_REGS_ORIG_SYSCALL(current_regs) = id;
         current_regs->syscallno = ksu_dispatcher_nr;
+#else
+#error Unsupported arch
 #endif
     }
 
     return;
-#if defined(__aarch64__) && defined(CONFIG_COMPAT)
-aarch64_compat:
+#ifdef CONFIG_COMPAT
+compat:
     if (ksu_compat_dispatcher_nr < 0)
         return;
 
     if (ksu_has_compat_syscall_hook(id)) {
         struct pt_regs *current_regs = task_pt_regs(current);
-
-        /* arm32 syscall numbers are passed in r7, not arm64 x8. */
+#ifdef __x86_64__
+        // Stash the original syscall number in ax.
+        // We use ax because it currently just holds -ENOSYS and is safe to overwrite.
+        current_regs->ax = (u32)id;
+        current_regs->orig_ax = ksu_compat_dispatcher_nr;
+#elif defined(__aarch64__)
         PT_REGS_ORIG_SYSCALL(current_regs) = (u32)id;
         current_regs->syscallno = ksu_compat_dispatcher_nr;
+#else
+#error Unsupported arch
+#endif
     }
 #endif
 }

@@ -17,7 +17,13 @@ mv .ddk-version .ddk-version.bak 2> /dev/null || true
 for kmi in $KMIS; do
     echo "========== Building $kmi =========="
     ODIR="$(realpath .)/out/$kmi"
-    if ddk build "$kmi" "ODIR=$ODIR" -e CONFIG_KSU=m -e CONFIG_KSU_TRACEPOINT_HOOK=y -e CONFIG_KSU_MULTI_MANAGER_SUPPORT=y; then
+    if ddk build "$kmi" \
+        -e CONFIG_KSU=m \
+        -e CONFIG_KSU_TRACEPOINT_HOOK=y \
+        -e CONFIG_KSU_MULTI_MANAGER_SUPPORT=y \
+        -- \
+        "ODIR=$ODIR" \
+        -C kernel; then
         if [ -f "$ODIR/kernelsu.ko" ]; then
             cp "$ODIR/kernelsu.ko" "out/kernelsu-${kmi}.ko"
             llvm-strip -d "out/kernelsu-${kmi}.ko"
