@@ -11,9 +11,7 @@
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
 #include <linux/sched/task_stack.h>
 #endif
-#ifdef CONFIG_COMPAT
 #include <linux/compat.h>
-#endif
 
 #include "compat/syscall_no.h"
 
@@ -25,6 +23,9 @@
 #include "hook/setuid_hook.h"
 #include "hook/syscall_hook.h"
 #include "hook/syscall_event_bridge.h"
+#if defined(__riscv)
+#include "hook/riscv64/syscall_regs.h"
+#endif
 
 #ifdef CONFIG_KRETPROBES
 
@@ -100,17 +101,22 @@ static struct kretprobe *syscall_unregfunc_rp = NULL;
 static void ksu_sys_enter_handler(void *data, struct pt_regs *regs, long id)
 {
 // we need handle arm64 kernel with arm32 userspace
-#if defined(__x86_64__)
-    if (unlikely(in_compat_syscall()))
-        return;
-#elif defined(__aarch64__)
+// clang-format off
 #ifdef CONFIG_COMPAT
-    if (unlikely(is_compat_task()))
-        goto aarch64_compat;
+    #if defined(__x86_64__)
+        if (unlikely(in_compat_syscall()))
+            return;
+    #elif defined(__riscv)
+        if (unlikely(is_compat_task()))
+            return;
+    #elif defined(__aarch64__)
+        if (unlikely(is_compat_task()))
+            goto aarch64_compat;
+    #else
+        #error Unsupported arch
+    #endif
 #endif
-#else
-#error Unsupported arch
-#endif
+// clang-format on
 
     if (ksu_dispatcher_nr < 0)
         return;
@@ -126,6 +132,9 @@ static void ksu_sys_enter_handler(void *data, struct pt_regs *regs, long id)
 #elif defined(__aarch64__)
         PT_REGS_ORIG_SYSCALL(current_regs) = id;
         current_regs->syscallno = ksu_dispatcher_nr;
+#elif defined(__riscv)
+        /* orig_a0 retains argument zero; a0 is the -ENOSYS return slot. */
+        ksu_riscv_redirect_syscall(current_regs, id, ksu_dispatcher_nr);
 #endif
     }
 

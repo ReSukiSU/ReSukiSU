@@ -245,7 +245,7 @@ static long ksu_handle_execve_sucompat_common_internal(const char __user **filen
     struct file *ksud_file;
     const struct cred *old_cred;
 
-    if (execveat && ((int)PT_REGS_PARM1(regs) != AT_FDCWD || (int)PT_REGS_PARM5(regs) != 0))
+    if (execveat && ((int)PT_REGS_SYSCALL_PARM1(regs) != AT_FDCWD || (int)PT_REGS_PARM5(regs) != 0))
         goto do_orig_execve;
 
     if (unlikely(!filename_user))
@@ -291,7 +291,7 @@ static long ksu_handle_execve_sucompat_common_internal(const char __user **filen
         (const char __user *)ksu_task_user_ptr((unsigned long)*filename_user), argv_user, GFP_KERNEL);
     // execve(file, argv, environ)
     // execveat(fd, file, argv, environ, flags)
-    orig_regs[0] = PT_REGS_NATIVE_PARM1(regs);
+    orig_regs[0] = PT_REGS_NATIVE_SYSCALL_PARM1(regs);
     orig_regs[1] = PT_REGS_NATIVE_PARM2(regs);
     orig_regs[2] = PT_REGS_NATIVE_PARM3(regs);
     orig_regs[3] = PT_REGS_NATIVE_SYSCALL_PARM4(regs);
@@ -300,7 +300,7 @@ static long ksu_handle_execve_sucompat_common_internal(const char __user **filen
     PT_REGS_NATIVE_SYSCALL_PARM4(regs) = envp;
     PT_REGS_NATIVE_PARM3(regs) = (unsigned long)argv_user;
     PT_REGS_NATIVE_PARM2(regs) = (unsigned long)empty_user_path();
-    PT_REGS_NATIVE_PARM1(regs) = tmp_fd;
+    PT_REGS_NATIVE_SYSCALL_PARM1(regs) = tmp_fd;
 
     ret = escape_with_root_profile();
     if (ret) {
@@ -316,7 +316,7 @@ static long ksu_handle_execve_sucompat_common_internal(const char __user **filen
         ret = ksu_call_syscall(__NR_execveat, regs);
     if (ret < 0) {
         ksu_close_fd(tmp_fd);
-        PT_REGS_NATIVE_PARM1(regs) = orig_regs[0];
+        PT_REGS_NATIVE_SYSCALL_PARM1(regs) = orig_regs[0];
         PT_REGS_NATIVE_PARM2(regs) = orig_regs[1];
         PT_REGS_NATIVE_PARM3(regs) = orig_regs[2];
         PT_REGS_NATIVE_SYSCALL_PARM4(regs) = orig_regs[3];

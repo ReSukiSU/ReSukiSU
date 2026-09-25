@@ -982,7 +982,7 @@ static void ksu_execve_hook_ksud_common(const char __user *filename_user, struct
 
 void ksu_execve_hook_ksud(const struct pt_regs *regs)
 {
-    const char __user *filename_user = (const char __user *)PT_REGS_USER_PTR(regs, 1);
+    const char __user *filename_user = (const char __user *)PT_REGS_SYSCALL_PARM1_USER_PTR(regs, 1);
     struct user_arg_ptr argv;
 
 #ifdef CONFIG_COMPAT
@@ -1018,7 +1018,7 @@ static long (*orig_compat_sys_read)(const struct pt_regs *regs);
 #endif
 static long ksu_sys_read(const struct pt_regs *regs)
 {
-    unsigned int fd = PT_REGS_PARM1(regs);
+    unsigned int fd = PT_REGS_SYSCALL_PARM1(regs);
     char __user *buf = (char __user *)PT_REGS_USER_PTR(regs, 2);
     size_t count = PT_REGS_PARM3(regs);
 
@@ -1042,7 +1042,7 @@ static long (*orig_sys_fstat64)(const struct pt_regs *regs);
 #endif
 static long ksu_sys_fstat(const struct pt_regs *regs)
 {
-    unsigned int fd = PT_REGS_PARM1(regs);
+    unsigned int fd = PT_REGS_SYSCALL_PARM1(regs);
     void __user *statbuf = PT_REGS_USER_PTR(regs, 2);
     bool is_rc = false;
     long ret;

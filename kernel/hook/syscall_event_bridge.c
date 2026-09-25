@@ -77,9 +77,9 @@ extern struct static_key_true ksud_execve_key;
 static long __nocfi ksu_hook_execve_common(int orig_nr, const struct pt_regs *regs, bool execveat)
 {
     const char __user **filename_user = execveat ? (const char __user **)&PT_REGS_NATIVE_PARM2(regs) :
-                                                   (const char __user **)&PT_REGS_NATIVE_PARM1(regs);
+                                                   (const char __user **)&PT_REGS_NATIVE_SYSCALL_PARM1(regs);
     const char __user *filename =
-        execveat ? (const char __user *)PT_REGS_USER_PTR(regs, 2) : (const char __user *)PT_REGS_USER_PTR(regs, 1);
+        execveat ? (const char __user *)PT_REGS_USER_PTR(regs, 2) : (const char __user *)PT_REGS_SYSCALL_PARM1_USER_PTR(regs);
     const char __user *const __user *argv_user = execveat ?
                                                      (const char __user *const __user *)PT_REGS_USER_PTR(regs, 3) :
                                                      (const char __user *const __user *)PT_REGS_USER_PTR(regs, 2);
