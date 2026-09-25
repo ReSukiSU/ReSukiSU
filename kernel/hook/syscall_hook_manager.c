@@ -164,7 +164,7 @@ void __init ksu_syscall_hook_manager_init(void)
     ksu_register_syscall_hook(__NR_faccessat, ksu_hook_faccessat);
 
 #ifdef CONFIG_COMPAT
-    ksu_register_compat_syscall_hook(ksu_get_compat_syscall_no(setresuid), ksu_hook_setresuid);
+    ksu_register_compat_syscall_hook(ksu_get_compat_syscall_no(setresuid32), ksu_hook_setresuid);
     ksu_register_compat_syscall_hook(ksu_get_compat_syscall_no(execve), ksu_hook_execve);
     ksu_register_compat_syscall_hook(ksu_get_compat_syscall_no(execveat), ksu_hook_execveat);
     ksu_register_compat_syscall_hook(ksu_get_compat_syscall_no(fstatat64), ksu_hook_newfstatat);
