@@ -982,7 +982,7 @@ static void ksu_execve_hook_ksud_common(const char __user *filename_user, struct
 
 void ksu_execve_hook_ksud(const struct pt_regs *regs)
 {
-    const char __user *filename_user = (const char __user *)PT_REGS_SYSCALL_PARM1_USER_PTR(regs, 1);
+    const char __user *filename_user = (const char __user *)PT_REGS_SYSCALL_PARM1_USER_PTR(regs);
     struct user_arg_ptr argv;
 
 #ifdef CONFIG_COMPAT

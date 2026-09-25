@@ -116,7 +116,7 @@ static void ksu_sys_enter_handler(void *data, struct pt_regs *regs, long id)
         #error Unsupported arch
     #endif
 #endif
-// clang-format on
+    // clang-format on
 
     if (ksu_dispatcher_nr < 0)
         return;
