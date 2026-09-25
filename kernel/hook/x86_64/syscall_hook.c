@@ -2,9 +2,6 @@
 
 #include "../syscall_hook.h"
 
-#ifdef CONFIG_COMPAT
-#include <linux/compat.h>
-#endif
 #include <linux/kallsyms.h>
 #include <linux/mutex.h>
 #include <linux/nospec.h>
@@ -16,22 +13,9 @@
 
 sys_call_ptr_t *ksu_syscall_table = NULL;
 int ksu_dispatcher_nr = -1;
-#ifdef CONFIG_COMPAT
-sys_call_ptr_t *ksu_compat_syscall_table = NULL;
-int ksu_compat_dispatcher_nr = -1;
-#endif
 
 long ksu_call_syscall(int nr, const struct pt_regs *regs)
 {
-#ifdef CONFIG_COMPAT
-    if (in_compat_syscall()) {
-        if (!ksu_compat_syscall_table)
-            return -ENOSYS;
-        return ksu_compat_syscall_table[nr](regs);
-    }
-#endif
-    if (!ksu_syscall_table)
-        return -ENOSYS;
     return ksu_syscall_table[nr](regs);
 }
 
@@ -39,22 +23,9 @@ long ksu_call_syscall(int nr, const struct pt_regs *regs)
 #define __NR_syscalls (__NR_syscall_max + 1)
 #endif
 
-#ifdef CONFIG_COMPAT
-#ifndef IA32_NR_syscalls
-#ifdef __NR_ia32_syscalls
-#define IA32_NR_syscalls __NR_ia32_syscalls
-#else
-#define IA32_NR_syscalls (__NR_ia32_syscall_max + 1)
-#endif
-#endif
-#endif
-
 // Hook registration table — read with READ_ONCE from tracepoint/dispatcher
 // context, written with WRITE_ONCE from init/exit context.
 static ksu_syscall_hook_fn syscall_hooks[__NR_syscalls];
-#ifdef CONFIG_COMPAT
-static ksu_syscall_hook_fn compat_syscall_hooks[IA32_NR_syscalls];
-#endif
 
 // Track all hooked syscall entries for restoration.
 // Protected by hooked_entries_lock.
@@ -65,10 +36,6 @@ struct syscall_hook_entry {
 
 static DEFINE_MUTEX(hooked_entries_lock);
 static struct syscall_hook_entry hooked_entries[16];
-#ifdef CONFIG_COMPAT
-static struct syscall_hook_entry hooked_compat_entries[16];
-static int compat_hooked_count;
-#endif
 static int hooked_count = 0;
 
 static int patch_syscall_table(int nr, sys_call_ptr_t fn)
@@ -88,24 +55,6 @@ static int patch_syscall_table(int nr, sys_call_ptr_t fn)
 
     return 0;
 }
-#ifdef CONFIG_COMPAT
-static int patch_compat_syscall_table(int nr, sys_call_ptr_t fn)
-{
-    if (!ksu_compat_syscall_table)
-        return -ENOENT;
-    if (nr < 0 || nr >= IA32_NR_syscalls)
-        return -EINVAL;
-
-    pr_info("patch compat syscall %d, 0x%lx -> 0x%lx\n", nr, (unsigned long)READ_ONCE(ksu_compat_syscall_table[nr]),
-            (unsigned long)fn);
-
-    if (ksu_patch_text(&ksu_compat_syscall_table[nr], &fn, sizeof(fn), KSU_PATCH_TEXT_FLUSH_DCACHE)) {
-        pr_err("patch compat syscall %d failed\n", nr);
-        return -EIO;
-    }
-    return 0;
-}
-#endif
 
 // Direct syscall table patching: overwrite syscall_table[nr] with fn,
 // save original to *old, and record for restoration at module exit.
@@ -174,62 +123,6 @@ void ksu_syscall_table_unhook(int nr)
     mutex_unlock(&hooked_entries_lock);
     pr_warn("syscall %d not found in hooked entries\n", nr);
 }
-#ifdef CONFIG_COMPAT
-void ksu_compat_syscall_table_hook(int nr, sys_call_ptr_t fn, sys_call_ptr_t *old)
-{
-    int i;
-    bool found = false;
-    sys_call_ptr_t orig;
-
-    if (!ksu_compat_syscall_table)
-        return;
-    if (nr < 0 || nr >= IA32_NR_syscalls) {
-        pr_info("invalid compat nr: %d\n", nr);
-        return;
-    }
-
-    mutex_lock(&hooked_entries_lock);
-    orig = READ_ONCE(ksu_compat_syscall_table[nr]);
-    if (old)
-        *old = orig;
-    for (i = 0; i < compat_hooked_count; i++) {
-        if (hooked_compat_entries[i].nr == nr) {
-            found = true;
-            break;
-        }
-    }
-    if (!found) {
-        if (compat_hooked_count < ARRAY_SIZE(hooked_compat_entries)) {
-            hooked_compat_entries[compat_hooked_count].nr = nr;
-            hooked_compat_entries[compat_hooked_count++].orig = orig;
-        } else {
-            pr_warn("hooked_compat_entries full, cannot track syscall %d for restoration\n", nr);
-        }
-    }
-    patch_compat_syscall_table(nr, fn);
-    mutex_unlock(&hooked_entries_lock);
-}
-
-void ksu_compat_syscall_table_unhook(int nr)
-{
-    int i;
-
-    if (!ksu_compat_syscall_table || nr < 0 || nr >= IA32_NR_syscalls)
-        return;
-    mutex_lock(&hooked_entries_lock);
-    for (i = 0; i < compat_hooked_count; i++) {
-        if (hooked_compat_entries[i].nr == nr) {
-            patch_compat_syscall_table(nr, hooked_compat_entries[i].orig);
-            hooked_compat_entries[i] = hooked_compat_entries[--compat_hooked_count];
-            mutex_unlock(&hooked_entries_lock);
-            pr_info("unhooked compat syscall %d\n", nr);
-            return;
-        }
-    }
-    mutex_unlock(&hooked_entries_lock);
-    pr_warn("compat syscall %d not found in hooked entries\n", nr);
-}
-#endif
 
 static int ksu_find_ni_syscall_slots(int *out_slots, int max_slots)
 {
@@ -255,61 +148,31 @@ static int ksu_find_ni_syscall_slots(int *out_slots, int max_slots)
 
     return count;
 }
-#ifdef CONFIG_COMPAT
-static int ksu_compat_find_ni_syscall_slots(int *out_slots, int max_slots)
-{
-    unsigned long ni_syscall;
-    int i, count = 0;
 
-    if (!ksu_compat_syscall_table || max_slots <= 0)
-        return 0;
-    ni_syscall = (unsigned long)ksu_resolve_symbol_for_functable_hook("__ia32_sys_ni_syscall");
-    if (!ni_syscall)
-        ni_syscall = (unsigned long)ksu_resolve_symbol_for_functable_hook("sys_ni_syscall");
-    if (!ni_syscall)
-        return 0;
-    for (i = 0; i < IA32_NR_syscalls && count < max_slots; i++) {
-        if ((unsigned long)ksu_compat_syscall_table[i] == ni_syscall)
-            out_slots[count++] = i;
-    }
-    return count;
-}
-#endif
-
+// Unified dispatcher: reads original NR from orig_ax, dispatches to handler.
+// Validates that orig_ax matches our dispatcher slot (i.e. we redirected it),
+// otherwise it's a spurious call — return -ENOSYS.
 static long __nocfi ksu_syscall_dispatcher(const struct pt_regs *regs)
 {
-    int orig_nr;
-
-#ifdef CONFIG_COMPAT
-    if (in_compat_syscall()) {
-        if (regs->orig_ax != ksu_compat_dispatcher_nr)
-            return -ENOSYS;
-        orig_nr = (int)(u32)regs->ax;
-        if (regs->orig_ax == orig_nr)
-            return -ENOSYS;
-        // Restore registers to original state before dispatching
-        ((struct pt_regs *)regs)->orig_ax = orig_nr;
-        if (likely(orig_nr >= 0 && orig_nr < IA32_NR_syscalls)) {
-            ksu_syscall_hook_fn fn = READ_ONCE(compat_syscall_hooks[orig_nr]);
-            if (likely(fn))
-                return fn(orig_nr, regs);
-        }
-        return -ENOSYS;
-    }
-#endif
-
     if (regs->orig_ax != ksu_dispatcher_nr)
         return -ENOSYS;
-    orig_nr = (int)regs->ax;
+
+    // On x86_64, orig_ax was overwritten by our tracepoint to route here.
+    // The original syscall number passed by userspace is still sitting untouched in ax.
+    int orig_nr = (int)regs->ax;
+
     if (regs->orig_ax == orig_nr)
         return -ENOSYS;
+
     // Restore registers to original state before dispatching
     ((struct pt_regs *)regs)->orig_ax = orig_nr;
+
     if (likely(orig_nr >= 0 && orig_nr < __NR_syscalls)) {
         ksu_syscall_hook_fn fn = READ_ONCE(syscall_hooks[orig_nr]);
         if (likely(fn))
             return fn(orig_nr, regs);
     }
+
     return -ENOSYS;
 }
 
@@ -327,18 +190,6 @@ int ksu_register_syscall_hook(int nr, ksu_syscall_hook_fn fn)
     pr_info("registered syscall hook for nr=%d\n", nr);
     return 0;
 }
-#ifdef CONFIG_COMPAT
-int ksu_register_compat_syscall_hook(int nr, ksu_syscall_hook_fn fn)
-{
-    if (nr < 0 || nr >= IA32_NR_syscalls)
-        return -EINVAL;
-    if (READ_ONCE(compat_syscall_hooks[nr]))
-        return -EEXIST;
-    WRITE_ONCE(compat_syscall_hooks[nr], fn);
-    pr_info("registered compat syscall hook for nr=%d\n", nr);
-    return 0;
-}
-#endif
 
 // Remove a handler from the dispatcher's routing table.
 // The syscall table is not touched — only the dispatcher stops routing this nr.
@@ -356,22 +207,6 @@ bool ksu_has_syscall_hook(int nr)
         return false;
     return READ_ONCE(syscall_hooks[nr]) != NULL;
 }
-#ifdef CONFIG_COMPAT
-void ksu_unregister_compat_syscall_hook(int nr)
-{
-    if (nr < 0 || nr >= IA32_NR_syscalls)
-        return;
-    WRITE_ONCE(compat_syscall_hooks[nr], NULL);
-    pr_info("unregistered compat syscall hook for nr=%d\n", nr);
-}
-
-bool ksu_has_compat_syscall_hook(int nr)
-{
-    if (nr < 0 || nr >= IA32_NR_syscalls)
-        return false;
-    return READ_ONCE(compat_syscall_hooks[nr]) != NULL;
-}
-#endif
 
 // https://github.com/torvalds/linux/commit/1e3ad78334a69b36e107232e337f9d693dcc9df2
 // harden syscall table was introduced in 6.9, but it was backported to almost
@@ -467,20 +302,12 @@ void __init __nocfi ksu_syscall_hook_init(void)
     int ni_slot;
 
     memset(syscall_hooks, 0, sizeof(syscall_hooks));
-#ifdef CONFIG_COMPAT
-    memset(compat_syscall_hooks, 0, sizeof(compat_syscall_hooks));
-#endif
 
     ksu_syscall_table = (sys_call_ptr_t *)ksu_resolve_symbol_for_functable_hook("sys_call_table");
     pr_info("sys_call_table=0x%lx\n", (unsigned long)ksu_syscall_table);
 
-    if (!ksu_syscall_table) {
-#ifdef CONFIG_COMPAT
-        goto init_compat_dispatcher;
-#else
+    if (!ksu_syscall_table)
         return;
-#endif
-    }
 
 #ifdef CONFIG_KSU_X86_PATCH_SYSCALL_DISPATCHER
     patch_abs_jump("x64_sys_call", &x64_sys_call_patch_addr, my_x64_sys_call, x64_sys_call_patch_orig_insn);
@@ -495,29 +322,15 @@ void __init __nocfi ksu_syscall_hook_init(void)
 #endif
 #endif
 
-    // Find one ni_syscall slot for the native dispatcher.
+    // Find one ni_syscall slot for the dispatcher
     if (ksu_find_ni_syscall_slots(&ni_slot, 1) < 1) {
         pr_err("failed to find ni_syscall slot for dispatcher\n");
-    } else {
-        ksu_dispatcher_nr = ni_slot;
-        ksu_syscall_table_hook(ksu_dispatcher_nr, (sys_call_ptr_t)ksu_syscall_dispatcher, NULL);
-        pr_info("dispatcher installed at slot %d\n", ksu_dispatcher_nr);
+        return;
     }
 
-#ifdef CONFIG_COMPAT
-init_compat_dispatcher:
-    ksu_compat_syscall_table = (sys_call_ptr_t *)ksu_resolve_symbol_for_functable_hook("ia32_sys_call_table");
-    pr_info("ia32_sys_call_table=0x%lx\n", (unsigned long)ksu_compat_syscall_table);
-    if (!ksu_compat_syscall_table)
-        return;
-    if (ksu_compat_find_ni_syscall_slots(&ni_slot, 1) < 1) {
-        pr_err("failed to find ni_syscall slot for compat dispatcher\n");
-        return;
-    }
-    ksu_compat_dispatcher_nr = ni_slot;
-    ksu_compat_syscall_table_hook(ksu_compat_dispatcher_nr, (sys_call_ptr_t)ksu_syscall_dispatcher, NULL);
-    pr_info("compat dispatcher installed at slot %d\n", ksu_compat_dispatcher_nr);
-#endif
+    ksu_dispatcher_nr = ni_slot;
+    ksu_syscall_table_hook(ksu_dispatcher_nr, (sys_call_ptr_t)ksu_syscall_dispatcher, NULL);
+    pr_info("dispatcher installed at slot %d\n", ksu_dispatcher_nr);
 }
 
 void __exit ksu_syscall_hook_exit(void)
@@ -545,36 +358,23 @@ void __exit ksu_syscall_hook_exit(void)
 #endif
 #endif
 
-    if (ksu_syscall_table) {
-        // Restore native entries while dispatcher and hook tables remain valid.
-        mutex_lock(&hooked_entries_lock);
-        for (i = 0; i < hooked_count; i++) {
-            int nr = hooked_entries[i].nr;
-            sys_call_ptr_t orig = hooked_entries[i].orig;
+    if (!ksu_syscall_table)
+        goto clear_state;
 
-            pr_info("restore syscall %d to 0x%lx\n", nr, (unsigned long)orig);
-            if (ksu_patch_text(&ksu_syscall_table[nr], &orig, sizeof(orig), KSU_PATCH_TEXT_FLUSH_DCACHE))
-                pr_err("restore syscall %d failed\n", nr);
+    // First, restore all patched syscall table entries while the dispatcher
+    // and hook table are still intact, so in-flight syscalls see valid state.
+    mutex_lock(&hooked_entries_lock);
+    for (i = 0; i < hooked_count; i++) {
+        int nr = hooked_entries[i].nr;
+        sys_call_ptr_t orig = hooked_entries[i].orig;
+
+        pr_info("restore syscall %d to 0x%lx\n", nr, (unsigned long)orig);
+        if (ksu_patch_text(&ksu_syscall_table[nr], &orig, sizeof(orig), KSU_PATCH_TEXT_FLUSH_DCACHE)) {
+            pr_err("restore syscall %d failed\n", nr);
         }
-        hooked_count = 0;
-        mutex_unlock(&hooked_entries_lock);
     }
-
-#ifdef CONFIG_COMPAT
-    if (ksu_compat_syscall_table) {
-        mutex_lock(&hooked_entries_lock);
-        for (i = 0; i < compat_hooked_count; i++) {
-            int nr = hooked_compat_entries[i].nr;
-            sys_call_ptr_t orig = hooked_compat_entries[i].orig;
-
-            pr_info("restore compat syscall %d to 0x%lx\n", nr, (unsigned long)orig);
-            if (ksu_patch_text(&ksu_compat_syscall_table[nr], &orig, sizeof(orig), KSU_PATCH_TEXT_FLUSH_DCACHE))
-                pr_err("restore compat syscall %d failed\n", nr);
-        }
-        compat_hooked_count = 0;
-        mutex_unlock(&hooked_entries_lock);
-    }
-#endif
+    hooked_count = 0;
+    mutex_unlock(&hooked_entries_lock);
 
 clear_state:
     // Now that the syscall table is restored, clear internal state.
@@ -582,15 +382,53 @@ clear_state:
     // (done by ksu_syscall_hook_manager_exit before calling us), so no new
     // dispatches will occur.
     memset(syscall_hooks, 0, sizeof(syscall_hooks));
-#ifdef CONFIG_COMPAT
-    memset(compat_syscall_hooks, 0, sizeof(compat_syscall_hooks));
-#endif
     ksu_dispatcher_nr = -1;
-#ifdef CONFIG_COMPAT
-    ksu_compat_dispatcher_nr = -1;
-#endif
 
     pr_info("all syscall hooks restored\n");
 }
+
+// stub here
+// because i think no usecase
+// (no device with x64 kernel and x32 userspace)
+#ifdef CONFIG_COMPAT
+// --- Dispatcher-based hook API (register/unregister) ---
+// Register a handler into the dispatcher's routing table for syscall @nr.
+// When a marked process invokes syscall @nr, the sys_enter tracepoint redirects
+// it to the unified dispatcher, which looks up @fn by @nr and calls it.
+// Does NOT modify the syscall table itself — the dispatcher slot is shared.
+// Returns 0 on success, -EEXIST if already registered, -EINVAL if nr invalid.
+int ksu_register_compat_syscall_hook(int nr, ksu_syscall_hook_fn fn)
+{
+    return -EOPNOTSUPP;
+}
+
+// Remove a handler from the dispatcher's routing table for syscall @nr.
+// The syscall table is not touched — only the dispatcher stops routing @nr.
+void ksu_unregister_compat_syscall_hook(int nr)
+{
+    // do nothing
+}
+
+// Check if a handler is registered in the dispatcher for syscall @nr.
+bool ksu_has_compat_syscall_hook(int nr)
+{
+    return false;
+}
+
+// --- Direct syscall table patching API (hook/unhook) ---
+// Directly overwrite syscall_table[@nr] with @fn using fixmap + stop_machine.
+// Saves the original handler to *@old (if non-NULL) and records the entry
+// for restoration at module exit. Use this for boot-time hooks that replace
+// a real syscall entry (e.g. ksud hooking __NR_execve/__NR_read/__NR_fstat).
+void ksu_compat_syscall_table_hook(int nr, syscall_fn_t fn, syscall_fn_t *old)
+{
+    // do nothing
+}
+
+void ksu_compat_syscall_table_unhook(int nr)
+{
+    // do nothing
+}
+#endif
 
 #endif /* __x86_64__ */
