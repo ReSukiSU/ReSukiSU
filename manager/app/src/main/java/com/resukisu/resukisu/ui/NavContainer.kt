@@ -374,9 +374,13 @@ fun NavContainer(
                 exitDirection = settings.predictiveBackExitDirection,
             )
         }
-        val swipeBackDirection = when (LocalLayoutDirection.current) {
-            LayoutDirection.Rtl -> NavSwipeDirection.RightToLeft
-            LayoutDirection.Ltr -> NavSwipeDirection.LeftToRight
+        val swipeBackDirection = if (settings.enableSwipeDismiss) {
+            when (LocalLayoutDirection.current) {
+                LayoutDirection.Rtl -> NavSwipeDirection.RightToLeft
+                LayoutDirection.Ltr -> NavSwipeDirection.LeftToRight
+            }
+        } else {
+            NavSwipeDirection.None
         }
         val interceptPredictiveBack =
             settings.predictiveBackAnimation == PredictiveBackAnimation.None && backStack.size > 1
@@ -428,7 +432,7 @@ fun NavContainer(
                     backgroundRenderState = backgroundRenderState,
                     useBlur = useBlur,
                 ) {
-                    MainScreen()
+                    MainScreen(pagerInterceptionMode = settings.pagerInterceptionMode)
                 }
             }
             entry<Route.AppProfileTemplate>(swipeDismiss = swipeBackDirection) {
@@ -531,7 +535,7 @@ fun NavContainer(
                     backgroundRenderState = backgroundRenderState,
                     useBlur = useBlur,
                 ) {
-                    MainScreen()
+                    MainScreen(pagerInterceptionMode = settings.pagerInterceptionMode)
                 }
             }
             entry<Route.SuperUser>(swipeDismiss = NavSwipeDirection.None) {
@@ -542,7 +546,7 @@ fun NavContainer(
                     backgroundRenderState = backgroundRenderState,
                     useBlur = useBlur,
                 ) {
-                    MainScreen()
+                    MainScreen(pagerInterceptionMode = settings.pagerInterceptionMode)
                 }
             }
             entry<Route.Module>(swipeDismiss = NavSwipeDirection.None) {
@@ -553,7 +557,7 @@ fun NavContainer(
                     backgroundRenderState = backgroundRenderState,
                     useBlur = useBlur,
                 ) {
-                    MainScreen()
+                    MainScreen(pagerInterceptionMode = settings.pagerInterceptionMode)
                 }
             }
             entry<Route.Settings>(swipeDismiss = NavSwipeDirection.None) {
@@ -564,7 +568,7 @@ fun NavContainer(
                     backgroundRenderState = backgroundRenderState,
                     useBlur = useBlur,
                 ) {
-                    MainScreen()
+                    MainScreen(pagerInterceptionMode = settings.pagerInterceptionMode)
                 }
             }
             entry<Route.ThemeSettings>(swipeDismiss = swipeBackDirection) {

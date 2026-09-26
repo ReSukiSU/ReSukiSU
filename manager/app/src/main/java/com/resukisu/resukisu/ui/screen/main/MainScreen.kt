@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -47,10 +48,16 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import top.yukonga.miuix.kmp.utils.PagerGestureNestedScrollConnection
+import top.yukonga.miuix.kmp.utils.PagerInterceptionMode
+import top.yukonga.miuix.kmp.utils.PagerNavigationSpringSpec
+import top.yukonga.miuix.kmp.utils.pagerGestureOverride
 
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    pagerInterceptionMode: Int = PagerInterceptionMode.CrossAxisInterceptor.ordinal,
+) {
     val themeConfig: ThemeConfig = koinInject()
     val homeViewModel = koinViewModel<HomeViewModel>()
     val homeState by homeViewModel.uiState.collectAsStateWithLifecycle()
@@ -68,6 +75,11 @@ fun MainScreen() {
     var animating by remember { mutableStateOf(false) }
     var animateJob by remember { mutableStateOf<Job?>(null) }
     var lastRequestedPage by remember { mutableIntStateOf(pagerState.currentPage) }
+
+    val pagerMode = PagerInterceptionMode.entries.getOrElse(pagerInterceptionMode) {
+        PagerInterceptionMode.Native
+    }
+    val interceptPagerGestures = pagerMode == PagerInterceptionMode.CrossAxisInterceptor
 
     val handlePageChange: (Int) -> Unit = remember(pagerState, coroutineScope) {
         { page ->
@@ -123,10 +135,27 @@ fun MainScreen() {
         val content = @Composable { paddingBottom: Dp ->
             HorizontalPager(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .pagerGestureOverride(
+                        pagerState = pagerState,
+                        mode = pagerMode,
+                        enabled = userScrollEnabled,
+                    ),
                 state = pagerState,
-                userScrollEnabled = userScrollEnabled,
+                userScrollEnabled = userScrollEnabled && !interceptPagerGestures,
                 beyondViewportPageCount = 1,
+                pageNestedScrollConnection = if (interceptPagerGestures) {
+                    PagerGestureNestedScrollConnection
+                } else {
+                    PagerDefaults.pageNestedScrollConnection(
+                        state = pagerState,
+                        orientation = androidx.compose.foundation.gestures.Orientation.Horizontal,
+                    )
+                },
+                flingBehavior = PagerDefaults.flingBehavior(
+                    state = pagerState,
+                    snapAnimationSpec = PagerNavigationSpringSpec,
+                ),
             ) { pageIndex ->
                 if (pages.isEmpty()) return@HorizontalPager
 

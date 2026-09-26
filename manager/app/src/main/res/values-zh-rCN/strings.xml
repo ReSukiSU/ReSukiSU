@@ -287,6 +287,12 @@
     <string name="predictive_back_exit_direction_follow_gesture">跟随手势</string>
     <string name="predictive_back_exit_direction_always_right">始终向右</string>
     <string name="predictive_back_exit_direction_always_left">始终向左</string>
+    <string name="settings_enable_swipe_dismiss">横移返回手势</string>
+    <string name="settings_enable_swipe_dismiss_summary">从屏幕边缘横移返回上一页</string>
+    <string name="settings_pager_gesture_mode">页面切换手势</string>
+    <string name="settings_pager_gesture_native">默认</string>
+    <string name="settings_pager_gesture_cross_axis">跨轴拦截</string>
+    <string name="settings_pager_gesture_ios_like">iOS 风格</string>
     <string name="back">返回</string>
     <string name="background_set_success">背景设置成功</string>
     <string name="background_removed">已移除自定义背景</string>

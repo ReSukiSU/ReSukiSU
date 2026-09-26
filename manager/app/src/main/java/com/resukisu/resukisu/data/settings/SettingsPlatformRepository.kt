@@ -83,6 +83,8 @@ class SettingsPlatformRepository(
             checkModuleUpdate = loadModuleUpdatePreference(),
             autoJailbreakEnabled = settings.getBoolean("auto_jailbreak", false),
             useBuiltinMonoFont = themeConfig.useBuiltinMonoFont,
+            enableSwipeDismiss = settings.getBoolean("enable_swipe_dismiss", true),
+            pagerInterceptionMode = settings.getInt("pager_interception_mode", 1).coerceIn(0, 2),
             useSoftReboot = settings.getBoolean("use_soft_reboot", false),
         )
     }
@@ -191,6 +193,11 @@ class SettingsPlatformRepository(
                 themeConfig.useBuiltinMonoFont = setting.enabled
             }
 
+            is PlatformSetting.SwipeDismiss ->
+                settings.putBoolean("enable_swipe_dismiss", setting.enabled)
+
+            is PlatformSetting.PagerInterceptionMode ->
+                settings.putInt("pager_interception_mode", setting.value.coerceIn(0, 2))
             is PlatformSetting.UseSoftReboot ->
                 settings.putBoolean("use_soft_reboot", setting.enabled)
         }
