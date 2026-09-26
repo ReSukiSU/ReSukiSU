@@ -7,7 +7,7 @@ on:
         type: string
         default: ubuntu-latest
 jobs:
-  build:
+  build-aarch64:
     runs-on: ${{ inputs.os }}
     steps:
     - uses: actions/checkout@v7
@@ -16,19 +16,24 @@ jobs:
         
     - name: Setup rustup
       run: |
-        rustup update stable
+        rustup update nightly
         rustup target add aarch64-linux-android
-        rustup target add x86_64-linux-android
 
-    - uses: nttld/setup-ndk@v1
+    - name: Setup NDK
+      uses: nttld/setup-ndk@v1
       id: setup-ndk
       with:
         ndk-version: r29
 
-    - uses: Swatinem/rust-cache@v2
+    - name: Setup aarch64 rust cache
+      uses: Swatinem/rust-cache@v2
       with:
-        workspaces: . -> target
-        cache-targets: false
+        prefix-key: ksuinit-aarch64
+        workspaces: userspace/ksuinit
+        cache-targets: true
+        add-job-id-key: false
+        add-rust-environment-hash-key: false
+        save-if: ${{ github.event_name != 'pull_request' }}
 
     - name: Build ksuinit
       env:
@@ -47,7 +52,35 @@ jobs:
         name: ksuinit-aarch64
         path: userspace/ksuinit/target/aarch64-linux-android/release/ksuinit
 
-    - name: Build ksuinit x64
+  build-x86_64:
+    runs-on: ${{ inputs.os }}
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+        
+    - name: Setup rustup
+      run: |
+        rustup update nightly
+        rustup target add x86_64-linux-android
+
+    - name: Setup NDK
+      uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r29
+
+    - name: Setup x86_64 rust cache
+      uses: Swatinem/rust-cache@v2
+      with:
+        prefix-key: ksuinit-x86_64
+        workspaces: userspace/ksuinit
+        cache-targets: true
+        add-job-id-key: false
+        add-rust-environment-hash-key: false
+        save-if: ${{ github.event_name != 'pull_request' }}
+
+    - name: Build ksuinit
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
       run: |
@@ -58,8 +91,50 @@ jobs:
         cd userspace/ksuinit
         cargo build --package ksuinit --target=x86_64-linux-android --release
 
-    - name: Upload x64 ksuinit artifact
+    - name: Upload ksuinit artifact
       uses: actions/upload-artifact@v7
       with:
         name: ksuinit-x86_64
         path: userspace/ksuinit/target/x86_64-linux-android/release/ksuinit
+
+  build-riscv64:
+    runs-on: ${{ inputs.os }}
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+
+    - name: Setup Rust
+      run: rustup toolchain install nightly --profile minimal --component rust-src
+
+    - name: Setup NDK
+      uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r29
+
+    - name: Setup riscv64 rust cache
+      uses: Swatinem/rust-cache@v2
+      with:
+        prefix-key: ksuinit-riscv64
+        workspaces: userspace/ksuinit
+        cache-targets: true
+        add-job-id-key: false
+        add-rust-environment-hash-key: false
+        save-if: ${{ github.event_name != 'pull_request' }}
+
+    - name: Build RISC-V ksuinit
+      env:
+        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+      run: |
+        source .github/scripts/setup-rust-build.sh riscv64-linux-android 35
+        BUILTINS="$($CLANG_PATH --print-resource-dir)/lib/linux/libclang_rt.builtins-riscv64-android.a"
+        export RUSTFLAGS="-C target-feature=+crt-static -C link-arg=-Wl,-z,max-page-size=16384 -C link-arg=-Wno-unused-command-line-argument -C link-arg=$BUILTINS"
+        cd userspace/ksuinit
+        cargo +nightly build -Z build-std=std,panic_abort --package ksuinit --target=riscv64-linux-android --release
+
+    - name: Upload ksuinit artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: ksuinit-riscv64
+        path: userspace/ksuinit/target/riscv64-linux-android/release/ksuinit

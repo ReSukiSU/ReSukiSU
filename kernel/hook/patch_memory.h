@@ -17,7 +17,7 @@
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0)
 #include "asm/insn.h" // IWYU pragma: keep
 #endif
-#elif defined(__x86_64__)
+#elif defined(__x86_64__) || defined(__riscv)
 #include <asm/ptrace.h>
 #else
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0)

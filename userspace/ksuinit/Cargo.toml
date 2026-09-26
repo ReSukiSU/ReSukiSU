@@ -17,11 +17,15 @@ rustix = { git = "https://github.com/ReSukiSU/rustix.git", rev = "4a53fbc", feat
 syscalls = { version = "0.8", default-features = false, features = [
     "aarch64",
     "x86_64",
+    "riscv64",
 ] }
 
 # for kmsg logging
 log = "0.4"
 kernlog = { git = "https://github.com/ReSukiSU/kernlog.rs" }
+
+[patch.crates-io]
+libc = { git = "https://github.com/rust-lang/libc", rev = "1a661633f11a261ff9c00b40875ef72f1cbec818" }
 
 [profile.release]
 strip = true

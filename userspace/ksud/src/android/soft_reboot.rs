@@ -1,10 +1,8 @@
 use std::{
-    collections::HashSet,
-    process::{Command, Output},
-};
-
-use std::{
-    thread,
+    fs::File,
+    io::Write,
+    os::fd::{AsRawFd, OwnedFd},
+    process::{Child, Command},
     time::{Duration, Instant},
 };
 
@@ -12,8 +10,15 @@ use anyhow::{Context, Result, bail, ensure};
 use libc::_exit;
 use log::{error, info, warn};
 use prop_rs_android::{resetprop::ResetProp, sys_prop};
-use regex_lite::Regex;
-use rustix::process::chdir;
+use rustix::{
+    event::{PollFd, PollFlags, poll},
+    fs::{MemfdFlags, Timespec, memfd_create},
+    io::{Errno, FdFlags, fcntl_getfd, fcntl_setfd, read},
+    pipe::{PipeFlags, pipe_with},
+    process::chdir,
+};
+
+use crate::assets;
 
 use crate::android::{
     init_event::{on_boot_completed, on_post_data_fs, on_services, run_stage},
@@ -21,173 +26,98 @@ use crate::android::{
     utils::{self, switch_mnt_ns},
 };
 
-const SERVICE_PATH: &str = "/system/bin/service";
-const GET_SERVICE_PID_TRANSACTION: &str = "1599097156";
-const SYSTEM_SERVER_FALLBACK_SERVICES: [&str; 3] = ["activity", "package", "user"];
-const SERVICE_POLL_INTERVAL: Duration = Duration::from_millis(200);
-const SERVICE_STOP_TIMEOUT: Duration = Duration::from_secs(5);
+const WAITSYS_FD_ENV: &str = "KSU_WAITSYS_FD";
+const WAITSYS_READY_TIMEOUT: Duration = Duration::from_secs(2);
+const WAITSYS_STOP_TIMEOUT: Duration = Duration::from_secs(5);
 
-fn command_stdout(output: Output, description: &str) -> Result<String> {
-    ensure!(
-        output.status.success(),
-        "{description} failed with {}: {}",
-        output.status,
-        String::from_utf8_lossy(&output.stderr).trim()
-    );
-
-    String::from_utf8(output.stdout).with_context(|| format!("{description} output is not UTF-8"))
+struct Waitsys {
+    child: Child,
+    read_fd: OwnedFd,
 }
 
-fn parse_service_list(output: &str) -> Result<Vec<String>> {
-    let mut lines = output.lines();
-    let header = lines.next().context("service list output is empty")?;
-    let service_count = header
-        .strip_prefix("Found ")
-        .and_then(|header| header.strip_suffix(" services:"))
-        .context("invalid service list header")?
-        .parse::<usize>()
-        .context("invalid service count")?;
+impl Waitsys {
+    fn spawn() -> Result<Self> {
+        let waitsys = assets::get_asset("waitsys").context("waitsys is not embedded")?;
+        let executable_fd = memfd_create("waitsys", MemfdFlags::CLOEXEC)
+            .context("failed to create waitsys memfd")?;
+        let mut executable = File::from(executable_fd);
+        executable
+            .write_all(&waitsys)
+            .context("failed to write waitsys to memfd")?;
 
-    let service_pattern = Regex::new(r"^\d\s+([^\s:]+):\s+\[[^\]]*\]$")?;
-    let services = lines
-        .filter(|line| !line.trim().is_empty())
-        .map(|line| {
-            service_pattern
-                .captures(line)
-                .and_then(|captures| captures.get(1))
-                .map(|service| service.as_str().to_owned())
-                .with_context(|| format!("invalid service list entry: {line}"))
-        })
-        .collect::<Result<Vec<_>>>()?;
+        let (read_fd, write_fd) =
+            pipe_with(PipeFlags::CLOEXEC).context("failed to create waitsys pipe")?;
+        fcntl_setfd(
+            &write_fd,
+            fcntl_getfd(&write_fd).context("get write_fd flags")? & !FdFlags::CLOEXEC,
+        )
+        .context("set write_fd flags")?;
 
-    ensure!(
-        services.len() == service_count,
-        "service list declared {service_count} services but contained {}",
-        services.len()
-    );
+        let mut cmd = Command::new(format!("/proc/self/fd/{}", executable.as_raw_fd()));
+        cmd.env(WAITSYS_FD_ENV, format!("{}", write_fd.as_raw_fd()));
+        let child = cmd.spawn()?;
 
-    Ok(services)
-}
-
-fn parse_service_pid(output: &str) -> Result<u32> {
-    let parcel_pattern =
-        Regex::new(r"^Result:\s+Parcel\(\s*([0-9A-Fa-f]{8})\s+'[^'\r\n]{4}'\s*\)\s*$")?;
-    let Some(pid) = parcel_pattern
-        .captures(output)
-        .and_then(|captures| captures.get(1))
-    else {
-        bail!("invalid service PID response: {}", output.trim());
-    };
-
-    u32::from_str_radix(pid.as_str(), 16).context("invalid PID in service response")
-}
-
-pub fn list_services() -> Result<Vec<String>> {
-    let output = Command::new(SERVICE_PATH)
-        .arg("list")
-        .output()
-        .context("failed to execute service list")?;
-    let stdout = command_stdout(output, "service list")?;
-    parse_service_list(&stdout)
-}
-
-pub fn get_service_pid(service: &str) -> Result<u32> {
-    let output = Command::new(SERVICE_PATH)
-        .args(["call", service, GET_SERVICE_PID_TRANSACTION])
-        .output()
-        .with_context(|| format!("failed to query service {service}"))?;
-    let stdout = command_stdout(output, "service PID query")?;
-    parse_service_pid(&stdout)
-}
-
-fn is_fallback_service(service: &str) -> bool {
-    SYSTEM_SERVER_FALLBACK_SERVICES.contains(&service)
-}
-
-fn find_system_server_services<F>(services: Vec<String>, mut get_pid: F) -> Vec<String>
-where
-    F: FnMut(&str) -> Option<u32>,
-{
-    let Some(activity_pid) = get_pid("activity") else {
-        return services
-            .into_iter()
-            .filter(|service| is_fallback_service(service))
-            .collect();
-    };
-
-    services
-        .into_iter()
-        .filter(|service| {
-            if service == "activity" {
-                return true;
-            }
-
-            get_pid(service).map_or_else(|| is_fallback_service(service), |pid| pid == activity_pid)
-        })
-        .collect()
-}
-
-fn collect_system_server_services() -> Result<Vec<String>> {
-    let services = list_services()?;
-    let system_server_services =
-        find_system_server_services(services, |service| match get_service_pid(service) {
-            Ok(pid) => Some(pid),
-            Err(err) => {
-                log::debug!("failed to get PID for service {service}: {err:#}");
-                None
-            }
-        });
-
-    info!(
-        "tracking {} system_server services",
-        system_server_services.len()
-    );
-    Ok(system_server_services)
-}
-
-fn remaining_services(tracked: &[String], running: &[String]) -> Vec<String> {
-    let running: HashSet<&str> = running.iter().map(String::as_str).collect();
-    tracked
-        .iter()
-        .filter(|service| running.contains(service.as_str()))
-        .cloned()
-        .collect()
-}
-
-fn wait_for_system_server_services(system_server_services: &[String]) {
-    if system_server_services.is_empty() {
-        return;
+        drop(write_fd);
+        drop(executable);
+        Ok(Self { child, read_fd })
     }
 
-    let deadline = Instant::now() + SERVICE_STOP_TIMEOUT;
-    let mut remaining = system_server_services.to_vec();
-    let mut list_error_logged = false;
-
-    loop {
-        match list_services() {
-            Ok(running) => remaining = remaining_services(system_server_services, &running),
-            Err(err) if !list_error_logged => {
-                warn!("failed to list services while waiting for system_server: {err:#}");
-                list_error_logged = true;
+    fn wait_for_signal(&self, expected: u8, timeout: Duration) -> Result<()> {
+        let deadline = Instant::now() + timeout;
+        loop {
+            let remaining = deadline.saturating_duration_since(Instant::now());
+            if remaining.is_zero() {
+                bail!("timed out waiting for signal {expected}");
             }
-            Err(_) => {}
-        }
 
-        if remaining.is_empty() {
-            info!("system_server services stopped");
-            return;
-        }
+            let remaining = Timespec::try_from(remaining)?;
+            let mut poll_fd = [PollFd::new(&self.read_fd, PollFlags::IN)];
+            let ready = match poll(&mut poll_fd, Some(&remaining)) {
+                Err(Errno::INTR) => continue,
+                result => result,
+            }?;
+            if ready == 0 {
+                bail!("timed out waiting for signal {expected}");
+            }
 
-        let remaining_time = deadline.saturating_duration_since(Instant::now());
-        if remaining_time.is_zero() {
-            warn!(
-                "timed out waiting for system_server services to stop: {}",
-                remaining.join(", ")
+            let mut signal = [0_u8; 1];
+            let bytes_read = match read(&self.read_fd, &mut signal) {
+                Err(Errno::INTR) => continue,
+                result => result,
+            }?;
+            ensure!(
+                bytes_read == 1,
+                "waitsys pipe closed before signal {expected}"
             );
-            return;
+            let signal = signal[0];
+            ensure!(
+                signal == expected,
+                "unexpected waitsys signal {signal}, expected {expected}"
+            );
+            return Ok(());
         }
+    }
 
-        thread::sleep(SERVICE_POLL_INTERVAL.min(remaining_time));
+    fn terminate(&mut self) -> Result<()> {
+        self.child.kill().ok();
+        self.child.wait().context("wait for waitsys")?;
+        Ok(())
+    }
+}
+
+impl Drop for Waitsys {
+    fn drop(&mut self) {
+        if let Err(error) = self.terminate() {
+            warn!("failed to clean up waitsys: {error:#}");
+        }
+    }
+}
+
+fn terminate_waitsys(waitsys: &mut Option<Waitsys>) {
+    if let Some(mut waitsys) = waitsys.take()
+        && let Err(error) = waitsys.terminate()
+    {
+        warn!("failed to clean up waitsys: {error:#}");
     }
 }
 
@@ -240,9 +170,23 @@ pub fn soft_reboot() -> Result<()> {
     }
     run_stage("emulated-soft-reboot", true);
 
-    let system_server_services = collect_system_server_services();
-    if let Err(ref e) = system_server_services {
-        warn!("could not collect services: {e:?}");
+    let mut waitsys = match Waitsys::spawn() {
+        Ok(waitsys) => Some(waitsys),
+        Err(error) => {
+            warn!("failed to start waitsys: {error:#}");
+            None
+        }
+    };
+    let wait_after_stop = waitsys.as_ref().is_some_and(|waitsys| {
+        if let Err(error) = waitsys.wait_for_signal(1, WAITSYS_READY_TIMEOUT) {
+            warn!("waitsys failed to collect services: {error:#}");
+            false
+        } else {
+            true
+        }
+    });
+    if !wait_after_stop {
+        terminate_waitsys(&mut waitsys);
     }
 
     info!("stop");
@@ -251,9 +195,12 @@ pub fn soft_reboot() -> Result<()> {
         warn!("stop exited with status: {status}");
     }
 
-    if let Ok(system_server_services) = system_server_services {
-        wait_for_system_server_services(&system_server_services);
+    if let Some(waitsys) = waitsys.as_ref()
+        && let Err(error) = waitsys.wait_for_signal(2, WAITSYS_STOP_TIMEOUT)
+    {
+        warn!("waitsys failed while waiting for services to stop: {error:#}");
     }
+    terminate_waitsys(&mut waitsys);
 
     info!("post-fs-data");
     on_post_data_fs()?;
