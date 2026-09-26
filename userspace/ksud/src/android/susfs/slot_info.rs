@@ -1,6 +1,4 @@
-use std::{
-    path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
 
 use android_bootimg::parser::BootImage;
 use anyhow::{Context, Result, bail};

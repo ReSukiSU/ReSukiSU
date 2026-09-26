@@ -131,7 +131,7 @@ jobs:
         BUILTINS="$($CLANG_PATH --print-resource-dir)/lib/linux/libclang_rt.builtins-riscv64-android.a"
         export RUSTFLAGS="-C target-feature=+crt-static -C link-arg=-Wl,-z,max-page-size=16384 -C link-arg=-Wno-unused-command-line-argument -C link-arg=$BUILTINS"
         cd userspace/ksuinit
-        cargo +nightly build -Z build-std=std,panic_abort --package ksuinit --target=riscv64-linux-android --release
+        cargo +nightly build -Z build-std=std,panic_abort --package ksuinit --target=riscv64-linux-android --release --config ../../.github/riscv64-cargo.toml
 
     - name: Upload ksuinit artifact
       uses: actions/upload-artifact@v7

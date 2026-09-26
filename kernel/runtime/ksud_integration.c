@@ -34,6 +34,8 @@
 #include <linux/vmalloc.h>
 #include <linux/stat.h>
 
+#include "compat/syscall_no.h"
+
 #include "arch.h"
 #include "klog.h" // IWYU pragma: keep
 #include "ksu.h"
@@ -86,6 +88,10 @@ static void stop_execve_hook(void);
     {
         ksu_syscall_table_unhook(__NR_read);
         ksu_syscall_table_unhook(__NR_fstat);
+        #if defined(CONFIG_COMPAT) && defined(__aarch64__)
+            ksu_compat_syscall_table_unhook(ksu_get_compat_syscall_no(read));
+            ksu_compat_syscall_table_unhook(ksu_get_compat_syscall_no(fstat64));
+        #endif
         pr_info("unregister init_rc syscall hook\n");
         pr_info("stop init_rc_hook!\n");
     }
@@ -951,9 +957,8 @@ bool ksu_is_safe_mode()
 }
 
 #ifdef CONFIG_KSU_TRACEPOINT_HOOK
-static void ksu_execve_hook_ksud_common(const char __user *filename_user, const char __user *const __user *argv_user)
+static void ksu_execve_hook_ksud_common(const char __user *filename_user, struct user_arg_ptr argv)
 {
-    struct user_arg_ptr argv = { .ptr.native = argv_user };
     char path[32];
     long ret;
     unsigned long addr;
@@ -977,36 +982,68 @@ static void ksu_execve_hook_ksud_common(const char __user *filename_user, const 
 
 void ksu_execve_hook_ksud(const struct pt_regs *regs)
 {
-    const char __user *filename_user = (const char __user *)PT_REGS_SYSCALL_PARM1(regs);
-    const char __user *const __user *argv_user = (const char __user *const __user *)PT_REGS_PARM2(regs);
+    const char __user *filename_user = (const char __user *)PT_REGS_SYSCALL_PARM1_USER_PTR(regs);
+    struct user_arg_ptr argv;
 
-    ksu_execve_hook_ksud_common(filename_user, argv_user);
+#ifdef CONFIG_COMPAT
+    argv.is_compat = is_compat_task();
+    if (argv.is_compat)
+        argv.ptr.compat = (const compat_uptr_t __user *)PT_REGS_USER_PTR(regs, 2);
+    else
+#endif
+        argv.ptr.native = (const char __user *const __user *)PT_REGS_USER_PTR(regs, 2);
+
+    ksu_execve_hook_ksud_common(filename_user, argv);
 }
 
 void ksu_execveat_hook_ksud(const struct pt_regs *regs)
 {
-    const char __user *filename_user = (const char __user *)PT_REGS_PARM2(regs);
-    const char __user *const __user *argv_user = (const char __user *const __user *)PT_REGS_PARM3(regs);
+    const char __user *filename_user = (const char __user *)PT_REGS_USER_PTR(regs, 2);
+    struct user_arg_ptr argv;
 
-    ksu_execve_hook_ksud_common(filename_user, argv_user);
+#ifdef CONFIG_COMPAT
+    argv.is_compat = is_compat_task();
+    if (argv.is_compat)
+        argv.ptr.compat = (const compat_uptr_t __user *)PT_REGS_USER_PTR(regs, 3);
+    else
+#endif
+        argv.ptr.native = (const char __user *const __user *)PT_REGS_USER_PTR(regs, 3);
+
+    ksu_execve_hook_ksud_common(filename_user, argv);
 }
 
 static long (*orig_sys_read)(const struct pt_regs *regs);
+#ifdef CONFIG_COMPAT
+static long (*orig_compat_sys_read)(const struct pt_regs *regs);
+#endif
 static long ksu_sys_read(const struct pt_regs *regs)
 {
     unsigned int fd = PT_REGS_SYSCALL_PARM1(regs);
-    char __user **buf_ptr = (char __user **)&PT_REGS_PARM2(regs);
-    size_t *count_ptr = (size_t *)&PT_REGS_PARM3(regs);
+    char __user *buf = (char __user *)PT_REGS_USER_PTR(regs, 2);
+    size_t count = PT_REGS_PARM3(regs);
 
-    ksu_handle_sys_read(fd, buf_ptr, count_ptr);
+    ksu_handle_sys_read(fd, &buf, &count);
+
+#if defined(__aarch64__) && defined(CONFIG_COMPAT)
+    if (is_compat_task()) {
+        return orig_compat_sys_read(regs);
+    } else {
+        return orig_sys_read(regs);
+    }
+#else
     return orig_sys_read(regs);
+#endif
 }
 
 static long (*orig_sys_fstat)(const struct pt_regs *regs);
+#ifdef CONFIG_COMPAT
+// Android system use fstat64 for this usecase
+static long (*orig_sys_fstat64)(const struct pt_regs *regs);
+#endif
 static long ksu_sys_fstat(const struct pt_regs *regs)
 {
     unsigned int fd = PT_REGS_SYSCALL_PARM1(regs);
-    void __user *statbuf = (void __user *)PT_REGS_PARM2(regs);
+    void __user *statbuf = PT_REGS_USER_PTR(regs, 2);
     bool is_rc = false;
     long ret;
 
@@ -1020,16 +1057,35 @@ static long ksu_sys_fstat(const struct pt_regs *regs)
         fput(file);
     }
 
+#if defined(__aarch64__) && defined(CONFIG_COMPAT)
+    if (is_compat_task()) {
+        ret = orig_sys_fstat64(regs);
+    } else {
+        ret = orig_sys_fstat(regs);
+    }
+#else
     ret = orig_sys_fstat(regs);
+#endif
 
     if (is_rc) {
-        void __user *st_size_ptr = statbuf + offsetof(struct stat, st_size);
-        long size, new_size;
+        void __user *st_size_ptr;
+        long long size, new_size;
+        size_t st_size_size;
         size_t extra = ksu_rc_len + module_rc_len;
-        if (!copy_from_user_nofault(&size, st_size_ptr, sizeof(long))) {
+#if defined(__aarch64__) && defined(CONFIG_COMPAT)
+        if (is_compat_task()) {
+            st_size_ptr = statbuf + offsetof(struct stat64, st_size);
+            st_size_size = sizeof_field(struct stat64, st_size);
+        } else
+#endif
+        {
+            st_size_ptr = statbuf + offsetof(struct stat, st_size);
+            st_size_size = sizeof_field(struct stat, st_size);
+        }
+        if (!copy_from_user_nofault(&size, st_size_ptr, st_size_size)) {
             new_size = size + extra;
-            pr_info("adding rc len: %ld -> %ld", size, new_size);
-            if (!copy_to_user_nofault(st_size_ptr, &new_size, sizeof(long))) {
+            pr_info("adding rc len: %lld -> %lld", size, new_size);
+            if (!copy_to_user_nofault(st_size_ptr, &new_size, sizeof(size))) {
                 pr_info("added rc len");
             } else {
                 pr_err("add rc len failed: statbuf 0x%lx", (unsigned long)st_size_ptr);
@@ -1044,8 +1100,8 @@ static long ksu_sys_fstat(const struct pt_regs *regs)
 
 static int input_handle_event_handler_pre(struct kprobe *p, struct pt_regs *regs)
 {
-    unsigned int *type = (unsigned int *)&PT_REGS_PARM2(regs);
-    unsigned int *code = (unsigned int *)&PT_REGS_PARM3(regs);
+    unsigned int *type = (unsigned int *)&PT_REGS_NATIVE_PARM2(regs);
+    unsigned int *code = (unsigned int *)&PT_REGS_NATIVE_PARM3(regs);
     int *value = (int *)&PT_REGS_CCALL_PARM4(regs);
     return ksu_handle_input_handle_event(type, code, value);
 }
@@ -1079,6 +1135,11 @@ void __init ksu_ksud_init(void)
 
     ksu_syscall_table_hook(__NR_read, ksu_sys_read, &orig_sys_read);
     ksu_syscall_table_hook(__NR_fstat, ksu_sys_fstat, &orig_sys_fstat);
+
+#if defined(CONFIG_COMPAT) && defined(__aarch64__)
+    ksu_compat_syscall_table_hook(ksu_get_compat_syscall_no(read), ksu_sys_read, &orig_compat_sys_read);
+    ksu_compat_syscall_table_hook(ksu_get_compat_syscall_no(fstat64), ksu_sys_fstat, &orig_sys_fstat64);
+#endif
 
     ret = register_kprobe(&input_event_kp);
     pr_info("ksud: input_event_kp: %d\n", ret);

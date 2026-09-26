@@ -92,7 +92,7 @@ jobs:
           if [ "${{ inputs.target }}" == "riscv64-linux-android" ]; then
             source .github/scripts/setup-rust-build.sh riscv64-linux-android 35
             cd userspace/ksud/ 
-            cargo +nightly build -Z build-std=std,panic_abort --target "$TRIPLE" --release --manifest-path ./Cargo.toml
+            cargo +nightly build -Z build-std=std,panic_abort --target "$TRIPLE" --release --manifest-path ./Cargo.toml --config ../../.github/riscv64-cargo.toml
           else
             cd userspace/ksud/
             cargo ndk b -P 26 -t ${{ inputs.target }} -r -Z build-std-features="optimize_for_size" -Z trim-paths

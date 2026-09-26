@@ -2,6 +2,7 @@
 #define __KSU_H_ARCH
 
 #include <linux/version.h>
+#include <linux/types.h>
 
 #if defined(__aarch64__)
 
@@ -98,29 +99,69 @@
 #define __PT_REGS_CAST(x) (x)
 #endif
 
-#define PT_REGS_PARM1(x) (__PT_REGS_CAST(x)->__PT_PARM1_REG)
 /* RISC-V saves syscall argument zero before using a0 as the return slot.
  * Kprobe C-call arguments (including PT_REAL_REGS) still use the live a0.
  */
 #ifndef __PT_SYSCALL_PARM1_REG
 #define __PT_SYSCALL_PARM1_REG __PT_PARM1_REG
 #endif
-#define PT_REGS_SYSCALL_PARM1(x) (__PT_REGS_CAST(x)->__PT_SYSCALL_PARM1_REG)
-#define PT_REGS_PARM2(x) (__PT_REGS_CAST(x)->__PT_PARM2_REG)
-#define PT_REGS_PARM3(x) (__PT_REGS_CAST(x)->__PT_PARM3_REG)
-#define PT_REGS_SYSCALL_PARM4(x) (__PT_REGS_CAST(x)->__PT_SYSCALL_PARM4_REG)
-#define PT_REGS_CCALL_PARM4(x) (__PT_REGS_CAST(x)->__PT_CCALL_PARM4_REG)
-#define PT_REGS_PARM5(x) (__PT_REGS_CAST(x)->__PT_PARM5_REG)
-#define PT_REGS_PARM6(x) (__PT_REGS_CAST(x)->__PT_PARM6_REG)
+
+/* Native slots remain writable for kernel C calls and register updates. */
+#define PT_REGS_NATIVE_PARM1(x) (__PT_REGS_CAST(x)->__PT_PARM1_REG)
+#define PT_REGS_NATIVE_SYSCALL_PARM1(x) (__PT_REGS_CAST(x)->__PT_SYSCALL_PARM1_REG)
+#define PT_REGS_NATIVE_PARM2(x) (__PT_REGS_CAST(x)->__PT_PARM2_REG)
+#define PT_REGS_NATIVE_PARM3(x) (__PT_REGS_CAST(x)->__PT_PARM3_REG)
+#define PT_REGS_NATIVE_SYSCALL_PARM4(x) (__PT_REGS_CAST(x)->__PT_SYSCALL_PARM4_REG)
+#define PT_REGS_NATIVE_PARM5(x) (__PT_REGS_CAST(x)->__PT_PARM5_REG)
+#define PT_REGS_NATIVE_PARM6(x) (__PT_REGS_CAST(x)->__PT_PARM6_REG)
+
+#if defined(__aarch64__) && defined(CONFIG_COMPAT)
+#include <linux/compat.h>
+
+/* AArch32 values occupy the low 32 bits of the saved arm64 register slots. */
+#define __PT_REGS_READ(x, native, compat)                                                                              \
+    (is_compat_task() ? (unsigned long)(u32)(__PT_REGS_CAST(x)->compat) : (__PT_REGS_CAST(x)->native))
+#define PT_REGS_ORIG_SYSCALL(x)                                                                                        \
+    (*(is_compat_task() ? &__PT_REGS_CAST(x)->regs[7] : &__PT_REGS_CAST(x)->__PT_ORIG_SYSCALL_REG))
+#else
+#define __PT_REGS_READ(x, native, compat) (__PT_REGS_CAST(x)->native)
 #define PT_REGS_RET(x) (__PT_REGS_CAST(x)->__PT_RET_REG)
 #define PT_REGS_FP(x) (__PT_REGS_CAST(x)->__PT_FP_REG)
 #define PT_REGS_RC(x) (__PT_REGS_CAST(x)->__PT_RC_REG)
 #define PT_REGS_SP(x) (__PT_REGS_CAST(x)->__PT_SP_REG)
 #define PT_REGS_IP(x) (__PT_REGS_CAST(x)->__PT_IP_REG)
 #define PT_REGS_ORIG_SYSCALL(x) (__PT_REGS_CAST(x)->__PT_ORIG_SYSCALL_REG)
+#endif
+
+#define PT_REGS_SYSCALL_PARM1(x) __PT_REGS_READ(x, __PT_SYSCALL_PARM1_REG, regs[0])
+#define PT_REGS_PARM1(x) __PT_REGS_READ(x, __PT_PARM1_REG, regs[0])
+#define PT_REGS_PARM2(x) __PT_REGS_READ(x, __PT_PARM2_REG, regs[1])
+#define PT_REGS_PARM3(x) __PT_REGS_READ(x, __PT_PARM3_REG, regs[2])
+#define PT_REGS_SYSCALL_PARM4(x) __PT_REGS_READ(x, __PT_SYSCALL_PARM4_REG, regs[3])
+/* Kernel C calls always use the native ABI, including for compat tasks. */
+#define PT_REGS_CCALL_PARM4(x) (__PT_REGS_CAST(x)->__PT_CCALL_PARM4_REG)
+#define PT_REGS_PARM5(x) __PT_REGS_READ(x, __PT_PARM5_REG, regs[4])
+#define PT_REGS_PARM6(x) __PT_REGS_READ(x, __PT_PARM6_REG, regs[5])
+#define PT_REGS_RET(x) __PT_REGS_READ(x, __PT_RET_REG, regs[14])
+#define PT_REGS_FP(x) __PT_REGS_READ(x, __PT_FP_REG, regs[11])
+#define PT_REGS_RC(x) __PT_REGS_READ(x, __PT_RC_REG, regs[0])
+#define PT_REGS_SP(x) __PT_REGS_READ(x, __PT_SP_REG, regs[13])
+#define PT_REGS_IP(x) __PT_REGS_READ(x, __PT_IP_REG, pc)
+
+static inline void __user *ksu_task_user_ptr(unsigned long addr)
+{
+#if defined(__aarch64__) && defined(CONFIG_COMPAT)
+    if (is_compat_task())
+        return compat_ptr((compat_uptr_t)addr);
+#endif
+    return (void __user *)addr;
+}
+
+#define PT_REGS_USER_PTR(x, n) ksu_task_user_ptr(PT_REGS_PARM##n(x))
+#define PT_REGS_SYSCALL_PARM1_USER_PTR(x) ksu_task_user_ptr(PT_REGS_SYSCALL_PARM1(x))
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 16, 0)
-#define PT_REAL_REGS(regs) ((struct pt_regs *)PT_REGS_PARM1(regs))
+#define PT_REAL_REGS(regs) ((struct pt_regs *)PT_REGS_NATIVE_PARM1(regs))
 #else
 #define PT_REAL_REGS(regs) ((regs))
 #endif
