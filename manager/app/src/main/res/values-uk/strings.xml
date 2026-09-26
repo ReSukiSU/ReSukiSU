@@ -542,4 +542,17 @@
     <string name="sort_name">Ім\'я</string>
     <string name="enable_floating_bottom_bar">Плаваюча нижня панель</string>
     <string name="enable_floating_bottom_bar_summary">Використовувати плаваючу нижню панель у стилі Apple.</string>
+    <string name="settings_soft_reboot">М\'який перезапуск замість перезавантаження</string>
+    <string name="settings_soft_reboot_summary">Використовувати м\'який перезапуск замість повного перезавантаження під час встановлення, оновлення або перемикання модулів.</string>
+    <string name="advanced_options">Додаткові налаштування</string>
+    <string name="allow_shell">Завжди надавати root-права для оболонки</string>
+    <string name="allow_shell_summary">Завжди дозволяти команді adb shell викликати команду SU. Не вмикайте це, якщо це не є абсолютно необхідним.</string>
+    <string name="enable_adb">Примусово ввімкнути adb під час завантаження</string>
+    <string name="enable_adb_summary">Примусово увімкнути налагодження USB та вимкнути автентифікацію adb. Не вмикайте це, якщо це не є абсолютно необхідним.</string>
+    <string name="install_force_backup">Резервне копіювання стокового образа</string>
+    <string name="install_force_backup_summary">Будь ласка, переконайтеся, що вибраний вами завантажувальний образ є стоковим образом</string>
+    <string name="ak3_select_zip">Вибрати zip-файл AnyKernel3 для прошивки</string>
+    <string name="install_upload_lkm_file_summary">Використовувати файл custom.ko замість вбудованого LKM</string>
+    <string name="skip_ksud">Не встановлювати ksud</string>
+    <string name="skip_ksud_summary">Скасувати встановлення ksud. Не вмикайте цю функцію, якщо це не є абсолютно необхідним.</string>
 </resources>

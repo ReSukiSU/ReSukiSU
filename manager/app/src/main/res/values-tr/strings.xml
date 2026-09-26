@@ -542,4 +542,12 @@
     <string name="reverse_order">Ters sırala</string>
     <string name="enable_floating_bottom_bar">Yüzen alt çubuk</string>
     <string name="enable_floating_bottom_bar_summary">Apple tarzı yüzen alt çubuğu kullan.</string>
+    <string name="advanced_options">Gelişmiş Seçenekler</string>
+    <string name="allow_shell">Kabuğ\'a her zaman kök erişimi ver</string>
+    <string name="allow_shell_summary">Her zaman ADB Shell\'in root komutuna erişmesine izin vermek. Gerekli olmadığı sürece bunu etkinleştirmeyiniz.</string>
+    <string name="enable_adb">Zorla adb\'yi başlangıç sürecinde etkinleştirmek</string>
+    <string name="enable_adb_summary">USB hata ayıklamayı ve adb doğrulamasını kapat. Gerekli olmadığı sürece bunu etkinleştirmeyiniz.</string>
+    <string name="install_force_backup">Stok imajı yedeklemek</string>
+    <string name="install_force_backup_summary">Lütfen önyükleme imajının bir stok önyükleme imajı olduğundan emin olun</string>
+    <string name="ak3_select_zip">Lütfen bir AnyKernel3 zip dosyası seçiniz</string>
 </resources>

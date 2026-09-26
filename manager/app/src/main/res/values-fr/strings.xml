@@ -7,7 +7,7 @@
     <string name="home_working">En cours d\'exécution</string>
     <string name="home_unsupported">Non pris en charge</string>
     <string name="home_unsupported_reason">Aucun pilote KernelSU détecté dans le noyau installé sur cet appareil, pas le bon noyau ?</string>
-    <string name="home_kernel">Noyau</string>
+    <string name="home_kernel">Version du noyau</string>
     <string name="home_susfs_version">Version de SuSFS</string>
     <string name="home_manager_version">Version du gestionnaire</string>
     <string name="home_selinux_status">État SELinux</string>
@@ -237,7 +237,7 @@
     <string name="profile_namespace_individual">Individuel</string>
     <string name="profile_flags">Drapeaux</string>
     <string name="profile_flags_desc_no_new_privs">Empêche toute élévation de privilèges supplémentaire via KernelSU dans le contexte de ce profil root.</string>
-    <string name="debug_version_notice">Ceci est une version DEBUG du gestionnaire, si vous ne savez pas ce qu\'est une version DEBUG, passez immédiatement à une version RELEASE.</string>
+    <string name="debug_version_notice">Ceci est une version \"DEBUG\" du gestionnaire, en cas de doute sur ce qu\'est une version \"DEBUG\", désinstaller cette application et installer une version \"RELEASE\" à la place.</string>
     <string name="unofficial_version_notice">Ce gestionnaire n\'est pas le gestionnaire officiel de %s, certaines permissions pourraient par conséquent être impossibles à obtenir.</string>
     <string name="conflict_with_apatch">APatch détecté, tout le système pourrait cesser de fonctionner.</string>
     <string name="module_action_success">Action du module exécutée avec succès.</string>
@@ -542,4 +542,17 @@
     <string name="require_kernel_version_gki">Mise à jour du noyau requise</string>
     <string name="enable_floating_bottom_bar">Barre de navigation flottante</string>
     <string name="enable_floating_bottom_bar_summary">Barre de navigation flottante à la manière du dock Apple</string>
+    <string name="settings_soft_reboot">Redémarrage logiciel plutôt que complet</string>
+    <string name="settings_soft_reboot_summary">Redémarre en mode logiciel plutôt qu\'un redémarrage complet de l\'appareil après l\'installation, la mise à jour ou l\'activation de modules</string>
+    <string name="advanced_options">Options avancées</string>
+    <string name="allow_shell">Toujours accorder les droits root au shell</string>
+    <string name="allow_shell_summary">Autorise systématiquement l\'exécution de la commande SU au shell adb. N\'activer cette option qu\'en cas d\'absolue nécessité.</string>
+    <string name="enable_adb">Activation forcée d\'adb au démarrage</string>
+    <string name="enable_adb_summary">Force l\'activation du débogage USB et désactive l\'authentification d\'adb. N\'activer cette option qu\'en cas d\'absolue nécessité.</string>
+    <string name="install_force_backup">Sauvegarde en tant qu\'image d\'origine</string>
+    <string name="install_force_backup_summary">S\'assurer que l\'image de démarrage sélectionnée est bien une image d\'origine</string>
+    <string name="ak3_select_zip">Sélectionner une image zip AnyKernel3 à flasher</string>
+    <string name="install_upload_lkm_file_summary">Utilise un fichier .ko personnalisé au lieu du module LKM intégré</string>
+    <string name="skip_ksud">Ne pas installer ksud</string>
+    <string name="skip_ksud_summary">Annule l\'installation de ksud. N\'activer cette option qu\'en cas d\'absolue nécessité.</string>
 </resources>
