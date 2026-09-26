@@ -23,28 +23,39 @@ GITHUB_REF_TYPE = os.environ.get("GITHUB_REF_TYPE")
 
 commit_message = ''
 commit_line = ''
+
+def format_commit_messages(commits, max_length=600):
+    formatted_commits = []
+    commits_to_show = commits[::-1]
+
+    for index, commit in enumerate(commits_to_show):
+        message = commit['message'].strip()
+        if len(message) > 200:
+            message = message[:197] + '...'
+        message += ' by ' + commit['author']['username']
+
+        remaining = len(commits_to_show) - index - 1
+        candidate_commits = formatted_commits + [message]
+        candidate_message = '\n------\n'.join(candidate_commits)
+        if remaining:
+            candidate_message += f'\n(other {remaining} commits)'
+
+        if len(candidate_message) > max_length:
+            omitted_count = len(commits_to_show) - index
+            omitted_message = f'(other {omitted_count} commits)'
+            commit_message = '\n------\n'.join(formatted_commits)
+            if commit_message:
+                commit_message += '\n'
+            return commit_message + omitted_message
+
+        formatted_commits.append(message)
+
+    return '\n------\n'.join(formatted_commits)
+
 try:
     if 'commits' in GITHUB_EVENT:
         commits = GITHUB_EVENT['commits']
-        commit_message = ''
-        i = len(commits)
-        for commit in commits[::-1]:
-            msg_line = commit['message'].split('\n')
-            msg = commit['message'].strip()
-            if len(msg) > 200:
-                msg = msg[:197] + '...'
-            msg += ' by ' + commit['author']['username']
-            if i > 1:
-                msg += '\n------'
-            if len(msg) + 1 + len(commit_message) > 600:
-                commit_message = f'{commit_message}\n(other {i} commits)'
-                break
-            else:
-                commit_message = f'{msg}\n{commit_message}\n'
-            i -= 1
-        commit_message = f'{commit_message.strip()}'
-        last_commit = commits[-1]
-
+        commit_message = format_commit_messages(commits)
     elif 'head_commit' in GITHUB_EVENT:
         msg = GITHUB_EVENT["head_commit"]["message"]
         if len(msg) > 200:
@@ -267,10 +278,14 @@ async def main():
             print("[+] Sending main branch updated message")
             await send_message(bot=bot,chat_id=CHAT_ID, text=MAIN_UPDATED_MSG, message_thread_id=DEVELOPING_THREAD_ID)
     print("[+] Done!")
-    process.kill()
 
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except Exception as e:
         print(f"[-] An error occurred: {e}")
+    finally:
+        try:
+            process.kill()
+        except:
+            pass
