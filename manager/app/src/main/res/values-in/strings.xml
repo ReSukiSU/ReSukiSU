@@ -527,4 +527,14 @@
     <string name="dynamic_manager_fixed_manager_summary">%1$s\ndikelola oleh %2$s</string>
     <string name="dynamic_manager_clear_confirm_title">Bersihkan manajer dinamis</string>
     <string name="susfs_standard_avc_log_spoofing">Log Spoof AVC</string>
+    <string name="about_anime_character_sticker"><![CDATA[Lisensi icon berada dalam pengaturan khusus: digambar oleh 怡子曰曰, hak cipta dimiliki oleh \u0020明风 OuO, dan vector icon disediakan oleh projek ini.]]></string>
+    <string name="settings_soft_reboot">Soft restart daripada reboot</string>
+    <string name="settings_soft_reboot_summary">Gunakan soft restart dibandingkan reboot penuh untuk menginstal, memperbarui, atau (non)aktikan modul.</string>
+    <string name="advanced_options">Opsi Lanjutan</string>
+    <string name="allow_shell">Selalu Root untuk Shell</string>
+    <string name="allow_shell_summary">Adb Shell selalu dapat mengakses perintah SU. Jangan diaktifkan, kecuali dibutuhkan.</string>
+    <string name="enable_adb">Aktifkan adb saat boot</string>
+    <string name="enable_adb_summary">Paksa mengaktifkan USB debugging dan menonaktifkan autnetifikasi adb. Jangan diaktifkan, kecuali dibutuhkan.</string>
+    <string name="install_force_backup">Cadangkan sebagai Stock Image</string>
+    <string name="install_force_backup_summary">Pastikan boot image yang dipilih adalah stock image</string>
 </resources>

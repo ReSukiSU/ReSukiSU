@@ -328,7 +328,7 @@
     <string name="confirm_installation">Подтвердите установку</string>
     <string name="confirm_multiple_installation">Подтвердите установку (%d файлов)</string>
     <string name="install_confirm">Установить</string>
-    <string name="module_package">Модули</string>
+    <string name="module_package">Модуль</string>
     <string name="kernel_package">Ядро</string>
     <string name="unknown_package">Неизвестно</string>
     <string name="unknown_kernel">Неизвестное ядро</string>
@@ -542,4 +542,17 @@
     <string name="reverse_order">Обратный порядок</string>
     <string name="enable_floating_bottom_bar">Плавающая нижняя панель</string>
     <string name="enable_floating_bottom_bar_summary">Использовать Apple-стиль для плавающей нижней панели</string>
+    <string name="settings_soft_reboot">Мягкая перезагрузка вместо полной перезагрузки</string>
+    <string name="settings_soft_reboot_summary">Используйте мягкую перезагрузку вместо полной перезагрузки при установке, обновлении или переключении модулей</string>
+    <string name="advanced_options">Расширенные опции</string>
+    <string name="allow_shell">Всегда разрешать рут-доступ оболочке (Shell)</string>
+    <string name="allow_shell_summary">Всегда разрешать adb shell вызывать команду SU. Не включайте это без крайней необходимости.</string>
+    <string name="enable_adb">Принудительно включить ADB при загрузке</string>
+    <string name="enable_adb_summary">Принудительно включить отладку по USB и отключить аутентификацию adb. Не включайте это без крайней необходимости.</string>
+    <string name="install_force_backup">Резервная копия стокового образа</string>
+    <string name="install_force_backup_summary">Пожалуйста, убедитесь, что выбранный вами загрузочный образ является стоковым</string>
+    <string name="ak3_select_zip">Выберите zip-файл AnyKernel3 для прошивки</string>
+    <string name="install_upload_lkm_file_summary">Использовать собственный файл .ko вместо встроенного LKM</string>
+    <string name="skip_ksud">Не устанавливать ksud</string>
+    <string name="skip_ksud_summary">Отмена установки ksud. Не включайте это, если в этом нет крайней необходимости.</string>
 </resources>

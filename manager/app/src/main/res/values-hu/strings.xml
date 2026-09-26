@@ -542,4 +542,17 @@
     <string name="sort_name">Név szerint</string>
     <string name="enable_floating_bottom_bar">Lebegő alsó sáv</string>
     <string name="enable_floating_bottom_bar_summary">Apple iOS stílusú lebegő alsó sáv használata.</string>
+    <string name="settings_soft_reboot_summary">Háttérrendszer újraindítása a készülék teljes újraindítása helyett modul telepítés, frissítés, vagy átkapcsolása után.</string>
+    <string name="settings_soft_reboot">Háttérrendszer újraindítás teljes újraindítás helyett</string>
+    <string name="advanced_options">Haladó beállítások</string>
+    <string name="allow_shell">Parancsértelmező Root jogosultságokkal</string>
+    <string name="allow_shell_summary">Parancsértelmező futtatása Root jogosultságokkal alapértelmezetten. Csak akkor engedélyezd, amennyiben feltétlenül szükséges.</string>
+    <string name="enable_adb">ADB kényszerített indítása android rendszerrel</string>
+    <string name="enable_adb_summary">USB hibaelhárítás kényszerített indítása az android rendszerrel és ADB hitelesítés letiltása. Csak akkor engedélyezd, amennyiben feltétlenül szükséges.</string>
+    <string name="skip_ksud">Ksud telepítés mellőzése</string>
+    <string name="skip_ksud_summary">Ksud nem fog települni. Csak akkor engedélyezd, amennyiben feltétlenül szükséges.</string>
+    <string name="ak3_select_zip">Válassz egy AnyKernel3 zip fájlt a telepítéshez</string>
+    <string name="install_upload_lkm_file_summary">Egyéni .ko fájl használata a beépített LKM helyett</string>
+    <string name="install_force_backup_summary">Győződj meg arról, hogy a kiválasztott boot képfájl gyári</string>
+    <string name="install_force_backup">Biztonsági mentés mint gyári képfálj</string>
 </resources>
