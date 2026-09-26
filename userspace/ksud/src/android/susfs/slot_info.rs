@@ -1,6 +1,5 @@
 use std::{
     path::{Path, PathBuf},
-    sync::mpsc::channel,
 };
 
 use android_bootimg::parser::BootImage;
@@ -20,40 +19,25 @@ struct SlotInfo {
 
 pub fn show_slot_info_json() -> Result<()> {
     log::debug!("Starting slot_info enumeration from /dev/block/by-name");
-
-    let (send, recv) = channel::<SlotInfo>();
-    let mut jobs = Vec::<std::thread::JoinHandle<_>>::new();
+    let mut result = Vec::new();
 
     for (slot_name, slot_path) in list_boot_slots() {
-        let send = send.clone();
-        jobs.push(
-            std::thread::Builder::new()
-                .name(format!("analyze_{slot_name}"))
-                .spawn(move || {
-                    log::debug!("Processing slot: {} at {}", slot_name, slot_path.display());
+        log::debug!("Processing slot: {} at {}", slot_name, slot_path.display());
 
-                    match extract_slot_kernel_info(&slot_path) {
-                        Ok((uname, build_time)) => {
-                            log::info!("Successfully extracted info from {}", slot_name);
-                            log::debug!("  build_time: {}", build_time);
-                            let _ = send.send(SlotInfo {
-                                slot_name,
-                                uname,
-                                build_time,
-                            });
-                        }
-                        Err(e) => {
-                            log::warn!("Failed to extract info from {}: {}", slot_name, e);
-                        }
-                    }
-                })?,
-        );
-    }
-
-    let mut result = Vec::new();
-    for job in jobs {
-        job.join().unwrap();
-        result.push(recv.recv()?);
+        match extract_slot_kernel_info(&slot_path) {
+            Ok((uname, build_time)) => {
+                log::info!("Successfully extracted info from {}", slot_name);
+                log::debug!("  build_time: {}", build_time);
+                result.push(SlotInfo {
+                    slot_name,
+                    uname,
+                    build_time,
+                });
+            }
+            Err(e) => {
+                log::warn!("Failed to extract info from {}: {}", slot_name, e);
+            }
+        }
     }
 
     println!("{}", serde_json::to_string(&result)?);
