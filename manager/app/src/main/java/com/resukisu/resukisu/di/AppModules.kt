@@ -8,6 +8,7 @@ import com.resukisu.resukisu.data.application.DynamicManagerRepository
 import com.resukisu.resukisu.data.count.CountRepository
 import com.resukisu.resukisu.data.download.DownloadRepository
 import com.resukisu.resukisu.data.file.ModuleFileRepository
+import com.resukisu.resukisu.data.file.WearFileRepository
 import com.resukisu.resukisu.data.flash.FlashRepository
 import com.resukisu.resukisu.data.kernel.KernelRepository
 import com.resukisu.resukisu.data.kernel.UmountRepository
@@ -19,6 +20,7 @@ import com.resukisu.resukisu.data.module.ModulePreferencesRepository
 import com.resukisu.resukisu.data.module.ModuleRepository
 import com.resukisu.resukisu.data.network.NetworkRequestRepository
 import com.resukisu.resukisu.data.network.NetworkStatusRepository
+import com.resukisu.resukisu.data.network.WearLinkRepository
 import com.resukisu.resukisu.data.network.WebResourceRepository
 import com.resukisu.resukisu.data.packageinfo.AppIconDataSource
 import com.resukisu.resukisu.data.packageinfo.InstalledPackageCache
@@ -163,6 +165,9 @@ import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
 import com.resukisu.resukisu.ui.viewmodel.TemplateEditorViewModel
 import com.resukisu.resukisu.ui.viewmodel.TemplateViewModel
 import com.resukisu.resukisu.ui.viewmodel.UmountManagerScreenViewModel
+import com.resukisu.resukisu.ui.viewmodel.WearFileViewModel
+import com.resukisu.resukisu.ui.viewmodel.WearLinkViewModel
+import com.resukisu.resukisu.ui.viewmodel.WearPreferencesViewModel
 import com.resukisu.resukisu.ui.webui.MonetColorsProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -270,6 +275,8 @@ val repositoryModule = module {
     singleOf(::WebResourceRepository)
     singleOf(::WebUiRepository)
     singleOf(::ModuleFileRepository)
+    singleOf(::WearFileRepository)
+    singleOf(::WearLinkRepository)
     singleOf(::ProfileRepository)
     singleOf(::ProfileTemplateRepository)
     singleOf(::SuSFSConfigHelper)
@@ -431,6 +438,9 @@ val viewModelModule = module {
     viewModelOf(::DynamicManagerViewModel)
     viewModelOf(::FlashViewModel)
     viewModelOf(::UmountManagerScreenViewModel)
+    viewModelOf(::WearFileViewModel)
+    viewModelOf(::WearLinkViewModel)
+    viewModelOf(::WearPreferencesViewModel)
     viewModel { parameters ->
         ExecuteModuleActionViewModel(
             moduleId = parameters[0],

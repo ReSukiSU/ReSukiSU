@@ -26,6 +26,8 @@ compose-ui = "1.12.1"
 documentfile = "1.1.0"
 ndk = "30.0.16248370"
 foundation = "1.12.1"
+wear-compose = "1.7.0"
+navigation3 = "1.2.0"
 aboutLibraries = "15.2.0"
 miuix = "0.9.4"
 datastore = "1.2.1"
@@ -102,6 +104,15 @@ androidx-documentfile = { group = "androidx.documentfile", name = "documentfile"
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+androidx-wear-compose-foundation = { group = "androidx.wear.compose", name = "compose-foundation", version.ref = "wear-compose" }
+androidx-wear-compose-material3 = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "wear-compose" }
+androidx-wear-compose-navigation3 = { group = "androidx.wear.compose", name = "compose-navigation3", version.ref = "wear-compose" }
+androidx-navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "navigation3" }
+androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
+androidx-lifecycle-viewmodel-navigation3 = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-navigation3", version.ref = "lifecycle" }
+androidx-wear-remote-interactions = { module = "androidx.wear:wear-remote-interactions", version = "1.1.0" }
+androidx-wear-input = { module = "androidx.wear:wear-input", version = "1.2.0" }
+play-services-wearable = { module = "com.google.android.gms:play-services-wearable", version = "20.0.1" }
 androidx-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "benchmark" }
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
 

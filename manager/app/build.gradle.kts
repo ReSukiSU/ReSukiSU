@@ -210,6 +210,12 @@ dependencies {
     implementation(libs.androidx.documentfile)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.wear.compose.foundation)
+    implementation(libs.androidx.wear.compose.material3)
+    implementation(libs.androidx.wear.compose.navigation3)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 
     implementation(libs.androidx.compose.runtime.tracing)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
@@ -248,6 +254,9 @@ dependencies {
 
     implementation(libs.markdown)
     implementation(libs.androidx.webkit)
+    implementation(libs.androidx.wear.remote.interactions)
+    implementation(libs.androidx.wear.input)
+    implementation(libs.play.services.wearable)
 
     implementation(libs.lsposed.cxx)
 

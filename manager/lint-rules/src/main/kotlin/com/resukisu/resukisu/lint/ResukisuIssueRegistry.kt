@@ -7,6 +7,7 @@ class ResukisuIssueRegistry : IssueRegistry() {
     override val issues = listOf(
         SegmentedColumnScopeConditionDetector.ISSUE,
         DirectHorizontalPagerDetector.ISSUE,
+        WearBoundaryDetector.ISSUE,
     )
 
     override val api = CURRENT_API

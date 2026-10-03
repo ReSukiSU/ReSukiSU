@@ -9,8 +9,7 @@ import android.webkit.JavascriptInterface
 import android.widget.Toast
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.resukisu.resukisu.data.packageinfo.InstalledPackageRepository
-import com.resukisu.resukisu.data.webui.WebUiRepository
+import com.resukisu.resukisu.data.webui.WebUiBackend
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -18,15 +17,14 @@ import java.io.File
 @Suppress("unused")
 class WebViewInterface(
     private val state: WebUIState,
-    private val packageRepository: InstalledPackageRepository,
-    private val webUiRepository: WebUiRepository,
+    private val backend: WebUiBackend,
 ) {
     private val webView get() = state.webView!!
     private val modDir get() = state.modDir
 
     @JavascriptInterface
     fun exec(cmd: String): String {
-        return webUiRepository.execute(cmd).stdout
+        return backend.execute(cmd).stdout
     }
 
     @JavascriptInterface
@@ -61,7 +59,7 @@ class WebViewInterface(
         processOptions(finalCommand, options)
         finalCommand.append(cmd)
 
-        val result = webUiRepository.execute(finalCommand.toString())
+        val result = backend.execute(finalCommand.toString())
         val stdout = result.stdout
         val stderr = result.stderr
 
@@ -106,7 +104,7 @@ class WebViewInterface(
             }
         }
 
-        val process = webUiRepository.spawn(finalCommand.toString(), true)
+        val process = backend.spawn(finalCommand.toString())
         process.start(
             onStdout = { emitData("stdout", it) },
             onStderr = { emitData("stderr", it) },
@@ -166,7 +164,7 @@ class WebViewInterface(
 
     @JavascriptInterface
     fun moduleInfo(): String {
-        val moduleInfos = JSONArray(webUiRepository.listModules())
+        val moduleInfos = JSONArray(backend.listModules())
         val currentModuleInfo = JSONObject()
         currentModuleInfo.put("moduleDir", modDir)
         val moduleId = File(modDir).name
@@ -187,51 +185,10 @@ class WebViewInterface(
     }
 
     @JavascriptInterface
-    fun listPackages(type: String): String {
-        val packageNames = packageRepository.packages.value
-            .filter { packageInfo ->
-                when (type.lowercase()) {
-                    "system" -> packageInfo.isSystem
-                    "user" -> !packageInfo.isSystem
-                    else -> true
-                }
-            }
-            .map { it.packageName }
-            .sorted()
-
-        val jsonArray = JSONArray()
-        for (pkgName in packageNames) {
-            jsonArray.put(pkgName)
-        }
-        return jsonArray.toString()
-    }
+    fun listPackages(type: String): String = backend.listPackages(type)
 
     @JavascriptInterface
-    fun getPackagesInfo(packageNamesJson: String): String {
-        val packageNames = JSONArray(packageNamesJson)
-        val jsonArray = JSONArray()
-        val appMap = packageRepository.packages.value.associateBy { it.packageName }
-        for (i in 0 until packageNames.length()) {
-            val pkgName = packageNames.getString(i)
-            val pkg = appMap[pkgName]
-            if (pkg != null) {
-                val obj = JSONObject()
-                obj.put("packageName", pkg.packageName)
-                obj.put("versionName", pkg.versionName)
-                obj.put("versionCode", pkg.versionCode)
-                obj.put("appLabel", pkg.appLabel)
-                obj.put("isSystem", pkg.isSystem)
-                obj.put("uid", pkg.uid)
-                jsonArray.put(obj)
-            } else {
-                val obj = JSONObject()
-                obj.put("packageName", pkgName)
-                obj.put("error", "Package not found or inaccessible")
-                jsonArray.put(obj)
-            }
-        }
-        return jsonArray.toString()
-    }
+    fun getPackagesInfo(packageNamesJson: String): String = backend.getPackagesInfo(packageNamesJson)
 
     @JavascriptInterface
     fun exit() {

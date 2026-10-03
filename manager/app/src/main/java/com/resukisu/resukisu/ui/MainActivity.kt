@@ -2,6 +2,7 @@ package com.resukisu.resukisu.ui
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -36,12 +37,13 @@ import com.resukisu.resukisu.ui.viewmodel.SettingsUiEvent
 import com.resukisu.resukisu.ui.viewmodel.SettingsViewModel
 import com.resukisu.resukisu.ui.viewmodel.SuperUserUiAction
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
+import com.resukisu.resukisu.ui.wear.WearMainActivity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class MainActivity : ComponentActivity() {
+open class MainActivity : ComponentActivity() {
     private val superUserViewModel: SuperUserViewModel by viewModel()
     private val homeViewModel: HomeViewModel by viewModel()
     private val moduleViewModel: ModuleViewModel by viewModel()
@@ -65,6 +67,13 @@ class MainActivity : ComponentActivity() {
     private val intentState = MutableStateFlow(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Watches use their own activity; the launcher entries and alias stay shared with the phone.
+        if (packageManager.hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+            super.onCreate(savedInstanceState)
+            startActivity(Intent(intent).setClass(this, WearMainActivity::class.java))
+            finish()
+            return
+        }
         try {
             val splashScreen = installSplashScreen()
 
@@ -219,7 +228,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         try {
-            themeUtils.unregisterThemeChangeObserver(this, themeChangeObserver)
+            if (::themeChangeObserver.isInitialized) {
+                themeUtils.unregisterThemeChangeObserver(this, themeChangeObserver)
+            }
             super.onDestroy()
         } catch (e: Exception) {
             e.printStackTrace()

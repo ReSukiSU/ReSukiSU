@@ -564,4 +564,93 @@
     <string name="install_upload_lkm_file_summary">Use a custom .ko file instead of the built-in LKM</string>
     <string name="skip_ksud">Do not install ksud</string>
     <string name="skip_ksud_summary">Cancel ksud installation. Do not enable this unless absolutely necessary.</string>
+
+    <!-- Wear OS -->
+    <string name="wear_mode_lkm" translatable="false">LKM</string>
+    <string name="wear_allowed">Allowed</string>
+    <string name="wear_denied">Denied</string>
+    <string name="wear_enabled">Enabled</string>
+    <string name="wear_disabled">Disabled</string>
+    <string name="wear_pending_removal">Pending removal</string>
+    <string name="wear_no_logs">No SU log entries</string>
+    <string name="wear_enable_sulog">Enable SU log</string>
+    <string name="wear_refresh">Refresh</string>
+    <string name="wear_module_file_unreadable">Cannot read the selected module ZIP</string>
+    <string name="wear_general">General</string>
+    <string name="wear_security">Security</string>
+    <string name="wear_project_url" translatable="false">https://github.com/ReSukiSU/ReSukiSU</string>
+    <string name="wear_project_license" translatable="false">GPL-3.0</string>
+    <string name="wear_app_version" translatable="false">%1$s (%2$d)</string>
+    <string name="wear_clear_search">Clear search</string>
+    <string name="wear_loading">Loading</string>
+    <string name="wear_template_offline">No network connection</string>
+    <string name="wear_log_tail">Showing the most recent log output</string>
+    <string name="wear_template_offline_local">Showing local templates only</string>
+    <string name="wear_settings_selinux_hide_summary">Block app detection</string>
+    <string name="wear_mode_builtin" translatable="false">Built-in</string>
+    <string name="wear_uid" translatable="false">UID</string>
+    <string name="wear_gid" translatable="false">GID</string>
+    <string name="wear_webui" translatable="false">WebUI</string>
+    <string name="scroll_to_top">Back to top</string>
+    <string name="wear_display">Display</string>
+    <string name="wear_link_mode">Open module WebUI</string>
+    <string name="wear_watch_webui">Open on watch</string>
+    <string name="wear_picker_mode">File picker</string>
+    <string name="wear_auto">Automatic</string>
+    <string name="wear_builtin_picker">Built-in picker</string>
+    <string name="wear_system_picker">System picker</string>
+    <string name="wear_phone">Open on phone</string>
+    <string name="wear_close_panel">Close menu</string>
+    <string name="wear_phone_sent">Open request sent to phone</string>
+    <string name="wear_directory_unavailable">Cannot read this directory. Check storage access.</string>
+    <string name="wear_file_exists">A file with this name already exists.</string>
+    <string name="wear_parent_directory">Parent directory</string>
+    <string name="wear_invalid_color">Enter a colour as #RRGGBB.</string>
+    <string name="wear_ui_scale" translatable="false">%1$.2fx</string>
+    <string name="wear_file_name">File name</string>
+    <string name="wear_remove_background">Remove background</string>
+    <string name="wear_link_unsupported">This type of link can\'t be opened.</string>
+    <string name="wear_link_webview_unavailable">System WebView isn\'t available on this watch.</string>
+    <string name="wear_link_phone_unavailable">No connected phone is available to open this link.</string>
+    <string name="wear_link_phone_failed">Couldn\'t send the link to the phone.</string>
+    <string name="wear_custom_color">Custom colour</string>
+    <string name="wear_joined" translatable="false">%1$s · %2$s</string>
+    <string name="wear_directory_empty">No matching files in this folder</string>
+    <string name="wear_phone_disconnected">Phone not connected</string>
+    <string name="wear_phone_app_missing">Install the companion phone app</string>
+    <string name="wear_phone_open_failed">Couldn\'t open on phone</string>
+    <string name="wear_display_scaling">Display &amp; scaling</string>
+    <string name="wear_screen_shape">Screen shape</string>
+    <string name="wear_shape_round">Round</string>
+    <string name="wear_shape_square">Square</string>
+    <string name="wear_display_appearance">Appearance</string>
+    <string name="wear_display_screen_layout">Screen and layout</string>
+    <string name="wear_settings_updates">Updates</string>
+    <string name="wear_settings_links_files">WebUI and files</string>
+    <string name="wear_settings_app_behavior">App behavior</string>
+    <string name="wear_settings_diagnostics">Logs and diagnostics</string>
+    <string name="wear_settings_access_profiles">Access and profiles</string>
+    <string name="wear_settings_mount_isolation">Mount isolation</string>
+    <string name="wear_settings_logging_privacy">Logging and privacy</string>
+    <string name="wear_settings_privileges_startup">Privileges and startup</string>
+    <string name="wear_settings_manager_mounts">Manager and mounts</string>
+    <string name="wear_settings_kernel_maintenance">Kernel maintenance</string>
+    <string name="wear_susfs_status_controls">Status and controls</string>
+    <string name="wear_susfs_features">Feature configuration</string>
+    <string name="wear_susfs_backup_restore">Backup and restore</string>
+    <string name="wear_filter_sort">Filter and sort</string>
+    <string name="wear_sort">Sort</string>
+    <string name="wear_susfs_backup_file_name" translatable="false">susfs_backup.json</string>
+    <string name="susfs_kstat_field_ino" translatable="false">ino</string>
+    <string name="susfs_kstat_field_dev" translatable="false">dev</string>
+    <string name="susfs_kstat_field_nlink" translatable="false">nlink</string>
+    <string name="susfs_kstat_field_size" translatable="false">size</string>
+    <string name="susfs_kstat_field_atime" translatable="false">atime</string>
+    <string name="susfs_kstat_field_atime_nsec" translatable="false">atime_nsec</string>
+    <string name="susfs_kstat_field_mtime" translatable="false">mtime</string>
+    <string name="susfs_kstat_field_mtime_nsec" translatable="false">mtime_nsec</string>
+    <string name="susfs_kstat_field_ctime" translatable="false">ctime</string>
+    <string name="susfs_kstat_field_ctime_nsec" translatable="false">ctime_nsec</string>
+    <string name="susfs_kstat_field_blocks" translatable="false">blocks</string>
+    <string name="susfs_kstat_field_blksize" translatable="false">blksize</string>
 </resources>

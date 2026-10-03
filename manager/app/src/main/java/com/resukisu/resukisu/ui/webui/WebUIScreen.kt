@@ -269,7 +269,7 @@ private fun HandleWebUIEvent(webUIState: WebUIState) {
 }
 
 @Composable
-private fun HandleWebViewLifecycle(webUIState: WebUIState) {
+internal fun HandleWebViewLifecycle(webUIState: WebUIState) {
     val lifecycleOwner = LocalLifecycleOwner.current
 
     DisposableEffect(lifecycleOwner, webUIState) {
@@ -289,7 +289,7 @@ private fun HandleWebViewLifecycle(webUIState: WebUIState) {
 }
 
 @Composable
-private fun HandleConfigurationChanges(webUIState: WebUIState) {
+internal fun HandleConfigurationChanges(webUIState: WebUIState) {
     val configuration = LocalConfiguration.current
     LaunchedEffect(configuration.fontScale, webUIState.webView) {
         webUIState.webView?.settings?.textZoom = (configuration.fontScale * 100).toInt()

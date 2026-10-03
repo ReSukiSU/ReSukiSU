@@ -5,7 +5,7 @@ import android.util.Log
 import android.webkit.WebResourceResponse
 import androidx.annotation.WorkerThread
 import androidx.webkit.WebViewAssetLoader
-import com.resukisu.resukisu.data.webui.WebUiRepository
+import com.resukisu.resukisu.data.webui.WebUiBackend
 import com.resukisu.resukisu.ui.webui.SuFilePathHandler.Companion.DEFAULT_MIME_TYPE
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -35,7 +35,7 @@ import java.util.zip.GZIPInputStream
  */
 class SuFilePathHandler(
     directory: File,
-    private val webUiRepository: WebUiRepository,
+    private val backend: WebUiBackend,
     private val insetsSupplier: InsetsSupplier,
     private val onInsetsRequestedListener: ((Boolean) -> Unit)?,
     private val colorsCssProvider: () -> String,
@@ -115,7 +115,7 @@ class SuFilePathHandler(
         try {
             val file = getCanonicalFileIfChild(directory, path)
             if (file != null) {
-                val inputStream = webUiRepository.openFile(file.absolutePath)
+                val inputStream = backend.openFile(file.absolutePath)
                     ?: return WebResourceResponse(null, null, null)
                 val mimeType = guessMimeType(path)
                 return WebResourceResponse(mimeType, null, handleSvgzStream(path, inputStream))

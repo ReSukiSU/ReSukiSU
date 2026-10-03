@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.KernelSU.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@android:color/black</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/wear_splash_icon</item>
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:statusBarColor">@android:color/black</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
+        <item name="postSplashScreenTheme">@style/Theme.KernelSU.Wear</item>
+    </style>
+    <style name="Theme.KernelSU.Wear" parent="Theme.KernelSU">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:statusBarColor">@android:color/black</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
+    </style>
+    <style name="Theme.KernelSU.Starting.Alternate" parent="Theme.KernelSU.Starting">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/wear_splash_icon_alt</item>
+    </style>
+    <style name="Theme.KernelSU.WebUI" parent="Theme.KernelSU.Wear" />
+</resources>

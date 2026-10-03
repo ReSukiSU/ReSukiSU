@@ -18,6 +18,31 @@
 
     <uses-sdk tools:overrideLibrary="top.yukonga.miuix.kmp.blur" />
 
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.OPEN_DOCUMENT" />
+            <data android:mimeType="*/*" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.CREATE_DOCUMENT" />
+            <data android:mimeType="*/*" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.GET_CONTENT" />
+            <data android:mimeType="*/*" />
+        </intent>
+    </queries>
+
     <application
         android:name=".KernelSUApplication"
         android:allowBackup="true"
@@ -68,9 +93,17 @@
             </intent-filter>
         </activity>
         <!-- 切换图标 -->
+        <activity
+            android:name=".ui.AltIconMainActivity"
+            android:icon="@mipmap/ic_launcher_alt"
+            android:exported="false"
+            android:launchMode="standard"
+            android:documentLaunchMode="intoExisting"
+            android:autoRemoveFromRecents="true"
+            android:theme="@style/Theme.KernelSU.Starting.Alternate" />
         <activity-alias
             android:name=".ui.MainActivityAlias"
-            android:targetActivity=".ui.MainActivity"
+            android:targetActivity=".ui.AltIconMainActivity"
             android:exported="true"
             android:enabled="false"
             android:icon="@mipmap/ic_launcher_alt"
@@ -110,6 +143,78 @@
             android:theme="@style/Theme.KernelSU.WebUI"
             android:configChanges="density|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|locale|layoutDirection|fontScale|keyboard|keyboardHidden"
             />
+
+        <!-- The Manager on watches; MainActivity hands watch launches over to it. -->
+        <activity
+            android:name=".ui.wear.WearMainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.KernelSU.Wear" />
+
+        <activity
+            android:name=".ui.wear.WearWebUIActivity"
+            android:autoRemoveFromRecents="true"
+            android:documentLaunchMode="intoExisting"
+            android:taskAffinity="${applicationId}.webui"
+            android:exported="false"
+            android:theme="@style/Theme.KernelSU.Wear"
+            android:configChanges="density|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|locale|layoutDirection|fontScale|keyboard|keyboardHidden" />
+
+        <!-- A watch module's WebUI shown on the phone; the watch opens it with RemoteActivityHelper,
+             which needs it exported. The link carries no data: the activity only shows a session it
+             claims from the paired watch over the Data Layer. -->
+        <activity
+            android:name=".ui.webui.RemoteWebUIActivity"
+            android:autoRemoveFromRecents="true"
+            android:taskAffinity="${applicationId}.webui"
+            android:exported="true"
+            android:theme="@style/Theme.KernelSU.WebUI"
+            android:configChanges="density|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|locale|layoutDirection|fontScale|keyboard|keyboardHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="resukisu-webui" android:host="open" />
+            </intent-filter>
+        </activity>
+
+        <!-- Built-in document picker for watches without a usable DocumentsUI. Not exported: only
+             this app's own SAF requests reach it, and only when no system picker can take them
+             (see withDocumentPickerFallback); the low priority keeps it behind any system picker. -->
+        <activity
+            android:name=".ui.wear.WearFilePickerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.KernelSU.Wear"
+            android:configChanges="density|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|locale|layoutDirection|fontScale|keyboard|keyboardHidden">
+            <intent-filter android:priority="-1000">
+                <action android:name="android.intent.action.OPEN_DOCUMENT" />
+                <action android:name="android.intent.action.CREATE_DOCUMENT" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.OPENABLE" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity>
+
+        <!-- Serves the files picked in the built-in picker to this app only. -->
+        <provider
+            android:name=".data.file.WearFileProvider"
+            android:authorities="${applicationId}.wearfiles"
+            android:exported="false"
+            android:grantUriPermissions="false" />
+
+        <!-- Serves watch WebUIs and phone-assisted template downloads over the Wear Data Layer.
+             Exported for Google Play services, which only delivers events from this app on paired
+             devices signed with the same key. -->
+        <service
+            android:name=".data.webui.WearWebUiService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.CHANNEL_EVENT" />
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/resukisu/webui" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/resukisu/templates" />
+            </intent-filter>
+        </service>
 
         <activity
             android:name=".ui.screen.themeSettings.crop.BackgroundCropActivity"

@@ -292,7 +292,7 @@ fun UmountManagerScreen() {
 }
 
 @Composable
-private fun Int.toUmountFlagName(): String = when (this) {
+internal fun Int.toUmountFlagName(): String = when (this) {
     -1 -> stringResource(R.string.unknown)
     0 -> "UMOUNT_UNUSED"
     1 -> "MNT_FORCE"

@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#FFFFFF</color>
+    <!-- Accent colors offered on the Wear theme color page. -->
+    <array name="wear_theme_swatches">
+        <item>#FF9FCAFF</item>
+        <item>#FFBEC2FF</item>
+        <item>#FFD6BBFF</item>
+        <item>#FFBF8D9D</item>
+        <item>#FFE6ACCC</item>
+        <item>#FFFFB3A5</item>
+        <item>#FFFFD166</item>
+        <item>#FFE9EF80</item>
+        <item>#FF9ACB78</item>
+        <item>#FF75CBBA</item>
+        <item>#FF44CBE0</item>
+        <item>#FFB5C4CD</item>
+    </array>
 </resources>
