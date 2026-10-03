@@ -16,6 +16,18 @@
 syscall_fn_t *ksu_syscall_table = NULL;
 int ksu_dispatcher_nr = -1;
 
+long ksu_call_syscall(int nr, const struct pt_regs *regs)
+{
+#ifdef CONFIG_COMPAT
+    if (unlikely(is_compat_task())) {
+        pr_err("compat but hooked! Please report this as a issue");
+        return -EOPNOTSUPP;
+    }
+#endif
+
+    return ksu_syscall_table[nr](regs);
+}
+
 // Hook registration table: read with READ_ONCE from tracepoint/dispatcher
 // context, written with WRITE_ONCE from init/exit context.
 static ksu_syscall_hook_fn syscall_hooks[__NR_syscalls];
@@ -251,5 +263,49 @@ clear_state:
 
     pr_info("all syscall hooks restored\n");
 }
+
+// stub here
+// because i think no usecase
+// ndk even no risc32 target
+#ifdef CONFIG_COMPAT
+// --- Dispatcher-based hook API (register/unregister) ---
+// Register a handler into the dispatcher's routing table for syscall @nr.
+// When a marked process invokes syscall @nr, the sys_enter tracepoint redirects
+// it to the unified dispatcher, which looks up @fn by @nr and calls it.
+// Does NOT modify the syscall table itself — the dispatcher slot is shared.
+// Returns 0 on success, -EEXIST if already registered, -EINVAL if nr invalid.
+int ksu_register_compat_syscall_hook(int nr, ksu_syscall_hook_fn fn)
+{
+    return -EOPNOTSUPP;
+}
+
+// Remove a handler from the dispatcher's routing table for syscall @nr.
+// The syscall table is not touched — only the dispatcher stops routing @nr.
+void ksu_unregister_compat_syscall_hook(int nr)
+{
+    // do nothing
+}
+
+// Check if a handler is registered in the dispatcher for syscall @nr.
+bool ksu_has_compat_syscall_hook(int nr)
+{
+    return false;
+}
+
+// --- Direct syscall table patching API (hook/unhook) ---
+// Directly overwrite syscall_table[@nr] with @fn using fixmap + stop_machine.
+// Saves the original handler to *@old (if non-NULL) and records the entry
+// for restoration at module exit. Use this for boot-time hooks that replace
+// a real syscall entry (e.g. ksud hooking __NR_execve/__NR_read/__NR_fstat).
+void ksu_compat_syscall_table_hook(int nr, syscall_fn_t fn, syscall_fn_t *old)
+{
+    // do nothing
+}
+
+void ksu_compat_syscall_table_unhook(int nr)
+{
+    // do nothing
+}
+#endif
 
 #endif /* __riscv */

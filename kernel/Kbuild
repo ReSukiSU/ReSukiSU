@@ -160,7 +160,7 @@ ifdef CONFIG_KSU_TRACEPOINT_HOOK
     kernelsu-objs += hook/arm64/syscall_hook.o
   else ifeq ($(CONFIG_X86_64),y)
     kernelsu-objs += hook/x86_64/syscall_hook.o
-  else ifeq ($(CONFIG_RISCV),y
+  else ifeq ($(CONFIG_RISCV),y)
     kernelsu-objs += hook/riscv64/syscall_hook.o
   else
     ifeq ($(CONFIG_KSU), y)
@@ -218,6 +218,7 @@ ifndef CONFIG_KSU_TRACEPOINT_HOOK
 endif
 
 include $(KSU_SRC)/tools/kernel_compat.mk
+include $(KSU_SRC)/tools/code_generation/code_generation.mk
 
 # Custom Signs
 ifdef KSU_EXPECTED_SIZE

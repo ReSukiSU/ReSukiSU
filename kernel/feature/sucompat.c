@@ -9,6 +9,9 @@
 #include <linux/uaccess.h>
 #include <asm/current.h>
 #include <linux/cred.h>
+#ifdef CONFIG_COMPAT
+#include <linux/compat.h>
+#endif
 #include <linux/fs.h>
 #include <linux/types.h>
 #include <linux/ptrace.h>
@@ -41,6 +44,7 @@
 #endif
 #include "sulog/event.h"
 #include "compat/kernel_compat.h"
+#include "compat/syscall_no.h"
 #include "ksu.h"
 
 #define SU_PATH "/system/bin/su"
@@ -166,11 +170,11 @@ long ksu_handle_faccessat_sucompat_internal(int orig_nr, struct pt_regs *regs)
         goto do_orig_facessat;
     }
 
-    filename_user = (const char __user **)&PT_REGS_PARM2(regs);
+    filename_user = (const char __user **)&PT_REGS_NATIVE_PARM2(regs);
 
     char path[sizeof(su_path) + 1];
     memset(path, 0, sizeof(path));
-    strncpy_from_user_nofault(path, *filename_user, sizeof(path));
+    strncpy_from_user_nofault(path, (const char __user *)PT_REGS_USER_PTR(regs, 2), sizeof(path));
 
     if (unlikely(!memcmp(path, su_path, sizeof(su_path)))) {
         old_cred = override_creds(ksu_cred);
@@ -178,7 +182,7 @@ long ksu_handle_faccessat_sucompat_internal(int orig_nr, struct pt_regs *regs)
             pr_info("faccessat su->ksud!\n");
             orig_filename = *filename_user;
             *filename_user = ksud_user_path();
-            ret = ksu_syscall_table[orig_nr](regs);
+            ret = ksu_call_syscall(orig_nr, regs);
             revert_creds(old_cred);
             *filename_user = orig_filename;
             return ret;
@@ -188,7 +192,7 @@ long ksu_handle_faccessat_sucompat_internal(int orig_nr, struct pt_regs *regs)
     }
 
 do_orig_facessat:
-    return ksu_syscall_table[orig_nr](regs);
+    return ksu_call_syscall(orig_nr, regs);
 }
 
 long ksu_handle_stat_sucompat_internal(int orig_nr, struct pt_regs *regs)
@@ -201,11 +205,11 @@ long ksu_handle_stat_sucompat_internal(int orig_nr, struct pt_regs *regs)
         goto do_orig_stat;
     }
 
-    filename_user = (const char __user **)&PT_REGS_PARM2(regs);
+    filename_user = (const char __user **)&PT_REGS_NATIVE_PARM2(regs);
 
     char path[sizeof(su_path) + 1];
     memset(path, 0, sizeof(path));
-    strncpy_from_user_nofault(path, *filename_user, sizeof(path));
+    strncpy_from_user_nofault(path, (const char __user *)PT_REGS_USER_PTR(regs, 2), sizeof(path));
 
     if (unlikely(!memcmp(path, su_path, sizeof(su_path)))) {
         old_cred = override_creds(ksu_cred);
@@ -213,7 +217,7 @@ long ksu_handle_stat_sucompat_internal(int orig_nr, struct pt_regs *regs)
             pr_info("newfstatat su->ksud!\n");
             orig_filename = *filename_user;
             *filename_user = ksud_user_path();
-            ret = ksu_syscall_table[orig_nr](regs);
+            ret = ksu_call_syscall(orig_nr, regs);
             revert_creds(old_cred);
             *filename_user = orig_filename;
             return ret;
@@ -223,7 +227,7 @@ long ksu_handle_stat_sucompat_internal(int orig_nr, struct pt_regs *regs)
     }
 
 do_orig_stat:
-    return ksu_syscall_table[orig_nr](regs);
+    return ksu_call_syscall(orig_nr, regs);
 }
 
 // ensure call from tracepoint
@@ -250,7 +254,7 @@ static long ksu_handle_execve_sucompat_common_internal(const char __user **filen
     if (!ksu_is_allow_uid_for_current(ksu_get_uid_t(current_uid())))
         goto do_orig_execve;
 
-    addr = untagged_addr((unsigned long)*filename_user);
+    addr = untagged_addr((unsigned long)ksu_task_user_ptr((unsigned long)*filename_user));
     fn = (const char __user *)addr;
     memset(path, 0, sizeof(path));
 
@@ -283,19 +287,20 @@ static long ksu_handle_execve_sucompat_common_internal(const char __user **filen
 
     fd_install(tmp_fd, ksud_file);
 
-    pending_sucompat = ksu_sulog_capture_sucompat_tracepoint(*filename_user, argv_user, GFP_KERNEL);
+    pending_sucompat = ksu_sulog_capture_sucompat_tracepoint(
+        (const char __user *)ksu_task_user_ptr((unsigned long)*filename_user), argv_user, GFP_KERNEL);
     // execve(file, argv, environ)
     // execveat(fd, file, argv, environ, flags)
-    orig_regs[0] = PT_REGS_SYSCALL_PARM1(regs);
-    orig_regs[1] = regs->__PT_PARM2_REG;
-    orig_regs[2] = regs->__PT_PARM3_REG;
-    orig_regs[3] = regs->__PT_SYSCALL_PARM4_REG;
-    orig_regs[4] = regs->__PT_PARM5_REG;
-    regs->__PT_PARM5_REG = AT_EMPTY_PATH;
-    regs->__PT_SYSCALL_PARM4_REG = envp;
-    regs->__PT_PARM3_REG = (unsigned long)argv_user;
-    regs->__PT_PARM2_REG = empty_user_path();
-    PT_REGS_SYSCALL_PARM1(regs) = tmp_fd;
+    orig_regs[0] = PT_REGS_NATIVE_SYSCALL_PARM1(regs);
+    orig_regs[1] = PT_REGS_NATIVE_PARM2(regs);
+    orig_regs[2] = PT_REGS_NATIVE_PARM3(regs);
+    orig_regs[3] = PT_REGS_NATIVE_SYSCALL_PARM4(regs);
+    orig_regs[4] = PT_REGS_NATIVE_PARM5(regs);
+    PT_REGS_NATIVE_PARM5(regs) = AT_EMPTY_PATH;
+    PT_REGS_NATIVE_SYSCALL_PARM4(regs) = envp;
+    PT_REGS_NATIVE_PARM3(regs) = (unsigned long)argv_user;
+    PT_REGS_NATIVE_PARM2(regs) = (unsigned long)empty_user_path();
+    PT_REGS_NATIVE_SYSCALL_PARM1(regs) = tmp_fd;
 
     ret = escape_with_root_profile();
     if (ret) {
@@ -303,14 +308,19 @@ static long ksu_handle_execve_sucompat_common_internal(const char __user **filen
     }
     ksu_sulog_emit_pending(pending_sucompat, ret, GFP_KERNEL);
 
-    ret = ksu_syscall_table[__NR_execveat](regs);
+#if defined(CONFIG_COMPAT) && defined(__aarch64__)
+    if (is_compat_task())
+        ret = ksu_call_syscall(ksu_get_compat_syscall_no(execveat), regs);
+    else
+#endif
+        ret = ksu_call_syscall(__NR_execveat, regs);
     if (ret < 0) {
         ksu_close_fd(tmp_fd);
-        PT_REGS_SYSCALL_PARM1(regs) = orig_regs[0];
-        regs->__PT_PARM2_REG = orig_regs[1];
-        regs->__PT_PARM3_REG = orig_regs[2];
-        regs->__PT_SYSCALL_PARM4_REG = orig_regs[3];
-        regs->__PT_PARM5_REG = orig_regs[4];
+        PT_REGS_NATIVE_SYSCALL_PARM1(regs) = orig_regs[0];
+        PT_REGS_NATIVE_PARM2(regs) = orig_regs[1];
+        PT_REGS_NATIVE_PARM3(regs) = orig_regs[2];
+        PT_REGS_NATIVE_SYSCALL_PARM4(regs) = orig_regs[3];
+        PT_REGS_NATIVE_PARM5(regs) = orig_regs[4];
     } else {
         // Only grant the scoped driver capability after the selected root
         // profile has been applied successfully.
@@ -322,20 +332,20 @@ static long ksu_handle_execve_sucompat_common_internal(const char __user **filen
     return ret;
 
 do_orig_execve:
-    return ksu_syscall_table[orig_nr](regs);
+    return ksu_call_syscall(orig_nr, regs);
 }
 
 long ksu_handle_execve_sucompat_internal(const char __user **filename_user, int orig_nr, struct pt_regs *regs)
 {
     return ksu_handle_execve_sucompat_common_internal(filename_user,
-                                                      (const char __user *const __user *)PT_REGS_PARM2(regs),
+                                                      (const char __user *const __user *)PT_REGS_USER_PTR(regs, 2),
                                                       PT_REGS_PARM3(regs), false, orig_nr, regs);
 }
 
 long ksu_handle_execveat_sucompat_internal(const char __user **filename_user, int orig_nr, struct pt_regs *regs)
 {
     return ksu_handle_execve_sucompat_common_internal(filename_user,
-                                                      (const char __user *const __user *)PT_REGS_PARM3(regs),
+                                                      (const char __user *const __user *)PT_REGS_USER_PTR(regs, 3),
                                                       PT_REGS_SYSCALL_PARM4(regs), true, orig_nr, regs);
 }
 #endif

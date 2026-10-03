@@ -31,6 +31,7 @@
 #include <linux/susfs_def.h>
 #include <linux/workqueue.h>
 #endif
+#include "compat/syscall_no.h"
 
 static inline void ksu_set_file_immutable(const char *path_name, bool immutable)
 {
@@ -107,7 +108,7 @@ static int handle_zygote_next_setresuid(uid_t new_uid)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
         if (current->seccomp.mode == SECCOMP_MODE_FILTER && current->seccomp.filter) {
             spin_lock_irq(&current->sighand->siglock);
-            ksu_seccomp_allow_cache(current->seccomp.filter, __NR_reboot);
+            ksu_seccomp_allow_cache(current->seccomp.filter, ksu_get_syscall_no(reboot));
             spin_unlock_irq(&current->sighand->siglock);
         }
 #else
@@ -154,7 +155,7 @@ int ksu_handle_setuid(uid_t new_uid, uid_t old_uid)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
         if (current->seccomp.mode == SECCOMP_MODE_FILTER && current->seccomp.filter) {
             spin_lock_irq(&current->sighand->siglock);
-            ksu_seccomp_allow_cache(current->seccomp.filter, __NR_reboot);
+            ksu_seccomp_allow_cache(current->seccomp.filter, ksu_get_syscall_no(reboot));
             spin_unlock_irq(&current->sighand->siglock);
         }
 #else
